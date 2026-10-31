@@ -1,4 +1,4 @@
-# Nexora Creative — où nous en sommes (31/10/2026)
+# Nexora Creative — où nous en sommes (31/10/2026, mis à jour le soir)
 
 Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'est pas. Détail jour par jour : `docs/JOURNAL.md`. Mesures : `recherche/08-mesures-gb10.md`.
 
@@ -10,7 +10,17 @@ Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'es
 
 Fork d'**OpenField** (MIT), comme WorkStudio est un fork de Sim : interface React 19 dans le navigateur, serveur Fastify qui compile lui-même les graphes ComfyUI (ComfyUI n'est jamais exposé). Rebaptisé Nexora Creative, en français. Provenance : `app/UPSTREAM.md`.
 
-## Ce qui est fait et prouvé
+## Mise à jour du 31/10 (demande du fondateur : H3 seul, deux GPU, qualité maximale, vidéo promo, page marketing)
+
+- **MiniMax H3 seul** : Wan 2.2 est retiré (code, registre, poids supprimés). Hors territoire H3, refus clair, aucun repli.
+- **Deux GPU** : le serveur pilote un parc (GB10 + RTX 5090 de pc1 par tunnel SSH en boucle locale), route chaque tâche vers un moteur qui porte sa recette (FastH3 « rapide » sur la GB10 ; H3 officiel complet « cinéma » et musique sur la 5090). Prouvé : les deux moteurs rendent des plans de la même bande-annonce ; l'application voit les deux en ligne.
+- **Banc qualité** : `recherche/10-qualite-h3.md` (5090 : 5 s en 1344×768 avec son en 290 s ; GB10 : 344 s).
+- **Musique MiniMax-Music3** : bande originale pour les films (panneau des plans) et les clips (bouton « Ajouter une musique »), description écrite par le LLM, mixage −14 LUFS. 60 s de musique en 27 s sur la 5090. Gain réel pour la musique ; les bruitages et voix restent ceux de H3 (`recherche/11-image-et-musique.md`).
+- **Image** : le studio pointe sur Qwen-Image-2512 (Apache-2.0), meilleur modèle d'image ouvert sans licence payante ; poids **non encore téléchargés**. Qwen-Image-2.1 (plus fort) et Ideogram 4 exigent une licence commerciale.
+- **Vidéo promotionnelle et page marketing** : voir `marketing/creative/` et le journal du 31/10.
+- **Non prouvé** : l'écoute par un humain (aucun A/B sonore fait), l'étape « l'IA dessine le plan clé avant H3 », le test réel du bouton « Ajouter une musique » dans le navigateur.
+
+## Ce qui est fait et prouvé (état du 31/10 matin)
 
 | Fonction | Preuve |
 |---|---|

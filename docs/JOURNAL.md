@@ -71,3 +71,14 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **MiniMax Music 3** : 60 s de musique en 27 s sur la 5090 ; le style est suivi, pas le minutage à la seconde → choix de la candidate par analyse d'énergie (`outils/analyser_musique.py`, `tempo.py`) et montage calé sur ses impacts.
 - Erreur de méthode de ma part : un `pkill -f` lancé sur pc6 (n'a rien tué, motif exact sans correspondance) ; contraire à la règle « tuer seulement ses PID ». Corrigé : arrêt par PID.
 - 84 tests verts.
+
+## 31/10/2026 (suite) — redémarrage des deux machines, vidéo promo, page, musique des clips
+- **pc6 et pc1 ont redémarré** pendant la session (moteurs et tunnel perdus). Relancés : moteur pc6 par son superviseur ; sur pc1, **ma propre instance** de ComfyUI (port 18388, boucle locale, journal dans `minimax-h3/logs/comfy-nexora-creative.log`) au lieu de l'instance de l'autre session ; tunnel `engine/tunnel-pc1.sh` repointé.
+- **Rushes** : 14 plans utilisables (GB10 FastH3 8 étapes ≈ 340 s ; 5090 H3 complet 24 étapes ≈ 292 s), choix plan par plan à l'œil : aucun moteur n'est meilleur partout (p04 bien meilleur sur GB10, p03 et p12 sur 5090).
+- **Défaut de propriété intellectuelle trouvé** : le robot de p09 (rouge et bleu, crête) imitait Optimus Prime et celui de p11 la Hulkbuster, sans que le prompt les nomme. Écartés ; re-tournés avec un design original (graphite, lignes ambre). **À retenir pour le produit** : un contrôle de ressemblance avec des franchises connues avant livraison est à construire (clause 1 de l'AUP de H3 : ne pas porter atteinte aux droits de tiers).
+- **Défauts de montage trouvés par mesure** : (1) deux plans ralentis dépassaient la fin de leur rush et raccourcissaient la timeline (logo 0,6 s trop tôt) → image figée de complément ; (2) chaque segment arrondi à l'image supérieure cumulait 0,2 s de retard → coupes comptées en images ; (3) mon animation de logo était inversée (mosaïque qui se remplit) → corrigée. Résultat mesuré : flash du logo à 54,208 s, impact audio à 54,19 s ; silence forcé 52,80-54,20 s.
+- **Musique** : 7 candidates MiniMax Music 3 (27 s de calcul pour 60 s) ; retenue b89 (122 BPM, silence puis impact +33 dB à 54,2 s).
+- **Page marketing** assemblée et vérifiée (bureau + 375 px). Deux affirmations non prouvables retirées (« au Canada », « payé en crédits » devenu « prévu »).
+- **Musique des clips** : routes `/api/nexora/clip/:id/musique` et `/avec-musique`, bouton dans « Tes vidéos » ; prouvé dans le navigateur (clip → musique composée sur la 5090 → clip « + musique », −13,2 LUFS). Défaut trouvé : musique 0,17 s plus courte que le clip → durée arrondie à la seconde supérieure.
+- **Image** : studio pointé sur Qwen-Image-2512 (Apache-2.0) ; poids non téléchargés.
+- 84 tests verts.

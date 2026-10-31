@@ -34,8 +34,9 @@ Mandat du fondateur (30/10/2026, soir) : carte blanche. Recherche approfondie (y
 - [x] **12. Parc GPU** — GB10 + RTX 5090 de pc1 (tunnel SSH en boucle locale), routage par recette, charge équilibrée, lien tâche → moteur persistant. Rendus réels sur les deux moteurs.
 - [x] **13. Banc qualité** — `recherche/10-qualite-h3.md` : H3 officiel complet (5090, 24 étapes, 290 s), Singularity V2, FastH3 (GB10, 344 s). Recette « cinéma » = H3 officiel complet.
 - [x] **14. Bande originale** — MiniMax Music 3 (licence sans territoire exclu) : graphe, description écrite par le LLM, mixage −14 LUFS, bouton dans le panneau du film ; 4 tests.
-- [ ] **15. Vidéo promotionnelle** — 12 plans × 2 moteurs, musique Music 3, cartons, montage au rythme, 1080p ; versions réseaux sociaux.
-- [ ] **16. Page marketing** — `marketing/creative/` (charte du site Nexora), vidéo et planche de plans réels.
+- [x] **15. Vidéo promotionnelle** — 60 s, 1080p 16:9 et 1080×1920 9:16, 22 coupes calées à l'image sur la bande originale MiniMax-Music3 (impact final à 54,208 s, mesuré), −13,2 LUFS ; 14 plans tournés sur GB10 et RTX 5090 ; envoyées au fondateur le 31/10.
+- [x] **16. Page marketing** — `marketing/creative/index.html` + `outils/page.py` (charte du site Nexora, vidéo, planche de 6 plans réels avec le moteur de chaque image, prompt réel du plan 1) ; testée dans le navigateur (bureau, 375 px sans débordement). **Pas publiée** : elle demande les entrées de `cms/content/claims.json` et la mise en route par le fondateur.
+- [x] **17. Musique des clips + image** — bouton « Ajouter une musique » prouvé de bout en bout dans le navigateur (clic → LLM → 5090 → mixage auto, clip n° 36) ; Qwen-Image-2512 retenu (`recherche/11`).
 
 ## Condition d'arrêt de la boucle
 

@@ -1121,7 +1121,7 @@ app.post('/api/nexora/clip/:id/musique', async (req, reply) => {
   const s = JSON.parse(clip.settings);
   if (s.film || clip.status !== 'done' || !clip.output_path) return reply.code(409).send({ error: 'La vidéo doit être terminée.' });
   if (!eng.moteursPour('music3').length) return reply.code(503).send({ error: 'Aucun moteur GPU ne compose de musique pour l’instant.' });
-  const duree = Math.max(5, Math.round(Number(s.lengthFrames || 124) / 24));
+  const duree = Math.max(5, Math.ceil(Number(s.lengthFrames || 124) / 24));
   const pseudo = { titre: String(s.intention ?? s.userPrompt ?? clip.shot_name ?? 'Clip').slice(0, 120), bible: { style: '', personnages: [], lieux: [] }, plans: [{ resume: String(s.intention ?? s.userPrompt ?? clip.shot_name ?? ''), description: '', duree, camera: '' }], dureeTotale: duree };
   const m = await ecrireMusique(pseudo as any, duree, llmCourant(), typeof b.envie === 'string' ? b.envie.slice(0, 500) : undefined);
   const [takeId] = await queueTakes({

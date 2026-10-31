@@ -160,8 +160,8 @@ def logo_impact(sortie: str, duree: float = 6.0):
         s_ = i / IPS
         im = Image.new("RGB", (L, H), ENCRE)
         d = ImageDraw.Draw(im)
-        seuil = 1.25 - max(0.0, (s_ - 0.1) / 0.95) * 1.25  # plein à l'impact, puis dissolution
-        if seuil > 0.02:
+        seuil = -0.35 + min(1.0, max(0.0, (s_ - 0.1) / 0.95)) * 1.6  # dense à l'impact, vide à 1,05 s
+        if seuil < 1.2:
             mosaique(d, 0, 0, L, H, 40, seuil, 5, lambda x, y: 1 - abs(x - 0.5) * 0.9 - abs(y - 0.5) * 0.5)
         a = min(1.0, max(0.0, (s_ - 1.05) / 0.4))
         mix = lambda c: tuple(int(ENCRE[k] + (c[k] - ENCRE[k]) * a) for k in range(3))

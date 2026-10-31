@@ -46,7 +46,7 @@ def main(choix: dict):
         phrase = choix.get("phrases", {}).get(k) or intentions[k[:3]]["intention"]
         cases.append(
             f'        <figure class="plan"><img src="img/{k}.jpg" alt="{html.escape(phrase)}" loading="lazy">'
-            f'<figcaption class="legende"><span class="etiquette">Plan {k[1:3]} · 5 s avec son</span>'
+            f'<figcaption class="legende"><span class="etiquette">{choix.get("moteurs", {}).get(k, "5 s avec son")}</span>'
             f"<p>« {html.escape(phrase)} »</p></figcaption></figure>"
         )
     gabarit = (ICI / "index.html").read_text()
