@@ -148,8 +148,75 @@ def logo(sortie: str, duree: float = 5.0):
     encoder(images, sortie)
 
 
+def logo_impact(sortie: str, duree: float = 6.0):
+    """Logo calé sur un impact de musique : la mosaïque pleine éclate à la première image (flash blanc), se dissout en
+    1,6 s et laisse le nom, le slogan et les mentions ; fondu au noir sur la dernière seconde."""
+    n = round(duree * IPS)
+    f_nom = police("geist-latin-wght-normal.woff2", 150, b"SemiBold")
+    f_slo = police("geist-latin-wght-normal.woff2", 58, b"Medium")
+    f_pet = police("inter-latin-wght-normal.woff2", 26, b"Regular")
+    images = []
+    for i in range(n):
+        s_ = i / IPS
+        im = Image.new("RGB", (L, H), ENCRE)
+        d = ImageDraw.Draw(im)
+        seuil = 1.25 - max(0.0, (s_ - 0.1) / 0.95) * 1.25  # plein à l'impact, puis dissolution
+        if seuil > 0.02:
+            mosaique(d, 0, 0, L, H, 40, seuil, 5, lambda x, y: 1 - abs(x - 0.5) * 0.9 - abs(y - 0.5) * 0.5)
+        a = min(1.0, max(0.0, (s_ - 1.05) / 0.4))
+        mix = lambda c: tuple(int(ENCRE[k] + (c[k] - ENCRE[k]) * a) for k in range(3))
+        if a > 0:
+            larg = f_nom.getlength("NEXORA CREATIVE")
+            x = (L - larg) / 2
+            d.text((x, 380), "NEXORA", font=f_nom, fill=mix(OS))
+            d.text((x + f_nom.getlength("NEXORA "), 380), "CREATIVE", font=f_nom, fill=mix(SIGNAL))
+            d.text((L / 2, 610), "Écris-le. Nexora le filme.", font=f_slo, fill=mix(OS), anchor="mm")
+        b = min(1.0, max(0.0, (s_ - 2.0) / 0.5))
+        if b > 0:
+            pet = tuple(int(ENCRE[k] + (BRUME[k] - ENCRE[k]) * b) for k in range(3))
+            d.text((L / 2, 760), "Bientôt dans ton espace Nexora", font=f_pet, fill=pet, anchor="mm")
+            d.text((L / 2, 1010), "Images et sons 100 % générés par IA avec Nexora Creative  ·  MiniMax H3  ·  MiniMax-Music3",
+                   font=f_pet, fill=pet, anchor="mm")
+        if s_ < 0.12:  # flash de l'impact
+            k = 1 - s_ / 0.12
+            im = Image.blend(im, Image.new("RGB", (L, H), (255, 255, 255)), 0.85 * k)
+        if s_ > duree - 1.0:  # fondu au noir final
+            im = Image.blend(im, Image.new("RGB", (L, H), ENCRE), min(1.0, (s_ - (duree - 1.0)) / 1.0))
+        images.append(im)
+    encoder(images, sortie)
+
+
+def texte(phrase: str, sortie: str, duree: float = 2.0):
+    """Phrase plein écran qui apparaît mot à mot, en Geist, sur le noir encre."""
+    n = round(duree * IPS)
+    f = police("geist-latin-wght-normal.woff2", 96, b"SemiBold")
+    mots = phrase.split()
+    images = []
+    for i in range(n):
+        t = i / max(1, n - 1)
+        im = Image.new("RGB", (L, H), ENCRE)
+        d = ImageDraw.Draw(im)
+        k = min(len(mots), 1 + int(t / 0.55 * len(mots)))
+        lgn = lignes(" ".join(mots), f, 1500)
+        y0 = H / 2 - len(lgn) * 60
+        vus = 0
+        for j, ligne in enumerate(lgn):
+            x = (L - f.getlength(ligne)) / 2
+            for m in ligne.split():
+                vus += 1
+                if vus <= k:
+                    d.text((x, y0 + j * 120), m, font=f, fill=SIGNAL if m.rstrip(".,") == mots[-1].rstrip(".,") else OS)
+                x += f.getlength(m + " ")
+        images.append(im)
+    encoder(images, sortie)
+
+
 if __name__ == "__main__":
     if sys.argv[1] == "saisie":
         saisie(sys.argv[2], sys.argv[3], float(sys.argv[4]) if len(sys.argv) > 4 else 2.0)
+    elif sys.argv[1] == "texte":
+        texte(sys.argv[2], sys.argv[3], float(sys.argv[4]) if len(sys.argv) > 4 else 2.0)
+    elif sys.argv[1] == "logo_impact":
+        logo_impact(sys.argv[2], float(sys.argv[3]) if len(sys.argv) > 3 else 6.0)
     elif sys.argv[1] == "logo":
         logo(sys.argv[2], float(sys.argv[3]) if len(sys.argv) > 3 else 5.0)

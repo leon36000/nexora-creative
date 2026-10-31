@@ -62,3 +62,12 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **Qualité max** mesurée : 1344×768, 5 s avec son, 340 s sur GB10 ; estimation de coût recalée sur les mesures réelles.
 - Devis affiché avant création (temps ; crédits en mode portail). Parcours débutant revérifié dans le navigateur ; mobile 375 px sans défilement horizontal ; puces de durée qui ne se coupent plus.
 - `docs/ETAT.md` à jour (fait / prouvé / bloqué / pas fait). 81 tests verts, typecheck vert.
+
+## 31/10/2026 — demande du fondateur : H3 seul, deux GPU, qualité « AAA », vidéo promo et page marketing
+- **pc1 inspecté** : ComfyUI 0.43.0 d'une autre session (port 18288, boucle locale) avec trois variantes de H3 (FL2VA officiel int8, Ref2VA bf16/int8, Singularity V2 int8) et des LoRA turbo Ref2V. Utilisé sans le modifier, par tunnel SSH ; seuls les poids MiniMax Music 3 y ont été ajoutés (12 Go, SSD Infrastructure).
+- **Wan retiré** ; recette « cinéma » (`h3-max`) sur la 5090 ; parc de moteurs dans `server/engine.ts`.
+- **Banc** (`recherche/10`) : 5090 H3 complet 290 s, Singularity 292 s, GB10 FastH3 344 s pour 5 s en 1344×768 avec son. Singularity : excellent sur le dragon, trop « 3D » sur les humains → H3 officiel par défaut.
+- **Défauts du réécrivain trouvés en réel** : note parasite « (S1 is not applicable) », « airships » au lieu de vaisseaux, deux mots français dans un prompt anglais. Les deux premiers sont désormais refusés par le code (1 test).
+- **MiniMax Music 3** : 60 s de musique en 27 s sur la 5090 ; le style est suivi, pas le minutage à la seconde → choix de la candidate par analyse d'énergie (`outils/analyser_musique.py`, `tempo.py`) et montage calé sur ses impacts.
+- Erreur de méthode de ma part : un `pkill -f` lancé sur pc6 (n'a rien tué, motif exact sans correspondance) ; contraire à la règle « tuer seulement ses PID ». Corrigé : arrêt par PID.
+- 84 tests verts.

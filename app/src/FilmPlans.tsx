@@ -15,10 +15,25 @@ export default function FilmPlans({ filmId, onClose }: { filmId: number; onClose
   const [envoi, setEnvoi] = useState<number | null>(null);
   const [ordre, setOrdre] = useState<number[] | null>(null);
   const [transition, setTransition] = useState<'coupe' | 'fondu'>('coupe');
+  const [envie, setEnvie] = useState('');
+  const [avecMusique, setAvecMusique] = useState(true);
   if (!film) return null;
   const s = settingsOf(film);
   const plans = (s.storyboard?.plans ?? []) as Plan[];
   const montage = ordre ?? plans.map((_, i) => i);
+  // Bandes originales composées pour ce film (MiniMax-Music3), la plus récente d'abord.
+  const musiques = toutes.filter((t) => settingsOf(t).nexoraMusiqueDe === filmId).sort((a, b) => b.id - a.id);
+  const musique = musiques.find((t) => t.status === 'done');
+  const enComposition = musiques.some((t) => t.status === 'queued' || t.status === 'rendering');
+
+  async function composer() {
+    try {
+      await api.nexoraFilmMusique(filmId, { envie: envie.trim() || undefined });
+      toast('Composition de la bande originale lancée (moins d’une minute de calcul).');
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'Impossible de composer la musique.', true);
+    }
+  }
   const deplacer = (k: number, d: -1 | 1) => {
     const o = [...montage];
     const j = k + d;
@@ -29,7 +44,7 @@ export default function FilmPlans({ filmId, onClose }: { filmId: number; onClose
 
   async function remonter() {
     try {
-      await api.nexoraFilmMontage(filmId, { ordre: montage, transition });
+      await api.nexoraFilmMontage(filmId, { ordre: montage, transition, ...(musique && avecMusique ? { musique: musique.id } : {}) });
       toast('Nouvelle version en assemblage (aucun nouveau rendu).');
       onClose();
     } catch (e) {
@@ -80,11 +95,23 @@ export default function FilmPlans({ filmId, onClose }: { filmId: number; onClose
                 <button type="button" className={`nx-puce ${transition === 'coupe' ? 'on' : ''}`} onClick={() => setTransition('coupe')}>Coupe franche</button>
                 <button type="button" className={`nx-puce ${transition === 'fondu' ? 'on' : ''}`} onClick={() => setTransition('fondu')}>Fondu enchaîné</button>
               </div>
+              {musique && (
+                <label className="nx-puce">
+                  <input type="checkbox" checked={avecMusique} onChange={(e) => setAvecMusique(e.target.checked)} /> Avec la bande originale
+                </label>
+              )}
               <button type="button" className="nx-puce on" onClick={() => void remonter()}>Créer cette version</button>
               <a className="nx-puce" href={`/api/nexora/film/${film.id}/export`} download>Exporter en ProRes (.mov)</a>
               <a className="nx-puce" href={mediaUrl(film.id)} download>Télécharger le MP4</a>
               <a className="nx-puce" href={`/api/nexora/film/${film.id}/projet`} download>Projet Premiere / DaVinci (.zip)</a>
             </div>
+            <strong>Bande originale</strong>
+            <div className="nx-options">
+              <input type="text" value={envie} onChange={(e) => setEnvie(e.target.value)} placeholder="Ambiance voulue (facultatif) : épique, synthwave, piano…" aria-label="Ambiance de la musique" />
+              <button type="button" className="nx-puce on" disabled={enComposition} onClick={() => void composer()}>{enComposition ? 'Composition en cours…' : musique ? 'Composer une autre musique' : 'Composer la musique du film'}</button>
+              {musique && <audio src={mediaUrl(musique.id)} controls preload="none" />}
+            </div>
+            <p className="nx-sous">Musique composée par MiniMax-Music3, puis mixée sous les sons des plans.</p>
           </div>
         )}
         <ol className="nx-plans">

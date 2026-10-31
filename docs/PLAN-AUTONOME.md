@@ -28,6 +28,15 @@ Mandat du fondateur (30/10/2026, soir) : carte blanche. Recherche approfondie (y
 - [x] **9. Montage** — montage cloud sans rendu (ordre, retrait, coupe/fondu), MP4, ProRes 422 HQ, ZIP projet FCP7 XML ; prouvé en réel. FreeCut écarté comme éditeur cloud (motifs au journal). : timeline (FreeCut ou équivalent MIT), plans → prises, export MP4 et ProRes (FFmpeg LGPL), reprise du projet sans perte.
 - [x] **10. Vérification de bout en bout** — parcours débutant dans le navigateur (clip, film, plans, refaire, montage, exports), mobile 375 px, `docs/ETAT.md` écrit. dans le navigateur (parcours débutant complet), rapport final `docs/ETAT.md` (fait / testé / mesuré / pas fait).
 
+## Lots du 31/10/2026 (demande du fondateur : H3 seul, qualité maximale, vidéo promo, page marketing)
+
+- [x] **11. H3 seul** — Wan 2.2 retiré du produit (code, registre, licences, tests) ; hors territoire H3, refus clair.
+- [x] **12. Parc GPU** — GB10 + RTX 5090 de pc1 (tunnel SSH en boucle locale), routage par recette, charge équilibrée, lien tâche → moteur persistant. Rendus réels sur les deux moteurs.
+- [x] **13. Banc qualité** — `recherche/10-qualite-h3.md` : H3 officiel complet (5090, 24 étapes, 290 s), Singularity V2, FastH3 (GB10, 344 s). Recette « cinéma » = H3 officiel complet.
+- [x] **14. Bande originale** — MiniMax Music 3 (licence sans territoire exclu) : graphe, description écrite par le LLM, mixage −14 LUFS, bouton dans le panneau du film ; 4 tests.
+- [ ] **15. Vidéo promotionnelle** — 12 plans × 2 moteurs, musique Music 3, cartons, montage au rythme, 1080p ; versions réseaux sociaux.
+- [ ] **16. Page marketing** — `marketing/creative/` (charte du site Nexora), vidéo et planche de plans réels.
+
 ## Condition d'arrêt de la boucle
 
 Tous les lots cochés avec leurs preuves, `docs/ETAT.md` écrit et poussé sur GitLab. Un lot impossible (matériel, licence) est marqué « bloqué » avec la raison et un contournement ; il ne bloque pas les suivants.

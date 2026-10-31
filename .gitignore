@@ -5,3 +5,8 @@ data/
 *.log
 .env
 node_modules/
+
+# Vidéos et images de travail de la page marketing (régénérables, lourdes)
+marketing/creative/site/promo.mp4
+marketing/creative/site/img/
+marketing/creative/apercu.html

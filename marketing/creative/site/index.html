@@ -1,0 +1,309 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nexora Creative</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Nexora Creative : écris une phrase, obtiens une scène de cinéma avec son. Dragons, combats, flottes spatiales : tout part d'une phrase en français.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : une salle de projection. Le film occupe l'écran ; autour, les filets d'un pixel du système « Instrument »
+   de Nexora, des repères de bobine (plans, minutage, 24 i/s) et la mosaïque « braise » qui se calcule en image. */
+:root {
+  --encre: #0a0a0e;      /* fond, la salle noire */
+  --surface: #121218;    /* surfaces */
+  --filet: #2b2b38;      /* filets d'un pixel */
+  --os: #f5f4ef;         /* texte principal */
+  --brume: #a8a8b6;      /* texte secondaire */
+  --signal: #ff5a1f;     /* accent unique : l'orange signal */
+  --signal-texte: #ff7a45;
+  --affichage: "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --corps: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --gouttiere-g: max(16px, env(safe-area-inset-left, 0px));
+  --gouttiere-d: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--encre); }
+body { background: var(--encre); color: var(--os); font-family: var(--corps); font-size: 1rem; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+.cadre { max-width: 80rem; margin: 0 auto; padding-left: var(--gouttiere-g); padding-right: var(--gouttiere-d); }
+.etiquette { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brume); }
+.etiquette b { color: var(--signal-texte); font-weight: 500; }
+h1, h2, h3 { font-family: var(--affichage); font-weight: 500; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+
+/* --- En-tête --- */
+.entete { border-bottom: 1px solid var(--filet); }
+.entete .cadre { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; }
+.marque { display: flex; align-items: center; gap: 0.6rem; font-family: var(--affichage); font-weight: 600; letter-spacing: -0.01em; text-decoration: none; }
+.marque svg { width: 22px; height: 22px; flex: none; }
+.marque span { color: var(--brume); font-weight: 400; }
+.bouton { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.1rem; border-radius: 0.375rem; background: var(--signal); color: var(--encre); font-weight: 500; text-decoration: none; font-size: 0.95rem; border: 0; cursor: pointer; transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1); }
+.bouton:hover { background: var(--signal-texte); }
+.bouton.secondaire { background: transparent; color: var(--os); box-shadow: inset 0 0 0 1px var(--filet); }
+.bouton.secondaire:hover { box-shadow: inset 0 0 0 1px var(--brume); }
+
+/* --- Héros : l'écran --- */
+.heros { padding-block: clamp(2rem, 1rem + 4vw, 4.5rem) 0; }
+.heros h1 { font-size: clamp(2.75rem, 1.35rem + 5.6vw, 6rem); line-height: 0.98; letter-spacing: -0.035em; max-width: 14ch; }
+.heros h1 em { font-style: normal; color: var(--signal); }
+.heros .chapeau { margin-top: 1.25rem; font-size: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem); color: var(--brume); max-width: 42rem; }
+.heros .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+.ecran { position: relative; margin-top: clamp(2rem, 1rem + 3vw, 3.5rem); border: 1px solid var(--filet); border-radius: 0.375rem; overflow: hidden; background: #000; aspect-ratio: 16 / 9; max-width: 100%; }
+.ecran video, .ecran img.affiche { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ecran canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.ecran .son { position: absolute; right: 12px; bottom: 12px; z-index: 2; }
+.reperes { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem; padding-block: 0.75rem; border-bottom: 1px solid var(--filet); }
+
+/* --- Sections --- */
+section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom: 1px solid var(--filet); }
+.bloc h2 { font-size: clamp(2rem, 1.3rem + 2.8vw, 3.5rem); line-height: 1.05; letter-spacing: -0.03em; max-width: 18ch; }
+.bloc .intro { margin-top: 1rem; color: var(--brume); max-width: 40rem; font-size: 1.0625rem; }
+.bloc .tete { display: grid; gap: 0.9rem; }
+
+/* La démonstration : phrase → scénario → plan */
+.demo { margin-top: 3rem; display: grid; grid-template-columns: 1fr 1.25fr 1.2fr; border: 1px solid var(--filet); border-radius: 0.375rem; overflow: hidden; }
+.demo > div { padding: 1.5rem; min-width: 0; border-right: 1px solid var(--filet); display: grid; align-content: start; gap: 0.9rem; }
+.demo > div:last-child { border-right: 0; padding: 0; }
+.demo .phrase { font-family: var(--affichage); font-size: 1.35rem; line-height: 1.3; letter-spacing: -0.01em; }
+.demo .phrase::before { content: "« "; color: var(--signal); }
+.demo .phrase::after { content: " »"; color: var(--signal); }
+.demo pre { margin: 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--brume); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 19rem; overflow: auto; }
+.demo pre .champ { color: var(--signal-texte); }
+.demo figure { margin: 0; position: relative; height: 100%; min-height: 15rem; }
+.demo figure img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.demo figure figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 0.75rem 1rem; background: linear-gradient(transparent, rgb(10 10 14 / 0.85)); }
+.mesures { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; }
+.mesures span { font-family: var(--mono); font-size: 0.8rem; color: var(--brume); font-variant-numeric: tabular-nums; }
+.mesures b { color: var(--os); font-weight: 500; }
+
+/* La planche : une phrase par plan */
+.planche { margin-top: 3rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--filet); border: 1px solid var(--filet); border-radius: 0.375rem; overflow: hidden; }
+.plan { margin: 0; background: var(--encre); display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.plan img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.plan .legende { padding: 1rem 1.1rem 1.25rem; display: grid; gap: 0.4rem; align-content: start; }
+.plan .legende p { font-size: 0.95rem; line-height: 1.45; }
+
+/* Le réalisateur IA */
+.etapes { margin-top: 3rem; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--filet); }
+.etape { padding: 1.5rem 1.25rem 0 0; display: grid; gap: 0.6rem; align-content: start; min-width: 0; }
+.etape + .etape { padding-left: 1.25rem; border-left: 1px solid var(--filet); }
+.etape h3 { font-size: 1.2rem; letter-spacing: -0.01em; }
+.etape p { color: var(--brume); font-size: 0.95rem; }
+
+/* Les moteurs */
+.moteurs { margin-top: 3rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.moteur { border: 1px solid var(--filet); border-radius: 0.375rem; padding: 1.5rem; display: grid; gap: 0.6rem; align-content: start; background: var(--surface); }
+.moteur h3 { font-size: 1.35rem; }
+.moteur p { color: var(--brume); font-size: 0.95rem; }
+
+/* Appel final */
+.final { position: relative; overflow: hidden; }
+.final canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; pointer-events: none; }
+.final .cadre { position: relative; display: grid; gap: 1.25rem; justify-items: start; }
+.final h2 { font-size: clamp(2.5rem, 1.4rem + 4.4vw, 5rem); max-width: 16ch; }
+.pied { padding-block: 2rem 3rem; color: var(--brume); font-size: 0.85rem; display: grid; gap: 0.5rem; }
+
+@media (max-width: 60rem) {
+  .demo { grid-template-columns: 1fr; }
+  .demo > div { border-right: 0; border-bottom: 1px solid var(--filet); }
+  .demo > div:last-child { border-bottom: 0; }
+  .demo figure { min-height: 0; aspect-ratio: 16 / 9; }
+  .planche { grid-template-columns: repeat(2, 1fr); }
+  .etapes { grid-template-columns: repeat(2, 1fr); }
+  .etape:nth-child(3) { padding-left: 0; border-left: 0; }
+  .etape { padding-bottom: 1.5rem; }
+  .moteurs { grid-template-columns: 1fr; }
+}
+@media (max-width: 34rem) {
+  .planche { grid-template-columns: 1fr; }
+  .etapes { grid-template-columns: 1fr; }
+  .etape + .etape { padding-left: 0; border-left: 0; border-top: 1px solid var(--filet); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="entete">
+  <div class="cadre">
+    <a class="marque" href="#haut" aria-label="Nexora Creative">
+      <svg viewBox="0 0 22 22" aria-hidden="true"><rect x="0" y="0" width="6" height="22" fill="#ff5a1f"/><rect x="16" y="0" width="6" height="22" fill="#ff5a1f"/><rect x="6" y="4" width="5" height="5" fill="#ff8a1f"/><rect x="11" y="9" width="5" height="5" fill="#ffb11a"/><rect x="6" y="13" width="5" height="5" fill="#e0341c" opacity=".0"/></svg>
+      Nexora <span>Creative</span>
+    </a>
+    <a class="bouton" href="#acces">Accès anticipé</a>
+  </div>
+</header>
+
+<main id="haut">
+  <section class="heros">
+    <div class="cadre">
+      <p class="etiquette"><b>Nexora Creative</b> · studio vidéo IA</p>
+      <h1>Écris-le. <em>Nexora</em> le filme.</h1>
+      <p class="chapeau">Une phrase en français suffit : Nexora Creative écrit le scénario, tourne les plans en 768p avec leur son, les monte et te rend un film. Les dragons, les combats et la flotte de cette bande-annonce sont sortis de phrases comme celle-ci.</p>
+      <div class="actions">
+        <a class="bouton" href="#acces">Rejoindre l’accès anticipé</a>
+        <a class="bouton secondaire" href="#comment">Voir comment ça marche</a>
+      </div>
+      <div class="ecran" id="ecran">
+        <img class="affiche" src="img/p01.jpg" alt="Un dragon d’obsidienne aux fissures de lave jaillit des nuages d’orage au coucher du soleil">
+        <video id="film" src="promo.mp4" poster="img/p01.jpg" playsinline muted loop autoplay preload="metadata" aria-label="Bande-annonce de Nexora Creative"></video>
+        <canvas id="mosaique-ecran" aria-hidden="true"></canvas>
+        <button class="bouton secondaire son" id="son" type="button" aria-pressed="false">Activer le son</button>
+      </div>
+      <div class="reperes">
+        <span class="etiquette">Bande-annonce · 100 % générée</span>
+        <span class="etiquette">1344 × 768 · 24 i/s · son stéréo</span>
+        <span class="etiquette">MiniMax H3 · MiniMax-Music3</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc" id="comment">
+    <div class="cadre">
+      <div class="tete">
+        <p class="etiquette"><b>01</b> · De la phrase à l’image</p>
+        <h2>Tu décris. L’IA écrit le scénario. Le GPU tourne.</h2>
+        <p class="intro">Pas de jargon à apprendre. Un assistant d’écriture transforme ta phrase en scénario de tournage, plan par plan, avec la caméra, la lumière et les sons. Un vérificateur le contrôle avant qu’un seul pixel soit calculé.</p>
+      </div>
+      <div class="demo">
+        <div>
+          <p class="etiquette">Ce que tu écris</p>
+          <p class="phrase">Un dragon colossal aux écailles d’obsidienne fissurées de lave jaillit d’une mer de nuages d’orage au coucher du soleil, déploie ses ailes et rugit vers la caméra.</p>
+        </div>
+        <div>
+          <p class="etiquette">Ce que l’assistant écrit pour le moteur</p>
+          <pre><span class="champ">integrated_multimodal_description:</span> [Shot 1] Photorealistic cinematic CG in the style of an epic Hollywood blockbuster trailer, IMAX-scale sense of size, a colossal obsidian-scaled dragon bursts upward out of a churning sea of storm clouds at sunset, its black scales fissured with glowing molten lava veins. The camera begins in a low aerial wide shot amid the clouds, then shoots upward in a fast Tracking Shot as the dragon erupts through the cloud deck, cloud wisps tearing away from its rising body. The dragon spreads its immense wings to their full span, membrane stretching between Obsidian bones while embers scatter, and the camera pulls back with large amplitude to reveal the creature&#x27;s towering silhouette against a burning orange-and-teal sunset sky. The dragon rears its horned head toward the lens and roars with jaws agape, sharp teeth backlit by volumetric light, anamorphic lens flares raking across the wet scales as the camera pushes in with large amplitude at fast speed toward its glowing maw, holding on the roar as embers and steam swirl around the frame.
+
+<span class="champ">overall_soundscape:</span> Deep thunder rumbles continuously through the storm-cloud sea, punctuated by rushing wind and the wet shredding of clouds as the dragon erupts through them. A massive layered roar bursts from the dragon&#x27;s throat with sub-bass weight, followed by wing membranes snapping taut and embers hissing through the air.
+
+<span class="champ">non_diegetic_music:</span> N/A</pre>
+        </div>
+        <div>
+          <figure>
+            <img src="img/p01b.jpg" alt="Le dragon déploie ses ailes au-dessus des nuages, la gueule ouverte">
+            <figcaption class="etiquette">Plan tourné · 5 s avec son</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="mesures">
+        <span>Scénario écrit en <b>3 à 5 s</b></span>
+        <span>5 s de vidéo avec son en <b>≈ 1 min 30</b> (rapide)</span>
+        <span>Qualité cinéma 768p en <b>≈ 5 min</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="cadre">
+      <div class="tete">
+        <p class="etiquette"><b>02</b> · Une phrase par plan</p>
+        <h2>Chaque image de la bande-annonce a commencé par une phrase.</h2>
+      </div>
+      <div class="planche">
+        <figure class="plan"><img src="img/p01.jpg" alt="Un dragon colossal aux écailles d&#x27;obsidienne fissurées de lave jaillit d&#x27;une mer de nuages d&#x27;orage au coucher du soleil, déploie ses ailes immenses et rugit vers la caméra ; la caméra monte avec lui à toute vitesse." loading="lazy"><figcaption class="legende"><span class="etiquette">Plan 01 · 5 s avec son</span><p>« Un dragon colossal aux écailles d&#x27;obsidienne fissurées de lave jaillit d&#x27;une mer de nuages d&#x27;orage au coucher du soleil, déploie ses ailes immenses et rugit vers la caméra ; la caméra monte avec lui à toute vitesse. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/p02.jpg" alt="Le même dragon noir aux fissures de lave survole en rase-mottes une forteresse médiévale de pierre la nuit et crache un torrent de feu blanc qui embrase les remparts ; des chevaliers en armure plongent à couvert, braises et fumée partout ; travelling latéral rapide qui suit le dragon." loading="lazy"><figcaption class="legende"><span class="etiquette">Plan 02 · 5 s avec son</span><p>« Le même dragon noir aux fissures de lave survole en rase-mottes une forteresse médiévale de pierre la nuit et crache un torrent de feu blanc qui embrase les remparts ; des chevaliers en armure plongent à couvert, braises et fumée partout ; travelling latéral rapide qui suit le dragon. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/p03.jpg" alt="Combat de karaté sur un toit-dojo trempé de pluie la nuit, sous des lanternes rouges : une combattante en kimono noir et un colosse en kimono blanc échangent coups de pied retournés, blocages et balayages ; la caméra tourne autour d&#x27;eux en arc, chorégraphie fluide et réaliste." loading="lazy"><figcaption class="legende"><span class="etiquette">Plan 03 · 5 s avec son</span><p>« Combat de karaté sur un toit-dojo trempé de pluie la nuit, sous des lanternes rouges : une combattante en kimono noir et un colosse en kimono blanc échangent coups de pied retournés, blocages et balayages ; la caméra tourne autour d&#x27;eux en arc, chorégraphie fluide et réaliste. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/p04.jpg" alt="Gros plan au ralenti : le coup de pied retourné de la combattante en kimono noir frappe la garde du colosse en kimono blanc, l&#x27;impact projette une gerbe de gouttes de pluie figées dans la lumière rouge des lanternes ; fond de ville néon flou." loading="lazy"><figcaption class="legende"><span class="etiquette">Plan 04 · 5 s avec son</span><p>« Gros plan au ralenti : le coup de pied retourné de la combattante en kimono noir frappe la garde du colosse en kimono blanc, l&#x27;impact projette une gerbe de gouttes de pluie figées dans la lumière rouge des lanternes ; fond de ville néon flou. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/p05.jpg" alt="Une immense flotte de vaisseaux spatiaux surgit de la vitesse lumière au-dessus d&#x27;une planète géante entourée d&#x27;anneaux : des centaines de traînées lumineuses se contractent d&#x27;un coup en croiseurs gris métallisés, onde de choc bleutée ; plan très large, grandiose." loading="lazy"><figcaption class="legende"><span class="etiquette">Plan 05 · 5 s avec son</span><p>« Une immense flotte de vaisseaux spatiaux surgit de la vitesse lumière au-dessus d&#x27;une planète géante entourée d&#x27;anneaux : des centaines de traînées lumineuses se contractent d&#x27;un coup en croiseurs gris métallisés, onde de choc bleutée ; plan très large, grandiose. »</p></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="cadre">
+      <div class="tete">
+        <p class="etiquette"><b>03</b> · L’AI Director</p>
+        <h2>Un réalisateur qui découpe, tourne et monte pour toi.</h2>
+        <p class="intro">Donne une idée de film. Le Director propose un découpage que tu peux modifier, tourne chaque plan, enchaîne les plans sur la dernière image du précédent pour garder la continuité, puis assemble.</p>
+      </div>
+      <div class="etapes">
+        <div class="etape"><p class="etiquette">Découpage</p><h3>Storyboard modifiable</h3><p>Plans, caméra, durées et une bible de continuité pour garder les mêmes personnages et décors.</p></div>
+        <div class="etape"><p class="etiquette">Tournage</p><h3>Plans enchaînés</h3><p>Un plan peut partir de la dernière image du précédent : la moto devient loup sans coupure visible.</p></div>
+        <div class="etape"><p class="etiquette">Retouche</p><h3>Refaire un seul plan</h3><p>Un plan ne te plaît pas ? Change sa description : seul ce plan est retourné, le film est réassemblé.</p></div>
+        <div class="etape"><p class="etiquette">Livraison</p><h3>Export pro</h3><p>Montage coupe ou fondu, ProRes 422 HQ, et un projet prêt à ouvrir dans Premiere ou DaVinci.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="cadre">
+      <div class="tete">
+        <p class="etiquette"><b>04</b> · Sous le capot</p>
+        <h2>Des modèles de premier plan, sur les GPU de Nexora.</h2>
+      </div>
+      <div class="moteurs">
+        <div class="moteur"><p class="etiquette">Image et son</p><h3>MiniMax H3</h3><p>Le modèle vidéo ouvert le mieux classé avec audio natif : dialogues, bruitages et ambiances synchronisés à l’image.</p></div>
+        <div class="moteur"><p class="etiquette">Musique</p><h3>MiniMax-Music3</h3><p>Une bande originale composée pour ton film, au rythme du montage, sans banque de sons.</p></div>
+        <div class="moteur"><p class="etiquette">Calcul</p><h3>GPU Nexora</h3><p>Rendus sur nos propres machines au Canada (NVIDIA DGX Spark et RTX 5090). Payé en crédits Nexora, avec le devis affiché avant de lancer.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc final" id="acces">
+    <canvas id="mosaique-final" aria-hidden="true"></canvas>
+    <div class="cadre">
+      <p class="etiquette"><b>Bientôt</b> · dans ton espace Nexora</p>
+      <h2>Ta prochaine scène tient en une phrase.</h2>
+      <p class="intro">Nexora Creative arrive dans le panneau « Mes outils » de ton compte Nexora. Inscris-toi à l’accès anticipé pour l’essayer parmi les premiers.</p>
+      <a class="bouton" href="/fr/apps/creative">Rejoindre l’accès anticipé</a>
+    </div>
+  </section>
+</main>
+
+<footer class="cadre pied">
+  <p>Toutes les images et tous les sons de cette page sont générés par IA avec Nexora Creative. Vidéo : MiniMax H3. Musique : MiniMax-Music3.</p>
+  <p>Nexora Creative est en préparation ; aucune date de disponibilité n’est encore annoncée.</p>
+</footer>
+
+<script>
+(() => {
+  // Mosaïque « braise » : un champ de carrés qui se dissout, la matière de Nexora AI. Sur l'écran, elle se calcule en
+  // image au chargement, comme un rendu qui converge ; en bas de page, elle respire doucement.
+  const BRAISE = ['#ffd37a', '#ffb11a', '#ff8a1f', '#ff5a1f', '#e0341c', '#b01a3c'];
+  const calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hache = (c, r, s) => { let h = Math.imul(c + 1, 73856093) ^ Math.imul(r + 1, 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+
+  function mosaique(canvas, { taille, dissolution, seuil, graine }) {
+    const ctx = canvas.getContext('2d');
+    const r = canvas.getBoundingClientRect();
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+    ctx.scale(dpr, dpr); ctx.clearRect(0, 0, r.width, r.height);
+    const cols = Math.ceil(r.width / taille), rows = Math.ceil(r.height / taille);
+    for (let c = 0; c < cols; c++) for (let l = 0; l < rows; l++) {
+      const avance = dissolution(c / Math.max(1, cols - 1), l / Math.max(1, rows - 1));
+      const h = hache(c, l, graine);
+      if (h > avance - seuil) continue;
+      ctx.fillStyle = BRAISE[Math.min(5, Math.floor(avance * 6 * (0.6 + 0.4 * h)))];
+      ctx.fillRect(c * taille, l * taille, taille - 1, taille - 1);
+    }
+  }
+
+  const ecran = document.getElementById('mosaique-ecran');
+  if (ecran && !calme) {
+    const t0 = performance.now();
+    const pas = (t) => {
+      const k = Math.min(1, (t - t0) / 1600);
+      mosaique(ecran, { taille: 24, graine: 7, seuil: k * 1.2, dissolution: (x, y) => 1 - Math.abs(x - 0.5) * 0.4 - y * 0.2 });
+      if (k < 1) requestAnimationFrame(pas); else ecran.remove();
+    };
+    requestAnimationFrame(pas);
+  } else if (ecran) ecran.remove();
+
+  const fin = document.getElementById('mosaique-final');
+  const dessinerFin = () => fin && mosaique(fin, { taille: 18, graine: 3, seuil: 0, dissolution: (x) => Math.max(0, x * 1.35 - 0.35) });
+  dessinerFin();
+  addEventListener('resize', dessinerFin);
+
+  // Le film démarre muet (règle des navigateurs) ; un bouton active le son.
+  const film = document.getElementById('film'), son = document.getElementById('son');
+  son?.addEventListener('click', () => {
+    film.muted = !film.muted;
+    if (!film.muted) { film.currentTime = 0; film.play().catch(() => {}); }
+    son.textContent = film.muted ? 'Activer le son' : 'Couper le son';
+    son.setAttribute('aria-pressed', String(!film.muted));
+  });
+})();
+</script>

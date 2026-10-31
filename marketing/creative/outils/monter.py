@@ -7,7 +7,8 @@ durées en temps (beats × 60 / BPM).
 
 Usage : python3 monter.py liste.json
 Liste : { "sortie", "musique", "bpm", "sfx_db", "musique_db", "segments": [
-          {"carton": "x.mp4", "temps": 4} | {"plan": "x.mp4", "debut": 1.0, "temps": 4, "vitesse": 1.0, "flash": true} ] }
+          {"carton": "x.mp4", "fin": 3.6} | {"plan": "x.mp4", "debut": 1.0, "fin": 8.76, "vitesse": 1.0, "flash": true} ] }
+        (« temps » en battements à la place de « fin » si la musique suit son BPM)
 """
 import json
 import subprocess
@@ -49,8 +50,15 @@ def monter(liste: dict):
     with tempfile.TemporaryDirectory() as d:
         dossier = Path(d)
         morceaux = []
+        precedent = 0.0
         for i, s in enumerate(liste["segments"]):
-            duree = float(s["temps"]) * temps_beat if s.get("en_temps", True) else float(s["duree"])
+            # Une coupe se donne par son instant absolu sur la musique (« fin », en secondes), ou en temps (« temps »).
+            if "fin" in s:
+                duree = float(s["fin"]) - precedent
+                precedent = float(s["fin"])
+            else:
+                duree = float(s["temps"]) * temps_beat
+                precedent += duree
             f = dossier / f"s{i:03d}"
             segment(s, duree, f)
             morceaux.append(f.with_suffix(".mov"))
