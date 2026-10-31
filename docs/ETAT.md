@@ -12,20 +12,28 @@ Fork d'**OpenField** (MIT), comme WorkStudio est un fork de Sim : interface Reac
 
 ## Mise à jour du 31/10 (demande du fondateur : H3 seul, deux GPU, qualité maximale, vidéo promo, page marketing)
 
-- **MiniMax H3 seul** : Wan 2.2 est retiré (code, registre, poids supprimés). Hors territoire H3, refus clair, aucun repli.
-- **Deux GPU** : le serveur pilote un parc (GB10 + RTX 5090 de pc1 par tunnel SSH en boucle locale), route chaque tâche vers un moteur qui porte sa recette (FastH3 « rapide » sur la GB10 ; H3 officiel complet « cinéma » et musique sur la 5090). Prouvé : les deux moteurs rendent des plans de la même bande-annonce ; l'application voit les deux en ligne.
+- **MiniMax H3 seul** : Wan 2.2 est retiré (code, registre, poids supprimés). Hors territoire H3, refus clair, aucun repli. Wan 2.2 : plus aucune trace dans le code.
+- **Deux GPU** : le serveur pilote un parc (GB10 + RTX 5090 de pc1 par tunnel SSH en boucle locale), route chaque tâche vers un moteur qui porte sa recette (depuis le 31/10 soir : H3 « rapide » et « cinéma » sur la RTX 5090, image Qwen et musique Music3 sur le GB10). Prouvé : les deux moteurs rendent des plans de la même bande-annonce ; l'application voit les deux en ligne.
 - **Banc qualité** : `recherche/10-qualite-h3.md` (5090 : 5 s en 1344×768 avec son en 290 s ; GB10 : 344 s).
 - **Musique MiniMax-Music3** : bande originale pour les films (panneau des plans) et les clips (bouton « Ajouter une musique »), description écrite par le LLM, mixage −14 LUFS. 60 s de musique en 27 s sur la 5090. Gain réel pour la musique ; les bruitages et voix restent ceux de H3 (`recherche/11-image-et-musique.md`).
-- **Image** : le studio pointe sur Qwen-Image-2512 (Apache-2.0), meilleur modèle d'image ouvert sans licence payante ; poids **non encore téléchargés**. Qwen-Image-2.1 (plus fort) et Ideogram 4 exigent une licence commerciale.
+- **Image** : Qwen-Image-2.1 installé sur le GB10 **en mode démonstration seulement** (licence de recherche) ; le défaut propre Qwen-Image-2512 (Apache-2.0) n'est **pas installé** (disque). Ideogram 4 exige une licence commerciale.
 - **Vidéo promotionnelle et page marketing** : voir `marketing/creative/` et le journal du 31/10.
 - **Non prouvé** : l'écoute par un humain (aucun A/B sonore fait), l'étape « l'IA dessine le plan clé avant H3 », le test réel du bouton « Ajouter une musique » dans le navigateur.
+
+## Mise à jour du 31/10 soir et nuit (Studio, Qwen, LLM, administration du site, bande-annonce V2)
+
+- **Interface Studio** refaite (état des deux GPU, modes Vidéo / Image / Film, « Booster ma phrase », publication par réseau, « Inspire-moi »).
+- **LLM par rôle**, modération avant rendu (règles + LLM), réglable depuis l'administration du site : **branche `feat/creative-admin-modeles` du dépôt du site, non fusionnée, non déployée** ; la migration 0030 n'est pas appliquée à la vraie base.
+- **Bande-annonce V2** (60 s : flotte au-dessus de la Terre, hyperespace, duels de sabres laser) en trois versions : publique 16:9, publique 9:16, démo investisseurs. **Non publiée** : réserve de licence H3 V.4 (voir `docs/LICENCES-PUBLICATION.md`). **Jamais écoutée par un humain** : volume, silences et synchro mesurés seulement.
+- **Page marketing** complète dans `marketing/creative/` ; pas encore dans le site Nexora (registre d'affirmations à remplir).
+- **H3 n'est pas sur le GB10** : malentendu de ma part (déplacé vers pc1 au lieu de dupliqué). Le retour demande 35 Go ; disque de pc6 à 93 % (66 Go libres, réserve de 50 Go) → autorisation de libérer de l'espace attendue.
+- **Pas encore au niveau de Higgsfield** : manquent personnages constants d'une vidéo à l'autre (Ref2VA non branché), transfert de mouvement, avatars qui parlent, retouche locale / relight, juge visuel automatique, crédits côté site, machine RTX 5080.
 
 ## Ce qui est fait et prouvé (état du 31/10 matin)
 
 | Fonction | Preuve |
 |---|---|
 | Moteur **MiniMax H3** (FastH3 V2 NVFP4) sur GB10 | rendus réels : 5 s en 82 à 92 s, 10 s en 230 s, **Qualité max 1344×768 en 340 s**, son stéréo vérifié [MESURÉ] |
-| Moteur **Wan 2.2** (Apache-2.0), repli sans dépendre de H3 | rendu réel 5 s en 118,6 s [MESURÉ] |
 | **Réécrivain LLM** des prompts H3 (guide officiel MiniMax + validateur déterministe) | votre exemple voiture → robot réussi du premier coup en 3,4 s ; défaut « champ inventé » trouvé et corrigé [TEST réel] |
 | Accueil **Créer** : phrase → vidéo, formats, durées, son, Rapide / Qualité max, **partir de sa photo** | parcours complet dans le navigateur (pub café verticale) ; photo → vidéo réel (93 s) [TEST navigateur] |
 | **AI Director** : idée → storyboard modifiable (plans, caméra, bible de continuité) → tournage → assemblage | film réel « Crimson Rising », 6 plans, 41 s, assemblé en 3,1 s, repris après plusieurs redémarrages du serveur [TEST réel] |
@@ -41,14 +49,14 @@ Fork d'**OpenField** (MIT), comme WorkStudio est un fork de Sim : interface Reac
 | **Connexion unique** au portail (OIDC + PKCE, patron WorkStudio) | test de bout en bout avec un faux site Nexora (3 tests) |
 | **Crédits** des rendus (devis, réservation, validation ou libération) et **espace disque** par organisation | 4 + 2 tests contre une API de site simulée |
 
-**81 tests automatisés verts**, contrôle de types vert, code sur GitLab (`root/nexora-creative`, branche `developpement`, demande de fusion !1).
+**99 tests automatisés verts**, contrôle de types vert, code sur GitLab (`root/nexora-creative`, branche `developpement`, demande de fusion !1).
 
 ## Ce qui n'est pas fait ou pas prouvé
 
 - **Côté site Nexora (nexora-web)** : client OIDC « Nexora Creative », portée `creative:model`, routes `/api/oauth/creative-access`, `/api/creative/credits/*`, `/api/creative/storage`, carte du panneau. Rien n'est construit : je n'ai pas touché au dépôt du site.
 - **Prix** : les crédits par seconde de GPU sont une proposition (0,5 crédit/s, soit ≈ 43 crédits pour 5 s rapides) ; à valider.
 - **Juge visuel par IA et 2 candidats par plan** : conçus (rapports 05 et 09), **bloqués** faute d'un modèle vision appelable (les modèles vision du catalogue sont « en aperçu » tant que la clé DeepInfra n'est pas déposée). Sans juge, tourner 2 candidats doublerait le coût pour un choix au hasard. En attendant : contrôle qualité automatique, reprise, et « Refaire ce plan ».
-- **Production** : une seule instance (SQLite en WAL) et un seul moteur (GB10). **Bloqué** : moteurs sur la RTX 5090 et la 5080, il faut me dire quelles machines et m'autoriser à y installer ComfyUI. Fichiers sur le disque du serveur (pas encore de stockage objet).
+- **Production** : une seule instance (SQLite en WAL) ; deux moteurs (GB10 + RTX 5090). **Bloqué** : moteurs sur la RTX 5090 et la 5080, il faut me dire quelles machines et m'autoriser à y installer ComfyUI. Fichiers sur le disque du serveur (pas encore de stockage objet).
 - **FreeCut** (montage avancé multipiste) : écarté pour l'instant après inspection, car il exige Chrome ou Edge et garde les projets sur le disque de l'utilisateur. Le montage cloud de Nexora (plans) et l'export Premiere/DaVinci couvrent le besoin de départ.
 - **Import du ZIP dans Premiere ou Resolve** : non essayé (logiciels absents de la machine).
 - Juridique : la stratégie de territoire H3 et les obligations de sa licence restent à valider par un juriste (architecture §7).

@@ -99,3 +99,8 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **Ressemblances de franchise écartées** : cockpit et chasseurs du saut en hyperespace (recadrage serré, `recadre`) ; robots de la V1 déjà remplacés.
 - **Page marketing complète** (`marketing/creative/index.html`, `outils/page.py`) : chiffres mesurés, parcours en six étapes, huit fonctions, planche de six plans réels (aucune image Qwen), moteurs, Q&R, accès anticipé ; testée (bureau, 375 px sans débordement). Publiée en page privée.
 - **Réserve juridique à trancher par le fondateur** : la licence H3 (V.4) interdit d'afficher les sorties hors du territoire autorisé ; une publication sur des réseaux publics est visible partout (États-Unis, UE, R.-U., Corée inclus). Avis juridique ou licence MiniMax pour ces territoires avant de publier.
+
+## 31/10/2026 (fin) — clôture : disque, licences, état
+- **Disque pc6** : 66 Go libres (93 %). H3 sur le GB10 (35 Go) ramènerait à 31 Go, sous la réserve de 50 Go : **non remis**. Seul le nettoyage de Docker (images, volumes, cache de build) ou des caches uv/pip libérerait assez ; hors de mon périmètre, donc en attente de l'autorisation du fondateur.
+- **Dossier de licences** : `docs/LICENCES-PUBLICATION.md` (H3 V.4 pour les réseaux sociaux, Qwen-Image-2.1, brouillons de demande à MiniMax et Alibaba, **non envoyés**).
+- `docs/ETAT.md` remis à jour (ancienne ligne Wan retirée, tests 99, limites Higgsfield). Vérifié : aucune occurrence de Wan dans `app/server`, `app/src`, `app/scripts` ; 99 tests verts.
