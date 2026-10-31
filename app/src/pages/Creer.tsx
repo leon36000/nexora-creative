@@ -149,6 +149,7 @@ export default function Creer() {
             {voirScenario && <pre>{dernier.prompt}</pre>}
           </div>
         )}
+        {etat && !etat.son && <p className="nx-note">Pour ton compte, les vidéos sont tournées avec {etat.moteur}, sans piste sonore générée.</p>}
         {etat && !etat.llm && <p className="nx-note">L’assistant d’écriture n’est pas branché sur ce poste : la vidéo sera tournée à partir de ta phrase telle quelle.</p>}
       </section>
 
@@ -204,7 +205,7 @@ export default function Creer() {
         )}
       </section>
 
-      <footer className="nx-pied">Vidéo propulsée par <strong>MiniMax H3</strong> · Scénario par IA · Nexora Creative</footer>
+      <footer className="nx-pied">Vidéo propulsée par <strong>{etat?.moteur ?? 'MiniMax H3'}</strong> · Scénario par IA · Nexora Creative</footer>
       {vue !== null && <Viewer takeId={vue} onClose={() => setVue(null)} onStep={(d) => {
         const n = ids[ids.indexOf(vue) + d];
         if (n !== undefined) setVue(n);

@@ -161,6 +161,21 @@ export const BUNDLES: Bundle[] = [
     ],
   },
   {
+    id: 'wan22',
+    label: 'Wan 2.2 TI2V-5B (licence Apache-2.0)',
+    purpose: 'Nexora Creative : second moteur vidéo à licence propre (texte ou image vers vidéo, sans son). Repli pour les comptes hors du territoire de MiniMax H3.',
+    license: 'Apache-2.0 (Wan-AI/Wan2.2-TI2V-5B ; reconditionné pour ComfyUI par Comfy-Org). Encodeur UMT5-XXL : Apache-2.0.',
+    optional: true,
+    files: [
+      { file: 'wan2.2_ti2v_5B_fp16.safetensors', dir: 'diffusion_models',
+        ...HF('Comfy-Org/Wan-2.2', 'split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors', 10.0) },
+      { file: 'umt5_xxl_fp8_e4m3fn_scaled.safetensors', dir: 'text_encoders',
+        ...HF('Comfy-Org/Wan-2.2', 'split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors', 6.7) },
+      { file: 'wan2.2_vae.safetensors', dir: 'vae',
+        ...HF('Comfy-Org/Wan-2.2', 'split_files/vae/wan2.2_vae.safetensors', 1.4) },
+    ],
+  },
+  {
     id: 'h3-refs',
     label: 'MiniMax H3 — Refs mode',
     purpose: 'Adds the Refs mode checkpoint: build a shot from up to 4 reference images (a character sheet, a location plate) instead of a single start frame.',
@@ -533,5 +548,6 @@ export function bundlesFor(req: {
   if (req.videoModel === 'ltx25') return ['ltx25'];
   if (req.videoModel === 'ltx') return ['ltx23'];
   if (req.videoModel === 'h3-fast') return ['h3-fast'];
+  if (req.videoModel === 'wan22') return ['wan22'];
   return req.mode === 'reference' ? ['h3', 'h3-refs'] : ['h3'];
 }

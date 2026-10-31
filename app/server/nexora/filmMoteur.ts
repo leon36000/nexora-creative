@@ -8,7 +8,7 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { config } from '../config.js';
 import { takes, type Take } from '../jobs.js';
-import { corpsRenduH3, type DemandeCreer } from './creer.js';
+import { corpsRendu, type DemandeCreer, type MoteurVideo } from './creer.js';
 import { argsAssemblage, intentionDuPlan, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
@@ -25,7 +25,7 @@ const pousser = (id: number) => deps.broadcast({ type: 'take', take: takes.get(i
 
 export async function tournerFilm(
   sb: Storyboard,
-  opts: { format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null },
+  opts: { format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo },
   llm: ClientLlm | null,
 ): Promise<number> {
   const filmId = takes.create({
@@ -33,7 +33,7 @@ export async function tournerFilm(
     kind: 'video',
     shot_name: sb.titre.slice(0, 40),
     settings: {
-      app: 'nexora-film', film: true, storyboard: sb, format: opts.format, son: opts.son,
+      app: 'nexora-film', film: true, storyboard: sb, format: opts.format, son: opts.son && opts.moteur === 'h3-fast', moteur: opts.moteur,
       prompt: opts.intention, userPrompt: sb.titre, seconds: sb.dureeTotale, shotName: sb.titre.slice(0, 40),
     },
   });
@@ -46,7 +46,7 @@ export async function tournerFilm(
     for (let i = 0; i < sb.plans.length; i++) {
       const p = sb.plans[i];
       const corps = {
-        ...corpsRenduH3({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son }, prompts[i].prompt),
+        ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son }, prompts[i].prompt, opts.moteur),
         app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: prompts[i].source,
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };

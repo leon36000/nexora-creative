@@ -15,7 +15,8 @@ import * as comfy from './comfy.js';
 import * as eng from './engine.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
-import { CHECKPOINT_FASTH3, corpsRenduH3, dureeEffective, lireDemandeCreer } from './nexora/creer.js';
+import { buildWan22Graph, imagesWan } from './graphs/wan22.js';
+import { CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer } from './nexora/creer.js';
 import { territoireDuCompte } from './nexora/compte.js';
 import { clientLlmDepuisEnv } from './nexora/llm.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
@@ -784,6 +785,16 @@ async function graphFor(b: any, seed: number): Promise<Built> {
       extraLoraStrength: b.extraLoraStrength,
       startImage: b.startImage,
     });
+  } else if (b.videoModel === 'wan22') {
+    kind = 'video';
+    graph = buildWan22Graph({
+      prompt: b.prompt,
+      width: b.width || 832,
+      height: b.height || 480,
+      frames: Number.isFinite(b.frames) ? b.frames : imagesWan(5),
+      seed,
+      startImage: b.startImage,
+    });
   } else {
     kind = 'video';
     graph = buildH3Graph({
@@ -884,12 +895,13 @@ app.post('/api/nexora/creer', async (req, reply) => {
   let demande;
   try { demande = lireDemandeCreer(req.body); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
+  const moteur = (req.body as any)?.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
   const r = await reecrireH3({ intention: demande.intention, mode: 't2va', dureeS: dureeEffective(demande) }, clientLlmDepuisEnv());
-  const corps: any = { ...corpsRenduH3(demande, r.prompt), intention: demande.intention, promptSource: r.source };
+  const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur };
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
-  return { ...res, prompt: r.prompt, source: r.source, tentatives: r.tentatives };
+  return { ...res, prompt: corps.prompt, source: r.source, tentatives: r.tentatives, moteur };
 });
 
 /** Director, étape 1 : l'idée devient un storyboard (plans, caméra, durées, bible de continuité), sans rien tourner. */
@@ -908,17 +920,21 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   try { sb = lireStoryboard(b.storyboard, 0); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'storyboard invalide' }); }
   const demande = lireDemandeCreer({ intention: sb.titre, format: b.format, son: b.son });
-  const missing = await blockingReasonFor(eng.isLocal(), ['h3-fast']);
+  const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
+  const missing = await blockingReasonFor(eng.isLocal(), [moteur]);
   if (missing) return reply.code(412).send({ error: missing });
   try {
-    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null }, clientLlmDepuisEnv());
+    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur }, clientLlmDepuisEnv());
     return { filmId, take: takes.get(filmId) };
   } catch (e) {
     return reply.code(400).send({ error: e instanceof Error ? e.message : 'tournage impossible' });
   }
 });
 
-app.get('/api/nexora/etat', async () => ({ llm: !!clientLlmDepuisEnv(), moteur: 'MiniMax H3', territoire: territoireDuCompte() }));
+app.get('/api/nexora/etat', async () => {
+  const moteur = choisirMoteur(territoireDuCompte());
+  return { llm: !!clientLlmDepuisEnv(), moteur: moteur === 'h3-fast' ? 'MiniMax H3' : 'Wan 2.2', son: moteur === 'h3-fast', territoire: territoireDuCompte() };
+});
 
 async function generate(b: any, reply: FastifyReply) {
   stripServerKeys(b);

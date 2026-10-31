@@ -1,7 +1,9 @@
 /**
  * Parcours simple « Créer » : une intention en français → prompt H3 écrit par le LLM → rendu FastH3.
- * Ce module ne fait que lire la demande et préparer le corps de rendu ; la route (server/nexora/routes.ts) enchaîne.
+ * Ce module ne fait que lire la demande et préparer le corps de rendu ; la route de server/index.ts enchaîne.
  */
+import { imagesWan, promptWanDepuisH3 } from '../graphs/wan22.js';
+import { verdictLicence } from './licences.js';
 
 export type FormatCreer = '16:9' | '9:16' | '1:1';
 export type DureeCreer = 5 | 10 | 15;
@@ -55,4 +57,28 @@ export function corpsRenduH3(d: DemandeCreer, prompt: string) {
 /** Durée effective (s) du rendu, pour la ligne d'instruction et les horodatages du prompt. */
 export function dureeEffective(d: DemandeCreer): number {
   return imagesPour(d.duree) / 24;
+}
+
+export type MoteurVideo = 'h3-fast' | 'wan22';
+
+/**
+ * Moteur vidéo du compte : MiniMax H3 là où sa licence le permet, sinon Wan 2.2 (Apache-2.0). C'est la règle dure du
+ * planificateur : la licence passe avant la qualité, et un territoire inconnu ne reçoit jamais H3 (échec fermé).
+ */
+export function choisirMoteur(territoire: string | null): MoteurVideo {
+  return verdictLicence('h3-fast', territoire).statut === 'permis' ? 'h3-fast' : 'wan22';
+}
+
+/** Corps de rendu pour le moteur choisi ; le prompt H3 sert aussi de source au prompt descriptif de Wan. */
+export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVideo) {
+  if (moteur === 'h3-fast') return corpsRenduH3(d, promptH3);
+  return {
+    kind: 'video' as const,
+    videoModel: 'wan22' as const,
+    prompt: promptWanDepuisH3(promptH3),
+    ...TAILLES[d.format],
+    frames: imagesWan(d.duree),
+    withAudio: false,
+    shotName: d.intention.slice(0, 60),
+  };
 }

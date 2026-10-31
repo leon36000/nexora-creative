@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { bundlesFor } from '../models.js';
 import { verdictLicence } from './licences.js';
-import { corpsRenduH3, lireDemandeCreer } from './creer.js';
+import { choisirMoteur, corpsRendu, corpsRenduH3, lireDemandeCreer } from './creer.js';
 
 describe('demande « Créer » (parcours simple)', () => {
   it('valide et complète la demande', () => {
@@ -35,3 +35,21 @@ describe('demande « Créer » (parcours simple)', () => {
     expect(verdictLicence('h3-fast', 'US').statut).toBe('territoire_exclu');
   });
 });
+
+describe('choix du moteur selon la licence et le territoire', () => {
+  it('prend H3 au Canada et Wan 2.2 dans les territoires exclus par H3 ou inconnus', () => {
+    expect(choisirMoteur('CA')).toBe('h3-fast');
+    expect(choisirMoteur('US')).toBe('wan22');
+    expect(choisirMoteur('FR')).toBe('wan22');
+    expect(choisirMoteur(null)).toBe('wan22');
+  });
+
+  it('prépare un rendu Wan sans son, sur sa grille 4n+1, avec un prompt descriptif', () => {
+    const h3 = 'integrated_multimodal_description: [Shot 1] Cinematic, a fox runs.\n\noverall_soundscape: wind.\n\nnon_diegetic_music: N/A';
+    const c = corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true }, h3, 'wan22');
+    expect(c).toMatchObject({ kind: 'video', videoModel: 'wan22', withAudio: false, frames: 121, width: 832, height: 480 });
+    expect(c.prompt).toBe('Cinematic, a fox runs.');
+    expect(corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true }, h3, 'h3-fast')).toMatchObject({ videoModel: 'h3-fast', withAudio: true });
+  });
+});
+

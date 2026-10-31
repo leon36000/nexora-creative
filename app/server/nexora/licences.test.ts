@@ -35,7 +35,7 @@ describe('politique de licences Nexora', () => {
   it('classe chaque ensemble d’OpenField, sans oubli', () => {
     for (const b of BUNDLES) expect(() => verdictLicence(b.id, 'CA')).not.toThrow();
     const permis = BUNDLES.filter((b) => verdictLicence(b.id, 'CA').statut === 'permis').map((b) => b.id).sort();
-    expect(permis).toEqual(['cutout', 'edit', 'h3', 'h3-fast', 'h3-refs', 'h3-turbo', 'qwen', 'sam3', 'seedvr2', 'stage-look', 'trellis2', 'upres'].sort());
+    expect(permis).toEqual(['cutout', 'edit', 'h3', 'h3-fast', 'h3-refs', 'h3-turbo', 'qwen', 'sam3', 'seedvr2', 'stage-look', 'trellis2', 'upres', 'wan22'].sort());
   });
 
   it('donne une phrase en français qui nomme la raison, ou null', () => {
