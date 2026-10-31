@@ -11,6 +11,7 @@ import { takes, type Take } from '../jobs.js';
 import { corpsRendu, type DemandeCreer, type MoteurVideo } from './creer.js';
 import { avecCompte } from './compte.js';
 import { controlerFichier } from './controle.js';
+import type { CreditsPrise } from './credits.js';
 import { argsAssemblage, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
@@ -27,7 +28,7 @@ const pousser = (id: number) => deps.broadcast({ type: 'take', take: takes.get(i
 
 export async function tournerFilm(
   sb: Storyboard,
-  opts: { format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo },
+  opts: { format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: CreditsPrise[] },
   llm: ClientLlm | null,
 ): Promise<number> {
   const filmId = takes.create({
@@ -53,6 +54,7 @@ export async function tournerFilm(
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
       const [id] = await deps.queueTakes(corps, 1);
+      if (opts.reservations?.[i]) takes.patchSettings(id, { nexoraCredits: opts.reservations[i] });
       majPlan(filmId, i, { take: id, corps });
     }
   } catch (e) {

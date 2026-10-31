@@ -5,6 +5,7 @@
  * handling, whisper transcription, and media serving. The browser never
  * talks to ComfyUI directly; every job goes through engine.ts (Comfy SDK).
  */
+import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
@@ -20,6 +21,7 @@ import { CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDeman
 import { compteCourant, territoireDuCompte } from './nexora/compte.js';
 import { clientLlmCourant } from './nexora/llm.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
+import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { lireStoryboard, planifierFilm } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
@@ -75,6 +77,29 @@ await app.register(websocket);
 // Nexora : connexion unique au portail (OIDC). Sans configuration, poste local à compte unique.
 const configAuth = configAuthDepuisEnv();
 if (configAuth) monterAuthentification(app, configAuth);
+/** Facturation des rendus : API du site avec la clé de l'organisation connectée ; aucune en poste local. */
+function facturationPour(org: string | null | undefined) {
+  if (!configAuth || !org) return null;
+  return facturationSite(configAuth.siteUrl, () => accesOrganisation(org)?.key);
+}
+const facturationCourante = () => facturationPour(compteCourant()?.organisationId);
+/** Valide ou libère les crédits des prises terminées (appelé par la réconciliation, idempotent). */
+async function solderCredits() {
+  for (const t of takes.list(null, 300)) {
+    const s = JSON.parse(t.settings);
+    const action = actionFacturation({ status: t.status, credits: s.nexoraCredits });
+    if (!action) continue;
+    const fac = facturationPour(t.organisation_id);
+    if (!fac || !accesOrganisation(t.organisation_id)) continue; // en attente d'une reconnexion de l'organisation
+    try {
+      if (action === 'valider') await fac.valider(s.nexoraCredits.reservationId, s.nexoraCredits.credits);
+      else await fac.liberer(s.nexoraCredits.reservationId);
+      takes.patchSettings(t.id, { nexoraCredits: { ...s.nexoraCredits, etat: action === 'valider' ? 'validee' : 'liberee' } });
+    } catch (e) {
+      console.error(`[nexora] crédits de la prise ${t.id} :`, e instanceof Error ? e.message : e);
+    }
+  }
+}
 /** LLM de la requête : clé de l'organisation connectée, ou configuration du poste. */
 const llmCourant = () => clientLlmCourant(compteCourant(), accesOrganisation);
 
@@ -101,7 +126,7 @@ if (config.judge.on) {
 }
 
 /** Settings keys only the server writes. A request body must never set them: some are file paths we later serve. */
-const SERVER_KEYS = ['alphaPath', 'hdr', 'hdrTag', 'seam', 'seamFix', 'output_path', 'outputPath'] as const;
+const SERVER_KEYS = ['alphaPath', 'hdr', 'hdrTag', 'seam', 'seamFix', 'output_path', 'outputPath', 'nexoraCredits'] as const;
 function stripServerKeys(b: any): void {
   if (b && typeof b === 'object') for (const k of SERVER_KEYS) delete b[k];
 }
@@ -940,12 +965,36 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
   const missing = await blockingReasonFor(eng.isLocal(), [moteur]);
   if (missing) return reply.code(412).send({ error: missing });
+  // Crédits : chaque plan réserve son devis avant le tournage ; les reprises automatiques sont offertes par Nexora.
+  const fac = facturationCourante();
+  const reservations: CreditsPrise[] = [];
+  if (fac) {
+    for (const p of sb.plans) {
+      const corps = corpsRendu({ intention: p.resume, format: demande.format, duree: p.duree, son: demande.son }, '', moteur);
+      const r = await fac.reserver({ idempotence: randomUUID(), credits: devisCredits(corps, tarifDepuisEnv()), libelle: `Nexora Creative · film « ${sb.titre.slice(0, 40)} »` });
+      if (!r.ok) {
+        for (const x of reservations) await fac.liberer(x.reservationId).catch(() => {});
+        return reply.code(402).send({ error: r.message });
+      }
+      reservations.push({ reservationId: r.reservationId, credits: r.credits, etat: 'reservee' });
+    }
+  }
   try {
-    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur }, llmCourant());
-    return { filmId, take: takes.get(filmId) };
+    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur, reservations }, llmCourant());
+    return { filmId, take: takes.get(filmId), credits: reservations.reduce((n, r) => n + r.credits, 0) || undefined };
   } catch (e) {
+    for (const x of reservations) await fac?.liberer(x.reservationId).catch(() => {});
     return reply.code(400).send({ error: e instanceof Error ? e.message : 'tournage impossible' });
   }
+});
+
+/** Devis en crédits d'une création, avant de la lancer (null en poste local : rien n'est débité). */
+app.post('/api/nexora/devis', async (req) => {
+  const b = (req.body ?? {}) as any;
+  const demande = lireDemandeCreer({ intention: 'devis', format: b.format, duree: b.duree, son: b.son });
+  const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
+  const corps = corpsRendu(demande, '', moteur);
+  return { credits: configAuth ? devisCredits(corps, tarifDepuisEnv()) : null, secondesEstimees: secondesGpuEstimees(corps), moteur };
 });
 
 app.get('/api/nexora/etat', async () => {
@@ -992,11 +1041,27 @@ async function generate(b: any, reply: FastifyReply) {
   }
 
   const count = Math.max(1, Math.min(8, Number(b.count) || 1));
+  // Nexora : avec une session du portail, chaque prise réserve son devis en crédits avant de partir au moteur.
+  const reservations: CreditsPrise[] = [];
+  const fac = facturationCourante();
+  if (fac) {
+    const credits = devisCredits(b, tarifDepuisEnv());
+    for (let i = 0; i < count; i++) {
+      const r = await fac.reserver({ idempotence: randomUUID(), credits, libelle: `Nexora Creative · ${b.kind === 'still' ? 'image' : 'vidéo'}` });
+      if (!r.ok) {
+        for (const x of reservations) await fac.liberer(x.reservationId).catch(() => {});
+        return reply.code(402).send({ error: r.message });
+      }
+      reservations.push({ reservationId: r.reservationId, credits: r.credits, etat: 'reservee' });
+    }
+  }
   try {
     const takeIds = await queueTakes(b, count);
+    takeIds.forEach((id, i) => { if (reservations[i]) takes.patchSettings(id, { nexoraCredits: reservations[i] }); });
     if (b.projectId) projects.touch(b.projectId);
-    return { takeIds, takeId: takeIds[0] };
+    return { takeIds, takeId: takeIds[0], credits: reservations.reduce((n, r) => n + r.credits, 0) || undefined };
   } catch (e) {
+    for (const x of reservations) await fac?.liberer(x.reservationId).catch(() => {});
     return reply.code(400).send({ error: e instanceof Error ? e.message : 'bad request', takeIds: (e as any)?.takeIds });
   }
 }
@@ -2326,6 +2391,7 @@ app.get('/api/media/:id', async (req, reply) => {
  * a restart). Polling the job is authoritative; the event stream is a bonus.
  */
 async function reconcile() {
+  void solderCredits();
   for (const id of waitingCuts()) void advance(id);
   for (const id of filmsEnAttente()) void avancerFilm(id);
   for (const t of takes.active()) {
