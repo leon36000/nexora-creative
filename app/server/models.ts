@@ -144,6 +144,23 @@ export const BUNDLES: Bundle[] = [
     ],
   },
   {
+    id: 'h3-fast',
+    label: 'MiniMax H3 — FastH3 V2 (NVFP4)',
+    purpose: 'Nexora Creative : le moteur vidéo par défaut. FastH3 V2 distillé en 8 étapes et quantifié NVFP4 pour Blackwell (RTX 50, DGX Spark), avec son natif.',
+    license: 'MiniMax H3 Community License Agreement (FastH3 est un « Model Derivative ») : territoires exclus (États-Unis, UE, Royaume-Uni, Corée du Sud), « MiniMax H3 » affiché dans l’interface, autorisation écrite au-delà de 20 M$ de revenus.',
+    optional: true,
+    files: [
+      { file: 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors', dir: 'diffusion_models',
+        ...HF('FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy', 'diffusion_models/fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors', 13.6) },
+      { file: 'qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors', dir: 'text_encoders',
+        ...HF('FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy', 'text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors', 15.7) },
+      { file: 'minimax_h3_video_vae_fp16.safetensors', dir: 'vae',
+        ...HF('FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy', 'vae/minimax_h3_video_vae_fp16.safetensors', 5.2) },
+      { file: 'minimax_h3_audio_vae_fp32.safetensors', dir: 'vae',
+        ...HF('FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy', 'vae/minimax_h3_audio_vae_fp32.safetensors', 0.6) },
+    ],
+  },
+  {
     id: 'h3-refs',
     label: 'MiniMax H3 — Refs mode',
     purpose: 'Adds the Refs mode checkpoint: build a shot from up to 4 reference images (a character sheet, a location plate) instead of a single start frame.',
@@ -515,5 +532,6 @@ export function bundlesFor(req: {
   if (req.kind === 'object') return ['trellis2'];
   if (req.videoModel === 'ltx25') return ['ltx25'];
   if (req.videoModel === 'ltx') return ['ltx23'];
+  if (req.videoModel === 'h3-fast') return ['h3-fast'];
   return req.mode === 'reference' ? ['h3', 'h3-refs'] : ['h3'];
 }

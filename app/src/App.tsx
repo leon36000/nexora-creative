@@ -1,4 +1,4 @@
-/** OpenField shell: top bar + routed page. */
+/** Coque de Nexora Creative (fork d'OpenField) : barre du haut + page routée. « Créer » est l'accueil. */
 import { lazy, Suspense, useEffect } from 'react';
 import { APPS, badgeLabel } from './catalog';
 import { linkProps, useRoute } from './router';
@@ -22,14 +22,16 @@ const StagePage = lazy(() => import('./pages/Stage'));
 const ObjectPage = lazy(() => import('./pages/Object'));
 import { Apps, Explore, Library, Soon } from './pages/Home';
 import Setup from './pages/Setup';
+import Creer from './pages/Creer';
 
 const SECTIONS = [
-  { to: '/', label: 'Explore' },
+  { to: '/', label: 'Créer' },
+  { to: '/explorer', label: 'Explorer' },
   { to: '/image', label: 'Image' },
-  { to: '/edit', label: 'Edit' },
-  { to: '/video', label: 'Video' },
-  { to: '/apps', label: 'Apps' },
-  { to: '/library', label: 'Library' },
+  { to: '/edit', label: 'Retouche' },
+  { to: '/video', label: 'Vidéo' },
+  { to: '/apps', label: 'Outils' },
+  { to: '/library', label: 'Bibliothèque' },
 ];
 const APP_LINKS = APPS.filter((a) => ['director', 'stage', 'loop', 'mirror', 'reshoot', 'upscale'].includes(a.id));
 
@@ -57,14 +59,15 @@ export default function App() {
     if (path === '/apps') return <Apps />;
     if (path === '/library') return <Library />;
     if (path === '/setup') return <Setup />;
-    return <Explore />;
+    if (path === '/explorer') return <Explore />;
+    return <Creer />;
   })();
 
   // the tab says where you are
   useEffect(() => {
-    const name = path === '/' ? 'Explore' : path === '/setup' ? 'Setup' : path === '/library' ? 'Library'
-      : APPS.find((a) => a.route.split('?')[0] === path)?.name ?? SECTIONS.find((s) => s.to === path)?.label;
-    document.title = name ? `${name} · OpenField` : 'OpenField';
+    const name = path === '/' ? 'Créer' : path === '/setup' ? 'Réglages' : path === '/library' ? 'Bibliothèque'
+      : SECTIONS.find((s) => s.to === path)?.label ?? APPS.find((a) => a.route.split('?')[0] === path)?.name;
+    document.title = name ? `${name} · Nexora Creative` : 'Nexora Creative';
   }, [path]);
 
   const isActive = (to: string) => {
@@ -78,7 +81,7 @@ export default function App() {
   return (
     <div className={`app ${judge ? 'has-judge' : ''}`}>
       <header className="topbar">
-        <a className="brand" {...linkProps('/')}><Logo /><span className="brand-word">OpenField</span></a>
+        <a className="brand" {...linkProps('/')}><Logo /><span className="brand-word">Nexora Creative</span></a>
         <nav className="nav">
           {SECTIONS.map((s) => <a key={s.to} className={`nav-link ${isActive(s.to) ? 'active' : ''}`} {...linkProps(s.to)}>{s.label}</a>)}
           <span className="nav-sep" />
@@ -87,10 +90,10 @@ export default function App() {
               {a.name}{a.badge === 'new' && <span className="badge">{badgeLabel(a.badge)}</span>}
             </a>
           ))}
-          <a className={`nav-link nav-setup ${isActive('/setup') ? 'active' : ''}`} {...linkProps('/setup')}>Setup</a>
+          <a className={`nav-link nav-setup ${isActive('/setup') ? 'active' : ''}`} {...linkProps('/setup')}>Réglages</a>
         </nav>
         <div className="topbar-right">
-          <a className="nav-link" {...linkProps('/setup')} title="Models and setup">Setup</a>
+          <a className="nav-link" {...linkProps('/setup')} title="Modèles et réglages">Réglages</a>
           <GpuChip />
         </div>
       </header>

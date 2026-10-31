@@ -43,6 +43,11 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
   if (positions.every((p) => p >= 0) && !(positions[0] < positions[1] && positions[1] < positions[2])) {
     erreurs.push('les trois champs ne sont pas dans l’ordre description, ambiance sonore, musique');
   }
+  for (const m of texte.matchAll(/^([a-z][a-z_]+):/gm)) {
+    if (!CHAMPS.includes(`${m[1]}:` as (typeof CHAMPS)[number])) {
+      erreurs.push(`champ « ${m[1]} » inventé : le guide n’a que trois champs (le texte à l’écran va dans la description, entre guillemets)`);
+    }
+  }
 
   const description =
     positions[0] >= 0 ? texte.slice(positions[0], positions[1] > positions[0] ? positions[1] : undefined) : '';

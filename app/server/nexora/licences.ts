@@ -36,6 +36,7 @@ const REGLES: Record<string, Regle> = {
   'stage-look': { genre: 'permis' },
   trellis2: { genre: 'permis' },
   h3: { genre: 'h3' },
+  'h3-fast': { genre: 'h3' },
   'h3-refs': { genre: 'h3' },
   'h3-turbo': { genre: 'h3' },
   flux2: { genre: 'bloque', raison: `FLUX.2 dev : ${NON_COMMERCIAL}` },

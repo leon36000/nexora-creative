@@ -104,8 +104,15 @@ async function j<T>(url: string, init?: RequestInit): Promise<T> {
   return d as T;
 }
 
+export interface CreerReponse { takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number }
+export interface EtatNexora { llm: boolean; moteur: string; territoire: string | null }
+
 export const api = {
   status: () => j<Status>('/api/status'),
+  /** Nexora Creative : une intention en français devient une vidéo (prompt écrit par le LLM, rendu MiniMax H3). */
+  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean }) =>
+    j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
+  nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
   /** Set the machine-wide render size; null goes back to the default (OPENFIELD_RENDER_TIER or the GPU). */
   setRenderTier: (renderTier: RenderTier | null) =>
     j<{ renderTier: TierState }>('/api/settings', { method: 'PUT', body: JSON.stringify({ renderTier }) }),

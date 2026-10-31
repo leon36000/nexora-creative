@@ -49,4 +49,9 @@ describe('validateur de prompt H3 (guide officiel MiniMax)', () => {
     );
     expect(validerPromptH3(`${fl}\n\n${corps}`, { mode: 'fl2va', dureeS: 5.17 })).toEqual([]);
   });
+
+  it('refuse un champ inventé hors du guide (ex. on_screen_text)', () => {
+    const avec = corps.replace('non_diegetic_music: N/A', 'on_screen_text: At 00:04.200, golden text.\n\nnon_diegetic_music: N/A');
+    expect(validerPromptH3(avec, { mode: 't2va', dureeS: 5.17 }).join(' ')).toMatch(/on_screen_text/);
+  });
 });

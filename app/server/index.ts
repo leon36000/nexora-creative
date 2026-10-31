@@ -15,6 +15,10 @@ import * as comfy from './comfy.js';
 import * as eng from './engine.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
+import { CHECKPOINT_FASTH3, corpsRenduH3, dureeEffective, lireDemandeCreer } from './nexora/creer.js';
+import { territoireDuCompte } from './nexora/compte.js';
+import { clientLlmDepuisEnv } from './nexora/llm.js';
+import { reecrireH3 } from './nexora/reecritureH3.js';
 import { buildLtxGraph } from './graphs/ltx.js';
 import { buildLtx25Graph, ltx25EffectiveSize, ltx25Mode, LTX25_FPS, snapFrames } from './graphs/ltx25.js';
 import { applyPost } from './graphs/director.js';
@@ -787,7 +791,7 @@ async function graphFor(b: any, seed: number): Promise<Built> {
       startImage: b.startImage,
       endImage: b.endImage,
       refImages: b.refImages,
-      checkpoint: typeof b.checkpoint === 'string' ? b.checkpoint : undefined,
+      checkpoint: b.videoModel === 'h3-fast' ? CHECKPOINT_FASTH3 : typeof b.checkpoint === 'string' ? b.checkpoint : undefined,
       extraLora: typeof b.extraLora === 'string' && b.extraLora ? b.extraLora : undefined,
       extraLoraStrength: b.extraLoraStrength,
       // Turbo overrides steps/shift inside the builder; '' = full sampling.
@@ -865,8 +869,27 @@ async function recordWorkflow(takeId: number, jobId: string, graph: Record<strin
   }
 }
 
-app.post('/api/generate', async (req, reply) => {
-  const b = req.body as any;
+app.post('/api/generate', async (req, reply) => generate(req.body as any, reply));
+
+/**
+ * Nexora Creative, parcours simple : une intention en français → prompt H3 écrit par le LLM cloud (réécrivain validé
+ * par le guide officiel, repli conforme si le LLM manque) → même chemin de rendu que /api/generate.
+ */
+app.post('/api/nexora/creer', async (req, reply) => {
+  let demande;
+  try { demande = lireDemandeCreer(req.body); }
+  catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
+  const r = await reecrireH3({ intention: demande.intention, mode: 't2va', dureeS: dureeEffective(demande) }, clientLlmDepuisEnv());
+  const corps: any = { ...corpsRenduH3(demande, r.prompt), intention: demande.intention, promptSource: r.source };
+  if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
+  const res = await generate(corps, reply);
+  if (reply.sent || (res && (res as any).error)) return res;
+  return { ...res, prompt: r.prompt, source: r.source, tentatives: r.tentatives };
+});
+
+app.get('/api/nexora/etat', async () => ({ llm: !!clientLlmDepuisEnv(), moteur: 'MiniMax H3', territoire: territoireDuCompte() }));
+
+async function generate(b: any, reply: FastifyReply) {
   stripServerKeys(b);
   // Scene bookkeeping is set by the scene runner only; a recreated shot is a plain take.
   delete b.sceneOf; delete b.sceneIndex; delete b.sceneStep;
@@ -912,7 +935,7 @@ app.post('/api/generate', async (req, reply) => {
   } catch (e) {
     return reply.code(400).send({ error: e instanceof Error ? e.message : 'bad request', takeIds: (e as any)?.takeIds });
   }
-});
+}
 
 // ---------- cast ----------
 
