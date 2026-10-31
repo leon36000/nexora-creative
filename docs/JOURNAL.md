@@ -36,3 +36,10 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **Contrôle qualité déterministe** (noir, figé, silencieux, durée ; 4 tests) + reprise automatique d'un plan raté. **Plans enchaînés** depuis la dernière image du précédent (I2VA). **Refaire un seul plan** d'un film (nouvelle version, autres plans gardés ; 3 tests).
 - Non testé en réel : la reprise automatique d'un plan raté (aucun plan n'a échoué au contrôle), les plans enchaînés (le film testé a été planifié avant cette fonction), la facturation contre un vrai site.
 - 59 tests verts, typecheck vert.
+
+## 30/10/2026 — itération 1, suite (Wan mesuré, refaire un plan prouvé, photo de départ, registre)
+- **Wan 2.2 réel** : 5 s en 118,6 s à froid, transformation présente, sans son [MESURÉ + contrôle visuel].
+- **Refaire un seul plan prouvé dans le navigateur** : description du plan 2 modifiée → nouvelle version du film (n° 10) avec 1 plan retourné (94 s) et 5 plans réutilisés, réassemblée en 2,8 s ; la nouvelle description est visible à l'image [TEST navigateur + contrôle visuel].
+- **Partir de sa photo** (I2V, H3 et Wan) : 2 tests ; pas encore essayé avec une vraie photo.
+- **Registre de capacités v1** (`server/nexora/registre.ts`, Zod) : manifestes H3 et Wan, planificateur à filtres durs (tâche, durée, licence/territoire, modèles installés) puis classement ; 7 tests. Le moteur de « Créer » vient du registre ; route `/api/nexora/moteurs` (raisons d'exclusion lisibles).
+- 68 tests verts.

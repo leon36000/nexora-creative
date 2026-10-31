@@ -17,7 +17,8 @@ import * as eng from './engine.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
 import { buildWan22Graph, imagesWan } from './graphs/wan22.js';
-import { CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer } from './nexora/creer.js';
+import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer } from './nexora/creer.js';
+import { planifierMoteurs } from './nexora/registre.js';
 import { compteCourant, territoireDuCompte } from './nexora/compte.js';
 import { clientLlmCourant } from './nexora/llm.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
@@ -937,7 +938,11 @@ app.post('/api/nexora/creer', async (req, reply) => {
   let demande;
   try { demande = lireDemandeCreer(req.body); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
-  const moteur = (req.body as any)?.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
+  // Moteur choisi par le registre de capacités (licence et territoire d'abord) ; la personne peut demander Wan.
+  const plan = planifierMoteurs(besoinDe(demande), { territoire: territoireDuCompte() });
+  const voulu = (req.body as any)?.moteur;
+  const moteur = (plan.retenus.find((m) => m.recette === voulu) ?? plan.retenus[0])?.recette as 'h3-fast' | 'wan22' | undefined;
+  if (!moteur) return reply.code(422).send({ error: `Aucun moteur ne peut faire cette vidéo pour ton compte : ${plan.exclus.map((e) => e.raison).join(' ; ')}.` });
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
   const r = await reecrireH3({ intention: demande.intention, mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande) }, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur };
@@ -1028,6 +1033,13 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
   takes.patchSettings(filmId, { versionDe: film.id });
   void avancerFilm(filmId);
   return { filmId, take: takes.get(filmId) };
+});
+
+/** Moteurs du registre pour une demande : ceux qui conviennent (classés) et ceux qui sont exclus, avec la raison. */
+app.post('/api/nexora/moteurs', async (req) => {
+  const d = lireDemandeCreer({ ...(req.body as any), intention: 'x' });
+  const r = planifierMoteurs(besoinDe(d), { territoire: territoireDuCompte() });
+  return { retenus: r.retenus.map((m) => ({ id: m.id, nom: m.nom.fr, recette: m.recette, son: m.sortie.audio, affichage: m.licence.affichage ?? null })), exclus: r.exclus };
 });
 
 app.get('/api/nexora/etat', async () => {
