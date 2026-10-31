@@ -22,6 +22,7 @@ import { planifierMoteurs } from './nexora/registre.js';
 import { compteCourant, territoireDuCompte } from './nexora/compte.js';
 import { clientLlmCourant } from './nexora/llm.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
+import { actionEspace, espacePlein, espaceSite, marquerPlein } from './nexora/espace.js';
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './nexora/film.js';
@@ -98,6 +99,24 @@ async function solderCredits() {
       takes.patchSettings(t.id, { nexoraCredits: { ...s.nexoraCredits, etat: action === 'valider' ? 'validee' : 'liberee' } });
     } catch (e) {
       console.error(`[nexora] crédits de la prise ${t.id} :`, e instanceof Error ? e.message : e);
+    }
+  }
+}
+/** Compte l'espace des prises terminées (réconciliation, idempotent) ; marque l'organisation pleine si refus. */
+async function compterEspace() {
+  if (!configAuth) return;
+  for (const t of takes.list(null, 300)) {
+    const s = JSON.parse(t.settings);
+    if (actionEspace({ status: t.status, output_path: t.output_path, espace: s.nexoraEspace }) !== 'compter') continue;
+    const cle = accesOrganisation(t.organisation_id)?.key;
+    if (!cle || !existsSync(t.output_path!)) continue;
+    const octets = statSync(t.output_path!).size;
+    try {
+      const r = await espaceSite(configAuth.siteUrl, () => cle).enregistrer(octets);
+      takes.patchSettings(t.id, { nexoraEspace: { octets, etat: r.ok ? 'compte' : 'depasse' } });
+      marquerPlein(t.organisation_id, !r.ok);
+    } catch (e) {
+      console.error(`[nexora] espace de la prise ${t.id} :`, e instanceof Error ? e.message : e);
     }
   }
 }
@@ -1117,6 +1136,10 @@ async function generate(b: any, reply: FastifyReply) {
     catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'bad LoRA' }); }
   }
 
+  const orgEnCours = compteCourant()?.organisationId;
+  if (configAuth && orgEnCours && espacePlein(orgEnCours)) {
+    return reply.code(409).send({ error: 'Ton espace Nexora est plein : supprime des vidéos ou ajoute de l’espace dans ton compte pour continuer.' });
+  }
   const count = Math.max(1, Math.min(8, Number(b.count) || 1));
   // Nexora : avec une session du portail, chaque prise réserve son devis en crédits avant de partir au moteur.
   const reservations: CreditsPrise[] = [];
@@ -2296,7 +2319,23 @@ app.post('/api/takes/:id/star', async (req) => {
 });
 
 app.delete('/api/takes/:id', async (req) => {
-  takes.delete(Number((req.params as any).id));
+  const id = Number((req.params as any).id);
+  const t = takes.get(id);
+  // Nexora (portail) : supprimer efface aussi les fichiers du serveur et rend l'espace à l'organisation.
+  if (configAuth && t) {
+    const s = JSON.parse(t.settings);
+    const fichiers = [t.output_path, s.alphaPath].filter((f): f is string => typeof f === 'string' && existsSync(f));
+    const { unlink } = await import('fs/promises');
+    for (const f of fichiers) await unlink(f).catch(() => {});
+    if (s.nexoraEspace?.etat === 'compte' || s.nexoraEspace?.etat === 'depasse') {
+      const cle = accesOrganisation(t.organisation_id)?.key;
+      if (cle) {
+        const r = await espaceSite(configAuth.siteUrl, () => cle).enregistrer(-s.nexoraEspace.octets).catch(() => null);
+        if (r?.ok) marquerPlein(t.organisation_id, false);
+      }
+    }
+  }
+  takes.delete(id);
   return { ok: true };
 });
 
@@ -2473,6 +2512,7 @@ app.get('/api/media/:id', async (req, reply) => {
  */
 async function reconcile() {
   void solderCredits();
+  void compterEspace();
   for (const id of waitingCuts()) void advance(id);
   for (const id of filmsEnAttente()) void avancerFilm(id);
   for (const t of takes.active()) {

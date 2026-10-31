@@ -10,6 +10,9 @@ import { compteCourant } from './nexora/compte.js';
 
 mkdirSync(config.dataDir, { recursive: true });
 const db = new Database(join(config.dataDir, 'openfield.db'));
+// Nexora : lectures concurrentes pendant les écritures (direct, réconciliation, requêtes) et attente courte sur verrou.
+db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS takes (
