@@ -150,6 +150,14 @@ export const H3_MODELS = {
   audioVae: 'minimax_h3_audio_vae_fp32.safetensors',
 };
 
+/**
+ * Nexora : points de contrôle FastH3 déjà distillés (DMD2) et quantifiés, qui remplacent le modèle de base + LoRA turbo.
+ * Réglages du modèle (carte FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy) : 8 étapes, décalage sigma 10 / 3.
+ */
+export const H3_DISTILLED_CHECKPOINTS: Record<string, { steps: number; shiftVideo: number; shiftAudio: number }> = {
+  'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors': { steps: 8, shiftVideo: 10, shiftAudio: 3 },
+};
+
 /** Frame counts must sit on the model's 17k+5 grid (5, 22, ..., 124, ..., 362). */
 export function snapH3Length(frames: number): number {
   const k = Math.round((frames - 5) / 17);
@@ -170,13 +178,16 @@ export function buildH3Graph(p: H3Params): Record<string, unknown> {
   const family = useRef ? 'ref2va' : 'fl2va';
   // Checkpoint override is honored only within the correct model family —
   // an fl2va file can't drive the ref graph and vice versa.
-  const unetName =
-    p.checkpoint && p.checkpoint.includes(`minimax_h3_${family}`)
+  const distilled = !useRef && p.checkpoint ? H3_DISTILLED_CHECKPOINTS[p.checkpoint] : undefined;
+  const unetName = distilled
+    ? p.checkpoint!
+    : p.checkpoint && p.checkpoint.includes(`minimax_h3_${family}`)
       ? p.checkpoint
       : H3_MODELS[family];
   // Turbo wins over a hand-picked extraLora: the distill and its sigma shift are
   // a matched pair, and stacking a second LoRA on top muddies both.
-  const turbo = resolveTurbo(p.turbo, useRef);
+  // A checkpoint that is already distilled carries its own steps and shift, and takes no LoRA.
+  const turbo = distilled ? { lora: '', ...distilled } : resolveTurbo(p.turbo, useRef);
   const loraName = turbo ? turbo.lora : p.extraLora;
   const steps = turbo ? turbo.steps : p.steps;
   // A LoRA is spliced between the UNET and its two consumers (scheduler +
