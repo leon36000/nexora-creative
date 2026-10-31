@@ -81,6 +81,22 @@ non_diegetic_music: N/A`;
   return instruction ? `${instruction}\n\n${corps}` : corps;
 }
 
+/**
+ * Textes affichés à l'image (entre guillemets dans la description, hors répliques <d>) que la personne n'a pas demandés.
+ * H3 écrit ce qu'on lui cite : une enseigne inventée par le LLM apparaît dans la vidéo. Un texte est « demandé » s'il
+ * figure dans l'intention et que celle-ci contient des guillemets.
+ */
+export function texteEcranNonDemande(prompt: string, intention: string): string[] {
+  const debut = prompt.indexOf('integrated_multimodal_description:');
+  const fin = prompt.indexOf('overall_soundscape:');
+  const description = (debut >= 0 ? prompt.slice(debut, fin > debut ? fin : undefined) : prompt).replace(/<d>[\s\S]*?<\/d>/g, '');
+  const cite = /["«“]/.test(intention);
+  const normal = (x: string) => x.toLowerCase().replace(/[.,!?…]+$/, '').trim();
+  return [...description.matchAll(/"([^"\n]{1,120})"/g)]
+    .map((m) => m[1].trim())
+    .filter((t) => !(cite && normal(intention).includes(normal(t))));
+}
+
 export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, maxTentatives = 3): Promise<ResultatReecriture> {
   const ctx = { mode: e.mode, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
   let erreurs: string[] = ['aucun LLM configuré'];
@@ -96,7 +112,10 @@ export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, max
       try {
         const brut = await llm.completer('prompt', messages, { json: true, temperature: 0.7 });
         prompt = String(lireJson<{ prompt?: unknown }>(brut).prompt ?? '').trim();
-        erreurs = validerPromptH3(prompt, ctx);
+        erreurs = [
+          ...validerPromptH3(prompt, ctx),
+          ...texteEcranNonDemande(prompt, e.intention).map((t) => `on-screen text "${t}" was not requested by the user: remove it`),
+        ];
         messages.push({ role: 'assistant', content: brut });
       } catch (err) {
         erreurs = [`réponse inutilisable : ${(err as Error).message}`];

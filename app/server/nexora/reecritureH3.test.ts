@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ClientLlm, MessageLlm } from './llm.js';
-import { reecrireH3 } from './reecritureH3.js';
+import { reecrireH3, texteEcranNonDemande } from './reecritureH3.js';
 
 const bon = `integrated_multimodal_description: [Shot 1] Live-action, cinematic, a wide shot of a red car. The camera performs an arc shot at slow speed around it.
 
@@ -13,7 +13,7 @@ function faux(reponses: string[]): ClientLlm & { appels: MessageLlm[][] } {
   return {
     appels,
     async completer(_role, messages) {
-      appels.push(messages);
+      appels.push([...messages]);
       const r = reponses.shift();
       if (r === undefined) throw new Error('plus de réponse');
       return r;
@@ -58,3 +58,20 @@ describe('réécrivain H3', () => {
     expect(r.prompt).toContain('<d>[French] On y va.</d>');
   });
 });
+
+describe('texte à l’écran non demandé', () => {
+  const avecEnseigne = bon.replace('around it.', 'around it. A neon sign reading "Ruelle Néon" glows on the wall.');
+  it('repère un texte affiché que la personne n’a pas demandé', () => {
+    expect(texteEcranNonDemande(avecEnseigne, 'une moto dans une ruelle néon')).toEqual(['Ruelle Néon']);
+    expect(texteEcranNonDemande(avecEnseigne, 'une enseigne « Ruelle Néon » au mur')).toEqual([]);
+    expect(texteEcranNonDemande(bon, 'une voiture')).toEqual([]);
+  });
+
+  it('fait réécrire le prompt pour retirer ce texte', async () => {
+    const llm = faux([JSON.stringify({ prompt: avecEnseigne }), JSON.stringify({ prompt: bon })]);
+    const r = await reecrireH3({ ...entree, intention: 'une moto dans une ruelle néon' }, llm);
+    expect(r.prompt).toBe(bon);
+    expect(llm.appels[1].at(-1)?.content).toMatch(/Ruelle Néon/);
+  });
+});
+
