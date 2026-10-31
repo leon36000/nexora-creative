@@ -104,3 +104,11 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **Disque pc6** : 66 Go libres (93 %). H3 sur le GB10 (35 Go) ramènerait à 31 Go, sous la réserve de 50 Go : **non remis**. Seul le nettoyage de Docker (images, volumes, cache de build) ou des caches uv/pip libérerait assez ; hors de mon périmètre, donc en attente de l'autorisation du fondateur.
 - **Dossier de licences** : `docs/LICENCES-PUBLICATION.md` (H3 V.4 pour les réseaux sociaux, Qwen-Image-2.1, brouillons de demande à MiniMax et Alibaba, **non envoyés**).
 - `docs/ETAT.md` remis à jour (ancienne ligne Wan retirée, tests 99, limites Higgsfield). Vérifié : aucune occurrence de Wan dans `app/server`, `app/src`, `app/scripts` ; 99 tests verts.
+
+## 31/10/2026 (fin de nuit) — fiche Nexora Creative sur le site (branche, non déployée)
+- Branche `feat/creative-admin-modeles` du dépôt nexora-web (commit a30b724) : la fiche `/apps/creative` passe de « Plus tard » à « Bientôt » et gagne une vitrine : bande-annonce V2 **publique** (vérifiée par comparaison d'images : aucun plan Qwen), temps mesurés, six étapes, six plans avec leur phrase, fonctions, « ce qui n'est pas encore là », mentions MiniMax H3 / MiniMax-Music3. Textes fr-CA et en-CA.
+- Registre d'affirmations : CL-CR01 à CL-CR05 ajoutés (en_revue, à approuver par une personne) ; CL-AP05 mis à jour.
+- Défauts trouvés au rendu réel : `next/image` refusait les images (localPatterns) → `<img>` ; le proxy du site n'accepte les fichiers statiques que **sans sous-dossier** → médias à la racine de `public/` (`creative-*`).
+- **Défaut de ma branche précédente corrigé** : les deux routes Creative n'avaient pas de garde déclarée (`route-guards.test.ts` échouait, je n'avais lancé qu'un sous-ensemble des tests) ; garde `service-token` ajoutée.
+- Tests : 1362 tests verts côté site ; 86 fichiers ne tournent pas ici faute de `DATABASE_URL` (base de données absente de ce poste). Typecheck : erreurs seulement dans `worker/` (modules `@nexora/*` non résolus dans le worktree), aucune dans `web/`.
+- Rendu vérifié dans le navigateur (fr, en, 375 px sans débordement ; vidéo 60 s lue). **Rien déployé.** Réserve : la vidéo sur le site est visible partout, donc la clause V.4 de H3 s'applique (docs/LICENCES-PUBLICATION.md).
