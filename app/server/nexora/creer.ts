@@ -13,6 +13,8 @@ export interface DemandeCreer {
   format: FormatCreer;
   duree: DureeCreer;
   son: boolean;
+  /** Photo de départ (jeton d'entrée du moteur, `asset:<uuid>`) : la vidéo part de cette image. */
+  image?: string;
 }
 
 /** Point de contrôle FastH3 V2 distillé et quantifié NVFP4 (server/graphs/h3.ts, H3_DISTILLED_CHECKPOINTS). */
@@ -37,7 +39,8 @@ export function lireDemandeCreer(b: unknown): DemandeCreer {
   if (intention.length > 4000) throw new Error('Description trop longue (4 000 caractères au plus).');
   const format: FormatCreer = o.format === '9:16' || o.format === '1:1' ? o.format : '16:9';
   const duree: DureeCreer = o.duree === 10 || o.duree === 15 ? o.duree : 5;
-  return { intention, format, duree, son: o.son !== false };
+  const image = typeof o.image === 'string' && /^asset:[0-9a-f-]{36}$/i.test(o.image) ? o.image : undefined;
+  return { intention, format, duree, son: o.son !== false, ...(image ? { image } : {}) };
 }
 
 export function corpsRenduH3(d: DemandeCreer, prompt: string) {
@@ -51,6 +54,7 @@ export function corpsRenduH3(d: DemandeCreer, prompt: string) {
     checkpoint: CHECKPOINT_FASTH3,
     withAudio: d.son,
     shotName: d.intention.slice(0, 60),
+    ...(d.image ? { startImage: d.image } : {}),
   };
 }
 
@@ -80,5 +84,6 @@ export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVide
     frames: imagesWan(d.duree),
     withAudio: false,
     shotName: d.intention.slice(0, 60),
+    ...(d.image ? { startImage: d.image } : {}),
   };
 }

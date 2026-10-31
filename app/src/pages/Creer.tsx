@@ -5,7 +5,7 @@
  * Aucun réglage technique ici ; le mode expert reste dans Vidéo, Image, Director.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { api, type CreerReponse, type EtatNexora, type Storyboard } from '../api';
+import { api, uploadFile, type CreerReponse, type EtatNexora, type Storyboard } from '../api';
 import { inFeed, isImage, isModel, settingsOf, toast, useStore } from '../store';
 import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
@@ -45,6 +45,8 @@ export default function Creer() {
   const [etat, setEtat] = useState<EtatNexora | null>(null);
   const [vue, setVue] = useState<number | null>(null);
   const [filmOuvert, setFilmOuvert] = useState<number | null>(null);
+  const [photo, setPhoto] = useState<{ jeton: string; apercu: string } | null>(null);
+  const [envoiPhoto, setEnvoiPhoto] = useState(false);
   const toutes = useStore((s) => s.takes);
   const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && !isImage(t) && !isModel(t) && settingsOf(t).nexoraFilm == null).slice(0, 12));
 
@@ -57,7 +59,7 @@ export default function Creer() {
     setEnvoi('clip');
     setVoirScenario(false);
     try {
-      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: duree as 5 | 10 | 15, son });
+      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: duree as 5 | 10 | 15, son, image: photo?.jeton });
       setDernier(r);
       toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : IA indisponible).');
     } catch (e) {
@@ -91,6 +93,20 @@ export default function Creer() {
       toast(e instanceof Error ? e.message : 'Le tournage a échoué.', true);
     } finally {
       setEnvoi(null);
+    }
+  }
+
+  async function choisirPhoto(f: File | undefined) {
+    if (!f) return;
+    if (!f.type.startsWith('image/')) { toast('Choisis une image (JPG, PNG ou WebP).', true); return; }
+    setEnvoiPhoto(true);
+    try {
+      const jeton = await uploadFile(f);
+      setPhoto({ jeton, apercu: URL.createObjectURL(f) });
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'La photo n’a pas pu être envoyée.', true);
+    } finally {
+      setEnvoiPhoto(false);
     }
   }
 
@@ -135,6 +151,19 @@ export default function Creer() {
               ))}
             </div>
             <button type="button" className={`nx-puce ${son ? 'on' : ''}`} onClick={() => setSon(!son)} aria-pressed={son}>{son ? 'Avec son' : 'Sans son'}</button>
+            {!film && (
+              photo ? (
+                <span className="nx-photo">
+                  <img src={photo.apercu} alt="Photo de départ" />
+                  <button type="button" className="nx-lien" onClick={() => setPhoto(null)}>Retirer la photo</button>
+                </span>
+              ) : (
+                <label className="nx-puce nx-photo-btn" title="La vidéo part de ta photo (ta voiture, ton produit, ton lieu)">
+                  {envoiPhoto ? 'Envoi de la photo…' : 'Partir de ma photo'}
+                  <input type="file" accept="image/*" hidden onChange={(e) => void choisirPhoto(e.target.files?.[0])} />
+                </label>
+              )
+            )}
             <button type="button" className="nx-creer-btn" disabled={!prete} onClick={() => void (film ? proposerDecoupage() : creerClip())}>{libelleBouton}</button>
           </div>
         </div>

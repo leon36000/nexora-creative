@@ -53,3 +53,19 @@ describe('choix du moteur selon la licence et le territoire', () => {
   });
 });
 
+describe('partir d’une photo (image vers vidéo)', () => {
+  const jeton = 'asset:0123abcd-0123-4567-89ab-0123456789ab';
+  it('accepte seulement un jeton d’entrée du moteur', () => {
+    expect(lireDemandeCreer({ intention: 'a', image: jeton }).image).toBe(jeton);
+    expect(lireDemandeCreer({ intention: 'a', image: '../../etc/passwd' }).image).toBeUndefined();
+    expect(lireDemandeCreer({ intention: 'a', image: 'asset:x' }).image).toBeUndefined();
+  });
+
+  it('passe la photo en première image, pour H3 comme pour Wan', () => {
+    const d = lireDemandeCreer({ intention: 'ma voiture', image: jeton });
+    expect(corpsRendu(d, 'P', 'h3-fast')).toMatchObject({ startImage: jeton });
+    expect(corpsRendu(d, 'integrated_multimodal_description: [Shot 1] x', 'wan22')).toMatchObject({ startImage: jeton });
+    expect(corpsRendu(lireDemandeCreer({ intention: 'b' }), 'P', 'h3-fast')).not.toHaveProperty('startImage');
+  });
+});
+

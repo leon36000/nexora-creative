@@ -938,7 +938,8 @@ app.post('/api/nexora/creer', async (req, reply) => {
   try { demande = lireDemandeCreer(req.body); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
   const moteur = (req.body as any)?.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
-  const r = await reecrireH3({ intention: demande.intention, mode: 't2va', dureeS: dureeEffective(demande) }, llmCourant());
+  // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
+  const r = await reecrireH3({ intention: demande.intention, mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande) }, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur };
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
   const res = await generate(corps, reply);

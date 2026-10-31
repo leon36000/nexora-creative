@@ -117,7 +117,7 @@ export interface EtatNexora { llm: boolean; moteur: string; son: boolean; territ
 export const api = {
   status: () => j<Status>('/api/status'),
   /** Nexora Creative : une intention en français devient une vidéo (prompt écrit par le LLM, rendu MiniMax H3). */
-  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean }) =>
+  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; image?: string }) =>
     j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
   nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
   nexoraFilmPlan: (b: { intention: string; duree: number }) =>

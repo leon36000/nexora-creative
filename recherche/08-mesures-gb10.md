@@ -18,7 +18,6 @@ Toutes les lignes de ce fichier sont **[MESURÉ par nous]** sauf mention contrai
 |---|---|---|---|---|---|---|
 | 1 | 832×480 | 124 (5,17 s) | stéréo 32 kHz | **à froid** | **92,1 s** | échantillonnage 61 s (7,65 s/étape) ; le reste = chargement + encodage du texte + décodage VAE |
 | 2 | 832×480 | 124 (5,17 s) | stéréo 32 kHz | **à chaud** | **82,1 s** | graine différente |
-
 | 3 | 832×480 | 124 (5,17 s) | stéréo | à chaud, dans un film | 82,9 à 86,3 s | 4 plans de 5 s du film « Crimson Rising » |
 | 4 | 832×480 | **243 (10,1 s)** | stéréo | à chaud, dans un film | **230,2 et 230,9 s** | ≈ 24 s par étape : **2,7 fois le temps d'un plan de 5 s pour 2 fois la durée** (l'attention croît plus vite que la longueur) |
 | 5 | assemblage ffmpeg | 6 plans → 41,0 s | AAC | — | **3,1 s** | concaténation ré-encodée H.264 CRF 18 + AAC |
