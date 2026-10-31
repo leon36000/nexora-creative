@@ -20,3 +20,10 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - Lot 2 fait : **premier rendu H3 réel** — 832×480, 5,17 s, son stéréo, **92,1 s à froid, 82,1 s à chaud** [MESURÉ]. Vidéo envoyée au fondateur. Graphe : prise en charge des points de contrôle FastH3 distillés (4 tests).
 - Demande du fondateur : exploiter un LLM cloud au maximum → conception `recherche/09-llm-au-maximum.md` (12 rôles) ; réécrivain H3 (rôle 4) codé : validateur déterministe du guide officiel MiniMax + réparation + repli (10 tests). Client LLM compatible OpenAI, modèle par rôle. Essai réel en cours avec `dev/cloud-glm-5-3` via le LiteLLM de développement de NexoraSite (petite dépense cloud, pratique établie de Nexora pour vérifier avec de vrais modèles).
 - Note : `main` est protégée sur GitLab ; le travail est poussé sur la branche `developpement`.
+
+## 30/10/2026 — itération 1, suite (lot 7 en partie : l'outil dans le navigateur)
+- Réécrivain réel avec le LLM cloud `dev/cloud-glm-5-3` : exemple du fondateur (voiture → robot géant, caméra en orbite) → prompt H3 conforme du 1er coup en 3,4 s → rendu H3 84,1 s [MESURÉ]. Vidéo envoyée au fondateur.
+- Application dans le navigateur (http://localhost:37160, pc6) : marque Nexora Creative, accueil **Créer** en français (intention, format, durée, son, idées, scénario visible, « MiniMax H3 » affiché), route `/api/nexora/creer`. **Test de bout en bout dans le navigateur** : idée « publicité café glacé », format vertical → vidéo 480×832 5,17 s avec son en 84,2 s ; texte « Le froid qui réveille. » correct à l'image [TEST navigateur + ffprobe]. Vidéo envoyée au fondateur.
+- Défaut trouvé pendant ce test : le LLM a inventé un champ `on_screen_text` ; le validateur le refuse désormais (test ajouté, 26 verts).
+- Pas encore fait dans le lot 7 : devis en crédits avant tournage, territoire du compte dans l'interface, plan proposé avant tournage.
+- Prochaine action : AI Director multi-plans (vidéos plus longues, découpage, 2 candidats, juge), profil Qualité 1344×768.
