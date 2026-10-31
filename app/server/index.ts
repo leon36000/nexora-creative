@@ -25,6 +25,7 @@ import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from '
 import { actionEspace, espacePlein, espaceSite, marquerPlein } from './nexora/espace.js';
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
+import { xmlFcp7 } from './nexora/projetExport.js';
 import { argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { buildLtxGraph } from './graphs/ltx.js';
@@ -1091,6 +1092,39 @@ app.get('/api/nexora/film/:id/export', async (req, reply) => {
   reply.header('content-type', 'video/quicktime');
   reply.header('content-disposition', `attachment; filename="${safeShotName(film.shot_name || 'film')}_prores.mov"`);
   return reply.send(createReadStream(sortie));
+});
+
+/** Projet de montage d'un film : plans MP4 + séquence FCP7 XML + storyboard Nexora, dans un ZIP. */
+app.get('/api/nexora/film/:id/projet', async (req, reply) => {
+  const film = takes.get(Number((req.params as any).id));
+  if (!film || film.status !== 'done') return reply.code(404).send({ error: 'Film introuvable ou pas terminé.' });
+  const s = JSON.parse(film.settings);
+  if (!s.film) return reply.code(400).send({ error: 'Ce n’est pas un film.' });
+  const { mkdtemp, copyFile, writeFile, rm } = await import('fs/promises');
+  const { tmpdir } = await import('os');
+  const dossier = await mkdtemp(join(tmpdir(), `nexora-projet-${film.id}-`));
+  const plans: { fichier: string; images: number; nom: string }[] = [];
+  let largeur = 832, hauteur = 480;
+  for (const [i, p] of (s.storyboard.plans as any[]).entries()) {
+    const t = p.take ? takes.get(p.take) : undefined;
+    if (!t?.output_path || !existsSync(t.output_path)) return reply.code(409).send({ error: `Le plan ${i + 1} n’a plus de fichier.` });
+    const nom = `plan${String(i + 1).padStart(2, '0')}.mp4`;
+    await copyFile(t.output_path, join(dossier, nom));
+    const m = await probeMedia(t.output_path);
+    largeur = m.w; hauteur = m.h;
+    plans.push({ fichier: nom, images: m.frames, nom: String(p.resume ?? nom) });
+  }
+  await writeFile(join(dossier, 'sequence-fcp7.xml'), xmlFcp7({ titre: s.storyboard.titre ?? film.shot_name, largeur, hauteur, son: !!s.son, plans }));
+  await writeFile(join(dossier, 'projet-nexora.json'), JSON.stringify({ format: 'nexora.film/1', titre: s.storyboard.titre, storyboard: s.storyboard, transition: s.transition ?? 'coupe', moteur: s.moteur }, null, 2));
+  await writeFile(join(dossier, 'LISEZMOI.txt'), 'Projet exporté de Nexora Creative.\n\nPremiere Pro : Fichier > Importer > sequence-fcp7.xml\nDaVinci Resolve : Fichier > Importer > Chronologie > sequence-fcp7.xml\nFinal Cut Pro : Fichier > Importer > XML (converti par l’outil 7toX si nécessaire)\nLes plans (planNN.mp4) doivent rester à côté du fichier XML.\n');
+  const zip = join(dossier, 'projet.zip');
+  const { execFile } = await import('child_process');
+  await new Promise<void>((ok, ko) => execFile('zip', ['-q', '-0', '-j', zip, ...plans.map((x) => join(dossier, x.fichier)), join(dossier, 'sequence-fcp7.xml'), join(dossier, 'projet-nexora.json'), join(dossier, 'LISEZMOI.txt')], (err) => (err ? ko(err) : ok())));
+  reply.header('content-type', 'application/zip');
+  reply.header('content-disposition', `attachment; filename="${safeShotName(film.shot_name || 'film')}_projet.zip"`);
+  const flux = createReadStream(zip);
+  flux.on('close', () => void rm(dossier, { recursive: true, force: true }));
+  return reply.send(flux);
 });
 
 app.get('/api/nexora/etat', async () => {

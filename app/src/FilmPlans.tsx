@@ -83,6 +83,7 @@ export default function FilmPlans({ filmId, onClose }: { filmId: number; onClose
               <button type="button" className="nx-puce on" onClick={() => void remonter()}>Créer cette version</button>
               <a className="nx-puce" href={`/api/nexora/film/${film.id}/export`} download>Exporter en ProRes (.mov)</a>
               <a className="nx-puce" href={mediaUrl(film.id)} download>Télécharger le MP4</a>
+              <a className="nx-puce" href={`/api/nexora/film/${film.id}/projet`} download>Projet Premiere / DaVinci (.zip)</a>
             </div>
           </div>
         )}
