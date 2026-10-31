@@ -9,7 +9,8 @@ import { join } from 'node:path';
 import { config } from '../config.js';
 import { takes, type Take } from '../jobs.js';
 import { corpsRendu, type DemandeCreer, type MoteurVideo } from './creer.js';
-import { argsAssemblage, intentionDuPlan, type Storyboard } from './film.js';
+import { controlerFichier } from './controle.js';
+import { argsAssemblage, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
 
@@ -51,7 +52,7 @@ export async function tournerFilm(
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
       const [id] = await deps.queueTakes(corps, 1);
-      majPlan(filmId, i, { take: id });
+      majPlan(filmId, i, { take: id, corps });
     }
   } catch (e) {
     takes.fail(filmId, `Les plans n'ont pas pu partir au tournage : ${e instanceof Error ? e.message : e}`);
@@ -92,6 +93,22 @@ async function etape(filmId: number) {
     if (!t) throw new Error(`Plan ${i + 1} : sa prise a été supprimée`);
     if (t.status === 'failed' || t.status === 'stopped') throw new Error(`Plan ${i + 1} : ${t.status}${t.error ? ` (${t.error})` : ''}`);
     if (t.status !== 'done' || !t.output_path || !existsSync(t.output_path)) return;
+    const plan = p as PlanFilm & { corps?: Record<string, any>; controle?: { ok: boolean; defauts: string[] }; reprises?: number };
+    if (!plan.controle) {
+      const images = Number(plan.corps?.lengthFrames ?? plan.corps?.frames);
+      const c = await controlerFichier(config.ffmpegBin, t.output_path, {
+        dureeAttendue: Number.isFinite(images) && images > 0 ? images / 24 : plan.duree,
+        sonAttendu: !!plan.corps?.withAudio,
+      });
+      plan.controle = { ok: c.ok, defauts: c.defauts };
+      majPlan(filmId, i, { controle: plan.controle });
+      // Correction automatique, budget d'une reprise par plan : même prompt, autre graine.
+      if (!c.ok && (plan.reprises ?? 0) < 1 && plan.corps) {
+        const [id] = await deps.queueTakes({ ...plan.corps, seed: Math.floor(Math.random() * 1e9) }, 1);
+        majPlan(filmId, i, { take: id, reprises: (plan.reprises ?? 0) + 1, controle: undefined, controleRefuse: { take: t.id, defauts: c.defauts } });
+        return;
+      }
+    }
     fichiers.push(t.output_path);
   }
   takes.patchSettings(filmId, { assemblage: 'en_cours' });
