@@ -28,6 +28,12 @@ Vérification du fichier n° 1 (ffprobe) : H.264 High 832×480 24 i/s + AAC sté
 
 Comparaison avec les chiffres publiés (rapports 03 et 04) : un tiers annonçait 141,4 s sur Spark pour FastH3 V2 NVFP4 en 480p 5 s ; nous mesurons 82 à 92 s avec ComfyUI 0.43.2, donc mieux que ce chiffre publié. Non comparable directement : version du moteur, réglages et résolution exacte diffèrent.
 
+## Rendus Wan 2.2 TI2V-5B (fp16, encodeur UMT5 fp8, 20 étapes, CFG 5, uni_pc)
+
+| # | Résolution | Images (durée) | Audio | État | Temps total | Détail |
+|---|---|---|---|---|---|---|
+| W1 | 832×480 | 121 (5,04 s) | aucun (le modèle n'en produit pas) | à froid (premier chargement de Wan) | **118,6 s** | même scène voiture → robot ; transformation présente, rendu plus « jouet » que H3 [contrôle visuel] |
+
 ## À mesurer ensuite
 - 1344×768 (résolution native de H3), 10 s et 15 s, avec et sans VSA (`BlockSparseAttention`).
 - Encodeur de texte INT8 contre NVFP4 (qualité de compréhension du prompt).
