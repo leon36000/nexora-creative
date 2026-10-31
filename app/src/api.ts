@@ -120,6 +120,8 @@ export const api = {
   nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string }) =>
     j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
   nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
+  nexoraDevis: (b: { format: string; duree: number; son: boolean; qualite: string; image?: string }) =>
+    j<{ credits: number | null; secondesEstimees: number; moteur: string }>('/api/nexora/devis', { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmPlan: (b: { intention: string; duree: number }) =>
     j<{ storyboard: Storyboard; source: 'llm' | 'repli' }>('/api/nexora/film/plan', { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmRefaire: (filmId: number, b: { plan: number; description?: string; camera?: string }) =>

@@ -5,6 +5,8 @@ describe('devis en crédits d’un rendu', () => {
   it('estime le temps GPU depuis les mesures du GB10 et le convertit en crédits entiers', () => {
     expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 832, height: 480 })).toBe(85);
     expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 243, width: 832, height: 480 })).toBe(230);
+    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 1344, height: 768 })).toBe(340);
+    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 768, height: 1344 })).toBe(340);
     const cinq = devisCredits({ videoModel: 'h3-fast', lengthFrames: 124, width: 832, height: 480 }, { creditsParSecondeGpu: 0.5 });
     expect(cinq).toBe(43);
     expect(Number.isInteger(devisCredits({ videoModel: 'wan22', frames: 121, width: 832, height: 480 }, { creditsParSecondeGpu: 0.5 }))).toBe(true);

@@ -765,7 +765,8 @@ input[type="color"].swatch::-webkit-color-swatch { border: 0; border-radius: 5px
 .nx-saisie textarea { width: 100%; background: transparent; border: 0; outline: none; resize: vertical; color: inherit; font: inherit; font-size: 18px; line-height: 1.5; min-height: 96px; }
 .nx-options { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
 .nx-groupe { display: inline-flex; gap: 4px; background: rgba(255,255,255,.04); border-radius: 999px; padding: 3px; }
-.nx-puce { border: 0; background: transparent; color: inherit; padding: 7px 13px; border-radius: 999px; cursor: pointer; font-size: 13px; }
+.nx-puce { border: 0; background: transparent; color: inherit; padding: 7px 13px; border-radius: 999px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+.nx-groupe { flex-wrap: wrap; }
 .nx-puce.on { background: var(--accent-soft); color: var(--accent-hi); box-shadow: inset 0 0 0 1px rgba(255,181,71,.35); }
 .nx-creer-btn { margin-left: auto; border: 0; border-radius: 999px; padding: 11px 22px; font-weight: 700; font-size: 15px; cursor: pointer; background: linear-gradient(135deg, var(--accent-hi), var(--accent-deep)); color: var(--accent-ink); }
 .nx-creer-btn:disabled { opacity: .45; cursor: not-allowed; }
@@ -807,3 +808,4 @@ input[type="color"].swatch::-webkit-color-swatch { border: 0; border-radius: 5px
 .nx-montage li { display: flex; gap: 10px; align-items: center; }
 .nx-montage li span { flex: 1; }
 .nx-montage a.nx-puce { text-decoration: none; }
+.nx-devis { color: var(--fg-2, #b9b2a8); font-size: 13px; margin: 10px 0 0; }

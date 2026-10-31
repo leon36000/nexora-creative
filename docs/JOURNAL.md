@@ -57,3 +57,8 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - Décision : SQLite (WAL) pour une instance ; PostgreSQL quand il y aura plusieurs instances (le serveur d'OpenField est synchrone sur SQLite partout : bascule coûteuse sans gain aujourd'hui).
 - **Bloqué, décision du fondateur requise** : moteurs sur RTX 5090 et 5080 (machine non identifiée, installation sur une autre infrastructure non autorisée par cette mission).
 - 81 tests verts.
+
+## 31/10/2026 — lot 10 (vérification finale)
+- **Qualité max** mesurée : 1344×768, 5 s avec son, 340 s sur GB10 ; estimation de coût recalée sur les mesures réelles.
+- Devis affiché avant création (temps ; crédits en mode portail). Parcours débutant revérifié dans le navigateur ; mobile 375 px sans défilement horizontal ; puces de durée qui ne se coupent plus.
+- `docs/ETAT.md` à jour (fait / prouvé / bloqué / pas fait). 81 tests verts, typecheck vert.

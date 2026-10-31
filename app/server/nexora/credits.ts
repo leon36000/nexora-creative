@@ -5,20 +5,29 @@
  * Les tarifs sont une **proposition** à valider par le fondateur ; ils vivent dans la configuration.
  */
 
-/** Secondes de calcul mesurées sur le DGX Spark GB10 (recherche/08), à 832×480. */
-const MESURES_GB10: Record<string, Record<number, number>> = {
-  'h3-fast': { 124: 85, 243: 230 },
+/** Secondes de calcul mesurées sur le DGX Spark GB10 (recherche/08), par moteur, nombre d'images et taille. */
+const MESURES_GB10: Record<string, Record<string, number>> = {
+  'h3-fast': { '124@832x480': 85, '243@832x480': 230, '124@1344x768': 340 },
+  wan22: { '121@832x480': 119 },
 };
 
 export interface CorpsDevis { videoModel?: string; lengthFrames?: number; frames?: number; width?: number; height?: number }
 
-/** Temps GPU estimé : mesure quand elle existe, sinon extrapolation (croissance plus que linéaire avec la longueur). */
+/**
+ * Temps GPU estimé : la mesure quand elle existe ; sinon extrapolation depuis la mesure de référence du moteur
+ * (croissance plus que linéaire avec la longueur et avec le nombre de pixels, comme mesuré : ×2,7 pour 2× la durée,
+ * ×4 pour 2,6× les pixels).
+ */
 export function secondesGpuEstimees(c: CorpsDevis): number {
   const images = Number(c.lengthFrames ?? c.frames ?? 124);
-  const pixels = ((c.width ?? 832) * (c.height ?? 480)) / (832 * 480);
+  const w = c.width ?? 832;
+  const h = c.height ?? 480;
   const mesures = MESURES_GB10[c.videoModel ?? ''] ?? {};
-  const base = mesures[images] ?? (c.videoModel === 'wan22' ? 90 : 85) * (images / 124) ** 1.45;
-  return Math.round(base * Math.max(1, pixels) ** 1.2);
+  const exacte = mesures[`${images}@${w}x${h}`] ?? mesures[`${images}@${h}x${w}`];
+  if (exacte) return exacte;
+  const reference = c.videoModel === 'wan22' ? { s: 119, images: 121 } : { s: 85, images: 124 };
+  const pixels = (w * h) / (832 * 480);
+  return Math.round(reference.s * (images / reference.images) ** 1.45 * Math.max(1, pixels) ** 1.45);
 }
 
 export function devisCredits(c: CorpsDevis, tarif: { creditsParSecondeGpu: number }): number {

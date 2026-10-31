@@ -52,6 +52,13 @@ export default function Creer() {
   const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && !isImage(t) && !isModel(t) && settingsOf(t).nexoraFilm == null).slice(0, 12));
 
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
+  const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number } | null>(null);
+  useEffect(() => {
+    if (duree > 15) { setDevis(null); return; }
+    let actif = true;
+    void api.nexoraDevis({ format, duree, son, qualite, image: photo?.jeton }).then((d) => actif && setDevis(d)).catch(() => actif && setDevis(null));
+    return () => { actif = false; };
+  }, [format, duree, son, qualite, photo]);
   const film = duree > 15;
   const prete = intention.trim().length > 0 && !envoi;
   const ids = useMemo(() => takes.map((t) => t.id), [takes]);
@@ -172,6 +179,9 @@ export default function Creer() {
             <button type="button" className="nx-creer-btn" disabled={!prete} onClick={() => void (film ? proposerDecoupage() : creerClip())}>{libelleBouton}</button>
           </div>
         </div>
+        {devis && !film && (
+          <p className="nx-devis">Tournage estimé ≈ {devis.secondesEstimees < 90 ? `${devis.secondesEstimees} s` : `${Math.floor(devis.secondesEstimees / 60)} min ${String(devis.secondesEstimees % 60).padStart(2, '0')} s`}{devis.credits !== null ? ` · ${devis.credits} crédits` : ''}</p>
+        )}
         {!intention && (
           <div className="nx-idees">
             <span>Idées :</span>

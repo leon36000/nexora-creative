@@ -1019,8 +1019,8 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
 /** Devis en crédits d'une création, avant de la lancer (null en poste local : rien n'est débité). */
 app.post('/api/nexora/devis', async (req) => {
   const b = (req.body ?? {}) as any;
-  const demande = lireDemandeCreer({ intention: 'devis', format: b.format, duree: b.duree, son: b.son });
-  const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
+  const demande = lireDemandeCreer({ intention: 'devis', format: b.format, duree: b.duree, son: b.son, qualite: b.qualite, image: b.image });
+  const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte(), besoinDe(demande));
   const corps = corpsRendu(demande, '', moteur);
   return { credits: configAuth ? devisCredits(corps, tarifDepuisEnv()) : null, secondesEstimees: secondesGpuEstimees(corps), moteur };
 });
