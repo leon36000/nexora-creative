@@ -13,7 +13,7 @@
 import { Comfy, type Job } from '@comfyorg/sdk';
 import { EventEmitter } from 'events';
 import { mkdir, readFile, writeFile } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { config } from './config.js';
 
@@ -24,16 +24,83 @@ const ASSET_TOKEN = /^asset:([0-9a-f-]{36})$/i;
 
 export const engine = new EventEmitter();
 
-let client: Comfy | null = null;
-function sdk(): Comfy {
-  if (!client) {
-    process.env.COMFY_BASE_URL = config.comfyBaseUrl;
-    client = new Comfy({
-      apiKey: config.comfyApiKey || undefined,
-      clientInfo: 'openfield',
-    });
+/**
+ * Nexora : parc de moteurs GPU. Le moteur « principal » est celui de COMFY_URL / COMFY_BASE_URL ; d'autres s'ajoutent
+ * par NEXORA_MOTEURS_GPU (JSON : [{ id, nom, comfyUrl, baseUrl, recettes }]), chacun derrière son propre
+ * comfy-api-proxy. Une recette (« h3-fast », « h3-max »…) ne part que vers un moteur qui la déclare ; parmi eux, le
+ * moins chargé. Le lien tâche → moteur est gardé sur disque pour retrouver les tâches après un redémarrage.
+ */
+export interface MoteurGpu { id: string; nom: string; comfyUrl: string; baseUrl: string; recettes: string[] }
+
+function lireMoteurs(): MoteurGpu[] {
+  const principal: MoteurGpu = {
+    id: 'principal',
+    nom: process.env.NEXORA_MOTEUR_NOM?.trim() || 'GPU principal',
+    comfyUrl: config.comfyUrl,
+    baseUrl: config.comfyBaseUrl,
+    recettes: (process.env.NEXORA_MOTEUR_RECETTES || '*').split(',').map((r) => r.trim()).filter(Boolean),
+  };
+  let autres: MoteurGpu[] = [];
+  try {
+    const brut = JSON.parse(process.env.NEXORA_MOTEURS_GPU || '[]');
+    if (Array.isArray(brut)) {
+      autres = brut
+        .filter((m) => m && typeof m.id === 'string' && m.id !== 'principal' && typeof m.comfyUrl === 'string' && typeof m.baseUrl === 'string')
+        .map((m) => ({
+          id: m.id, nom: String(m.nom ?? m.id), comfyUrl: m.comfyUrl.replace(/\/+$/, ''), baseUrl: m.baseUrl.replace(/\/+$/, ''),
+          recettes: Array.isArray(m.recettes) ? m.recettes.map(String) : ['*'],
+        }));
+    }
+  } catch (e) {
+    console.error('[nexora] NEXORA_MOTEURS_GPU illisible :', e instanceof Error ? e.message : e);
   }
-  return client;
+  return [principal, ...autres];
+}
+
+export const moteurs: MoteurGpu[] = lireMoteurs();
+const moteurParId = (id: string | undefined) => moteurs.find((m) => m.id === id) ?? moteurs[0];
+
+const clients = new Map<string, Comfy>();
+function sdk(moteur = 'principal'): Comfy {
+  let c = clients.get(moteur);
+  if (!c) {
+    // Le SDK lit son adresse dans l'environnement au moment de la construction.
+    process.env.COMFY_BASE_URL = moteurParId(moteur).baseUrl;
+    c = new Comfy({ apiKey: config.comfyApiKey || undefined, clientInfo: 'openfield' });
+    clients.set(moteur, c);
+  }
+  return c;
+}
+
+/** Tâche → moteur, persistant (les ids de tâche sont des UUID, uniques sur tout le parc). */
+const FICHIER_JOBS = join(config.dataDir, 'moteurs-jobs.json');
+const jobMoteur = new Map<string, string>(
+  (() => {
+    try {
+      return Object.entries(JSON.parse(readFileSync(FICHIER_JOBS, 'utf8')) as Record<string, string>);
+    } catch {
+      return [];
+    }
+  })(),
+);
+function noterMoteur(jobId: string, moteur: string) {
+  jobMoteur.set(jobId, moteur);
+  // Borne : on ne garde que les 2 000 dernières tâches.
+  while (jobMoteur.size > 2000) jobMoteur.delete(jobMoteur.keys().next().value!);
+  try {
+    mkdirSync(config.dataDir, { recursive: true });
+    writeFileSync(FICHIER_JOBS, JSON.stringify(Object.fromEntries(jobMoteur)));
+  } catch { /* le lien reste en mémoire */ }
+}
+export const moteurDuJob = (jobId: string) => moteurParId(jobMoteur.get(jobId));
+
+/** Tâches en cours par moteur, pour répartir la charge. */
+const enCours = new Map<string, Set<string>>();
+
+/** Moteurs capables d'une recette, le moins chargé d'abord. */
+export function moteursPour(recette?: string): MoteurGpu[] {
+  const capables = moteurs.filter((m) => m.recettes.includes('*') || (recette !== undefined && m.recettes.includes(recette)));
+  return capables.sort((a, b) => (enCours.get(a.id)?.size ?? 0) - (enCours.get(b.id)?.size ?? 0));
 }
 
 const jobs = new Map<string, Job>();
@@ -72,17 +139,32 @@ export function inputPath(token: string): string | null {
 }
 
 /** Replace every `asset:<id>` string in a graph with an SDK asset reference. */
-function bindAssets(graph: Record<string, unknown>): Record<string, unknown> {
+async function bindAssets(graph: Record<string, unknown>, moteur = 'principal'): Promise<Record<string, unknown>> {
   const out: Record<string, unknown> = structuredClone(graph);
   for (const node of Object.values(out) as any[]) {
     const inputs = node?.inputs;
     if (!inputs) continue;
     for (const [k, v] of Object.entries(inputs)) {
       const m = typeof v === 'string' ? ASSET_TOKEN.exec(v) : null;
-      if (m) inputs[k] = { __type: 'core/ASSET', info: { id: m[1] } };
+      if (m) inputs[k] = { __type: 'core/ASSET', info: { id: await assetSur(m[1], moteur) } };
     }
   }
   return out;
+}
+
+/**
+ * Nexora : les entrées sont envoyées au moteur principal ; un autre moteur a son propre magasin. On y renvoie l'octet
+ * gardé en cache local une seule fois, et on retient l'id distant.
+ */
+async function assetSur(id: string, moteur: string): Promise<string> {
+  if (moteur === 'principal') return id;
+  const lien = join(INPUT_CACHE, `${id}.${moteur}`);
+  if (existsSync(lien)) return (await readFile(lien, 'utf8')).trim();
+  const inp = await readInput(`asset:${id}`);
+  if (!inp) throw new Error('Une image d’entrée n’est plus sur ce serveur. Ajoute-la de nouveau.');
+  const distant = await sdk(moteur).assets.fromBytes(new Uint8Array(inp.data), { filename: inp.name }).commit();
+  await writeFile(lien, distant);
+  return distant;
 }
 
 /**
@@ -112,7 +194,7 @@ export async function withInputNames(graph: Record<string, unknown>): Promise<Re
  */
 export async function executedWorkflow(jobId: string): Promise<Record<string, unknown> | null> {
   try {
-    const job = jobs.get(jobId) ?? (await sdk().jobs.get(jobId));
+    const job = jobs.get(jobId) ?? (await sdk(moteurDuJob(jobId).id).jobs.get(jobId));
     const wf = await job.getWorkflow();
     return wf.format === 'api' ? (wf.workflow as Record<string, unknown>) : null;
   } catch {
@@ -121,10 +203,14 @@ export async function executedWorkflow(jobId: string): Promise<Record<string, un
 }
 
 /** Submit an API-format graph. Returns the Comfy job id. */
-export async function submit(graph: Record<string, unknown>): Promise<string> {
-  const wf = sdk().workflows.fromJson(bindAssets(graph));
-  const job = await sdk().submit(wf);
+export async function submit(graph: Record<string, unknown>, moteur = 'principal'): Promise<string> {
+  const m = moteurParId(moteur).id;
+  const wf = sdk(m).workflows.fromJson(await bindAssets(graph, m));
+  const job = await sdk(m).submit(wf);
   jobs.set(job.id, job);
+  noterMoteur(job.id, m);
+  if (!enCours.has(m)) enCours.set(m, new Set());
+  enCours.get(m)!.add(job.id);
   void watch(job);
   return job.id;
 }
@@ -152,14 +238,18 @@ async function watch(job: Job): Promise<void> {
   } catch {
     /* result() reports the failure */
   }
+  for (const set of enCours.values()) set.delete(job.id);
   engine.emit('finished', { jobId: job.id });
 }
 
 /** Re-attach to a job submitted before a restart. */
 export async function reattach(jobId: string): Promise<void> {
   if (jobs.has(jobId)) return;
-  const job = await sdk().jobs.get(jobId);
+  const m = moteurDuJob(jobId).id;
+  const job = await sdk(m).jobs.get(jobId);
   jobs.set(jobId, job);
+  if (!enCours.has(m)) enCours.set(m, new Set());
+  enCours.get(m)!.add(jobId);
   void watch(job);
 }
 
@@ -182,16 +272,16 @@ const EXTRA_NODES = new Set(['turntable', 'subject']);
  * a "3d" key that the v2 API does not list as an output, so locally they are
  * fetched from ComfyUI's /view like any output file.
  */
-async function savedModels(promptId: string): Promise<{ nodeId: string; name: string; contentType: string; data: Buffer }[]> {
+async function savedModels(promptId: string, comfyUrl = config.comfyUrl): Promise<{ nodeId: string; name: string; contentType: string; data: Buffer }[]> {
   try {
-    const r = await fetch(`${config.comfyUrl}/history/${encodeURIComponent(promptId)}`, { signal: AbortSignal.timeout(5000) });
+    const r = await fetch(`${comfyUrl}/history/${encodeURIComponent(promptId)}`, { signal: AbortSignal.timeout(5000) });
     const h = (await r.json()) as Record<string, { outputs?: Record<string, Record<string, unknown>> }>;
     const out = [];
     for (const [nodeId, o] of Object.entries(h[promptId]?.outputs ?? {})) {
       const items = Array.isArray(o['3d']) ? (o['3d'] as { filename: string; subfolder?: string; type?: string }[]) : [];
       for (const it of items) {
         const q = new URLSearchParams({ filename: it.filename, subfolder: it.subfolder ?? '', type: it.type ?? 'output' });
-        const f = await fetch(`${config.comfyUrl}/view?${q}`, { signal: AbortSignal.timeout(120_000) });
+        const f = await fetch(`${comfyUrl}/view?${q}`, { signal: AbortSignal.timeout(120_000) });
         if (!f.ok) continue;
         const ext = it.filename.split('.').pop()?.toLowerCase();
         out.push({
@@ -207,9 +297,9 @@ async function savedModels(promptId: string): Promise<{ nodeId: string; name: st
 }
 
 /** Start and end of a prompt's execution from ComfyUI's history, in ms. */
-async function executionWindow(promptId: string): Promise<{ start?: number; end?: number } | null> {
+async function executionWindow(promptId: string, comfyUrl = config.comfyUrl): Promise<{ start?: number; end?: number } | null> {
   try {
-    const r = await fetch(`${config.comfyUrl}/history/${encodeURIComponent(promptId)}`, { signal: AbortSignal.timeout(3000) });
+    const r = await fetch(`${comfyUrl}/history/${encodeURIComponent(promptId)}`, { signal: AbortSignal.timeout(3000) });
     const h = (await r.json()) as Record<string, { status?: { messages?: [string, { timestamp?: number }][] } }>;
     const msgs = h[promptId]?.status?.messages ?? [];
     const at = (kind: string) => msgs.find((m) => m[0] === kind)?.[1]?.timestamp;
@@ -223,14 +313,15 @@ async function executionWindow(promptId: string): Promise<{ start?: number; end?
 
 /** Final state of a job plus the bytes of its first output. */
 export async function result(jobId: string): Promise<JobResult> {
-  const job = jobs.get(jobId) ?? (await sdk().jobs.get(jobId));
+  const moteur = moteurDuJob(jobId);
+  const job = jobs.get(jobId) ?? (await sdk(moteur.id).jobs.get(jobId));
   await job.refresh();
   if (!TERMINAL.has(job.status)) return { done: false };
   jobs.delete(jobId);
   // Locally the job id is ComfyUI's prompt id, and ComfyUI's history has exact
   // execution timestamps. The event stream can miss the running event (the proxy
   // caps live streams), so it is only the fallback.
-  const exec = isLocal() ? await executionWindow(jobId) : null;
+  const exec = isLocal() ? await executionWindow(jobId, moteur.comfyUrl) : null;
   const started = exec?.start ?? job.startedAt?.getTime() ?? runningSince.get(jobId);
   const ended = exec?.end ?? job.completedAt?.getTime() ?? Date.now();
   runningSince.delete(jobId);
@@ -253,7 +344,7 @@ export async function result(jobId: string): Promise<JobResult> {
   const extras = await Promise.all(job.outputs.filter((o) => EXTRA_NODES.has(o.nodeId))
     .map(async (o) => ({ nodeId: o.nodeId, name: o.name, contentType: o.contentType, data: Buffer.from(await o.toBytes()) })));
   // A 3D save is the take's file when the graph has one.
-  const model = isLocal() ? (await savedModels(jobId)).find((m) => m.nodeId === 'save') : undefined;
+  const model = isLocal() ? (await savedModels(jobId, moteur.comfyUrl)).find((m) => m.nodeId === 'save') : undefined;
   if (model) return { done: true, success: true, output: model, extras, renderSeconds };
   const saved = all.filter((o) => o.nodeId === 'save' || o.nodeId === 'out');
   const outs = saved.length ? saved : all;
@@ -275,7 +366,7 @@ export async function result(jobId: string): Promise<JobResult> {
 
 /** Cancel one job, queued or running. */
 export async function cancel(jobId: string): Promise<void> {
-  const job = jobs.get(jobId) ?? (await sdk().jobs.get(jobId));
+  const job = jobs.get(jobId) ?? (await sdk(moteurDuJob(jobId).id).jobs.get(jobId));
   await job.cancel();
 }
 
@@ -285,11 +376,11 @@ export async function cancelAll(): Promise<void> {
 }
 
 /** Is the v2 API answering? */
-export async function apiUp(): Promise<boolean> {
+export async function apiUp(baseUrl = config.comfyBaseUrl): Promise<boolean> {
   try {
     const headers: Record<string, string> = {};
     if (config.comfyApiKey) headers.Authorization = `Bearer ${config.comfyApiKey}`;
-    const r = await fetch(`${config.comfyBaseUrl}/api/v2/jobs?limit=1`, {
+    const r = await fetch(`${baseUrl}/api/v2/jobs?limit=1`, {
       headers,
       signal: AbortSignal.timeout(4000),
     });
@@ -302,45 +393,58 @@ export async function apiUp(): Promise<boolean> {
 
 export const isLocal = () => /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(config.comfyBaseUrl);
 
-let proxyChild: import('child_process').ChildProcess | null = null;
+const proxies = new Map<string, import('child_process').ChildProcess>();
+const estLocal = (url: string) => /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(url);
 
 /**
  * Local mode only: start comfy-api-proxy in front of ComfyUI if the v2 API is
  * not already answering. The proxy keeps job state in <data>/proxy so jobs
  * survive an OpenField restart.
+ * Nexora : un proxy par moteur du parc (état dans <data>/proxy-<id> pour les moteurs ajoutés) ; la réponse est celle
+ * du moteur principal, les autres démarrent en arrière-plan.
  */
 export async function ensureProxy(timeoutMs = 20_000): Promise<boolean> {
-  if (!isLocal()) return apiUp();
-  if (await apiUp()) return true;
-  if (proxyChild && proxyChild.exitCode === null) return waitUp(timeoutMs);
+  for (const m of moteurs.slice(1)) void proxyPour(m, timeoutMs);
+  return proxyPour(moteurs[0], timeoutMs);
+}
+
+async function proxyPour(m: MoteurGpu, timeoutMs: number): Promise<boolean> {
+  if (!estLocal(m.baseUrl)) return apiUp(m.baseUrl);
+  if (await apiUp(m.baseUrl)) return true;
+  const enfant = proxies.get(m.id);
+  if (enfant && enfant.exitCode === null) return waitUp(timeoutMs, m.baseUrl);
   const { spawn } = await import('child_process');
-  const port = new URL(config.comfyBaseUrl).port || '8189';
-  const stateDir = join(config.dataDir, 'proxy');
+  const port = new URL(m.baseUrl).port || '8189';
+  const stateDir = join(config.dataDir, m.id === 'principal' ? 'proxy' : `proxy-${m.id}`);
   await mkdir(stateDir, { recursive: true });
   try {
-    proxyChild = spawn(
-      config.proxyBin,
-      ['run', '--comfyui', config.comfyUrl, '--port', port, '--state-dir', stateDir],
-      { stdio: 'ignore' },
-    );
-    proxyChild.on('error', (e) => console.error(`[openfield] could not start ${config.proxyBin}:`, e.message));
+    const p = spawn(config.proxyBin, ['run', '--comfyui', m.comfyUrl, '--port', port, '--state-dir', stateDir], { stdio: 'ignore' });
+    p.on('error', (e) => console.error(`[openfield] could not start ${config.proxyBin}:`, e.message));
+    proxies.set(m.id, p);
   } catch (e) {
     console.error('[openfield] proxy launch failed:', e instanceof Error ? e.message : e);
     return false;
   }
-  return waitUp(timeoutMs);
+  return waitUp(timeoutMs, m.baseUrl);
 }
 
-async function waitUp(timeoutMs: number): Promise<boolean> {
+async function waitUp(timeoutMs: number, baseUrl = config.comfyBaseUrl): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (await apiUp()) return true;
+    if (await apiUp(baseUrl)) return true;
     await new Promise((r) => setTimeout(r, 500));
   }
   return false;
 }
 
-/** Stop a proxy this process started. */
+/** Nexora : état de chaque moteur du parc (API v2 joignable, tâches en cours). */
+export async function etatMoteurs() {
+  return Promise.all(moteurs.map(async (m) => ({
+    id: m.id, nom: m.nom, recettes: m.recettes, enLigne: await apiUp(m.baseUrl), enCours: enCours.get(m.id)?.size ?? 0,
+  })));
+}
+
+/** Stop the proxies this process started. */
 export function stopProxy(): void {
-  if (proxyChild && proxyChild.exitCode === null) proxyChild.kill();
+  for (const p of proxies.values()) if (p.exitCode === null) p.kill();
 }

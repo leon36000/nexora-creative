@@ -4,7 +4,7 @@ import { MANIFESTES, Manifeste, planifierMoteurs } from './registre.js';
 describe('registre de capacités', () => {
   it('chaque manifeste est valide, avec licence et ensembles de modèles déclarés', () => {
     for (const m of MANIFESTES) expect(() => Manifeste.parse(m), m.id).not.toThrow();
-    expect(MANIFESTES.map((m) => m.id).sort()).toEqual(['minimax/fasth3-v2-nvfp4', 'wan/2.2-ti2v-5b']);
+    expect(MANIFESTES.map((m) => m.id).sort()).toEqual(['minimax/fasth3-v2-nvfp4', 'minimax/h3-cinema']);
   });
 
   it('refuse un manifeste incomplet (licence absente)', () => {
@@ -16,15 +16,21 @@ describe('registre de capacités', () => {
 describe('planificateur : filtres durs, puis classement', () => {
   const base = { tache: 't2v' as const, dureeS: 5, son: true };
 
-  it('au Canada, H3 passe devant Wan (qualité, son natif)', () => {
+  it('au Canada, le moteur cinéma passe devant FastH3 (qualité)', () => {
     const r = planifierMoteurs(base, { territoire: 'CA' });
-    expect(r.retenus.map((m) => m.id)).toEqual(['minimax/fasth3-v2-nvfp4', 'wan/2.2-ti2v-5b']);
+    expect(r.retenus.map((m) => m.id)).toEqual(['minimax/h3-cinema', 'minimax/fasth3-v2-nvfp4']);
   });
 
-  it('aux États-Unis, H3 est exclu par sa licence, avec la raison', () => {
+  it('aux États-Unis, H3 est exclu par sa licence, avec la raison, et rien ne le remplace', () => {
     const r = planifierMoteurs(base, { territoire: 'US' });
-    expect(r.retenus.map((m) => m.id)).toEqual(['wan/2.2-ti2v-5b']);
+    expect(r.retenus).toEqual([]);
     expect(r.exclus.find((e) => e.id === 'minimax/fasth3-v2-nvfp4')?.raison).toMatch(/territoire/);
+  });
+
+  it('une recette qu’aucun moteur GPU du parc ne porte est exclue', () => {
+    const r = planifierMoteurs(base, { territoire: 'CA', recettes: new Set(['h3-fast']) });
+    expect(r.retenus.map((m) => m.id)).toEqual(['minimax/fasth3-v2-nvfp4']);
+    expect(r.exclus.find((e) => e.id === 'minimax/h3-cinema')?.raison).toMatch(/parc/);
   });
 
   it('une tâche non prise en charge exclut le moteur', () => {
@@ -39,8 +45,8 @@ describe('planificateur : filtres durs, puis classement', () => {
   });
 
   it('un ensemble de modèles absent du moteur exclut le manifeste', () => {
-    const r = planifierMoteurs(base, { territoire: 'CA', ensemblesPrets: new Set(['wan22']) });
-    expect(r.retenus.map((m) => m.id)).toEqual(['wan/2.2-ti2v-5b']);
+    const r = planifierMoteurs(base, { territoire: 'CA', ensemblesPrets: new Set(['h3-fast']) });
+    expect(r.retenus.map((m) => m.id)).toEqual(['minimax/fasth3-v2-nvfp4']);
     expect(r.exclus[0].raison).toMatch(/installé/);
   });
 });

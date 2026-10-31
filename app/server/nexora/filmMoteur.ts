@@ -12,7 +12,7 @@ import { corpsRendu, type DemandeCreer, type MoteurVideo } from './creer.js';
 import { avecCompte } from './compte.js';
 import { controlerFichier } from './controle.js';
 import type { CreditsPrise } from './credits.js';
-import { argsAssemblage, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
+import { argsAssemblage, argsAvecMusique, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
 
@@ -40,7 +40,7 @@ export async function tournerFilm(
     kind: 'video',
     shot_name: sb.titre.slice(0, 40),
     settings: {
-      app: 'nexora-film', film: true, storyboard: sb, format: opts.format, qualite: opts.qualite ?? 'rapide', son: opts.son && opts.moteur === 'h3-fast', moteur: opts.moteur,
+      app: 'nexora-film', film: true, storyboard: sb, format: opts.format, qualite: opts.qualite ?? 'rapide', son: opts.son, moteur: opts.moteur,
       prompt: opts.intention, userPrompt: sb.titre, seconds: sb.dureeTotale, shotName: sb.titre.slice(0, 40),
     },
   });
@@ -199,7 +199,18 @@ async function etape(filmId: number) {
     }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
       err ? ko(new Error(`ffmpeg : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
   );
-  takes.finish(filmId, sortie, (Date.now() - t0) / 1000);
+  let final = sortie;
+  // Bande originale MiniMax-Music3 choisie pour cette version du film : mixée sous les sons des plans.
+  if (typeof s.musique === 'string' && existsSync(s.musique)) {
+    final = sortie.replace(/\.mp4$/, '_musique.mp4');
+    const duree = sb.plans.reduce((n, p) => n + (Number((p as any).controle?.duree) || dureePlan(p)), 0)
+      - (s.transition === 'fondu' ? 0.5 * (sb.plans.length - 1) : 0);
+    await new Promise<void>((ok, ko) =>
+      execFile(config.ffmpegBin, argsAvecMusique(sortie, s.musique, final, { dureeS: duree, sonDuFilm: !!s.son }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
+        err ? ko(new Error(`ffmpeg (musique) : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
+    );
+  }
+  takes.finish(filmId, final, (Date.now() - t0) / 1000);
   takes.patchSettings(filmId, { assemblage: 'fait', planTakes: sb.plans.map((p) => p.take) });
   pousser(filmId);
 }

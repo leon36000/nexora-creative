@@ -35,9 +35,11 @@ const REGLES: Record<string, Regle> = {
   sam3: { genre: 'permis' },
   'stage-look': { genre: 'permis' },
   trellis2: { genre: 'permis' },
-  wan22: { genre: 'permis' },
   h3: { genre: 'h3' },
   'h3-fast': { genre: 'h3' },
+  'h3-max': { genre: 'h3' },
+  // MiniMax-Music3 Community License : pas de territoire exclu ; « MiniMax-Music3 » affiché dans l'interface.
+  music3: { genre: 'permis' },
   'h3-refs': { genre: 'h3' },
   'h3-turbo': { genre: 'h3' },
   flux2: { genre: 'bloque', raison: `FLUX.2 dev : ${NON_COMMERCIAL}` },

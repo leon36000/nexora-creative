@@ -161,7 +161,7 @@ export default function Creer() {
             <button type="button" className={`nx-puce ${son ? 'on' : ''}`} onClick={() => setSon(!son)} aria-pressed={son}>{son ? 'Avec son' : 'Sans son'}</button>
             <div className="nx-groupe" role="group" aria-label="Qualité">
               <button type="button" className={`nx-puce ${qualite === 'rapide' ? 'on' : ''}`} onClick={() => setQualite('rapide')} title="Rendu rapide, idéal pour essayer">Rapide</button>
-              <button type="button" className={`nx-puce ${qualite === 'max' ? 'on' : ''}`} onClick={() => setQualite('max')} title="Résolution native du modèle, plus long à tourner">Qualité max</button>
+              <button type="button" className={`nx-puce ${qualite === 'max' ? 'on' : ''}`} onClick={() => setQualite('max')} title={etat?.cinema ? 'Moteur cinéma : MiniMax H3 complet, pleine résolution, pleines étapes (RTX 5090)' : 'Résolution native du modèle, plus long à tourner'}>{etat?.cinema ? 'Cinéma' : 'Qualité max'}</button>
             </div>
             {!film && (
               photo ? (
@@ -196,7 +196,7 @@ export default function Creer() {
             {voirScenario && <pre>{dernier.prompt}</pre>}
           </div>
         )}
-        {etat && !etat.son && <p className="nx-note">Pour ton compte, les vidéos sont tournées avec {etat.moteur}, sans piste sonore générée.</p>}
+        {etat?.erreur && <p className="nx-note">{etat.erreur}</p>}
         {etat && !etat.llm && <p className="nx-note">L’assistant d’écriture n’est pas branché sur ce poste : la vidéo sera tournée à partir de ta phrase telle quelle.</p>}
       </section>
 

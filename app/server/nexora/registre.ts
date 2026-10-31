@@ -19,7 +19,7 @@ export const Manifeste = z.object({
   nom: z.object({ fr: z.string().min(1), en: z.string().optional() }),
   famille: z.literal('video'),
   /** Valeur de `videoModel` attendue par la recette de graphe (server/index.ts). */
-  recette: z.enum(['h3-fast', 'wan22']),
+  recette: z.enum(['h3-fast', 'h3-max']),
   taches: z.array(Tache).min(1),
   sortie: z.object({ audio: z.boolean(), fps: z.number().int().positive(), dureeS: z.object({ min: z.number(), max: z.number() }) }),
   /** Ensembles de server/models.ts à avoir sur le moteur. */
@@ -61,26 +61,33 @@ export const MANIFESTES: Manifeste[] = [
   },
   {
     contrat: 'nexora.capability/1',
-    id: 'wan/2.2-ti2v-5b',
-    nom: { fr: 'Wan 2.2 (5B)', en: 'Wan 2.2 (5B)' },
+    id: 'minimax/h3-cinema',
+    nom: { fr: 'MiniMax H3 (cinéma, pleines étapes)', en: 'MiniMax H3 (cinema, full steps)' },
     famille: 'video',
-    recette: 'wan22',
+    recette: 'h3-max',
     taches: ['t2v', 'i2v'],
-    sortie: { audio: false, fps: 24, dureeS: { min: 1, max: 10.1 } },
-    ensembles: ['wan22'],
+    sortie: { audio: true, fps: 24, dureeS: { min: 5, max: 15.1 } },
+    ensembles: ['h3-max'],
     licence: {
-      nom: 'Apache-2.0',
-      url: 'https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B',
+      nom: 'MiniMax H3 Community License Agreement',
+      url: 'https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE',
       commercial: true,
-      regle: 'wan22',
+      regle: 'h3-max',
+      affichage: 'MiniMax H3',
     },
-    qualite: 60,
-    materiel: { memoireGo: 20 },
+    // Modèle non distillé, 1344×768, ≥ 24 étapes : la meilleure image du parc (banc du 31/10, recherche/10).
+    qualite: 97,
+    materiel: { requiertSm: ['sm_120'], memoireGo: 32 },
   },
 ];
 
 export interface Besoin { tache: Tache; dureeS: number; son: boolean }
-export interface Contexte { territoire: string | null; ensemblesPrets?: Set<string> }
+export interface Contexte {
+  territoire: string | null;
+  ensemblesPrets?: Set<string>;
+  /** Recettes que le parc de moteurs GPU sait rendre (server/engine.ts) ; absent = pas de filtre. */
+  recettes?: Set<string>;
+}
 
 export function planifierMoteurs(b: Besoin, ctx: Contexte, manifestes: Manifeste[] = MANIFESTES) {
   const retenus: (Manifeste & { score: number })[] = [];
@@ -96,7 +103,9 @@ export function planifierMoteurs(b: Besoin, ctx: Contexte, manifestes: Manifeste
             ? `licence ${m.licence.nom} : territoire du compte exclu ou inconnu`
             : ctx.ensemblesPrets && !m.ensembles.every((e) => ctx.ensemblesPrets!.has(e))
               ? 'modèles pas encore installés sur le moteur'
-              : null;
+              : ctx.recettes && !ctx.recettes.has('*') && !ctx.recettes.has(m.recette)
+                ? 'aucun moteur GPU du parc ne porte cette recette'
+                : null;
     if (raison) exclus.push({ id: m.id, raison });
     // Classement : qualité, puis bonus si le son demandé est natif.
     else retenus.push({ ...m, score: m.qualite + (b.son && m.sortie.audio ? 10 : 0) });

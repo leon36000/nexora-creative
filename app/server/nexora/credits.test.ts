@@ -9,7 +9,7 @@ describe('devis en crédits d’un rendu', () => {
     expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 768, height: 1344 })).toBe(340);
     const cinq = devisCredits({ videoModel: 'h3-fast', lengthFrames: 124, width: 832, height: 480 }, { creditsParSecondeGpu: 0.5 });
     expect(cinq).toBe(43);
-    expect(Number.isInteger(devisCredits({ videoModel: 'wan22', frames: 121, width: 832, height: 480 }, { creditsParSecondeGpu: 0.5 }))).toBe(true);
+    expect(Number.isInteger(devisCredits({ videoModel: 'h3-max', lengthFrames: 124, width: 1344, height: 768 }, { creditsParSecondeGpu: 0.5 }))).toBe(true);
   });
 
   it('coûte plus cher pour plus de pixels', () => {

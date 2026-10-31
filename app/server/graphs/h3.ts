@@ -15,6 +15,8 @@ export interface H3Params {
   startImage?: string; // ComfyUI input-folder filename
   endImage?: string;
   refImages?: string[]; // reference mode (ref2va checkpoint)
+  /** Nexora : force le nœud de référence même sans image (texte → vidéo sur un point de contrôle ref2va, ex. Singularity). */
+  refMode?: boolean;
   /** Optional checkpoint override (must belong to the right family). */
   checkpoint?: string;
   /** Optional LoRA (e.g. the lightx2v fl2v turbo step-distills). */
@@ -174,14 +176,14 @@ function useShiftSrc(
 }
 
 export function buildH3Graph(p: H3Params): Record<string, unknown> {
-  const useRef = !!p.refImages?.length;
+  const useRef = !!p.refImages?.length || !!p.refMode;
   const family = useRef ? 'ref2va' : 'fl2va';
   // Checkpoint override is honored only within the correct model family —
   // an fl2va file can't drive the ref graph and vice versa.
   const distilled = !useRef && p.checkpoint ? H3_DISTILLED_CHECKPOINTS[p.checkpoint] : undefined;
   const unetName = distilled
     ? p.checkpoint!
-    : p.checkpoint && p.checkpoint.includes(`minimax_h3_${family}`)
+    : p.checkpoint && p.checkpoint.toLowerCase().includes(family)
       ? p.checkpoint
       : H3_MODELS[family];
   // Turbo wins over a hand-picked extraLora: the distill and its sigma shift are

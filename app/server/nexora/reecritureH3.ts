@@ -44,6 +44,8 @@ function consignesSysteme(): string {
     'make it vivid, concrete and filmable (subjects, materials, light, composition, action along the timeline, camera motion with',
     'the guide vocabulary, diegetic sounds); keep it consistent with the requested duration; never add text on screen unless asked;',
     'respect the safety rules: no real person impersonation, no minors in harmful contexts, no misleading political content.',
+    'Write only what is seen and heard: no meta remarks, notes or parentheses about the prompt itself (e.g. never "(S1 is not applicable)");',
+    'keep every subject the user named exactly as named (a spaceship stays a spaceship, never an airship), and never add brands, franchises or trademarked characters.',
     'Answer with a JSON object {"prompt": "<the final prompt>"} and nothing else.',
     '',
     '=== OFFICIAL GUIDE ===',
@@ -97,6 +99,12 @@ export function texteEcranNonDemande(prompt: string, intention: string): string[
     .filter((t) => !(cite && normal(intention).includes(normal(t))));
 }
 
+/** Notes adressées au modèle au lieu de décrire la scène ; H3 les lirait comme du contenu. */
+export function remarquesParasites(prompt: string): string[] {
+  return [...prompt.matchAll(/\((?:[^()]*\b(?:not applicable|does not speak|no dialogue|note:|N\/A)\b[^()]*)\)/gi)]
+    .map((m) => `remove the meta remark ${m[0]}: describe only what is seen and heard`);
+}
+
 export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, maxTentatives = 3): Promise<ResultatReecriture> {
   const ctx = { mode: e.mode, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
   let erreurs: string[] = ['aucun LLM configuré'];
@@ -114,6 +122,7 @@ export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, max
         prompt = String(lireJson<{ prompt?: unknown }>(brut).prompt ?? '').trim();
         erreurs = [
           ...validerPromptH3(prompt, ctx),
+          ...remarquesParasites(prompt),
           ...texteEcranNonDemande(prompt, e.intention).map((t) => `on-screen text "${t}" was not requested by the user: remove it`),
         ];
         messages.push({ role: 'assistant', content: brut });

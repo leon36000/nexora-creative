@@ -176,6 +176,20 @@ export function argsAssemblage(fichiers: string[], sortie: string, son: boolean,
   ];
 }
 
+/**
+ * Bande originale : la musique passe sous le film, les sons des plans (bruitages, voix) restent audibles par-dessus,
+ * puis le mixage est normalisé à −14 LUFS (cible des plateformes vidéo). La musique s'arrête avec l'image, en fondu.
+ */
+export function argsAvecMusique(film: string, musique: string, sortie: string, o: { dureeS: number; sonDuFilm: boolean; sfxDb?: number }): string[] {
+  const fin = Math.max(0, o.dureeS - 1.5).toFixed(2);
+  const mus = `[1:a]aresample=48000,afade=t=out:st=${fin}:d=1.5[m]`;
+  const filtre = o.sonDuFilm
+    ? `${mus};[0:a]aresample=48000,volume=${o.sfxDb ?? -8}dB[s];[m][s]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1:LRA=11[a]`
+    : `${mus};[m]loudnorm=I=-14:TP=-1:LRA=11[a]`;
+  return ['-y', '-i', film, '-i', musique, '-filter_complex', filtre, '-map', '0:v', '-map', '[a]', '-t', o.dureeS.toFixed(3),
+    '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', sortie];
+}
+
 /** Export professionnel : ProRes 422 HQ 10 bits + PCM, lisible par Premiere, DaVinci Resolve et Final Cut. */
 export function argsExport(entree: string, sortie: string, format: 'prores'): string[] {
   void format;

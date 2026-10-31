@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ClientLlm, MessageLlm } from './llm.js';
-import { reecrireH3, texteEcranNonDemande } from './reecritureH3.js';
+import { reecrireH3, remarquesParasites, texteEcranNonDemande } from './reecritureH3.js';
 
 const bon = `integrated_multimodal_description: [Shot 1] Live-action, cinematic, a wide shot of a red car. The camera performs an arc shot at slow speed around it.
 
@@ -75,3 +75,15 @@ describe('texte à l’écran non demandé', () => {
   });
 });
 
+
+describe('remarques parasites', () => {
+  it('repère une note adressée au modèle et la fait retirer', async () => {
+    const parasite = bon.replace('a red car.', 'a red car (S1 is not applicable; she does not speak).');
+    expect(remarquesParasites(parasite)).toHaveLength(1);
+    expect(remarquesParasites(bon)).toEqual([]);
+    const llm = faux([JSON.stringify({ prompt: parasite }), JSON.stringify({ prompt: bon })]);
+    const r = await reecrireH3(entree, llm);
+    expect(r.prompt).toBe(bon);
+    expect(r.tentatives).toBe(2);
+  });
+});

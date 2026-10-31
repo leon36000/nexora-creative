@@ -104,7 +104,7 @@ async function j<T>(url: string, init?: RequestInit): Promise<T> {
   return d as T;
 }
 
-export interface CreerReponse { takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number; moteur: 'h3-fast' | 'wan22' }
+export interface CreerReponse { takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number; moteur: 'h3-fast' | 'h3-max' }
 export interface PlanFilm { resume: string; description: string; duree: 5 | 10; camera: string; take?: number }
 export interface Storyboard {
   titre: string;
@@ -112,7 +112,7 @@ export interface Storyboard {
   plans: PlanFilm[];
   dureeTotale: number;
 }
-export interface EtatNexora { llm: boolean; moteur: string; son: boolean; territoire: string | null }
+export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string }
 
 export const api = {
   status: () => j<Status>('/api/status'),

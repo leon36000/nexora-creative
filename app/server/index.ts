@@ -16,8 +16,9 @@ import * as comfy from './comfy.js';
 import * as eng from './engine.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
-import { buildWan22Graph, imagesWan } from './graphs/wan22.js';
-import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer } from './nexora/creer.js';
+import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type MoteurVideo } from './nexora/creer.js';
+import { buildMusic3Graph } from './graphs/music3.js';
+import { ecrireMusique } from './nexora/musique.js';
 import { planifierMoteurs } from './nexora/registre.js';
 import { compteCourant, territoireDuCompte } from './nexora/compte.js';
 import { clientLlmCourant } from './nexora/llm.js';
@@ -609,6 +610,10 @@ async function graphFor(b: any, seed: number): Promise<Built> {
   let graph: Record<string, unknown>;
   let kind: string;
 
+  // Nexora : bande originale MiniMax Music 3 (recette « music3 », routée vers le moteur qui la porte).
+  if (b.kind === 'musique') {
+    return { kind: 'audio', graph: buildMusic3Graph({ description: String(b.description ?? ''), paroles: String(b.paroles ?? ''), dureeS: Number(b.dureeS) || 30, seed }) };
+  }
   if (b.kind === 'upscale') return upscaleGraph(b, seed);
   if (b.kind === 'cutout') return cutoutGraph(b);
   if (b.kind === 'restyle' || b.kind === 'swap') return motionEditGraph(b, seed);
@@ -850,16 +855,6 @@ async function graphFor(b: any, seed: number): Promise<Built> {
       extraLoraStrength: b.extraLoraStrength,
       startImage: b.startImage,
     });
-  } else if (b.videoModel === 'wan22') {
-    kind = 'video';
-    graph = buildWan22Graph({
-      prompt: b.prompt,
-      width: b.width || 832,
-      height: b.height || 480,
-      frames: Number.isFinite(b.frames) ? b.frames : imagesWan(5),
-      seed,
-      startImage: b.startImage,
-    });
   } else {
     kind = 'video';
     graph = buildH3Graph({
@@ -872,6 +867,7 @@ async function graphFor(b: any, seed: number): Promise<Built> {
       startImage: b.startImage,
       endImage: b.endImage,
       refImages: b.refImages,
+      refMode: b.videoModel === 'h3-max' && b.refMode === true,
       checkpoint: b.videoModel === 'h3-fast' ? CHECKPOINT_FASTH3 : typeof b.checkpoint === 'string' ? b.checkpoint : undefined,
       extraLora: typeof b.extraLora === 'string' && b.extraLora ? b.extraLora : undefined,
       extraLoraStrength: b.extraLoraStrength,
@@ -960,11 +956,12 @@ app.post('/api/nexora/creer', async (req, reply) => {
   let demande;
   try { demande = lireDemandeCreer(req.body); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
-  // Moteur choisi par le registre de capacités (licence et territoire d'abord) ; la personne peut demander Wan.
-  const plan = planifierMoteurs(besoinDe(demande), { territoire: territoireDuCompte() });
-  const voulu = (req.body as any)?.moteur;
-  const moteur = (plan.retenus.find((m) => m.recette === voulu) ?? plan.retenus[0])?.recette as 'h3-fast' | 'wan22' | undefined;
-  if (!moteur) return reply.code(422).send({ error: `Aucun moteur ne peut faire cette vidéo pour ton compte : ${plan.exclus.map((e) => e.raison).join(' ; ')}.` });
+  // Moteur choisi par le registre de capacités (licence et territoire d'abord, puis la qualité demandée).
+  const moteur = moteurDuCompte(demande.qualite, besoinDe(demande));
+  if (!moteur) {
+    const plan = planifierMoteurs(besoinDe(demande), { territoire: territoireDuCompte(), recettes: recettesDuParc() });
+    return reply.code(422).send({ error: `Aucun moteur ne peut faire cette vidéo pour ton compte : ${plan.exclus.map((e) => e.raison).join(' ; ')}.` });
+  }
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
   const r = await reecrireH3({ intention: demande.intention, mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande) }, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur };
@@ -990,8 +987,9 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   try { sb = lireStoryboard(b.storyboard, 0); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'storyboard invalide' }); }
   const demande = lireDemandeCreer({ intention: sb.titre, format: b.format, son: b.son, qualite: b.qualite });
-  const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
-  const missing = await blockingReasonFor(eng.isLocal(), [moteur]);
+  const moteur = moteurDuCompte(demande.qualite);
+  if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
+  const missing = await blockingReasonFor(eng.isLocal(), bundlesFor({ kind: 'video', videoModel: moteur }));
   if (missing) return reply.code(412).send({ error: missing });
   // Crédits : chaque plan réserve son devis avant le tournage ; les reprises automatiques sont offertes par Nexora.
   const fac = facturationCourante();
@@ -1020,7 +1018,8 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
 app.post('/api/nexora/devis', async (req) => {
   const b = (req.body ?? {}) as any;
   const demande = lireDemandeCreer({ intention: 'devis', format: b.format, duree: b.duree, son: b.son, qualite: b.qualite, image: b.image });
-  const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte(), besoinDe(demande));
+  const moteur = moteurDuCompte(demande.qualite, besoinDe(demande));
+  if (!moteur) return { credits: null, secondesEstimees: null, moteur: null, erreur: REFUS_TERRITOIRE };
   const corps = corpsRendu(demande, '', moteur);
   return { credits: configAuth ? devisCredits(corps, tarifDepuisEnv()) : null, secondesEstimees: secondesGpuEstimees(corps), moteur };
 });
@@ -1038,7 +1037,8 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
   let sb;
   try { sb = storyboardPourRefaire(s.storyboard, Number(b.plan), { description: b.description, camera: b.camera }); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'plan invalide' }); }
-  const moteur = s.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
+  const moteur = s.moteur === 'h3-max' || s.moteur === 'h3-fast' ? s.moteur as MoteurVideo : moteurDuCompte(s.qualite);
+  if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
   const fac = facturationCourante();
   const reservations: (CreditsPrise | undefined)[] = [];
   for (const p of sb.plans) {
@@ -1074,10 +1074,40 @@ app.post('/api/nexora/film/:id/montage', async (req, reply) => {
   let sb;
   try { sb = storyboardPourMontage(s.storyboard, Array.isArray(b.ordre) ? b.ordre.map(Number) : s.storyboard.plans.map((_: unknown, i: number) => i)); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'montage invalide' }); }
+  // Bande originale : une prise « musique » terminée de la même organisation (garde par takes.get), ou celle du film.
+  let musique: string | undefined = typeof s.musique === 'string' ? s.musique : undefined;
+  if (b.musique === null) musique = undefined;
+  else if (b.musique !== undefined) {
+    const m = takes.get(Number(b.musique));
+    if (!m || m.status !== 'done' || !m.output_path || JSON.parse(m.settings).kind !== 'musique') return reply.code(400).send({ error: 'Cette musique n’est pas prête.' });
+    musique = m.output_path;
+  }
   const filmId = await tournerFilm(sb, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur: s.moteur ?? 'h3-fast', qualite: s.qualite }, null);
-  takes.patchSettings(filmId, { versionDe: film.id, transition: b.transition === 'fondu' ? 'fondu' : 'coupe' });
+  takes.patchSettings(filmId, { versionDe: film.id, transition: b.transition === 'fondu' ? 'fondu' : 'coupe', ...(musique ? { musique } : {}) });
   void avancerFilm(filmId);
   return { filmId };
+});
+
+/**
+ * Bande originale d'un film terminé : le LLM écrit la description MiniMax Music 3 depuis le storyboard, la musique est
+ * composée sur le moteur qui porte la recette « music3 ». Une fois prête, /montage avec { musique: <prise> } la mixe.
+ */
+app.post('/api/nexora/film/:id/musique', async (req, reply) => {
+  const film = takes.get(Number((req.params as any).id));
+  const b = (req.body ?? {}) as any;
+  if (!film) return reply.code(404).send({ error: 'Film introuvable.' });
+  const s = JSON.parse(film.settings);
+  if (!s.film || film.status !== 'done') return reply.code(409).send({ error: 'Le film doit être terminé pour recevoir sa musique.' });
+  if (!eng.moteursPour('music3').length) return reply.code(503).send({ error: 'Aucun moteur GPU ne compose de musique pour l’instant.' });
+  const duree = Number(s.storyboard?.dureeTotale) || Number(s.seconds) || 30;
+  const m = await ecrireMusique(s.storyboard, duree, llmCourant(), typeof b.envie === 'string' ? b.envie.slice(0, 500) : undefined);
+  const [takeId] = await queueTakes({
+    kind: 'musique', videoModel: 'music3', description: m.description, paroles: m.paroles, dureeS: Math.ceil(duree),
+    app: 'nexora-musique', nexoraMusiqueDe: film.id, shotName: `${(film.shot_name || 'film').slice(0, 40)}_musique`,
+    prompt: m.description, userPrompt: typeof b.envie === 'string' ? b.envie : 'Bande originale', promptSource: m.source,
+    projectId: film.project_id ?? undefined,
+  }, 1);
+  return { takeId, source: m.source };
 });
 
 /** Export professionnel d'un film terminé (ProRes 422 HQ + PCM, .mov). */
@@ -1130,9 +1160,27 @@ app.get('/api/nexora/film/:id/projet', async (req, reply) => {
 });
 
 app.get('/api/nexora/etat', async () => {
-  const moteur = choisirMoteur(territoireDuCompte());
-  return { llm: !!llmCourant(), moteur: moteur === 'h3-fast' ? 'MiniMax H3' : 'Wan 2.2', son: moteur === 'h3-fast', territoire: territoireDuCompte() };
+  const moteur = moteurDuCompte('rapide');
+  return {
+    llm: !!llmCourant(), moteur: moteur ? 'MiniMax H3' : null, son: !!moteur, territoire: territoireDuCompte(),
+    cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
+  };
 });
+
+/** Parc de moteurs GPU (état, charge), pour le tableau de bord et les diagnostics. */
+app.get('/api/nexora/moteurs-gpu', async () => eng.etatMoteurs());
+
+/** Recettes que le parc de moteurs GPU déclare. */
+function recettesDuParc(): Set<string> {
+  return new Set(eng.moteurs.flatMap((m) => m.recettes));
+}
+
+/** Moteur vidéo du compte courant pour une qualité donnée (null : territoire exclu ou inconnu). */
+function moteurDuCompte(qualite: 'rapide' | 'max' = 'rapide', besoin?: Parameters<typeof choisirMoteur>[1]): MoteurVideo | null {
+  return choisirMoteur(territoireDuCompte(), besoin, qualite, recettesDuParc());
+}
+
+const REFUS_TERRITOIRE = 'MiniMax H3 n’est pas offert dans le territoire de ton compte : sa licence exclut les États-Unis, l’Union européenne, le Royaume-Uni et la Corée du Sud.';
 
 async function generate(b: any, reply: FastifyReply) {
   stripServerKeys(b);
@@ -1350,7 +1398,10 @@ async function firstFrame(token: string): Promise<string> {
 
 /** Submit a built graph for an existing take row. */
 async function submitTake(takeId: number, built: Built) {
-  const promptId = await eng.submit(built.graph);
+  // Nexora : la recette (videoModel) choisit le moteur GPU du parc ; parmi ceux qui la portent, le moins chargé.
+  const recette = JSON.parse(takes.get(takeId)?.settings ?? '{}').videoModel as string | undefined;
+  const moteur = eng.moteursPour(recette)[0]?.id ?? 'principal';
+  const promptId = await eng.submit(built.graph, moteur);
   takes.setPrompt(takeId, promptId);
   // Cancelled while it was being submitted: the take stays stopped, so drop the job too.
   if (takes.get(takeId)?.status === 'stopped') await eng.cancel(promptId).catch(() => {});

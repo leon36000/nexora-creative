@@ -36,20 +36,28 @@ describe('demande « Créer » (parcours simple)', () => {
   });
 });
 
-describe('choix du moteur selon la licence et le territoire', () => {
-  it('prend H3 au Canada et Wan 2.2 dans les territoires exclus par H3 ou inconnus', () => {
+describe('choix du moteur : MiniMax H3 seul, selon la licence, le territoire et la qualité', () => {
+  const parc = new Set(['h3-fast', 'h3-max']);
+  it('H3 au Canada ; rien dans les territoires exclus ou inconnus (échec fermé, pas de repli)', () => {
     expect(choisirMoteur('CA')).toBe('h3-fast');
-    expect(choisirMoteur('US')).toBe('wan22');
-    expect(choisirMoteur('FR')).toBe('wan22');
-    expect(choisirMoteur(null)).toBe('wan22');
+    expect(choisirMoteur('US')).toBeNull();
+    expect(choisirMoteur('FR')).toBeNull();
+    expect(choisirMoteur(null)).toBeNull();
   });
 
-  it('prépare un rendu Wan sans son, sur sa grille 4n+1, avec un prompt descriptif', () => {
-    const h3 = 'integrated_multimodal_description: [Shot 1] Cinematic, a fox runs.\n\noverall_soundscape: wind.\n\nnon_diegetic_music: N/A';
-    const c = corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true }, h3, 'wan22');
-    expect(c).toMatchObject({ kind: 'video', videoModel: 'wan22', withAudio: false, frames: 121, width: 832, height: 480 });
-    expect(c.prompt).toBe('Cinematic, a fox runs.');
-    expect(corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true }, h3, 'h3-fast')).toMatchObject({ videoModel: 'h3-fast', withAudio: true });
+  it('« max » va au moteur cinéma s’il est dans le parc, sinon FastH3 à pleine résolution', () => {
+    expect(choisirMoteur('CA', undefined, 'max', parc)).toBe('h3-max');
+    expect(choisirMoteur('CA', undefined, 'rapide', parc)).toBe('h3-fast');
+    expect(choisirMoteur('CA', undefined, 'max', new Set(['h3-fast']))).toBe('h3-fast');
+    expect(choisirMoteur('US', undefined, 'max', parc)).toBeNull();
+  });
+
+  it('le moteur cinéma rend en 1344×768 avec son point de contrôle et ses étapes', () => {
+    const c = corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true, qualite: 'rapide' }, 'P', 'h3-max');
+    expect(c).toMatchObject({ videoModel: 'h3-max', width: 1344, height: 768, withAudio: true, steps: 24 });
+    expect(c.checkpoint).toBe('minimax_h3_fl2va_pruned_int8_convrot.safetensors');
+    expect(c).not.toHaveProperty('refMode');
+    expect(corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true }, 'P', 'h3-fast')).toMatchObject({ videoModel: 'h3-fast', withAudio: true, steps: 8 });
   });
 });
 
@@ -61,10 +69,10 @@ describe('partir d’une photo (image vers vidéo)', () => {
     expect(lireDemandeCreer({ intention: 'a', image: 'asset:x' }).image).toBeUndefined();
   });
 
-  it('passe la photo en première image, pour H3 comme pour Wan', () => {
+  it('passe la photo en première image, sur les deux moteurs H3', () => {
     const d = lireDemandeCreer({ intention: 'ma voiture', image: jeton });
     expect(corpsRendu(d, 'P', 'h3-fast')).toMatchObject({ startImage: jeton });
-    expect(corpsRendu(d, 'integrated_multimodal_description: [Shot 1] x', 'wan22')).toMatchObject({ startImage: jeton });
+    expect(corpsRendu(d, 'P', 'h3-max')).toMatchObject({ startImage: jeton });
     expect(corpsRendu(lireDemandeCreer({ intention: 'b' }), 'P', 'h3-fast')).not.toHaveProperty('startImage');
   });
 });

@@ -1,8 +1,9 @@
 /**
- * Parcours simple « Créer » : une intention en français → prompt H3 écrit par le LLM → rendu FastH3.
+ * Parcours simple « Créer » : une intention en français → prompt H3 écrit par le LLM → rendu MiniMax H3.
  * Ce module ne fait que lire la demande et préparer le corps de rendu ; la route de server/index.ts enchaîne.
+ * Décision du fondateur (31/10/2026) : MiniMax H3 seul. « Rapide » = FastH3 8 étapes ; « max » = le point de contrôle
+ * H3 complet du moteur cinéma (RTX 5090), à pleine résolution et pleines étapes.
  */
-import { imagesWan, promptWanDepuisH3 } from '../graphs/wan22.js';
 import { type Besoin, planifierMoteurs } from './registre.js';
 
 export type FormatCreer = '16:9' | '9:16' | '1:1';
@@ -21,6 +22,17 @@ export interface DemandeCreer {
 
 /** Point de contrôle FastH3 V2 distillé et quantifié NVFP4 (server/graphs/h3.ts, H3_DISTILLED_CHECKPOINTS). */
 export const CHECKPOINT_FASTH3 = 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors';
+
+/**
+ * Recette « h3-max » : point de contrôle H3 non distillé et nombre d'étapes, réglables par la configuration (le banc
+ * qualité du 31/10/2026 les a choisis : recherche/10-qualite-h3.md). Un point de contrôle ref2va passe par le nœud de
+ * référence, même sans image.
+ */
+export function reglagesH3Max(env: NodeJS.ProcessEnv = process.env) {
+  const checkpoint = env.NEXORA_H3_MAX_CHECKPOINT?.trim() || 'minimax_h3_fl2va_pruned_int8_convrot.safetensors';
+  const etapes = Number(env.NEXORA_H3_MAX_ETAPES);
+  return { checkpoint, etapes: Number.isInteger(etapes) && etapes >= 8 && etapes <= 60 ? etapes : 24, ref: /ref2va/i.test(checkpoint) };
+}
 
 const TAILLES: Record<'rapide' | 'max', Record<FormatCreer, { width: number; height: number }>> = {
   rapide: { '16:9': { width: 832, height: 480 }, '9:16': { width: 480, height: 832 }, '1:1': { width: 640, height: 640 } },
@@ -65,14 +77,21 @@ export function dureeEffective(d: DemandeCreer): number {
   return imagesPour(d.duree) / 24;
 }
 
-export type MoteurVideo = 'h3-fast' | 'wan22';
+export type MoteurVideo = 'h3-fast' | 'h3-max';
 
 /**
- * Moteur vidéo du compte : MiniMax H3 là où sa licence le permet, sinon Wan 2.2 (Apache-2.0). C'est la règle dure du
- * planificateur : la licence passe avant la qualité, et un territoire inconnu ne reçoit jamais H3 (échec fermé).
+ * Moteur vidéo du compte : MiniMax H3, là où sa licence le permet (échec fermé : un territoire inconnu ou exclu ne
+ * reçoit rien). « max » prend le moteur cinéma s'il est en ligne dans le parc, sinon FastH3 à pleine résolution.
  */
-export function choisirMoteur(territoire: string | null, besoin: Besoin = { tache: 't2v', dureeS: 5, son: true }): MoteurVideo {
-  return (planifierMoteurs(besoin, { territoire }).retenus[0]?.recette as MoteurVideo | undefined) ?? 'wan22';
+export function choisirMoteur(
+  territoire: string | null,
+  besoin: Besoin = { tache: 't2v', dureeS: 5, son: true },
+  qualite: 'rapide' | 'max' = 'rapide',
+  recettes?: Set<string>,
+): MoteurVideo | null {
+  const retenus = planifierMoteurs(besoin, { territoire, recettes }).retenus.map((m) => m.recette as MoteurVideo);
+  if (qualite === 'max' && retenus.includes('h3-max')) return 'h3-max';
+  return retenus.includes('h3-fast') ? 'h3-fast' : (retenus[0] ?? null);
 }
 
 /** Besoin d'une demande « Créer », pour le registre de capacités. */
@@ -80,17 +99,11 @@ export function besoinDe(d: DemandeCreer): Besoin {
   return { tache: d.image ? 'i2v' : 't2v', dureeS: imagesPour(d.duree) / 24, son: d.son };
 }
 
-/** Corps de rendu pour le moteur choisi ; le prompt H3 sert aussi de source au prompt descriptif de Wan. */
+/** Corps de rendu pour le moteur choisi. */
 export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVideo) {
-  if (moteur === 'h3-fast') return corpsRenduH3(d, promptH3);
-  return {
-    kind: 'video' as const,
-    videoModel: 'wan22' as const,
-    prompt: promptWanDepuisH3(promptH3),
-    ...taille(d),
-    frames: imagesWan(d.duree),
-    withAudio: false,
-    shotName: d.intention.slice(0, 60),
-    ...(d.image ? { startImage: d.image } : {}),
-  };
+  const base = corpsRenduH3(d, promptH3);
+  if (moteur === 'h3-fast') return base;
+  const m = reglagesH3Max();
+  // Le moteur cinéma est toujours à pleine résolution.
+  return { ...base, ...TAILLES.max[d.format], videoModel: 'h3-max' as const, checkpoint: m.checkpoint, steps: m.etapes, ...(m.ref ? { refMode: true } : {}) };
 }
