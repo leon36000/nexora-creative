@@ -60,3 +60,18 @@ export function lireJson<T>(texte: string): T {
   if (debut < 0 || fin <= debut) throw new ErreurLlm('pas d’objet JSON dans la réponse');
   return JSON.parse(texte.slice(debut, fin + 1)) as T;
 }
+
+/**
+ * Client LLM de la requête en cours : avec une session Nexora, la passerelle et la clé de l'organisation (ses crédits,
+ * sa politique de confidentialité) ; sinon la configuration du poste (développement).
+ */
+export function clientLlmCourant(
+  compte: { organisationId: string } | null,
+  acces: (org: string) => { url: string; model: string; key: string } | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): ClientLlm | null {
+  const a = compte ? acces(compte.organisationId) : undefined;
+  if (!a) return compte ? null : clientLlmDepuisEnv(env);
+  return clientLlmDepuisEnv({ ...env, NEXORA_LLM_BASE_URL: a.url, NEXORA_LLM_CLE: a.key, NEXORA_LLM_MODELE: a.model });
+}
+

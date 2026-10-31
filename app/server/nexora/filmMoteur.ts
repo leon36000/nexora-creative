@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { config } from '../config.js';
 import { takes, type Take } from '../jobs.js';
 import { corpsRendu, type DemandeCreer, type MoteurVideo } from './creer.js';
+import { avecCompte } from './compte.js';
 import { controlerFichier } from './controle.js';
 import { argsAssemblage, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
@@ -104,7 +105,10 @@ async function etape(filmId: number) {
       majPlan(filmId, i, { controle: plan.controle });
       // Correction automatique, budget d'une reprise par plan : même prompt, autre graine.
       if (!c.ok && (plan.reprises ?? 0) < 1 && plan.corps) {
-        const [id] = await deps.queueTakes({ ...plan.corps, seed: Math.floor(Math.random() * 1e9) }, 1);
+        // Hors requête (fin de rendu côté moteur) : la reprise doit naître dans l'organisation du film.
+        const org = takes.organisationDe(filmId) ?? 'local';
+        const [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () =>
+          deps.queueTakes({ ...plan.corps!, seed: Math.floor(Math.random() * 1e9) }, 1));
         majPlan(filmId, i, { take: id, reprises: (plan.reprises ?? 0) + 1, controle: undefined, controleRefuse: { take: t.id, defauts: c.defauts } });
         return;
       }

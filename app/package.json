@@ -34,6 +34,7 @@
     "@types/three": "^0.186.0",
     "better-sqlite3": "^11.7.0",
     "fastify": "^5.2.0",
+    "openid-client": "6.8.8",
     "qrcode-generator": "^2.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

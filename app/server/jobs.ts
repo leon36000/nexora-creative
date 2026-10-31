@@ -6,6 +6,7 @@ import Database from 'better-sqlite3';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
 import { config } from './config.js';
+import { compteCourant } from './nexora/compte.js';
 
 mkdirSync(config.dataDir, { recursive: true });
 const db = new Database(join(config.dataDir, 'openfield.db'));
@@ -62,6 +63,65 @@ CREATE TABLE IF NOT EXISTS take_workflows (
 );
 `);
 
+/**
+ * Nexora : chaque prise, personnage et projet appartient à une organisation. Les lectures faites pendant une requête
+ * ne voient que l'organisation du compte (server/nexora/compte.ts) ; le moteur, hors requête, voit tout pour terminer
+ * les rendus. Migration idempotente : colonne `organisation_id` ('local' pour l'existant) et unicité des noms de
+ * personnages et de projets par organisation au lieu de globale.
+ */
+function colonnes(table: string): string[] {
+  return (db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((c) => c.name);
+}
+if (!colonnes('takes').includes('organisation_id')) {
+  db.exec("ALTER TABLE takes ADD COLUMN organisation_id TEXT NOT NULL DEFAULT 'local'");
+}
+if (!colonnes('cast').includes('organisation_id')) {
+  db.exec(`
+    BEGIN;
+    CREATE TABLE cast_org (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      organisation_id TEXT NOT NULL DEFAULT 'local',
+      name TEXT NOT NULL COLLATE NOCASE,
+      kind TEXT NOT NULL DEFAULT 'character',
+      refs TEXT NOT NULL DEFAULT '[]',
+      notes TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (organisation_id, name)
+    );
+    INSERT INTO cast_org (id, name, kind, refs, notes, created_at) SELECT id, name, kind, refs, notes, created_at FROM cast;
+    DROP TABLE cast;
+    ALTER TABLE cast_org RENAME TO cast;
+    COMMIT;`);
+}
+if (!colonnes('projects').includes('organisation_id')) {
+  db.exec(`
+    BEGIN;
+    CREATE TABLE projects_org (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      organisation_id TEXT NOT NULL DEFAULT 'local',
+      name TEXT NOT NULL,
+      folder TEXT NOT NULL,
+      last_used TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (organisation_id, name)
+    );
+    INSERT INTO projects_org (id, name, folder, last_used) SELECT id, name, folder, last_used FROM projects;
+    DROP TABLE projects;
+    ALTER TABLE projects_org RENAME TO projects;
+    COMMIT;`);
+}
+
+/** Organisation de la requête en cours, ou null hors requête (moteur, reprise, scripts) : alors pas de filtre. */
+function org(): string | null {
+  return compteCourant()?.organisationId ?? null;
+}
+/** Organisation à écrire sur une nouvelle ligne. */
+const orgEcrite = () => org() ?? 'local';
+/** Fragment SQL et paramètres qui limitent une requête à l'organisation en cours. */
+function portee(prefixe = 'AND'): [string, unknown[]] {
+  const o = org();
+  return o === null ? ['', []] : [` ${prefixe} organisation_id=?`, [o]];
+}
+
 export interface Take {
   id: number;
   created_at: string;
@@ -77,13 +137,14 @@ export interface Take {
   starred: number;
   error: string | null;
   parent_take_id: number | null;
+  organisation_id: string;
 }
 
 export const takes = {
   create(row: { project_id: number | null; kind: string; shot_name: string; settings: unknown; parent_take_id?: number }): number {
     const r = db
-      .prepare('INSERT INTO takes (project_id, kind, shot_name, settings, parent_take_id) VALUES (?,?,?,?,?)')
-      .run(row.project_id, row.kind, row.shot_name, JSON.stringify(row.settings), row.parent_take_id ?? null);
+      .prepare('INSERT INTO takes (project_id, kind, shot_name, settings, parent_take_id, organisation_id) VALUES (?,?,?,?,?,?)')
+      .run(row.project_id, row.kind, row.shot_name, JSON.stringify(row.settings), row.parent_take_id ?? null, orgEcrite());
     return Number(r.lastInsertRowid);
   },
   /*
@@ -118,22 +179,32 @@ export const takes = {
     db.prepare('UPDATE takes SET transcript=? WHERE id=?').run(t, id);
   },
   star(id: number, on: boolean) {
-    db.prepare('UPDATE takes SET starred=? WHERE id=?').run(on ? 1 : 0, id);
+    const [w, a] = portee();
+    db.prepare(`UPDATE takes SET starred=? WHERE id=?${w}`).run(on ? 1 : 0, id, ...a);
   },
   delete(id: number) {
-    db.prepare('DELETE FROM takes WHERE id=?').run(id);
-    db.prepare('DELETE FROM take_workflows WHERE take_id=?').run(id);
+    const [w, a] = portee();
+    if (db.prepare(`DELETE FROM takes WHERE id=?${w}`).run(id, ...a).changes) {
+      db.prepare('DELETE FROM take_workflows WHERE take_id=?').run(id);
+    }
   },
   get(id: number): Take | undefined {
-    return db.prepare('SELECT * FROM takes WHERE id=?').get(id) as Take | undefined;
+    const [w, a] = portee();
+    return db.prepare(`SELECT * FROM takes WHERE id=?${w}`).get(id, ...a) as Take | undefined;
   },
   byPrompt(promptId: string): Take | undefined {
-    return db.prepare('SELECT * FROM takes WHERE prompt_id=?').get(promptId) as Take | undefined;
+    const [w, a] = portee();
+    return db.prepare(`SELECT * FROM takes WHERE prompt_id=?${w}`).get(promptId, ...a) as Take | undefined;
   },
   list(projectId: number | null, limit = 100): Take[] {
+    const [w, a] = portee();
     return projectId === null
-      ? (db.prepare('SELECT * FROM takes ORDER BY id DESC LIMIT ?').all(limit) as Take[])
-      : (db.prepare('SELECT * FROM takes WHERE project_id=? ORDER BY id DESC LIMIT ?').all(projectId, limit) as Take[]);
+      ? (db.prepare(`SELECT * FROM takes WHERE 1=1${w} ORDER BY id DESC LIMIT ?`).all(...a, limit) as Take[])
+      : (db.prepare(`SELECT * FROM takes WHERE project_id=?${w} ORDER BY id DESC LIMIT ?`).all(projectId, ...a, limit) as Take[]);
+  },
+  /** Organisation propriétaire d'une prise, sans filtre (diffusion en direct, facturation). */
+  organisationDe(id: number): string | undefined {
+    return (db.prepare('SELECT organisation_id FROM takes WHERE id=?').get(id) as { organisation_id: string } | undefined)?.organisation_id;
   },
   active(): Take[] {
     return db.prepare("SELECT * FROM takes WHERE status IN ('queued','rendering') ORDER BY id").all() as Take[];
@@ -167,46 +238,53 @@ const castRow = (r: any): CastMember => ({ ...r, refs: JSON.parse(r.refs || '[]'
 /** Cast: characters, props and places, saved once and @mentioned in any prompt. */
 export const cast = {
   list(): CastMember[] {
-    return (db.prepare('SELECT * FROM cast ORDER BY id').all() as any[]).map(castRow);
+    const [w, a] = portee('WHERE');
+    return (db.prepare(`SELECT * FROM cast${w} ORDER BY id`).all(...a) as any[]).map(castRow);
   },
   get(id: number): CastMember | undefined {
-    const r = db.prepare('SELECT * FROM cast WHERE id=?').get(id);
+    const [w, a] = portee();
+    const r = db.prepare(`SELECT * FROM cast WHERE id=?${w}`).get(id, ...a);
     return r ? castRow(r) : undefined;
   },
   byName(name: string): CastMember | undefined {
-    const r = db.prepare('SELECT * FROM cast WHERE name=?').get(name);
+    const [w, a] = portee();
+    const r = db.prepare(`SELECT * FROM cast WHERE name=?${w}`).get(name, ...a);
     return r ? castRow(r) : undefined;
   },
   create(row: { name: string; kind: CastKind; refs: CastRef[]; notes: string }): number {
-    const r = db.prepare('INSERT INTO cast (name, kind, refs, notes) VALUES (?,?,?,?)')
-      .run(row.name, row.kind, JSON.stringify(row.refs), row.notes);
+    const r = db.prepare('INSERT INTO cast (name, kind, refs, notes, organisation_id) VALUES (?,?,?,?,?)')
+      .run(row.name, row.kind, JSON.stringify(row.refs), row.notes, orgEcrite());
     return Number(r.lastInsertRowid);
   },
   update(id: number, patch: Partial<{ name: string; kind: CastKind; refs: CastRef[]; notes: string }>) {
     const cur = cast.get(id);
     if (!cur) return;
+    // cast.get a déjà vérifié l'organisation.
     db.prepare('UPDATE cast SET name=?, kind=?, refs=?, notes=? WHERE id=?').run(
       patch.name ?? cur.name, patch.kind ?? cur.kind, JSON.stringify(patch.refs ?? cur.refs), patch.notes ?? cur.notes, id,
     );
   },
   delete(id: number) {
-    db.prepare('DELETE FROM cast WHERE id=?').run(id);
+    const [w, a] = portee();
+    db.prepare(`DELETE FROM cast WHERE id=?${w}`).run(id, ...a);
   },
 };
 
 export const projects = {
   list() {
-    return db.prepare('SELECT * FROM projects ORDER BY last_used DESC').all();
+    const [w, a] = portee('WHERE');
+    return db.prepare(`SELECT * FROM projects${w} ORDER BY last_used DESC`).all(...a);
   },
   create(name: string, folder: string): number {
-    const r = db.prepare('INSERT INTO projects (name, folder) VALUES (?,?)').run(name, folder);
+    const r = db.prepare('INSERT INTO projects (name, folder, organisation_id) VALUES (?,?,?)').run(name, folder, orgEcrite());
     return Number(r.lastInsertRowid);
   },
   touch(id: number) {
     db.prepare("UPDATE projects SET last_used=datetime('now') WHERE id=?").run(id);
   },
   get(id: number): { id: number; name: string; folder: string } | undefined {
-    return db.prepare('SELECT * FROM projects WHERE id=?').get(id) as any;
+    const [w, a] = portee();
+    return db.prepare(`SELECT * FROM projects WHERE id=?${w}`).get(id, ...a) as any;
   },
 };
 

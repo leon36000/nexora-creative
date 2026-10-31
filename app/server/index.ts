@@ -17,8 +17,9 @@ import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
 import { buildWan22Graph, imagesWan } from './graphs/wan22.js';
 import { CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer } from './nexora/creer.js';
-import { territoireDuCompte } from './nexora/compte.js';
-import { clientLlmDepuisEnv } from './nexora/llm.js';
+import { compteCourant, territoireDuCompte } from './nexora/compte.js';
+import { clientLlmCourant } from './nexora/llm.js';
+import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { lireStoryboard, planifierFilm } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
@@ -71,6 +72,11 @@ if (config.judge.on && config.judge.password.length < MIN_PASSWORD) {
 
 const app = Fastify({ bodyLimit: 64 * 1024 * 1024 });
 await app.register(websocket);
+// Nexora : connexion unique au portail (OIDC). Sans configuration, poste local à compte unique.
+const configAuth = configAuthDepuisEnv();
+if (configAuth) monterAuthentification(app, configAuth);
+/** LLM de la requête : clé de l'organisation connectée, ou configuration du poste. */
+const llmCourant = () => clientLlmCourant(compteCourant(), accesOrganisation);
 
 let judgeState: (() => JudgeState) | undefined;
 if (config.judge.on) {
@@ -108,13 +114,24 @@ function besideOutput(outputPath: string | null | undefined, file: string | unde
 
 // ---------- live relay ----------
 
-const browsers = new Set<WebSocket>();
+/** Navigateurs connectés au direct, avec l'organisation de leur session (Nexora : rien ne passe d'une organisation à l'autre). */
+const browsers = new Map<WebSocket, string>();
+/** Organisation concernée par un message du direct, ou null pour un message sans donnée de client (file d'attente). */
+function orgDuMessage(msg: any): string | null {
+  if (msg?.take?.organisation_id) return msg.take.organisation_id;
+  if (typeof msg?.promptId === 'string') return takes.byPrompt(msg.promptId)?.organisation_id ?? '?';
+  return null;
+}
+let derniersDestinataires: WebSocket[] = [];
 function broadcast(msg: unknown) {
   const s = JSON.stringify(msg);
-  for (const ws of browsers) if (ws.readyState === 1) ws.send(s);
+  const org = orgDuMessage(msg);
+  derniersDestinataires = [...browsers].filter(([, o]) => org === null || o === org).map(([ws]) => ws);
+  for (const ws of derniersDestinataires) if (ws.readyState === 1) ws.send(s);
 }
+/** Image d'aperçu : elle suit son message « preview », donc mêmes destinataires. */
 function broadcastBinary(buf: Buffer) {
-  for (const ws of browsers) if (ws.readyState === 1) ws.send(buf);
+  for (const ws of derniersDestinataires) if (ws.readyState === 1) ws.send(buf);
 }
 
 let lastProgressAt = 0;
@@ -230,7 +247,7 @@ function nextInScene(take: { settings: string }) {
 }
 
 app.get('/live', { websocket: true }, (conn) => {
-  browsers.add(conn);
+  browsers.set(conn, compteCourant()?.organisationId ?? 'local');
   conn.on('close', () => browsers.delete(conn));
 });
 
@@ -896,7 +913,7 @@ app.post('/api/nexora/creer', async (req, reply) => {
   try { demande = lireDemandeCreer(req.body); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
   const moteur = (req.body as any)?.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
-  const r = await reecrireH3({ intention: demande.intention, mode: 't2va', dureeS: dureeEffective(demande) }, clientLlmDepuisEnv());
+  const r = await reecrireH3({ intention: demande.intention, mode: 't2va', dureeS: dureeEffective(demande) }, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur };
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
   const res = await generate(corps, reply);
@@ -910,7 +927,7 @@ app.post('/api/nexora/film/plan', async (req, reply) => {
   const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
   if (!intention) return reply.code(400).send({ error: 'Décris le film que tu veux.' });
   const dureeCible = Math.max(10, Math.min(120, Number(b.duree) || 30));
-  return planifierFilm({ intention: intention.slice(0, 4000), dureeCible }, clientLlmDepuisEnv());
+  return planifierFilm({ intention: intention.slice(0, 4000), dureeCible }, llmCourant());
 });
 
 /** Director, étape 2 : tourner le storyboard (éventuellement modifié par la personne) et l'assembler. */
@@ -924,7 +941,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   const missing = await blockingReasonFor(eng.isLocal(), [moteur]);
   if (missing) return reply.code(412).send({ error: missing });
   try {
-    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur }, clientLlmDepuisEnv());
+    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur }, llmCourant());
     return { filmId, take: takes.get(filmId) };
   } catch (e) {
     return reply.code(400).send({ error: e instanceof Error ? e.message : 'tournage impossible' });
@@ -933,7 +950,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
 
 app.get('/api/nexora/etat', async () => {
   const moteur = choisirMoteur(territoireDuCompte());
-  return { llm: !!clientLlmDepuisEnv(), moteur: moteur === 'h3-fast' ? 'MiniMax H3' : 'Wan 2.2', son: moteur === 'h3-fast', territoire: territoireDuCompte() };
+  return { llm: !!llmCourant(), moteur: moteur === 'h3-fast' ? 'MiniMax H3' : 'Wan 2.2', son: moteur === 'h3-fast', territoire: territoireDuCompte() };
 });
 
 async function generate(b: any, reply: FastifyReply) {
