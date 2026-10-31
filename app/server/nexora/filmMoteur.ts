@@ -4,7 +4,7 @@
  * ordinaire étiquetée `nexoraFilm` ; quand un plan se termine, `avancerFilm` regarde s'il peut assembler.
  */
 import { execFile } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { config } from '../config.js';
 import { takes, type Take } from '../jobs.js';
@@ -19,6 +19,10 @@ import { reecrireH3 } from './reecritureH3.js';
 export interface DepsFilm {
   queueTakes: (b: any, count: number) => Promise<number[]>;
   broadcast: (msg: unknown) => void;
+  /** Téléverse une image d'entrée au moteur (dernière image d'un plan) ; rend son jeton. */
+  televerser: (nom: string, data: Buffer, type: string) => Promise<string>;
+  /** LLM de l'organisation du film, hors requête (plans enchaînés écrits pendant le tournage). */
+  llmPour: (organisationId: string) => ClientLlm | null;
 }
 let deps: DepsFilm;
 export const initFilms = (d: DepsFilm) => { deps = d; };
@@ -42,15 +46,21 @@ export async function tournerFilm(
   });
   pousser(filmId);
   try {
-    // Les prompts des plans s'écrivent en parallèle (quelques secondes chacun), puis les rendus partent dans l'ordre.
+    // Les prompts des plans indépendants s'écrivent en parallèle, puis leurs rendus partent dans l'ordre. Un plan
+    // « suite » attend la fin du précédent : il partira de sa dernière image (voir lancerSuite).
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => reecrireH3({ intention: intentionDuPlan(sb, i), mode: 't2va', dureeS: p.duree === 10 ? 243 / 24 : 124 / 24 }, llm)),
+      sb.plans.map((p, i) => (p.suite ? null : reecrireH3({ intention: intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p) }, llm))),
     );
     for (let i = 0; i < sb.plans.length; i++) {
       const p = sb.plans[i];
+      const ecrit = prompts[i];
+      if (!ecrit) {
+        majPlan(filmId, i, { attente: 'image_precedente', reservation: opts.reservations?.[i] });
+        continue;
+      }
       const corps = {
-        ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son }, prompts[i].prompt, opts.moteur),
-        app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: prompts[i].source,
+        ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son }, ecrit.prompt, opts.moteur),
+        app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: ecrit.source,
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
       const [id] = await deps.queueTakes(corps, 1);
@@ -63,6 +73,42 @@ export async function tournerFilm(
     throw e;
   }
   return filmId;
+}
+
+/** Durée effective d'un plan sur la grille de H3 (5 s → 124 images, 10 s → 243). */
+const dureePlan = (p: PlanFilm) => (p.duree === 10 ? 243 : 124) / 24;
+
+/**
+ * Plan enchaîné : la dernière image du plan précédent devient sa première image (H3 en image vers vidéo, I2VA), ce qui
+ * garde sujets, lieu et lumière identiques d'un plan à l'autre. Tourne hors requête, dans l'organisation du film.
+ */
+async function lancerSuite(film: Take, i: number, precedent: string) {
+  const s = reglages(film);
+  const sb = s.storyboard as Storyboard;
+  const p = sb.plans[i] as PlanFilm & { reservation?: CreditsPrise };
+  const dossier = join(config.outputDir, 'films', 'images');
+  mkdirSync(dossier, { recursive: true });
+  const image = join(dossier, `film_${film.id}_plan${i}_depart.png`);
+  await new Promise<void>((ok, ko) =>
+    execFile(config.ffmpegBin, ['-y', '-sseof', '-0.25', '-i', precedent, '-frames:v', '1', '-update', '1', image], (err, _o, stderr) =>
+      err ? ko(new Error(`dernière image du plan ${i} : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()),
+  );
+  const jeton = await deps.televerser(`nexora_film_${film.id}_plan${i}.png`, readFileSync(image), 'image/png');
+  const org = takes.organisationDe(film.id) ?? 'local';
+  const ecrit = await reecrireH3({
+    intention: `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
+    mode: 'i2va',
+    dureeS: dureePlan(p),
+  }, deps.llmPour(org));
+  const corps = {
+    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son }, ecrit.prompt, s.moteur ?? 'h3-fast'),
+    startImage: jeton,
+    app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
+    shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: film.project_id ?? undefined,
+  };
+  const [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes(corps, 1));
+  if (p.reservation) takes.patchSettings(id, { nexoraCredits: p.reservation });
+  majPlan(film.id, i, { take: id, corps, attente: undefined });
 }
 
 function majPlan(filmId: number, i: number, patch: Record<string, unknown>) {
@@ -91,7 +137,11 @@ async function etape(filmId: number) {
   const sb = s.storyboard as Storyboard;
   const fichiers: string[] = [];
   for (const [i, p] of sb.plans.entries()) {
-    if (!p.take) return; // pas encore en file
+    if (!p.take) {
+      // Un plan enchaîné part quand le précédent est rendu et contrôlé (les plans sont parcourus dans l'ordre).
+      if (p.suite && i > 0 && fichiers.length === i) await lancerSuite(film, i, fichiers[i - 1]);
+      return;
+    }
     const t = takes.get(p.take);
     if (!t) throw new Error(`Plan ${i + 1} : sa prise a été supprimée`);
     if (t.status === 'failed' || t.status === 'stopped') throw new Error(`Plan ${i + 1} : ${t.status}${t.error ? ` (${t.error})` : ''}`);

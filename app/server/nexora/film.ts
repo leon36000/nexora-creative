@@ -14,6 +14,8 @@ export interface PlanFilm {
   description: string;
   duree: 5 | 10;
   camera: string;
+  /** Le plan prolonge directement le précédent : il part de sa dernière image (H3 en image vers vidéo). */
+  suite?: boolean;
   /** Prise de rendu de ce plan, une fois en file. */
   take?: number;
 }
@@ -42,10 +44,12 @@ export function lireStoryboard(o: unknown, dureeCible: number): Storyboard {
       description: txt(p?.description),
       duree: (Number(p?.duree) >= 8 ? 10 : 5) as 5 | 10,
       camera: txt(p?.camera, 300),
+      suite: p?.suite === true,
     }))
     .filter((p: PlanFilm) => p.description || p.resume)
     .slice(0, MAX_PLANS);
   if (!plans.length) throw new Error('storyboard sans plan');
+  plans[0].suite = false;
   for (const p of plans) {
     if (!p.description) p.description = p.resume;
     if (!p.resume) p.resume = p.description.slice(0, 80);
@@ -93,8 +97,9 @@ Each shot is rendered separately by H3 as a 5 or 10 second clip, so:
 - put everything that must stay identical across shots in the "bible" (style, characters with precise looks and clothes, places), and reuse the same names;
 - vary framing and camera (wide, medium, close-up, low angle, arc shot, tracking shot, push in, static) to tell the story like a real editor;
 - prefer 5 s shots; use 10 s only for a continuous action that needs it; the sum of durations should be close to the requested duration;
+- set "suite": true on a shot that continues the previous one with no jump in time or place (the same action goes on, e.g. a transformation that keeps unfolding): it will start from the last frame of the previous shot, which keeps subjects identical; use it for at most half of the shots and never on the first;
 - the "resume" of each shot is a short French phrase for the user interface.
-Answer only with JSON: {"titre": "...", "bible": {"style": "...", "personnages": [{"nom": "...", "description": "..."}], "lieux": [{"nom": "...", "description": "..."}]}, "plans": [{"resume": "...", "description": "...", "duree": 5, "camera": "..."}]}`;
+Answer only with JSON: {"titre": "...", "bible": {"style": "...", "personnages": [{"nom": "...", "description": "..."}], "lieux": [{"nom": "...", "description": "..."}]}, "plans": [{"resume": "...", "description": "...", "duree": 5, "camera": "...", "suite": false}]}`;
 
 export async function planifierFilm(
   d: { intention: string; dureeCible: number },

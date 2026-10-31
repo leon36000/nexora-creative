@@ -55,4 +55,17 @@ describe('storyboard du Director', () => {
     expect(a.at(-1)).toBe('/sortie.mp4');
     expect(argsAssemblage(['/a.mp4'], '/s.mp4', false).join(' ')).toMatch(/concat=n=1:v=1:a=0/);
   });
+
+  it('lit l’enchaînement « suite » d’un plan sur le précédent, jamais sur le premier', () => {
+    const s = lireStoryboard({ ...brut, plans: brut.plans.map((p, i) => ({ ...p, suite: i !== 1 })) }, 20);
+    expect(s.plans.map((p) => !!p.suite)).toEqual([false, false, true]);
+  });
+
+  it('demande au réalisateur de marquer les plans qui prolongent le précédent', async () => {
+    let consignes = '';
+    const llm: ClientLlm = { completer: async (_r, m) => { consignes = m[0].content; return JSON.stringify(brut); } };
+    await planifierFilm({ intention: 'x', dureeCible: 20 }, llm);
+    expect(consignes).toMatch(/"suite"/);
+  });
 });
+

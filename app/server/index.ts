@@ -1482,7 +1482,11 @@ async function objectGraph(b: any, seed: number): Promise<Built> {
 // ---------- Director scenes ----------
 
 initScenes({ queueTakes, broadcast, recordWorkflow, probeMedia });
-initFilms({ queueTakes, broadcast });
+initFilms({
+  queueTakes, broadcast,
+  televerser: (nom, data, type) => eng.uploadInput(nom, data, type),
+  llmPour: (org) => clientLlmCourant(configAuth ? { organisationId: org } : null, accesOrganisation),
+});
 
 /** Start planning a scene into shots. Poll GET /api/director/plan/:id. */
 app.post('/api/director/plan', async (req, reply) => {
