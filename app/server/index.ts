@@ -9,7 +9,7 @@ import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
-import { createReadStream, existsSync, mkdirSync, realpathSync, statSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync, readFileSync, realpathSync, statSync } from 'fs';
 import { dirname, extname, join, resolve, sep } from 'path';
 import type { WebSocket } from 'ws';
 import * as comfy from './comfy.js';
@@ -18,6 +18,11 @@ import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
 import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type MoteurVideo } from './nexora/creer.js';
 import { buildMusic3Graph } from './graphs/music3.js';
+import { reecrireImage } from './nexora/reecritureImage.js';
+import { demarrerLectureReglages } from './nexora/reglagesSite.js';
+import { lireJson } from './nexora/llm.js';
+import { moderer } from './nexora/moderation.js';
+import { ecrirePublication, PLATEFORMES, type Plateforme } from './nexora/publication.js';
 import { ecrireMusique } from './nexora/musique.js';
 import { planifierMoteurs } from './nexora/registre.js';
 import { compteCourant, territoireDuCompte } from './nexora/compte.js';
@@ -798,7 +803,7 @@ async function graphFor(b: any, seed: number): Promise<Built> {
     kind = 'still';
     const flux2 = b.model === 'flux2';
     graph = buildStillsGraph({
-      model: flux2 ? 'flux2' : 'qwen',
+      model: flux2 ? 'flux2' : b.model === 'qwen21' ? 'qwen21' : 'qwen',
       quality: b.quality === 'draft' ? 'draft' : 'quality',
       prompt: b.prompt,
       negative: typeof b.negative === 'string' && b.negative ? b.negative : undefined,
@@ -962,9 +967,14 @@ app.post('/api/nexora/creer', async (req, reply) => {
     const plan = planifierMoteurs(besoinDe(demande), { territoire: territoireDuCompte(), recettes: recettesDuParc() });
     return reply.code(422).send({ error: `Aucun moteur ne peut faire cette vidéo pour ton compte : ${plan.exclus.map((e) => e.raison).join(' ; ')}.` });
   }
+  const verdict = await moderer(`${demande.intention} ${demande.replique ?? ''}`, llmCourant(), (m) => app.log.warn(m));
+  if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
-  const r = await reecrireH3({ intention: demande.intention, mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande) }, llmCourant());
-  const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur };
+  const r = await reecrireH3({
+    intention: demande.intention, mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande),
+    ...(demande.replique ? { dialogues: [{ texte: demande.replique, langue: 'French' }] } : {}),
+  }, llmCourant());
+  const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur, nexoraAutoMusique: (req.body as any)?.musique === true };
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
@@ -977,6 +987,8 @@ app.post('/api/nexora/film/plan', async (req, reply) => {
   const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
   if (!intention) return reply.code(400).send({ error: 'Décris le film que tu veux.' });
   const dureeCible = Math.max(10, Math.min(120, Number(b.duree) || 30));
+  const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
+  if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   return planifierFilm({ intention: intention.slice(0, 4000), dureeCible }, llmCourant());
 });
 
@@ -989,7 +1001,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   const demande = lireDemandeCreer({ intention: sb.titre, format: b.format, son: b.son, qualite: b.qualite });
   const moteur = moteurDuCompte(demande.qualite);
   if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
-  const missing = await blockingReasonFor(eng.isLocal(), bundlesFor({ kind: 'video', videoModel: moteur }));
+  const missing = await blockingReasonFor(eng.isLocal() && eng.recetteSurPrincipal(moteur), bundlesFor({ kind: 'video', videoModel: moteur }));
   if (missing) return reply.code(412).send({ error: missing });
   // Crédits : chaque plan réserve son devis avant le tournage ; les reprises automatiques sont offertes par Nexora.
   const fac = facturationCourante();
@@ -1123,6 +1135,8 @@ app.post('/api/nexora/clip/:id/musique', async (req, reply) => {
   if (!eng.moteursPour('music3').length) return reply.code(503).send({ error: 'Aucun moteur GPU ne compose de musique pour l’instant.' });
   const duree = Math.max(5, Math.ceil(Number(s.lengthFrames || 124) / 24));
   const pseudo = { titre: String(s.intention ?? s.userPrompt ?? clip.shot_name ?? 'Clip').slice(0, 120), bible: { style: '', personnages: [], lieux: [] }, plans: [{ resume: String(s.intention ?? s.userPrompt ?? clip.shot_name ?? ''), description: '', duree, camera: '' }], dureeTotale: duree };
+  if (s.nexoraMusiqueLance) return reply.code(409).send({ error: 'Une musique a déjà été lancée pour cette vidéo.' });
+  takes.patchSettings(clip.id, { nexoraMusiqueLance: true });
   const m = await ecrireMusique(pseudo as any, duree, llmCourant(), typeof b.envie === 'string' ? b.envie.slice(0, 500) : undefined);
   const [takeId] = await queueTakes({
     kind: 'musique', videoModel: 'music3', description: m.description, paroles: m.paroles, dureeS: duree,
@@ -1209,15 +1223,126 @@ app.get('/api/nexora/etat', async () => {
   return {
     llm: !!llmCourant(), moteur: moteur ? 'MiniMax H3' : null, son: !!moteur, territoire: territoireDuCompte(),
     cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
+    image: eng.recettesEnLigne().has(modeDemo() ? 'qwen21' : 'qwen') ? (modeDemo() ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
+    musique: eng.recettesEnLigne().has('music3') ? 'MiniMax-Music3' : null,
+    demo: modeDemo(),
   };
+});
+
+/**
+ * Image de plan clé : une phrase → prompt d'image écrit par le LLM → Qwen-Image sur le GPU qui porte l'image (GB10).
+ * Modèle : Qwen-Image-2.1 en mode démonstration (NEXORA_MODE_DEMO=1, licence de recherche), sinon Qwen-Image-2512 (Apache-2.0).
+ */
+const modeDemo = () => process.env.NEXORA_MODE_DEMO === '1';
+app.post('/api/nexora/image', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
+  if (!intention) return reply.code(400).send({ error: 'Décris l’image que tu veux.' });
+  if (intention.length > 4000) return reply.code(400).send({ error: 'Description trop longue (4 000 caractères au plus).' });
+  const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
+  if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
+  const format = b.format === '9:16' || b.format === '1:1' ? b.format : '16:9';
+  const dims = modeDemo()
+    ? { '16:9': [1792, 1024], '9:16': [1024, 1792], '1:1': [1536, 1536] }[format as '16:9']
+    : { '16:9': [1328, 752], '9:16': [752, 1328], '1:1': [1024, 1024] }[format as '16:9'];
+  const r = await reecrireImage(intention, llmCourant(), format);
+  const nb = Math.max(1, Math.min(4, Number(b.nombre) || 1));
+  const corps: any = {
+    kind: 'still', model: modeDemo() ? 'qwen21' : 'qwen', quality: b.qualite === 'rapide' ? 'draft' : 'quality',
+    prompt: r.prompt, width: dims[0], height: dims[1], count: nb,
+    intention, promptSource: r.source, app: 'nexora-image', shotName: intention.slice(0, 60),
+  };
+  const res = await generate(corps, reply);
+  if (reply.sent || (res && (res as any).error)) return res;
+  return { ...res, prompt: r.prompt, source: r.source, modele: modeDemo() ? 'Qwen-Image-2.1' : 'Qwen-Image-2512' };
+});
+
+/**
+ * « Booster ma phrase » : le LLM réécrit l'idée de la personne en une description française plus riche et plus filmable
+ * (sujet, caméra, lumière, ambiance, son), sans rien changer à ce qu'elle a voulu. La personne choisit de l'utiliser ou non.
+ */
+app.post('/api/nexora/ameliorer', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
+  if (!intention) return reply.code(400).send({ error: 'Écris d’abord une idée.' });
+  const llm = llmCourant();
+  if (!llm) return reply.code(503).send({ error: 'L’assistant d’écriture n’est pas branché sur ce poste.' });
+  try {
+    const brut = await llm.completer('boost', [
+      { role: 'system', content: [
+        'Tu es le directeur artistique de Nexora Creative. Réécris l’idée de l’utilisateur en français, en 2 à 4 phrases (90 mots au plus), plus vivante et plus filmable :',
+        'sujet précis, action, décor, lumière, ambiance, mouvement de caméra et sons importants.',
+        'Garde tous les sujets et toutes les intentions de l’utilisateur, n’en retire aucun, n’invente ni marque, ni personnage connu, ni texte à l’écran.',
+        b.mode === 'image' ? 'C’est pour une image fixe : décris une seule image, pas de mouvement.' : 'C’est pour une vidéo de quelques secondes : une seule action claire.',
+        'Réponds en JSON {"texte": "..."} et rien d’autre.',
+      ].join(' ') },
+      { role: 'user', content: intention },
+    ], { json: true, temperature: 0.8 });
+    const texte = String(lireJson<{ texte?: unknown }>(brut).texte ?? '').trim();
+    if (texte.length < 20 || texte.length > 1200) throw new Error('réponse inutilisable');
+    return { texte };
+  } catch {
+    return reply.code(502).send({ error: 'L’assistant n’a pas pu améliorer ta phrase. Réessaie.' });
+  }
+});
+
+const IDEES_REPLI: Record<string, string[]> = {
+  video: ['Un dragon d’obsidienne jaillit d’une mer de nuages d’orage et rugit vers la caméra.', 'Combat de karaté sur un toit trempé de pluie, la nuit, sous des lanternes rouges.', 'Une flotte de vaisseaux surgit de l’hyperespace au-dessus d’une planète à anneaux.', 'Publicité pour un café glacé : gouttes au ralenti, lumière dorée.'],
+  image: ['Une guerrière en kimono noir face à un dragon sur une falaise, au crépuscule.', 'Affiche de film : un astronaute seul sur une plage de cendres sous deux lunes.', 'Un renard en papier découpé dans une forêt d’automne, lumière douce.', 'Une ville flottante au-dessus des nuages à l’aube.'],
+  film: ['Un livreur à vélo voit une ville entière s’illuminer sur son passage, de l’aube à la nuit.', 'Une flotte surgit de l’hyperespace ; un duel éclate dans un temple au bord d’un volcan.'],
+};
+/** « Inspire-moi » : des idées neuves, courtes et filmables, écrites par le LLM (rôle « idées »). Repli : exemples fixes. */
+app.post('/api/nexora/idees', async (req) => {
+  const b = (req.body ?? {}) as any;
+  const mode = b.mode === 'image' || b.mode === 'film' ? b.mode : 'video';
+  const theme = typeof b.theme === 'string' ? b.theme.trim().slice(0, 200) : '';
+  const llm = llmCourant();
+  if (llm) {
+    try {
+      const brut = await llm.completer('idees', [
+        { role: 'system', content: `Tu proposes 4 idées ${mode === 'image' ? 'd’images' : mode === 'film' ? 'de courts films' : 'de scènes vidéo de 5 secondes'} spectaculaires et variées, en français, une phrase de 25 mots au plus chacune, concrètes (sujet, action, décor, ambiance). Aucune marque, aucun personnage connu, aucune personne réelle. Réponds en JSON {"idees":["...","...","...","..."]}.` },
+        { role: 'user', content: theme ? `Thème : ${theme}` : 'Surprends-moi.' },
+      ], { json: true, temperature: 1 });
+      const idees = (lireJson<{ idees?: unknown }>(brut).idees as unknown[] ?? []).map((x) => String(x).trim()).filter((x) => x.length > 10 && x.length < 300).slice(0, 4);
+      if (idees.length >= 2) return { idees, source: 'llm' };
+    } catch { /* repli */ }
+  }
+  return { idees: IDEES_REPLI[mode], source: 'repli' };
+});
+
+/** Texte de publication d'une création (titre, texte, hashtags) pour un réseau social. */
+app.post('/api/nexora/publication', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const t = takes.get(Number(b.id));
+  if (!t) return reply.code(404).send({ error: 'Création introuvable.' });
+  const plateforme: Plateforme = b.plateforme in PLATEFORMES ? b.plateforme : 'instagram';
+  const s = JSON.parse(t.settings);
+  const idee = String(s.intention ?? s.userPrompt ?? t.shot_name ?? '');
+  return ecrirePublication(idee, plateforme, b.langue === 'en' ? 'en' : 'fr', llmCourant());
+});
+
+/** Une image terminée devient l'image de départ d'une vidéo H3 : jeton d'entrée à passer à /api/nexora/creer. */
+app.post('/api/nexora/image/:id/jeton', async (req, reply) => {
+  const t = takes.get(Number((req.params as any).id));
+  if (!t || t.kind !== 'still' || t.status !== 'done' || !t.output_path) return reply.code(409).send({ error: 'L’image doit être terminée.' });
+  const data = readFileSync(t.output_path);
+  const jeton = await eng.uploadInput(`nexora_cle_${t.id}_${Date.now()}.png`, data, 'image/png');
+  return { jeton };
 });
 
 /** Parc de moteurs GPU (état, charge), pour le tableau de bord et les diagnostics. */
 app.get('/api/nexora/moteurs-gpu', async () => eng.etatMoteurs());
 
-/** Recettes que le parc de moteurs GPU déclare. */
+/** Recettes des moteurs GPU du parc qui répondent. */
 function recettesDuParc(): Set<string> {
-  return new Set(eng.moteurs.flatMap((m) => m.recettes));
+  return eng.recettesEnLigne();
+}
+
+/** Recette d'une demande : ce qui décide du moteur GPU (H3 → RTX 5090 ; image et musique → GB10). */
+function recetteDe(b: any): string | undefined {
+  if (b?.kind === 'musique') return 'music3';
+  if (b?.kind === 'still') return b.model === 'flux2' ? 'flux2' : b.model === 'qwen21' ? 'qwen21' : 'qwen';
+  return typeof b?.videoModel === 'string' ? b.videoModel : undefined;
 }
 
 /** Moteur vidéo du compte courant pour une qualité donnée (null : territoire exclu ou inconnu). */
@@ -1248,7 +1373,7 @@ async function generate(b: any, reply: FastifyReply) {
 
   // Say exactly which weights are missing rather than letting ComfyUI reject
   // the graph with a node id the user has never heard of.
-  const missing = await blockingReasonFor(eng.isLocal(), bundlesFor({ ...b, castEngine: castEngineFor(b) }));
+  const missing = await blockingReasonFor(eng.isLocal() && eng.recetteSurPrincipal(recetteDe(b)), bundlesFor({ ...b, castEngine: castEngineFor(b) }));
   if (missing) return reply.code(412).send({ error: missing });
   const postMissing = eng.isLocal() ? await postBlockingReason(b) : null;
   if (postMissing) return reply.code(412).send({ error: postMissing });
@@ -1444,7 +1569,7 @@ async function firstFrame(token: string): Promise<string> {
 /** Submit a built graph for an existing take row. */
 async function submitTake(takeId: number, built: Built) {
   // Nexora : la recette (videoModel) choisit le moteur GPU du parc ; parmi ceux qui la portent, le moins chargé.
-  const recette = JSON.parse(takes.get(takeId)?.settings ?? '{}').videoModel as string | undefined;
+  const recette = recetteDe(JSON.parse(takes.get(takeId)?.settings ?? '{}'));
   const moteur = eng.moteursPour(recette)[0]?.id ?? 'principal';
   const promptId = await eng.submit(built.graph, moteur);
   takes.setPrompt(takeId, promptId);
@@ -2643,6 +2768,7 @@ app.get('/api/media/:id', async (req, reply) => {
  * a restart). Polling the job is authoritative; the event stream is a bonus.
  */
 async function reconcile() {
+  void eng.etatMoteurs();
   void solderCredits();
   void compterEspace();
   for (const id of waitingCuts()) void advance(id);
@@ -2663,6 +2789,10 @@ async function reconcile() {
   }
 }
 setInterval(() => void reconcile(), 20_000);
+// Réglages de l'administration du site (modèles et moteurs) : lus toutes les minutes quand le jeton du service est fourni.
+if (process.env.NEXORA_SITE_URL && process.env.NEXORA_CREATIVE_SERVICE_TOKEN) {
+  demarrerLectureReglages({ siteUrl: process.env.NEXORA_SITE_URL, jeton: process.env.NEXORA_CREATIVE_SERVICE_TOKEN, journal: (m) => console.log(`[nexora] ${m}`) });
+}
 
 // Cast hero frames are ordinary takes queued through the same path.
 setCastQueue(queueTakes);

@@ -18,6 +18,8 @@ export interface DemandeCreer {
   qualite?: 'rapide' | 'max';
   /** Photo de départ (jeton d'entrée du moteur, `asset:<uuid>`) : la vidéo part de cette image. */
   image?: string;
+  /** Réplique à faire dire (français), recopiée mot pour mot dans le prompt H3 : la voix est synchronisée à l'image. */
+  replique?: string;
 }
 
 /** Point de contrôle FastH3 V2 distillé et quantifié NVFP4 (server/graphs/h3.ts, H3_DISTILLED_CHECKPOINTS). */
@@ -54,7 +56,8 @@ export function lireDemandeCreer(b: unknown): DemandeCreer {
   const format: FormatCreer = o.format === '9:16' || o.format === '1:1' ? o.format : '16:9';
   const duree: DureeCreer = o.duree === 10 || o.duree === 15 ? o.duree : 5;
   const image = typeof o.image === 'string' && /^asset:[0-9a-f-]{36}$/i.test(o.image) ? o.image : undefined;
-  return { intention, format, duree, son: o.son !== false, qualite: o.qualite === 'max' ? 'max' : 'rapide', ...(image ? { image } : {}) };
+  const replique = typeof o.replique === 'string' ? o.replique.trim().slice(0, 300) : '';
+  return { intention, format, duree, son: o.son !== false, qualite: o.qualite === 'max' ? 'max' : 'rapide', ...(image ? { image } : {}), ...(replique ? { replique } : {}) };
 }
 
 export function corpsRenduH3(d: DemandeCreer, prompt: string) {

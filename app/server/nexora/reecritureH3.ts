@@ -118,7 +118,7 @@ export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, max
       tentatives++;
       let prompt = '';
       try {
-        const brut = await llm.completer('prompt', messages, { json: true, temperature: 0.7 });
+        const brut = await llm.completer('redaction', messages, { json: true, temperature: 0.7 });
         prompt = String(lireJson<{ prompt?: unknown }>(brut).prompt ?? '').trim();
         erreurs = [
           ...validerPromptH3(prompt, ctx),

@@ -58,3 +58,20 @@ describe('territoire du compte', () => {
     expect(territoireDuCompte()).toBeNull();
   });
 });
+
+describe('Qwen-Image-2.1 : licence de recherche, réservée au mode démonstration', () => {
+  it('est bloqué par défaut, permis seulement avec NEXORA_MODE_DEMO=1, et jamais sans règle', () => {
+    const avant = process.env.NEXORA_MODE_DEMO;
+    try {
+      delete process.env.NEXORA_MODE_DEMO;
+      expect(verdictLicence('qwen21', 'CA').statut).toBe('bloque');
+      expect(verdictLicence('qwen21', 'CA').raison).toMatch(/licence de recherche/);
+      process.env.NEXORA_MODE_DEMO = '1';
+      expect(verdictLicence('qwen21', 'CA').statut).toBe('permis');
+      process.env.NEXORA_MODE_DEMO = 'oui';
+      expect(verdictLicence('qwen21', 'CA').statut).toBe('bloque');
+    } finally {
+      if (avant === undefined) delete process.env.NEXORA_MODE_DEMO; else process.env.NEXORA_MODE_DEMO = avant;
+    }
+  });
+});

@@ -7,7 +7,23 @@
  * NEXORA_LLM_MODELE     modèle par défaut ; NEXORA_LLM_MODELE_<ROLE> le remplace pour un rôle (ex. NEXORA_LLM_MODELE_JUGE)
  */
 
-export type RoleLlm = 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant';
+/**
+ * Rôles : chacun peut recevoir son propre modèle (local ou cloud) depuis l'administration du site.
+ *  redaction   : prompts H3 et image (le plus exigeant)      realisation : découpage d'un film (Director)
+ *  boost       : « Booster ma phrase »                        musique     : description de la bande originale
+ *  moderation  : garde-fou avant rendu (licence H3, V.5)      publication : titres et textes pour les réseaux
+ *  idees       : « Inspire-moi »                              juge        : contrôle visuel (réservé)
+ * `prompt`, `intention` et `assistant` restent acceptés (anciens appels).
+ */
+export type RoleLlm = 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees';
+export const ROLES_LLM: readonly RoleLlm[] = ['redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge'];
+
+/** Réglages venus de l'administration du site (modèle par défaut et par rôle) ; ils passent avant l'environnement du poste. */
+let reglages: { defaut?: string; roles: Partial<Record<RoleLlm, string>> } = { roles: {} };
+export function appliquerReglagesLlm(r: { defaut?: string | null; roles?: Partial<Record<RoleLlm, string>> } | null): void {
+  reglages = { defaut: r?.defaut?.trim() || undefined, roles: { ...(r?.roles ?? {}) } };
+}
+export const reglagesLlmCourants = () => ({ defaut: reglages.defaut ?? null, roles: { ...reglages.roles } });
 
 export interface MessageLlm {
   role: 'system' | 'user' | 'assistant';
@@ -22,7 +38,8 @@ export interface ClientLlm {
 export class ErreurLlm extends Error {}
 
 export function modelePour(role: RoleLlm, env: NodeJS.ProcessEnv = process.env): string | null {
-  return env[`NEXORA_LLM_MODELE_${role.toUpperCase()}`]?.trim() || env.NEXORA_LLM_MODELE?.trim() || null;
+  // Ordre : réglage du site pour ce rôle, variable d'environnement du rôle, réglage du site par défaut, variable par défaut.
+  return reglages.roles[role]?.trim() || env[`NEXORA_LLM_MODELE_${role.toUpperCase()}`]?.trim() || reglages.defaut || env.NEXORA_LLM_MODELE?.trim() || null;
 }
 
 export function clientLlmDepuisEnv(env: NodeJS.ProcessEnv = process.env, f: typeof fetch = fetch): ClientLlm | null {

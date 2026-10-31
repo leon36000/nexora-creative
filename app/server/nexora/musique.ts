@@ -31,7 +31,7 @@ Arrangement: Intro with soft strings and a low drone; build with ostinato string
 export async function ecrireMusique(sb: Storyboard, dureeS: number, llm: ClientLlm | null, envie?: string): Promise<DemandeMusique> {
   if (!llm) return musiqueDeRepli(sb, dureeS);
   try {
-    const brut = await llm.completer('prompt', [
+    const brut = await llm.completer('musique', [
       {
         role: 'system',
         content: [

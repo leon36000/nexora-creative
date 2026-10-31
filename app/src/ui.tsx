@@ -286,7 +286,7 @@ export function MediaCard({ take, onOpen, actions, pendingLabel, tag }: { take: 
         {running && preview && preview.promptId === take.prompt_id && <img src={preview.url} alt="" style={{ opacity: 0.85, filter: 'saturate(.9)' }} />}
         <div className="status">
           <div>
-            <div className="label" style={{ color: 'var(--accent)' }}>{running ? (progress?.max && progress.max !== 100 ? `Step ${progress.value}/${progress.max}` : 'Rendering') : first ? 'Waiting for the engine' : pendingLabel ?? 'Queued'}</div>
+            <div className="label" style={{ color: 'var(--accent)' }}>{running ? (progress?.max && progress.max !== 100 ? `Étape ${progress.value}/${progress.max}` : 'Rendu en cours') : first ? 'En attente du moteur' : pendingLabel ?? 'En file d’attente'}</div>
           </div>
         </div>
         <div className="progress"><i style={{ width: `${running ? pct : 0}%` }} /></div>

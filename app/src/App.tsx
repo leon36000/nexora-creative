@@ -4,7 +4,9 @@ import { APPS, badgeLabel } from './catalog';
 import { linkProps, useRoute } from './router';
 import { startLive, useStore } from './store';
 import { useGlobalDrop } from './drop';
-import { GpuChip, JudgeBanner, Logo, Toast } from './ui';
+import { JudgeBanner, Toast } from './ui';
+import { Marque } from './studio/icons';
+import { Moteurs } from './studio/Moteurs';
 import VideoPage from './pages/Video';
 import ImagePage from './pages/Image';
 import DirectorPage from './pages/Director';
@@ -63,6 +65,9 @@ export default function App() {
     return <Creer />;
   })();
 
+  // le menu Atelier se referme à chaque navigation
+  useEffect(() => { document.querySelectorAll('.st-atelier').forEach((d) => d.removeAttribute('open')); }, [path]);
+
   // the tab says where you are
   useEffect(() => {
     const name = path === '/' ? 'Créer' : path === '/setup' ? 'Réglages' : path === '/library' ? 'Bibliothèque'
@@ -80,21 +85,24 @@ export default function App() {
 
   return (
     <div className={`app ${judge ? 'has-judge' : ''}`}>
-      <header className="topbar">
-        <a className="brand" {...linkProps('/')}><Logo /><span className="brand-word">Nexora Creative</span></a>
-        <nav className="nav">
-          {SECTIONS.map((s) => <a key={s.to} className={`nav-link ${isActive(s.to) ? 'active' : ''}`} {...linkProps(s.to)}>{s.label}</a>)}
-          <span className="nav-sep" />
-          {APP_LINKS.map((a) => (
-            <a key={a.id} className={`nav-link ${isActive(a.route) ? 'active' : ''}`} {...linkProps(a.route)}>
-              {a.name}{a.badge === 'new' && <span className="badge">{badgeLabel(a.badge)}</span>}
-            </a>
-          ))}
-          <a className={`nav-link nav-setup ${isActive('/setup') ? 'active' : ''}`} {...linkProps('/setup')}>Réglages</a>
+      <header className="st-top">
+        <a className="st-brand" {...linkProps('/')}><Marque className="st-mark" /><span>Nexora <em>Creative</em></span></a>
+        <nav className="st-nav" aria-label="Navigation principale">
+          <a className={`st-link ${isActive('/') ? 'active' : ''}`} {...linkProps('/')}>Créer</a>
+          <a className={`st-link ${isActive('/library') ? 'active' : ''}`} {...linkProps('/library')}>Bibliothèque</a>
+          <a className={`st-link ${isActive('/explorer') ? 'active' : ''}`} {...linkProps('/explorer')}>Explorer</a>
+          <details className="st-atelier">
+            <summary className="st-link">Atelier ▾</summary>
+            <div className="st-menu">
+              {SECTIONS.filter((x) => ['/image', '/edit', '/video', '/apps'].includes(x.to)).map((x) => <a key={x.to} {...linkProps(x.to)}>{x.label}</a>)}
+              <hr />
+              {APP_LINKS.map((a) => <a key={a.id} {...linkProps(a.route)}>{a.name}{a.badge === 'new' && <span className="badge">{badgeLabel(a.badge)}</span>}</a>)}
+            </div>
+          </details>
         </nav>
-        <div className="topbar-right">
-          <a className="nav-link" {...linkProps('/setup')} title="Modèles et réglages">Réglages</a>
-          <GpuChip />
+        <div className="st-right">
+          <Moteurs />
+          <a className={`st-link ${isActive('/setup') ? 'active' : ''}`} {...linkProps('/setup')} title="Modèles et réglages">Réglages</a>
         </div>
       </header>
       <JudgeBanner />

@@ -16,7 +16,7 @@
  */
 
 export interface StillsParams {
-  model: 'qwen' | 'flux2';
+  model: 'qwen' | 'flux2' | 'qwen21';
   quality: 'draft' | 'quality';
   prompt: string;
   width: number;
@@ -120,6 +120,38 @@ function flux2Graph(p: StillsParams): Record<string, unknown> {
   return { ...g, ...g0 };
 }
 
+/**
+ * Qwen-Image-2.1 (gabarit officiel ComfyUI « Text to Image (Qwen Image 2.1) ») : 25 étapes, CFG 1, euler/simple, cache de
+ * préfixe du modèle, encodeur Qwen3-VL 8B, sortie native jusqu'à 2K. Licence de recherche Qwen : voir licences.ts (« démo »).
+ */
+export const QWEN21_MODELS = {
+  unet: 'qwen_image_2.1_int8_convrot.safetensors',
+  clip: 'qwen3vl_8b_int8_convrot.safetensors',
+  vae: 'qwen_image_2.1_vae_bf16.safetensors',
+};
+function qwen21Graph(p: StillsParams): Record<string, unknown> {
+  const g0: Record<string, unknown> = {};
+  const g: Record<string, unknown> = {
+    u: { class_type: 'UNETLoader', inputs: { unet_name: QWEN21_MODELS.unet, weight_dtype: 'default' } },
+    cache: { class_type: 'QwenImage21Cache', inputs: { model: ['u', 0], device: 'auto', dtype: 'default' } },
+    c: { class_type: 'CLIPLoader', inputs: { clip_name: QWEN21_MODELS.clip, type: 'qwen_image', device: 'default' } },
+    v: { class_type: 'VAELoader', inputs: { vae_name: QWEN21_MODELS.vae } },
+    enc: { class_type: 'TextEncodeQwenImage21', inputs: { clip: ['c', 0], prompt: p.prompt, negative_prompt: p.negative ?? '', resolution: 1024 } },
+    lat: { class_type: 'EmptyLatentImage', inputs: { width: p.width, height: p.height, batch_size: 1 } },
+    k: {
+      class_type: 'KSampler',
+      inputs: {
+        model: chainLoras(g0, ['cache', 0], p.loras), positive: ['enc', 0], negative: ['enc', 1], latent_image: ['lat', 0],
+        seed: p.seed, steps: p.quality === 'draft' ? 12 : 25, cfg: 1, sampler_name: 'euler', scheduler: 'simple', denoise: 1.0,
+      },
+    },
+    d: { class_type: 'VAEDecode', inputs: { samples: ['k', 0], vae: ['v', 0] } },
+    save: { class_type: 'SaveImage', inputs: { images: ['d', 0], filename_prefix: 'nexora/image' } },
+  };
+  return { ...g, ...g0 };
+}
+
 export function buildStillsGraph(p: StillsParams): Record<string, unknown> {
+  if (p.model === 'qwen21') return qwen21Graph(p);
   return p.model === 'flux2' ? flux2Graph(p) : qwenGraph(p);
 }

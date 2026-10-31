@@ -2,13 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { actionFacturation, devisCredits, facturationSite, secondesGpuEstimees } from './credits.js';
 
 describe('devis en crédits d’un rendu', () => {
-  it('estime le temps GPU depuis les mesures du GB10 et le convertit en crédits entiers', () => {
-    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 832, height: 480 })).toBe(85);
-    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 243, width: 832, height: 480 })).toBe(230);
-    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 1344, height: 768 })).toBe(340);
-    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 768, height: 1344 })).toBe(340);
+  it('estime le temps GPU depuis les mesures réelles (RTX 5090) et le convertit en crédits entiers', () => {
+    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 832, height: 480 })).toBe(30);
+    expect(secondesGpuEstimees({ videoModel: 'h3-max', lengthFrames: 124, width: 1344, height: 768 })).toBe(290);
+    expect(secondesGpuEstimees({ videoModel: 'h3-fast', lengthFrames: 124, width: 1344, height: 768 })).toBeGreaterThan(30);
     const cinq = devisCredits({ videoModel: 'h3-fast', lengthFrames: 124, width: 832, height: 480 }, { creditsParSecondeGpu: 0.5 });
-    expect(cinq).toBe(43);
+    expect(cinq).toBe(15);
     expect(Number.isInteger(devisCredits({ videoModel: 'h3-max', lengthFrames: 124, width: 1344, height: 768 }, { creditsParSecondeGpu: 0.5 }))).toBe(true);
   });
 

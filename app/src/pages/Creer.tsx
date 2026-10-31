@@ -1,93 +1,171 @@
 /**
- * Nexora Creative — accueil « Créer » : la personne décrit sa vidéo avec ses mots.
- * Clip (5 à 15 s) : le LLM écrit le scénario, MiniMax H3 tourne. Film (30 s à 2 min) : l'AI Director propose un
- * découpage en plans que la personne peut relire et retoucher, puis chaque plan est tourné et le film assemblé.
- * Aucun réglage technique ici ; le mode expert reste dans Vidéo, Image, Director.
+ * Nexora Creative — le studio « Créer ».
+ * À gauche, le composeur : une idée en français, un bouton « Booster ma phrase » (le LLM la rend plus riche et plus filmable),
+ * trois modes (Vidéo, Image, Film), un départ facultatif (ta photo ou un plan clé dessiné par Qwen-Image) et la musique
+ * MiniMax en option. À droite, les créations en direct : progression, aperçu, musique, animation d'un plan clé.
+ * Vidéo : le LLM écrit le scénario H3 et MiniMax H3 tourne (RTX 5090). Image : Qwen-Image (GB10). Film : l'AI Director
+ * propose un découpage relisible, tourne chaque plan et assemble.
  */
-import { useEffect, useMemo, useState } from 'react';
-import { api, uploadFile, type CreerReponse, type EtatNexora, type Storyboard } from '../api';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { api, mediaUrl, posterUrl, uploadFile, type EtatNexora, type Storyboard } from '../api';
 import { inFeed, isImage, isModel, settingsOf, toast, useStore } from '../store';
 import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
 import FilmPlans from '../FilmPlans';
+import { Publication } from '../studio/Publication';
+import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
 
+type Mode = 'video' | 'image' | 'film';
 type Format = '16:9' | '9:16' | '1:1';
-type Duree = 5 | 10 | 15 | 30 | 60 | 120;
+type Depart = 'texte' | 'photo' | 'cle';
+type Filtre = 'tout' | 'videos' | 'films' | 'images';
 
-const IDEES = [
-  'Ma voiture rouge se transforme en robot géant pendant que la caméra tourne autour, au coucher du soleil.',
-  'Publicité pour un café glacé : gouttes au ralenti, lumière dorée, une voix dit « Le froid qui réveille ».',
-  'Un renard en papier découpé traverse une forêt d’automne qui s’anime à son passage.',
-  'Plan drone au-dessus de Montréal en hiver, la neige tombe, la ville s’illumine à la tombée du jour.',
-];
-
+const IDEES: Record<Mode, string[]> = {
+  video: [
+    'Ma voiture rouge se transforme en robot géant pendant que la caméra tourne autour, au coucher du soleil.',
+    'Un dragon d’obsidienne jaillit d’une mer de nuages d’orage et rugit vers la caméra.',
+    'Publicité pour un café glacé : gouttes au ralenti, lumière dorée, une voix dit « Le froid qui réveille ».',
+    'Combat de karaté sur un toit trempé de pluie, la nuit, sous des lanternes rouges.',
+  ],
+  image: [
+    'Une guerrière en kimono noir face à un dragon sur une falaise, au crépuscule.',
+    'Affiche de film : un astronaute seul sur une plage de cendres sous deux lunes.',
+    'Portrait en studio d’un renard en papier découpé, lumière douce, fond bleu nuit.',
+  ],
+  film: [
+    'Un livreur à vélo découvre qu’une ville entière s’illumine sur son passage, de l’aube à la nuit.',
+    'Une flotte de vaisseaux surgit de l’hyperespace au-dessus d’une planète à anneaux ; un duel éclate dans un temple.',
+  ],
+};
 const FORMATS: { v: Format; label: string; aide: string }[] = [
-  { v: '16:9', label: 'Paysage', aide: 'YouTube, site web' },
-  { v: '9:16', label: 'Vertical', aide: 'TikTok, Reels, Shorts' },
+  { v: '16:9', label: 'Paysage', aide: 'YouTube, site' },
+  { v: '9:16', label: 'Vertical', aide: 'TikTok, Reels' },
   { v: '1:1', label: 'Carré', aide: 'Publications' },
 ];
-const DUREES: { v: Duree; label: string }[] = [
-  { v: 5, label: '5 s' }, { v: 10, label: '10 s' }, { v: 15, label: '15 s' },
-  { v: 30, label: 'Film 30 s' }, { v: 60, label: 'Film 1 min' }, { v: 120, label: 'Film 2 min' },
-];
-/** Temps de tournage mesuré sur le DGX Spark GB10 pour un plan de 5 s (recherche/08). */
-const SECONDES_PAR_PLAN_5S = 85;
+const DUREES_VIDEO = [5, 10, 15] as const;
+const DUREES_FILM = [{ v: 30, label: '30 s' }, { v: 60, label: '1 min' }, { v: 120, label: '2 min' }] as const;
+const SECONDES_PAR_PLAN_5S = 40;
+
+const fmtTemps = (s: number) => (s < 90 ? `${Math.round(s)} s` : `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')} s`);
 
 export default function Creer() {
+  const [mode, setMode] = useState<Mode>('video');
   const [intention, setIntention] = useState('');
   const [format, setFormat] = useState<Format>('16:9');
-  const [duree, setDuree] = useState<Duree>(5);
+  const [duree, setDuree] = useState<number>(5);
+  const [dureeFilm, setDureeFilm] = useState<number>(30);
   const [son, setSon] = useState(true);
+  const [musique, setMusique] = useState(false);
   const [qualite, setQualite] = useState<'rapide' | 'max'>('rapide');
-  const [envoi, setEnvoi] = useState<null | 'clip' | 'plan' | 'film'>(null);
-  const [dernier, setDernier] = useState<CreerReponse | null>(null);
+  const [nombreImages, setNombreImages] = useState(2);
+  const [depart, setDepart] = useState<Depart>('texte');
+  const [cle, setCle] = useState<{ jeton: string; apercu: string } | null>(null);
+  const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo'>(null);
+  const [boost, setBoost] = useState<string | null>(null);
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
-  const [voirScenario, setVoirScenario] = useState(false);
   const [etat, setEtat] = useState<EtatNexora | null>(null);
   const [vue, setVue] = useState<number | null>(null);
   const [filmOuvert, setFilmOuvert] = useState<number | null>(null);
-  const [photo, setPhoto] = useState<{ jeton: string; apercu: string } | null>(null);
-  const [envoiPhoto, setEnvoiPhoto] = useState(false);
+  const [filtre, setFiltre] = useState<Filtre>('tout');
+  const [replique, setReplique] = useState('');
+  const [pub, setPub] = useState<number | null>(null);
+  const [idees, setIdees] = useState<Partial<Record<Mode, string[]>>>({});
+  const [inspire, setInspire] = useState(false);
+  const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number | null } | null>(null);
   const toutes = useStore((s) => s.takes);
-  const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && !isImage(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null).slice(0, 12));
-  // Musiques composées pour des clips (MiniMax-Music3) : dès qu'une est prête, le mixage se lance une seule fois.
-  const musiques = useStore((s) => s.takes.filter((t) => settingsOf(t).nexoraMusiqueDe != null && settingsOf(t).app === 'nexora-musique' && !(t.status === 'done' && s.takes.some((x) => settingsOf(x).nexoraAvecMusique && settingsOf(x).musique === t.output_path)) && t.status !== 'failed' && t.status !== 'stopped'));
-  const [mixes] = useState(() => new Set<number>());
+  const lances = useRef(new Set<number>());
 
+  const visibles = useStore((s) => s.takes.filter((t) => inFeed(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null && t.kind !== 'audio'));
+  const montrees = useMemo(() => visibles.filter((t) => {
+    const s = settingsOf(t);
+    if (filtre === 'images') return isImage(t);
+    if (filtre === 'films') return !!s.film;
+    if (filtre === 'videos') return !isImage(t) && !s.film;
+    return true;
+  }).slice(0, 24), [visibles, filtre]);
+  const ids = useMemo(() => montrees.map((t) => t.id), [montrees]);
+
+  // Musiques composées pour des clips (MiniMax-Music3) : dès qu'une est prête, le mixage se lance une seule fois.
+  const musiques = useStore((s) => s.takes.filter((t) => settingsOf(t).nexoraMusiqueDe != null && settingsOf(t).app === 'nexora-musique' && t.status !== 'failed' && t.status !== 'stopped'));
   useEffect(() => {
     for (const m of musiques) {
       const clip = settingsOf(m).nexoraMusiqueDe as number;
-      // Un film assemble sa musique dans son panneau ; ici seuls les clips simples.
-      if (m.status !== 'done' || mixes.has(m.id) || settingsOf(toutes.find((x) => x.id === clip) ?? m).film) continue;
-      mixes.add(m.id);
+      const dejaMixee = toutes.some((x) => settingsOf(x).nexoraAvecMusique && settingsOf(x).musique === m.output_path);
+      if (m.status !== 'done' || lances.current.has(m.id) || dejaMixee || settingsOf(toutes.find((x) => x.id === clip) ?? m).film) continue;
+      lances.current.add(m.id);
       api.nexoraClipAvecMusique(clip, m.id).then(() => toast('Ta vidéo avec sa musique est prête.')).catch((e) => toast(e instanceof Error ? e.message : 'Le mixage de la musique a échoué.', true));
     }
-  }, [musiques, toutes, mixes]);
-  async function ajouterMusique(clipId: number) {
-    try { await api.nexoraClipMusique(clipId, {}); toast('Composition de la musique lancée (moins d’une minute).'); }
-    catch (e) { toast(e instanceof Error ? e.message : 'Impossible de composer la musique.', true); }
-  }
-  useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
-  const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number } | null>(null);
+  }, [musiques, toutes]);
+  // « Avec musique » demandé à la création : la musique se compose dès que le clip est terminé.
   useEffect(() => {
-    if (duree > 15) { setDevis(null); return; }
-    let actif = true;
-    void api.nexoraDevis({ format, duree, son, qualite, image: photo?.jeton }).then((d) => actif && setDevis(d)).catch(() => actif && setDevis(null));
-    return () => { actif = false; };
-  }, [format, duree, son, qualite, photo]);
-  const film = duree > 15;
-  const prete = intention.trim().length > 0 && !envoi;
-  const ids = useMemo(() => takes.map((t) => t.id), [takes]);
+    for (const t of toutes) {
+      const s = settingsOf(t);
+      if (!s.nexoraAutoMusique || t.status !== 'done' || s.nexoraMusiqueLance || lances.current.has(-t.id)) continue;
+      lances.current.add(-t.id);
+      api.nexoraClipMusique(t.id, {}).catch(() => {});
+    }
+  }, [toutes]);
 
-  async function creerClip() {
-    setEnvoi('clip');
-    setVoirScenario(false);
+  useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
+  const film = mode === 'film';
+  const dureeClip = duree;
+  useEffect(() => {
+    if (mode !== 'video') { setDevis(null); return; }
+    let actif = true;
+    void api.nexoraDevis({ format, duree: dureeClip, son, qualite, image: cle?.jeton }).then((d) => actif && setDevis(d)).catch(() => actif && setDevis(null));
+    return () => { actif = false; };
+  }, [mode, format, dureeClip, son, qualite, cle]);
+
+  const occupe = envoi !== null;
+  const prete = intention.trim().length > 0 && !occupe;
+  const demoImage = etat?.image ?? 'Qwen-Image';
+
+  async function inspirer() {
+    setInspire(true);
     try {
-      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: duree as 5 | 10 | 15, son, qualite, image: photo?.jeton });
-      setDernier(r);
-      toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : IA indisponible).');
+      const r = await api.nexoraIdees({ mode, theme: intention.trim() || undefined });
+      setIdees((x) => ({ ...x, [mode]: r.idees }));
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'Pas d’idée pour l’instant.', true);
+    } finally {
+      setInspire(false);
+    }
+  }
+
+  async function booster() {
+    if (!intention.trim()) return;
+    setEnvoi('boost');
+    try {
+      const r = await api.nexoraAmeliorer({ intention: intention.trim(), mode });
+      setBoost(r.texte);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'Impossible d’améliorer la phrase.', true);
+    } finally {
+      setEnvoi(null);
+    }
+  }
+
+  async function creerVideo() {
+    setEnvoi('creer');
+    try {
+      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined });
+      toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : l’assistant est indisponible).');
+      setCle(null);
     } catch (e) {
       toast(e instanceof Error ? e.message : 'La création a échoué.', true);
+    } finally {
+      setEnvoi(null);
+    }
+  }
+
+  async function dessinerCles() {
+    setEnvoi('cle');
+    try {
+      await api.nexoraImage({ intention: intention.trim(), format, nombre: nombreImages, qualite });
+      toast(`${nombreImages > 1 ? `${nombreImages} plans clés` : 'Un plan clé'} en cours de dessin avec ${demoImage}. Clique « Animer » sur celui que tu préfères.`);
+      setFiltre('images');
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'Le dessin a échoué.', true);
     } finally {
       setEnvoi(null);
     }
@@ -96,7 +174,7 @@ export default function Creer() {
   async function proposerDecoupage() {
     setEnvoi('plan');
     try {
-      const r = await api.nexoraFilmPlan({ intention: intention.trim(), duree });
+      const r = await api.nexoraFilmPlan({ intention: intention.trim(), duree: dureeFilm });
       setStoryboard(r.storyboard);
       if (r.source === 'repli') toast('L’IA n’a pas répondu : découpage simple proposé.', true);
     } catch (e) {
@@ -123,14 +201,26 @@ export default function Creer() {
   async function choisirPhoto(f: File | undefined) {
     if (!f) return;
     if (!f.type.startsWith('image/')) { toast('Choisis une image (JPG, PNG ou WebP).', true); return; }
-    setEnvoiPhoto(true);
+    setEnvoi('photo');
     try {
       const jeton = await uploadFile(f);
-      setPhoto({ jeton, apercu: URL.createObjectURL(f) });
+      setCle({ jeton, apercu: URL.createObjectURL(f) });
     } catch (e) {
       toast(e instanceof Error ? e.message : 'La photo n’a pas pu être envoyée.', true);
     } finally {
-      setEnvoiPhoto(false);
+      setEnvoi(null);
+    }
+  }
+
+  async function animer(id: number) {
+    try {
+      const { jeton } = await api.nexoraImageJeton(id);
+      setCle({ jeton, apercu: posterUrl(id) });
+      setMode('video');
+      setDepart('cle');
+      toast('Plan clé prêt : choisis la durée puis lance « Animer avec H3 ».');
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'Impossible d’utiliser cette image.', true);
     }
   }
 
@@ -145,136 +235,283 @@ export default function Creer() {
     setStoryboard({ ...storyboard, plans, dureeTotale: plans.reduce((n, p) => n + p.duree, 0) });
   }
 
-  const libelleBouton = envoi === 'clip' ? 'L’IA écrit le scénario…' : envoi === 'plan' ? 'L’IA découpe ton film…' : film ? 'Proposer le découpage' : 'Créer la vidéo';
+  const cleRequise = mode === 'video' && depart === 'cle' && !cle;
+  const libelle = envoi === 'creer' ? 'L’IA écrit le scénario…'
+    : envoi === 'plan' ? 'L’IA découpe ton film…'
+      : envoi === 'cle' ? 'Dessin en cours…'
+        : mode === 'image' ? `Dessiner ${nombreImages > 1 ? `${nombreImages} images` : 'l’image'}`
+          : film ? 'Proposer le découpage'
+            : cleRequise ? `Dessiner ${nombreImages} plans clés` : cle ? 'Animer avec H3' : 'Créer la vidéo';
+  function lancer() {
+    if (mode === 'image') void dessinerCles();
+    else if (film) void proposerDecoupage();
+    else if (cleRequise) void dessinerCles();
+    else void creerVideo();
+  }
   const minutesFilm = storyboard ? Math.ceil((storyboard.plans.reduce((n, p) => n + (p.duree === 10 ? 2 : 1), 0) * SECONDES_PAR_PLAN_5S) / 60) : 0;
 
   return (
-    <div className="nx-creer">
-      <section className="nx-hero">
-        <h1>Décris ta vidéo. Nexora la tourne.</h1>
-        <p className="nx-sous">Écris ce que tu imagines, avec tes mots. L’IA écrit le scénario, choisit les plans, la caméra et le son, puis tourne la vidéo.</p>
-        <div className="nx-saisie">
-          <textarea
-            value={intention}
-            onChange={(e) => setIntention(e.target.value)}
-            onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && prete) void (film ? proposerDecoupage() : creerClip()); }}
-            placeholder="Ex. : Ma voiture se transforme en robot géant pendant qu’une caméra tourne autour…"
-            rows={4}
-            maxLength={4000}
-            aria-label="Description de la vidéo"
-          />
-          <div className="nx-options">
-            <div className="nx-groupe" role="group" aria-label="Format">
-              {FORMATS.map((f) => (
-                <button key={f.v} type="button" className={`nx-puce ${format === f.v ? 'on' : ''}`} onClick={() => setFormat(f.v)} title={f.aide}>{f.label}</button>
-              ))}
+    <div className="st">
+      <section className="st-hero">
+        <div>
+          <h1>Écris-le. <em>Nexora</em> le filme.</h1>
+          <p>Une phrase en français suffit. L’IA écrit le scénario, dessine le plan clé, tourne avec son et compose la musique.</p>
+        </div>
+        <div className="st-pile" aria-label="Modèles utilisés">
+          <span>Vidéo <b>MiniMax H3</b></span>
+          <span>Image <b>{etat?.image ?? 'Qwen-Image'}</b></span>
+          <span>Musique <b>MiniMax-Music3</b></span>
+        </div>
+      </section>
+
+      <div className="st-grid">
+        <aside className="st-composer" aria-label="Composeur">
+          <div className="st-modes" role="tablist" aria-label="Que veux-tu créer ?">
+            {([['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => (
+              <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
+                <Ic />{label}
+              </button>
+            ))}
+          </div>
+
+          <div className="st-champ">
+            <textarea
+              value={intention}
+              onChange={(e) => setIntention(e.target.value)}
+              onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && prete && !cleRequise) lancer(); }}
+              placeholder={mode === 'image' ? 'Décris l’image : sujet, décor, lumière, ambiance…' : mode === 'film' ? 'Raconte ton film : une idée, des personnages, une ambiance…' : 'Décris ta scène : ce qu’on voit, ce qui bouge, la caméra…'}
+              maxLength={4000}
+              aria-label="Description"
+            />
+            <div className="st-champ-pied">
+              <span>{intention.length}/4000 · Ctrl+Entrée pour lancer</span>
+              <button type="button" className={`st-boost ${envoi === 'boost' ? 'charge' : ''}`} disabled={!intention.trim() || occupe} onClick={() => void booster()} title="L’assistant réécrit ta phrase en version plus riche et plus filmable">
+                {envoi === 'boost' ? <IcRond /> : <IcEtincelle />}Booster ma phrase
+              </button>
             </div>
-            <div className="nx-groupe" role="group" aria-label="Durée">
-              {DUREES.map((d) => (
-                <button key={d.v} type="button" className={`nx-puce ${duree === d.v ? 'on' : ''}`} onClick={() => { setDuree(d.v); setStoryboard(null); }}>{d.label}</button>
-              ))}
+          </div>
+
+          {boost && (
+            <div className="st-suggestion" role="status">
+              <span className="st-etiq">Version boostée</span>
+              <p>{boost}</p>
+              <div className="st-ligne">
+                <button type="button" className="st-bouton primaire" onClick={() => { setIntention(boost); setBoost(null); }}>Utiliser cette version</button>
+                <button type="button" className="st-bouton" onClick={() => setBoost(null)}>Garder la mienne</button>
+              </div>
             </div>
-            <button type="button" className={`nx-puce ${son ? 'on' : ''}`} onClick={() => setSon(!son)} aria-pressed={son}>{son ? 'Avec son' : 'Sans son'}</button>
-            <div className="nx-groupe" role="group" aria-label="Qualité">
-              <button type="button" className={`nx-puce ${qualite === 'rapide' ? 'on' : ''}`} onClick={() => setQualite('rapide')} title="Rendu rapide, idéal pour essayer">Rapide</button>
-              <button type="button" className={`nx-puce ${qualite === 'max' ? 'on' : ''}`} onClick={() => setQualite('max')} title={etat?.cinema ? 'Moteur cinéma : MiniMax H3 complet, pleine résolution, pleines étapes (RTX 5090)' : 'Résolution native du modèle, plus long à tourner'}>{etat?.cinema ? 'Cinéma' : 'Qualité max'}</button>
+          )}
+
+          {(!intention || idees[mode]) && (
+            <div className="st-idees" aria-label="Idées">
+              {(idees[mode] ?? IDEES[mode]).map((i) => <button key={i} type="button" className="st-idee" onClick={() => setIntention(i)}>{i.length > 72 ? `${i.slice(0, 70)}…` : i}</button>)}
+              <button type="button" className="st-idee" disabled={inspire} onClick={() => void inspirer()} style={{ borderColor: 'rgba(255,90,31,.45)', color: 'var(--accent-hi)' }}>{inspire ? 'Je cherche…' : '✦ Inspire-moi'}</button>
             </div>
-            {!film && (
-              photo ? (
-                <span className="nx-photo">
-                  <img src={photo.apercu} alt="Photo de départ" />
-                  <button type="button" className="nx-lien" onClick={() => setPhoto(null)}>Retirer la photo</button>
-                </span>
-              ) : (
-                <label className="nx-puce nx-photo-btn" title="La vidéo part de ta photo (ta voiture, ton produit, ton lieu)">
-                  {envoiPhoto ? 'Envoi de la photo…' : 'Partir de ma photo'}
+          )}
+
+          {mode === 'video' && (
+            <div className="st-bloc">
+              <span className="st-etiq">Départ</span>
+              <div className="st-seg" role="group" aria-label="Point de départ">
+                {([['texte', 'Texte seul', 'H3 imagine'], ['photo', 'Ma photo', 'import'], ['cle', 'Plan clé IA', demoImage]] as const).map(([v, label, sub]) => (
+                  <button key={v} type="button" className={depart === v ? 'on' : ''} onClick={() => { setDepart(v); if (v === 'texte') setCle(null); }}>{label}<small>{sub}</small></button>
+                ))}
+              </div>
+              {depart === 'photo' && !cle && (
+                <label className="st-bouton" style={{ textAlign: 'center', cursor: 'pointer' }}>
+                  {envoi === 'photo' ? 'Envoi de la photo…' : 'Choisir une photo (ta voiture, ton produit, ton lieu)'}
                   <input type="file" accept="image/*" hidden onChange={(e) => void choisirPhoto(e.target.files?.[0])} />
                 </label>
-              )
-            )}
-            <button type="button" className="nx-creer-btn" disabled={!prete} onClick={() => void (film ? proposerDecoupage() : creerClip())}>{libelleBouton}</button>
-          </div>
-        </div>
-        {devis && !film && (
-          <p className="nx-devis">Tournage estimé ≈ {devis.secondesEstimees < 90 ? `${devis.secondesEstimees} s` : `${Math.floor(devis.secondesEstimees / 60)} min ${String(devis.secondesEstimees % 60).padStart(2, '0')} s`}{devis.credits !== null ? ` · ${devis.credits} crédits` : ''}</p>
-        )}
-        {!intention && (
-          <div className="nx-idees">
-            <span>Idées :</span>
-            {IDEES.map((i) => <button key={i} type="button" className="nx-idee" onClick={() => setIntention(i)}>{i}</button>)}
-          </div>
-        )}
-        {dernier && !film && (
-          <div className="nx-scenario">
-            <button type="button" className="nx-lien" onClick={() => setVoirScenario(!voirScenario)}>
-              {voirScenario ? 'Masquer' : 'Voir'} le scénario écrit par l’IA {dernier.source === 'repli' ? '(version simplifiée)' : ''}
-            </button>
-            {voirScenario && <pre>{dernier.prompt}</pre>}
-          </div>
-        )}
-        {etat?.erreur && <p className="nx-note">{etat.erreur}</p>}
-        {etat && !etat.llm && <p className="nx-note">L’assistant d’écriture n’est pas branché sur ce poste : la vidéo sera tournée à partir de ta phrase telle quelle.</p>}
-      </section>
-
-      {storyboard && (
-        <section className="nx-storyboard" aria-label="Découpage proposé">
-          <div className="nx-sb-tete">
-            <div>
-              <h2>{storyboard.titre}</h2>
-              <p className="nx-sous">{storyboard.plans.length} plans · {storyboard.dureeTotale} s · tournage estimé ≈ {minutesFilm} min. Relis, retouche ce que tu veux, puis lance.</p>
-            </div>
-            <button type="button" className="nx-creer-btn" disabled={!!envoi} onClick={() => void tournerFilm()}>{envoi === 'film' ? 'Mise en tournage…' : 'Tourner le film'}</button>
-          </div>
-          {(storyboard.bible.style || storyboard.bible.personnages.length > 0) && (
-            <details className="nx-bible">
-              <summary>Bible de continuité (style, personnages, lieux)</summary>
-              {storyboard.bible.style && <p><strong>Style :</strong> {storyboard.bible.style}</p>}
-              {storyboard.bible.personnages.map((c) => <p key={c.nom}><strong>{c.nom} :</strong> {c.description}</p>)}
-              {storyboard.bible.lieux.map((l) => <p key={l.nom}><strong>{l.nom} :</strong> {l.description}</p>)}
-            </details>
-          )}
-          <ol className="nx-plans">
-            {storyboard.plans.map((p, i) => (
-              <li key={i} className="nx-plan">
-                <div className="nx-plan-num">{i + 1}</div>
-                <div className="nx-plan-corps">
-                  <input value={p.resume} onChange={(e) => majPlan(i, { resume: e.target.value })} aria-label={`Résumé du plan ${i + 1}`} />
-                  <textarea value={p.description} rows={3} onChange={(e) => majPlan(i, { description: e.target.value })} aria-label={`Description du plan ${i + 1}`} />
-                  <div className="nx-plan-pied">
-                    <span className="nx-camera">🎥 {p.camera}</span>
-                    <div className="nx-groupe">
-                      {([5, 10] as const).map((d) => <button key={d} type="button" className={`nx-puce ${p.duree === d ? 'on' : ''}`} onClick={() => majPlan(i, { duree: d })}>{d} s</button>)}
-                    </div>
-                    <button type="button" className="nx-lien" onClick={() => retirerPlan(i)} disabled={storyboard.plans.length <= 1}>Retirer</button>
-                  </div>
+              )}
+              {cle && (
+                <div className="st-cle">
+                  <img src={cle.apercu} alt="Image de départ" />
+                  <span>La vidéo part de cette image.</span>
+                  <button type="button" className="st-bouton" onClick={() => { setCle(null); }}>Retirer</button>
                 </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
+              )}
+              {depart === 'cle' && !cle && <span className="st-credit" style={{ textAlign: 'left' }}>Écris ta scène, clique « Dessiner », puis « Animer » sur le plan clé que tu préfères.</span>}
+            </div>
+          )}
 
-      <section className="nx-resultats">
-        <h2>Tes vidéos</h2>
-        {musiques.length > 0 && <p className="nx-sous">Musique MiniMax-Music3 : {musiques.some((m) => m.status === 'queued' || m.status === 'rendering') ? 'composition en cours…' : 'prête, mixage…'}</p>}
-        {takes.length === 0 ? <p className="nx-vide">Tes créations apparaîtront ici, avec leur progression en direct.</p> : (
-          <div className="grid">
-            {takes.map((t) => {
-              const s = settingsOf(t);
-              const plans = s.film ? (s.storyboard?.plans ?? []) as { take?: number }[] : [];
-              const faits = plans.filter((p) => p.take && toutes.find((x) => x.id === p.take)?.status === 'done').length;
-              return <MediaCard key={t.id} take={t} onOpen={() => (s.film ? setFilmOuvert(t.id) : setVue(t.id))} tag={s.film ? 'Film' : undefined}
-                pendingLabel={s.film ? `Film : ${faits}/${plans.length} plans tournés` : 'En file d’attente'}
-                actions={s.film ? <button type="button" className="nx-puce on" onClick={() => setFilmOuvert(t.id)}>Plans</button>
-                  : t.status === 'done' && t.kind === 'video' && !s.nexoraAvecMusique && !s.nexoraMusiqueDe
-                    ? <button type="button" className="nx-puce" disabled={musiques.some((m) => settingsOf(m).nexoraMusiqueDe === t.id)} onClick={() => void ajouterMusique(t.id)} title="Compose une musique avec MiniMax-Music3 et la mixe sous les sons de la vidéo">Ajouter une musique</button>
-                    : undefined} />;
-            })}
+          <div className="st-bloc">
+            <span className="st-etiq">Format</span>
+            <div className="st-seg" role="group" aria-label="Format">
+              {FORMATS.map((f) => (
+                <button key={f.v} type="button" className={format === f.v ? 'on' : ''} onClick={() => setFormat(f.v)}><Ratio v={f.v} />{f.label}<small>{f.aide}</small></button>
+              ))}
+            </div>
           </div>
-        )}
-      </section>
 
-      <footer className="nx-pied">Vidéo propulsée par <strong>{etat?.moteur ?? 'MiniMax H3'}</strong> · Scénario par IA · Nexora Creative</footer>
+          {mode === 'video' && (
+            <div className="st-bloc">
+              <span className="st-etiq">Durée</span>
+              <div className="st-seg" role="group" aria-label="Durée">
+                {DUREES_VIDEO.map((d) => <button key={d} type="button" className={duree === d ? 'on' : ''} onClick={() => setDuree(d)}>{d} s</button>)}
+              </div>
+            </div>
+          )}
+          {film && (
+            <div className="st-bloc">
+              <span className="st-etiq">Durée du film</span>
+              <div className="st-seg" role="group" aria-label="Durée du film">
+                {DUREES_FILM.map((d) => <button key={d.v} type="button" className={dureeFilm === d.v ? 'on' : ''} onClick={() => { setDureeFilm(d.v); setStoryboard(null); }}>{d.label}</button>)}
+              </div>
+            </div>
+          )}
+          {mode === 'image' && (
+            <div className="st-bloc">
+              <span className="st-etiq">Nombre d’images</span>
+              <div className="st-seg" role="group" aria-label="Nombre d’images">
+                {[1, 2, 4].map((n) => <button key={n} type="button" className={nombreImages === n ? 'on' : ''} onClick={() => setNombreImages(n)}>{n}</button>)}
+              </div>
+            </div>
+          )}
+
+          {mode !== 'image' && (
+            <div className="st-bloc">
+              <span className="st-etiq">Qualité</span>
+              <div className="st-seg" role="group" aria-label="Qualité">
+                <button type="button" className={qualite === 'rapide' ? 'on' : ''} onClick={() => setQualite('rapide')}>Rapide<small>FastH3 · 832×480</small></button>
+                <button type="button" className={qualite === 'max' ? 'on' : ''} onClick={() => setQualite('max')}>{etat?.cinema ? 'Cinéma' : 'Qualité max'}<small>{etat?.cinema ? 'H3 complet · 768p' : '1344×768'}</small></button>
+              </div>
+            </div>
+          )}
+          {mode === 'image' && (
+            <div className="st-bloc">
+              <span className="st-etiq">Qualité</span>
+              <div className="st-seg" role="group" aria-label="Qualité de l’image">
+                <button type="button" className={qualite === 'rapide' ? 'on' : ''} onClick={() => setQualite('rapide')}>Brouillon<small>12 étapes</small></button>
+                <button type="button" className={qualite === 'max' ? 'on' : ''} onClick={() => setQualite('max')}>Maximale<small>25 étapes</small></button>
+              </div>
+            </div>
+          )}
+
+          {mode === 'video' && son && (
+            <div className="st-bloc">
+              <span className="st-etiq">Réplique (facultatif)</span>
+              <input className="st-champ-ligne" value={replique} maxLength={300} onChange={(e) => setReplique(e.target.value)} placeholder="Ce qu’un personnage dit, ex. : On y va." aria-label="Réplique" />
+            </div>
+          )}
+
+          {mode !== 'image' && (
+            <div className="st-interrupteurs">
+              <button type="button" className="st-inter" aria-pressed={son} onClick={() => setSon(!son)}><span>Son<small>bruitages et voix H3</small></span><i /></button>
+              {mode === 'video' && (
+                <button type="button" className="st-inter" aria-pressed={musique} onClick={() => setMusique(!musique)} disabled={!etat?.musique} title={etat?.musique ? '' : 'Aucun moteur de musique en ligne'}>
+                  <span>Musique<small>MiniMax-Music3</small></span><i />
+                </button>
+              )}
+            </div>
+          )}
+
+          {etat?.demo && mode !== 'video' && <div className="st-demo">Mode démonstration : {demoImage} est sous licence de recherche Qwen (usage non commercial).</div>}
+
+          <div className="st-cta">
+            <button type="button" className="st-go" disabled={!prete} onClick={lancer}>{libelle}</button>
+            {mode === 'video' && devis && devis.secondesEstimees != null && !cleRequise && (
+              <div className="st-devis">
+                <span>Tournage ≈ <b>{fmtTemps(devis.secondesEstimees)}</b></span>
+                <span>{qualite === 'max' && etat?.cinema ? 'H3 complet' : 'FastH3'} · RTX 5090{devis.credits !== null ? ` · ${devis.credits} crédits` : ''}</span>
+              </div>
+            )}
+            {mode === 'image' && <div className="st-devis"><span>{demoImage} · DGX Spark GB10</span><span>≈ {qualite === 'max' ? '50 s' : '25 s'} par image</span></div>}
+            <p className="st-credit">Propulsé par MiniMax H3 · {etat?.image ?? 'Qwen-Image'} · MiniMax-Music3</p>
+          </div>
+        </aside>
+
+        <section className="st-galerie" aria-label="Tes créations">
+          {storyboard && (
+            <div className="st-decoupage">
+              <div className="nx-sb-tete">
+                <div>
+                  <h2>{storyboard.titre}</h2>
+                  <p className="nx-sous" style={{ margin: 0 }}>{storyboard.plans.length} plans · {storyboard.dureeTotale} s · tournage ≈ {minutesFilm} min. Retouche ce qui ne te plaît pas, puis lance.</p>
+                </div>
+                <div className="st-ligne">
+                  <button type="button" className="st-bouton" onClick={() => setStoryboard(null)}>Annuler</button>
+                  <button type="button" className="st-bouton primaire" disabled={occupe} onClick={() => void tournerFilm()}>{envoi === 'film' ? 'Lancement…' : 'Tourner le film'}</button>
+                </div>
+              </div>
+              <details className="nx-bible">
+                <summary>Bible de continuité (style, personnages, lieux)</summary>
+                <p><strong>Style :</strong> {storyboard.bible.style}</p>
+                {storyboard.bible.personnages.map((p) => <p key={p.nom}><strong>{p.nom} :</strong> {p.description}</p>)}
+                {storyboard.bible.lieux.map((l) => <p key={l.nom}><strong>{l.nom} :</strong> {l.description}</p>)}
+              </details>
+              <ol className="nx-plans">
+                {storyboard.plans.map((p, i) => (
+                  <li key={i} className="nx-plan">
+                    <div className="nx-plan-num">{i + 1}</div>
+                    <div className="nx-plan-corps">
+                      <input value={p.resume} onChange={(e) => majPlan(i, { resume: e.target.value })} aria-label={`Titre du plan ${i + 1}`} />
+                      <textarea rows={3} value={p.description} onChange={(e) => majPlan(i, { description: e.target.value })} aria-label={`Description du plan ${i + 1}`} />
+                      <div className="nx-plan-pied">
+                        <span className="nx-camera">{p.camera}</span>
+                        <button type="button" className={`nx-puce ${p.duree === 5 ? 'on' : ''}`} onClick={() => majPlan(i, { duree: 5 })}>5 s</button>
+                        <button type="button" className={`nx-puce ${p.duree === 10 ? 'on' : ''}`} onClick={() => majPlan(i, { duree: 10 })}>10 s</button>
+                        <button type="button" className="nx-lien" onClick={() => retirerPlan(i)} disabled={storyboard.plans.length <= 1}>Retirer</button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          <div className="st-g-tete">
+            <h2>Tes créations</h2>
+            <div className="st-filtres" role="group" aria-label="Filtrer">
+              {([['tout', 'Tout'], ['videos', 'Vidéos'], ['films', 'Films'], ['images', 'Images']] as const).map(([v, label]) => (
+                <button key={v} type="button" className={filtre === v ? 'on' : ''} onClick={() => setFiltre(v)}>{label}</button>
+              ))}
+            </div>
+          </div>
+
+          {montrees.length === 0 ? (
+            <div className="st-vide">
+              <div className="st-mosaique" aria-hidden>
+                {Array.from({ length: 18 }, (_, i) => <i key={i} style={{ opacity: [1, 0.15, 0.6, 0.3, 0.9, 0.2][(i * 5) % 6] }} />)}
+              </div>
+              <strong>Ta première scène t’attend.</strong>
+              <span>Écris une idée à gauche, ou pars d’un exemple. Les vidéos, images et films apparaîtront ici, avec leur progression en direct.</span>
+            </div>
+          ) : (
+            <div className="st-cartes">
+              {montrees.map((t) => {
+                const s = settingsOf(t);
+                const plans = s.film ? ((s.storyboard?.plans ?? []) as { take?: number }[]) : [];
+                const faits = plans.filter((p) => p.take && toutes.find((x) => x.id === p.take)?.status === 'done').length;
+                const image = isImage(t);
+                const actions = t.status !== 'done' ? undefined : s.film ? (
+                  <div className="st-actions-carte"><button type="button" onClick={() => setFilmOuvert(t.id)}>Plans et montage</button></div>
+                ) : image ? (
+                  <div className="st-actions-carte">
+                    <button type="button" onClick={() => void animer(t.id)}>Animer avec H3</button>
+                    <a href={mediaUrl(t.id)} download>Télécharger</a>
+                  </div>
+                ) : (
+                  <div className="st-actions-carte">
+                    {!s.nexoraAvecMusique && !s.nexoraMusiqueLance && etat?.musique && (
+                      <button type="button" onClick={() => { api.nexoraClipMusique(t.id, {}).then(() => toast('Composition de la musique lancée (moins d’une minute).')).catch((e) => toast(e instanceof Error ? e.message : 'Impossible de composer la musique.', true)); }}>Ajouter une musique</button>
+                    )}
+                    <button type="button" onClick={() => setPub(t.id)}>Texte réseaux</button>
+                    <a href={mediaUrl(t.id)} download>Télécharger</a>
+                  </div>
+                );
+                return (
+                  <MediaCard key={t.id} take={t} onOpen={() => (s.film ? setFilmOuvert(t.id) : setVue(t.id))}
+                    tag={s.film ? 'Film' : s.nexoraAvecMusique ? '+ musique' : image ? 'Image' : undefined}
+                    pendingLabel={s.film ? `Film : ${faits}/${plans.length} plans tournés` : 'En file d’attente'}
+                    actions={actions} />
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {pub !== null && <Publication id={pub} onClose={() => setPub(null)} />}
       {filmOuvert !== null && <FilmPlans filmId={filmOuvert} onClose={() => setFilmOuvert(null)} />}
       {vue !== null && <Viewer takeId={vue} onClose={() => setVue(null)} onStep={(d) => {
         const n = ids[ids.indexOf(vue) + d];

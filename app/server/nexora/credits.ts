@@ -7,7 +7,8 @@
 
 /** Secondes de calcul mesurées sur le DGX Spark GB10 (recherche/08), par moteur, nombre d'images et taille. */
 const MESURES_GB10: Record<string, Record<string, number>> = {
-  'h3-fast': { '124@832x480': 85, '243@832x480': 230, '124@1344x768': 340 },
+  // FastH3 : DGX Spark GB10 (anciennes mesures) ; RTX 5090 (31/10/2026) : 5 s en 832×480 en 23 s à chaud, 40 s à froid.
+  'h3-fast': { '124@832x480': 30 },
   // Moteur cinéma, RTX 5090 de pc1 : H3 non distillé int8, 24 étapes (banc du 31/10/2026).
   'h3-max': { '124@1344x768': 290 },
 };
@@ -26,7 +27,7 @@ export function secondesGpuEstimees(c: CorpsDevis): number {
   const mesures = MESURES_GB10[c.videoModel ?? ''] ?? {};
   const exacte = mesures[`${images}@${w}x${h}`] ?? mesures[`${images}@${h}x${w}`];
   if (exacte) return exacte;
-  const reference = c.videoModel === 'h3-max' ? { s: 290, images: 124, w: 1344, h: 768 } : { s: 85, images: 124, w: 832, h: 480 };
+  const reference = c.videoModel === 'h3-max' ? { s: 290, images: 124, w: 1344, h: 768 } : { s: 30, images: 124, w: 832, h: 480 };
   const pixels = (w * h) / (reference.w * reference.h);
   return Math.round(reference.s * (images / reference.images) ** 1.45 * Math.max(1, pixels) ** 1.45);
 }

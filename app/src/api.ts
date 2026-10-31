@@ -112,14 +112,25 @@ export interface Storyboard {
   plans: PlanFilm[];
   dureeTotale: number;
 }
-export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string }
+export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; demo?: boolean }
+export interface MoteurGpu { id: string; nom: string; recettes: string[]; enLigne: boolean; enCours: number }
 
 export const api = {
   status: () => j<Status>('/api/status'),
   /** Nexora Creative : une intention en français devient une vidéo (prompt écrit par le LLM, rendu MiniMax H3). */
-  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string }) =>
+  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string; musique?: boolean; replique?: string }) =>
     j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
   nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
+  nexoraIdees: (b: { mode: 'video' | 'image' | 'film'; theme?: string }) =>
+    j<{ idees: string[]; source: 'llm' | 'repli' }>('/api/nexora/idees', { method: 'POST', body: JSON.stringify(b) }),
+  nexoraPublication: (b: { id: number; plateforme: string; langue: 'fr' | 'en' }) =>
+    j<{ titre: string; texte: string; hashtags: string[]; mention: string; source: 'llm' | 'repli' }>('/api/nexora/publication', { method: 'POST', body: JSON.stringify(b) }),
+  nexoraMoteursGpu: () => j<MoteurGpu[]>('/api/nexora/moteurs-gpu'),
+  nexoraAmeliorer: (b: { intention: string; mode: 'video' | 'image' | 'film' }) =>
+    j<{ texte: string }>('/api/nexora/ameliorer', { method: 'POST', body: JSON.stringify(b) }),
+  nexoraImage: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; nombre?: number; qualite?: 'rapide' | 'max' }) =>
+    j<{ takeIds: number[]; prompt: string; source: 'llm' | 'repli'; modele: string }>('/api/nexora/image', { method: 'POST', body: JSON.stringify(b) }),
+  nexoraImageJeton: (id: number) => j<{ jeton: string }>(`/api/nexora/image/${id}/jeton`, { method: 'POST', body: '{}' }),
   nexoraDevis: (b: { format: string; duree: number; son: boolean; qualite: string; image?: string }) =>
     j<{ credits: number | null; secondesEstimees: number; moteur: string }>('/api/nexora/devis', { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmPlan: (b: { intention: string; duree: number }) =>

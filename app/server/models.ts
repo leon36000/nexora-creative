@@ -106,6 +106,22 @@ export const BUNDLES: Bundle[] = [
     ],
   },
   {
+    id: 'qwen21',
+    label: 'Qwen-Image 2.1 (démonstration)',
+    purpose: 'Nexora Creative : image de plan clé la plus puissante en poids ouverts (arène 1225), sortie native jusqu\'à 2K. Mode démonstration seulement.',
+    license: 'Qwen RESEARCH LICENSE AGREEMENT (30/09/2026) : usage non commercial (recherche ou évaluation) ; tout usage commercial exige une licence séparée (model-business@notice.qwencloud.com). Mention « Built with Qwen » si un modèle dérivé est distribué.',
+    licenseWarning: 'Non commercial : réservé aux démonstrations (NEXORA_MODE_DEMO=1).',
+    optional: true,
+    files: [
+      { file: 'qwen_image_2.1_int8_convrot.safetensors', dir: 'diffusion_models',
+        ...HF('Comfy-Org/Qwen-Image-2.1', 'diffusion_models/qwen_image_2.1_int8_convrot.safetensors', 7.3) },
+      { file: 'qwen3vl_8b_int8_convrot.safetensors', dir: 'text_encoders',
+        ...HF('Comfy-Org/Qwen-Image-2.1', 'text_encoders/qwen3vl_8b_int8_convrot.safetensors', 9.4) },
+      { file: 'qwen_image_2.1_vae_bf16.safetensors', dir: 'vae',
+        ...HF('Comfy-Org/Qwen-Image-2.1', 'vae/qwen_image_2.1_vae_bf16.safetensors', 0.7) },
+    ],
+  },
+  {
     id: 'edit',
     label: 'Qwen-Image-Edit stills',
     purpose: 'The Edit app and its one-click image apps (New angle, Coverage, Push in, Next beat, Relight, Expand), plus Edit / Relight / Expand on any still. Instruction editing with up to three input images. Shares the text encoder, VAE and Lightning LoRA with the qwen bundle.',
@@ -510,7 +526,7 @@ export function bundlesFor(req: {
     if (req.mode === 'dream') return ['ltx25', 'dream'];
     return req.model === 'ultrasharp' ? ['upres', 'upres-ultrasharp'] : ['upres'];
   }
-  if (req.kind === 'still') return [req.model === 'flux2' ? 'flux2' : 'qwen'];
+  if (req.kind === 'still') return [req.model === 'flux2' ? 'flux2' : req.model === 'qwen21' ? 'qwen21' : 'qwen'];
   if (req.kind === 'edit') return ['edit'];
   if (req.kind === 'upres') return ['upres'];
   if (req.kind === 'mirror') return ['ltx25', 'mirror'];

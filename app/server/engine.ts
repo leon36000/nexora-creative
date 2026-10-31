@@ -30,7 +30,7 @@ export const engine = new EventEmitter();
  * comfy-api-proxy. Une recette (« h3-fast », « h3-max »…) ne part que vers un moteur qui la déclare ; parmi eux, le
  * moins chargé. Le lien tâche → moteur est gardé sur disque pour retrouver les tâches après un redémarrage.
  */
-export interface MoteurGpu { id: string; nom: string; comfyUrl: string; baseUrl: string; recettes: string[] }
+export interface MoteurGpu { id: string; nom: string; comfyUrl: string; baseUrl: string; recettes: string[]; /** Clé d'un moteur cloud (jamais journalisée). */ cle?: string }
 
 function lireMoteurs(): MoteurGpu[] {
   const principal: MoteurGpu = {
@@ -58,6 +58,27 @@ function lireMoteurs(): MoteurGpu[] {
 }
 
 export const moteurs: MoteurGpu[] = lireMoteurs();
+const moteursEnv: MoteurGpu[] = moteurs.map((m) => ({ ...m }));
+
+/**
+ * Nexora : applique la liste de moteurs de l'administration du site (lue toutes les minutes). Le moteur « principal » de
+ * l'environnement reste si le site ne définit pas le même identifiant. Un moteur dont l'adresse ou la clé change est
+ * reconstruit ; les tâches en cours sur un moteur retiré retombent sur le premier moteur de la liste.
+ */
+export function appliquerMoteurs(depuisSite: MoteurGpu[]): void {
+  const prochain = [...depuisSite, ...moteursEnv.filter((m) => !depuisSite.some((x) => x.id === m.id))];
+  if (!prochain.some((m) => m.id === 'principal')) prochain.unshift(moteursEnv[0]);
+  // « principal » reste en tête : c'est le moteur par défaut des recettes non déclarées.
+  prochain.sort((a, b) => (a.id === 'principal' ? -1 : b.id === 'principal' ? 1 : 0));
+  for (const m of prochain) {
+    const avant = moteurs.find((x) => x.id === m.id);
+    if (avant && (avant.baseUrl !== m.baseUrl || avant.cle !== m.cle)) clients.delete(m.id);
+  }
+  for (const id of [...clients.keys()]) if (!prochain.some((m) => m.id === id)) clients.delete(id);
+  moteurs.splice(0, moteurs.length, ...prochain);
+}
+/** Les moteurs tels que l'environnement les définit (retour à la configuration du poste). */
+export const retablirMoteursEnv = () => appliquerMoteurs([]);
 const moteurParId = (id: string | undefined) => moteurs.find((m) => m.id === id) ?? moteurs[0];
 
 const clients = new Map<string, Comfy>();
@@ -66,7 +87,7 @@ function sdk(moteur = 'principal'): Comfy {
   if (!c) {
     // Le SDK lit son adresse dans l'environnement au moment de la construction.
     process.env.COMFY_BASE_URL = moteurParId(moteur).baseUrl;
-    c = new Comfy({ apiKey: config.comfyApiKey || undefined, clientInfo: 'openfield' });
+    c = new Comfy({ apiKey: moteurParId(moteur).cle || config.comfyApiKey || undefined, clientInfo: 'openfield' });
     clients.set(moteur, c);
   }
   return c;
@@ -379,7 +400,8 @@ export async function cancelAll(): Promise<void> {
 export async function apiUp(baseUrl = config.comfyBaseUrl): Promise<boolean> {
   try {
     const headers: Record<string, string> = {};
-    if (config.comfyApiKey) headers.Authorization = `Bearer ${config.comfyApiKey}`;
+    const cle = moteurs.find((m) => m.baseUrl === baseUrl)?.cle ?? config.comfyApiKey;
+    if (cle) headers.Authorization = `Bearer ${cle}`;
     const r = await fetch(`${baseUrl}/api/v2/jobs?limit=1`, {
       headers,
       signal: AbortSignal.timeout(4000),
@@ -437,11 +459,27 @@ async function waitUp(timeoutMs: number, baseUrl = config.comfyBaseUrl): Promise
   return false;
 }
 
+/** Dernier état connu de chaque moteur (mis à jour par etatMoteurs, appelé toutes les 20 s). */
+const enLigneConnu = new Map<string, boolean>();
+
 /** Nexora : état de chaque moteur du parc (API v2 joignable, tâches en cours). */
 export async function etatMoteurs() {
-  return Promise.all(moteurs.map(async (m) => ({
+  const etat = await Promise.all(moteurs.map(async (m) => ({
     id: m.id, nom: m.nom, recettes: m.recettes, enLigne: await apiUp(m.baseUrl), enCours: enCours.get(m.id)?.size ?? 0,
   })));
+  for (const e of etat) enLigneConnu.set(e.id, e.enLigne);
+  return etat;
+}
+
+/** Recettes déclarées par les moteurs en ligne (un moteur jamais sondé est présumé en ligne). */
+export function recettesEnLigne(): Set<string> {
+  return new Set(moteurs.filter((m) => enLigneConnu.get(m.id) !== false).flatMap((m) => m.recettes));
+}
+
+/** La recette part-elle sur le moteur principal (dont ce serveur contrôle les poids) ? Sinon le moteur distant sait ce qu'il a. */
+export function recetteSurPrincipal(recette?: string): boolean {
+  const m = moteursPour(recette)[0];
+  return !m || m.id === 'principal';
 }
 
 /** Stop the proxies this process started. */
