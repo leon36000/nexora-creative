@@ -147,14 +147,14 @@ async function etape(filmId: number) {
     if (!t) throw new Error(`Plan ${i + 1} : sa prise a été supprimée`);
     if (t.status === 'failed' || t.status === 'stopped') throw new Error(`Plan ${i + 1} : ${t.status}${t.error ? ` (${t.error})` : ''}`);
     if (t.status !== 'done' || !t.output_path || !existsSync(t.output_path)) return;
-    const plan = p as PlanFilm & { corps?: Record<string, any>; controle?: { ok: boolean; defauts: string[] }; reprises?: number };
+    const plan = p as PlanFilm & { corps?: Record<string, any>; controle?: { ok: boolean; defauts: string[]; duree?: number }; reprises?: number };
     if (!plan.controle) {
       const images = Number(plan.corps?.lengthFrames ?? plan.corps?.frames);
       const c = await controlerFichier(config.ffmpegBin, t.output_path, {
         dureeAttendue: Number.isFinite(images) && images > 0 ? images / 24 : plan.duree,
         sonAttendu: !!plan.corps?.withAudio,
       });
-      plan.controle = { ok: c.ok, defauts: c.defauts };
+      plan.controle = { ok: c.ok, defauts: c.defauts, duree: c.duree };
       majPlan(filmId, i, { controle: plan.controle });
       // Correction automatique, budget d'une reprise par plan : même prompt, autre graine.
       if (!c.ok && (plan.reprises ?? 0) < 1 && plan.corps) {
@@ -175,7 +175,11 @@ async function etape(filmId: number) {
   const sortie = join(dossier, `film_${filmId}_${Date.now()}.mp4`);
   const t0 = Date.now();
   await new Promise<void>((ok, ko) =>
-    execFile(config.ffmpegBin, argsAssemblage(fichiers, sortie, !!s.son), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
+    execFile(config.ffmpegBin, argsAssemblage(fichiers, sortie, !!s.son, {
+      transition: s.transition === 'fondu' ? 'fondu' : 'coupe',
+      durees: sb.plans.map((p) => Number((p as any).controle?.duree) || dureePlan(p)),
+      fondu: 0.5,
+    }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
       err ? ko(new Error(`ffmpeg : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
   );
   takes.finish(filmId, sortie, (Date.now() - t0) / 1000);

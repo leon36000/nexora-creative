@@ -125,11 +125,48 @@ export async function planifierFilm(
   return { storyboard: decoupageSimple(d.intention, d.dureeCible), source: 'repli' };
 }
 
-/** Arguments ffmpeg qui mettent les plans bout à bout (même taille, ré-encodés en H.264 + AAC). */
-export function argsAssemblage(fichiers: string[], sortie: string, son: boolean): string[] {
+export interface OptionsAssemblage {
+  transition: 'coupe' | 'fondu';
+  /** Durée de chaque plan (s), nécessaire au fondu pour placer les transitions. */
+  durees: number[];
+  /** Durée du fondu enchaîné (s). */
+  fondu: number;
+}
+
+/**
+ * Arguments ffmpeg qui mettent les plans bout à bout (même taille, ré-encodés en H.264 + AAC), en coupe franche ou
+ * en fondu enchaîné (xfade pour l'image, acrossfade pour le son).
+ */
+export function argsAssemblage(fichiers: string[], sortie: string, son: boolean, o?: OptionsAssemblage): string[] {
   const entrees = fichiers.flatMap((f) => ['-i', f]);
-  const flux = fichiers.map((_, i) => `[${i}:v:0]${son ? `[${i}:a:0]` : ''}`).join('');
-  const filtre = `${flux}concat=n=${fichiers.length}:v=1:a=${son ? 1 : 0}[v]${son ? '[a]' : ''}`;
+  let filtre: string;
+  if (o?.transition === 'fondu' && fichiers.length > 1) {
+    const d = o.fondu;
+    const norm = fichiers.map((_, i) => `[${i}:v:0]fps=24,settb=AVTB,format=yuv420p[n${i}]`);
+    const video: string[] = [];
+    let cumul = 0;
+    let precedent = 'n0';
+    for (let i = 1; i < fichiers.length; i++) {
+      cumul += o.durees[i - 1];
+      const offset = Math.round((cumul - i * d) * 1000) / 1000;
+      const sortieV = i === fichiers.length - 1 ? 'v' : `x${i}`;
+      video.push(`[${precedent}][n${i}]xfade=transition=fade:duration=${d}:offset=${offset}[${sortieV}]`);
+      precedent = sortieV;
+    }
+    const audio: string[] = [];
+    if (son) {
+      let pa = '0:a:0';
+      for (let i = 1; i < fichiers.length; i++) {
+        const sortieA = i === fichiers.length - 1 ? 'a' : `y${i}`;
+        audio.push(`[${pa}][${i}:a:0]acrossfade=d=${d}[${sortieA}]`);
+        pa = sortieA;
+      }
+    }
+    filtre = [...norm, ...video, ...audio].join(';');
+  } else {
+    const flux = fichiers.map((_, i) => `[${i}:v:0]${son ? `[${i}:a:0]` : ''}`).join('');
+    filtre = `${flux}concat=n=${fichiers.length}:v=1:a=${son ? 1 : 0}[v]${son ? '[a]' : ''}`;
+  }
   return [
     '-y', ...entrees,
     '-filter_complex', filtre,
@@ -137,6 +174,24 @@ export function argsAssemblage(fichiers: string[], sortie: string, son: boolean)
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
     sortie,
   ];
+}
+
+/** Export professionnel : ProRes 422 HQ 10 bits + PCM, lisible par Premiere, DaVinci Resolve et Final Cut. */
+export function argsExport(entree: string, sortie: string, format: 'prores'): string[] {
+  void format;
+  return ['-y', '-i', entree, '-c:v', 'prores_ks', '-profile:v', '3', '-pix_fmt', 'yuv422p10le', '-vendor', 'apl0', '-c:a', 'pcm_s16le', sortie];
+}
+
+/** Nouvelle version d'un film avec un autre ordre de plans (ou des plans retirés), sans aucun nouveau rendu. */
+export function storyboardPourMontage(sb: Storyboard, ordre: number[]): Storyboard {
+  if (!ordre.length) throw new Error('un film garde au moins un plan');
+  if (new Set(ordre).size !== ordre.length) throw new Error('un plan apparaît deux fois');
+  const plans = ordre.map((i) => {
+    if (!Number.isInteger(i) || i < 0 || i >= sb.plans.length) throw new Error(`le film n'a pas de plan ${i + 1}`);
+    // Les plans sont déjà tournés : l'enchaînement par image ne sert plus qu'au tournage.
+    return { ...sb.plans[i], suite: false };
+  });
+  return { ...sb, plans, dureeTotale: plans.reduce((n, p) => n + p.duree, 0) };
 }
 
 /**

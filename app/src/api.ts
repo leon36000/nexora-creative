@@ -124,6 +124,8 @@ export const api = {
     j<{ storyboard: Storyboard; source: 'llm' | 'repli' }>('/api/nexora/film/plan', { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmRefaire: (filmId: number, b: { plan: number; description?: string; camera?: string }) =>
     j<{ filmId: number }>(`/api/nexora/film/${filmId}/refaire`, { method: 'POST', body: JSON.stringify(b) }),
+  nexoraFilmMontage: (filmId: number, b: { ordre: number[]; transition: 'coupe' | 'fondu' }) =>
+    j<{ filmId: number }>(`/api/nexora/film/${filmId}/montage`, { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmTourner: (b: { storyboard: Storyboard; format: '16:9' | '9:16' | '1:1'; son: boolean; intention: string }) =>
     j<{ filmId: number }>('/api/nexora/film/tourner', { method: 'POST', body: JSON.stringify(b) }),
   /** Set the machine-wide render size; null goes back to the default (OPENFIELD_RENDER_TIER or the GPU). */

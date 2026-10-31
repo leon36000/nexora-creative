@@ -9,7 +9,7 @@ import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
-import { createReadStream, existsSync, realpathSync, statSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync, realpathSync, statSync } from 'fs';
 import { dirname, extname, join, resolve, sep } from 'path';
 import type { WebSocket } from 'ws';
 import * as comfy from './comfy.js';
@@ -24,7 +24,7 @@ import { clientLlmCourant } from './nexora/llm.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
-import { lireStoryboard, planifierFilm, storyboardPourRefaire } from './nexora/film.js';
+import { argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { buildLtxGraph } from './graphs/ltx.js';
 import { buildLtx25Graph, ltx25EffectiveSize, ltx25Mode, LTX25_FPS, snapFrames } from './graphs/ltx25.js';
@@ -1040,6 +1040,38 @@ app.post('/api/nexora/moteurs', async (req) => {
   const d = lireDemandeCreer({ ...(req.body as any), intention: 'x' });
   const r = planifierMoteurs(besoinDe(d), { territoire: territoireDuCompte() });
   return { retenus: r.retenus.map((m) => ({ id: m.id, nom: m.nom.fr, recette: m.recette, son: m.sortie.audio, affichage: m.licence.affichage ?? null })), exclus: r.exclus };
+});
+
+/** Montage d'un film sans nouveau rendu : nouvel ordre, plans retirés, coupe franche ou fondu enchaîné. */
+app.post('/api/nexora/film/:id/montage', async (req, reply) => {
+  const film = takes.get(Number((req.params as any).id));
+  const b = (req.body ?? {}) as any;
+  if (!film) return reply.code(404).send({ error: 'Film introuvable.' });
+  const s = JSON.parse(film.settings);
+  if (!s.film || film.status !== 'done') return reply.code(409).send({ error: 'Le film doit être terminé pour être remonté.' });
+  let sb;
+  try { sb = storyboardPourMontage(s.storyboard, Array.isArray(b.ordre) ? b.ordre.map(Number) : s.storyboard.plans.map((_: unknown, i: number) => i)); }
+  catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'montage invalide' }); }
+  const filmId = await tournerFilm(sb, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur: s.moteur ?? 'h3-fast' }, null);
+  takes.patchSettings(filmId, { versionDe: film.id, transition: b.transition === 'fondu' ? 'fondu' : 'coupe' });
+  void avancerFilm(filmId);
+  return { filmId };
+});
+
+/** Export professionnel d'un film terminé (ProRes 422 HQ + PCM, .mov). */
+app.get('/api/nexora/film/:id/export', async (req, reply) => {
+  const film = takes.get(Number((req.params as any).id));
+  if (!film || !film.output_path || film.status !== 'done') return reply.code(404).send({ error: 'Film introuvable ou pas terminé.' });
+  const dossier = join(config.outputDir, 'films', 'exports');
+  mkdirSync(dossier, { recursive: true });
+  const sortie = join(dossier, `film_${film.id}_prores.mov`);
+  if (!existsSync(sortie)) {
+    const { execFile } = await import('child_process');
+    await new Promise<void>((ok, ko) => execFile(config.ffmpegBin, argsExport(film.output_path!, sortie, 'prores'), { maxBuffer: 1 << 24 }, (err) => (err ? ko(err) : ok())));
+  }
+  reply.header('content-type', 'video/quicktime');
+  reply.header('content-disposition', `attachment; filename="${safeShotName(film.shot_name || 'film')}_prores.mov"`);
+  return reply.send(createReadStream(sortie));
 });
 
 app.get('/api/nexora/etat', async () => {

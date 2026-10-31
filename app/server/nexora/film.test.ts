@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ClientLlm } from './llm.js';
-import { argsAssemblage, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourRefaire } from './film.js';
+import { argsAssemblage, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './film.js';
 
 const brut = {
   titre: 'La métamorphose',
@@ -88,6 +88,38 @@ describe('refaire un seul plan d’un film', () => {
 
   it('refuse un numéro de plan inexistant', () => {
     expect(() => storyboardPourRefaire(tourne, 9, {})).toThrow();
+  });
+});
+
+describe('montage sans nouveau rendu', () => {
+  const sb = lireStoryboard(brut, 20);
+  sb.plans = sb.plans.map((p, i) => ({ ...p, take: 200 + i }));
+
+  it('réordonne et retire des plans en gardant leurs prises', () => {
+    const m = storyboardPourMontage(sb, [2, 0]);
+    expect(m.plans.map((p) => p.take)).toEqual([202, 200]);
+    expect(m.dureeTotale).toBe(10);
+    expect(m.plans.every((p) => !p.suite)).toBe(true);
+  });
+
+  it('refuse un ordre vide, en double ou hors du film', () => {
+    expect(() => storyboardPourMontage(sb, [])).toThrow();
+    expect(() => storyboardPourMontage(sb, [0, 0])).toThrow();
+    expect(() => storyboardPourMontage(sb, [5])).toThrow();
+  });
+
+  it('assemble en fondu enchaîné image et son, aux bons décalages', () => {
+    const a = argsAssemblage(['/a.mp4', '/b.mp4', '/c.mp4'], '/s.mp4', true, { transition: 'fondu', durees: [5, 5, 5], fondu: 0.5 }).join(' ');
+    expect(a).toMatch(/xfade=transition=fade:duration=0.5:offset=4.5/);
+    expect(a).toMatch(/xfade=transition=fade:duration=0.5:offset=9/);
+    expect(a).toMatch(/acrossfade=d=0.5/);
+  });
+
+  it('exporte en ProRes 422 HQ pour les logiciels de montage', () => {
+    const a = argsExport('/f.mp4', '/f.mov', 'prores').join(' ');
+    expect(a).toMatch(/prores_ks/);
+    expect(a).toMatch(/-profile:v 3/);
+    expect(a).toMatch(/pcm_s16le/);
   });
 });
 

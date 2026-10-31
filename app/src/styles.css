@@ -802,3 +802,8 @@ input[type="color"].swatch::-webkit-color-swatch { border: 0; border-radius: 5px
 .nx-photo-btn { cursor: pointer; border: 1px dashed rgba(255,181,71,.45); }
 .nx-photo { display: inline-flex; align-items: center; gap: 8px; }
 .nx-photo img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,181,71,.45); }
+.nx-montage { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.nx-montage ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.nx-montage li { display: flex; gap: 10px; align-items: center; }
+.nx-montage li span { flex: 1; }
+.nx-montage a.nx-puce { text-decoration: none; }

@@ -13,9 +13,29 @@ export default function FilmPlans({ filmId, onClose }: { filmId: number; onClose
   const toutes = useStore((s) => s.takes);
   const [edition, setEdition] = useState<Record<number, string>>({});
   const [envoi, setEnvoi] = useState<number | null>(null);
+  const [ordre, setOrdre] = useState<number[] | null>(null);
+  const [transition, setTransition] = useState<'coupe' | 'fondu'>('coupe');
   if (!film) return null;
   const s = settingsOf(film);
   const plans = (s.storyboard?.plans ?? []) as Plan[];
+  const montage = ordre ?? plans.map((_, i) => i);
+  const deplacer = (k: number, d: -1 | 1) => {
+    const o = [...montage];
+    const j = k + d;
+    if (j < 0 || j >= o.length) return;
+    [o[k], o[j]] = [o[j], o[k]];
+    setOrdre(o);
+  };
+
+  async function remonter() {
+    try {
+      await api.nexoraFilmMontage(filmId, { ordre: montage, transition });
+      toast('Nouvelle version en assemblage (aucun nouveau rendu).');
+      onClose();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'Le montage a échoué.', true);
+    }
+  }
 
   async function refaire(i: number) {
     setEnvoi(i);
@@ -42,6 +62,30 @@ export default function FilmPlans({ filmId, onClose }: { filmId: number; onClose
           <button type="button" className="nx-lien" onClick={onClose}>Fermer</button>
         </div>
         {film.status === 'done' && <video className="nx-film-video" src={mediaUrl(film.id)} poster={posterUrl(film.id)} controls playsInline />}
+        {film.status === 'done' && (
+          <div className="nx-montage">
+            <strong>Montage</strong>
+            <ol>
+              {montage.map((i, k) => (
+                <li key={i}>
+                  <span>{k + 1}. {plans[i].resume}</span>
+                  <button type="button" className="nx-lien" onClick={() => deplacer(k, -1)} disabled={k === 0} aria-label="Monter">↑</button>
+                  <button type="button" className="nx-lien" onClick={() => deplacer(k, 1)} disabled={k === montage.length - 1} aria-label="Descendre">↓</button>
+                  <button type="button" className="nx-lien" onClick={() => setOrdre(montage.filter((x) => x !== i))} disabled={montage.length <= 1}>Retirer</button>
+                </li>
+              ))}
+            </ol>
+            <div className="nx-options">
+              <div className="nx-groupe">
+                <button type="button" className={`nx-puce ${transition === 'coupe' ? 'on' : ''}`} onClick={() => setTransition('coupe')}>Coupe franche</button>
+                <button type="button" className={`nx-puce ${transition === 'fondu' ? 'on' : ''}`} onClick={() => setTransition('fondu')}>Fondu enchaîné</button>
+              </div>
+              <button type="button" className="nx-puce on" onClick={() => void remonter()}>Créer cette version</button>
+              <a className="nx-puce" href={`/api/nexora/film/${film.id}/export`} download>Exporter en ProRes (.mov)</a>
+              <a className="nx-puce" href={mediaUrl(film.id)} download>Télécharger le MP4</a>
+            </div>
+          </div>
+        )}
         <ol className="nx-plans">
           {plans.map((p, i) => {
             const t = p.take ? toutes.find((x) => x.id === p.take) : undefined;
