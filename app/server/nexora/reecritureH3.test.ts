@@ -1,0 +1,60 @@
+import { describe, expect, it } from 'vitest';
+import type { ClientLlm, MessageLlm } from './llm.js';
+import { reecrireH3 } from './reecritureH3.js';
+
+const bon = `integrated_multimodal_description: [Shot 1] Live-action, cinematic, a wide shot of a red car. The camera performs an arc shot at slow speed around it.
+
+overall_soundscape: Waves and wind.
+
+non_diegetic_music: N/A`;
+
+function faux(reponses: string[]): ClientLlm & { appels: MessageLlm[][] } {
+  const appels: MessageLlm[][] = [];
+  return {
+    appels,
+    async completer(_role, messages) {
+      appels.push(messages);
+      const r = reponses.shift();
+      if (r === undefined) throw new Error('plus de réponse');
+      return r;
+    },
+  };
+}
+
+const entree = { intention: 'ma voiture rouge au bord de la mer, la caméra tourne autour', mode: 't2va' as const, dureeS: 5.17 };
+
+describe('réécrivain H3', () => {
+  it('donne le guide officiel au LLM et rend un prompt conforme', async () => {
+    const llm = faux([JSON.stringify({ prompt: bon })]);
+    const r = await reecrireH3(entree, llm);
+    expect(r.prompt).toBe(bon);
+    expect(r.source).toBe('llm');
+    expect(r.tentatives).toBe(1);
+    expect(llm.appels[0][0].content).toMatch(/Arc Shot/);
+    expect(llm.appels[0][1].content).toMatch(/ma voiture rouge/);
+  });
+
+  it('renvoie les erreurs du validateur au LLM pour réparation', async () => {
+    const llm = faux([JSON.stringify({ prompt: 'n’importe quoi' }), JSON.stringify({ prompt: bon })]);
+    const r = await reecrireH3(entree, llm);
+    expect(r.tentatives).toBe(2);
+    expect(r.prompt).toBe(bon);
+    expect(llm.appels[1].at(-1)?.content).toMatch(/overall_soundscape/);
+  });
+
+  it('retombe sur un prompt minimal conforme si le LLM échoue ou est absent', async () => {
+    const r1 = await reecrireH3(entree, faux(['pas du json', 'toujours pas', 'non']));
+    expect(r1.source).toBe('repli');
+    expect(r1.prompt).toMatch(/^integrated_multimodal_description: \[Shot 1\]/);
+    const r2 = await reecrireH3(entree, null);
+    expect(r2.source).toBe('repli');
+    expect(r2.erreurs).toEqual([]);
+  });
+
+  it('protège les répliques de l’utilisateur', async () => {
+    const llm = faux([JSON.stringify({ prompt: bon }), JSON.stringify({ prompt: bon }), JSON.stringify({ prompt: bon })]);
+    const r = await reecrireH3({ ...entree, dialogues: [{ texte: 'On y va.', langue: 'French' }] }, llm);
+    expect(r.source).toBe('repli');
+    expect(r.prompt).toContain('<d>[French] On y va.</d>');
+  });
+});

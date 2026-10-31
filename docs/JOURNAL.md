@@ -13,3 +13,10 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - Politique de licences en échec fermé (`app/server/nexora/licences.ts`) : LTX-2.x et tous ses dérivés, FLUX.2 dev, 4x-UltraSharp bloqués ; H3 permis seulement si le territoire du compte n'est pas US/UE/R.-U./Corée ; ensemble inconnu bloqué. Branchée sur `blockingReason`, `effectBlockingReason` et les rendus en moteur distant. Contexte de compte par requête (`compte.ts`, AsyncLocalStorage). 8 tests vitest verts [TEST].
 - Téléchargement FastH3 V2 NVFP4 (≈ 35 Go) lancé en arrière-plan dans `~/nexora-creative-data/models`.
 - Prochaine action : lot 1 (ComfyUI sur GB10).
+
+## 30/10/2026 — itération 1, suite (lots R, 1, 2 ; priorité du fondateur : « l'important est l'outil »)
+- Lot R fait : `recherche/07-litterature-scientifique.md` (≈ 95 articles, 9 axes, top 10 classé) par un sous-agent ; chiffres des auteurs, non reproduits.
+- Lot 1 fait : ComfyUI v0.43.2 + PyTorch 2.14.1 cu130 sur GB10, écoute 127.0.0.1:37188 [TEST]. Piège `Python.h` contourné sans droits (voir rapport 08).
+- Lot 2 fait : **premier rendu H3 réel** — 832×480, 5,17 s, son stéréo, **92,1 s à froid, 82,1 s à chaud** [MESURÉ]. Vidéo envoyée au fondateur. Graphe : prise en charge des points de contrôle FastH3 distillés (4 tests).
+- Demande du fondateur : exploiter un LLM cloud au maximum → conception `recherche/09-llm-au-maximum.md` (12 rôles) ; réécrivain H3 (rôle 4) codé : validateur déterministe du guide officiel MiniMax + réparation + repli (10 tests). Client LLM compatible OpenAI, modèle par rôle. Essai réel en cours avec `dev/cloud-glm-5-3` via le LiteLLM de développement de NexoraSite (petite dépense cloud, pratique établie de Nexora pour vérifier avec de vrais modèles).
+- Note : `main` est protégée sur GitLab ; le travail est poussé sur la branche `developpement`.
