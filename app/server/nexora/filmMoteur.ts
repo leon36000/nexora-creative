@@ -49,11 +49,12 @@ export async function tournerFilm(
     // Les prompts des plans indépendants s'écrivent en parallèle, puis leurs rendus partent dans l'ordre. Un plan
     // « suite » attend la fin du précédent : il partira de sa dernière image (voir lancerSuite).
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite ? null : reecrireH3({ intention: intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p) }, llm))),
     );
     for (let i = 0; i < sb.plans.length; i++) {
       const p = sb.plans[i];
       const ecrit = prompts[i];
+      if (p.take) continue; // version refaite d'un film : ce plan garde sa prise
       if (!ecrit) {
         majPlan(filmId, i, { attente: 'image_precedente', reservation: opts.reservations?.[i] });
         continue;

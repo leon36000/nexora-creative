@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ClientLlm } from './llm.js';
-import { argsAssemblage, intentionDuPlan, lireStoryboard, planifierFilm } from './film.js';
+import { argsAssemblage, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourRefaire } from './film.js';
 
 const brut = {
   titre: 'La métamorphose',
@@ -66,6 +66,28 @@ describe('storyboard du Director', () => {
     const llm: ClientLlm = { completer: async (_r, m) => { consignes = m[0].content; return JSON.stringify(brut); } };
     await planifierFilm({ intention: 'x', dureeCible: 20 }, llm);
     expect(consignes).toMatch(/"suite"/);
+  });
+});
+
+describe('refaire un seul plan d’un film', () => {
+  const tourne = {
+    ...lireStoryboard({ ...brut, plans: [...brut.plans, { resume: 'Fin', description: 'The robot walks away', duree: 5, camera: 'wide', suite: true }] }, 25),
+  };
+  tourne.plans = tourne.plans.map((p, i) => ({ ...p, take: 100 + i }));
+
+  it('garde les prises des autres plans et vide celle du plan refait', () => {
+    const r = storyboardPourRefaire(tourne, 0, {});
+    expect(r.plans.map((p) => p.take)).toEqual([undefined, 101, 102, 103]);
+  });
+
+  it('refait aussi les plans enchaînés qui partaient de son image', () => {
+    const r = storyboardPourRefaire(tourne, 2, { description: 'The robot kneels instead' });
+    expect(r.plans.map((p) => p.take)).toEqual([100, 101, undefined, undefined]);
+    expect(r.plans[2].description).toBe('The robot kneels instead');
+  });
+
+  it('refuse un numéro de plan inexistant', () => {
+    expect(() => storyboardPourRefaire(tourne, 9, {})).toThrow();
   });
 });
 

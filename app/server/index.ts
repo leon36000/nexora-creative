@@ -23,7 +23,7 @@ import { clientLlmCourant } from './nexora/llm.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
-import { lireStoryboard, planifierFilm } from './nexora/film.js';
+import { lireStoryboard, planifierFilm, storyboardPourRefaire } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { buildLtxGraph } from './graphs/ltx.js';
 import { buildLtx25Graph, ltx25EffectiveSize, ltx25Mode, LTX25_FPS, snapFrames } from './graphs/ltx25.js';
@@ -995,6 +995,38 @@ app.post('/api/nexora/devis', async (req) => {
   const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
   const corps = corpsRendu(demande, '', moteur);
   return { credits: configAuth ? devisCredits(corps, tarifDepuisEnv()) : null, secondesEstimees: secondesGpuEstimees(corps), moteur };
+});
+
+/**
+ * Refaire un seul plan d'un film (description ou caméra retouchées) : une nouvelle version du film garde les prises des
+ * autres plans, ne retourne que ce plan et ceux qui s'enchaînaient dessus, puis réassemble.
+ */
+app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
+  const film = takes.get(Number((req.params as any).id));
+  const b = (req.body ?? {}) as any;
+  if (!film) return reply.code(404).send({ error: 'Film introuvable.' });
+  const s = JSON.parse(film.settings);
+  if (!s.film || film.status === 'queued' || film.status === 'rendering') return reply.code(409).send({ error: 'Ce film est encore en tournage.' });
+  let sb;
+  try { sb = storyboardPourRefaire(s.storyboard, Number(b.plan), { description: b.description, camera: b.camera }); }
+  catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'plan invalide' }); }
+  const moteur = s.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
+  const fac = facturationCourante();
+  const reservations: (CreditsPrise | undefined)[] = [];
+  for (const p of sb.plans) {
+    if (!fac || p.take) { reservations.push(undefined); continue; }
+    const corps = corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son }, '', moteur);
+    const r = await fac.reserver({ idempotence: randomUUID(), credits: devisCredits(corps, tarifDepuisEnv()), libelle: `Nexora Creative · plan refait « ${sb.titre.slice(0, 40)} »` });
+    if (!r.ok) {
+      for (const x of reservations) if (x) await fac.liberer(x.reservationId).catch(() => {});
+      return reply.code(402).send({ error: r.message });
+    }
+    reservations.push({ reservationId: r.reservationId, credits: r.credits, etat: 'reservee' });
+  }
+  const filmId = await tournerFilm({ ...sb, titre: sb.titre }, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur, reservations: reservations as CreditsPrise[] }, llmCourant());
+  takes.patchSettings(filmId, { versionDe: film.id });
+  void avancerFilm(filmId);
+  return { filmId, take: takes.get(filmId) };
 });
 
 app.get('/api/nexora/etat', async () => {

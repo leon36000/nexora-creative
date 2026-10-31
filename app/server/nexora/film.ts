@@ -138,3 +138,28 @@ export function argsAssemblage(fichiers: string[], sortie: string, son: boolean)
     sortie,
   ];
 }
+
+/**
+ * Nouvelle version d'un film où seul le plan `i` est refait (avec une description ou une caméra retouchées), ainsi
+ * que les plans enchaînés qui partaient de son image. Les autres plans gardent leur prise : ils ne sont pas retournés.
+ * Ne s'applique qu'au storyboard lu côté serveur (jamais à des numéros de prise venus du navigateur).
+ */
+export function storyboardPourRefaire(sb: Storyboard, i: number, modif: { description?: string; camera?: string }): Storyboard {
+  if (!Number.isInteger(i) || i < 0 || i >= sb.plans.length) throw new Error(`le film n'a pas de plan ${i + 1}`);
+  let refaire = false;
+  const plans = sb.plans.map((p, k) => {
+    if (k === i) refaire = true;
+    else if (!p.suite) refaire = false;
+    const garde = !(refaire && k >= i);
+    const base = { ...p } as PlanFilm & Record<string, unknown>;
+    delete base.attente;
+    // Un plan gardé garde aussi son contrôle qualité (pas de nouvelle reprise sur une prise déjà acceptée).
+    if (!garde) { delete base.take; delete base.corps; delete base.reservation; delete base.controle; delete base.reprises; delete base.controleRefuse; }
+    if (k === i) {
+      if (modif.description?.trim()) base.description = modif.description.trim().slice(0, 1200);
+      if (modif.camera?.trim()) base.camera = modif.camera.trim().slice(0, 300);
+    }
+    return base as PlanFilm;
+  });
+  return { ...sb, plans };
+}
