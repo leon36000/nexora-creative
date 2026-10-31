@@ -57,6 +57,15 @@ def segment(s: dict, images: int, sortie: Path):
                 "-c:v", "libx264", "-preset", "slow", "-crf", "15", "-c:a", "pcm_s16le", str(sortie.with_suffix(".mov"))])
         return
     base = NORME_V.format(x=float(s.get("x", 0.5))) if VERTICAL else NORME
+    if s.get("recadre"):
+        # Recadrage serré au centre (r = part conservée, cy = décalage vertical 0 à 1) puis remise à 1920×1080 : écarte les bords
+        # indésirables de l'image (ici un cockpit trop proche d'un vaisseau de franchise connue).
+        r, cy = float(s["recadre"]), float(s.get("cy", 0.5))
+        base += f",crop=iw*{r}:ih*{r}:(iw-iw*{r})/2:(ih-ih*{r})*{cy},scale={'1080:1920' if VERTICAL else '1920:1080'}:flags=lanczos,setsar=1"
+    if s.get("zoom") and not VERTICAL:
+        # Poussée progressive (« punch-in ») : l'image grossit de z pendant le plan, recadrée au centre.
+        z = float(s["zoom"])
+        base += f",scale=w='1920*(1+{z}*t/{max(0.5, duree)})':h=-2:eval=frame:flags=bilinear,crop=1920:1080,setsar=1"
     lancer([*entree, "-vf", pre + base + post, "-af", af, "-ac", "2",
             "-c:v", "libx264", "-preset", "slow", "-crf", "15", "-c:a", "pcm_s16le", str(sortie.with_suffix(".mov"))])
 
@@ -86,14 +95,27 @@ def monter(liste: dict):
         image = dossier / "image.mov"
         lancer(["-f", "concat", "-safe", "0", "-i", str(concat), "-c", "copy", str(image)])
         sfx, mus = liste.get("sfx_db", -9), liste.get("musique_db", 0)
+        # Sound design synthétisé (voir sfx.py) : chaque ajout est un son daté sur la ligne de temps, avec son gain.
+        sys.path.insert(0, str(Path(__file__).resolve().parent))  # -I n'ajoute pas le dossier du script
+        from sfx import generer
+        ajouts = []
+        for k, a in enumerate(liste.get("ajouts_son", [])):
+            wav = dossier / f"ajout{k}.wav"
+            generer(a["type"], float(a.get("duree", 1.0)), str(wav))
+            ajouts.append((wav, float(a["t"]), float(a.get("db", 0))))
+        entrees = ["-i", str(image), "-ss", str(liste.get("musique_debut", 0)), "-i", liste["musique"]]
+        for wav, _t, _db in ajouts:
+            entrees += ["-i", str(wav)]
         # Silences voulus (dernier souffle avant un impact) : forcés à zéro après la normalisation.
         coupes = "".join(f",volume=enable='between(t,{a},{b})':volume=0" for a, b in liste.get("silences", []))
-        filtre = (
-            f"[0:a]volume={sfx}dB[s];[1:a]aresample=48000,volume={mus}dB[m];"
-            f"[m][s]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1:LRA=11{coupes}[a]"
-        )
-        lancer(["-i", str(image), "-ss", str(liste.get("musique_debut", 0)), "-i", liste["musique"],
-                "-filter_complex", filtre.replace("[m][s]amix=inputs=2:duration=first", "[m][s]amix=inputs=2:duration=longest"),
+        chaines = [f"[0:a]volume={sfx}dB[s]", f"[1:a]aresample=48000,volume={mus}dB[m]"]
+        noms = ["[m]", "[s]"]
+        for k, (_wav, t, db) in enumerate(ajouts):
+            ms = max(0, int(t * 1000))
+            chaines.append(f"[{k + 2}:a]aresample=48000,adelay={ms}|{ms},volume={db}dB[x{k}]")
+            noms.append(f"[x{k}]")
+        chaines.append(f"{''.join(noms)}amix=inputs={len(noms)}:duration=longest:normalize=0,loudnorm=I=-14:TP=-1:LRA=11{coupes}[a]")
+        lancer([*entrees, "-filter_complex", ";".join(chaines),
                 "-map", "0:v", "-map", "[a]", "-shortest", "-c:v", "libx264", "-preset", "slow", "-crf", "17",
                 "-profile:v", "high", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-c:a", "aac", "-b:a", "256k",
                 liste["sortie"]])

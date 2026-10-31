@@ -124,6 +124,55 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
   .etape + .etape { padding-left: 0; border-left: 0; border-top: 1px solid var(--filet); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* --- Chiffres mesurés --- */
+.chiffres { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--filet); }
+.chiffre { padding: 1.6rem 1.25rem 1.6rem 0; display: grid; gap: 0.35rem; align-content: start; min-width: 0; }
+.chiffre + .chiffre { padding-left: 1.25rem; border-left: 1px solid var(--filet); }
+.chiffre b { font-family: var(--affichage); font-weight: 500; font-size: clamp(2rem, 1.2rem + 2.6vw, 3.4rem); letter-spacing: -0.03em; line-height: 1; color: var(--os); }
+.chiffre b em { font-style: normal; color: var(--signal); }
+.chiffre span { color: var(--brume); font-size: 0.92rem; line-height: 1.4; }
+.note-mesure { margin-top: 0.9rem; font-family: var(--mono); font-size: 0.72rem; color: var(--brume); letter-spacing: 0.02em; }
+
+/* --- Parcours en six étapes --- */
+.parcours { margin-top: 3rem; display: grid; grid-template-columns: repeat(6, 1fr); border-top: 1px solid var(--filet); counter-reset: etape; }
+.pas { padding: 1.25rem 1rem 0 0; display: grid; gap: 0.5rem; align-content: start; min-width: 0; }
+.pas + .pas { padding-left: 1rem; border-left: 1px solid var(--filet); }
+.pas h3 { font-size: 1.05rem; letter-spacing: -0.01em; }
+.pas p { color: var(--brume); font-size: 0.88rem; line-height: 1.5; }
+
+/* --- Fonctions --- */
+.fonctions { margin-top: 3rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--filet); border: 1px solid var(--filet); border-radius: 0.375rem; overflow: hidden; }
+.fonction { background: var(--encre); padding: 1.5rem 1.25rem 1.75rem; display: grid; gap: 0.6rem; align-content: start; min-width: 0; }
+.fonction h3 { font-size: 1.15rem; letter-spacing: -0.01em; }
+.fonction p { color: var(--brume); font-size: 0.92rem; line-height: 1.55; }
+
+/* --- Cas d'usage et Q&R --- */
+.usages { margin-top: 3rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.usage { border: 1px solid var(--filet); border-radius: 0.375rem; padding: 1.5rem; background: var(--surface); display: grid; gap: 0.6rem; align-content: start; }
+.usage h3 { font-size: 1.25rem; }
+.usage p { color: var(--brume); font-size: 0.95rem; }
+.faq { margin-top: 2.5rem; display: grid; border-top: 1px solid var(--filet); max-width: 52rem; }
+.faq details { border-bottom: 1px solid var(--filet); padding: 1.1rem 0; }
+.faq summary { cursor: pointer; font-family: var(--affichage); font-size: 1.1rem; letter-spacing: -0.01em; list-style: none; display: flex; justify-content: space-between; gap: 1rem; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; color: var(--signal); font-family: var(--mono); }
+.faq details[open] summary::after { content: '−'; }
+.faq p { margin-top: 0.7rem; color: var(--brume); font-size: 0.98rem; max-width: 46rem; }
+@media (max-width: 60rem) {
+  .chiffres { grid-template-columns: repeat(2, 1fr); }
+  .chiffre:nth-child(3) { padding-left: 0; border-left: 0; }
+  .chiffre:nth-child(n+3) { border-top: 1px solid var(--filet); }
+  .parcours { grid-template-columns: repeat(2, 1fr); }
+  .pas:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .pas:nth-child(n+3) { border-top: 1px solid var(--filet); margin-top: 1rem; }
+  .fonctions { grid-template-columns: repeat(2, 1fr); }
+  .usages { grid-template-columns: 1fr; }
+}
+@media (max-width: 34rem) {
+  .chiffres, .fonctions, .parcours { grid-template-columns: 1fr; }
+  .chiffre + .chiffre, .pas + .pas { padding-left: 0; border-left: 0; border-top: 1px solid var(--filet); }
+}
 </style>
 
 <header class="entete">
@@ -141,7 +190,7 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
     <div class="cadre">
       <p class="etiquette"><b>Nexora Creative</b> · studio vidéo IA</p>
       <h1>Écris-le. <em>Nexora</em> le filme.</h1>
-      <p class="chapeau">Une phrase en français suffit : Nexora Creative écrit le scénario, tourne les plans en 768p avec leur son, les monte et te rend un film. Les dragons, les combats et la flotte de cette bande-annonce sont sortis de phrases comme celle-ci.</p>
+      <p class="chapeau">Une phrase en français suffit : Nexora Creative écrit le scénario, dessine le plan clé, tourne en 768p avec le son, compose la musique et monte le film. Les dragons, la flotte au-dessus de la Terre et les duels de cette bande-annonce sont sortis de phrases comme celle-ci.</p>
       <div class="actions">
         <a class="bouton" href="#acces">Rejoindre l’accès anticipé</a>
         <a class="bouton secondaire" href="#comment">Voir comment ça marche</a>
@@ -153,10 +202,22 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
         <button class="bouton secondaire son" id="son" type="button" aria-pressed="false">Activer le son</button>
       </div>
       <div class="reperes">
-        <span class="etiquette">Bande-annonce · 60 s · 100 % générée par IA</span>
+        <span class="etiquette">Bande-annonce · 100 % générée par IA</span>
         <span class="etiquette">1344 × 768 · 24 i/s · son stéréo</span>
         <span class="etiquette">MiniMax H3 · MiniMax-Music3</span>
       </div>
+    </div>
+  </section>
+
+  <section class="bloc" style="padding-block: 0;">
+    <div class="cadre">
+      <div class="chiffres">
+        <div class="chiffre"><b>23<em> s</em></b><span>pour 5 s de vidéo avec son, en mode Rapide</span></div>
+        <div class="chiffre"><b>5<em> min</em></b><span>pour 5 s en qualité Cinéma, 1344 × 768</span></div>
+        <div class="chiffre"><b>50<em> s</em></b><span>pour un plan clé de 1792 × 1024</span></div>
+        <div class="chiffre"><b>27<em> s</em></b><span>pour composer une minute de musique</span></div>
+      </div>
+      <p class="note-mesure">Mesures sur les GPU de Nexora (RTX 5090 et DGX Spark), à chaud, octobre 2026. Les temps varient selon la charge.</p>
     </div>
   </section>
 
@@ -165,7 +226,7 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
       <div class="tete">
         <p class="etiquette"><b>01</b> · De la phrase à l’image</p>
         <h2>Tu décris. L’IA écrit le scénario. Le GPU tourne.</h2>
-        <p class="intro">Pas de jargon à apprendre. Un assistant d’écriture transforme ta phrase en scénario de tournage, plan par plan, avec la caméra, la lumière et les sons. Un vérificateur le contrôle avant qu’un seul pixel soit calculé.</p>
+        <p class="intro">Pas de jargon à apprendre. Un assistant transforme ta phrase en scénario de tournage, plan par plan, avec la caméra, la lumière et les sons. Un vérificateur le contrôle avant qu’un seul pixel soit calculé.</p>
       </div>
       <div class="demo">
         <div>
@@ -187,10 +248,13 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
           </figure>
         </div>
       </div>
-      <div class="mesures">
-        <span>Scénario écrit en <b>3 à 5 s</b></span>
-        <span>5 s de vidéo avec son en <b>≈ 1 min 30</b> (rapide)</span>
-        <span>Qualité cinéma 768p en <b>≈ 5 min</b></span>
+      <div class="parcours" aria-label="Le parcours, en six étapes">
+        <div class="pas"><p class="etiquette">Étape 1</p><h3>Écris</h3><p>Une idée en français, même courte. « Inspire-moi » en propose si la page blanche te bloque.</p></div>
+        <div class="pas"><p class="etiquette">Étape 2</p><h3>Booste</h3><p>L’assistant réécrit ta phrase en version plus riche et plus filmable. Tu gardes la tienne ou tu prends la sienne.</p></div>
+        <div class="pas"><p class="etiquette">Étape 3</p><h3>Plan clé</h3><p>L’IA dessine l’image de départ ; tu choisis celle que tu préfères, ou tu pars de ta photo.</p></div>
+        <div class="pas"><p class="etiquette">Étape 4</p><h3>Tourne</h3><p>MiniMax H3 anime le plan avec ses bruitages, ses ambiances et ses voix synchronisés.</p></div>
+        <div class="pas"><p class="etiquette">Étape 5</p><h3>Compose</h3><p>MiniMax-Music3 écrit une bande originale pour ta scène, mixée sous les sons.</p></div>
+        <div class="pas"><p class="etiquette">Étape 6</p><h3>Publie</h3><p>Titre, texte et hashtags pour chaque réseau, prêts à copier, avec la mention « généré par IA ».</p></div>
       </div>
     </div>
   </section>
@@ -202,12 +266,12 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
         <h2>Chaque image de la bande-annonce a commencé par une phrase.</h2>
       </div>
       <div class="planche">
-        <figure class="plan"><img src="img/p01.jpg" alt="Un dragon colossal aux écailles d’obsidienne jaillit d’une mer de nuages d’orage au coucher du soleil." loading="lazy"><figcaption class="legende"><span class="etiquette">H3 complet · RTX 5090 · 5 s avec son</span><p>« Un dragon colossal aux écailles d’obsidienne jaillit d’une mer de nuages d’orage au coucher du soleil. »</p></figcaption></figure>
-        <figure class="plan"><img src="img/p03.jpg" alt="Combat de karaté sur un toit-dojo trempé de pluie, la nuit, sous des lanternes rouges." loading="lazy"><figcaption class="legende"><span class="etiquette">H3 complet · RTX 5090 · 5 s avec son</span><p>« Combat de karaté sur un toit-dojo trempé de pluie, la nuit, sous des lanternes rouges. »</p></figcaption></figure>
-        <figure class="plan"><img src="img/p04.jpg" alt="Gros plan au ralenti : un coup de pied retourné fait gicler la pluie dans la lumière des lanternes." loading="lazy"><figcaption class="legende"><span class="etiquette">FastH3 · DGX Spark · 5 s avec son</span><p>« Gros plan au ralenti : un coup de pied retourné fait gicler la pluie dans la lumière des lanternes. »</p></figcaption></figure>
-        <figure class="plan"><img src="img/p05.jpg" alt="Une immense flotte de vaisseaux surgit de la vitesse lumière au-dessus d’une planète à anneaux." loading="lazy"><figcaption class="legende"><span class="etiquette">FastH3 · DGX Spark · 5 s avec son</span><p>« Une immense flotte de vaisseaux surgit de la vitesse lumière au-dessus d’une planète à anneaux. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/terre-flotte.jpg" alt="Une immense flotte surgit de l’hyperespace au-dessus de la planète Terre ; onde de choc, traînées de lumière, la caméra recule au-dessus de l’armada." loading="lazy"><figcaption class="legende"><span class="etiquette">H3 complet · RTX 5090 · 5 s avec son</span><p>« Une immense flotte surgit de l’hyperespace au-dessus de la planète Terre ; onde de choc, traînées de lumière, la caméra recule au-dessus de l’armada. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/sabres-hangar.jpg" alt="Duel de sabres laser dans un hangar de vaisseau spatial éclairé de rouge : une lame verte, une lame bleue, des étincelles." loading="lazy"><figcaption class="legende"><span class="etiquette">H3 complet · RTX 5090 · 5 s avec son</span><p>« Duel de sabres laser dans un hangar de vaisseau spatial éclairé de rouge : une lame verte, une lame bleue, des étincelles. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/sabres-mer.jpg" alt="Duel de sabres laser sur une plateforme de pierre au-dessus d’un océan déchaîné, au crépuscule, sous les éclairs." loading="lazy"><figcaption class="legende"><span class="etiquette">H3 complet · RTX 5090 · 5 s avec son</span><p>« Duel de sabres laser sur une plateforme de pierre au-dessus d’un océan déchaîné, au crépuscule, sous les éclairs. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/terre-croiseur.jpg" alt="Un croiseur gigantesque glisse devant la Terre pendant que d’autres vaisseaux sortent de l’hyperespace." loading="lazy"><figcaption class="legende"><span class="etiquette">H3 complet · RTX 5090 · 5 s avec son</span><p>« Un croiseur gigantesque glisse devant la Terre pendant que d’autres vaisseaux sortent de l’hyperespace. »</p></figcaption></figure>
         <figure class="plan"><img src="img/p07.jpg" alt="Duel d’épées d’énergie dans un temple ancien au bord d’un volcan." loading="lazy"><figcaption class="legende"><span class="etiquette">FastH3 · DGX Spark · 5 s avec son</span><p>« Duel d’épées d’énergie dans un temple ancien au bord d’un volcan. »</p></figcaption></figure>
-        <figure class="plan"><img src="img/p12.jpg" alt="La guerrière, le dragon et la flotte au crépuscule, plan final héroïque." loading="lazy"><figcaption class="legende"><span class="etiquette">H3 complet · RTX 5090 · 5 s avec son</span><p>« La guerrière, le dragon et la flotte au crépuscule, plan final héroïque. »</p></figcaption></figure>
+        <figure class="plan"><img src="img/p04.jpg" alt="Gros plan au ralenti : un coup de pied retourné fait gicler la pluie dans la lumière des lanternes." loading="lazy"><figcaption class="legende"><span class="etiquette">FastH3 · DGX Spark · 5 s avec son</span><p>« Gros plan au ralenti : un coup de pied retourné fait gicler la pluie dans la lumière des lanternes. »</p></figcaption></figure>
       </div>
     </div>
   </section>
@@ -215,15 +279,18 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
   <section class="bloc">
     <div class="cadre">
       <div class="tete">
-        <p class="etiquette"><b>03</b> · L’AI Director</p>
-        <h2>Un réalisateur qui découpe, tourne et monte pour toi.</h2>
-        <p class="intro">Donne une idée de film. Le Director propose un découpage que tu peux modifier, tourne chaque plan, enchaîne les plans sur la dernière image du précédent pour garder la continuité, puis assemble.</p>
+        <p class="etiquette"><b>03</b> · Tout ce qu’il faut pour finir une vidéo</p>
+        <h2>Du premier mot au fichier prêt à publier.</h2>
       </div>
-      <div class="etapes">
-        <div class="etape"><p class="etiquette">Découpage</p><h3>Storyboard modifiable</h3><p>Plans, caméra, durées et une bible de continuité pour garder les mêmes personnages et décors.</p></div>
-        <div class="etape"><p class="etiquette">Tournage</p><h3>Plans enchaînés</h3><p>Un plan peut partir de la dernière image du précédent : la moto devient loup sans coupure visible.</p></div>
-        <div class="etape"><p class="etiquette">Retouche</p><h3>Refaire un seul plan</h3><p>Un plan ne te plaît pas ? Change sa description : seul ce plan est retourné, le film est réassemblé.</p></div>
-        <div class="etape"><p class="etiquette">Livraison</p><h3>Export pro</h3><p>Montage coupe ou fondu, ProRes 422 HQ, et un projet prêt à ouvrir dans Premiere ou DaVinci.</p></div>
+      <div class="fonctions">
+        <div class="fonction"><p class="etiquette">Vidéo</p><h3>Son natif</h3><p>Dialogues, bruitages et ambiances sont générés avec l’image et synchronisés avec elle. Tu peux écrire la réplique que dit un personnage.</p></div>
+        <div class="fonction"><p class="etiquette">Image</p><h3>Plan clé IA</h3><p>Vois l’image avant de tourner : dessine plusieurs plans clés, choisis-en un, puis anime-le. Ou pars de ta propre photo.</p></div>
+        <div class="fonction"><p class="etiquette">Écriture</p><h3>Booster ma phrase</h3><p>Une idée de huit mots devient une description riche : sujet, décor, lumière, caméra, sons. Rien de ce que tu voulais n’est retiré.</p></div>
+        <div class="fonction"><p class="etiquette">Film</p><h3>Réalisateur IA</h3><p>Donne une idée de film : le Director propose un découpage que tu modifies, tourne chaque plan, enchaîne les raccords et assemble.</p></div>
+        <div class="fonction"><p class="etiquette">Son</p><h3>Musique originale</h3><p>Une bande originale composée pour ta scène, avec sa structure, ses montées et ses chutes, mixée à −14 LUFS.</p></div>
+        <div class="fonction"><p class="etiquette">Post-production</p><h3>Montage et exports</h3><p>Réordonne, retire, enchaîne en fondu, refais un seul plan. Exporte en ProRes ou en projet pour Premiere et DaVinci.</p></div>
+        <div class="fonction"><p class="etiquette">Réseaux</p><h3>Textes de publication</h3><p>Titre, texte et hashtags adaptés à Instagram, TikTok, YouTube, LinkedIn ou X, en français ou en anglais.</p></div>
+        <div class="fonction"><p class="etiquette">Confiance</p><h3>Garde-fous intégrés</h3><p>Une modération vérifie chaque demande avant le rendu, et chaque création porte la mention « généré par IA ».</p></div>
       </div>
     </div>
   </section>
@@ -231,13 +298,44 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
   <section class="bloc">
     <div class="cadre">
       <div class="tete">
-        <p class="etiquette"><b>04</b> · Sous le capot</p>
+        <p class="etiquette"><b>04</b> · Pour qui</p>
+        <h2>Du créateur seul à l’équipe marketing.</h2>
+      </div>
+      <div class="usages">
+        <div class="usage"><p class="etiquette">Réseaux sociaux</p><h3>Des vidéos qui arrêtent le pouce</h3><p>Paysage, vertical ou carré en un clic, avec le texte de publication. Une idée le matin, une vidéo avant midi.</p></div>
+        <div class="usage"><p class="etiquette">Publicité</p><h3>Des maquettes tournées, pas dessinées</h3><p>Montre à ton client une scène avec son, musique et voix avant de lancer le vrai tournage.</p></div>
+        <div class="usage"><p class="etiquette">Cinéma et jeu vidéo</p><h3>Du storyboard animé</h3><p>Le Director découpe, tourne et monte une séquence ; tu retouches plan par plan et tu exportes vers ton logiciel de montage.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="cadre">
+      <div class="tete">
+        <p class="etiquette"><b>05</b> · Sous le capot</p>
         <h2>Des modèles de premier plan, sur les GPU de Nexora.</h2>
+        <p class="intro">Les modèles se choisissent dans l’administration de Nexora : locaux sur nos GPU ou cloud, selon l’usage. Rien n’est figé.</p>
       </div>
       <div class="moteurs">
         <div class="moteur"><p class="etiquette">Image et son</p><h3>MiniMax H3</h3><p>Le modèle vidéo ouvert le mieux classé avec audio natif : dialogues, bruitages et ambiances synchronisés à l’image.</p></div>
-        <div class="moteur"><p class="etiquette">Musique</p><h3>MiniMax-Music3</h3><p>Une bande originale composée pour ton film, au rythme du montage, sans banque de sons.</p></div>
-        <div class="moteur"><p class="etiquette">Calcul</p><h3>GPU Nexora</h3><p>Rendus sur les GPU de Nexora (NVIDIA DGX Spark et RTX 5090). Prévu : crédits Nexora, avec le devis affiché avant de lancer.</p></div>
+        <div class="moteur"><p class="etiquette">Musique</p><h3>MiniMax-Music3</h3><p>Une bande originale composée pour ton film, avec sa structure et son tempo, sans banque de sons.</p></div>
+        <div class="moteur"><p class="etiquette">Calcul</p><h3>GPU Nexora</h3><p>NVIDIA RTX 5090 et DGX Spark. Prévu : crédits Nexora, avec le devis affiché avant de lancer.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="cadre">
+      <div class="tete">
+        <p class="etiquette"><b>06</b> · Questions</p>
+        <h2>Ce que tu veux savoir avant de te lancer.</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Quand Nexora Creative sera-t-il disponible ?</summary><p>Il est en préparation et aucune date n’est annoncée. L’accès anticipé te permet de l’essayer parmi les premiers dans ton espace Nexora.</p></details>
+        <details><summary>Faut-il savoir écrire des prompts ?</summary><p>Non. Tu décris ta scène avec tes mots, en français. L’assistant écrit le prompt technique pour le moteur et le fait vérifier avant le rendu.</p></details>
+        <details><summary>Combien de temps dure un rendu ?</summary><p>Environ 23 secondes pour 5 secondes de vidéo avec son en mode Rapide, et environ 5 minutes en qualité Cinéma, sur nos GPU actuels. Le devis s’affiche avant de lancer.</p></details>
+        <details><summary>Où puis-je l’utiliser ?</summary><p>La licence de MiniMax H3 exclut certains territoires (États-Unis, Union européenne, Royaume-Uni, Corée du Sud). Nous associons un territoire à chaque compte et l’affichons clairement.</p></details>
+        <details><summary>Les vidéos sont-elles signalées comme générées par IA ?</summary><p>Oui. Chaque création porte la mention « généré par IA », et les textes de publication l’incluent.</p></details>
       </div>
     </div>
   </section>
@@ -292,6 +390,8 @@ section.bloc { padding-block: clamp(4rem, 2.8rem + 4.6vw, 7.5rem); border-bottom
     };
     requestAnimationFrame(pas);
   } else if (ecran) ecran.remove();
+  // Filet de sécurité : si l'animation est suspendue (onglet en arrière-plan), la mosaïque disparaît quand même.
+  if (ecran) setTimeout(() => ecran.isConnected && ecran.remove(), 2600);
 
   const fin = document.getElementById('mosaique-final');
   const dessinerFin = () => fin && mosaique(fin, { taille: 18, graine: 3, seuil: 0, dissolution: (x) => Math.max(0, x * 1.35 - 0.35) });

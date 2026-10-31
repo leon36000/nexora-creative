@@ -38,6 +38,9 @@ Mandat du fondateur (30/10/2026, soir) : carte blanche. Recherche approfondie (y
 - [x] **16. Page marketing** — `marketing/creative/index.html` + `outils/page.py` (charte du site Nexora, vidéo, planche de 6 plans réels avec le moteur de chaque image, prompt réel du plan 1) ; testée dans le navigateur (bureau, 375 px sans débordement). **Pas publiée** : elle demande les entrées de `cms/content/claims.json` et la mise en route par le fondateur.
 - [x] **17. Musique des clips + image** — bouton « Ajouter une musique » prouvé de bout en bout dans le navigateur (clic → LLM → 5090 → mixage auto, clip n° 36) ; Qwen-Image-2512 retenu (`recherche/11`).
 
+- [x] **18. Studio, Qwen-Image-2.1 (démo), LLM partout, réglages du site** — voir journal du 31/10 (soir).
+- [x] **19. Bande-annonce V2 et page marketing complète** — voir journal du 31/10 (nuit). Non publiée sur le site (revue des affirmations et avis juridique H3 en attente).
+
 ## Condition d'arrêt de la boucle
 
 Tous les lots cochés avec leurs preuves, `docs/ETAT.md` écrit et poussé sur GitLab. Un lot impossible (matériel, licence) est marqué « bloqué » avec la raison et un contournement ; il ne bloque pas les suivants.
