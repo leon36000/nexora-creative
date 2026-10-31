@@ -19,8 +19,8 @@ The installer needs `COMFY_MODELS_DIR` pointing at your ComfyUI `models/`
 folder, and `HF_TOKEN` for the gated repos. Downloads resume, so an
 interrupted 21 GB pull does not start over.
 
-The core install is **LTX-2.5 video + Qwen-Image stills**, about 
-**72 GB**. Everything here is about 334 GB.
+The core install is **LTX-2.5 video + Qwen-Image 2512 stills**, about 
+**72 GB**. Everything here is about 348 GB.
 
 ## Bundles
 
@@ -39,16 +39,16 @@ Video + Loop modes on the LTX-2.5 engine. The recommended starting point: it is 
 | `ltx-2.5-audio-vae-bf16.safetensors` | `models/vae/` | 0.4 GB | [Lightricks/LTX-2.5](https://huggingface.co/Lightricks/LTX-2.5/blob/main/vae/ltx-2.5-audio-vae-bf16.safetensors) 🔒 |
 | `ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors` | `models/latent_upscale_models/` | 1 GB | [Lightricks/LTX-2.5](https://huggingface.co/Lightricks/LTX-2.5/blob/main/latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors) 🔒 |
 
-### Qwen-Image stills `qwen`
+### Qwen-Image 2512 stills `qwen`
 
 Still mode. Also the cheapest way to make a start frame for a video, which is how most shots here begin.
 
 - **Size** 31.8 GB · part of the core install
-- **License** Apache 2.0 (Qwen-Image, the Qwen2.5-VL text encoder, and the Lightning LoRA).
+- **License** Apache 2.0 (Qwen-Image-2512, the Qwen2.5-VL text encoder, and the Lightning LoRA). Choix du 31/10/2026 : le meilleur modèle d’image ouvert utilisable commercialement sans licence payante (arène : 1125, devant Z-Image-Turbo 1082) ; Qwen-Image-2.1 (1225) est sous licence de recherche.
 
 | File | Goes in | Size | Source |
 | --- | --- | --- | --- |
-| `qwen_image_fp8_e4m3fn.safetensors` | `models/diffusion_models/` | 20.4 GB | [Comfy-Org/Qwen-Image_ComfyUI](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/blob/main/split_files/diffusion_models/qwen_image_fp8_e4m3fn.safetensors) |
+| `qwen_image_2512_fp8_e4m3fn.safetensors` | `models/diffusion_models/` | 20.4 GB | [Comfy-Org/Qwen-Image_ComfyUI](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/blob/main/split_files/diffusion_models/qwen_image_2512_fp8_e4m3fn.safetensors) |
 | `qwen_2.5_vl_7b_fp8_scaled.safetensors` | `models/text_encoders/` | 9.4 GB | [Comfy-Org/Qwen-Image_ComfyUI](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/blob/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors) |
 | `qwen_image_vae.safetensors` | `models/vae/` | 0.3 GB | [Comfy-Org/Qwen-Image_ComfyUI](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/blob/main/split_files/vae/qwen_image_vae.safetensors) |
 | `Qwen-Image-Lightning-8steps-V1.0.safetensors` | `models/loras/` | 1.7 GB | [lightx2v/Qwen-Image-Lightning](https://huggingface.co/lightx2v/Qwen-Image-Lightning/blob/main/Qwen-Image-Lightning-8steps-V1.0.safetensors) |
@@ -81,6 +81,20 @@ Video / Loop / Refs modes on the H3 engine. The only engine here with reference-
 | `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | `models/text_encoders/` | 15.7 GB | [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3/blob/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors) |
 | `minimax_h3_video_vae_fp16.safetensors` | `models/vae/` | 5.2 GB | [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3/blob/main/vae/minimax_h3_video_vae_fp16.safetensors) |
 | `minimax_h3_audio_vae_fp32.safetensors` | `models/vae/` | 0.6 GB | [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3/blob/main/vae/minimax_h3_audio_vae_fp32.safetensors) |
+
+### MiniMax H3 — FastH3 V2 (NVFP4) `h3-fast`
+
+Nexora Creative : le moteur vidéo par défaut. FastH3 V2 distillé en 8 étapes et quantifié NVFP4 pour Blackwell (RTX 50, DGX Spark), avec son natif.
+
+- **Size** 35.1 GB · optional
+- **License** MiniMax H3 Community License Agreement (FastH3 est un « Model Derivative ») : territoires exclus (États-Unis, UE, Royaume-Uni, Corée du Sud), « MiniMax H3 » affiché dans l’interface, autorisation écrite au-delà de 20 M$ de revenus.
+
+| File | Goes in | Size | Source |
+| --- | --- | --- | --- |
+| `fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors` | `models/diffusion_models/` | 13.6 GB | [FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy](https://huggingface.co/FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy/blob/main/diffusion_models/fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors) |
+| `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | `models/text_encoders/` | 15.7 GB | [FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy](https://huggingface.co/FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy/blob/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors) |
+| `minimax_h3_video_vae_fp16.safetensors` | `models/vae/` | 5.2 GB | [FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy](https://huggingface.co/FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy/blob/main/vae/minimax_h3_video_vae_fp16.safetensors) |
+| `minimax_h3_audio_vae_fp32.safetensors` | `models/vae/` | 0.6 GB | [FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy](https://huggingface.co/FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy/blob/main/vae/minimax_h3_audio_vae_fp32.safetensors) |
 
 ### MiniMax H3 — Refs mode `h3-refs`
 

@@ -91,12 +91,12 @@ export const BUNDLES: Bundle[] = [
   },
   {
     id: 'qwen',
-    label: 'Qwen-Image stills',
+    label: 'Qwen-Image 2512 stills',
     purpose: 'Still mode. Also the cheapest way to make a start frame for a video, which is how most shots here begin.',
-    license: 'Apache 2.0 (Qwen-Image, the Qwen2.5-VL text encoder, and the Lightning LoRA).',
+    license: 'Apache 2.0 (Qwen-Image-2512, the Qwen2.5-VL text encoder, and the Lightning LoRA). Choix du 31/10/2026 : le meilleur modèle d’image ouvert utilisable commercialement sans licence payante (arène : 1125, devant Z-Image-Turbo 1082) ; Qwen-Image-2.1 (1225) est sous licence de recherche.',
     files: [
-      { file: 'qwen_image_fp8_e4m3fn.safetensors', dir: 'diffusion_models',
-        ...HF('Comfy-Org/Qwen-Image_ComfyUI', 'split_files/diffusion_models/qwen_image_fp8_e4m3fn.safetensors', 20.4) },
+      { file: 'qwen_image_2512_fp8_e4m3fn.safetensors', dir: 'diffusion_models',
+        ...HF('Comfy-Org/Qwen-Image_ComfyUI', 'split_files/diffusion_models/qwen_image_2512_fp8_e4m3fn.safetensors', 20.4) },
       { file: 'qwen_2.5_vl_7b_fp8_scaled.safetensors', dir: 'text_encoders',
         ...HF('Comfy-Org/Qwen-Image_ComfyUI', 'split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors', 9.4) },
       { file: 'qwen_image_vae.safetensors', dir: 'vae',

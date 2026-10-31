@@ -49,8 +49,24 @@ export default function Creer() {
   const [photo, setPhoto] = useState<{ jeton: string; apercu: string } | null>(null);
   const [envoiPhoto, setEnvoiPhoto] = useState(false);
   const toutes = useStore((s) => s.takes);
-  const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && !isImage(t) && !isModel(t) && settingsOf(t).nexoraFilm == null).slice(0, 12));
+  const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && !isImage(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null).slice(0, 12));
+  // Musiques composées pour des clips (MiniMax-Music3) : dès qu'une est prête, le mixage se lance une seule fois.
+  const musiques = useStore((s) => s.takes.filter((t) => settingsOf(t).nexoraMusiqueDe != null && settingsOf(t).app === 'nexora-musique' && !(t.status === 'done' && s.takes.some((x) => settingsOf(x).nexoraAvecMusique && settingsOf(x).musique === t.output_path)) && t.status !== 'failed' && t.status !== 'stopped'));
+  const [mixes] = useState(() => new Set<number>());
 
+  useEffect(() => {
+    for (const m of musiques) {
+      const clip = settingsOf(m).nexoraMusiqueDe as number;
+      // Un film assemble sa musique dans son panneau ; ici seuls les clips simples.
+      if (m.status !== 'done' || mixes.has(m.id) || settingsOf(toutes.find((x) => x.id === clip) ?? m).film) continue;
+      mixes.add(m.id);
+      api.nexoraClipAvecMusique(clip, m.id).then(() => toast('Ta vidéo avec sa musique est prête.')).catch((e) => toast(e instanceof Error ? e.message : 'Le mixage de la musique a échoué.', true));
+    }
+  }, [musiques, toutes, mixes]);
+  async function ajouterMusique(clipId: number) {
+    try { await api.nexoraClipMusique(clipId, {}); toast('Composition de la musique lancée (moins d’une minute).'); }
+    catch (e) { toast(e instanceof Error ? e.message : 'Impossible de composer la musique.', true); }
+  }
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
   const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number } | null>(null);
   useEffect(() => {
@@ -240,6 +256,7 @@ export default function Creer() {
 
       <section className="nx-resultats">
         <h2>Tes vidéos</h2>
+        {musiques.length > 0 && <p className="nx-sous">Musique MiniMax-Music3 : {musiques.some((m) => m.status === 'queued' || m.status === 'rendering') ? 'composition en cours…' : 'prête, mixage…'}</p>}
         {takes.length === 0 ? <p className="nx-vide">Tes créations apparaîtront ici, avec leur progression en direct.</p> : (
           <div className="grid">
             {takes.map((t) => {
@@ -248,7 +265,10 @@ export default function Creer() {
               const faits = plans.filter((p) => p.take && toutes.find((x) => x.id === p.take)?.status === 'done').length;
               return <MediaCard key={t.id} take={t} onOpen={() => (s.film ? setFilmOuvert(t.id) : setVue(t.id))} tag={s.film ? 'Film' : undefined}
                 pendingLabel={s.film ? `Film : ${faits}/${plans.length} plans tournés` : 'En file d’attente'}
-                actions={s.film ? <button type="button" className="nx-puce on" onClick={() => setFilmOuvert(t.id)}>Plans</button> : undefined} />;
+                actions={s.film ? <button type="button" className="nx-puce on" onClick={() => setFilmOuvert(t.id)}>Plans</button>
+                  : t.status === 'done' && t.kind === 'video' && !s.nexoraAvecMusique && !s.nexoraMusiqueDe
+                    ? <button type="button" className="nx-puce" disabled={musiques.some((m) => settingsOf(m).nexoraMusiqueDe === t.id)} onClick={() => void ajouterMusique(t.id)} title="Compose une musique avec MiniMax-Music3 et la mixe sous les sons de la vidéo">Ajouter une musique</button>
+                    : undefined} />;
             })}
           </div>
         )}

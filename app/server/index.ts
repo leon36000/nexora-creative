@@ -27,7 +27,7 @@ import { actionEspace, espacePlein, espaceSite, marquerPlein } from './nexora/es
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { xmlFcp7 } from './nexora/projetExport.js';
-import { argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './nexora/film.js';
+import { argsAvecMusique, argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { buildLtxGraph } from './graphs/ltx.js';
 import { buildLtx25Graph, ltx25EffectiveSize, ltx25Mode, LTX25_FPS, snapFrames } from './graphs/ltx25.js';
@@ -1108,6 +1108,51 @@ app.post('/api/nexora/film/:id/musique', async (req, reply) => {
     projectId: film.project_id ?? undefined,
   }, 1);
   return { takeId, source: m.source };
+});
+
+/**
+ * Bande originale d'un clip simple (même moteur de musique que pour un film) : la musique est composée depuis la
+ * phrase du clip ; /avec-musique la mixe ensuite sous les sons du clip, dans une nouvelle vidéo (le clip d'origine reste).
+ */
+app.post('/api/nexora/clip/:id/musique', async (req, reply) => {
+  const clip = takes.get(Number((req.params as any).id));
+  const b = (req.body ?? {}) as any;
+  if (!clip || clip.kind !== 'video') return reply.code(404).send({ error: 'Vidéo introuvable.' });
+  const s = JSON.parse(clip.settings);
+  if (s.film || clip.status !== 'done' || !clip.output_path) return reply.code(409).send({ error: 'La vidéo doit être terminée.' });
+  if (!eng.moteursPour('music3').length) return reply.code(503).send({ error: 'Aucun moteur GPU ne compose de musique pour l’instant.' });
+  const duree = Math.max(5, Math.round(Number(s.lengthFrames || 124) / 24));
+  const pseudo = { titre: String(s.intention ?? s.userPrompt ?? clip.shot_name ?? 'Clip').slice(0, 120), bible: { style: '', personnages: [], lieux: [] }, plans: [{ resume: String(s.intention ?? s.userPrompt ?? clip.shot_name ?? ''), description: '', duree, camera: '' }], dureeTotale: duree };
+  const m = await ecrireMusique(pseudo as any, duree, llmCourant(), typeof b.envie === 'string' ? b.envie.slice(0, 500) : undefined);
+  const [takeId] = await queueTakes({
+    kind: 'musique', videoModel: 'music3', description: m.description, paroles: m.paroles, dureeS: duree,
+    app: 'nexora-musique', nexoraMusiqueDe: clip.id, shotName: `${(clip.shot_name || 'clip').slice(0, 40)}_musique`,
+    prompt: m.description, userPrompt: typeof b.envie === 'string' ? b.envie : 'Musique', promptSource: m.source, projectId: clip.project_id ?? undefined,
+  }, 1);
+  return { takeId, source: m.source };
+});
+
+app.post('/api/nexora/clip/:id/avec-musique', async (req, reply) => {
+  const clip = takes.get(Number((req.params as any).id));
+  const m = takes.get(Number(((req.body ?? {}) as any).musique));
+  if (!clip || !m || clip.status !== 'done' || m.status !== 'done' || !clip.output_path || !m.output_path || JSON.parse(m.settings).kind !== 'musique') {
+    return reply.code(409).send({ error: 'La vidéo et la musique doivent être terminées.' });
+  }
+  const s = JSON.parse(clip.settings);
+  const { execFile } = await import('child_process');
+  const dureeS = await new Promise<number>((ok) =>
+    execFile(config.ffprobeBin, ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', clip.output_path!], (err, out) => ok(err ? Math.round(Number(s.lengthFrames || 124) / 24 * 100) / 100 : Number(String(out).trim()) || 5)));
+  const dossier = join(config.outputDir, 'clips-musique');
+  mkdirSync(dossier, { recursive: true });
+  const sortie = join(dossier, `clip_${clip.id}_musique_${Date.now()}.mp4`);
+  await new Promise<void>((ok, ko) =>
+    execFile(config.ffmpegBin, argsAvecMusique(clip.output_path!, m.output_path!, sortie, { dureeS, sonDuFilm: !!s.withAudio }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
+      err ? ko(new Error(`ffmpeg (musique) : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()))
+    .catch((e) => { throw Object.assign(e, { statusCode: 500 }); });
+  const id = takes.create({ project_id: clip.project_id, kind: 'video', shot_name: `${(clip.shot_name || 'clip').slice(0, 40)} + musique`, settings: { ...s, nexoraAvecMusique: true, versionDe: clip.id, musique: m.output_path, nexoraMusiqueDe: undefined } });
+  takes.finish(id, sortie, 0);
+  broadcast({ type: 'take', take: takes.get(id) });
+  return { takeId: id };
 });
 
 /** Export professionnel d'un film terminé (ProRes 422 HQ + PCM, .mov). */

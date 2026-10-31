@@ -126,6 +126,10 @@ export const api = {
     j<{ storyboard: Storyboard; source: 'llm' | 'repli' }>('/api/nexora/film/plan', { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmRefaire: (filmId: number, b: { plan: number; description?: string; camera?: string }) =>
     j<{ filmId: number }>(`/api/nexora/film/${filmId}/refaire`, { method: 'POST', body: JSON.stringify(b) }),
+  nexoraClipMusique: (clipId: number, b: { envie?: string }) =>
+    j<{ takeId: number; source: 'llm' | 'repli' }>(`/api/nexora/clip/${clipId}/musique`, { method: 'POST', body: JSON.stringify(b) }),
+  nexoraClipAvecMusique: (clipId: number, musique: number) =>
+    j<{ takeId: number }>(`/api/nexora/clip/${clipId}/avec-musique`, { method: 'POST', body: JSON.stringify({ musique }) }),
   nexoraFilmMusique: (filmId: number, b: { envie?: string }) =>
     j<{ takeId: number; source: 'llm' | 'repli' }>(`/api/nexora/film/${filmId}/musique`, { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmMontage: (filmId: number, b: { ordre: number[]; transition: 'coupe' | 'fondu'; musique?: number | null }) =>

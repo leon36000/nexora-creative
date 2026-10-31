@@ -50,7 +50,7 @@ function qwenGraph(p: StillsParams): Record<string, unknown> {
   const draft = p.quality === 'draft';
   const g0: Record<string, unknown> = {};
   const g: Record<string, unknown> = {
-    u: { class_type: 'UNETLoader', inputs: { unet_name: 'qwen_image_fp8_e4m3fn.safetensors', weight_dtype: 'default' } },
+    u: { class_type: 'UNETLoader', inputs: { unet_name: 'qwen_image_2512_fp8_e4m3fn.safetensors', weight_dtype: 'default' } },
     c: { class_type: 'CLIPLoader', inputs: { clip_name: 'qwen_2.5_vl_7b_fp8_scaled.safetensors', type: 'qwen_image', device: 'default' } },
     v: { class_type: 'VAELoader', inputs: { vae_name: 'qwen_image_vae.safetensors' } },
     pos: { class_type: 'CLIPTextEncode', inputs: { clip: ['c', 0], text: p.prompt } },
