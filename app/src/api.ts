@@ -117,7 +117,7 @@ export interface EtatNexora { llm: boolean; moteur: string; son: boolean; territ
 export const api = {
   status: () => j<Status>('/api/status'),
   /** Nexora Creative : une intention en français devient une vidéo (prompt écrit par le LLM, rendu MiniMax H3). */
-  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; image?: string }) =>
+  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string }) =>
     j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
   nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
   nexoraFilmPlan: (b: { intention: string; duree: number }) =>
@@ -126,7 +126,7 @@ export const api = {
     j<{ filmId: number }>(`/api/nexora/film/${filmId}/refaire`, { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmMontage: (filmId: number, b: { ordre: number[]; transition: 'coupe' | 'fondu' }) =>
     j<{ filmId: number }>(`/api/nexora/film/${filmId}/montage`, { method: 'POST', body: JSON.stringify(b) }),
-  nexoraFilmTourner: (b: { storyboard: Storyboard; format: '16:9' | '9:16' | '1:1'; son: boolean; intention: string }) =>
+  nexoraFilmTourner: (b: { storyboard: Storyboard; format: '16:9' | '9:16' | '1:1'; son: boolean; qualite?: 'rapide' | 'max'; intention: string }) =>
     j<{ filmId: number }>('/api/nexora/film/tourner', { method: 'POST', body: JSON.stringify(b) }),
   /** Set the machine-wide render size; null goes back to the default (OPENFIELD_RENDER_TIER or the GPU). */
   setRenderTier: (renderTier: RenderTier | null) =>

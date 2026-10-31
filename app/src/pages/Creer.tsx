@@ -38,6 +38,7 @@ export default function Creer() {
   const [format, setFormat] = useState<Format>('16:9');
   const [duree, setDuree] = useState<Duree>(5);
   const [son, setSon] = useState(true);
+  const [qualite, setQualite] = useState<'rapide' | 'max'>('rapide');
   const [envoi, setEnvoi] = useState<null | 'clip' | 'plan' | 'film'>(null);
   const [dernier, setDernier] = useState<CreerReponse | null>(null);
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
@@ -59,7 +60,7 @@ export default function Creer() {
     setEnvoi('clip');
     setVoirScenario(false);
     try {
-      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: duree as 5 | 10 | 15, son, image: photo?.jeton });
+      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: duree as 5 | 10 | 15, son, qualite, image: photo?.jeton });
       setDernier(r);
       toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : IA indisponible).');
     } catch (e) {
@@ -86,7 +87,7 @@ export default function Creer() {
     if (!storyboard) return;
     setEnvoi('film');
     try {
-      await api.nexoraFilmTourner({ storyboard, format, son, intention: intention.trim() });
+      await api.nexoraFilmTourner({ storyboard, format, son, qualite, intention: intention.trim() });
       toast(`Tournage lancé : ${storyboard.plans.length} plans. Le film s’assemble tout seul à la fin.`);
       setStoryboard(null);
     } catch (e) {
@@ -151,6 +152,10 @@ export default function Creer() {
               ))}
             </div>
             <button type="button" className={`nx-puce ${son ? 'on' : ''}`} onClick={() => setSon(!son)} aria-pressed={son}>{son ? 'Avec son' : 'Sans son'}</button>
+            <div className="nx-groupe" role="group" aria-label="Qualité">
+              <button type="button" className={`nx-puce ${qualite === 'rapide' ? 'on' : ''}`} onClick={() => setQualite('rapide')} title="Rendu rapide, idéal pour essayer">Rapide</button>
+              <button type="button" className={`nx-puce ${qualite === 'max' ? 'on' : ''}`} onClick={() => setQualite('max')} title="Résolution native du modèle, plus long à tourner">Qualité max</button>
+            </div>
             {!film && (
               photo ? (
                 <span className="nx-photo">

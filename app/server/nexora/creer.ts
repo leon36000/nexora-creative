@@ -13,6 +13,8 @@ export interface DemandeCreer {
   format: FormatCreer;
   duree: DureeCreer;
   son: boolean;
+  /** Profil : « rapide » (832×480, ≈ 85 s pour 5 s sur GB10) ou « max » (résolution native de H3, 1344×768). */
+  qualite?: 'rapide' | 'max';
   /** Photo de départ (jeton d'entrée du moteur, `asset:<uuid>`) : la vidéo part de cette image. */
   image?: string;
 }
@@ -20,11 +22,11 @@ export interface DemandeCreer {
 /** Point de contrôle FastH3 V2 distillé et quantifié NVFP4 (server/graphs/h3.ts, H3_DISTILLED_CHECKPOINTS). */
 export const CHECKPOINT_FASTH3 = 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors';
 
-const TAILLES: Record<FormatCreer, { width: number; height: number }> = {
-  '16:9': { width: 832, height: 480 },
-  '9:16': { width: 480, height: 832 },
-  '1:1': { width: 640, height: 640 },
+const TAILLES: Record<'rapide' | 'max', Record<FormatCreer, { width: number; height: number }>> = {
+  rapide: { '16:9': { width: 832, height: 480 }, '9:16': { width: 480, height: 832 }, '1:1': { width: 640, height: 640 } },
+  max: { '16:9': { width: 1344, height: 768 }, '9:16': { width: 768, height: 1344 }, '1:1': { width: 1024, height: 1024 } },
 };
+const taille = (d: DemandeCreer) => TAILLES[d.qualite ?? 'rapide'][d.format];
 
 /** Plus petite longueur de la grille H3 (124 + 17n) qui couvre la durée demandée. */
 function imagesPour(dureeS: number): number {
@@ -40,7 +42,7 @@ export function lireDemandeCreer(b: unknown): DemandeCreer {
   const format: FormatCreer = o.format === '9:16' || o.format === '1:1' ? o.format : '16:9';
   const duree: DureeCreer = o.duree === 10 || o.duree === 15 ? o.duree : 5;
   const image = typeof o.image === 'string' && /^asset:[0-9a-f-]{36}$/i.test(o.image) ? o.image : undefined;
-  return { intention, format, duree, son: o.son !== false, ...(image ? { image } : {}) };
+  return { intention, format, duree, son: o.son !== false, qualite: o.qualite === 'max' ? 'max' : 'rapide', ...(image ? { image } : {}) };
 }
 
 export function corpsRenduH3(d: DemandeCreer, prompt: string) {
@@ -48,7 +50,7 @@ export function corpsRenduH3(d: DemandeCreer, prompt: string) {
     kind: 'video' as const,
     videoModel: 'h3-fast' as const,
     prompt,
-    ...TAILLES[d.format],
+    ...taille(d),
     lengthFrames: imagesPour(d.duree),
     steps: 8,
     checkpoint: CHECKPOINT_FASTH3,
@@ -85,7 +87,7 @@ export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVide
     kind: 'video' as const,
     videoModel: 'wan22' as const,
     prompt: promptWanDepuisH3(promptH3),
-    ...TAILLES[d.format],
+    ...taille(d),
     frames: imagesWan(d.duree),
     withAudio: false,
     shotName: d.intention.slice(0, 60),

@@ -967,7 +967,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   let sb;
   try { sb = lireStoryboard(b.storyboard, 0); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'storyboard invalide' }); }
-  const demande = lireDemandeCreer({ intention: sb.titre, format: b.format, son: b.son });
+  const demande = lireDemandeCreer({ intention: sb.titre, format: b.format, son: b.son, qualite: b.qualite });
   const moteur = b.moteur === 'wan22' ? 'wan22' : choisirMoteur(territoireDuCompte());
   const missing = await blockingReasonFor(eng.isLocal(), [moteur]);
   if (missing) return reply.code(412).send({ error: missing });
@@ -976,7 +976,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   const reservations: CreditsPrise[] = [];
   if (fac) {
     for (const p of sb.plans) {
-      const corps = corpsRendu({ intention: p.resume, format: demande.format, duree: p.duree, son: demande.son }, '', moteur);
+      const corps = corpsRendu({ intention: p.resume, format: demande.format, duree: p.duree, son: demande.son, qualite: demande.qualite }, '', moteur);
       const r = await fac.reserver({ idempotence: randomUUID(), credits: devisCredits(corps, tarifDepuisEnv()), libelle: `Nexora Creative · film « ${sb.titre.slice(0, 40)} »` });
       if (!r.ok) {
         for (const x of reservations) await fac.liberer(x.reservationId).catch(() => {});
@@ -986,7 +986,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
     }
   }
   try {
-    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur, reservations }, llmCourant());
+    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur, reservations, qualite: demande.qualite }, llmCourant());
     return { filmId, take: takes.get(filmId), credits: reservations.reduce((n, r) => n + r.credits, 0) || undefined };
   } catch (e) {
     for (const x of reservations) await fac?.liberer(x.reservationId).catch(() => {});
@@ -1021,7 +1021,7 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
   const reservations: (CreditsPrise | undefined)[] = [];
   for (const p of sb.plans) {
     if (!fac || p.take) { reservations.push(undefined); continue; }
-    const corps = corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son }, '', moteur);
+    const corps = corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite }, '', moteur);
     const r = await fac.reserver({ idempotence: randomUUID(), credits: devisCredits(corps, tarifDepuisEnv()), libelle: `Nexora Creative · plan refait « ${sb.titre.slice(0, 40)} »` });
     if (!r.ok) {
       for (const x of reservations) if (x) await fac.liberer(x.reservationId).catch(() => {});
@@ -1029,7 +1029,7 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
     }
     reservations.push({ reservationId: r.reservationId, credits: r.credits, etat: 'reservee' });
   }
-  const filmId = await tournerFilm({ ...sb, titre: sb.titre }, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur, reservations: reservations as CreditsPrise[] }, llmCourant());
+  const filmId = await tournerFilm({ ...sb, titre: sb.titre }, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur, reservations: reservations as CreditsPrise[], qualite: s.qualite }, llmCourant());
   takes.patchSettings(filmId, { versionDe: film.id });
   void avancerFilm(filmId);
   return { filmId, take: takes.get(filmId) };
@@ -1052,7 +1052,7 @@ app.post('/api/nexora/film/:id/montage', async (req, reply) => {
   let sb;
   try { sb = storyboardPourMontage(s.storyboard, Array.isArray(b.ordre) ? b.ordre.map(Number) : s.storyboard.plans.map((_: unknown, i: number) => i)); }
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'montage invalide' }); }
-  const filmId = await tournerFilm(sb, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur: s.moteur ?? 'h3-fast' }, null);
+  const filmId = await tournerFilm(sb, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur: s.moteur ?? 'h3-fast', qualite: s.qualite }, null);
   takes.patchSettings(filmId, { versionDe: film.id, transition: b.transition === 'fondu' ? 'fondu' : 'coupe' });
   void avancerFilm(filmId);
   return { filmId };

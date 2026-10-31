@@ -6,7 +6,7 @@ import { choisirMoteur, corpsRendu, corpsRenduH3, lireDemandeCreer } from './cre
 describe('demande « Créer » (parcours simple)', () => {
   it('valide et complète la demande', () => {
     expect(lireDemandeCreer({ intention: '  un chat astronaute  ' })).toEqual({
-      intention: 'un chat astronaute', format: '16:9', duree: 5, son: true,
+      intention: 'un chat astronaute', format: '16:9', duree: 5, son: true, qualite: 'rapide',
     });
     expect(() => lireDemandeCreer({ intention: '' })).toThrow(/Décris/);
     expect(() => lireDemandeCreer({ intention: 'x'.repeat(4001) })).toThrow(/long/);
@@ -66,6 +66,18 @@ describe('partir d’une photo (image vers vidéo)', () => {
     expect(corpsRendu(d, 'P', 'h3-fast')).toMatchObject({ startImage: jeton });
     expect(corpsRendu(d, 'integrated_multimodal_description: [Shot 1] x', 'wan22')).toMatchObject({ startImage: jeton });
     expect(corpsRendu(lireDemandeCreer({ intention: 'b' }), 'P', 'h3-fast')).not.toHaveProperty('startImage');
+  });
+});
+
+describe('profils Rapide et Qualité maximale', () => {
+  it('Rapide par défaut (832×480), Qualité en résolution native de H3 (1344×768), multiples de 32', () => {
+    expect(lireDemandeCreer({ intention: 'a' }).qualite).toBe('rapide');
+    const q = lireDemandeCreer({ intention: 'a', qualite: 'max' });
+    expect(q.qualite).toBe('max');
+    expect(corpsRendu(q, 'P', 'h3-fast')).toMatchObject({ width: 1344, height: 768 });
+    expect(corpsRendu({ ...q, format: '9:16' }, 'P', 'h3-fast')).toMatchObject({ width: 768, height: 1344 });
+    expect(corpsRendu({ ...q, format: '1:1' }, 'P', 'h3-fast')).toMatchObject({ width: 1024, height: 1024 });
+    expect(corpsRendu(lireDemandeCreer({ intention: 'a' }), 'P', 'h3-fast')).toMatchObject({ width: 832, height: 480 });
   });
 });
 

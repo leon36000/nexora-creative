@@ -32,7 +32,7 @@ const pousser = (id: number) => deps.broadcast({ type: 'take', take: takes.get(i
 
 export async function tournerFilm(
   sb: Storyboard,
-  opts: { format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: CreditsPrise[] },
+  opts: { format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: CreditsPrise[]; qualite?: 'rapide' | 'max' },
   llm: ClientLlm | null,
 ): Promise<number> {
   const filmId = takes.create({
@@ -40,7 +40,7 @@ export async function tournerFilm(
     kind: 'video',
     shot_name: sb.titre.slice(0, 40),
     settings: {
-      app: 'nexora-film', film: true, storyboard: sb, format: opts.format, son: opts.son && opts.moteur === 'h3-fast', moteur: opts.moteur,
+      app: 'nexora-film', film: true, storyboard: sb, format: opts.format, qualite: opts.qualite ?? 'rapide', son: opts.son && opts.moteur === 'h3-fast', moteur: opts.moteur,
       prompt: opts.intention, userPrompt: sb.titre, seconds: sb.dureeTotale, shotName: sb.titre.slice(0, 40),
     },
   });
@@ -60,7 +60,7 @@ export async function tournerFilm(
         continue;
       }
       const corps = {
-        ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son }, ecrit.prompt, opts.moteur),
+        ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son, qualite: opts.qualite }, ecrit.prompt, opts.moteur),
         app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: ecrit.source,
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
@@ -102,7 +102,7 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
     dureeS: dureePlan(p),
   }, deps.llmPour(org));
   const corps = {
-    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son }, ecrit.prompt, s.moteur ?? 'h3-fast'),
+    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite }, ecrit.prompt, s.moteur ?? 'h3-fast'),
     startImage: jeton,
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
     shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: film.project_id ?? undefined,
