@@ -1,0 +1,7 @@
+# État local de la boucle et des agents
+.claude/
+# Données locales (poids, rendus) : jamais dans le dépôt
+data/
+*.log
+.env
+node_modules/
