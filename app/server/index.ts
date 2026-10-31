@@ -19,6 +19,8 @@ import { CHECKPOINT_FASTH3, corpsRenduH3, dureeEffective, lireDemandeCreer } fro
 import { territoireDuCompte } from './nexora/compte.js';
 import { clientLlmDepuisEnv } from './nexora/llm.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
+import { lireStoryboard, planifierFilm } from './nexora/film.js';
+import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { buildLtxGraph } from './graphs/ltx.js';
 import { buildLtx25Graph, ltx25EffectiveSize, ltx25Mode, LTX25_FPS, snapFrames } from './graphs/ltx25.js';
 import { applyPost } from './graphs/director.js';
@@ -219,8 +221,11 @@ async function saveSidecars(path: string, extras: NonNullable<eng.JobResult['ext
 
 /** A Director scene shot (or its hero frame) settled: move its scene on. */
 function nextInScene(take: { settings: string }) {
-  const cut = Number(JSON.parse(take.settings).sceneOf);
+  const s = JSON.parse(take.settings);
+  const cut = Number(s.sceneOf);
   if (cut) void advance(cut);
+  const film = Number(s.nexoraFilm);
+  if (film) void avancerFilm(film);
 }
 
 app.get('/live', { websocket: true }, (conn) => {
@@ -887,6 +892,32 @@ app.post('/api/nexora/creer', async (req, reply) => {
   return { ...res, prompt: r.prompt, source: r.source, tentatives: r.tentatives };
 });
 
+/** Director, étape 1 : l'idée devient un storyboard (plans, caméra, durées, bible de continuité), sans rien tourner. */
+app.post('/api/nexora/film/plan', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
+  if (!intention) return reply.code(400).send({ error: 'Décris le film que tu veux.' });
+  const dureeCible = Math.max(10, Math.min(120, Number(b.duree) || 30));
+  return planifierFilm({ intention: intention.slice(0, 4000), dureeCible }, clientLlmDepuisEnv());
+});
+
+/** Director, étape 2 : tourner le storyboard (éventuellement modifié par la personne) et l'assembler. */
+app.post('/api/nexora/film/tourner', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  let sb;
+  try { sb = lireStoryboard(b.storyboard, 0); }
+  catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'storyboard invalide' }); }
+  const demande = lireDemandeCreer({ intention: sb.titre, format: b.format, son: b.son });
+  const missing = await blockingReasonFor(eng.isLocal(), ['h3-fast']);
+  if (missing) return reply.code(412).send({ error: missing });
+  try {
+    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null }, clientLlmDepuisEnv());
+    return { filmId, take: takes.get(filmId) };
+  } catch (e) {
+    return reply.code(400).send({ error: e instanceof Error ? e.message : 'tournage impossible' });
+  }
+});
+
 app.get('/api/nexora/etat', async () => ({ llm: !!clientLlmDepuisEnv(), moteur: 'MiniMax H3', territoire: territoireDuCompte() }));
 
 async function generate(b: any, reply: FastifyReply) {
@@ -1353,6 +1384,7 @@ async function objectGraph(b: any, seed: number): Promise<Built> {
 // ---------- Director scenes ----------
 
 initScenes({ queueTakes, broadcast, recordWorkflow, probeMedia });
+initFilms({ queueTakes, broadcast });
 
 /** Start planning a scene into shots. Poll GET /api/director/plan/:id. */
 app.post('/api/director/plan', async (req, reply) => {
@@ -2262,6 +2294,7 @@ app.get('/api/media/:id', async (req, reply) => {
  */
 async function reconcile() {
   for (const id of waitingCuts()) void advance(id);
+  for (const id of filmsEnAttente()) void avancerFilm(id);
   for (const t of takes.active()) {
     if (!t.prompt_id) continue;
     try {
@@ -2282,7 +2315,8 @@ setInterval(() => void reconcile(), 20_000);
 // Cast hero frames are ordinary takes queued through the same path.
 setCastQueue(queueTakes);
 // A take still waiting on a hero frame when the server stopped can never run.
-for (const t of takes.orphans()) takes.fail(t.id, 'interrupted: the server restarted while it waited for its hero frame', true);
+// Nexora : un film attend ses plans sans travail moteur propre ; il reprend par reconcile (avancerFilm), pas un orphelin.
+for (const t of takes.orphans()) if (JSON.parse(t.settings).film !== true) takes.fail(t.id, 'interrupted: the server restarted while it waited for its hero frame', true);
 
 // In production the sidecar also serves the built UI, so the whole app is one
 // port with no Vite in the picture. In dev, Vite serves it and proxies here.

@@ -105,6 +105,13 @@ async function j<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export interface CreerReponse { takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number }
+export interface PlanFilm { resume: string; description: string; duree: 5 | 10; camera: string; take?: number }
+export interface Storyboard {
+  titre: string;
+  bible: { style: string; personnages: { nom: string; description: string }[]; lieux: { nom: string; description: string }[] };
+  plans: PlanFilm[];
+  dureeTotale: number;
+}
 export interface EtatNexora { llm: boolean; moteur: string; territoire: string | null }
 
 export const api = {
@@ -113,6 +120,10 @@ export const api = {
   nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean }) =>
     j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
   nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
+  nexoraFilmPlan: (b: { intention: string; duree: number }) =>
+    j<{ storyboard: Storyboard; source: 'llm' | 'repli' }>('/api/nexora/film/plan', { method: 'POST', body: JSON.stringify(b) }),
+  nexoraFilmTourner: (b: { storyboard: Storyboard; format: '16:9' | '9:16' | '1:1'; son: boolean; intention: string }) =>
+    j<{ filmId: number }>('/api/nexora/film/tourner', { method: 'POST', body: JSON.stringify(b) }),
   /** Set the machine-wide render size; null goes back to the default (OPENFIELD_RENDER_TIER or the GPU). */
   setRenderTier: (renderTier: RenderTier | null) =>
     j<{ renderTier: TierState }>('/api/settings', { method: 'PUT', body: JSON.stringify({ renderTier }) }),
