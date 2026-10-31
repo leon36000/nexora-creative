@@ -19,6 +19,12 @@ Toutes les lignes de ce fichier sont **[MESURÉ par nous]** sauf mention contrai
 | 1 | 832×480 | 124 (5,17 s) | stéréo 32 kHz | **à froid** | **92,1 s** | échantillonnage 61 s (7,65 s/étape) ; le reste = chargement + encodage du texte + décodage VAE |
 | 2 | 832×480 | 124 (5,17 s) | stéréo 32 kHz | **à chaud** | **82,1 s** | graine différente |
 
+| 3 | 832×480 | 124 (5,17 s) | stéréo | à chaud, dans un film | 82,9 à 86,3 s | 4 plans de 5 s du film « Crimson Rising » |
+| 4 | 832×480 | **243 (10,1 s)** | stéréo | à chaud, dans un film | **230,2 et 230,9 s** | ≈ 24 s par étape : **2,7 fois le temps d'un plan de 5 s pour 2 fois la durée** (l'attention croît plus vite que la longueur) |
+| 5 | assemblage ffmpeg | 6 plans → 41,0 s | AAC | — | **3,1 s** | concaténation ré-encodée H.264 CRF 18 + AAC |
+
+Conséquence pour le Director : préférer des plans de 5 s (meilleur rapport temps/durée), réserver 10 s aux actions continues.
+
 Vérification du fichier n° 1 (ffprobe) : H.264 High 832×480 24 i/s + AAC stéréo 32 kHz, 5,17 s ; volume moyen −18,9 dB, crête −3,9 dB (le son est bien présent). Contrôle visuel : le mouvement de caméra en orbite demandé est respecté, la voiture garde son identité sur tout le plan.
 
 Comparaison avec les chiffres publiés (rapports 03 et 04) : un tiers annonçait 141,4 s sur Spark pour FastH3 V2 NVFP4 en 480p 5 s ; nous mesurons 82 à 92 s avec ComfyUI 0.43.2, donc mieux que ce chiffre publié. Non comparable directement : version du moteur, réglages et résolution exacte diffèrent.

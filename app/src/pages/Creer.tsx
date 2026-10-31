@@ -9,6 +9,7 @@ import { api, type CreerReponse, type EtatNexora, type Storyboard } from '../api
 import { inFeed, isImage, isModel, settingsOf, toast, useStore } from '../store';
 import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
+import FilmPlans from '../FilmPlans';
 
 type Format = '16:9' | '9:16' | '1:1';
 type Duree = 5 | 10 | 15 | 30 | 60 | 120;
@@ -43,6 +44,8 @@ export default function Creer() {
   const [voirScenario, setVoirScenario] = useState(false);
   const [etat, setEtat] = useState<EtatNexora | null>(null);
   const [vue, setVue] = useState<number | null>(null);
+  const [filmOuvert, setFilmOuvert] = useState<number | null>(null);
+  const toutes = useStore((s) => s.takes);
   const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && !isImage(t) && !isModel(t) && settingsOf(t).nexoraFilm == null).slice(0, 12));
 
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
@@ -198,14 +201,17 @@ export default function Creer() {
             {takes.map((t) => {
               const s = settingsOf(t);
               const plans = s.film ? (s.storyboard?.plans ?? []) as { take?: number }[] : [];
-              return <MediaCard key={t.id} take={t} onOpen={() => setVue(t.id)} tag={s.film ? 'Film' : undefined}
-                pendingLabel={s.film ? `Film : ${plans.length} plans en tournage` : 'En file d’attente'} />;
+              const faits = plans.filter((p) => p.take && toutes.find((x) => x.id === p.take)?.status === 'done').length;
+              return <MediaCard key={t.id} take={t} onOpen={() => (s.film ? setFilmOuvert(t.id) : setVue(t.id))} tag={s.film ? 'Film' : undefined}
+                pendingLabel={s.film ? `Film : ${faits}/${plans.length} plans tournés` : 'En file d’attente'}
+                actions={s.film ? <button type="button" className="nx-puce on" onClick={() => setFilmOuvert(t.id)}>Plans</button> : undefined} />;
             })}
           </div>
         )}
       </section>
 
       <footer className="nx-pied">Vidéo propulsée par <strong>{etat?.moteur ?? 'MiniMax H3'}</strong> · Scénario par IA · Nexora Creative</footer>
+      {filmOuvert !== null && <FilmPlans filmId={filmOuvert} onClose={() => setFilmOuvert(null)} />}
       {vue !== null && <Viewer takeId={vue} onClose={() => setVue(null)} onStep={(d) => {
         const n = ids[ids.indexOf(vue) + d];
         if (n !== undefined) setVue(n);

@@ -27,3 +27,12 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - Défaut trouvé pendant ce test : le LLM a inventé un champ `on_screen_text` ; le validateur le refuse désormais (test ajouté, 26 verts).
 - Pas encore fait dans le lot 7 : devis en crédits avant tournage, territoire du compte dans l'interface, plan proposé avant tournage.
 - Prochaine action : AI Director multi-plans (vidéos plus longues, découpage, 2 candidats, juge), profil Qualité 1344×768.
+
+## 30/10/2026 — itération 1, suite (Director, Wan, multi-organisation, SSO, crédits, contrôle qualité)
+- **AI Director v1** : idée → storyboard LLM (plans, caméra, bible de continuité) modifiable dans l'interface → tournage H3 → contrôle qualité de chaque plan → assemblage. **Premier film réel « Crimson Rising » : 6 plans, 41,0 s, tous contrôlés OK, assemblé en 3,1 s** [TEST navigateur + ffprobe], malgré plusieurs redémarrages du serveur pendant le tournage (reprise prouvée). Film envoyé au fondateur.
+- Mesure : un plan H3 de 10 s coûte 230 s contre 85 s pour 5 s sur le GB10 [MESURÉ] (rapport 08).
+- **Wan 2.2 TI2V-5B** (Apache-2.0) téléchargé (18 Go) et branché ; choix du moteur par le code selon licence et territoire ; premier rendu Wan en file.
+- **Multi-organisation** (isolation prouvée par 3 tests), **connexion unique OIDC + PKCE** (prouvée de bout en bout avec un faux site Nexora, 3 tests), **crédits GPU** (devis, réservation, validation/libération ; 4 tests), contrat du site dans `docs/INTEGRATION-NEXORA.md`. Côté site : **rien n'est construit** (dépôt nexora-web non modifié).
+- **Contrôle qualité déterministe** (noir, figé, silencieux, durée ; 4 tests) + reprise automatique d'un plan raté. **Plans enchaînés** depuis la dernière image du précédent (I2VA). **Refaire un seul plan** d'un film (nouvelle version, autres plans gardés ; 3 tests).
+- Non testé en réel : la reprise automatique d'un plan raté (aucun plan n'a échoué au contrôle), les plans enchaînés (le film testé a été planifié avant cette fonction), la facturation contre un vrai site.
+- 59 tests verts, typecheck vert.
