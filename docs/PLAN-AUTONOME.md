@@ -16,7 +16,7 @@ Mandat du fondateur (30/10/2026, soir) : carte blanche. Recherche approfondie (y
 ## Lots (cocher au fur et à mesure, avec la preuve)
 
 - [ ] **R. Littérature scientifique** : `recherche/07-litterature-scientifique.md` (arXiv : génération vidéo, distillation/accélération, cohérence de personnages, vidéos longues, contrôle caméra, agents réalisateurs, évaluation automatique, édition vidéo). Chaque article : idée, résultat publié, ce qu'on en fait dans Nexora Creative.
-- [ ] **0b. Fork OpenField** dans `app/` : `UPSTREAM.md` (commit d'origine), notices, retrait des modèles non commerciaux, graphes LTX isolés et désactivés, `npm install` + `typecheck` verts, contrôle de licences (`scripts/check-licenses.*`).
+- [x] **0b. Fork OpenField** — fait le 30/10 : import brut c355ce9, politique de licences `app/server/nexora/licences.ts` branchée sur le preflight (8 tests verts, typecheck vert) [TEST]. dans `app/` : `UPSTREAM.md` (commit d'origine), notices, retrait des modèles non commerciaux, graphes LTX isolés et désactivés, `npm install` + `typecheck` verts, contrôle de licences (`scripts/check-licenses.*`).
 - [ ] **1. Moteur local sur GB10** : environnement PyTorch pour sm_121 (vérifier `torch.cuda.get_arch_list()`), ComfyUI figé (version notée), nœuds minimaux. Rapport `recherche/08-mesures-gb10.md`.
 - [ ] **2. Premier rendu H3 réel** (FastH3 quantifié) via le serveur OpenField forké ou via l'API ComfyUI : vidéo de 5 s, temps froid et chaud, pic mémoire, avec et sans audio. Vidéo gardée hors dépôt, empreinte et réglages au journal.
 - [ ] **3. Second moteur à licence propre** (Wan 2.2 TI2V-5B, Apache-2.0) : même mesure. Preuve « jamais exclusif ».

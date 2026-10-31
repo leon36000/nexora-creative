@@ -42,7 +42,7 @@ import { buildCastVideoGraph } from './graphs/cast.js';
 import { imageDims, saveToProject, safeShotName } from './files.js';
 import { transcribe } from './whisper.js';
 import { bundlesFor } from './models.js';
-import { blockingReason, clearPreflightCache, effectBlockingReason, preflight } from './preflight.js';
+import { blockingReason, blockingReasonFor, clearPreflightCache, effectBlockingReason, preflight } from './preflight.js';
 import { effectById, effectPrompt } from '../src/effects.js';
 import { closePhoneSession, openPhoneSession, phoneSession } from './phone.js';
 import { load as loadClip, measureLoop, planBridge, planRegen, planTrim, scoreWindow, videoInfo, type SeamMeasure } from './seam.js';
@@ -887,7 +887,7 @@ app.post('/api/generate', async (req, reply) => {
 
   // Say exactly which weights are missing rather than letting ComfyUI reject
   // the graph with a node id the user has never heard of.
-  const missing = eng.isLocal() ? await blockingReason(bundlesFor({ ...b, castEngine: castEngineFor(b) })) : null;
+  const missing = await blockingReasonFor(eng.isLocal(), bundlesFor({ ...b, castEngine: castEngineFor(b) }));
   if (missing) return reply.code(412).send({ error: missing });
   const postMissing = eng.isLocal() ? await postBlockingReason(b) : null;
   if (postMissing) return reply.code(412).send({ error: postMissing });
@@ -1733,7 +1733,7 @@ async function afterRender(id: number) {
 app.post('/api/takes/:id/upres', async (req, reply) => {
   const b = (req.body ?? {}) as any;
   const id = Number((req.params as any).id);
-  const missing = eng.isLocal() ? await blockingReason(bundlesFor({ kind: 'upscale', mode: 'sharpen', model: b.model === 'ultrasharp' ? 'ultrasharp' : 'esrgan' })) : null;
+  const missing = await blockingReasonFor(eng.isLocal(), bundlesFor({ kind: 'upscale', mode: 'sharpen', model: b.model === 'ultrasharp' ? 'ultrasharp' : 'esrgan' }));
   if (missing) return reply.code(412).send({ error: missing });
   try {
     const r = await queueTakes({ kind: 'upscale', mode: 'sharpen', sourceTake: id, model: b.model === 'ultrasharp' ? 'ultrasharp' : 'esrgan', rife: !!b.rife }, 1);
@@ -1936,7 +1936,7 @@ app.get('/api/cast/:id/ref/:n', async (req, reply) => {
  */
 app.post('/api/cast/hero', async (req, reply) => {
   const b = (req.body ?? {}) as { castIds?: number[]; shot?: string; width?: number; height?: number; projectId?: number; seed?: number };
-  const missing = eng.isLocal() ? await blockingReason(['edit']) : null;
+  const missing = await blockingReasonFor(eng.isLocal(), ['edit']);
   if (missing) return reply.code(412).send({ error: missing });
   const ids = (Array.isArray(b.castIds) ? b.castIds : []).map(Number).filter(Boolean);
   const shot = String(b.shot ?? '');

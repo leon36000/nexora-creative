@@ -8,6 +8,8 @@
  */
 import { comboOptions, listModelFolder, listNodeClasses } from './comfy.js';
 import { BUNDLES, bundle, bundleGb, type Bundle, type ModelFile } from './models.js';
+import { territoireDuCompte } from './nexora/compte.js';
+import { refusLicence } from './nexora/licences.js';
 
 /** ComfyUI folder -> the loader node whose enum lists that folder. */
 const LOADER: Partial<Record<ModelFile['dir'], [string, string]>> = {
@@ -101,6 +103,8 @@ export function clearPreflightCache(): void {
  * when it can proceed. This is the string the user sees instead of a stack trace.
  */
 export async function blockingReason(bundleIds: string[]): Promise<string | null> {
+  const licence = refusLicence(bundleIds, territoireDuCompte());
+  if (licence) return licence;
   const all = await preflight();
   const problems: string[] = [];
   for (const id of bundleIds) {
@@ -116,10 +120,20 @@ export async function blockingReason(bundleIds: string[]): Promise<string | null
 }
 
 /**
+ * Pour un moteur distant, seules les licences sont vérifiées (le moteur sait ce qu'il a) ; en local, tout.
+ */
+export async function blockingReasonFor(local: boolean, bundleIds: string[]): Promise<string | null> {
+  if (!local) return refusLicence(bundleIds, territoireDuCompte());
+  return blockingReason(bundleIds);
+}
+
+/**
  * Effects need one file out of a bundle, not the whole bundle: say what is
  * missing for this effect only (its LoRA, and the bundle's node packs).
  */
 export async function effectBlockingReason(bundleId: string, file: string, label: string): Promise<string | null> {
+  const licence = refusLicence([bundleId], territoireDuCompte());
+  if (licence) return licence;
   const st = (await preflight()).find((s) => s.id === bundleId);
   if (!st) return null;
   const f = st.missingFiles.find((m) => m.file === file);

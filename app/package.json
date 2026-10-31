@@ -20,7 +20,8 @@
     "mcp": "tsx mcp/server.ts",
     "mcp:smoke": "tsx mcp/smoke.ts",
     "mcp:check": "tsx mcp/bodies.check.ts",
-    "workflows": "tsx scripts/export-workflows.ts"
+    "workflows": "tsx scripts/export-workflows.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@comfyorg/sdk": "^0.5.0",
@@ -50,8 +51,14 @@
     "concurrently": "^9.1.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vite": "^6.4.5"
+    "vite": "^6.4.5",
+    "vitest": "^3.2.7"
   },
   "description": "OpenField: an open-source, local-first creative suite (video, image, director, loops) on ComfyUI and the Comfy SDK.",
-  "license": "MIT"
+  "license": "MIT",
+  "allowScripts": {
+    "better-sqlite3@11.10.0": true,
+    "esbuild@0.28.1": true,
+    "esbuild@0.25.12": true
+  }
 }
