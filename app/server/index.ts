@@ -92,6 +92,8 @@ async function solderCredits() {
     const s = JSON.parse(t.settings);
     const action = actionFacturation({ status: t.status, credits: s.nexoraCredits });
     if (!action) continue;
+    // Plan d'un film encore en tournage : le film peut le relancer et lui transférer sa réservation ; on attend.
+    if (action === 'liberer' && s.nexoraFilm && ['queued', 'rendering'].includes(takes.get(Number(s.nexoraFilm))?.status ?? '')) continue;
     const fac = facturationPour(t.organisation_id);
     if (!fac || !accesOrganisation(t.organisation_id)) continue; // en attente d'une reconnexion de l'organisation
     try {

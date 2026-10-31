@@ -26,6 +26,8 @@ describe('suite de la facturation d’une prise', () => {
     expect(actionFacturation({ status: 'rendering', credits: reserve })).toBeNull();
     expect(actionFacturation({ status: 'done', credits: { ...reserve, etat: 'validee' as const } })).toBeNull();
     expect(actionFacturation({ status: 'done', credits: undefined })).toBeNull();
+    // Plan relancé après une panne : la réservation suit la nouvelle prise, l'ancienne ne la libère pas.
+    expect(actionFacturation({ status: 'failed', credits: { ...reserve, etat: 'transferee' as const } })).toBeNull();
   });
 });
 

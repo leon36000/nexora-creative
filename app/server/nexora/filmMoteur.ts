@@ -145,6 +145,23 @@ async function etape(filmId: number) {
     }
     const t = takes.get(p.take);
     if (!t) throw new Error(`Plan ${i + 1} : sa prise a été supprimée`);
+    // Panne du moteur pendant un plan : on le relance (même prompt, même graine) jusqu'à 2 fois avant d'abandonner le film.
+    const relances = Number((p as any).relances ?? 0);
+    if (t.status === 'failed' && (p as any).corps && relances < 2) {
+      const org = takes.organisationDe(filmId) ?? 'local';
+      let id: number;
+      try {
+        [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes({ ...(p as any).corps }, 1));
+      } catch (e) {
+        // Moteur encore à terre : le plan attend ; la réconciliation (toutes les 20 s) refait cette étape.
+        majPlan(filmId, i, { attenteMoteur: e instanceof Error ? e.message : 'moteur indisponible' });
+        return;
+      }
+      const credits = JSON.parse(t.settings).nexoraCredits;
+      if (credits) takes.patchSettings(id, { nexoraCredits: credits }), takes.patchSettings(t.id, { nexoraCredits: { ...credits, etat: 'transferee' } });
+      majPlan(filmId, i, { take: id, relances: relances + 1, panne: t.error ?? 'échec', attenteMoteur: undefined });
+      return;
+    }
     if (t.status === 'failed' || t.status === 'stopped') throw new Error(`Plan ${i + 1} : ${t.status}${t.error ? ` (${t.error})` : ''}`);
     if (t.status !== 'done' || !t.output_path || !existsSync(t.output_path)) return;
     const plan = p as PlanFilm & { corps?: Record<string, any>; controle?: { ok: boolean; defauts: string[]; duree?: number }; reprises?: number };

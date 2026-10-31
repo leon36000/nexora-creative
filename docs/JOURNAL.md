@@ -43,3 +43,17 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **Partir de sa photo** (I2V, H3 et Wan) : 2 tests ; pas encore essayé avec une vraie photo.
 - **Registre de capacités v1** (`server/nexora/registre.ts`, Zod) : manifestes H3 et Wan, planificateur à filtres durs (tâche, durée, licence/territoire, modèles installés) puis classement ; 7 tests. Le moteur de « Créer » vient du registre ; route `/api/nexora/moteurs` (raisons d'exclusion lisibles).
 - 68 tests verts.
+
+## 30/10/2026 — itération 1, suite (tests de panne réels, montage, exports, qualité)
+- **Pannes provoquées** (`kill -9` du moteur ComfyUI en plein échantillonnage) :
+  1. clip isolé : la prise passe en échec avec un message clair ; en mode portail ses crédits sont libérés (règle testée) ;
+  2. moteur sous superviseur (`~/nexora-creative-data/engine/superviser-comfyui.sh`) : **relevé seul en 13 s**, rendu suivant réussi (95,9 s) [TEST réel] ;
+  3. film de 2 plans : 1er essai, **défaut trouvé** (la relance partait pendant que le moteur était à terre et faisait échouer le film) → corrigé (le plan attend le moteur, la réconciliation le relance) ; 2e essai : **les 2 plans relancés automatiquement, film terminé et contrôlé** [TEST réel]. Les crédits d'un plan relancé suivent la nouvelle prise (« transferee »).
+- **Plans enchaînés prouvés** : film « Métamorphose sous la pluie » (20,5 s), raccords sans rupture visible ; défaut d'une enseigne inventée → le réécrivain refuse désormais le texte à l'écran non demandé (2 tests).
+- **Photo de départ prouvée** (93,4 s, première image = photo).
+- **Montage sans rendu** (33,84 s en 2,4 s), **ProRes 422 HQ** (2,4 s), **ZIP projet Premiere/DaVinci** (FCP7 XML valide ; import non testé faute des logiciels).
+- **Profil Qualité max** (1344×768) branché ; pas encore mesuré.
+- Décision : FreeCut écarté comme éditeur cloud après inspection (Chromium seulement, projets sur le disque de l'utilisateur) ; montage cloud Nexora + export pro à la place.
+- Décision : SQLite (WAL) pour une instance ; PostgreSQL quand il y aura plusieurs instances (le serveur d'OpenField est synchrone sur SQLite partout : bascule coûteuse sans gain aujourd'hui).
+- **Bloqué, décision du fondateur requise** : moteurs sur RTX 5090 et 5080 (machine non identifiée, installation sur une autre infrastructure non autorisée par cette mission).
+- 81 tests verts.

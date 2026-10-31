@@ -30,7 +30,8 @@ export function tarifDepuisEnv(env: NodeJS.ProcessEnv = process.env) {
   return { creditsParSecondeGpu: Number.isFinite(v) && v > 0 ? v : 0.5 };
 }
 
-export interface CreditsPrise { reservationId: string; credits: number; etat: 'reservee' | 'validee' | 'liberee' }
+/** « transferee » : la réservation est passée à la prise qui relance ce plan après une panne (ni validée ni libérée ici). */
+export interface CreditsPrise { reservationId: string; credits: number; etat: 'reservee' | 'validee' | 'liberee' | 'transferee' }
 
 export function actionFacturation(t: { status: string; credits?: CreditsPrise }): 'valider' | 'liberer' | null {
   if (!t.credits || t.credits.etat !== 'reservee') return null;
