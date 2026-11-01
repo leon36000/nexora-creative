@@ -1,0 +1,16 @@
+[Unit]
+Description=Nexora Creative (serveur et Mode Studio)
+After=network-online.target nexora-tunnel-gb10.service nexora-tunnel-rtx5090.service
+Wants=nexora-tunnel-gb10.service nexora-tunnel-rtx5090.service
+[Service]
+User=nexora
+WorkingDirectory=/srv/creative/app
+EnvironmentFile=/etc/nexora/creative.env
+ExecStart=/srv/creative/app/node_modules/.bin/tsx server/index.ts --production
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

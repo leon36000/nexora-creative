@@ -1,0 +1,13 @@
+# Un tunnel par moteur GPU : nexora-tunnel-gb10 (37188 -> pc6@192.168.1.11:37188), nexora-tunnel-rtx5090 (37288 -> pc1@192.168.1.149:18388).
+# La clé du tunnel n'ouvre qu'un seul port : côté GPU, authorized_keys = restrict,port-forwarding,permitopen="127.0.0.1:<port>" <clé>.
+[Unit]
+Description=Tunnel SSH vers le moteur GPU <NOM> de Nexora Creative
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=nexora
+ExecStart=/usr/bin/ssh -N -i /home/nexora/.ssh/id_ed25519_tunnel -o IdentitiesOnly=yes -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L 127.0.0.1:<PORT_LOCAL>:127.0.0.1:<PORT_GPU> <UTILISATEUR>@<HOTE>
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
