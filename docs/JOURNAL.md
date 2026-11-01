@@ -112,3 +112,9 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **Défaut de ma branche précédente corrigé** : les deux routes Creative n'avaient pas de garde déclarée (`route-guards.test.ts` échouait, je n'avais lancé qu'un sous-ensemble des tests) ; garde `service-token` ajoutée.
 - Tests : 1362 tests verts côté site ; 86 fichiers ne tournent pas ici faute de `DATABASE_URL` (base de données absente de ce poste). Typecheck : erreurs seulement dans `worker/` (modules `@nexora/*` non résolus dans le worktree), aucune dans `web/`.
 - Rendu vérifié dans le navigateur (fr, en, 375 px sans débordement ; vidéo 60 s lue). **Rien déployé.** Réserve : la vidéo sur le site est visible partout, donc la clause V.4 de H3 s'applique (docs/LICENCES-PUBLICATION.md).
+
+## 31/10/2026 (nuit) — fiche Nexora Creative fusionnée dans `main` du site
+- Demande de fusion !1 de `root/nexora-web` (`feat/creative-admin-modeles` → `main`) ouverte puis fusionnée sur ordre du fondateur ; `main` du site est maintenant `0bfc14e`.
+- Pipeline : `pc4_gitleaks` échoue (10 alertes). Toutes viennent de commits des 29 et 30 octobre déjà sur `main` (valeurs de test dans `dry-run.test.ts`, `rag-connect.test.ts`, `detectors.test.ts`, `activity*.test.ts`, exemples curl des guides) ; aucune n'est dans les fichiers Creative. Les trois derniers pipelines de `main` échouaient déjà au même endroit. **Rien n'a été ajouté à `.gitleaksignore`** : c'est la liste des alertes examinées par une personne, à lui laisser.
+- Aucun déploiement automatique : le CI du site ne fait que de l'analyse ; le site ne tourne pas encore sur un domaine public (mise en service Proxmox à faire). La fusion n'a donc rien mis en ligne.
+- Reste avant une mise en ligne : migration 0030 sur la vraie base, variables `NEXORA_CREATIVE_SERVICE_TOKEN` et `NEXORA_SECRET_HOSTS_CREATIVE`, approbation des affirmations CL-CR01 à CL-CR05 par une personne, avis sur la vidéo (clause V.4 de H3).
