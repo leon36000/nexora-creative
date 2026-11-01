@@ -136,3 +136,10 @@ Une entrée par itération : date, lot, ce qui a été fait, preuves, échecs, p
 - **Prouvé depuis la VM** : `/api/nexora/moteurs-gpu` → GB10 et RTX 5090 en ligne ; image Qwen-Image-2.1 rendue sur le GB10 (prise 59) ; plan H3 5 s rendu sur la RTX 5090 (prise 60) ; assistant (commandes JSON valides) ; transcription du clip migré en 14 s ; `/mode-studio/` servi avec COOP/COEP.
 - Dépôt : `deploy/proxmox/` (unités systemd, modèle de configuration sans secret, `mettre-a-jour-creative.sh` testé).
 - **En attente** : approbation Tailscale des deux VM par le fondateur (HTTPS valide ; le Mode Studio exige un contexte sécurisé) ; la pile du site (VM 201) est montée par un agent, rapport séparé.
+
+## 01/11/2026 (fin) — pile du site en service sur la VM 201
+- Un agent (Sonnet) a monté la pile sur `nexora-pile` ; **vérifié par moi** : 9 conteneurs healthy, `/`, `/apps/creative`, `/api/health`, la vidéo : 200 ; seuls 80, 127.0.0.1:3500 et 127.0.0.1:8456 écoutent hors SSH ; LiteLLM → DeepInfra et OpenRouter (`z-ai/glm-5.3`) répondent ; migrations 0000 à 0030, schéma Directus, 2FA exigée de l'administrateur ; essai de sauvegarde/restauration exact. Demande de fusion `root/nexora-web!2` fusionnée (Dockerfiles, compose de production, scripts, correctifs `await connection()` sur deux routes).
+- J'ai ensuite posé la règle `DOCKER-USER` (navigateur WebPilot sans accès au LAN, éprouvée) et sauvegardé la VM 201 (2 min 22).
+- **Provisoire** : Mailpit (pas de SMTP), courriel d'administrateur `admin@nexora-pile.example.com`, Stripe absent, accès par LAN seulement.
+- **En attente d'une action du fondateur** : approuver les deux VM dans Tailscale (un surveillant sur pc6 pose alors `tailscale serve` tout seul) ; domaine, SMTP, Stripe, clé Directus OIG, taux USD→CAD et prix, copie hors VM des secrets critiques.
+- **Pas encore fait** : WorkStudio, RAG, Nexora Code, produit VPS ; Chromium et lychee dans le worker (audit nocturne en échec) ; authentification de Creative par le site (OIDC) : la VM Creative tourne en mode local, accessible seulement par le tailnet une fois approuvée.
