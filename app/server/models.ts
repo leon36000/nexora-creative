@@ -107,10 +107,9 @@ export const BUNDLES: Bundle[] = [
   },
   {
     id: 'qwen21',
-    label: 'Qwen-Image 2.1 (démonstration)',
-    purpose: 'Nexora Creative : image de plan clé la plus puissante en poids ouverts (arène 1225), sortie native jusqu\'à 2K. Mode démonstration seulement.',
+    label: 'Qwen-Image 2.1',
+    purpose: 'Nexora Creative : image de plan clé la plus puissante en poids ouverts (arène 1225), sortie native jusqu\'à 2K.',
     license: 'Qwen RESEARCH LICENSE AGREEMENT (30/09/2026) : usage non commercial (recherche ou évaluation) ; tout usage commercial exige une licence séparée (model-business@notice.qwencloud.com). Mention « Built with Qwen » si un modèle dérivé est distribué.',
-    licenseWarning: 'Non commercial : réservé aux démonstrations (NEXORA_MODE_DEMO=1).',
     optional: true,
     files: [
       { file: 'qwen_image_2.1_int8_convrot.safetensors', dir: 'diffusion_models',

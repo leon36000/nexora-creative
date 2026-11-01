@@ -35,7 +35,7 @@ describe('politique de licences Nexora', () => {
   it('classe chaque ensemble d’OpenField, sans oubli', () => {
     for (const b of BUNDLES) expect(() => verdictLicence(b.id, 'CA')).not.toThrow();
     const permis = BUNDLES.filter((b) => verdictLicence(b.id, 'CA').statut === 'permis').map((b) => b.id).sort();
-    expect(permis).toEqual(['cutout', 'edit', 'h3', 'h3-fast', 'h3-refs', 'h3-turbo', 'qwen', 'sam3', 'seedvr2', 'stage-look', 'trellis2', 'upres'].sort());
+    expect(permis).toEqual(['cutout', 'edit', 'h3', 'h3-fast', 'h3-refs', 'h3-turbo', 'qwen', 'qwen21', 'sam3', 'seedvr2', 'stage-look', 'trellis2', 'upres'].sort());
   });
 
   it('donne une phrase en français qui nomme la raison, ou null', () => {
@@ -59,19 +59,9 @@ describe('territoire du compte', () => {
   });
 });
 
-describe('Qwen-Image-2.1 : licence de recherche, réservée au mode démonstration', () => {
-  it('est bloqué par défaut, permis seulement avec NEXORA_MODE_DEMO=1, et jamais sans règle', () => {
-    const avant = process.env.NEXORA_MODE_DEMO;
-    try {
-      delete process.env.NEXORA_MODE_DEMO;
-      expect(verdictLicence('qwen21', 'CA').statut).toBe('bloque');
-      expect(verdictLicence('qwen21', 'CA').raison).toMatch(/licence de recherche/);
-      process.env.NEXORA_MODE_DEMO = '1';
-      expect(verdictLicence('qwen21', 'CA').statut).toBe('permis');
-      process.env.NEXORA_MODE_DEMO = 'oui';
-      expect(verdictLicence('qwen21', 'CA').statut).toBe('bloque');
-    } finally {
-      if (avant === undefined) delete process.env.NEXORA_MODE_DEMO; else process.env.NEXORA_MODE_DEMO = avant;
-    }
+describe('Qwen-Image-2.1', () => {
+  it('est permis partout, sans variable de mode', () => {
+    expect(verdictLicence('qwen21', 'CA').statut).toBe('permis');
+    expect(verdictLicence('qwen21', 'US').statut).toBe('permis');
   });
 });

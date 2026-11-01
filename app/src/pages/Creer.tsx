@@ -118,7 +118,7 @@ export default function Creer() {
 
   const occupe = envoi !== null;
   const prete = intention.trim().length > 0 && !occupe;
-  const demoImage = etat?.image ?? 'Qwen-Image';
+  const nomImage = etat?.image ?? 'Qwen-Image';
 
   async function inspirer() {
     setInspire(true);
@@ -162,7 +162,7 @@ export default function Creer() {
     setEnvoi('cle');
     try {
       await api.nexoraImage({ intention: intention.trim(), format, nombre: nombreImages, qualite });
-      toast(`${nombreImages > 1 ? `${nombreImages} plans clés` : 'Un plan clé'} en cours de dessin avec ${demoImage}. Clique « Animer » sur celui que tu préfères.`);
+      toast(`${nombreImages > 1 ? `${nombreImages} plans clés` : 'Un plan clé'} en cours de dessin avec ${nomImage}. Clique « Animer » sur celui que tu préfères.`);
       setFiltre('images');
     } catch (e) {
       toast(e instanceof Error ? e.message : 'Le dessin a échoué.', true);
@@ -313,7 +313,7 @@ export default function Creer() {
             <div className="st-bloc">
               <span className="st-etiq">Départ</span>
               <div className="st-seg" role="group" aria-label="Point de départ">
-                {([['texte', 'Texte seul', 'H3 imagine'], ['photo', 'Ma photo', 'import'], ['cle', 'Plan clé IA', demoImage]] as const).map(([v, label, sub]) => (
+                {([['texte', 'Texte seul', 'H3 imagine'], ['photo', 'Ma photo', 'import'], ['cle', 'Plan clé IA', nomImage]] as const).map(([v, label, sub]) => (
                   <button key={v} type="button" className={depart === v ? 'on' : ''} onClick={() => { setDepart(v); if (v === 'texte') setCle(null); }}>{label}<small>{sub}</small></button>
                 ))}
               </div>
@@ -405,7 +405,6 @@ export default function Creer() {
             </div>
           )}
 
-          {etat?.demo && mode !== 'video' && <div className="st-demo">Mode démonstration : {demoImage} est sous licence de recherche Qwen (usage non commercial).</div>}
 
           <div className="st-cta">
             <button type="button" className="st-go" disabled={!prete} onClick={lancer}>{libelle}</button>
@@ -415,7 +414,7 @@ export default function Creer() {
                 <span>{qualite === 'max' && etat?.cinema ? 'H3 complet' : 'FastH3'} · RTX 5090{devis.credits !== null ? ` · ${devis.credits} crédits` : ''}</span>
               </div>
             )}
-            {mode === 'image' && <div className="st-devis"><span>{demoImage} · DGX Spark GB10</span><span>≈ {qualite === 'max' ? '50 s' : '25 s'} par image</span></div>}
+            {mode === 'image' && <div className="st-devis"><span>{nomImage} · DGX Spark GB10</span><span>≈ {qualite === 'max' ? '50 s' : '25 s'} par image</span></div>}
             <p className="st-credit">Propulsé par MiniMax H3 · {etat?.image ?? 'Qwen-Image'} · MiniMax-Music3</p>
           </div>
         </aside>

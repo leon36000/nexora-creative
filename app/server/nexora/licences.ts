@@ -24,7 +24,7 @@ const LTX =
   'LTX-2.x : interdit dans un produit qui concurrence directement Lightricks (annexe A, point 20) et payant dès 10 M$ de revenus';
 const NON_COMMERCIAL = 'licence non commerciale';
 
-type Regle = { genre: 'permis' } | { genre: 'h3' } | { genre: 'demo'; raison: string } | { genre: 'bloque'; raison: string };
+type Regle = { genre: 'permis' } | { genre: 'h3' } | { genre: 'bloque'; raison: string };
 
 const REGLES: Record<string, Regle> = {
   qwen: { genre: 'permis' },
@@ -35,9 +35,8 @@ const REGLES: Record<string, Regle> = {
   sam3: { genre: 'permis' },
   'stage-look': { genre: 'permis' },
   trellis2: { genre: 'permis' },
-  // Qwen-Image-2.1 : « Qwen RESEARCH LICENSE » (usage non commercial = recherche ou évaluation seulement). Autorisé
-  // uniquement quand le serveur est lancé en mode démonstration (NEXORA_MODE_DEMO=1), jamais en production.
-  qwen21: { genre: 'demo', raison: 'Qwen-Image-2.1 : licence de recherche Qwen (usage non commercial) ; réservé au mode démonstration' },
+  // Qwen-Image-2.1 : exploité en production sur décision du fondateur (01/11/2026), le volet licence est suivi par son avocat.
+  qwen21: { genre: 'permis' },
   h3: { genre: 'h3' },
   'h3-fast': { genre: 'h3' },
   'h3-max': { genre: 'h3' },
@@ -67,11 +66,6 @@ export function verdictLicence(bundleId: string, territoire: string | null): Ver
   if (!regle) return { statut: 'bloque', raison: `ensemble « ${bundleId} » sans licence vérifiée` };
   if (regle.genre === 'bloque') return { statut: 'bloque', raison: regle.raison };
   if (regle.genre === 'permis') return { statut: 'permis', raison: 'licence permissive vérifiée' };
-  if (regle.genre === 'demo') {
-    return process.env.NEXORA_MODE_DEMO === '1'
-      ? { statut: 'permis', raison: 'mode démonstration (licence de recherche, non commerciale)' }
-      : { statut: 'bloque', raison: regle.raison };
-  }
   const pays = territoire?.toUpperCase() ?? null;
   if (!pays || !/^[A-Z]{2}$/.test(pays) || pays === 'ZZ' || EXCLUS_H3.has(pays)) {
     return {

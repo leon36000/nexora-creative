@@ -1223,17 +1223,19 @@ app.get('/api/nexora/etat', async () => {
   return {
     llm: !!llmCourant(), moteur: moteur ? 'MiniMax H3' : null, son: !!moteur, territoire: territoireDuCompte(),
     cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
-    image: eng.recettesEnLigne().has(modeDemo() ? 'qwen21' : 'qwen') ? (modeDemo() ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
+    image: modeleImage() ? (modeleImage() === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
     musique: eng.recettesEnLigne().has('music3') ? 'MiniMax-Music3' : null,
-    demo: modeDemo(),
   };
 });
 
 /**
  * Image de plan clé : une phrase → prompt d'image écrit par le LLM → Qwen-Image sur le GPU qui porte l'image (GB10).
- * Modèle : Qwen-Image-2.1 en mode démonstration (NEXORA_MODE_DEMO=1, licence de recherche), sinon Qwen-Image-2512 (Apache-2.0).
+ * Modèle : Qwen-Image-2.1 dès qu'il est en ligne, sinon Qwen-Image-2512 en repli.
  */
-const modeDemo = () => process.env.NEXORA_MODE_DEMO === '1';
+function modeleImage(): 'qwen21' | 'qwen' | null {
+  const enLigne = eng.recettesEnLigne();
+  return enLigne.has('qwen21') ? 'qwen21' : enLigne.has('qwen') ? 'qwen' : null;
+}
 app.post('/api/nexora/image', async (req, reply) => {
   const b = (req.body ?? {}) as any;
   const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
@@ -1242,19 +1244,20 @@ app.post('/api/nexora/image', async (req, reply) => {
   const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   const format = b.format === '9:16' || b.format === '1:1' ? b.format : '16:9';
-  const dims = modeDemo()
+  const modele = modeleImage() ?? 'qwen21';
+  const dims = modele === 'qwen21'
     ? { '16:9': [1792, 1024], '9:16': [1024, 1792], '1:1': [1536, 1536] }[format as '16:9']
     : { '16:9': [1328, 752], '9:16': [752, 1328], '1:1': [1024, 1024] }[format as '16:9'];
   const r = await reecrireImage(intention, llmCourant(), format);
   const nb = Math.max(1, Math.min(4, Number(b.nombre) || 1));
   const corps: any = {
-    kind: 'still', model: modeDemo() ? 'qwen21' : 'qwen', quality: b.qualite === 'rapide' ? 'draft' : 'quality',
+    kind: 'still', model: modele, quality: b.qualite === 'rapide' ? 'draft' : 'quality',
     prompt: r.prompt, width: dims[0], height: dims[1], count: nb,
     intention, promptSource: r.source, app: 'nexora-image', shotName: intention.slice(0, 60),
   };
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
-  return { ...res, prompt: r.prompt, source: r.source, modele: modeDemo() ? 'Qwen-Image-2.1' : 'Qwen-Image-2512' };
+  return { ...res, prompt: r.prompt, source: r.source, modele: modele === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512' };
 });
 
 /**
