@@ -91,6 +91,8 @@ export default function App() {
           <a className={`st-link ${isActive('/') ? 'active' : ''}`} {...linkProps('/')}>Créer</a>
           <a className={`st-link ${isActive('/library') ? 'active' : ''}`} {...linkProps('/library')}>Bibliothèque</a>
           <a className={`st-link ${isActive('/explorer') ? 'active' : ''}`} {...linkProps('/explorer')}>Explorer</a>
+          {/* Mode Studio : le montage expert (éditeur FreeCut servi sous /mode-studio/, page à part). */}
+          <a className="st-link st-link-studio" href="/mode-studio/" title="Montage expert assisté par l’IA">Mode Studio</a>
           <details className="st-atelier">
             <summary className="st-link">Atelier ▾</summary>
             <div className="st-menu">

@@ -32,6 +32,7 @@ import { actionEspace, espacePlein, espaceSite, marquerPlein } from './nexora/es
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { xmlFcp7 } from './nexora/projetExport.js';
+import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
 import { argsAvecMusique, argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { buildLtxGraph } from './graphs/ltx.js';
@@ -2696,7 +2697,7 @@ app.post('/api/free', async (_req, reply) => {
 const isModelFile = (p: string) => /\.(glb|gltf|obj)$/i.test(p);
 const mediaMime = (p: string) => {
   const ext = extname(p).toLowerCase();
-  return ({ '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.obj': 'model/obj', '.mov': 'video/quicktime' } as Record<string, string>)[ext] ?? 'video/mp4';
+  return ({ '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.obj': 'model/obj', '.mov': 'video/quicktime', '.flac': 'audio/flac', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.ogg': 'audio/ogg', '.webm': 'video/webm' } as Record<string, string>)[ext] ?? 'video/mp4';
 };
 
 /**
@@ -2802,6 +2803,147 @@ setCastQueue(queueTakes);
 // A take still waiting on a hero frame when the server stopped can never run.
 // Nexora : un film attend ses plans sans travail moteur propre ; il reprend par reconcile (avancerFilm), pas un orphelin.
 for (const t of takes.orphans()) if (JSON.parse(t.settings).film !== true) takes.fail(t.id, 'interrupted: the server restarted while it waited for its hero frame', true);
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Mode Studio (montage expert, éditeur FreeCut de mode-studio/) : créations, assistant, analyses. Voir server/nexora/studio.ts.
+
+/** Sortie d'un programme (ffmpeg, Python) en Buffer, avec stderr ; rejette si le code de sortie n'est pas 0. */
+async function executer(bin: string, args: string[], delaiMs = 300_000): Promise<{ stdout: Buffer; stderr: string }> {
+  const { execFile } = await import('child_process');
+  return new Promise((ok, ko) =>
+    execFile(bin, args, { maxBuffer: 1 << 30, encoding: 'buffer', timeout: delaiMs }, (err, stdout, stderr) =>
+      err ? ko(Object.assign(new Error(`${bin.split('/').pop()} : ${String(stderr).split('\n').slice(-3).join(' ')}`), { statusCode: 500 }))
+        : ok({ stdout, stderr: String(stderr) })));
+}
+
+/** Une prise terminée de l'organisation dont le fichier existe encore, ou une réponse 404. */
+function priseStudio(id: unknown, reply: FastifyReply) {
+  const t = takes.get(Number(id));
+  if (!t || t.status !== 'done' || !t.output_path || !existsSync(t.output_path)) {
+    reply.code(404).send({ error: 'Ce média n’est pas une création Nexora disponible.' });
+    return null;
+  }
+  return t;
+}
+
+app.get('/api/studio/creations', async () => ({ creations: creationsPourStudio(takes.list(null, 500) as any) }));
+
+/**
+ * Média d'une création pour le Mode Studio : le fichier d'origine, sauf les formats que l'éditeur ne lit pas (FLAC de
+ * MiniMax-Music3), livrés en AAC 256 kb/s (.m4a), convertis une fois puis gardés en cache.
+ */
+app.get('/api/studio/media/:id', async (req, reply) => {
+  const t = priseStudio((req.params as any).id, reply);
+  if (!t) return;
+  let chemin = t.output_path!;
+  if (/\.flac$/i.test(chemin)) {
+    const dossier = join(config.outputDir, 'mode-studio-cache');
+    mkdirSync(dossier, { recursive: true });
+    const m4a = join(dossier, `prise_${t.id}.m4a`);
+    if (!existsSync(m4a)) await executer(config.ffmpegBin, ['-v', 'error', '-y', '-i', chemin, '-vn', '-c:a', 'aac', '-b:a', '256k', m4a]);
+    chemin = m4a;
+  }
+  const nom = `${safeShotName(t.shot_name || `prise_${t.id}`)}${extname(chemin).toLowerCase()}`;
+  reply.headers({ 'Content-Type': mediaMime(chemin), 'Content-Length': statSync(chemin).size, 'Content-Disposition': `attachment; filename="${nom}"` });
+  return reply.send(createReadStream(chemin));
+});
+
+/** État d'une génération lancée depuis le Mode Studio ; la création, une fois prête, s'importe dans la timeline. */
+app.get('/api/studio/prise/:id', async (req, reply) => {
+  const t = takes.get(Number((req.params as any).id));
+  if (!t) return reply.code(404).send({ error: 'Génération introuvable.' });
+  return { statut: t.status, ...(t.error ? { erreur: t.error } : {}), creation: creationsPourStudio([t as any])[0] ?? null };
+});
+
+app.post('/api/studio/assistant', async (req, reply) => {
+  let d;
+  try { d = lireDemandeAssistant(req.body); }
+  catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
+  try { return await demanderAssistant(d, llmCourant()); }
+  catch (e) {
+    app.log.warn(`assistant du Mode Studio : ${e instanceof Error ? e.message : e}`);
+    return reply.code(502).send({ error: 'L’assistant n’a pas pu répondre. Réessaie dans un instant.' });
+  }
+});
+
+app.get('/api/studio/silences/:id', async (req, reply) => {
+  const t = priseStudio((req.params as any).id, reply);
+  if (!t) return;
+  const { stderr } = await executer(config.ffmpegBin, argsSilences(t.output_path!));
+  const duree = /Duration:\s*(\d+):(\d+):([\d.]+)/.exec(stderr);
+  const dureeS = duree ? Number(duree[1]) * 3600 + Number(duree[2]) * 60 + Number(duree[3]) : undefined;
+  return { silences: silencesAvecMarge(lireSilences(stderr, dureeS)), dureeS };
+});
+
+app.get('/api/studio/rythme/:id', async (req, reply) => {
+  const t = priseStudio((req.params as any).id, reply);
+  if (!t) return;
+  const { stdout } = await executer(config.ffmpegBin, argsPcm(t.output_path!));
+  const pcm = new Float32Array(stdout.buffer, stdout.byteOffset, Math.floor(stdout.byteLength / 4));
+  return detecterTemps(pcm, TAUX_RYTHME);
+});
+
+const PYTHON_TRANSCRIPTION = process.env.NEXORA_TRANSCRIPTION_PYTHON
+  || join(process.env.HOME ?? '', 'nexora-creative-data/engine/transcription-venv/bin/python');
+const transcriptions = new Map<number, Promise<unknown>>();
+app.get('/api/studio/transcription/:id', async (req, reply) => {
+  const t = priseStudio((req.params as any).id, reply);
+  if (!t) return;
+  if (!existsSync(PYTHON_TRANSCRIPTION)) return reply.code(503).send({ error: 'La transcription n’est pas installée sur ce serveur.' });
+  // Une seule transcription à la fois par prise ; le résultat reste en mémoire le temps du processus.
+  let p = transcriptions.get(t.id);
+  if (!p) {
+    p = (async () => {
+      const { mkdtemp, rm } = await import('fs/promises');
+      const { tmpdir } = await import('os');
+      const dossier = await mkdtemp(join(tmpdir(), 'nexora-transcription-'));
+      try {
+        const audio = join(dossier, 'a.f32');
+        await executer(config.ffmpegBin, ['-v', 'error', '-y', '-i', t.output_path!, '-vn', '-ac', '1', '-ar', '16000', '-f', 'f32le', audio]);
+        const { stdout } = await executer(PYTHON_TRANSCRIPTION, ['-I', join(ROOT, 'server/nexora/transcrire.py'), audio], 900_000);
+        const tr = lireTranscription(stdout.toString('utf-8'));
+        return { ...tr, sousTitres: decouperSousTitres(tr) };
+      } finally {
+        rm(dossier, { recursive: true, force: true }).catch(() => {});
+      }
+    })();
+    transcriptions.set(t.id, p);
+    p.catch(() => transcriptions.delete(t.id));
+  }
+  return p;
+});
+
+/** Musique libre pour le Mode Studio : une envie en français → description MiniMax Music 3 écrite par le LLM. */
+app.post('/api/studio/musique', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const envie = typeof b.envie === 'string' ? b.envie.trim().slice(0, 500) : '';
+  if (!envie) return reply.code(400).send({ error: 'Décris la musique que tu veux.' });
+  if (!eng.moteursPour('music3').length) return reply.code(503).send({ error: 'Aucun moteur GPU ne compose de musique pour l’instant.' });
+  const duree = Math.max(10, Math.min(240, Math.round(Number(b.dureeS) || 30)));
+  const pseudo = { titre: envie.slice(0, 120), bible: { style: '', personnages: [], lieux: [] }, plans: [{ resume: envie, description: '', duree, camera: '' }], dureeTotale: duree };
+  const m = await ecrireMusique(pseudo as any, duree, llmCourant(), envie);
+  const [takeId] = await queueTakes({
+    kind: 'musique', videoModel: 'music3', description: m.description, paroles: m.paroles, dureeS: duree,
+    app: 'nexora-musique', shotName: envie.slice(0, 60), prompt: m.description, userPrompt: envie, promptSource: m.source,
+  }, 1);
+  return { takeId, source: m.source };
+});
+
+/** Les fichiers construits du Mode Studio (mode-studio/dist), servis sous /mode-studio/ avec l'isolation d'origine qu'il exige. */
+const distStudio = join(ROOT, '..', 'mode-studio', 'dist');
+if (existsSync(distStudio)) {
+  app.addHook('onSend', async (req, reply) => {
+    if (req.url.startsWith('/mode-studio')) {
+      reply.header('Cross-Origin-Embedder-Policy', 'require-corp');
+      reply.header('Cross-Origin-Opener-Policy', 'same-origin');
+    }
+  });
+  await app.register(fastifyStatic, { root: distStudio, prefix: '/mode-studio/', decorateReply: false, wildcard: false });
+  const pageStudio = readFileSync(join(distStudio, 'index.html'));
+  app.get('/mode-studio/*', async (_req, reply) => reply.type('text/html').send(pageStudio));
+} else {
+  console.log('Mode Studio : mode-studio/dist absent (npm run build dans mode-studio/) ; /mode-studio/ ne sera pas servi.');
+}
 
 // In production the sidecar also serves the built UI, so the whole app is one
 // port with no Vite in the picture. In dev, Vite serves it and proxies here.

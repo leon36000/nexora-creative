@@ -23,6 +23,8 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': { target: `http://${host}:${api}`, changeOrigin: true },
         '/live': { target: `ws://${host}:${api}`, ws: true },
+        // Mode Studio (montage expert) : servi par le serveur depuis mode-studio/dist.
+        '/mode-studio': { target: `http://${host}:${api}`, changeOrigin: true },
       },
     },
   };

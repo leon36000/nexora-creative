@@ -32,7 +32,7 @@ export interface MessageLlm {
 
 export interface ClientLlm {
   /** Renvoie le texte de la réponse ; `json` demande un objet JSON. */
-  completer(role: RoleLlm, messages: MessageLlm[], options?: { json?: boolean; temperature?: number }): Promise<string>;
+  completer(role: RoleLlm, messages: MessageLlm[], options?: { json?: boolean; temperature?: number; maxTokens?: number }): Promise<string>;
 }
 
 export class ErreurLlm extends Error {}
@@ -57,6 +57,8 @@ export function clientLlmDepuisEnv(env: NodeJS.ProcessEnv = process.env, f: type
           model,
           messages,
           temperature: options.temperature ?? 0.4,
+          // Sans plafond, la passerelle réserve le maximum du modèle sur les crédits à chaque appel.
+          max_tokens: options.maxTokens ?? 8000,
           ...(options.json ? { response_format: { type: 'json_object' } } : {}),
         }),
         signal: AbortSignal.timeout(180_000),
