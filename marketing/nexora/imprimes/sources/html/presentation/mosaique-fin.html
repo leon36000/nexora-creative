@@ -1,0 +1,36 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>mosaique-fin</title><style>
+
+@font-face{font-family:"Geist";src:url("../../../../identite/sources/polices/geist-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal}
+@font-face{font-family:"Inter";src:url("../../../../identite/sources/polices/inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal}
+@font-face{font-family:"JetBrains Mono";src:url("../../../../identite/sources/polices/jetbrains-mono-latin-wght-normal.woff2") format("woff2");font-weight:100 800;font-style:normal}
+
+:root{--noir:#0A0A0E;--surface:#121218;--papier:#FBFBF8;--creme:#F3F2EC;--sable:#E4E2D9;--texte-clair:#F5F4EF;
+--gris:#A8A8B6;--encre:#121218;--gris-sombre:#54545F;--orange:#FF5A1F;--orange-s:#FF7A45;--orange-c:#B53A0A;--nuit:#11112A;
+--b1:#FFD37A;--b2:#FFB11A;--b3:#FF8A1F;--b4:#FF5A1F;--b5:#E0341C;--b6:#B01A3C}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:"Inter",system-ui,sans-serif;color:var(--encre);font-feature-settings:"cv11","ss03";text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased}
+svg{display:block}
+.geist{font-family:"Geist","Inter",sans-serif;font-weight:500;letter-spacing:-.03em;line-height:1.05}
+.mono{font-family:"JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.06em;font-weight:500;line-height:1.4}
+.mosaique{position:absolute;inset:0;width:100%;height:100%}
+/* bande braise : quatre barres franches */
+.bande{background:linear-gradient(to bottom,var(--b2) 0 25%,var(--b4) 25% 50%,var(--b5) 50% 75%,var(--b6) 75% 100%)}
+.bande-x{background:linear-gradient(to right,var(--b2) 0 25%,var(--b4) 25% 50%,var(--b5) 50% 75%,var(--b6) 75% 100%)}
+/* règle graduée : trait toutes les 8 unités, plus haut toutes les 64 (en mm si --pas est donné en mm) */
+.regle{height:var(--h,2.6mm);background-image:linear-gradient(to right,var(--c,rgba(245,244,239,.55)) var(--e,.25mm),transparent var(--e,.25mm)),linear-gradient(to right,var(--c2,rgba(245,244,239,.2)) var(--e,.25mm),transparent var(--e,.25mm));background-size:calc(var(--pas,2mm)*8) 100%,var(--pas,2mm) 50%;background-position:left bottom;background-repeat:repeat-x}
+/* grille de mesure */
+.grille{position:absolute;inset:0;background-image:linear-gradient(to right,var(--g,rgba(245,244,239,.12)) var(--e,.2mm),transparent var(--e,.2mm)),linear-gradient(to bottom,var(--g,rgba(245,244,239,.12)) var(--e,.2mm),transparent var(--e,.2mm));background-size:var(--pas,8mm) var(--pas,8mm);background-position:center top;-webkit-mask-image:var(--masque,radial-gradient(70% 90% at 50% 40%,#000 25%,transparent 78%));mask-image:var(--masque,radial-gradient(70% 90% at 50% 40%,#000 25%,transparent 78%))}
+.carre{display:inline-block;background:var(--orange)}
+
+
+html,body{margin:0;background:#fff}
+.page{position:relative;overflow:hidden;break-after:page;page-break-after:always;background:#fff}
+.page:last-child{break-after:auto;page-break-after:auto}
+@page{size:148.16666666666666mm 190.5mm;margin:0}
+html,body,.page{background:transparent!important}
+</style></head><body><section class="page " style="width:148.16666666666666mm;height:190.5mm;">
+<div class="art" style="position:absolute;left:0mm;top:0mm;width:148.16666666666666mm;height:190.5mm;overflow:hidden">
+<div class="fond-art" style="position:absolute;inset:0"><svg class="mosaique" viewBox="0 0 14 18" preserveAspectRatio="xMaxYMid slice" shape-rendering="crispEdges" aria-hidden="true"><path fill="#FFB11A" d="M6.04 0.04h0.91v0.91h-0.91zM8.04 0.04h0.91v0.91h-0.91zM9.04 3.04h0.91v0.91h-0.91zM3.04 4.04h0.91v0.91h-0.91zM9.04 6.04h0.91v0.91h-0.91zM7.04 9.04h0.91v0.91h-0.91zM8.04 12.04h0.91v0.91h-0.91zM8.04 14.04h0.91v0.91h-0.91zM3.04 15.04h0.91v0.91h-0.91zM8.04 15.04h0.91v0.91h-0.91z"/><path fill="#FF8A1F" d="M3.04 1.04h0.91v0.91h-0.91zM5.04 2.04h0.91v0.91h-0.91zM8.04 3.04h0.91v0.91h-0.91zM6.04 5.04h0.91v0.91h-0.91zM12.04 6.04h0.91v0.91h-0.91zM13.04 7.04h0.91v0.91h-0.91zM7.04 8.04h0.91v0.91h-0.91zM3.04 10.04h0.91v0.91h-0.91zM8.04 10.04h0.91v0.91h-0.91zM12.04 10.04h0.91v0.91h-0.91zM9.04 11.04h0.91v0.91h-0.91zM12.04 15.04h0.91v0.91h-0.91zM8.04 17.05h0.91v0.91h-0.91z"/><path fill="#FF5A1F" d="M9.04 0.04h0.91v0.91h-0.91zM6.04 2.04h0.91v0.91h-0.91zM9.04 2.04h0.91v0.91h-0.91zM12.04 3.04h0.91v0.91h-0.91zM13.04 3.04h0.91v0.91h-0.91zM10.04 4.04h0.91v0.91h-0.91zM11.04 4.04h0.91v0.91h-0.91zM13.04 4.04h0.91v0.91h-0.91zM10.04 5.04h0.91v0.91h-0.91zM12.04 5.04h0.91v0.91h-0.91zM8.04 6.04h0.91v0.91h-0.91zM10.04 7.04h0.91v0.91h-0.91zM13.04 8.04h0.91v0.91h-0.91zM5.04 9.04h0.91v0.91h-0.91zM10.04 9.04h0.91v0.91h-0.91zM9.04 10.04h0.91v0.91h-0.91zM11.04 11.04h0.91v0.91h-0.91zM12.04 11.04h0.91v0.91h-0.91zM4.04 13.04h0.91v0.91h-0.91zM10.04 13.04h0.91v0.91h-0.91zM4.04 14.04h0.91v0.91h-0.91zM5.04 15.04h0.91v0.91h-0.91zM10.04 15.04h0.91v0.91h-0.91zM9.04 16.05h0.91v0.91h-0.91z"/><path fill="#E0341C" d="M11.04 0.04h0.91v0.91h-0.91zM13.04 0.04h0.91v0.91h-0.91zM10.04 1.04h0.91v0.91h-0.91zM12.04 1.04h0.91v0.91h-0.91zM8.04 2.04h0.91v0.91h-0.91zM13.04 2.04h0.91v0.91h-0.91zM12.04 4.04h0.91v0.91h-0.91zM10.04 6.04h0.91v0.91h-0.91zM11.04 6.04h0.91v0.91h-0.91zM13.04 6.04h0.91v0.91h-0.91zM12.04 8.04h0.91v0.91h-0.91zM8.04 9.04h0.91v0.91h-0.91zM11.04 9.04h0.91v0.91h-0.91zM13.04 9.04h0.91v0.91h-0.91zM8.04 11.04h0.91v0.91h-0.91zM13.04 11.04h0.91v0.91h-0.91zM13.04 12.04h0.91v0.91h-0.91zM13.04 13.04h0.91v0.91h-0.91zM13.04 14.04h0.91v0.91h-0.91zM12.04 16.05h0.91v0.91h-0.91zM13.04 16.05h0.91v0.91h-0.91zM9.04 17.05h0.91v0.91h-0.91zM10.04 17.05h0.91v0.91h-0.91zM13.04 17.05h0.91v0.91h-0.91z"/><path fill="#B01A3C" d="M12.04 0.04h0.91v0.91h-0.91zM13.04 1.04h0.91v0.91h-0.91zM10.04 3.04h0.91v0.91h-0.91zM9.04 5.04h0.91v0.91h-0.91zM11.04 5.04h0.91v0.91h-0.91zM13.04 5.04h0.91v0.91h-0.91zM12.04 7.04h0.91v0.91h-0.91zM12.04 9.04h0.91v0.91h-0.91zM13.04 10.04h0.91v0.91h-0.91zM12.04 12.04h0.91v0.91h-0.91zM11.04 13.04h0.91v0.91h-0.91zM12.04 13.04h0.91v0.91h-0.91zM10.04 14.04h0.91v0.91h-0.91zM12.04 14.04h0.91v0.91h-0.91zM11.04 15.04h0.91v0.91h-0.91zM13.04 15.04h0.91v0.91h-0.91zM11.04 16.05h0.91v0.91h-0.91zM12.04 17.05h0.91v0.91h-0.91z"/></svg></div>
+<div class="trim" style="position:absolute;left:0mm;top:0mm;width:148.16666666666666mm;height:190.5mm"></div>
+</div></section></body></html>

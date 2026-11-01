@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Régénère les cartes d'affaires depuis coordonnees.json (voir LISEZMOI.md).
+exec bun "$(dirname "$(readlink -f "$0")")/sources/generer-cartes.mjs" "$@"

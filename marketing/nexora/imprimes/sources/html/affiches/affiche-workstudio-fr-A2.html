@@ -1,0 +1,41 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>affiche-workstudio-fr-A2</title><style>
+
+@font-face{font-family:"Geist";src:url("../../../../identite/sources/polices/geist-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal}
+@font-face{font-family:"Inter";src:url("../../../../identite/sources/polices/inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal}
+@font-face{font-family:"JetBrains Mono";src:url("../../../../identite/sources/polices/jetbrains-mono-latin-wght-normal.woff2") format("woff2");font-weight:100 800;font-style:normal}
+
+:root{--noir:#0A0A0E;--surface:#121218;--papier:#FBFBF8;--creme:#F3F2EC;--sable:#E4E2D9;--texte-clair:#F5F4EF;
+--gris:#A8A8B6;--encre:#121218;--gris-sombre:#54545F;--orange:#FF5A1F;--orange-s:#FF7A45;--orange-c:#B53A0A;--nuit:#11112A;
+--b1:#FFD37A;--b2:#FFB11A;--b3:#FF8A1F;--b4:#FF5A1F;--b5:#E0341C;--b6:#B01A3C}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:"Inter",system-ui,sans-serif;color:var(--encre);font-feature-settings:"cv11","ss03";text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased}
+svg{display:block}
+.geist{font-family:"Geist","Inter",sans-serif;font-weight:500;letter-spacing:-.03em;line-height:1.05}
+.mono{font-family:"JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.06em;font-weight:500;line-height:1.4}
+.mosaique{position:absolute;inset:0;width:100%;height:100%}
+/* bande braise : quatre barres franches */
+.bande{background:linear-gradient(to bottom,var(--b2) 0 25%,var(--b4) 25% 50%,var(--b5) 50% 75%,var(--b6) 75% 100%)}
+.bande-x{background:linear-gradient(to right,var(--b2) 0 25%,var(--b4) 25% 50%,var(--b5) 50% 75%,var(--b6) 75% 100%)}
+/* règle graduée : trait toutes les 8 unités, plus haut toutes les 64 (en mm si --pas est donné en mm) */
+.regle{height:var(--h,2.6mm);background-image:linear-gradient(to right,var(--c,rgba(245,244,239,.55)) var(--e,.25mm),transparent var(--e,.25mm)),linear-gradient(to right,var(--c2,rgba(245,244,239,.2)) var(--e,.25mm),transparent var(--e,.25mm));background-size:calc(var(--pas,2mm)*8) 100%,var(--pas,2mm) 50%;background-position:left bottom;background-repeat:repeat-x}
+/* grille de mesure */
+.grille{position:absolute;inset:0;background-image:linear-gradient(to right,var(--g,rgba(245,244,239,.12)) var(--e,.2mm),transparent var(--e,.2mm)),linear-gradient(to bottom,var(--g,rgba(245,244,239,.12)) var(--e,.2mm),transparent var(--e,.2mm));background-size:var(--pas,8mm) var(--pas,8mm);background-position:center top;-webkit-mask-image:var(--masque,radial-gradient(70% 90% at 50% 40%,#000 25%,transparent 78%));mask-image:var(--masque,radial-gradient(70% 90% at 50% 40%,#000 25%,transparent 78%))}
+.carre{display:inline-block;background:var(--orange)}
+
+
+html,body{margin:0;background:#fff}
+.page{position:relative;overflow:hidden;break-after:page;page-break-after:always;background:#fff}
+.page:last-child{break-after:auto;page-break-after:auto}
+@page{size:426mm 600mm;margin:0}
+
+</style></head><body><section class="page " style="width:426mm;height:600mm;">
+<div class="art" style="position:absolute;left:0mm;top:0mm;width:426mm;height:600mm;overflow:hidden">
+<div class="fond-art" style="position:absolute;inset:0"><img src="../../generees/workstudio-flux-9x16-x4.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 8%">
+<div style="position:absolute;left:0;right:0;bottom:0;height:142.800mm;background:linear-gradient(to top,rgba(10,10,14,.92),rgba(10,10,14,0))"></div>
+<div style="position:absolute;left:0;right:0;top:0;height:142.800mm;background:linear-gradient(to bottom,rgba(10,10,14,.78),rgba(10,10,14,0))"></div><div style="position:absolute;left:0;right:0;bottom:0;height:9.3mm;background:linear-gradient(to bottom,var(--b2) 0 25%,var(--b4) 25% 50%,var(--b5) 50% 75%,var(--b6) 75% 100%)"></div></div>
+<div class="trim" style="position:absolute;left:3mm;top:3mm;width:420mm;height:594mm"><div class="mono" style="font-size:6.300mm;;position:absolute;left:29.400mm;top:31.080mm;color:var(--orange-s)">Agents et flux de travaux</div>
+<div class="geist" style="position:absolute;left:29.400mm;top:48.720mm;color:var(--texte-clair);font-size:38.640mm;line-height:1.02">Faites couler<br>le travail.</div>
+<div style="position:absolute;left:29.400mm;bottom:39.900mm"><svg style="width:218.400mm;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="6 6 506.18 52" aria-hidden="true"><path fill="#f5f4ef" d="M6 6h10.4v52h-10.4zM47.6 6h10.4v52h-10.4z"/><path fill="#ff5a1f" d="M16.4 16.4h10.4v10.4h-10.4zM26.8 26.8h10.4v10.4h-10.4zM37.2 37.2h10.4v10.4h-10.4z"/><text x="76.36" y="50" font-family="Geist, sans-serif" font-weight="500" font-size="51" letter-spacing="-1.53" fill="#F5F4EF">Nexora WorkStudio</text></svg></div>
+<div class="mono" style="font-size:5.880mm;;position:absolute;left:29.400mm;bottom:24.360mm;color:var(--gris)">État : Disponible</div><div class="mono" style="font-size:5.670mm;;color:var(--gris);position:absolute;right:29.400mm;bottom:33.600mm">«à compléter : domaine»</div></div>
+</div></section></body></html>

@@ -1,0 +1,67 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/final/spot-15s-9x16-fr.mp4",
+ "format": "9:16",
+ "ambiance_db": -17,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/musique/E-15s.flac",
+  "debut": 0,
+  "db": 0,
+  "fondu_fin": 0.6
+ },
+ "segments": [
+  {
+   "duree": 2.6,
+   "fondu": 0,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s01-pixel-v1.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.03
+  },
+  {
+   "duree": 3.7,
+   "fondu": 0.3,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s05-atelier-v2.mp4",
+   "debut": 1.8,
+   "vitesse": 1.0,
+   "zoom": 0.03
+  },
+  {
+   "duree": 3.3,
+   "fondu": 0.3,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s02-aurore-v2.mp4",
+   "debut": 0.5,
+   "vitesse": 1.0,
+   "zoom": 0.04
+  },
+  {
+   "duree": 6.3,
+   "fondu": 0.3,
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/carton-court-15-fr-9x16.mp4"
+  }
+ ],
+ "textes": [
+  {
+   "texte": "Rêvez grand.",
+   "debut": 6.3,
+   "duree": 2.4,
+   "taille": 0.055,
+   "position": "bas",
+   "accent": "grand."
+  }
+ ],
+ "sfx": [
+  {
+   "type": "whoosh",
+   "t": 5.8,
+   "duree": 0.9,
+   "db": -15
+  },
+  {
+   "type": "boom",
+   "t": 9.0,
+   "duree": 1.6,
+   "db": -8
+  }
+ ],
+ "noir_debut": 0.0
+}

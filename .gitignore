@@ -11,3 +11,19 @@ marketing/creative/site/promo.mp4
 marketing/creative/site/img/
 marketing/creative/apercu.html
 marketing/creative/video/
+
+# Campagne Nexora : livrables lourds et régénérables (les scripts sources, eux, sont versionnés)
+marketing/nexora/**/final/
+marketing/nexora/**/generees/
+marketing/nexora/essais/
+marketing/nexora/video/sources/plans/
+marketing/nexora/video/sources/plans-rapide/
+marketing/nexora/video/sources/plans-vertical/
+marketing/nexora/video/sources/musique/
+marketing/nexora/video/sources/teasers/
+marketing/nexora/video/sources/*.mp4
+marketing/nexora/**/__pycache__/
+marketing/nexora/**/node_modules/
+marketing/nexora/video/essais/
+marketing/nexora/partage/img/
+marketing/nexora/partage/video/

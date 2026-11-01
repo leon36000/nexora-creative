@@ -1,0 +1,119 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/final/spot-30s-1x1-fr.mp4",
+ "format": "1:1",
+ "ambiance_db": -17,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/musique/D-30s.flac",
+  "debut": 0,
+  "db": 0,
+  "fondu_fin": 0.6
+ },
+ "segments": [
+  {
+   "duree": 4.7,
+   "fondu": 0,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans/s01-pixel-v1.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.03
+  },
+  {
+   "duree": 6.3,
+   "fondu": 0.5,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-rapide/s05-atelier-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 0.9,
+   "zoom": 0.03
+  },
+  {
+   "duree": 2.0,
+   "fondu": 0.3,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-rapide/s04-ville-v2.mp4",
+   "debut": 1.5,
+   "vitesse": 1.0,
+   "zoom": 0.03
+  },
+  {
+   "duree": 3.8,
+   "fondu": 0.1,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-rapide/s02-aurore-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.04
+  },
+  {
+   "duree": 2.7,
+   "fondu": 0.1,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-rapide/s03-pont-v2.mp4",
+   "debut": 0.3,
+   "vitesse": 1.0,
+   "zoom": 0.05
+  },
+  {
+   "duree": 3.6,
+   "fondu": 0.3,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-rapide/s13-lanternes-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.02
+  },
+  {
+   "duree": 2.9,
+   "fondu": 0.1,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-rapide/s08-paume-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.0
+  },
+  {
+   "duree": 5.7,
+   "fondu": 0.3,
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/carton-court-30-fr-1x1.mp4"
+  }
+ ],
+ "textes": [
+  {
+   "texte": "Rêvez grand.",
+   "debut": 12.5,
+   "duree": 3.2,
+   "taille": 0.08,
+   "position": "bas",
+   "accent": "grand."
+  },
+  {
+   "texte": "Gardez le contrôle.",
+   "debut": 21.9,
+   "duree": 2.5,
+   "taille": 0.068,
+   "position": "bas",
+   "accent": "contrôle."
+  }
+ ],
+ "sfx": [
+  {
+   "type": "boom",
+   "t": 12.2,
+   "duree": 1.6,
+   "db": -9
+  },
+  {
+   "type": "whoosh",
+   "t": 15.7,
+   "duree": 0.9,
+   "db": -15
+  },
+  {
+   "type": "boom",
+   "t": 21.8,
+   "duree": 1.6,
+   "db": -8
+  },
+  {
+   "type": "riser",
+   "t": 22.4,
+   "duree": 2.2,
+   "db": -14
+  }
+ ],
+ "noir_debut": 0.0
+}

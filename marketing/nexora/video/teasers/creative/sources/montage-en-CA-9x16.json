@@ -1,0 +1,92 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/creative/sources/brut-en-CA-9x16.mp4",
+ "format": "9:16",
+ "ips": 24,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/teasers/musique/creative.flac",
+  "debut": 0,
+  "db": -2,
+  "fondu_fin": 1.6
+ },
+ "ambiance_db": -18,
+ "segments": [
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/creative/sources/plans-9x16/p1-v3.mp4",
+   "debut": 0.3,
+   "duree": 2.474
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/creative/sources/plans-9x16/p2-v1.mp4",
+   "debut": 0.3,
+   "duree": 3.07,
+   "fondu": 0
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/creative/sources/plans-9x16/p3-v1.mp4",
+   "debut": 0.3,
+   "duree": 4.298,
+   "fondu": 0
+  },
+  {
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/creative/sources/carte-en.mp4",
+   "duree": 5.741,
+   "fondu": 0.5
+  }
+ ],
+ "textes": [
+  {
+   "texte": "An image is born.",
+   "debut": 0.45,
+   "duree": 1.924,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "It becomes a film.",
+   "debut": 2.824,
+   "duree": 2.62,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "Dream big.\nStay in control.",
+   "debut": 6.094,
+   "duree": 3.648,
+   "position": "haut",
+   "taille": 0.052,
+   "style": "titre",
+   "accent": "Stay in control."
+  }
+ ],
+ "sfx": [
+  {
+   "type": "whoosh",
+   "t": 2.224,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "whoosh",
+   "t": 5.294,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "riser",
+   "t": 8.242,
+   "duree": 1.6,
+   "db": -26
+  },
+  {
+   "type": "boom",
+   "t": 9.342,
+   "duree": 1.6,
+   "db": -13
+  }
+ ],
+ "noir_debut": 0.35,
+ "noir_fin": 0.7,
+ "etalonnage": true
+}

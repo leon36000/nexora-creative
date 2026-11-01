@@ -1,0 +1,36 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>pastille-bot</title><style>
+
+@font-face{font-family:"Geist";src:url("../../../../identite/sources/polices/geist-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal}
+@font-face{font-family:"Inter";src:url("../../../../identite/sources/polices/inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal}
+@font-face{font-family:"JetBrains Mono";src:url("../../../../identite/sources/polices/jetbrains-mono-latin-wght-normal.woff2") format("woff2");font-weight:100 800;font-style:normal}
+
+:root{--noir:#0A0A0E;--surface:#121218;--papier:#FBFBF8;--creme:#F3F2EC;--sable:#E4E2D9;--texte-clair:#F5F4EF;
+--gris:#A8A8B6;--encre:#121218;--gris-sombre:#54545F;--orange:#FF5A1F;--orange-s:#FF7A45;--orange-c:#B53A0A;--nuit:#11112A;
+--b1:#FFD37A;--b2:#FFB11A;--b3:#FF8A1F;--b4:#FF5A1F;--b5:#E0341C;--b6:#B01A3C}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:"Inter",system-ui,sans-serif;color:var(--encre);font-feature-settings:"cv11","ss03";text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased}
+svg{display:block}
+.geist{font-family:"Geist","Inter",sans-serif;font-weight:500;letter-spacing:-.03em;line-height:1.05}
+.mono{font-family:"JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.06em;font-weight:500;line-height:1.4}
+.mosaique{position:absolute;inset:0;width:100%;height:100%}
+/* bande braise : quatre barres franches */
+.bande{background:linear-gradient(to bottom,var(--b2) 0 25%,var(--b4) 25% 50%,var(--b5) 50% 75%,var(--b6) 75% 100%)}
+.bande-x{background:linear-gradient(to right,var(--b2) 0 25%,var(--b4) 25% 50%,var(--b5) 50% 75%,var(--b6) 75% 100%)}
+/* règle graduée : trait toutes les 8 unités, plus haut toutes les 64 (en mm si --pas est donné en mm) */
+.regle{height:var(--h,2.6mm);background-image:linear-gradient(to right,var(--c,rgba(245,244,239,.55)) var(--e,.25mm),transparent var(--e,.25mm)),linear-gradient(to right,var(--c2,rgba(245,244,239,.2)) var(--e,.25mm),transparent var(--e,.25mm));background-size:calc(var(--pas,2mm)*8) 100%,var(--pas,2mm) 50%;background-position:left bottom;background-repeat:repeat-x}
+/* grille de mesure */
+.grille{position:absolute;inset:0;background-image:linear-gradient(to right,var(--g,rgba(245,244,239,.12)) var(--e,.2mm),transparent var(--e,.2mm)),linear-gradient(to bottom,var(--g,rgba(245,244,239,.12)) var(--e,.2mm),transparent var(--e,.2mm));background-size:var(--pas,8mm) var(--pas,8mm);background-position:center top;-webkit-mask-image:var(--masque,radial-gradient(70% 90% at 50% 40%,#000 25%,transparent 78%));mask-image:var(--masque,radial-gradient(70% 90% at 50% 40%,#000 25%,transparent 78%))}
+.carre{display:inline-block;background:var(--orange)}
+
+
+html,body{margin:0;background:#fff}
+.page{position:relative;overflow:hidden;break-after:page;page-break-after:always;background:#fff}
+.page:last-child{break-after:auto;page-break-after:auto}
+@page{size:31.75mm 31.75mm;margin:0}
+html,body,.page{background:transparent!important}
+</style></head><body><section class="page " style="width:31.75mm;height:31.75mm;">
+<div class="art" style="position:absolute;left:0mm;top:0mm;width:31.75mm;height:31.75mm;overflow:hidden">
+<div class="fond-art" style="position:absolute;inset:0"><svg class="mosaique" viewBox="0 0 5 5" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" aria-hidden="true"><path fill="#ffe58a" d="M0.05 0.05h0.9v0.9h-0.9zM1.05 0.05h0.9v0.9h-0.9zM3.05 0.05h0.9v0.9h-0.9zM0.05 1.05h0.9v0.9h-0.9zM4.05 1.05h0.9v0.9h-0.9zM3.05 2.05h0.9v0.9h-0.9zM4.05 2.05h0.9v0.9h-0.9zM0.05 3.05h0.9v0.9h-0.9zM4.05 3.05h0.9v0.9h-0.9zM0.05 4.05h0.9v0.9h-0.9z"/><path fill="#ffd44d" d="M3.05 1.05h0.9v0.9h-0.9zM0.05 2.05h0.9v0.9h-0.9zM1.05 2.05h0.9v0.9h-0.9zM2.05 3.05h0.9v0.9h-0.9zM1.05 4.05h0.9v0.9h-0.9zM4.05 4.05h0.9v0.9h-0.9z"/><path fill="#ffc01f" d="M2.05 0.05h0.9v0.9h-0.9zM2.05 2.05h0.9v0.9h-0.9zM1.05 3.05h0.9v0.9h-0.9zM3.05 3.05h0.9v0.9h-0.9zM2.05 4.05h0.9v0.9h-0.9z"/><path fill="#f5a30b" d="M4.05 0.05h0.9v0.9h-0.9zM1.05 1.05h0.9v0.9h-0.9zM2.05 1.05h0.9v0.9h-0.9zM3.05 4.05h0.9v0.9h-0.9z"/></svg></div>
+<div class="trim" style="position:absolute;left:0mm;top:0mm;width:31.75mm;height:31.75mm"></div>
+</div></section></body></html>

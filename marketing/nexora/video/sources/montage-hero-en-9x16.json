@@ -1,0 +1,205 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/final/film-marque-9x16-en.mp4",
+ "format": "9:16",
+ "ambiance_db": -17,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/musique/C-piano.flac",
+  "debut": 0,
+  "db": 0,
+  "fondu_fin": 0.5
+ },
+ "segments": [
+  {
+   "duree": 2.0,
+   "fondu": 0,
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/noir.mp4"
+  },
+  {
+   "duree": 5.9,
+   "fondu": 0.9,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s01-pixel-v1.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.04
+  },
+  {
+   "duree": 7.0,
+   "fondu": 0.6,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s05-atelier-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 0.84,
+   "zoom": 0.03
+  },
+  {
+   "duree": 7.0,
+   "fondu": 0.5,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s02-aurore-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 0.74,
+   "zoom": 0.04
+  },
+  {
+   "duree": 4.12,
+   "fondu": 0.35,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s03-pont-v2.mp4",
+   "debut": 0.3,
+   "vitesse": 1.0,
+   "zoom": 0.05
+  },
+  {
+   "duree": 1.14,
+   "fondu": 0.1,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s04-ville-v2.mp4",
+   "debut": 1.5,
+   "vitesse": 1.0,
+   "zoom": 0.03
+  },
+  {
+   "duree": 0.77,
+   "fondu": 0.1,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s10-pluie-v2.mp4",
+   "debut": 0.4,
+   "vitesse": 1.0,
+   "zoom": 0.03
+  },
+  {
+   "duree": 2.02,
+   "fondu": 0.1,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s09-crete-v1.mp4",
+   "debut": 0.6,
+   "vitesse": 1.0,
+   "zoom": 0.0
+  },
+  {
+   "duree": 6.2,
+   "fondu": 1.0,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s08-paume-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 0.9,
+   "zoom": 0.0
+  },
+  {
+   "duree": 6.0,
+   "fondu": 0.8,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s12-glace-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.0
+  },
+  {
+   "duree": 4.7,
+   "fondu": 0.9,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s06-phare-v2.mp4",
+   "debut": 1.2,
+   "vitesse": 1.0,
+   "zoom": 0.0
+  },
+  {
+   "duree": 5.3,
+   "fondu": 0.1,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s13-lanternes-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.02
+  },
+  {
+   "duree": 3.2,
+   "fondu": 0.6,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans-vertical/s14-explosion-v2.mp4",
+   "debut": 0.0,
+   "vitesse": 1.0,
+   "zoom": 0.0
+  },
+  {
+   "duree": 11.0,
+   "fondu": 0.3,
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/carton-marque-en-9x16.mp4"
+  }
+ ],
+ "textes": [
+  {
+   "texte": "It all starts\nwith a light.",
+   "debut": 0.7,
+   "duree": 3.3,
+   "taille": 0.033,
+   "position": "centre"
+  },
+  {
+   "texte": "Dream big.",
+   "debut": 20.2,
+   "duree": 3.3,
+   "taille": 0.055,
+   "position": "bas",
+   "accent": "big."
+  },
+  {
+   "texte": "Stay\nin control.",
+   "debut": 27.5,
+   "duree": 4.0,
+   "taille": 0.0468,
+   "position": "bas",
+   "accent": "control."
+  },
+  {
+   "texte": "On your premises,\nor in Quebec.",
+   "debut": 37.9,
+   "duree": 3.1,
+   "taille": 0.0358,
+   "position": "bas"
+  },
+  {
+   "texte": "One account.\nAll your tools.",
+   "debut": 41.9,
+   "duree": 3.7,
+   "taille": 0.0413,
+   "position": "bas",
+   "accent": "All your tools."
+  }
+ ],
+ "sfx": [
+  {
+   "type": "whoosh",
+   "t": 12.5,
+   "duree": 1.2,
+   "db": -14
+  },
+  {
+   "type": "boom",
+   "t": 19.9,
+   "duree": 1.6,
+   "db": -9
+  },
+  {
+   "type": "whoosh",
+   "t": 23.2,
+   "duree": 0.9,
+   "db": -15
+  },
+  {
+   "type": "whoosh",
+   "t": 26.8,
+   "duree": 1.0,
+   "db": -16
+  },
+  {
+   "type": "boom",
+   "t": 41.5,
+   "duree": 1.8,
+   "db": -8
+  },
+  {
+   "type": "riser",
+   "t": 44.2,
+   "duree": 5.1,
+   "db": -13
+  },
+  {
+   "type": "boom",
+   "t": 49.3,
+   "duree": 2.4,
+   "db": -5
+  }
+ ],
+ "noir_debut": 0.0,
+ "noir_fin": 0.5
+}

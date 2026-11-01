@@ -1,0 +1,5 @@
+atelier déjà là
+phare ok
+cabane-neige ok
+salle-calcul ok
+carres-flottants ok

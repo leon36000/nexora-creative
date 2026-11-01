@@ -1,0 +1,92 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/webpilot/sources/brut-fr-CA-1x1.mp4",
+ "format": "1:1",
+ "ips": 24,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/teasers/musique/webpilot.flac",
+  "debut": 0,
+  "db": -2,
+  "fondu_fin": 1.6
+ },
+ "ambiance_db": -18,
+ "segments": [
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/webpilot/sources/plans-1x1/p1-v2.mp4",
+   "debut": 0.3,
+   "duree": 2.801
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/webpilot/sources/plans-1x1/p2-v1.mp4",
+   "debut": 0.3,
+   "duree": 2.795,
+   "fondu": 0
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/webpilot/sources/plans-1x1/p3-v2.mp4",
+   "debut": 0.3,
+   "duree": 4.192,
+   "fondu": 0
+  },
+  {
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/webpilot/sources/carte-fr.mp4",
+   "duree": 5.796,
+   "fondu": 0.5
+  }
+ ],
+ "textes": [
+  {
+   "texte": "Un immense\nchamp de pages.",
+   "debut": 0.45,
+   "duree": 2.251,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "Une lanterne\ntrace la route.",
+   "debut": 3.151,
+   "duree": 2.345,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "Rêvez grand.\nGardez le contrôle.",
+   "debut": 6.146,
+   "duree": 3.542,
+   "position": "haut",
+   "taille": 0.052,
+   "style": "titre",
+   "accent": "Gardez le contrôle."
+  }
+ ],
+ "sfx": [
+  {
+   "type": "whoosh",
+   "t": 2.551,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "whoosh",
+   "t": 5.346,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "riser",
+   "t": 8.188,
+   "duree": 1.6,
+   "db": -26
+  },
+  {
+   "type": "boom",
+   "t": 9.288,
+   "duree": 1.6,
+   "db": -13
+  }
+ ],
+ "noir_debut": 0.35,
+ "noir_fin": 0.7,
+ "etalonnage": true
+}

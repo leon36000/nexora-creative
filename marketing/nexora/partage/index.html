@@ -1,0 +1,128 @@
+<title>Kit de lancement Nexora</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Mise en page : une galerie sombre à rails de filets comme le site Nexora ; le film occupe le haut de page, chaque famille suit dans l'ordre où on la montrerait à un client. */
+:root {
+  --encre: #0A0A0E; --surface: #121218; --filet: #2B2B38; --os: #F5F4EF; --brume: #A8A8B6; --signal: #FF5A1F; --accent: #FF7A45;
+  --titre: "Geist", "Inter", system-ui, sans-serif; --texte: "Inter", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--encre); color: var(--os); font: 400 16px/1.6 var(--texte);
+  padding-block: 0 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.cadre { max-width: 1180px; margin: 0 auto; }
+header { padding-block: 28px 8px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+header svg { height: 30px; width: auto; display: block; }
+nav { display: flex; flex-wrap: wrap; gap: 6px; font: 500 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+nav a { color: var(--brume); text-decoration: none; padding: 9px 12px; border: 1px solid var(--filet); border-radius: 6px; }
+nav a:hover, nav a:focus-visible { color: var(--encre); background: var(--signal); border-color: var(--signal); outline: none; }
+h1 { font: 500 clamp(38px, 7vw, 84px)/1.0 var(--titre); letter-spacing: -.03em; margin: 56px 0 12px; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--accent); }
+.chapeau { max-width: 46rem; color: var(--brume); font-size: 18px; margin: 0 0 8px; }
+section { border-top: 1px solid var(--filet); margin-top: 72px; padding-top: 28px; scroll-margin-top: 16px; }
+h2 { font: 500 clamp(26px, 4vw, 40px)/1.1 var(--titre); letter-spacing: -.024em; margin: 0 0 6px; text-wrap: balance; }
+.sur { font: 500 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; display: block; }
+.note { color: var(--brume); max-width: 46rem; margin: 0 0 22px; }
+figure { margin: 0; }
+img, video { display: block; width: 100%; height: auto; border-radius: 6px; background: var(--surface); }
+.v figcaption { font-size: 13px; color: var(--brume); padding-top: 8px; }
+.v figcaption b { color: var(--os); font-weight: 500; }
+.grille { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+.grille.large { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+.grille.etroit { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+.film { display: grid; gap: 14px; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); align-items: start; }
+@media (max-width: 760px) { .film { grid-template-columns: minmax(0, 1fr); } .film .v.vert { max-width: 280px; } }
+.sel { display: inline-flex; gap: 0; border: 1px solid var(--filet); border-radius: 6px; margin-bottom: 12px; overflow: hidden; }
+.sel button { font: 500 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; background: transparent; color: var(--brume); border: 0; padding: 10px 14px; cursor: pointer; }
+.sel button[aria-pressed="true"] { background: var(--signal); color: var(--encre); }
+.sel button:focus-visible { outline: 2px solid var(--os); outline-offset: -2px; }
+.planche img { border: 1px solid var(--filet); }
+footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--filet); color: var(--brume); font-size: 14px; max-width: 46rem; }
+code { font: 500 13px var(--mono); color: var(--os); background: var(--surface); padding: 2px 6px; border-radius: 4px; word-break: break-all; }
+</style>
+<div class="cadre">
+<header><svg xmlns="http://www.w3.org/2000/svg" viewBox="6 6 285.55 52" role="img" aria-label="Nexora AI"><path fill="#f5f4ef" d="M6 6h10.4v52h-10.4zM47.6 6h10.4v52h-10.4z"/><path fill="#ff5a1f" d="M16.4 16.4h10.4v10.4h-10.4zM26.8 26.8h10.4v10.4h-10.4zM37.2 37.2h10.4v10.4h-10.4z"/><path fill="#f5f4ef" d="M81.84 50L76.36 50L76.36 14L83.31 14L99.94 43.36L99.94 14L105.41 14L105.41 50L98.21 50L81.84 21.30L81.84 50M122.65 50.61Q118.70 50.61 115.83 48.88Q112.97 47.16 111.42 43.97Q109.88 40.77 109.88 36.51Q109.88 32.25 111.42 29.08Q112.97 25.92 115.81 24.17Q118.65 22.42 122.50 22.42Q126.15 22.42 128.94 24.12Q131.73 25.81 133.28 29.01Q134.82 32.20 134.82 36.72L134.82 38.08L115.45 38.08Q115.66 42.04 117.56 44.02Q119.46 45.99 122.70 45.99Q125.09 45.99 126.66 44.88Q128.23 43.76 128.84 41.89L134.42 42.24Q133.35 45.99 130.23 48.30Q127.12 50.61 122.65 50.61M115.45 34.03L129.14 34.03Q128.89 30.43 127.09 28.70Q125.29 26.98 122.50 26.98Q119.61 26.98 117.76 28.78Q115.91 30.58 115.45 34.03M141.16 50L135.08 50L144.86 36.21L135.48 23.03L141.46 23.03L148.11 32.71L154.55 23.03L160.68 23.03L151.40 36.31L161.09 50L155.10 50L148.16 39.71L141.16 50M174.12 50.61Q170.26 50.61 167.37 48.88Q164.48 47.16 162.91 43.97Q161.34 40.77 161.34 36.51Q161.34 32.20 162.91 29.06Q164.48 25.92 167.37 24.17Q170.26 22.42 174.12 22.42Q177.97 22.42 180.86 24.17Q183.75 25.92 185.32 29.06Q186.90 32.20 186.90 36.51Q186.90 40.77 185.32 43.97Q183.75 47.16 180.86 48.88Q177.97 50.61 174.12 50.61M174.12 45.94Q177.57 45.94 179.44 43.43Q181.32 40.92 181.32 36.51Q181.32 32.10 179.44 29.59Q177.57 27.08 174.12 27.08Q170.72 27.08 168.82 29.59Q166.92 32.10 166.92 36.51Q166.92 40.92 168.82 43.43Q170.72 45.94 174.12 45.94M196.17 50L190.80 50L190.80 23.03L195.72 23.03L195.87 28.15Q196.48 25.92 197.75 24.70Q199.42 23.03 202.31 23.03L204.90 23.03L204.90 27.84L202.31 27.84Q200.28 27.84 198.91 28.50Q197.54 29.16 196.86 30.53Q196.17 31.90 196.17 34.08L196.17 50M214.88 50.61Q210.68 50.61 208.17 48.68Q205.66 46.75 205.66 43.26Q205.66 39.76 207.76 37.81Q209.86 35.85 214.28 34.99L223.55 33.22Q223.55 30.07 222.08 28.53Q220.61 26.98 217.72 26.98Q215.14 26.98 213.67 28.12Q212.20 29.26 211.64 31.49L206.11 31.14Q206.87 27.08 209.89 24.75Q212.91 22.42 217.72 22.42Q223.20 22.42 226.06 25.33Q228.93 28.25 228.93 33.52L228.93 44.02Q228.93 44.98 229.26 45.36Q229.59 45.74 230.35 45.74L231.31 45.74L231.31 50Q231.06 50.05 230.50 50.10Q229.94 50.15 229.34 50.15Q227.61 50.15 226.37 49.59Q225.13 49.04 224.52 47.72Q224.16 46.96 224.01 45.84Q223.55 46.86 222.74 47.67Q221.37 49.04 219.32 49.82Q217.27 50.61 214.88 50.61M215.75 46.35Q218.18 46.35 219.90 45.41Q221.63 44.47 222.59 42.80Q223.55 41.13 223.55 39L223.55 37.27L215.65 38.79Q213.21 39.25 212.22 40.24Q211.23 41.23 211.23 42.75Q211.23 44.47 212.43 45.41Q213.62 46.35 215.75 46.35"/><path fill="#ff7a45" d="M247.64 50L241.81 50L254.79 14L261.74 14L274.72 50L268.88 50L265.59 40.62L250.88 40.62L247.64 50M258.24 19.22L252.61 35.65L263.92 35.65M276.34 14h15.21v4.16h-4.87v27.68h4.87v4.16h-15.21v-4.16h4.87v-27.68h-4.87z"/></svg>
+<nav aria-label="Sections"><a href="#film">Film</a><a href="#spots">Spots</a><a href="#teasers">Teasers</a><a href="#identite">Identité</a><a href="#social">Social</a><a href="#objets">Objets</a></nav></header>
+
+<h1>Rêvez grand.<br><em>Gardez le contrôle.</em></h1>
+<p class="chapeau">Le lancement de Nexora AI, produit avec Nexora Creative : image par Qwen-Image-2.1, plans vidéo par MiniMax H3, musique par MiniMax-Music3. Tout le texte et tous les logos sont posés en code, jamais dessinés par l’IA.</p>
+
+<section id="film">
+<span class="sur">Le film · 60 s</span>
+<h2>Tout commence par une lumière.</h2>
+<p class="note">Du premier cube de lumière jusqu’au logo : une nuit québécoise, un atelier, une aurore, un pont de carrés sur le fleuve, une main qui garde la lumière. Les images sont de petits aperçus ; les fichiers 1080p sont sur le poste.</p>
+<div class="sel" role="group" aria-label="Langue du film"><button id="b-fr" aria-pressed="true">Français</button><button id="b-en" aria-pressed="false">English</button></div>
+<div class="film">
+  <figure class="v"><video id="film-h" controls preload="none" playsinline poster="img/film-marque-16x9-fr.jpg"><source src="video/film-marque-16x9-fr.mp4" type="video/mp4"></video><figcaption><b>Film de marque</b> · 16:9 · aussi en 9:16 et 1:1</figcaption></figure>
+  <figure class="v vert"><video controls preload="none" playsinline poster="img/film-marque-9x16-fr.jpg"><source src="video/film-marque-9x16-fr.mp4" type="video/mp4"></video><figcaption><b>Version verticale</b> · 9:16, réseaux sociaux</figcaption></figure>
+</div>
+</section>
+
+<section id="spots">
+<span class="sur">Spots courts</span>
+<h2>30 s, 15 s, 6 s, et la signature.</h2>
+<p class="note">Chaque spot a sa propre musique et existe en 16:9, 9:16 et 1:1, en français et en anglais.</p>
+<div class="grille large">
+<figure class="v "><video controls preload="none" playsinline poster="img/spot-30s-16x9-fr.jpg"><source src="video/spot-30s-16x9-fr.mp4" type="video/mp4"></video><figcaption><b>Spot 30 s</b> · 16:9</figcaption></figure>
+<figure class="v "><video controls preload="none" playsinline poster="img/spot-15s-9x16-fr.jpg"><source src="video/spot-15s-9x16-fr.mp4" type="video/mp4"></video><figcaption><b>Spot 15 s</b> · 9:16</figcaption></figure>
+<figure class="v "><video controls preload="none" playsinline poster="img/spot-6s-1x1-fr.jpg"><source src="video/spot-6s-1x1-fr.mp4" type="video/mp4"></video><figcaption><b>Bumper 6 s</b> · 1:1</figcaption></figure>
+<figure class="v "><video controls preload="none" playsinline poster="img/sting-nexora-16x9.jpg"><source src="video/sting-nexora-16x9.mp4" type="video/mp4"></video><figcaption><b>Signature animée</b> · 4,6 s, avec son</figcaption></figure>
+</div>
+</section>
+
+<section id="teasers">
+<span class="sur">Huit outils, huit rêves</span>
+<h2>Un teaser de 15 s par outil.</h2>
+<p class="note">L’état affiché sur chaque carte de fin est celui du site : aucun outil n’annonce plus que ce qui est prêt.</p>
+<div class="grille etroit">
+<figure class="v "><video controls preload="none" playsinline poster="img/teaser-workstudio-fr-9x16.jpg"><source src="video/teaser-workstudio-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>WorkStudio</b> · Des agents qui les assemblent.</figcaption></figure><figure class="v "><video controls preload="none" playsinline poster="img/teaser-code-fr-9x16.jpg"><source src="video/teaser-code-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>Code</b> · Marche après marche.</figcaption></figure><figure class="v "><video controls preload="none" playsinline poster="img/teaser-rag-fr-9x16.jpg"><source src="video/teaser-rag-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>RAG</b> · Une réponse s’allume.</figcaption></figure><figure class="v "><video controls preload="none" playsinline poster="img/teaser-bot-fr-9x16.jpg"><source src="video/teaser-bot-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>Bot</b> · Un compagnon qui éclaire.</figcaption></figure><figure class="v "><video controls preload="none" playsinline poster="img/teaser-creative-fr-9x16.jpg"><source src="video/teaser-creative-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>Creative</b> · Elle devient film.</figcaption></figure><figure class="v "><video controls preload="none" playsinline poster="img/teaser-webpilot-fr-9x16.jpg"><source src="video/teaser-webpilot-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>WebPilot</b> · Une lanterne trace la route.</figcaption></figure><figure class="v "><video controls preload="none" playsinline poster="img/teaser-privacy-router-fr-9x16.jpg"><source src="video/teaser-privacy-router-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>Privacy Router</b> · Vos données, à l’abri.</figcaption></figure><figure class="v "><video controls preload="none" playsinline poster="img/teaser-vps-fr-9x16.jpg"><source src="video/teaser-vps-fr-9x16.mp4" type="video/mp4"></video><figcaption><b>VPS au Québec</b> · Ici, au Québec.</figcaption></figure>
+</div>
+</section>
+
+<section id="identite">
+<span class="sur">Identité et imprimés</span>
+<h2>Cartes, affiches, papeterie, salon.</h2>
+<p class="note">Le logo officiel n’est jamais modifié. Les coordonnées sont encore des marqueurs à compléter : tout se régénère d’une commande.</p>
+<div class="grille large"><figure class=""><img src="img/carte-recto.jpg" alt="Carte d’affaires, recto" loading="lazy"></figure><figure class=""><img src="img/carte-verso-fr.jpg" alt="Carte d’affaires, verso clair" loading="lazy"></figure><figure class=""><img src="img/carte-verso-braise.jpg" alt="Carte d’affaires, verso braise" loading="lazy"></figure></div>
+<div class="grille" style="margin-top:14px"><figure class=""><img src="img/affiche-heros.jpg" alt="Affiche : Rêvez grand. Gardez le contrôle." loading="lazy"></figure><figure class=""><img src="img/affiche-quebec.jpg" alt="Affiche : IA souveraine au Québec" loading="lazy"></figure><figure class=""><img src="img/affiche-famille.jpg" alt="Affiche : la famille Nexora" loading="lazy"></figure><figure class=""><img src="img/affiche-typo.jpg" alt="Affiche typographique : le N en mosaïque" loading="lazy"></figure></div>
+<div class="grille large" style="margin-top:14px"><figure class=""><img src="img/guide-1.jpg" alt="Kit de marque, couverture" loading="lazy"></figure><figure class=""><img src="img/guide-6.jpg" alt="Kit de marque, page 6" loading="lazy"></figure><figure class=""><img src="img/guide-9.jpg" alt="Kit de marque, page 9" loading="lazy"></figure></div>
+<div class="planche" style="margin-top:14px"><figure class=""><img src="img/apercu-imprimes.jpg" alt="Toutes les pièces imprimées" loading="lazy"></figure></div>
+</section>
+
+<section id="social">
+<span class="sur">Réseaux sociaux et publicité</span>
+<h2>Facebook, Instagram, LinkedIn, X, YouTube, TikTok.</h2>
+<p class="note">Couvertures, publications, carrousels, stories, bannières publicitaires, courriels et une page d’atterrissage : 185 pièces pour le social, 90 pour la publicité.</p>
+<div class="grille large"><figure class=""><img src="img/fb-aurore.jpg" alt="Couverture Facebook, aurore" loading="lazy"></figure><figure class=""><img src="img/fb-nuit.jpg" alt="Couverture Facebook, nuit" loading="lazy"></figure><figure class=""><img src="img/fb-mosaique.jpg" alt="Couverture Facebook, mosaïque" loading="lazy"></figure></div>
+<div class="grille" style="margin-top:14px"><figure class=""><img src="img/ig-1.jpg" alt="Carrousel Instagram, 1 sur 7" loading="lazy"></figure><figure class=""><img src="img/ig-2.jpg" alt="Carrousel Instagram, 2 sur 7" loading="lazy"></figure><figure class=""><img src="img/ig-3.jpg" alt="Carrousel Instagram, 3 sur 7" loading="lazy"></figure><figure class=""><img src="img/site-390.jpg" alt="Page d’atterrissage sur téléphone" loading="lazy"></figure></div>
+<div class="grille large" style="margin-top:14px"><figure class=""><img src="img/site-1440.jpg" alt="Page d’atterrissage sur ordinateur" loading="lazy"></figure></div>
+<div class="planche" style="margin-top:14px"><figure class=""><img src="img/apercu-social.jpg" alt="Toutes les pièces sociales" loading="lazy"></figure><figure class=""><img src="img/apercu-publicite.jpg" alt="Toute la publicité" loading="lazy"></figure></div>
+</section>
+
+<section id="objets">
+<span class="sur">Objets promotionnels</span>
+<h2>Ceux qu’on veut porter et garder.</h2>
+<p class="note">24 objets avec fichier de fabrication à l’échelle réelle (calques, notes d’impression, Pantone approchés) et maquette réaliste. Les logos sont posés en code sur des photos vierges.</p>
+<div class="grille"><figure class=""><img src="img/obj-tshirt.jpg" alt="T-shirt" loading="lazy"></figure><figure class=""><img src="img/obj-hoodie.jpg" alt="Chandail à capuchon" loading="lazy"></figure><figure class=""><img src="img/obj-tasse.jpg" alt="Tasse" loading="lazy"></figure><figure class=""><img src="img/obj-tote.jpg" alt="Sac fourre-tout" loading="lazy"></figure><figure class=""><img src="img/obj-carnet.jpg" alt="Carnet" loading="lazy"></figure><figure class=""><img src="img/obj-trousse.jpg" alt="Trousse de bienvenue" loading="lazy"></figure><figure class=""><img src="img/obj-coffret.jpg" alt="Coffret de lancement" loading="lazy"></figure><figure class=""><img src="img/obj-lampe.jpg" alt="Lampe carré orange" loading="lazy"></figure><figure class=""><img src="img/obj-kiosque.jpg" alt="Fond de kiosque" loading="lazy"></figure></div>
+<div class="planche" style="margin-top:14px"><figure class=""><img src="img/apercu-objets.jpg" alt="Les 24 objets" loading="lazy"></figure></div>
+</section>
+
+<footer>
+<p>Tout est dans <code>marketing/nexora/</code> sur pc6 : films en 1080p dans <code>video/final/</code>, teasers, stings et boucles dans <code>video/teasers/</code>, sources reproductibles dans chaque dossier.</p>
+<p>Pour finir les imprimés, il manque un fichier : <code>coordonnees.json</code> (nom, titre, courriel, téléphone, adresse, domaine).</p>
+</footer>
+</div>
+<script>
+(function () {
+  var v = document.getElementById("film-h"), fr = document.getElementById("b-fr"), en = document.getElementById("b-en");
+  function langue(l) {
+    var t = v.currentTime, p = !v.paused;
+    v.poster = "img/film-marque-16x9-" + l + ".jpg";
+    v.querySelector("source").src = "video/film-marque-16x9-" + l + ".mp4";
+    v.load(); v.currentTime = t || 0; if (p) v.play();
+    fr.setAttribute("aria-pressed", l === "fr"); en.setAttribute("aria-pressed", l === "en");
+  }
+  fr.onclick = function () { langue("fr"); }; en.onclick = function () { langue("en"); };
+})();
+</script>

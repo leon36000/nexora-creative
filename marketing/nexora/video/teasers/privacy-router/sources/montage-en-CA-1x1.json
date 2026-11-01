@@ -1,0 +1,92 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/privacy-router/sources/brut-en-CA-1x1.mp4",
+ "format": "1:1",
+ "ips": 24,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/teasers/musique/privacy-router.flac",
+  "debut": 0,
+  "db": -2,
+  "fondu_fin": 1.6
+ },
+ "ambiance_db": -18,
+ "segments": [
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/privacy-router/sources/plans-1x1/p1-v2.mp4",
+   "debut": 0.4,
+   "duree": 2.821
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/privacy-router/sources/plans-1x1/p2-v2.mp4",
+   "debut": 0.3,
+   "duree": 2.362,
+   "fondu": 0
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/privacy-router/sources/plans-1x1/p3-v2.mp4",
+   "debut": 0.3,
+   "duree": 4.724,
+   "fondu": 0
+  },
+  {
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/privacy-router/sources/carte-en.mp4",
+   "duree": 5.677,
+   "fondu": 0.5
+  }
+ ],
+ "textes": [
+  {
+   "texte": "Outside, the storm.",
+   "debut": 0.45,
+   "duree": 2.271,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "Your data, sheltered.",
+   "debut": 3.171,
+   "duree": 1.912,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "Dream big.\nStay in control.",
+   "debut": 5.733,
+   "duree": 4.074,
+   "position": "haut",
+   "taille": 0.052,
+   "style": "titre",
+   "accent": "Stay in control."
+  }
+ ],
+ "sfx": [
+  {
+   "type": "whoosh",
+   "t": 2.571,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "whoosh",
+   "t": 4.933,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "riser",
+   "t": 8.307,
+   "duree": 1.6,
+   "db": -26
+  },
+  {
+   "type": "boom",
+   "t": 9.407,
+   "duree": 1.6,
+   "db": -13
+  }
+ ],
+ "noir_debut": 0.35,
+ "noir_fin": 0.7,
+ "etalonnage": true
+}

@@ -1,0 +1,92 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/workstudio/sources/brut-fr-CA-1x1.mp4",
+ "format": "1:1",
+ "ips": 24,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/teasers/musique/workstudio.flac",
+  "debut": 0,
+  "db": -2,
+  "fondu_fin": 1.6
+ },
+ "ambiance_db": -18,
+ "segments": [
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/workstudio/sources/plans-1x1/p1-v1.mp4",
+   "debut": 0.3,
+   "duree": 2.643
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/workstudio/sources/plans-1x1/p2-v2.mp4",
+   "debut": 0.3,
+   "duree": 2.866,
+   "fondu": 0
+  },
+  {
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/workstudio/sources/plans-1x1/p3-v1.mp4",
+   "debut": 0.3,
+   "duree": 4.299,
+   "fondu": 0
+  },
+  {
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/teasers/workstudio/sources/carte-fr.mp4",
+   "duree": 5.776,
+   "fondu": 0.5
+  }
+ ],
+ "textes": [
+  {
+   "texte": "Des tâches éparpillées.",
+   "debut": 0.45,
+   "duree": 2.093,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "Des agents qui\nles assemblent.",
+   "debut": 2.993,
+   "duree": 2.416,
+   "position": "bas",
+   "taille": 0.052,
+   "style": "titre"
+  },
+  {
+   "texte": "Rêvez grand.\nGardez le contrôle.",
+   "debut": 6.059,
+   "duree": 3.649,
+   "position": "haut",
+   "taille": 0.052,
+   "style": "titre",
+   "accent": "Gardez le contrôle."
+  }
+ ],
+ "sfx": [
+  {
+   "type": "whoosh",
+   "t": 2.393,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "whoosh",
+   "t": 5.259,
+   "duree": 0.5,
+   "db": -24
+  },
+  {
+   "type": "riser",
+   "t": 8.208,
+   "duree": 1.6,
+   "db": -26
+  },
+  {
+   "type": "boom",
+   "t": 9.308,
+   "duree": 1.6,
+   "db": -13
+  }
+ ],
+ "noir_debut": 0.35,
+ "noir_fin": 0.7,
+ "etalonnage": true
+}

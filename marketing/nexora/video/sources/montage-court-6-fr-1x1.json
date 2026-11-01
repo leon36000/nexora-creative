@@ -1,0 +1,42 @@
+{
+ "sortie": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/final/spot-6s-1x1-fr.mp4",
+ "format": "1:1",
+ "ambiance_db": -17,
+ "musique": {
+  "fichier": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/musique/F-6s.flac",
+  "debut": 0,
+  "db": 0,
+  "fondu_fin": 0.6
+ },
+ "segments": [
+  {
+   "duree": 2.2,
+   "fondu": 0,
+   "plan": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/plans/s01-pixel-v1.mp4",
+   "debut": 0.5,
+   "vitesse": 1.0,
+   "zoom": 0.03
+  },
+  {
+   "duree": 4.1,
+   "fondu": 0.3,
+   "carton": "/home/pc6/Desktop/Nexora Creative/marketing/nexora/video/sources/carton-court-6-fr-1x1.mp4"
+  }
+ ],
+ "textes": [],
+ "sfx": [
+  {
+   "type": "riser",
+   "t": 0.8,
+   "duree": 3.2,
+   "db": -14
+  },
+  {
+   "type": "boom",
+   "t": 4.0,
+   "duree": 1.6,
+   "db": -7
+  }
+ ],
+ "noir_debut": 0.0
+}
