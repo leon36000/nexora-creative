@@ -40,7 +40,7 @@ const carreEtat = (e) => `<i class="sq" style="${e === "disponible" ? "backgroun
 const carreEtatS = (e) => `<i class="sq" style="${e === "disponible" ? "background:var(--orange)" : e === "bientot" ? "background:var(--gris)" : "border:.25mm solid var(--gris)"}"></i>`;
 const coordBloc = (l, sombre = false) => {
   const L = R[l].lib, col = sombre ? "var(--gris)" : "var(--gris-sombre)", v = sombre ? "var(--texte-clair)" : "var(--encre)";
-  return [[L.c, c.courriel_general], [L.t, c.telephone], [L.w, c.site], [L.a, c.adresse]].map(([a, b]) => `<div style="margin-top:2.2mm"><div class="m lt" style="color:${col}">${a}</div><div style="font-size:${pt(8.4)};color:${v};line-height:1.3;overflow-wrap:anywhere">${esc(b)}</div></div>`).join("");
+  return [[L.c, c.courriel_general], [L.t, c.telephone], [L.w, c.site], [L.a, c.adresse]].filter(([, b]) => b && !/^\s*$/.test(b)).map(([a, b]) => `<div style="margin-top:2.2mm"><div class="m lt" style="color:${col}">${a}</div><div style="font-size:${pt(8.4)};color:${v};line-height:1.3;overflow-wrap:anywhere">${esc(b)}</div></div>`).join("");
 };
 function verrou(id, lang, mode, style = "") {
   const o = M.OUTILS.find((x) => x.id === id);
@@ -142,7 +142,7 @@ async function fiches(nav) {
 <div class="m" style="font-size:6.4pt;padding:3.4mm 4mm;border-right:.3pt solid rgba(18,18,24,.4);color:var(--gris-sombre)">${t.etat}</div>
 <div style="padding:3mm 4mm"><div class="m" style="font-size:8pt;color:var(--encre)">${carreEtat(o.etat)}${TEXTE[l].etats[o.etat]}</div><div style="font-size:8.6pt;color:var(--gris-sombre);margin-top:1mm">${esc(t.notes[o.etat])}</div></div></div>
 <div style="position:absolute;left:16mm;right:16mm;bottom:14mm;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:4mm" class="filet"><div style="padding-top:3mm">${M.logo("clair", "logo", "width:30mm;height:auto")}</div>
-${[[t.lib.c, c.courriel_general], [t.lib.t, c.telephone], [t.lib.w, c.site]].map(([a, b]) => `<div style="padding-top:3mm"><div class="m" style="font-size:5.6pt;color:var(--gris-sombre)">${a}</div><div style="font-size:7.4pt;overflow-wrap:anywhere">${esc(b)}</div></div>`).join("")}</div>`;
+${[[t.lib.c, c.courriel_general], [t.lib.t, c.telephone], [t.lib.w, c.site]].filter(([, b]) => b && !/^\s*$/.test(b)).map(([a, b]) => `<div style="padding-top:3mm"><div class="m" style="font-size:5.6pt;color:var(--gris-sombre)">${a}</div><div style="font-size:7.4pt;overflow-wrap:anywhere">${esc(b)}</div></div>`).join("")}</div>`;
     const nom = `fiche-${o.id}-${l}`;
     await M.produire(nav, { dossierHtml: HTML, nom: `${nom}-${mode}`, pages: [M.feuille({ ...f, nom, fondArt: art, corps })], css, taille: f, lang: l,
       pdf: join(OUT, "fiches", `fiche-${o.id}-${l}-${mode === "ecran" ? "" : "impression-"}`.replace(/-$/, "") + ".pdf"), png: mode === "ecran" ? join(OUT, "fiches", `fiche-${o.id}-${l}.png`) : undefined, dpi: 80 });

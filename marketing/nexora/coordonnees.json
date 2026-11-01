@@ -4,11 +4,17 @@
   "signature_en": "AI that works for your business. Under your control.",
   "campagne": "Rêvez grand. Gardez le contrôle.",
   "campagne_en": "Dream big. Stay in control.",
-  "site": "«à compléter : domaine»",
-  "courriel_general": "«à compléter : courriel»",
-  "telephone": "«à compléter : téléphone»",
-  "adresse": "«à compléter : adresse»",
+  "site": "nexora.ai",
+  "courriel_general": "info@nexora.ai",
+  "telephone": "",
+  "adresse": "",
   "personnes": [
-    { "nom": "«à compléter : prénom nom»", "titre": "«à compléter : titre»", "titre_en": "«to complete: title»", "courriel": "«à compléter : courriel»", "telephone": "«à compléter : téléphone»" }
+    {
+      "nom": "Nexora AI",
+      "titre": "IA souveraine au Québec",
+      "titre_en": "Sovereign AI, made in Québec",
+      "courriel": "info@nexora.ai",
+      "telephone": ""
+    }
   ]
 }

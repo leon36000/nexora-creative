@@ -159,7 +159,7 @@ function fabriquer(l) {
   sl = pres.addSlide({ masterName: "CITATION" }); sl.addText(s.citation2, { placeholder: "citation" }); sl.addText(s.attrib2.toUpperCase(), { placeholder: "attribution" }); note(sl);
   // 12 fin
   sl = pres.addSlide({ masterName: "FIN" }); sl.addText(s.finL.toUpperCase(), { placeholder: "label" }); sl.addText(s.finT, { placeholder: "titre" });
-  sl.addText([{ text: c.courriel_general, options: { breakLine: true } }, { text: c.telephone, options: { breakLine: true } }, { text: c.site, options: { breakLine: true } }, { text: c.adresse }], { placeholder: "contact" }); note(sl);
+  sl.addText([c.courriel_general, c.telephone, c.site, c.adresse].filter((b) => b && !/^\s*$/.test(b)).map((text, i, a) => ({ text, options: i < a.length - 1 ? { breakLine: true } : {} })), { placeholder: "contact" }); note(sl);
   return pres;
 }
 for (const l of ["fr", "en"]) {

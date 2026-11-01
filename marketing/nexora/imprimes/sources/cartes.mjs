@@ -65,10 +65,7 @@ ${M.logo(logoV, "logo")}
 <div class="tete"><div class="nom geist">${esc(v.nom)}</div><div class="titre">${esc(v.titre)}</div></div>
 <div class="filet" style="top:30.4mm"></div>
 <div class="coord">
-<div><span class="lib mono">${v.lib.c}</span><span class="val">${esc(v.courriel)}</span></div>
-<div><span class="lib mono">${v.lib.t}</span><span class="val">${esc(v.tel)}</span></div>
-<div><span class="lib mono">${v.lib.s}</span><span class="val">${esc(v.site)}</span></div>
-<div><span class="lib mono">${v.lib.a}</span><span class="val">${esc(v.adresse)}</span></div>
+${[[v.lib.c, v.courriel], [v.lib.t, v.tel], [v.lib.s, v.site], [v.lib.a, v.adresse]].filter(([, b]) => b && !/^\s*$/.test(b)).map(([a, b]) => `<div><span class="lib mono">${a}</span><span class="val">${esc(b)}</span></div>`).join("\n")}
 </div></div>`;
 }
 /** Bande de quatre barres sur le bord droit du verso (déborde dans le fond perdu, haut, bas et droite). */

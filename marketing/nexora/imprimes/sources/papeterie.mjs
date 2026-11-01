@@ -29,11 +29,8 @@ const CSS = `
 `;
 const pied = (lang) => {
   const L = LIB[lang];
-  return `<div class="pied" style="grid-template-columns:1.3fr 1fr 1fr 1fr">
-<div class="col"><span class="lib mono">${L.adr}</span><span class="val">${esc(c.adresse)}</span></div>
-<div class="col"><span class="lib mono">${L.courriel}</span><span class="val">${esc(c.courriel_general)}</span></div>
-<div class="col"><span class="lib mono">${L.tel}</span><span class="val">${esc(c.telephone)}</span></div>
-<div class="col"><span class="lib mono">${L.web}</span><span class="val">${esc(c.site)}</span></div></div>`;
+  return `<div class="pied" style="grid-template-columns:repeat(${[c.adresse, c.courriel_general, c.telephone, c.site].filter((b) => b && !/^\s*$/.test(b)).length || 1}, 1fr)">
+${[[L.adr, c.adresse], [L.courriel, c.courriel_general], [L.tel, c.telephone], [L.web, c.site]].filter(([, b]) => b && !/^\s*$/.test(b)).map(([a, b]) => `<div class="col"><span class="lib mono">${a}</span><span class="val">${esc(b)}</span></div>`).join("\n")}</div>`;
 };
 const nav = await M.navigateur();
 const P = (nom, opts) => M.produire(nav, { dossierHtml: HTML, ...opts, nom });
@@ -54,7 +51,7 @@ ${pied(lang).replace('class="pied"', 'class="pied" style="grid-template-columns:
 }
 
 // ------------------------------------------------------------------------------------------- enveloppes
-const adresseRetour = `<div class="txt" style="font-size:7.6pt;line-height:1.4;margin-top:2.4mm"><b style="font-weight:600">Nexora AI</b><br>${esc(c.adresse)}<br>${esc(c.courriel_general)}<br>${esc(c.site)}</div>`;
+const adresseRetour = `<div class="txt" style="font-size:7.6pt;line-height:1.4;margin-top:2.4mm"><b style="font-weight:600">Nexora AI</b>${[c.adresse, c.courriel_general, c.site].filter((b) => b && !/^\s*$/.test(b)).map((b) => `<br>${esc(b)}`).join("")}</div>`;
 for (const [nom, w, h] of [["dl", 220, 110], ["no10", po(9.5), po(4.125)]]) {
   const f = { w, h, fond: 3, traits: true };
   const face = M.feuille({ ...f, nom: `enveloppe-${nom} face`, fondArt: '<div style="position:absolute;inset:0;background:var(--papier)"></div>',
@@ -125,7 +122,7 @@ ${champ(T.nomc)}${champ(T.mail)}${champ(T.adr, "grid-column:1/3")}</div>
 <div style="position:absolute;left:0;right:0;top:0;height:17mm;background:var(--noir);display:flex;align-items:center;padding:0 5mm">${M.logo("sombre", "logo", "width:34mm;height:auto")}</div>
 <div class="bande-x" style="position:absolute;left:0;right:0;top:17mm;height:1.6mm"></div>
 <div style="position:absolute;left:5mm;right:5mm;top:23mm;display:grid;gap:3mm">
-<div style="border:.5pt solid var(--encre);padding:2.2mm 2.8mm"><span class="lib mono" style="color:var(--encre)">Expéditeur / From</span><div class="txt" style="font-size:7.4pt;margin-top:1mm">Nexora AI<br>${esc(c.adresse)}</div></div>
+<div style="border:.5pt solid var(--encre);padding:2.2mm 2.8mm"><span class="lib mono" style="color:var(--encre)">Expéditeur / From</span><div class="txt" style="font-size:7.4pt;margin-top:1mm">Nexora AI${c.adresse && !/^\s*$/.test(c.adresse) ? `<br>${esc(c.adresse)}` : ""}</div></div>
 ${zone("Destinataire / To", "36mm")}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:3mm">${zone("N° commande / Order no.", "7mm")}${zone("Poids / Weight", "7mm")}</div>
 ${zone("Code de suivi / Tracking", "20mm", "border-style:dashed")}
@@ -162,11 +159,11 @@ c.personnes.forEach((p, i) => {
 <div style="${F}font-size:13px;line-height:18px;color:#54545F;">${esc(titre)}</div>
 <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;margin:8px 0 8px 0;"><tr>
 <td width="18" height="4" bgcolor="#FFB11A" style="font-size:0;line-height:0;">&nbsp;</td><td width="18" height="4" bgcolor="#FF5A1F" style="font-size:0;line-height:0;">&nbsp;</td><td width="18" height="4" bgcolor="#E0341C" style="font-size:0;line-height:0;">&nbsp;</td><td width="18" height="4" bgcolor="#B01A3C" style="font-size:0;line-height:0;">&nbsp;</td></tr></table>
-<div style="${F}font-size:12px;line-height:18px;color:#121218;"><span style="color:#54545F;">${L.c}&nbsp;</span>${esc(courriel)}<br><span style="color:#54545F;">${L.t}&nbsp;</span>${esc(tel)}<br><span style="color:#54545F;">${L.w}&nbsp;</span>${esc(c.site)}</div>
+<div style="${F}font-size:12px;line-height:18px;color:#121218;"><span style="color:#54545F;">${L.c}&nbsp;</span>${esc(courriel)}<br>${tel && !/^\s*$/.test(tel) ? `<span style="color:#54545F;">${L.t}&nbsp;</span>${esc(tel)}<br>` : ""}<span style="color:#54545F;">${L.w}&nbsp;</span>${esc(c.site)}</div>
 <div style="${F}font-size:11px;line-height:16px;color:#54545F;padding-top:6px;">${esc(en ? c.signature_en : c.signature)}</div>
 </td></tr></table>`;
     writeFileSync(join(sigDir, `signature-${slug}-${lang}.html`), html);
-    const txt = `${p.nom}\n${titre}\nNexora AI\n${L.c}: ${courriel}\n${L.t}: ${tel}\n${L.w}: ${c.site}\n${en ? c.signature_en : c.signature}\n`;
+    const txt = `${p.nom}\n${titre}\nNexora AI\n${L.c}: ${courriel}\n${tel && !/^\s*$/.test(tel) ? `${L.t}: ${tel}\n` : ""}${L.w}: ${c.site}\n${en ? c.signature_en : c.signature}\n`;
     writeFileSync(join(sigDir, `signature-${slug}-${lang}.txt`), txt);
   }
 });
