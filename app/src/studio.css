@@ -270,3 +270,14 @@ body { font-variation-settings: normal; letter-spacing: -0.003em; }
 .pr-md ul, .pr-md ol { margin: 0; padding-left: 20px; display: grid; gap: 3px; }
 .pr-md code { font: 500 12px var(--font-mono); background: var(--panel-3); padding: 1px 5px; border-radius: 4px; }
 .pr-devis-note { color: var(--dim); font: 500 11px/1.3 var(--font-mono); }
+
+/* Aperçu du montage */
+.pr-montage { display: grid; gap: 10px; padding: 14px; margin-top: 12px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--bg); }
+.pr-montage h4 { margin: 2px 0 0; font: 500 16px/1.2 var(--font-ui); }
+.pr-montage-video { width: 100%; max-height: 360px; border-radius: 8px; background: #000; object-fit: contain; }
+.pr-mesures { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.pr-mesures li { display: grid; grid-template-columns: 150px 1fr 32px; gap: 10px; align-items: center; font-size: 12px; color: var(--dim); }
+.pr-mesures i { height: 5px; border-radius: 3px; background: var(--panel-3); position: relative; overflow: hidden; }
+.pr-mesures i::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--v); background: var(--accent, #ff5a1f); border-radius: 3px; }
+.pr-mesures b { font: 500 12px var(--font-mono); text-align: right; color: var(--text, inherit); }
+.pr-ecarts { margin: 0; padding-left: 16px; display: grid; gap: 2px; }

@@ -27,6 +27,7 @@ describe('rendu ffmpeg d’un EditPlan', () => {
     expect(g).toContain('xfade=transition=fade:duration=0.5:offset=1.5');
     expect(g).toContain('concat=n=6'); // rampe en 6 morceaux
     expect(g.indexOf("ass='/o.ass'")).toBeGreaterThan(g.indexOf('xfade'));
+    expect(g).toMatch(/crop=320:180,setsar=1/); // un zoom ne doit pas laisser dériver le SAR (concat refuse des SAR différents)
     expect(g).toContain('sidechaincompress'); expect(g).toContain('loudnorm=I=-14:TP=-1');
     expect(c.dureeS).toBeCloseTo((48 + 48 - 12 + 36) / 24);
     expect(c.ass).toContain('Bonjour le monde.');
