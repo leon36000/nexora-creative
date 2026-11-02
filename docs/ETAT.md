@@ -6,6 +6,25 @@ Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'es
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
 
+## Mise à jour du 02/11 (soir) : harnais de montage pour LLM bon marché (tranche 1)
+
+Branche `feat/harness-montage` (recherche/13 et 14). Un modèle bon marché (`z-ai/glm-5.3`) peut piloter le montage grâce à un contrat typé, des outils gratuits et une mémoire à la AMD. Détail : `docs/JOURNAL.md`, `recherche/14` §12.
+
+| Brique | État | Preuve |
+|---|---|---|
+| **EditPlan v1** (Zod + validateur : images entières, pas de coupe dans un mot, fondus audio 30 ms, ducking, transitions, vitesse, zoom, texte, plans à tourner) | **fait** | `server/nexora/montage/editplan.ts`, 7 tests de validateur |
+| **`montage_auto`** (base déterministe et repli) | **fait** | valide sur 12 briefs, durée ±5 %, aucun doublon, coupes sur les temps forts ; déterministe |
+| **`analyze_media`** (ffmpeg scdet, silencedetect, ebur128 + énergie/temps forts en TS, cache) | **fait** | tempo 120,2 BPM retrouvé sur une piste de 120 BPM ; vrai fichier analysé en test |
+| **Métriques en code, `critique`, `revise`** | **fait** | rythme vs énergie, coupes sur temps forts, doublons, texte, audio, crédits ; juge visuel optionnel (30 %) |
+| **Mémoire AMD** (4 recettes, 4 exemplaires réels, indices de fonction, k = 1) | **fait** | exemplaires tirés du film V3 et de la pub surveillance (listes réelles) ; le 4e (explicatif) est écrit à la main |
+| **Rendu ffmpeg d'un EditPlan** | **fait** | xfade, rampes, zoom, libass, musique, voix, ducking, loudnorm ; film de 15 s rendu par MCP, −14,5 LUFS |
+| **Outils du Producteur** (`analyze_media`, `plan_edit`, `critique`, `revise`) | **fait côté serveur** | 2 tours au plus, plan invalide jamais gardé, score qui ne baisse pas, repli sur `montage_auto`, plafond de crédits ; **pas d'interface** : aucun bouton de rendu dans l'UI |
+| **MCP** (`montage_*`, 7 outils) | **fait** | `npm run mcp:smoke:montage` (analyse → auto → mesure → rustine → rendu → relecture) |
+| **Banc** (12 briefs, 3 bras, IC par brief) | **fait** | `npm run bench:montage` ; 1,6 USD dépensés au total |
+
+**Ce que le banc dit (honnêtement)** : sur les métriques en code, `montage_auto` fait 0,937 ; GLM tel quel 0,884 (42 % de plans invalides remplacés par le code) ; GLM + exemplaire + validateur + 1 critique 0,876. La mémoire fait passer la validité de 58 % à 92 % mais **ne bat pas le code seul** et coûte ≈ ×6 par essai. Ces métriques sont des proxys proches de ce que le code optimise ; aucun juge visuel ni œil humain n'a encore tranché.
+**Pas fait** : bouton de montage dans l'interface et route de rendu HTTP, juge visuel sur planche contact dans le banc, `mix_audio` en deux passes (crête −0,9 dB mesurée), son propre des plans vidéo, mots horodatés (Whisper) dans l'inventaire, recettes `grade`/`reframe`, distillation par Claude des briefs d'apprentissage, règles apprises (ACE). **VM 202 non redéployée** (voir le journal).
+
 ## Mise à jour du 02/11 : Producteur IA, juge visuel, Prolonger et Raccord, mode simple refait
 
 Branche `feat/producteur` (feuille de route `recherche/07` : R9, R8, R3a, R2 en partie). Détail et mesures : `docs/JOURNAL.md`.

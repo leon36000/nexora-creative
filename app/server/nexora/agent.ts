@@ -19,6 +19,7 @@ import { corpsRendu, type MoteurVideo } from './creer.js';
 import { devisCredits, secondesGpuEstimees } from './credits.js';
 import { MAX_PLANS, type Storyboard } from './film.js';
 import type { ClientLlm, DefinitionOutil, MessageLlm } from './llm.js';
+import { DEFINITIONS_MONTAGE, executerOutilMontage, type DepsMontage, type EtatMontage } from './montage/outils.js';
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Plan de production
@@ -144,6 +145,8 @@ export interface SessionProducteur {
   proposition: Proposition | null;
   productions: Production[];
   jetons: number;
+  /** Montage en cours (outils de montage : plan_edit, critique, revise). */
+  montage?: EtatMontage;
 }
 
 export function nouvelleSession(): SessionProducteur {
@@ -188,7 +191,7 @@ const definitions: { nom: string; description: string; schema: z.ZodType }[] = [
   { nom: 'remonter', description: 'Prépare un nouveau montage d’un film terminé, sans nouveau rendu (ordre des plans, plans retirés, fondu).', schema: z.object({ film: z.number().int(), ordre: z.array(z.number().int().min(1)).min(1), transition: z.enum(['coupe', 'fondu']).optional() }) },
 ];
 
-export const OUTILS_PRODUCTEUR: DefinitionOutil[] = definitions.map((d) => {
+export const OUTILS_PRODUCTEUR: DefinitionOutil[] = [...definitions, ...DEFINITIONS_MONTAGE].map((d) => {
   const js = z.toJSONSchema(d.schema) as Record<string, unknown>;
   delete js.$schema;
   return { nom: d.nom, description: d.description, parametres: js };
@@ -206,6 +209,8 @@ export interface DepsAgent {
   outils: Partial<Record<'etat_studio' | 'lister_creations' | 'voir_production', (args: any) => Promise<unknown>>> & {
     devisPlan?: (film: number, plan: number) => Promise<Devis>;
   };
+  /** Médias du projet pour les outils de montage ; absent = outils indisponibles. */
+  montage?: DepsMontage;
   maxEtapes?: number;
   maxJetonsSession?: number;
 }
@@ -293,6 +298,14 @@ async function executerOutil(s: SessionProducteur, nom: string, args: Record<str
       const devis: Devis = { credits: 0, secondesGpu: 0, minutes: 1, rendus: 0, plans: ordre.length, musique: false, candidats: 1 };
       s.proposition = { id: randomUUID(), genre: 'remontage', film, ordre, transition: args.transition === 'fondu' ? 'fondu' : 'coupe', devis };
       return { ok: true, devis, note: 'montage sans nouveau rendu' };
+    }
+    case 'analyze_media':
+    case 'plan_edit':
+    case 'critique':
+    case 'revise': {
+      const r = await executerOutilMontage(s.montage, nom, args, deps);
+      s.montage = r.etat;
+      return r.resultat;
     }
     case 'etat_studio':
     case 'lister_creations':

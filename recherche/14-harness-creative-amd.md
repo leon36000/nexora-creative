@@ -15,7 +15,7 @@ Statut : **conception** [PROPOSÉ]. Niveaux de certitude : [CONFIRMÉ] lu à la 
 2. **Mémoire de sous-tâche** : la trajectoire découpée en segments sémantiques (étiquette, description, exemples d'exécution) ; l'élève décompose sa tâche (≤ 6 sous-tâches), un segment top-1 par sous-tâche. Format « description + blocs de code » : 49,4 % contre 23,2 % en langage seul. C'est le niveau qui apporte le plus.
 3. **Mémoire de fonction** : par outil, un appel exemple réel + schéma ; injectée **réactivement**, seulement quand l'appel d'outil échoue (indice ajouté au message d'erreur).
 
-Résultats rapportés : professeur GPT-5-mini ; élèves Qwen3-4B/8B, Gemma4-E4B, Llama3.1-8B ; gain moyen en points de pourcentage par rapport au zero-shot : **+27,2 (AppWorld), +11,2 (BFCL V3), +3,4 (ToolSandbox)** ; ex. Qwen3-4B AppWorld 14,9 → 49,4. Enseignements transposables : **k = 1 est optimal** (k plus grand dégrade, sous-tâche 49,4 → 33,3) ; la mémoire fabriquée par l'élève lui-même est nettement moins bonne que celle du professeur ; un professeur plus fort n'est pas toujours meilleur (GPT-5-mini > DeepSeek V4 Pro pour l'élève 4B) ; le gain culmine pour les petits élèves (4B) et diminue avec la taille.
+Résultats rapportés (corrigés le 02/11 d'après la page du projet https://agent-memory-distillation.github.io/ ; l'extraction arXiv de la première version de cette note donnait des moyennes inférieures, +27,2 / +11,2 / +3,4, non retenues) : professeur GPT-5-mini ; élève Qwen3-4B : **AppWorld 14,88 → 49,40 (+34,5 points ; le professeur seul fait 50,0), BFCL V3 +23,0, ToolSandbox +3,9**. Autres élèves : Qwen3-8B, Gemma4-E4B, Llama3.1-8B. La mémoire de sous-tâche est celle qui compte le plus ; prose pour les plans, code pour l'exécution ; **k = 1** ; la mémoire collectée par l'élève seul n'aide presque pas ; un professeur *plus accessible* vaut mieux qu'un professeur plus fort. Enseignements transposables : **k = 1 est optimal** (k plus grand dégrade, sous-tâche 49,4 → 33,3) ; la mémoire fabriquée par l'élève lui-même est nettement moins bonne que celle du professeur ; un professeur plus fort n'est pas toujours meilleur (GPT-5-mini > DeepSeek V4 Pro pour l'élève 4B) ; le gain culmine pour les petits élèves (4B) et diminue avec la taille.
 **Limites déclarées** : mémoire figée (aucune adaptation en cours d'usage) ; validé seulement sur de l'appel d'outils texte (API Python/fonctions) ; **non vérifié en multimodal ni en génération ouverte** : le montage vidéo en est un cas hors du domaine validé [HYPOTHÈSE de transfert].
 
 **Pistes voisines**
@@ -167,3 +167,23 @@ Total ≈ 3-4 semaines pour 1-7 ; l'étape 0 donne un premier chiffre dès demai
 ## 11. Sources
 
 AMD : https://arxiv.org/abs/2608.07169 · https://huggingface.co/papers/2608.07169 · https://github.com/taeilkim2465/agentic_memory_distillation. ACE : https://arxiv.org/abs/2510.04618 · https://github.com/mgechev/ACE-open. Travaux du fondateur : `Mission_GEPA_DSPy_MetaHarness_Protocole_2026-09-30.pdf`, `Mission_Harness_AutoEvolution_2026-09-30.pdf`, `Mission_Harness_AutoEvolution_intermediaire_2026-10-03.pdf` (Bureau). GEPA https://arxiv.org/abs/2507.19457 · Meta-Harness https://arxiv.org/abs/2603.28052 (références citées par ces PDF). Internes : `recherche/05`, `09`, `10`, `app/server/nexora/{competences,juge,agent,llm}.ts`.
+
+## 12. Résultat de la tranche 1 (réalisée le 02/11/2026, branche `feat/harness-montage`)
+
+Construit : EditPlan v1 + validateur, `montage_auto`, `analyze_media` (ffmpeg), métriques en code, `critique`/`revise`, mémoire à trois niveaux (4 recettes, 4 exemplaires, 4 fiches de fonction), rendu ffmpeg, outils du Producteur et du MCP, banc de 12 briefs synthétiques. Code : `app/server/nexora/montage/`, `memoire/`, `bench/` ; résultats bruts : `app/server/nexora/bench/resultats/2026-11-02-glm53/` (registre, réponses brutes, rapport).
+Banc (GLM-5.3 via OpenRouter, `reasoning.effort = low` car le raisonnement est obligatoire et épuise sinon `max_tokens`, 12 briefs × 3 répétitions, 1,24 USD, 776 000 jetons) :
+
+| Bras | score brut [IC95] | score avec repli [IC95] | EDL valide du 1er coup | repli |
+|---|---|---|---|---|
+| `montage_auto` (code seul) | 0,937 [0,922 ; 0,950] | 0,937 | 100 % | 0 % |
+| GLM tel quel | 0,500 [0,320 ; 0,668] | 0,884 [0,857 ; 0,909] | 58 % | 42 % |
+| GLM + exemplaire + validateur + 1 critique | 0,798 [0,686 ; 0,883] | 0,876 [0,850 ; 0,903] | 53 % | 8 % |
+
+Lecture honnête, contre les critères préenregistrés du §9 :
+1. **A1 − A0**, borne basse de l'IC > 0 : oui sur le score brut (+0,298 [0,12 ; 0,48], l'invalide compte 0) ; **non** sur ce que la personne reçoit, repli compris (−0,008 [−0,048 ; +0,035]). Le gain vient de la validité (le validateur et sa réparation font passer de 58 % à 92 % de plans valides), pas d'un meilleur montage.
+2. **EDL valide du 1er coup ≥ 90 %** : non (53 %, 58 % pour A0). L'exemplaire n'a pas amélioré la validité du premier jet.
+3. **Jetons par EDL valide ≤ +25 %** : non (≈ 19 000 contre ≈ 6 700, soit ×2,9 ; coût par essai ×5,8).
+4. **A1 ≥ A_code** : non (−0,061 [−0,084 ; −0,037]). Sur ces proxys, le code seul bat le modèle, avec ou sans mémoire.
+Réserves : les métriques mesurent en grande partie ce que `montage_auto` optimise (plafond ≈ 0,94, circularité) ; aucun juge visuel ni œil humain ; briefs synthétiques ; 12 briefs. Les 36 plans invalides de A0 viennent surtout des voix off : la spécification du format ne montrait pas la forme de `audio.voix` ni le signe de `profondeur_db` (défaut de documentation trouvé par le banc, corrigé dans `competences/montage-plan.md` v2). Second passage, **explicatifs seulement** (2 briefs × 3 répétitions, 0,27 USD, test scellé non rejoué, n = 2 donc sans valeur d'intervalle) : A0 83 % de plans valides au premier coup, A1 100 % et à égalité avec le code (−0,002).
+**Ce que cela dit** : le plancher de qualité est le code ; le modèle bon marché n'apporte pas de gain mesurable sur ces proxys, mais avec validateur + exemplaire + repli il atteint le plancher à un coût de ≈ 0,03 USD par montage. Le vrai test du gain (goût, accroche, cohérence visuelle) exige le juge sur planches et un œil humain : c'est l'étape suivante.
+
