@@ -9,6 +9,7 @@ import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
+import { execFile } from 'child_process';
 import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { dirname, extname, join, resolve, sep } from 'path';
 import type { WebSocket } from 'ws';
@@ -33,7 +34,7 @@ import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, se
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { xmlFcp7 } from './nexora/projetExport.js';
 import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
-import { argsAvecMusique, argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
+import { argsAvecMusique, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { lireCartons } from './nexora/cartons.js';
 import { buildLtxGraph } from './graphs/ltx.js';
@@ -54,15 +55,19 @@ import { buildRestyleGraph, buildSwapGraph } from './graphs/restyle.js';
 import { checkerPreview } from './cutout.js';
 import { buildReshootGraph, buildReshootWarpPreviewGraph } from './graphs/reshoot.js';
 import { buildExtendGraph, buildSoundGraph, buildSpeakGraph, buildTransitionGraph } from './graphs/ltxtools.js';
-import { takes, projects, speed, preambles, takeWorkflows, cast as castDb, sessionsProducteur, type CastKind } from './jobs.js';
+import { takes, projects, speed, preambles, takeWorkflows, cast as castDb, sessionsProducteur, projetsLongs, type CastKind } from './jobs.js';
 import { analyserMedia } from './nexora/montage/analyse.js';
+import { resoudrePersonnages } from './nexora/personnagesCast.js';
+import { compteurProjet, corpsBrouillonDe, corpsFinalDe, prisesDuPlan, type PrisesDuPlan } from './nexora/prises.js';
+import { aplatir, estimerProjet, intentionDuPlanProjet, ordreAssemblage, prochainLot, scenarioVersArbre, type ProjetLong, type PlanProjet } from './nexora/projet.js';
+import { convertirEnPromptRef, decoupeFiche, promptFiche } from './nexora/personnages.js';
 import { dureeTotaleS } from './nexora/montage/editplan.js';
 import { rendreEditPlan } from './nexora/montage/rendu.js';
 import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
-import { ajusterProposition, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
+import { ajusterProposition, depassement, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
 import {
-  CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles,
+  CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles, storeRef,
   setCastQueue, sheetPlan, type HeroOpts,
 } from './cast.js';
 import { buildCastVideoGraph } from './graphs/cast.js';
@@ -978,11 +983,14 @@ app.post('/api/nexora/creer', async (req, reply) => {
   const verdict = await moderer(`${demande.intention} ${demande.replique ?? ''}`, llmCourant(), (m) => app.log.warn(m));
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
+  // Personnages @ : sur le moteur cinéma (Ref2VA), @nom joint les images du personnage ; ailleurs, seulement ses mots.
+  const persos = moteur === 'h3-max' && !demande.image ? await resoudrePersonnages(demande.intention) : null;
   const r = await reecrireH3({
-    intention: intentionAvecCamera(demande), mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande),
+    intention: intentionAvecCamera(persos?.sujets.length ? { ...demande, intention: persos.texteClair } : demande), mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande),
     ...(demande.replique ? { dialogues: [{ texte: demande.replique, langue: 'French' }] } : {}),
   }, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur, nexoraAutoMusique: (req.body as any)?.musique === true };
+  if (persos?.sujets.length) Object.assign(corps, { prompt: convertirEnPromptRef(r.prompt, persos.sujets), refImages: persos.jetons, personnages: persos.noms });
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
@@ -1359,6 +1367,296 @@ app.get('/api/nexora/montage/:mid/apercu.mp4', async (req, reply) => {
   return reply.send(createReadStream(f));
 });
 
+/**
+ * Prises par plan (vague 2) : brouillons rapides pour choisir, finale cinéma pour la prise gardée, compteur de coût du
+ * projet qui inclut les prises écartées. Les prises ajoutées vivent dans le storyboard du film (plan.extra, plan.rejetees) ;
+ * elles portent `prisesFilm` et `prisePlan`, jamais `nexoraFilm`, pour ne pas toucher à l'assemblage du film.
+ */
+function corpsDePrise(id: number) {
+  const t = takes.get(id);
+  if (!t) return undefined;
+  const s = JSON.parse(t.settings);
+  return { status: t.status, corps: { videoModel: s.videoModel, width: s.width, height: s.height, lengthFrames: s.lengthFrames } };
+}
+function vuePrisesFilm(film: { id: number; settings: string }) {
+  const s = JSON.parse(film.settings);
+  const plans = (s.storyboard?.plans ?? []) as any[];
+  const parPlan = plans.map((p) => prisesDuPlan({ take: p.take, candidats: p.candidats, extra: p.extra, rejetees: p.rejetees } as PrisesDuPlan, corpsDePrise, tarifDepuisEnv()));
+  return {
+    film: film.id, creditsActifs: !!configAuth,
+    plans: plans.map((p, i) => ({ plan: i + 1, resume: String(p.resume ?? ''), prises: parPlan[i] })),
+    compteur: compteurProjet(parPlan),
+  };
+}
+function filmTerminePour(id: unknown, reply: FastifyReply) {
+  const film = takes.get(Number(id));
+  if (!film) { reply.code(404).send({ error: 'Film introuvable.' }); return null; }
+  const s = JSON.parse(film.settings);
+  if (!s.film || !s.storyboard) { reply.code(409).send({ error: 'Ce n’est pas un film du Producteur.' }); return null; }
+  return { film, s };
+}
+function majPlanStoryboard(filmId: number, n: number, f: (p: any) => void) {
+  const s = JSON.parse(takes.get(filmId)!.settings);
+  f(s.storyboard.plans[n]);
+  takes.patchSettings(filmId, { storyboard: s.storyboard });
+}
+/** Réserve les crédits d'une prise ajoutée (portail) ; sans portail, rien. Renvoie un refus lisible ou la réservation. */
+async function reserverPrise(corps: any, libelle: string): Promise<{ refus?: string; reservation?: CreditsPrise }> {
+  const fac = facturationCourante();
+  if (!fac) return {};
+  const r = await fac.reserver({ idempotence: randomUUID(), credits: devisCredits(corps, tarifDepuisEnv()), libelle });
+  return r.ok ? { reservation: { reservationId: r.reservationId, credits: r.credits, etat: 'reservee' } } : { refus: r.message };
+}
+async function lancerPrises(film: number, n: number, corps: any, nombre: number, extra: Record<string, unknown>, libelle: string) {
+  const reservations: CreditsPrise[] = [];
+  for (let k = 0; k < nombre; k++) {
+    const r = await reserverPrise(corps, libelle);
+    if (r.refus) { for (const x of reservations) await facturationCourante()?.liberer(x.reservationId).catch(() => {}); throw new Error(r.refus); }
+    if (r.reservation) reservations.push(r.reservation);
+  }
+  const ids = await queueTakes({ ...corps, seed: corps.seed ?? Math.floor(Math.random() * 1e9) }, nombre);
+  ids.forEach((id, k) => takes.patchSettings(id, { prisesFilm: film, prisePlan: n, ...extra, ...(reservations[k] ? { nexoraCredits: reservations[k] } : {}) }));
+  return ids;
+}
+
+app.get('/api/nexora/film/:id/prises', async (req, reply) => {
+  const f = filmTerminePour((req.params as any).id, reply);
+  return f ? vuePrisesFilm(f.film) : undefined;
+});
+
+app.post('/api/nexora/film/:id/plan/:n/brouillon', async (req, reply) => {
+  const f = filmTerminePour((req.params as any).id, reply);
+  if (!f) return;
+  const n = Number((req.params as any).n);
+  const plan = f.s.storyboard.plans[n];
+  if (!plan?.corps) return reply.code(409).send({ error: 'Ce plan n’a pas encore de rendu de référence.' });
+  const nombre = Math.max(1, Math.min(2, Number((req.body as any)?.nombre) || 2));
+  const rapide = corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'rapide' }, plan.corps.prompt, 'h3-fast');
+  try {
+    const ids = await lancerPrises(f.film.id, n, corpsBrouillonDe(plan.corps, Math.floor(Math.random() * 1e9), { ...rapide, app: 'nexora-prise', shotName: `${f.s.storyboard.titre.slice(0, 24)}_plan${n + 1}_brouillon`, userPrompt: plan.resume }), nombre, { brouillon: true }, `Nexora Creative · brouillon plan ${n + 1}`);
+    majPlanStoryboard(f.film.id, n, (p) => { p.extra = [...(p.extra ?? []), ...ids.map((take) => ({ take, brouillon: true }))]; });
+  } catch (e) { return reply.code(402).send({ error: e instanceof Error ? e.message : 'Impossible de lancer les brouillons.' }); }
+  return vuePrisesFilm(takes.get(f.film.id)!);
+});
+
+app.post('/api/nexora/film/:id/plan/:n/prise', async (req, reply) => {
+  const f = filmTerminePour((req.params as any).id, reply);
+  if (!f) return;
+  const n = Number((req.params as any).n);
+  const { take, action } = (req.body ?? {}) as { take?: number; action?: string };
+  const plan = f.s.storyboard.plans[n];
+  const connues = prisesDuPlan({ take: plan?.take, candidats: plan?.candidats, extra: plan?.extra, rejetees: plan?.rejetees }, corpsDePrise, tarifDepuisEnv());
+  const prise = connues.find((x) => x.take === Number(take));
+  if (!plan || !prise) return reply.code(404).send({ error: 'Cette prise n’appartient pas à ce plan.' });
+  if (action === 'rejeter') {
+    if (prise.retenue) return reply.code(409).send({ error: 'La prise gardée ne se rejette pas : garde-en une autre.' });
+    majPlanStoryboard(f.film.id, n, (p) => { p.rejetees = [...new Set([...(p.rejetees ?? []), prise.take])]; });
+    return vuePrisesFilm(takes.get(f.film.id)!);
+  }
+  if (action === 'finaliser') {
+    const brouillon = takes.get(prise.take);
+    if (!brouillon || brouillon.status !== 'done') return reply.code(409).send({ error: 'Le brouillon n’est pas terminé.' });
+    const bs = JSON.parse(brouillon.settings);
+    const corps = { ...corpsFinalDe({ ...bs, prompt: bs.prompt }, plan.corps), app: 'nexora-prise', shotName: `${f.s.storyboard.titre.slice(0, 24)}_plan${n + 1}_final`, userPrompt: plan.resume };
+    try {
+      const ids = await lancerPrises(f.film.id, n, corps, 1, { finalDe: prise.take }, `Nexora Creative · finale plan ${n + 1}`);
+      majPlanStoryboard(f.film.id, n, (p) => { p.extra = [...(p.extra ?? []), { take: ids[0], brouillon: false, finalDe: prise.take }]; });
+    } catch (e) { return reply.code(402).send({ error: e instanceof Error ? e.message : 'Impossible de lancer la finale.' }); }
+    return vuePrisesFilm(takes.get(f.film.id)!);
+  }
+  if (action === 'garder') {
+    if (prise.statut !== 'done') return reply.code(409).send({ error: 'Cette prise n’est pas terminée.' });
+    // Nouvelle version du film avec cette prise à la place : seul l'assemblage est refait, rien n'est re-rendu.
+    const sb = structuredClone(f.s.storyboard);
+    sb.plans = sb.plans.map((p: any, i: number) => ({ ...p, suite: false, ...(i === n ? { take: prise.take } : {}) }));
+    const moteur = (f.s.moteur ?? 'h3-fast') as MoteurVideo;
+    const filmId = await tournerFilm(sb, { format: f.s.format, son: !!f.s.son, intention: f.s.prompt, projectId: f.film.project_id, moteur, qualite: f.s.qualite }, null);
+    takes.patchSettings(filmId, { versionDe: f.film.id, taille: [Number(plan.corps?.width) || 1344, Number(plan.corps?.height) || 768], ...(typeof f.s.musique === 'string' ? { musique: f.s.musique } : {}), transition: f.s.transition === 'fondu' ? 'fondu' : 'coupe' });
+    void avancerFilm(filmId);
+    return { ...vuePrisesFilm(takes.get(f.film.id)!), filmId };
+  }
+  return reply.code(400).send({ error: 'Action inconnue : garder, rejeter ou finaliser.' });
+});
+
+/**
+ * « Montre-moi » : une image (jeton d'envoi) attachée à un plan comme référence. « depart » : la vidéo part de cette
+ * image (I2VA) ; « composition » : image de cadrage et de placement pour le moteur cinéma (Ref2VA, <Picture N>).
+ * Le résultat est un brouillon de plus pour ce plan (pas de transfert vidéo → vidéo : H3 ne sait pas le faire).
+ */
+app.post('/api/nexora/film/:id/plan/:n/reference', async (req, reply) => {
+  const f = filmTerminePour((req.params as any).id, reply);
+  if (!f) return;
+  const n = Number((req.params as any).n);
+  const b = (req.body ?? {}) as { jeton?: string; role?: string };
+  const plan = f.s.storyboard.plans[n];
+  if (!plan) return reply.code(404).send({ error: 'Plan introuvable.' });
+  if (typeof b.jeton !== 'string' || !/^asset:[0-9a-f-]{36}$/i.test(b.jeton) || !(await eng.readInput(b.jeton))) return reply.code(400).send({ error: 'Envoie d’abord l’image de référence.' });
+  const role = b.role === 'composition' ? 'composition' : 'depart';
+  const sb = f.s.storyboard as Storyboard;
+  const persos = role === 'composition' ? await resoudrePersonnages(intentionDuPlan(sb, n)) : null;
+  const dureeS = (plan.duree === 10 ? 243 : 124) / 24;
+  const dialogues = plan.replique ? { dialogues: [{ texte: plan.replique, langue: 'French' }] } : {};
+  const llm = llmCourant();
+  let corps: any;
+  if (role === 'depart') {
+    const r = await reecrireH3({ intention: `${intentionDuPlan(sb, n)}\nThe video starts exactly from the provided first frame and continues the action from it.`, mode: 'i2va', dureeS, ...dialogues }, llm);
+    corps = { ...corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'rapide' }, r.prompt, 'h3-fast'), startImage: b.jeton, brouillon: true };
+  } else {
+    if (!moteurDuCompte('max')) return reply.code(422).send({ error: 'La composition par image demande le moteur cinéma, indisponible ici.' });
+    const r = await reecrireH3({ intention: persos?.sujets.length ? persos.texteClair : intentionDuPlan(sb, n), mode: 't2va', dureeS, ...dialogues }, llm);
+    const base = corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'max' }, r.prompt, 'h3-max');
+    const jetons = [...(persos?.jetons ?? []), b.jeton].slice(0, 4);
+    corps = { ...base, refImages: jetons, prompt: convertirEnPromptRef(r.prompt, persos?.sujets ?? [], { composition: jetons.length - (persos?.jetons.length ?? 0) }), personnages: persos?.noms };
+    corps = corpsBrouillonDe(corps, Math.floor(Math.random() * 1e9), corps);
+  }
+  Object.assign(corps, { app: 'nexora-prise', shotName: `${sb.titre.slice(0, 24)}_plan${n + 1}_ref`, userPrompt: plan.resume });
+  try {
+    const ids = await lancerPrises(f.film.id, n, corps, 1, { brouillon: true, reference: role }, `Nexora Creative · référence plan ${n + 1}`);
+    majPlanStoryboard(f.film.id, n, (p) => { p.extra = [...(p.extra ?? []), { take: ids[0], brouillon: true, reference: role }]; });
+  } catch (e) { return reply.code(402).send({ error: e instanceof Error ? e.message : 'Impossible de lancer cette prise.' }); }
+  return vuePrisesFilm(takes.get(f.film.id)!);
+});
+
+/**
+ * Projets longs (vague 2, squelette du long métrage) : un scénario devient séquences → scènes → plans (code), la bible de
+ * continuité (style, personnages, lieux) est injectée dans chaque plan, le coût du projet entier est estimé avant tout
+ * rendu, et les plans partent par lots (la file des moteurs fait le reste). Aucune limite de longueur : 90 minutes = 1 080
+ * plans de 5 s. Les plans tournés s'assemblent dans la timeline du Mode Studio (/api/nexora/projet/:id/creations).
+ */
+const idProjet = (v: unknown) => (/^[0-9a-f-]{36}$/i.test(String(v)) ? String(v) : null);
+function synchroniserProjet(p: ProjetLong): ProjetLong {
+  let change = false;
+  for (const { plan } of aplatir(p)) {
+    if (plan.etat !== 'en_cours' || typeof plan.take !== 'number') continue;
+    const t = takes.get(plan.take);
+    if (t?.status === 'done') { plan.etat = 'tourne'; change = true; }
+    else if (t?.status === 'failed' || t?.status === 'stopped') { plan.etat = 'echec'; change = true; }
+  }
+  if (change) projetsLongs.save(p);
+  return p;
+}
+const resumeProjet = (p: ProjetLong) => {
+  const e = estimerProjet(p, tarifDepuisEnv());
+  return { id: p.id, titre: p.titre, format: p.format, qualite: p.qualite, plans: e.plans, tournes: e.tournes, estimation: e, creditsActifs: !!configAuth };
+};
+
+app.get('/api/nexora/projets', async () => ({ projets: projetsLongs.list<ProjetLong>().map((p) => resumeProjet(synchroniserProjet(p))) }));
+
+app.post('/api/nexora/projet', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const titre = typeof b.titre === 'string' ? b.titre.trim().slice(0, 120) : '';
+  const scenario = typeof b.scenario === 'string' ? b.scenario.trim() : '';
+  if (!titre) return reply.code(400).send({ error: 'Donne un titre au projet.' });
+  if (scenario.length < 20) return reply.code(400).send({ error: 'Colle le scénario (au moins quelques lignes) : séquences, scènes (INT./EXT.) et paragraphes d’action.' });
+  const verdict = await moderer(scenario.slice(0, 8000), llmCourant(), (m) => app.log.warn(m));
+  if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
+  const sequences = scenarioVersArbre(scenario, b.duree === 10 ? 10 : 5);
+  if (!aplatir({ sequences } as ProjetLong).length) return reply.code(400).send({ error: 'Aucun plan trouvé dans ce scénario.' });
+  const bible = b.bible ?? {};
+  const p: ProjetLong = {
+    id: randomUUID(), titre, scenario, cree: new Date().toISOString(),
+    format: b.format === '9:16' || b.format === '1:1' ? b.format : '16:9', qualite: b.qualite === 'max' ? 'max' : 'rapide',
+    bible: {
+      style: String(bible.style ?? '').slice(0, 400), notes: String(bible.notes ?? '').slice(0, 800),
+      // Les personnages @ de l'organisation entrent dans la bible : leurs images partent en Ref2VA à chaque plan qui les nomme.
+      personnages: [...castDb.list().filter((m) => m.kind === 'character').map((m) => ({ nom: m.name, description: m.notes })), ...(Array.isArray(bible.personnages) ? bible.personnages.slice(0, 50).map((x: any) => ({ nom: String(x?.nom ?? '').slice(0, 60), description: String(x?.description ?? '').slice(0, 400) })).filter((x: any) => x.nom) : [])],
+      lieux: (Array.isArray(bible.lieux) ? bible.lieux.slice(0, 100) : []).map((x: any) => ({ nom: String(x?.nom ?? '').slice(0, 60), description: String(x?.description ?? '').slice(0, 400) })).filter((x: any) => x.nom),
+    },
+    sequences,
+  };
+  projetsLongs.save(p);
+  return { ...resumeProjet(p), arbre: p.sequences.map((s) => ({ id: s.id, titre: s.titre, scenes: s.scenes.map((c) => ({ id: c.id, titre: c.titre, plans: c.plans.length })) })), bible: p.bible };
+});
+
+app.get('/api/nexora/projet/:id', async (req, reply) => {
+  const id = idProjet((req.params as any).id);
+  const p = id ? projetsLongs.get<ProjetLong>(id) : undefined;
+  if (!p) return reply.code(404).send({ error: 'Projet introuvable.' });
+  synchroniserProjet(p);
+  return { ...resumeProjet(p), bible: p.bible, arbre: p.sequences.map((s) => ({ id: s.id, titre: s.titre, scenes: s.scenes.map((c) => ({ id: c.id, titre: c.titre, plans: c.plans.map((x) => ({ id: x.id, resume: x.resume, duree: x.duree, etat: x.etat, take: x.take ?? null })) })) })) };
+});
+
+app.put('/api/nexora/projet/:id', async (req, reply) => {
+  const id = idProjet((req.params as any).id);
+  const p = id ? projetsLongs.get<ProjetLong>(id) : undefined;
+  if (!p) return reply.code(404).send({ error: 'Projet introuvable.' });
+  const b = (req.body ?? {}) as any;
+  if (b.bible && typeof b.bible === 'object') {
+    if (typeof b.bible.style === 'string') p.bible.style = b.bible.style.slice(0, 400);
+    if (typeof b.bible.notes === 'string') p.bible.notes = b.bible.notes.slice(0, 800);
+  }
+  if (b.qualite === 'rapide' || b.qualite === 'max') p.qualite = b.qualite;
+  projetsLongs.save(p);
+  return resumeProjet(p);
+});
+
+/** Tourne le lot suivant (8 plans par défaut, 50 au plus par appel) : prompt H3 écrit avec la bible, personnages @ en Ref2VA. */
+app.post('/api/nexora/projet/:id/lancer', async (req, reply) => {
+  const id = idProjet((req.params as any).id);
+  const p = id ? projetsLongs.get<ProjetLong>(id) : undefined;
+  if (!p) return reply.code(404).send({ error: 'Projet introuvable.' });
+  synchroniserProjet(p);
+  const lot = prochainLot(p, Math.min(50, Number((req.body as any)?.taille) || 8));
+  if (!lot.length) return reply.code(409).send({ error: 'Tous les plans sont déjà tournés ou en cours.' });
+  const moteur = moteurDuCompte(p.qualite);
+  if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
+  const demandeDe = (x: PlanProjet) => ({ intention: x.resume, format: p.format, duree: x.duree, son: true, qualite: p.qualite });
+  const cout = lot.reduce((n, x) => n + devisCredits(corpsRendu(demandeDe(x.plan), '', moteur), tarifDepuisEnv()), 0);
+  const secondes = lot.reduce((n, x) => n + secondesGpuEstimees(corpsRendu(demandeDe(x.plan), '', moteur)), 0);
+  const refus = depassement({ credits: configAuth ? cout : null, secondesGpu: secondes }, PLAFOND_PRODUCTEUR);
+  if (refus) return reply.code(409).send({ error: `${refus} Lance un lot plus petit.`, cout, secondes });
+  const llm = llmCourant();
+  const cast = castDb.list().filter((m) => m.kind === 'character');
+  const lances: number[] = [];
+  try {
+    const textes = lot.map((x) => {
+      let t = intentionDuPlanProjet(p, x);
+      for (const m of cast) t = t.replace(new RegExp(`\\b${m.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g'), `@${m.name}`);
+      return t;
+    });
+    const persos = await Promise.all(textes.map((t) => (moteur === 'h3-max' ? resoudrePersonnages(t) : null)));
+    const ecrits = await Promise.all(lot.map((x, i) => reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : textes[i].replace(/@/g, ''), mode: 't2va', dureeS: (x.plan.duree === 10 ? 243 : 124) / 24, ...(x.plan.replique ? { dialogues: [{ texte: x.plan.replique, langue: 'French' }] } : {}) }, llm)));
+    for (let i = 0; i < lot.length; i++) {
+      const x = lot[i];
+      const corps: any = {
+        ...corpsRendu(demandeDe(x.plan), ecrits[i].prompt, moteur),
+        ...(persos[i]?.sujets.length ? { prompt: convertirEnPromptRef(ecrits[i].prompt, persos[i]!.sujets), refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
+        app: 'nexora-projet', userPrompt: x.plan.resume, projetLong: p.id, projetPlan: x.plan.id, promptSource: ecrits[i].source,
+        shotName: `${p.titre.slice(0, 24)}_${x.plan.id}`,
+      };
+      const r = await reserverPrise(corps, `Nexora Creative · projet « ${p.titre.slice(0, 40)} » · ${x.plan.id}`);
+      if (r.refus) { if (!lances.length) return reply.code(402).send({ error: r.refus }); break; }
+      const [take] = await queueTakes(corps, 1);
+      if (r.reservation) takes.patchSettings(take, { nexoraCredits: r.reservation });
+      x.plan.take = take; x.plan.prises = [...(x.plan.prises ?? []), take]; x.plan.etat = 'en_cours';
+      lances.push(take);
+    }
+  } finally {
+    projetsLongs.save(p);
+  }
+  return { lances: lances.length, takes: lances, cout, secondes, projet: resumeProjet(p) };
+});
+
+app.get('/api/nexora/projet/:id/creations', async (req, reply) => {
+  const id = idProjet((req.params as any).id);
+  const p = id ? projetsLongs.get<ProjetLong>(id) : undefined;
+  if (!p) return reply.code(404).send({ error: 'Projet introuvable.' });
+  synchroniserProjet(p);
+  return {
+    creations: ordreAssemblage(p).map((x, i) => {
+      const t = takes.get(x.take);
+      return { id: x.take, genre: 'video', nom: `${String(i + 1).padStart(4, '0')} · ${x.sequence} · ${x.scene}`.slice(0, 120), url: `/api/media/${x.take}`, date: t?.created_at ?? '', dureeS: undefined };
+    }),
+  };
+});
+
+app.delete('/api/nexora/projet/:id', async (req, reply) => {
+  const id = idProjet((req.params as any).id);
+  if (!id || !projetsLongs.get(id)) return reply.code(404).send({ error: 'Projet introuvable.' });
+  projetsLongs.delete(id);
+  return { ok: true };
+});
+
 /** Projet de montage d'un film : plans MP4 + séquence FCP7 XML + storyboard Nexora, dans un ZIP. */
 app.get('/api/nexora/film/:id/projet', async (req, reply) => {
   const film = takes.get(Number((req.params as any).id));
@@ -1432,6 +1730,71 @@ app.post('/api/nexora/image', async (req, reply) => {
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
   return { ...res, prompt: r.prompt, source: r.source, modele: modele === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512' };
+});
+
+/**
+ * Personnages @ (Soul ID) : « Créer un personnage » dessine une fiche standard avec Qwen-Image (fond gris, corps entier à
+ * gauche, gros plan à droite) ; quand la prise est prête, la fiche est découpée en deux références et enregistrée comme
+ * élément nommé (Cast, « character »). Le statut finalise de façon idempotente : un redémarrage ne perd rien.
+ */
+app.post('/api/nexora/personnage', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const nom = castName(b.nom);
+  const description = typeof b.description === 'string' ? b.description.trim() : '';
+  if (!NAME_OK.test(nom)) return reply.code(400).send({ error: 'Donne-lui un nom : lettres, chiffres et espaces, 40 caractères au plus.' });
+  if (castDb.byName(nom)) return reply.code(409).send({ error: `Il existe déjà un élément nommé ${nom}.` });
+  if (description.length < 8 || description.length > 600) return reply.code(400).send({ error: 'Décris le personnage (âge, visage, cheveux, tenue) en 8 à 600 caractères.' });
+  const verdict = await moderer(description, llmCourant(), (m) => app.log.warn(m));
+  if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
+  // L'apparence est gardée en anglais : elle sert aux prompts H3 (subject_definitions) et à la fiche.
+  let apparence = description;
+  const llm = llmCourant();
+  if (llm) {
+    try {
+      apparence = (await llm.completer('redaction', [
+        { role: 'system', content: 'Translate and tighten this character description into one English sentence of at most 40 words (age, face, hair, build, outfit). Keep every detail, add nothing, no names, no preamble. Answer with the sentence only.' },
+        { role: 'user', content: description },
+      ], { temperature: 0.2, maxTokens: 300 })).trim().replace(/^["“]|["”]$/g, '').slice(0, 400);
+    } catch { /* description brute */ }
+  }
+  const modele = modeleImage() ?? 'qwen21';
+  const dims = modele === 'qwen21' ? [1792, 1024] : [1328, 752];
+  const corps: any = {
+    kind: 'still', model: modele, quality: 'quality', prompt: promptFiche(apparence), width: dims[0], height: dims[1], count: 1,
+    app: 'nexora-personnage', shotName: `fiche_${nom}`.slice(0, 40), intention: description,
+    personnage: { nom, apparence },
+  };
+  const res = await generate(corps, reply);
+  if (reply.sent || (res && (res as any).error)) return res;
+  return { takeId: (res as any).takeIds?.[0], nom, apparence };
+});
+
+app.get('/api/nexora/personnage/:take', async (req, reply) => {
+  const t = takes.get(Number((req.params as any).take));
+  const s = t ? JSON.parse(t.settings) : null;
+  if (!t || !s?.personnage) return reply.code(404).send({ error: 'Fiche introuvable.' });
+  if (typeof s.membre === 'number' && castDb.get(s.membre)) return { etat: 'pret', membre: castOut(castDb.get(s.membre)!) };
+  if (t.status === 'failed' || t.status === 'stopped') return { etat: 'echec', erreur: t.error ?? 'Le dessin a échoué.' };
+  if (t.status !== 'done' || !t.output_path || !existsSync(t.output_path)) return { etat: 'rendu' };
+  try {
+    const { nom, apparence } = s.personnage as { nom: string; apparence: string };
+    if (castDb.byName(nom)) return reply.code(409).send({ error: `Il existe déjà un élément nommé ${nom}.` });
+    const dims = imageDims(readFileSync(t.output_path)) ?? { w: 1792, h: 1024 };
+    const d = decoupeFiche(dims.w, dims.h);
+    const dossier = join(config.outputDir, 'films', 'images');
+    mkdirSync(dossier, { recursive: true });
+    const refs = [];
+    for (const [nomVue, r] of [['corps', d.corps], ['visage', d.visage]] as const) {
+      const fichier = join(dossier, `fiche_${t.id}_${nomVue}.png`);
+      await new Promise<void>((ok, ko) => execFile(config.ffmpegBin, ['-y', '-i', t.output_path!, '-vf', `crop=${r[2]}:${r[3]}:${r[0]}:${r[1]}`, '-frames:v', '1', '-update', '1', fichier], (err, _o, e) => (err ? ko(new Error(String(e).split('\n').slice(-2).join(' '))) : ok())));
+      refs.push(await storeRef(nom, readFileSync(fichier), `${nomVue}.png`));
+    }
+    const id = castDb.create({ name: nom, kind: 'character', refs, notes: String(apparence).slice(0, 1200) });
+    takes.patchSettings(t.id, { membre: id });
+    return { etat: 'pret', membre: castOut(castDb.get(id)!) };
+  } catch (e) {
+    return reply.code(500).send({ error: `Fiche non enregistrée : ${e instanceof Error ? e.message.slice(0, 160) : 'erreur'}` });
+  }
 });
 
 /**
@@ -1589,6 +1952,13 @@ app.post('/api/nexora/producteur/:id/message', async (req, reply) => {
   try {
     const apres = await tourProducteur(s, texte, {
       llm: llmCourant(), devis: devisDuCompte, plafond: PLAFOND_PRODUCTEUR,
+      personnages: {
+        liste: () => {
+          const l = castDb.list().filter((m) => m.kind === 'character');
+          return l.length ? `Personnages disponibles : ${l.map((m) => `@${m.name} (${m.notes.slice(0, 90)})`).join(' ; ')}. Pour garder un personnage identique d'un plan à l'autre, écris @Nom dans la description du plan (le tournage passera en qualité cinéma).` : '';
+        },
+        cite: (t) => mentioned(t, castDb.list()).length > 0,
+      },
       // Outils de montage (analyze_media, plan_edit, critique, revise) : un média du projet = une création terminée (id de prise).
       montage: {
         plafondCredits: PLAFOND_PRODUCTEUR.credits,

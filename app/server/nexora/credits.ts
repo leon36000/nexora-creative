@@ -10,7 +10,9 @@ const MESURES_GB10: Record<string, Record<string, number>> = {
   // FastH3 : DGX Spark GB10 (anciennes mesures) ; RTX 5090 (31/10/2026) : 5 s en 832×480 en 23 s à chaud, 40 s à froid.
   'h3-fast': { '124@832x480': 30 },
   // Moteur cinéma, RTX 5090 de pc1 : H3 non distillé int8, 24 étapes (banc du 31/10/2026).
-  'h3-max': { '124@1344x768': 290 },
+  // 02/11/2026 : point de contrôle 10Eros-Max × Singularity V2 (8 étapes) en mode référence : 129 s mesurés (deux prises réelles) ;
+  // brouillon ref2va 768×448 : 28,7 s. L'ancienne mesure du H3 complet 24 étapes était de 290 s.
+  'h3-max': { '124@1344x768': 129, '124@768x448': 29 },
 };
 
 export interface CorpsDevis { videoModel?: string; lengthFrames?: number; frames?: number; width?: number; height?: number }
@@ -27,9 +29,10 @@ export function secondesGpuEstimees(c: CorpsDevis): number {
   const mesures = MESURES_GB10[c.videoModel ?? ''] ?? {};
   const exacte = mesures[`${images}@${w}x${h}`] ?? mesures[`${images}@${h}x${w}`];
   if (exacte) return exacte;
-  const reference = c.videoModel === 'h3-max' ? { s: 290, images: 124, w: 1344, h: 768 } : { s: 30, images: 124, w: 832, h: 480 };
+  const reference = c.videoModel === 'h3-max' ? { s: 129, images: 124, w: 1344, h: 768 } : { s: 30, images: 124, w: 832, h: 480 };
   const pixels = (w * h) / (reference.w * reference.h);
-  return Math.round(reference.s * (images / reference.images) ** 1.45 * Math.max(1, pixels) ** 1.45);
+  // Un brouillon à basse résolution coûte moins : plancher à 0,2 de la référence (mesure : 0,22 à 768×448).
+  return Math.round(reference.s * (images / reference.images) ** 1.45 * Math.max(0.2 ** (1 / 1.45), pixels) ** 1.45);
 }
 
 export function devisCredits(c: CorpsDevis, tarif: { creditsParSecondeGpu: number }): number {

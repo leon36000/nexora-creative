@@ -39,6 +39,22 @@ function deps(llm: ClientLlm, extra: Partial<DepsAgent> = {}): DepsAgent {
   };
 }
 
+describe('personnages @ dans le Producteur', () => {
+  const persos = { liste: () => 'Personnages disponibles : @Mara (femme rousse, manteau vert).', cite: (t: string) => /@Mara/.test(t) };
+  it('donne la liste au modèle et passe en qualité cinéma un plan qui cite un personnage', async () => {
+    const brut = { ...planBrut, qualite: 'rapide', plans: [{ ...planBrut.plans[0] }, { resume: '@Mara sourit', description: '@Mara sourit à la caméra.', camera: 'static', duree: 5 }] };
+    const llm = fauxLlm([outil('proposer_production', brut), texte('Plan prêt.')]);
+    const s = await tourProducteur(nouvelleSession(), 'Un film avec Mara', deps(llm, { personnages: persos }));
+    expect(JSON.stringify(llm.vus[0][0])).toContain('@Mara');
+    expect(s.proposition).toMatchObject({ genre: 'production', plan: { qualite: 'max' } });
+  });
+  it('sans personnage cité, la qualité demandée ne change pas', async () => {
+    const llm = fauxLlm([outil('proposer_production', planBrut), texte('Plan prêt.')]);
+    const s = await tourProducteur(nouvelleSession(), 'Une pub', deps(llm, { personnages: persos }));
+    expect(s.proposition).toMatchObject({ plan: { qualite: 'rapide' } });
+  });
+});
+
 describe('plan de production', () => {
   it('borne et normalise ce que propose le LLM', () => {
     const p = lirePlanProduction({ ...planBrut, format: 'carre?', candidats: 5, plans: [...planBrut.plans, { description: '' }] });

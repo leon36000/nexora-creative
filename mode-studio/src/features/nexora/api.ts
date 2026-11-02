@@ -74,6 +74,12 @@ const poster = <T>(url: string, corps: unknown) =>
 export const nexora = {
   creations: () =>
     appel<{ creations: Creation[] }>('/api/studio/creations').then((r) => r.creations),
+  projets: () =>
+    appel<{ projets: { id: string; titre: string; plans: number; tournes: number }[] }>(
+      '/api/nexora/projets',
+    ).then((r) => r.projets),
+  creationsProjet: (id: string) =>
+    appel<{ creations: Creation[] }>(`/api/nexora/projet/${id}/creations`).then((r) => r.creations),
   assistant: (demande: string, etat: unknown, historique: MessageChat[]) =>
     poster<ReponseAssistant>('/api/studio/assistant', { demande, etat, historique }),
   silences: (takeId: number) =>

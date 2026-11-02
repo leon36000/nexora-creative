@@ -46,6 +46,28 @@ export const CreationsPanel = memo(function CreationsPanel() {
   const [enCours, setEnCours] = useState<number | null>(null)
   const [idee, setIdee] = useState('')
   const [generation, setGeneration] = useState<string | null>(null)
+  const [projets, setProjets] = useState<{ id: string; titre: string; plans: number; tournes: number }[]>([])
+  const [assemblage, setAssemblage] = useState<string | null>(null)
+
+  useEffect(() => {
+    nexora.projets().then(setProjets, () => setProjets([]))
+  }, [])
+
+  /** Monte un projet long : ses plans tournés, dans l'ordre du film, bout à bout sur la piste principale. */
+  const assembler = async (id: string) => {
+    setErreur(null)
+    try {
+      const plans = await nexora.creationsProjet(id)
+      for (let i = 0; i < plans.length; i++) {
+        setAssemblage(`Plan ${i + 1} / ${plans.length}`)
+        poserALaTete(await importerCreation(plans[i]!))
+      }
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : String(e))
+    } finally {
+      setAssemblage(null)
+    }
+  }
 
   const charger = useCallback(async () => {
     setErreur(null)
@@ -154,6 +176,27 @@ export const CreationsPanel = memo(function CreationsPanel() {
           {generation ?? `Créer avec ${moteur} et poser à la tête de lecture`}
         </Button>
       </div>
+
+      {projets.length > 0 && (
+        <div className="space-y-1 border-b border-border p-3">
+          <div className="text-[11px] font-medium text-muted-foreground">Projets longs</div>
+          {projets.map((p) => (
+            <Button
+              key={p.id}
+              size="sm"
+              variant="secondary"
+              className="w-full justify-between gap-2 text-xs"
+              disabled={!p.tournes || !!assemblage}
+              onClick={() => void assembler(p.id)}
+            >
+              <span className="truncate">{p.titre}</span>
+              <span className="shrink-0">
+                {assemblage ?? `${p.tournes}/${p.plans} plans · monter`}
+              </span>
+            </Button>
+          ))}
+        </div>
+      )}
 
       {erreur && (
         <div className="mx-3 mt-2 rounded-md bg-destructive/15 px-3 py-2 text-xs text-destructive">

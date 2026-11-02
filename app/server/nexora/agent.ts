@@ -212,6 +212,8 @@ export interface DepsAgent {
   outils: Partial<Record<'etat_studio' | 'lister_creations' | 'voir_production', (args: any) => Promise<unknown>>> & {
     devisPlan?: (film: number, plan: number) => Promise<Devis>;
   };
+  /** Personnages @ de l'organisation : la liste est donnée au modèle, et un plan qui en cite un passe en qualité cinéma (Ref2VA). */
+  personnages?: { liste: () => string; cite: (texte: string) => boolean };
   /** Médias du projet pour les outils de montage ; absent = outils indisponibles. */
   montage?: DepsMontage;
   maxEtapes?: number;
@@ -249,7 +251,7 @@ export async function tourProducteur(session: SessionProducteur, message: string
   let reponse = '';
   for (let etape = 0; etape < max; etape++) {
     // Les modèles qui raisonnent consomment une partie du plafond avant de répondre : 6 000 jetons au plus par étape.
-    const r = await deps.llm.completerAvecOutils('producteur', [{ role: 'system', content: avecCompetences('producteur', CONSIGNES) }, ...s.messages], OUTILS_PRODUCTEUR, { maxTokens: 6000 });
+    const r = await deps.llm.completerAvecOutils('producteur', [{ role: 'system', content: avecCompetences('producteur', deps.personnages?.liste() ? `${CONSIGNES}\n${deps.personnages.liste()}` : CONSIGNES) }, ...s.messages], OUTILS_PRODUCTEUR, { maxTokens: 6000 });
     s.jetons += r.jetons;
     if (!r.appels.length && !r.texte.trim()) {
       // Réponse vide (raisonnement coupé) : une relance courte, comptée dans les étapes.
@@ -280,6 +282,8 @@ async function executerOutil(s: SessionProducteur, nom: string, args: Record<str
   switch (nom) {
     case 'proposer_production': {
       const plan = lirePlanProduction(args);
+      // Un personnage @ cité dans un plan exige la qualité cinéma : seul le moteur Ref2VA lit ses images de référence.
+      if (deps.personnages && plan.plans.some((x) => deps.personnages!.cite(`${x.resume} ${x.description}`))) plan.qualite = 'max';
       const devis = deps.devis(plan);
       const refus = depassement(devis, deps.plafond);
       if (refus) return { erreur: `${refus} Raccourcis (moins de plans, qualité rapide, un seul candidat) et propose à nouveau.`, devis };

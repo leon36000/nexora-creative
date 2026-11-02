@@ -135,18 +135,23 @@ export interface OptionsAssemblage {
   durees: number[];
   /** Durée du fondu enchaîné (s). */
   fondu: number;
+  /** Taille de sortie : chaque plan y est ramené (un brouillon basse résolution peut remplacer un plan en pleine résolution). */
+  taille?: [number, number];
 }
 
 /**
  * Arguments ffmpeg qui mettent les plans bout à bout (même taille, ré-encodés en H.264 + AAC), en coupe franche ou
  * en fondu enchaîné (xfade pour l'image, acrossfade pour le son).
  */
+/** Mise à la taille de sortie : remplit puis recadre, pixels carrés. */
+const mise = (t?: [number, number]) => (t ? `scale=${t[0]}:${t[1]}:force_original_aspect_ratio=increase,crop=${t[0]}:${t[1]},setsar=1,` : '');
+
 export function argsAssemblage(fichiers: string[], sortie: string, son: boolean, o?: OptionsAssemblage): string[] {
   const entrees = fichiers.flatMap((f) => ['-i', f]);
   let filtre: string;
   if (o?.transition === 'fondu' && fichiers.length > 1) {
     const d = o.fondu;
-    const norm = fichiers.map((_, i) => `[${i}:v:0]fps=24,settb=AVTB,format=yuv420p[n${i}]`);
+    const norm = fichiers.map((_, i) => `[${i}:v:0]${mise(o.taille)}fps=24,settb=AVTB,format=yuv420p[n${i}]`);
     const video: string[] = [];
     let cumul = 0;
     let precedent = 'n0';
@@ -168,8 +173,9 @@ export function argsAssemblage(fichiers: string[], sortie: string, son: boolean,
     }
     filtre = [...norm, ...video, ...audio].join(';');
   } else {
-    const flux = fichiers.map((_, i) => `[${i}:v:0]${son ? `[${i}:a:0]` : ''}`).join('');
-    filtre = `${flux}concat=n=${fichiers.length}:v=1:a=${son ? 1 : 0}[v]${son ? '[a]' : ''}`;
+    const tailles = o?.taille ? fichiers.map((_, i) => `[${i}:v:0]${mise(o.taille)}fps=24[t${i}]`) : [];
+    const flux = fichiers.map((_, i) => `${o?.taille ? `[t${i}]` : `[${i}:v:0]`}${son ? `[${i}:a:0]` : ''}`).join('');
+    filtre = [...tailles, `${flux}concat=n=${fichiers.length}:v=1:a=${son ? 1 : 0}[v]${son ? '[a]' : ''}`].join(';');
   }
   return [
     '-y', ...entrees,

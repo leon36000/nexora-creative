@@ -45,6 +45,8 @@ export default function CastPage() {
           {!open && <button type="button" className="btn accent" onClick={() => setParams({ new: '1', edit: null })}><Icon name="plus" size={14} />New cast member</button>}
         </div>
 
+        {!open && <FicheIA />}
+
         {open && <CastForm key={editing?.id ?? 'new'} member={editing} onDone={() => setParams({ new: null, edit: null })} />}
 
         {cast.length === 0 && !open ? (
@@ -252,5 +254,63 @@ export function SaveToCast({ takeId, onClose }: { takeId: number; onClose: () =>
         <button type="button" className="btn sm ghost" onClick={onClose}>Cancel</button>
       </div>
     </div>
+  );
+}
+
+/**
+ * Personnage par l'IA (équivalent Soul ID) : un nom et une description, Qwen-Image dessine la fiche standard (fond gris,
+ * corps entier, gros plan), elle est découpée en deux références et enregistrée ici. `@nom` s'écrit ensuite dans n'importe
+ * quel plan : le moteur cinéma (H3 Ref2VA) garde le même visage et la même tenue d'un plan à l'autre.
+ */
+function FicheIA() {
+  const [nom, setNom] = useState('');
+  const [description, setDescription] = useState('');
+  const [etat, setEtat] = useState<null | 'envoi' | 'rendu'>(null);
+  const [membre, setMembre] = useState<CastMember | null>(null);
+  const [fiche, setFiche] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (fiche === null) return;
+    let actif = true;
+    const t = window.setInterval(async () => {
+      try {
+        const r = await api.statutPersonnage(fiche);
+        if (!actif) return;
+        if (r.etat === 'pret' && r.membre) { setMembre(r.membre); setEtat(null); setFiche(null); void refreshCast(); toast(`@${r.membre.name} est prêt : écris @${r.membre.name} dans un plan.`); }
+        else if (r.etat === 'echec') { setEtat(null); setFiche(null); toast(r.erreur ?? 'Le dessin a échoué.', true); }
+      } catch (e) { if (actif) { setEtat(null); setFiche(null); toast(e instanceof Error ? e.message : 'Suivi impossible.', true); } }
+    }, 4000);
+    return () => { actif = false; window.clearInterval(t); };
+  }, [fiche]);
+
+  async function creer() {
+    setEtat('envoi'); setMembre(null);
+    try {
+      const r = await api.creerPersonnage({ nom: nom.trim(), description: description.trim() });
+      setFiche(r.takeId); setEtat('rendu');
+    } catch (e) { setEtat(null); toast(e instanceof Error ? e.message : 'Création impossible.', true); }
+  }
+  return (
+    <section className="fiche-ia" aria-label="Créer un personnage par l’IA">
+      <div>
+        <span className="st-etiq">Personnage par l’IA</span>
+        <h2>Décris-le, Nexora dessine sa fiche</h2>
+        <p className="dim">Fond gris, corps entier et gros plan, même visage. Ensuite, <b className="mono">@nom</b> dans un plan le garde constant dans le film (qualité cinéma).</p>
+      </div>
+      <div className="fiche-ia-champs">
+        <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom (ex. Mara)" aria-label="Nom du personnage" maxLength={40} disabled={!!etat} />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={600} disabled={!!etat}
+          placeholder="Une femme d’une trentaine d’années, cheveux roux courts, taches de rousseur, manteau vert forêt, jean sombre…" aria-label="Description du personnage" />
+        <button type="button" className="btn accent" disabled={!!etat || nom.trim().length < 1 || description.trim().length < 8} onClick={() => void creer()}>
+          {etat === 'envoi' ? 'Envoi…' : etat === 'rendu' ? 'Dessin de la fiche (≈ 1 min)…' : 'Dessiner la fiche'}
+        </button>
+      </div>
+      {membre && (
+        <div className="fiche-ia-resultat">
+          {membre.refs.map((_, i) => <img key={i} src={`/api/cast/${membre.id}/ref/${i}`} alt={`${membre.name}, vue ${i + 1}`} />)}
+          <div><b>@{membre.name}</b><p className="dim">{membre.notes}</p></div>
+        </div>
+      )}
+    </section>
   );
 }
