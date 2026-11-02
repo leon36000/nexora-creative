@@ -27,15 +27,18 @@ export interface DemandeCreer {
 /** Point de contrôle FastH3 V2 distillé et quantifié NVFP4 (server/graphs/h3.ts, H3_DISTILLED_CHECKPOINTS). */
 export const CHECKPOINT_FASTH3 = 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors';
 
+/** Point de contrôle « cinéma » retenu le 02/11/2026 : 10Eros-Max × Singularity V2, turbo 8 étapes (famille ref2va). */
+export const CHECKPOINT_H3_MAX = '10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors';
+
 /**
- * Recette « h3-max » : point de contrôle H3 non distillé et nombre d'étapes, réglables par la configuration (le banc
- * qualité du 31/10/2026 les a choisis : recherche/10-qualite-h3.md). Un point de contrôle ref2va passe par le nœud de
- * référence, même sans image.
+ * Recette « h3-max » : point de contrôle H3 et nombre d'étapes, réglables par la configuration (ronde de comparaison
+ * du 02/11/2026 : marketing/creative/video-v3/JOURNAL-V3.md). Un point de contrôle ref2va passe par le nœud de
+ * référence, même sans image ; une photo de départ y devient la première référence.
  */
 export function reglagesH3Max(env: NodeJS.ProcessEnv = process.env) {
-  const checkpoint = env.NEXORA_H3_MAX_CHECKPOINT?.trim() || 'minimax_h3_fl2va_pruned_int8_convrot.safetensors';
+  const checkpoint = env.NEXORA_H3_MAX_CHECKPOINT?.trim() || CHECKPOINT_H3_MAX;
   const etapes = Number(env.NEXORA_H3_MAX_ETAPES);
-  return { checkpoint, etapes: Number.isInteger(etapes) && etapes >= 8 && etapes <= 60 ? etapes : 24, ref: /ref2va/i.test(checkpoint) };
+  return { checkpoint, etapes: Number.isInteger(etapes) && etapes >= 6 && etapes <= 60 ? etapes : 8, ref: /ref2va/i.test(checkpoint) };
 }
 
 const TAILLES: Record<'rapide' | 'max', Record<FormatCreer, { width: number; height: number }>> = {

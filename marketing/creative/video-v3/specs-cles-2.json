@@ -1,0 +1,22 @@
+[
+ {
+  "type": "image",
+  "nom": "k11-tourelle-311",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Close low-angle shot on the armoured deck of a kilometre-long gunmetal defender battleship in orbit: a massive triple-barrel heavy gun turret, scarred and weathered, fires at the exact moment of the frame, a huge orange-white muzzle blast and expanding ring of grey smoke, glowing hot shell streaking away, sparks and debris; other turrets along the deck recede into the distance, the cloud-covered Earth far below and black space above. No bridge tower, no superstructure.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 1680,
+  "hauteur": 960,
+  "graine": 311,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k12-onde-choc-312",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. From high orbit: the colossal enemy mothership detonates far above the Earth, a flat ring-shaped shockwave of blinding white-blue light expands across space over the cloud tops of the planet, burning debris racing outward, and in the foreground the dark silhouettes of a long line of defender warships seen from behind, small and dwarfed against the flash. Majestic, apocalyptic, awe.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 1680,
+  "hauteur": 960,
+  "graine": 312,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ }
+]

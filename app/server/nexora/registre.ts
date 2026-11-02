@@ -62,7 +62,7 @@ export const MANIFESTES: Manifeste[] = [
   {
     contrat: 'nexora.capability/1',
     id: 'minimax/h3-cinema',
-    nom: { fr: 'MiniMax H3 (cinéma, pleines étapes)', en: 'MiniMax H3 (cinema, full steps)' },
+    nom: { fr: 'MiniMax H3 (cinéma, 10Eros-Max × Singularity)', en: 'MiniMax H3 (cinema, 10Eros-Max × Singularity)' },
     famille: 'video',
     recette: 'h3-max',
     taches: ['t2v', 'i2v'],
@@ -75,7 +75,8 @@ export const MANIFESTES: Manifeste[] = [
       regle: 'h3-max',
       affichage: 'MiniMax H3',
     },
-    // Modèle non distillé, 1344×768, ≥ 24 étapes : la meilleure image du parc (banc du 31/10, recherche/10).
+    // Fusion 10Eros-Max × Singularity V2 (turbo 8 étapes, famille ref2va), 1344×768 : le plus de mouvement, d'échelle et
+    // d'explosions de la ronde de comparaison du 02/11/2026 (marketing/creative/video-v3/JOURNAL-V3.md).
     qualite: 97,
     materiel: { requiertSm: ['sm_120'], memoireGo: 32 },
   },

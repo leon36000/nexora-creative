@@ -1,0 +1,58 @@
+[
+ {
+  "type": "h3",
+  "nom": "p01-orbite-nuit",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5000,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors",
+  "etapes": 8,
+  "decalage": [
+   10,
+   3
+  ],
+  "echantillonneur": "res_multistep",
+  "image": "~/nexora-creative-data/promo/v3/cles/k01-orbite-nuit-101.png",
+  "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. Silent wide shot from high orbit over the night side of the Earth. The camera drifts forward very slowly. Hundreds of tiny dark warships hold a long wall formation above the planet, their small blue engine lights flickering. Golden city lights twinkle under thin moving cloud layers, the thin blue line of the atmosphere glows, and the sunrise flare on the right edge slowly grows brighter. No text, no logos.\n\noverall_soundscape: Near silence: a very low hum of deep space and a faint distant radio crackle.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p02-mur-flotte",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5001,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k02-mur-flotte-102.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. The camera glides slowly along the flank of the kilometre-long battleship in the foreground, revealing rows upon rows of warships stretching to the horizon above the cloud-covered Earth. A wave of engine ignitions ripples through the formation, blue-white engine flares lighting up one after another as the whole fleet starts to move forward together. No text, no logos.\n\noverall_soundscape:\nA deep rumbling of colossal engines swelling one after another, metallic hull groans, a low resonant thrum.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p03-vague-ennemie",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5002,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k03-vague-ennemie-103.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. The black swarm of thousands of small angular enemy craft pours toward the camera at great speed, filling more and more of the frame, while the colossal crescent mothership looms behind, its red veins pulsing. Handheld camera with nervous shake, motion blur on the closest craft streaking past. No text, no logos.\n\noverall_soundscape:\nA rising roar of thousands of engines like an insect swarm, a deep ominous drone, sharp whooshes as craft pass close.\n\nnon_diegetic_music:\nN/A"
+ }
+]

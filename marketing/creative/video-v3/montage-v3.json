@@ -1,0 +1,3103 @@
+{
+ "_schema": "plans : spec couches.py (plaque, debut, vitesse, cadre[[t,cx,cy,zoom]], cadre_v, secousse{base,derive,coups}, effets[], fouet, impact, miroir, son_h3 dB) ; sequence : segments {fin, section, plan|type, modif, suffixe, …} ; sons : sfx_v3 datés",
+ "pellicule": {
+  "cache_239": true
+ },
+ "musique": {
+  "db": 0,
+  "blocs": [
+   {
+    "fichier": "~/nexora-creative-data/promo/v3/audio/v3-musique-31.flac",
+    "de": 1.95,
+    "a": 51.25,
+    "t": 3.2,
+    "fondu_in": 0.5,
+    "fondu_out": 0.04
+   }
+  ]
+ },
+ "h3_db": 0,
+ "plans": {
+  "p01-orbite-nuit": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p01-orbite-nuit.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p01-orbite-nuit-v.mp4",
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.55,
+     1.0
+    ],
+    [
+     6,
+     0.5,
+     0.55,
+     1.06
+    ]
+   ],
+   "secousse": {
+    "base": 0,
+    "derive": 2
+   },
+   "effets": [
+    {
+     "type": "flotte",
+     "n": 900,
+     "zone": [
+      0,
+      0.45,
+      1,
+      1.0
+     ],
+     "mur": true,
+     "profondeur": [
+      2,
+      9
+     ],
+     "taille": [
+      1,
+      3
+     ],
+     "derive": [
+      -6,
+      0
+     ],
+     "moteurs": "bleu",
+     "lueur": 0.6
+    }
+   ],
+   "son_h3": -22,
+   "etalonnage": {
+    "exposition": 0.95
+   }
+  },
+  "p02-mur-flotte": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p02-mur-flotte.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p02-mur-flotte-v.mp4",
+   "suivi": true,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.02
+    ],
+    [
+     5,
+     0.48,
+     0.5,
+     1.1
+    ]
+   ],
+   "secousse": {
+    "base": 1.5
+   },
+   "effets": [
+    {
+     "type": "flotte",
+     "n": 1400,
+     "zone": [
+      0.3,
+      0.05,
+      1,
+      0.6
+     ],
+     "mur": true,
+     "profondeur": [
+      2,
+      9
+     ],
+     "taille": [
+      1.5,
+      4
+     ],
+     "derive": [
+      -10,
+      2
+     ],
+     "moteurs": "bleu",
+     "lueur": 0.8
+    }
+   ],
+   "son_h3": -8
+  },
+  "p03-vague-ennemie": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p03-vague-ennemie.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p03-vague-ennemie-v.mp4",
+   "suivi": true,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     5,
+     0.5,
+     0.5,
+     1.15
+    ]
+   ],
+   "secousse": {
+    "base": 5
+   },
+   "effets": [
+    {
+     "type": "flotte",
+     "n": 2600,
+     "zone": [
+      0,
+      0,
+      1,
+      1
+     ],
+     "profondeur": [
+      1,
+      7
+     ],
+     "taille": [
+      1.5,
+      5
+     ],
+     "derive": [
+      0,
+      0
+     ],
+     "agitation": 30,
+     "moteurs": "rouge",
+     "lueur": 0.6,
+     "cap": 2.6,
+     "dispersion_cap": 0.4
+    }
+   ],
+   "son_h3": -6
+  },
+  "p04-bordee": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p04-bordee.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p04-bordee-v.mp4",
+   "suivi": true,
+   "secousse": {
+    "base": 6,
+    "coups": [
+     {
+      "t": 0.0,
+      "force": 40
+     },
+     {
+      "t": 0.9,
+      "force": 25
+     },
+     {
+      "t": 1.7,
+      "force": 25
+     }
+    ]
+   },
+   "effets": [
+    {
+     "type": "traceurs",
+     "par_s": 70,
+     "source": [
+      0.1,
+      0.35,
+      0.8,
+      0.7
+     ],
+     "cible": [
+      0.6,
+      0.0,
+      1.2,
+      0.3
+     ],
+     "couleur": "orange",
+     "rafale": 6,
+     "cadence": 0.07,
+     "impacts": 0.3,
+     "vitesse": 1.5,
+     "longueur": 0.06,
+     "epaisseur": 2.4
+    },
+    {
+     "type": "explosions",
+     "par_s": 2.5,
+     "zone": [
+      0.05,
+      0.12,
+      0.95,
+      0.75
+     ],
+     "taille": [
+      8,
+      28
+     ],
+     "duree": 1.1
+    },
+    {
+     "type": "flash",
+     "t": 0.0,
+     "force": 1.2,
+     "couleur": "ambre",
+     "duree": 0.3
+    }
+   ],
+   "impact": true,
+   "son_h3": -2
+  },
+  "p05-hangar": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p05-hangar.mp4",
+   "secousse": {
+    "base": 7
+   },
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.05
+    ]
+   ],
+   "son_h3": -6
+  },
+  "p06-cockpit": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p06-cockpit.mp4",
+   "secousse": {
+    "base": 9
+   },
+   "suivi": true,
+   "effets": [
+    {
+     "type": "traceurs",
+     "par_s": 30,
+     "source": [
+      0.2,
+      0.9,
+      0.8,
+      1.1
+     ],
+     "cible": [
+      0.3,
+      0.2,
+      0.7,
+      0.45
+     ],
+     "couleur": "orange",
+     "rafale": 6,
+     "cadence": 0.07,
+     "impacts": 0.3,
+     "vitesse": 1.5,
+     "longueur": 0.06,
+     "epaisseur": 2.4
+    },
+    {
+     "type": "explosions",
+     "par_s": 2.5,
+     "zone": [
+      0.05,
+      0.12,
+      0.95,
+      0.75
+     ],
+     "taille": [
+      8,
+      28
+     ],
+     "duree": 1.1
+    }
+   ],
+   "son_h3": -4
+  },
+  "p07-pilote": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p07-pilote.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p07-pilote-v.mp4",
+   "secousse": {
+    "base": 6,
+    "coups": [
+     {
+      "t": 0.6,
+      "force": 18
+     }
+    ]
+   },
+   "effets": [
+    {
+     "type": "flash",
+     "t": 0.6,
+     "force": 0.6,
+     "couleur": "orange",
+     "duree": 0.5
+    }
+   ],
+   "son_h3": -6
+  },
+  "p08-vaisseau-mere": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p08-vaisseau-mere.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p08-vaisseau-mere-v.mp4",
+   "suivi": true,
+   "secousse": {
+    "base": 7,
+    "coups": [
+     {
+      "t": 0.0,
+      "force": 35
+     }
+    ]
+   },
+   "effets": [
+    {
+     "type": "flotte",
+     "n": 600,
+     "zone": [
+      0,
+      0.15,
+      1,
+      0.85
+     ],
+     "mur": true,
+     "profondeur": [
+      2,
+      9
+     ],
+     "taille": [
+      1.5,
+      4
+     ],
+     "derive": [
+      -40,
+      0
+     ],
+     "moteurs": "bleu",
+     "lueur": 0.8
+    },
+    {
+     "type": "traceurs",
+     "par_s": 30,
+     "source": [
+      0.65,
+      0.05,
+      1,
+      0.45
+     ],
+     "cible": [
+      0,
+      0.4,
+      0.5,
+      0.95
+     ],
+     "couleur": "bleu",
+     "longueur": 0.09,
+     "vitesse": 1.0,
+     "epaisseur": 3.4,
+     "rafale": 3,
+     "cadence": 0.12
+    },
+    {
+     "type": "explosions",
+     "par_s": 2.5,
+     "zone": [
+      0.05,
+      0.12,
+      0.95,
+      0.75
+     ],
+     "taille": [
+      8,
+      28
+     ],
+     "duree": 1.1
+    },
+    {
+     "type": "flash",
+     "t": 0.0,
+     "force": 1.4,
+     "couleur": "blanc",
+     "duree": 0.25
+    }
+   ],
+   "son_h3": -2
+  },
+  "p09-rupture": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p09-rupture.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p09-rupture-v.mp4",
+   "secousse": {
+    "base": 6,
+    "coups": [
+     {
+      "t": 0.2,
+      "force": 30
+     }
+    ]
+   },
+   "suivi": true,
+   "effets": [
+    {
+     "type": "debris",
+     "t": 0.1,
+     "origine": [
+      0.5,
+      0.45
+     ],
+     "n": 140,
+     "vitesse": 650,
+     "vers_camera": 0.9,
+     "braises": 0.6
+    }
+   ],
+   "son_h3": -3
+  },
+  "p10-aube": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/p10-aube.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v3/plans/p10-aube-v.mp4",
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     5,
+     0.5,
+     0.5,
+     1.05
+    ]
+   ],
+   "secousse": {
+    "base": 0,
+    "derive": 3
+   },
+   "son_h3": -12
+  },
+  "t01-passage": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/t01-passage.mp4",
+   "secousse": {
+    "base": 10
+   },
+   "fouet": {
+    "sortie": 4,
+    "sens": 1
+   },
+   "effets": [
+    {
+     "type": "traceurs",
+     "par_s": 40,
+     "source": [
+      0,
+      0.45,
+      0.35,
+      0.9
+     ],
+     "cible": [
+      0.55,
+      0.1,
+      1,
+      0.55
+     ],
+     "couleur": "orange",
+     "rafale": 6,
+     "cadence": 0.07,
+     "impacts": 0.3,
+     "vitesse": 1.5,
+     "longueur": 0.06,
+     "epaisseur": 2.4
+    },
+    {
+     "type": "traceurs",
+     "par_s": 8,
+     "source": [
+      0.65,
+      0.05,
+      1,
+      0.45
+     ],
+     "cible": [
+      0,
+      0.4,
+      0.5,
+      0.95
+     ],
+     "couleur": "bleu",
+     "longueur": 0.09,
+     "vitesse": 1.0,
+     "epaisseur": 3.4,
+     "rafale": 3,
+     "cadence": 0.12
+    },
+    {
+     "type": "explosions",
+     "par_s": 2.5,
+     "zone": [
+      0.05,
+      0.12,
+      0.95,
+      0.75
+     ],
+     "taille": [
+      8,
+      28
+     ],
+     "duree": 1.1
+    },
+    {
+     "type": "flotte",
+     "n": 700,
+     "zone": [
+      0,
+      0.15,
+      1,
+      0.85
+     ],
+     "mur": true,
+     "profondeur": [
+      2,
+      9
+     ],
+     "taille": [
+      1.5,
+      4
+     ],
+     "derive": [
+      -80,
+      0
+     ],
+     "moteurs": "bleu",
+     "lueur": 0.8
+    }
+   ],
+   "son_h3": -3
+  },
+  "t02-poursuite": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/t02-poursuite.mp4",
+   "secousse": {
+    "base": 9
+   },
+   "suivi": true,
+   "effets": [
+    {
+     "type": "traceurs",
+     "par_s": 8,
+     "source": [
+      0.65,
+      0.05,
+      1,
+      0.45
+     ],
+     "cible": [
+      0,
+      0.4,
+      0.5,
+      0.95
+     ],
+     "couleur": "bleu",
+     "longueur": 0.09,
+     "vitesse": 1.0,
+     "epaisseur": 3.4,
+     "rafale": 3,
+     "cadence": 0.12
+    },
+    {
+     "type": "explosions",
+     "par_s": 2.5,
+     "zone": [
+      0.05,
+      0.12,
+      0.95,
+      0.75
+     ],
+     "taille": [
+      8,
+      28
+     ],
+     "duree": 1.1
+    }
+   ],
+   "son_h3": -3
+  },
+  "t03-torpilles": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/t03-torpilles.mp4",
+   "secousse": {
+    "base": 4
+   },
+   "effets": [
+    {
+     "type": "flotte",
+     "n": 500,
+     "zone": [
+      0,
+      0.15,
+      1,
+      0.85
+     ],
+     "mur": true,
+     "profondeur": [
+      2,
+      9
+     ],
+     "taille": [
+      1.5,
+      4
+     ],
+     "derive": [
+      -14,
+      0
+     ],
+     "moteurs": "bleu",
+     "lueur": 0.8
+    }
+   ],
+   "son_h3": -4
+  },
+  "t04-explosion": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/t04-explosion.mp4",
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.45
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "secousse": {
+    "base": 5,
+    "coups": [
+     {
+      "t": 0.0,
+      "force": 45,
+      "tenue": 0.4
+     }
+    ]
+   },
+   "effets": [
+    {
+     "type": "flash",
+     "t": 0.0,
+     "force": 1.6,
+     "couleur": "orange",
+     "duree": 0.35
+    },
+    {
+     "type": "debris",
+     "t": 0.05,
+     "origine": [
+      0.5,
+      0.5
+     ],
+     "n": 160,
+     "vitesse": 900,
+     "vers_camera": 1.4,
+     "braises": 0.7
+    }
+   ],
+   "impact": true,
+   "son_h3": -2
+  },
+  "t05-onde-choc": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/t05-onde-choc.mp4",
+   "secousse": {
+    "base": 3,
+    "coups": [
+     {
+      "t": 0.3,
+      "force": 25,
+      "tenue": 0.6
+     }
+    ]
+   },
+   "effets": [
+    {
+     "type": "flotte",
+     "n": 1800,
+     "zone": [
+      0,
+      0.15,
+      1,
+      0.85
+     ],
+     "mur": true,
+     "profondeur": [
+      2,
+      9
+     ],
+     "taille": [
+      1.5,
+      4
+     ],
+     "derive": [
+      -5,
+      0
+     ],
+     "moteurs": "bleu",
+     "lueur": 0.8
+    }
+   ],
+   "son_h3": -3
+  },
+  "t06-tourelle": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/t06-tourelle.mp4",
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.6,
+     1.15
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.62,
+     0.6,
+     1.0
+    ]
+   ],
+   "secousse": {
+    "base": 3,
+    "coups": [
+     {
+      "t": 0.1,
+      "force": 14
+     },
+     {
+      "t": 0.55,
+      "force": 14
+     }
+    ]
+   },
+   "effets": [
+    {
+     "type": "traceurs",
+     "par_s": 50,
+     "source": [
+      0.4,
+      0.4,
+      0.6,
+      0.6
+     ],
+     "cible": [
+      0.9,
+      0,
+      1.2,
+      0.2
+     ],
+     "couleur": "orange",
+     "rafale": 6,
+     "cadence": 0.07,
+     "impacts": 0.3,
+     "vitesse": 1.5,
+     "longueur": 0.06,
+     "epaisseur": 2.4
+    }
+   ],
+   "son_h3": -3
+  },
+  "t07-essaim": {
+   "plaque": "~/nexora-creative-data/promo/v3/plans/t07-essaim.mp4",
+   "suivi": true,
+   "secousse": {
+    "base": 6
+   },
+   "effets": [
+    {
+     "type": "traceurs",
+     "par_s": 90,
+     "source": [
+      0,
+      0.6,
+      1,
+      1
+     ],
+     "cible": [
+      0,
+      0,
+      1,
+      0.45
+     ],
+     "couleur": "orange",
+     "rafale": 6,
+     "cadence": 0.07,
+     "impacts": 0.3,
+     "vitesse": 1.5,
+     "longueur": 0.06,
+     "epaisseur": 2.4
+    },
+    {
+     "type": "traceurs",
+     "par_s": 8,
+     "source": [
+      0.65,
+      0.05,
+      1,
+      0.45
+     ],
+     "cible": [
+      0,
+      0.4,
+      0.5,
+      0.95
+     ],
+     "couleur": "bleu",
+     "longueur": 0.09,
+     "vitesse": 1.0,
+     "epaisseur": 3.4,
+     "rafale": 3,
+     "cadence": 0.12
+    },
+    {
+     "type": "explosions",
+     "par_s": 5,
+     "zone": [
+      0.05,
+      0.12,
+      0.95,
+      0.75
+     ],
+     "taille": [
+      8,
+      28
+     ],
+     "duree": 1.1
+    },
+    {
+     "type": "flotte",
+     "n": 1500,
+     "zone": [
+      0,
+      0,
+      1,
+      0.5
+     ],
+     "profondeur": [
+      1,
+      6
+     ],
+     "taille": [
+      1.5,
+      4
+     ],
+     "derive": [
+      30,
+      40
+     ],
+     "agitation": 20,
+     "moteurs": "rouge",
+     "cap": 0.9,
+     "dispersion_cap": 0.3
+    }
+   ],
+   "son_h3": -4
+  }
+ },
+ "sequence": [
+  {
+   "fin": 3.2,
+   "section": "ouverture",
+   "plan": "p01-orbite-nuit",
+   "modif": {
+    "debut": 0.4,
+    "fondu_noir_entree": 14
+   }
+  },
+  {
+   "fin": 6.51,
+   "section": "ouverture",
+   "type": "saisie",
+   "part_frappe": 0.62,
+   "clic": 0.84
+  },
+  {
+   "fin": 8.79,
+   "section": "montee",
+   "plan": "p03-vague-ennemie",
+   "modif": {
+    "debut": 2.4
+   }
+  },
+  {
+   "fin": 11.63,
+   "section": "montee",
+   "plan": "p02-mur-flotte",
+   "modif": {
+    "debut": 1.1
+   }
+  },
+  {
+   "fin": 13.84,
+   "section": "montee",
+   "plan": "p05-hangar",
+   "modif": {
+    "debut": 1.0
+   }
+  },
+  {
+   "fin": 15.87,
+   "section": "montee",
+   "plan": "p07-pilote",
+   "modif": {
+    "debut": 0.25
+   }
+  },
+  {
+   "fin": 16.79,
+   "section": "montee",
+   "plan": "p06-cockpit",
+   "modif": {
+    "debut": 3.15
+   }
+  },
+  {
+   "fin": 18.0,
+   "section": "montee",
+   "type": "titre",
+   "texte": "carton_1"
+  },
+  {
+   "fin": 19.34,
+   "section": "action",
+   "plan": "p04-bordee",
+   "modif": {
+    "debut": 0.0,
+    "vitesse": [
+     [
+      0,
+      0.5
+     ],
+     [
+      0.45,
+      0.5
+     ],
+     [
+      0.8,
+      1.15
+     ]
+    ]
+   }
+  },
+  {
+   "fin": 21.22,
+   "section": "action",
+   "plan": "t01-passage",
+   "modif": {
+    "debut": 1.0
+   }
+  },
+  {
+   "fin": 22.65,
+   "section": "action",
+   "plan": "t06-tourelle",
+   "modif": {
+    "debut": 2.85,
+    "fouet": {
+     "entree": 4,
+     "sens": 1
+    }
+   }
+  },
+  {
+   "fin": 24.32,
+   "section": "action",
+   "plan": "t07-essaim",
+   "modif": {
+    "debut": 0.8
+   }
+  },
+  {
+   "fin": 25.61,
+   "section": "action",
+   "plan": "p06-cockpit",
+   "modif": {
+    "debut": 2.2
+   },
+   "suffixe": "-b"
+  },
+  {
+   "fin": 26.63,
+   "section": "action",
+   "plan": "t04-explosion",
+   "modif": {
+    "debut": 0.9
+   }
+  },
+  {
+   "fin": 28.55,
+   "section": "action",
+   "type": "rendu",
+   "source": "t03-torpilles"
+  },
+  {
+   "fin": 31.34,
+   "section": "action",
+   "plan": "t03-torpilles",
+   "modif": {
+    "debut": 0.9
+   }
+  },
+  {
+   "fin": 33.3,
+   "section": "action",
+   "plan": "p03-vague-ennemie",
+   "modif": {
+    "debut": 3.0,
+    "miroir": true
+   },
+   "suffixe": "-b"
+  },
+  {
+   "fin": 34.85,
+   "section": "action",
+   "plan": "p02-mur-flotte",
+   "modif": {
+    "debut": 3.1,
+    "vitesse": 1.25
+   },
+   "suffixe": "-b"
+  },
+  {
+   "fin": 36.41,
+   "section": "action",
+   "plan": "t01-passage",
+   "modif": {
+    "debut": 3.2,
+    "miroir": true
+   },
+   "suffixe": "-b"
+  },
+  {
+   "fin": 37.95,
+   "section": "action",
+   "plan": "p04-bordee",
+   "modif": {
+    "debut": 2.3,
+    "miroir": true
+   },
+   "suffixe": "-b"
+  },
+  {
+   "fin": 39.17,
+   "section": "action",
+   "plan": "p05-hangar",
+   "modif": {
+    "debut": 1.9
+   },
+   "suffixe": "-b"
+  },
+  {
+   "fin": 40.19,
+   "section": "action",
+   "plan": "t07-essaim",
+   "modif": {
+    "debut": 3.0,
+    "miroir": true
+   },
+   "suffixe": "-b"
+  },
+  {
+   "fin": 42.25,
+   "section": "action",
+   "type": "galerie",
+   "sources": [
+    "p04-bordee",
+    "t03-torpilles",
+    "p02-mur-flotte",
+    "t04-explosion",
+    "p03-vague-ennemie",
+    "t01-passage"
+   ]
+  },
+  {
+   "fin": 44.8,
+   "section": "montee2",
+   "type": "titre",
+   "texte": "carton_2"
+  },
+  {
+   "fin": 45.66,
+   "section": "climax",
+   "plan": "t03-torpilles",
+   "modif": {
+    "debut": 2.2,
+    "impact": true
+   },
+   "suffixe": "-c0"
+  },
+  {
+   "fin": 46.08,
+   "section": "climax",
+   "plan": "p08-vaisseau-mere",
+   "modif": {
+    "debut": 0.6,
+    "impact": false
+   },
+   "suffixe": "-c1"
+  },
+  {
+   "fin": 46.52,
+   "section": "climax",
+   "plan": "t04-explosion",
+   "modif": {
+    "debut": 1.2,
+    "miroir": true,
+    "impact": true
+   },
+   "suffixe": "-c2"
+  },
+  {
+   "fin": 46.94,
+   "section": "climax",
+   "plan": "p07-pilote",
+   "modif": {
+    "debut": 1.45,
+    "impact": false
+   },
+   "suffixe": "-c3"
+  },
+  {
+   "fin": 47.79,
+   "section": "climax",
+   "plan": "p09-rupture",
+   "modif": {
+    "debut": 0.8,
+    "impact": true
+   },
+   "suffixe": "-c4"
+  },
+  {
+   "fin": 48.23,
+   "section": "climax",
+   "plan": "t01-passage",
+   "modif": {
+    "debut": 2.0,
+    "impact": false
+   },
+   "suffixe": "-c5"
+  },
+  {
+   "fin": 48.65,
+   "section": "climax",
+   "plan": "p04-bordee",
+   "modif": {
+    "debut": 1.2,
+    "impact": true
+   },
+   "suffixe": "-c6"
+  },
+  {
+   "fin": 49.09,
+   "section": "climax",
+   "plan": "p03-vague-ennemie",
+   "modif": {
+    "debut": 4.2,
+    "impact": false
+   },
+   "suffixe": "-c7"
+  },
+  {
+   "fin": 49.94,
+   "section": "climax",
+   "plan": "p08-vaisseau-mere",
+   "modif": {
+    "debut": 2.2,
+    "vitesse": [
+     [
+      0,
+      0.6
+     ],
+     [
+      0.4,
+      1.3
+     ]
+    ],
+    "impact": true
+   },
+   "suffixe": "-c8"
+  },
+  {
+   "fin": 50.8,
+   "section": "climax",
+   "plan": "p09-rupture",
+   "modif": {
+    "debut": 2.6,
+    "impact": false
+   },
+   "suffixe": "-c9"
+  },
+  {
+   "fin": 51.66,
+   "section": "climax",
+   "plan": "p06-cockpit",
+   "modif": {
+    "debut": 3.6,
+    "impact": true
+   },
+   "suffixe": "-c10"
+  },
+  {
+   "fin": 52.5,
+   "section": "climax",
+   "plan": "t05-onde-choc",
+   "modif": {
+    "debut": 0.5,
+    "vitesse": 0.8
+   },
+   "suffixe": "-fin"
+  },
+  {
+   "fin": 54.0,
+   "section": "silence",
+   "plan": "p10-aube",
+   "modif": {
+    "debut": 1.2
+   }
+  },
+  {
+   "fin": 60.5,
+   "section": "fin",
+   "type": "fin"
+  }
+ ],
+ "sons": [
+  {
+   "t": 0.0,
+   "type": "drone",
+   "duree": 6.8,
+   "db": -19
+  },
+  {
+   "t": 3.25,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 0
+  },
+  {
+   "t": 3.309,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 1
+  },
+  {
+   "t": 3.368,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 2
+  },
+  {
+   "t": 3.397,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 3
+  },
+  {
+   "t": 3.456,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 4
+  },
+  {
+   "t": 3.515,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 5
+  },
+  {
+   "t": 3.544,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 6
+  },
+  {
+   "t": 3.603,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 7
+  },
+  {
+   "t": 3.662,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 8
+  },
+  {
+   "t": 3.691,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 9
+  },
+  {
+   "t": 3.75,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 10
+  },
+  {
+   "t": 3.809,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 11
+  },
+  {
+   "t": 3.838,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 12
+  },
+  {
+   "t": 3.897,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 13
+  },
+  {
+   "t": 3.956,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 14
+  },
+  {
+   "t": 3.985,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 15
+  },
+  {
+   "t": 4.044,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 16
+  },
+  {
+   "t": 4.103,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 17
+  },
+  {
+   "t": 4.132,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 18
+  },
+  {
+   "t": 4.191,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 19
+  },
+  {
+   "t": 4.25,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 20
+  },
+  {
+   "t": 4.279,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 21
+  },
+  {
+   "t": 4.338,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 22
+  },
+  {
+   "t": 4.397,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 23
+  },
+  {
+   "t": 4.426,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 24
+  },
+  {
+   "t": 4.485,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 25
+  },
+  {
+   "t": 4.544,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 26
+  },
+  {
+   "t": 4.573,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 27
+  },
+  {
+   "t": 4.632,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 28
+  },
+  {
+   "t": 4.691,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 29
+  },
+  {
+   "t": 4.72,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 30
+  },
+  {
+   "t": 4.779,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 31
+  },
+  {
+   "t": 4.838,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 32
+  },
+  {
+   "t": 4.867,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 33
+  },
+  {
+   "t": 4.926,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 34
+  },
+  {
+   "t": 4.985,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 35
+  },
+  {
+   "t": 5.014,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 36
+  },
+  {
+   "t": 5.073,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 37
+  },
+  {
+   "t": 5.132,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 38
+  },
+  {
+   "t": 5.161,
+   "type": "frappe",
+   "duree": 0.05,
+   "db": -22,
+   "graine": 39
+  },
+  {
+   "t": 5.85,
+   "type": "clic",
+   "duree": 0.08,
+   "db": -12
+  },
+  {
+   "t": 6.51,
+   "type": "impact",
+   "duree": 2.5,
+   "db": -4
+  },
+  {
+   "t": 6.51,
+   "type": "chute",
+   "duree": 2.0,
+   "db": -10
+  },
+  {
+   "t": 8.79,
+   "type": "boom",
+   "duree": 2.5,
+   "db": -10
+  },
+  {
+   "t": 11.18,
+   "type": "fouet",
+   "duree": 0.6,
+   "db": -14
+  },
+  {
+   "t": 11.63,
+   "type": "souffle",
+   "duree": 1.6,
+   "db": -14
+  },
+  {
+   "t": 16.79,
+   "type": "explosion",
+   "duree": 1.0,
+   "db": -14
+  },
+  {
+   "t": 18.0,
+   "type": "montee",
+   "duree": 3.2,
+   "db": -12,
+   "ancre": 1.0
+  },
+  {
+   "t": 18.0,
+   "type": "inverse",
+   "duree": 1.1,
+   "db": -12,
+   "ancre": 1.0
+  },
+  {
+   "t": 18.0,
+   "type": "impact",
+   "duree": 3.0,
+   "db": 0
+  },
+  {
+   "t": 18.0,
+   "type": "canons",
+   "duree": 1.3,
+   "db": -9
+  },
+  {
+   "t": 20.92,
+   "type": "fouet",
+   "duree": 0.55,
+   "db": -11
+  },
+  {
+   "t": 21.75,
+   "type": "canons",
+   "duree": 0.9,
+   "db": -10
+  },
+  {
+   "t": 24.32,
+   "type": "impact",
+   "duree": 2.0,
+   "db": -6
+  },
+  {
+   "t": 25.61,
+   "type": "explosion",
+   "duree": 1.8,
+   "db": -6
+  },
+  {
+   "t": 26.73,
+   "type": "clic",
+   "duree": 0.08,
+   "db": -14
+  },
+  {
+   "t": 28.2,
+   "type": "fouet",
+   "duree": 0.6,
+   "db": -13
+  },
+  {
+   "t": 31.34,
+   "type": "impact",
+   "duree": 2.0,
+   "db": -6
+  },
+  {
+   "t": 36.11,
+   "type": "fouet",
+   "duree": 0.55,
+   "db": -11
+  },
+  {
+   "t": 37.95,
+   "type": "impact",
+   "duree": 2.2,
+   "db": -4
+  },
+  {
+   "t": 21.22,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 212
+  },
+  {
+   "t": 22.65,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 226
+  },
+  {
+   "t": 25.61,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 256
+  },
+  {
+   "t": 26.63,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 266
+  },
+  {
+   "t": 33.3,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 333
+  },
+  {
+   "t": 34.85,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 348
+  },
+  {
+   "t": 36.41,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 364
+  },
+  {
+   "t": 39.17,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 391
+  },
+  {
+   "t": 40.19,
+   "type": "impact",
+   "duree": 1.0,
+   "db": -10,
+   "graine": 401
+  },
+  {
+   "t": 40.19,
+   "type": "fouet",
+   "duree": 0.5,
+   "db": -14
+  },
+  {
+   "t": 44.8,
+   "type": "montee",
+   "duree": 3.0,
+   "db": -9,
+   "ancre": 1.0
+  },
+  {
+   "t": 44.8,
+   "type": "inverse",
+   "duree": 1.2,
+   "db": -10,
+   "ancre": 1.0
+  },
+  {
+   "t": 45.66,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -8,
+   "graine": 101
+  },
+  {
+   "t": 46.08,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -6,
+   "graine": 102
+  },
+  {
+   "t": 46.52,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -8,
+   "graine": 103
+  },
+  {
+   "t": 46.94,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -6,
+   "graine": 104
+  },
+  {
+   "t": 47.79,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -8,
+   "graine": 105
+  },
+  {
+   "t": 48.23,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -6,
+   "graine": 106
+  },
+  {
+   "t": 48.65,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -8,
+   "graine": 107
+  },
+  {
+   "t": 49.09,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -6,
+   "graine": 108
+  },
+  {
+   "t": 49.94,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -8,
+   "graine": 109
+  },
+  {
+   "t": 50.8,
+   "type": "impact",
+   "duree": 1.2,
+   "db": -6,
+   "graine": 110
+  },
+  {
+   "t": 44.8,
+   "type": "impact",
+   "duree": 3.0,
+   "db": -1
+  },
+  {
+   "t": 45.66,
+   "type": "explosion",
+   "duree": 1.5,
+   "db": -10
+  },
+  {
+   "t": 47.79,
+   "type": "explosion",
+   "duree": 1.5,
+   "db": -9
+  },
+  {
+   "t": 49.94,
+   "type": "boom",
+   "duree": 2.5,
+   "db": -6
+  },
+  {
+   "t": 51.66,
+   "type": "souffle",
+   "duree": 1.4,
+   "db": -8
+  },
+  {
+   "t": 54.0,
+   "type": "impact",
+   "duree": 4.0,
+   "db": 0
+  },
+  {
+   "t": 54.0,
+   "type": "boom",
+   "duree": 4.0,
+   "db": -4
+  }
+ ],
+ "silences": {
+  "long": [
+   [
+    52.52,
+    53.98
+   ]
+  ]
+ },
+ "versions": {
+  "30": {
+   "sequence": [
+    {
+     "fin": 2.2,
+     "section": "ouverture",
+     "type": "saisie",
+     "part_frappe": 0.62,
+     "clic": 0.86
+    },
+    {
+     "fin": 3.54,
+     "section": "action",
+     "plan": "p04-bordee",
+     "modif": {
+      "debut": 0.0,
+      "vitesse": [
+       [
+        0,
+        0.5
+       ],
+       [
+        0.45,
+        0.5
+       ],
+       [
+        0.8,
+        1.15
+       ]
+      ]
+     },
+     "suffixe": ""
+    },
+    {
+     "fin": 5.42,
+     "section": "action",
+     "plan": "t01-passage",
+     "modif": {
+      "debut": 1.0
+     },
+     "suffixe": ""
+    },
+    {
+     "fin": 6.85,
+     "section": "action",
+     "plan": "p03-vague-ennemie",
+     "modif": {
+      "debut": 3.0
+     },
+     "suffixe": "-b"
+    },
+    {
+     "fin": 8.52,
+     "section": "action",
+     "plan": "p02-mur-flotte",
+     "modif": {
+      "debut": 1.6
+     },
+     "suffixe": "-30"
+    },
+    {
+     "fin": 9.81,
+     "section": "action",
+     "plan": "p06-cockpit",
+     "modif": {
+      "debut": 2.2
+     },
+     "suffixe": "-b"
+    },
+    {
+     "fin": 10.83,
+     "section": "action",
+     "plan": "t04-explosion",
+     "modif": {
+      "debut": 0.9
+     },
+     "suffixe": ""
+    },
+    {
+     "fin": 12.05,
+     "section": "action",
+     "plan": "t03-torpilles",
+     "modif": {
+      "debut": 0.9
+     },
+     "suffixe": "-30"
+    },
+    {
+     "fin": 13.07,
+     "section": "action",
+     "plan": "p07-pilote",
+     "modif": {
+      "debut": 0.25
+     },
+     "suffixe": "-30"
+    },
+    {
+     "fin": 15.13,
+     "section": "action",
+     "type": "galerie",
+     "sources": [
+      "p04-bordee",
+      "t03-torpilles",
+      "p02-mur-flotte",
+      "t04-explosion",
+      "p03-vague-ennemie",
+      "t01-passage"
+     ]
+    },
+    {
+     "fin": 17.68,
+     "section": "montee2",
+     "type": "titre",
+     "texte": "carton_2"
+    },
+    {
+     "fin": 18.54,
+     "section": "climax",
+     "plan": "t03-torpilles",
+     "modif": {
+      "debut": 2.2,
+      "impact": true
+     },
+     "suffixe": "-c0"
+    },
+    {
+     "fin": 18.96,
+     "section": "climax",
+     "plan": "p08-vaisseau-mere",
+     "modif": {
+      "debut": 0.6,
+      "impact": false
+     },
+     "suffixe": "-c1"
+    },
+    {
+     "fin": 19.4,
+     "section": "climax",
+     "plan": "t04-explosion",
+     "modif": {
+      "debut": 1.2,
+      "miroir": true,
+      "impact": true
+     },
+     "suffixe": "-c2"
+    },
+    {
+     "fin": 19.82,
+     "section": "climax",
+     "plan": "p07-pilote",
+     "modif": {
+      "debut": 1.45,
+      "impact": false
+     },
+     "suffixe": "-c3"
+    },
+    {
+     "fin": 20.67,
+     "section": "climax",
+     "plan": "p09-rupture",
+     "modif": {
+      "debut": 0.8,
+      "impact": true
+     },
+     "suffixe": "-c4"
+    },
+    {
+     "fin": 21.11,
+     "section": "climax",
+     "plan": "t01-passage",
+     "modif": {
+      "debut": 2.0,
+      "impact": false
+     },
+     "suffixe": "-c5"
+    },
+    {
+     "fin": 21.53,
+     "section": "climax",
+     "plan": "p04-bordee",
+     "modif": {
+      "debut": 1.2,
+      "impact": true
+     },
+     "suffixe": "-c6"
+    },
+    {
+     "fin": 21.97,
+     "section": "climax",
+     "plan": "p03-vague-ennemie",
+     "modif": {
+      "debut": 4.2,
+      "impact": false
+     },
+     "suffixe": "-c7"
+    },
+    {
+     "fin": 22.82,
+     "section": "climax",
+     "plan": "p08-vaisseau-mere",
+     "modif": {
+      "debut": 2.2,
+      "vitesse": [
+       [
+        0,
+        0.6
+       ],
+       [
+        0.4,
+        1.3
+       ]
+      ],
+      "impact": true
+     },
+     "suffixe": "-c8"
+    },
+    {
+     "fin": 23.68,
+     "section": "climax",
+     "plan": "p09-rupture",
+     "modif": {
+      "debut": 2.6,
+      "impact": false
+     },
+     "suffixe": "-c9"
+    },
+    {
+     "fin": 24.54,
+     "section": "climax",
+     "plan": "p06-cockpit",
+     "modif": {
+      "debut": 3.6,
+      "impact": true
+     },
+     "suffixe": "-c10"
+    },
+    {
+     "fin": 25.38,
+     "section": "climax",
+     "plan": "t05-onde-choc",
+     "modif": {
+      "debut": 0.5,
+      "vitesse": 0.8
+     },
+     "suffixe": "-fin"
+    },
+    {
+     "fin": 26.38,
+     "section": "silence",
+     "plan": "p10-aube",
+     "modif": {
+      "debut": 1.2
+     },
+     "suffixe": "-30"
+    },
+    {
+     "fin": 29.98,
+     "section": "fin",
+     "type": "fin"
+    }
+   ],
+   "musique": {
+    "db": 0,
+    "blocs": [
+     {
+      "fichier": "~/nexora-creative-data/promo/v3/audio/v3-musique-31.flac",
+      "de": 16.75,
+      "a": 25.38,
+      "t": 2.2,
+      "fondu_in": 0.005,
+      "fondu_out": 0.02
+     },
+     {
+      "fichier": "~/nexora-creative-data/promo/v3/audio/v3-musique-31.flac",
+      "de": 36.7,
+      "a": 51.25,
+      "t": 10.83,
+      "fondu_in": 0.005,
+      "fondu_out": 0.04
+     }
+    ]
+   },
+   "sons": [
+    {
+     "t": 0.25,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 0
+    },
+    {
+     "t": 0.285,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 1
+    },
+    {
+     "t": 0.32,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 2
+    },
+    {
+     "t": 0.355,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 3
+    },
+    {
+     "t": 0.39,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 4
+    },
+    {
+     "t": 0.425,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 5
+    },
+    {
+     "t": 0.46,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 6
+    },
+    {
+     "t": 0.495,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 7
+    },
+    {
+     "t": 0.53,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 8
+    },
+    {
+     "t": 0.565,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 9
+    },
+    {
+     "t": 0.6,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 10
+    },
+    {
+     "t": 0.635,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 11
+    },
+    {
+     "t": 0.67,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 12
+    },
+    {
+     "t": 0.705,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 13
+    },
+    {
+     "t": 0.74,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 14
+    },
+    {
+     "t": 0.775,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 15
+    },
+    {
+     "t": 0.81,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 16
+    },
+    {
+     "t": 0.845,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 17
+    },
+    {
+     "t": 0.88,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 18
+    },
+    {
+     "t": 0.915,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 19
+    },
+    {
+     "t": 0.95,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 20
+    },
+    {
+     "t": 0.985,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 21
+    },
+    {
+     "t": 1.02,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 22
+    },
+    {
+     "t": 1.055,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 23
+    },
+    {
+     "t": 1.09,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 24
+    },
+    {
+     "t": 1.125,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 25
+    },
+    {
+     "t": 1.16,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 26
+    },
+    {
+     "t": 1.195,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 27
+    },
+    {
+     "t": 1.23,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 28
+    },
+    {
+     "t": 1.265,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 29
+    },
+    {
+     "t": 1.3,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 30
+    },
+    {
+     "t": 1.335,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 31
+    },
+    {
+     "t": 1.37,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 32
+    },
+    {
+     "t": 1.405,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 33
+    },
+    {
+     "t": 1.44,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 34
+    },
+    {
+     "t": 1.475,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 35
+    },
+    {
+     "t": 0.0,
+     "type": "drone",
+     "duree": 2.4,
+     "db": -19
+    },
+    {
+     "t": 1.88,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -12
+    },
+    {
+     "t": 2.2,
+     "type": "impact",
+     "duree": 3.0,
+     "db": 0
+    },
+    {
+     "t": 2.2,
+     "type": "canons",
+     "duree": 1.3,
+     "db": -9
+    },
+    {
+     "t": 10.83,
+     "type": "impact",
+     "duree": 2.0,
+     "db": -4
+    },
+    {
+     "t": 17.679999999999993,
+     "type": "montee",
+     "duree": 3.0,
+     "db": -9,
+     "ancre": 1.0
+    },
+    {
+     "t": 26.379999999999995,
+     "type": "impact",
+     "duree": 4.0,
+     "db": 0
+    },
+    {
+     "t": 26.379999999999995,
+     "type": "boom",
+     "duree": 4.0,
+     "db": -4
+    },
+    {
+     "t": 5.42,
+     "type": "impact",
+     "duree": 1.0,
+     "db": -10
+    },
+    {
+     "t": 6.85,
+     "type": "impact",
+     "duree": 1.0,
+     "db": -10
+    },
+    {
+     "t": 9.81,
+     "type": "impact",
+     "duree": 1.0,
+     "db": -10
+    },
+    {
+     "t": 12.05,
+     "type": "impact",
+     "duree": 1.0,
+     "db": -10
+    },
+    {
+     "t": 13.07,
+     "type": "impact",
+     "duree": 1.0,
+     "db": -10
+    },
+    {
+     "t": 18.54,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 101
+    },
+    {
+     "t": 18.96,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 102
+    },
+    {
+     "t": 19.4,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 103
+    },
+    {
+     "t": 19.82,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 104
+    },
+    {
+     "t": 20.67,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 105
+    },
+    {
+     "t": 21.11,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 106
+    },
+    {
+     "t": 21.53,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 107
+    },
+    {
+     "t": 21.97,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 108
+    },
+    {
+     "t": 22.82,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 109
+    },
+    {
+     "t": 23.68,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 110
+    },
+    {
+     "t": 17.68,
+     "type": "impact",
+     "duree": 3.0,
+     "db": -1
+    },
+    {
+     "t": 22.82,
+     "type": "boom",
+     "duree": 2.5,
+     "db": -6
+    }
+   ],
+   "silences": [
+    [
+     25.4,
+     26.36
+    ]
+   ]
+  },
+  "15": {
+   "sequence": [
+    {
+     "fin": 1.6,
+     "section": "ouverture",
+     "type": "saisie",
+     "part_frappe": 0.55,
+     "clic": 0.82
+    },
+    {
+     "fin": 2.94,
+     "section": "action",
+     "plan": "p04-bordee",
+     "modif": {
+      "debut": 0.0,
+      "vitesse": [
+       [
+        0,
+        0.6
+       ],
+       [
+        0.5,
+        1.2
+       ]
+      ]
+     },
+     "suffixe": ""
+    },
+    {
+     "fin": 3.8,
+     "section": "climax",
+     "plan": "t03-torpilles",
+     "modif": {
+      "debut": 2.2,
+      "impact": true
+     },
+     "suffixe": "-c0"
+    },
+    {
+     "fin": 4.22,
+     "section": "climax",
+     "plan": "p08-vaisseau-mere",
+     "modif": {
+      "debut": 0.6,
+      "impact": false
+     },
+     "suffixe": "-c1"
+    },
+    {
+     "fin": 4.66,
+     "section": "climax",
+     "plan": "t04-explosion",
+     "modif": {
+      "debut": 1.2,
+      "miroir": true,
+      "impact": true
+     },
+     "suffixe": "-c2"
+    },
+    {
+     "fin": 5.08,
+     "section": "climax",
+     "plan": "p07-pilote",
+     "modif": {
+      "debut": 1.45,
+      "impact": false
+     },
+     "suffixe": "-c3"
+    },
+    {
+     "fin": 5.93,
+     "section": "climax",
+     "plan": "p09-rupture",
+     "modif": {
+      "debut": 0.8,
+      "impact": true
+     },
+     "suffixe": "-c4"
+    },
+    {
+     "fin": 6.37,
+     "section": "climax",
+     "plan": "t01-passage",
+     "modif": {
+      "debut": 2.0,
+      "impact": false
+     },
+     "suffixe": "-c5"
+    },
+    {
+     "fin": 6.79,
+     "section": "climax",
+     "plan": "p04-bordee",
+     "modif": {
+      "debut": 1.2,
+      "impact": true
+     },
+     "suffixe": "-c6"
+    },
+    {
+     "fin": 7.23,
+     "section": "climax",
+     "plan": "p03-vague-ennemie",
+     "modif": {
+      "debut": 4.2,
+      "impact": false
+     },
+     "suffixe": "-c7"
+    },
+    {
+     "fin": 8.08,
+     "section": "climax",
+     "plan": "p08-vaisseau-mere",
+     "modif": {
+      "debut": 2.2,
+      "vitesse": [
+       [
+        0,
+        0.6
+       ],
+       [
+        0.4,
+        1.3
+       ]
+      ],
+      "impact": true
+     },
+     "suffixe": "-c8"
+    },
+    {
+     "fin": 8.94,
+     "section": "climax",
+     "plan": "p09-rupture",
+     "modif": {
+      "debut": 2.6,
+      "impact": false
+     },
+     "suffixe": "-c9"
+    },
+    {
+     "fin": 9.8,
+     "section": "climax",
+     "plan": "p06-cockpit",
+     "modif": {
+      "debut": 3.6,
+      "impact": true
+     },
+     "suffixe": "-c10"
+    },
+    {
+     "fin": 10.64,
+     "section": "climax",
+     "plan": "t05-onde-choc",
+     "modif": {
+      "debut": 0.5,
+      "vitesse": 0.8
+     },
+     "suffixe": "-fin"
+    },
+    {
+     "fin": 11.34,
+     "section": "silence",
+     "plan": "p10-aube",
+     "modif": {
+      "debut": 1.2
+     },
+     "suffixe": "-15"
+    },
+    {
+     "fin": 15.0,
+     "section": "fin",
+     "type": "fin"
+    }
+   ],
+   "musique": {
+    "db": 0,
+    "blocs": [
+     {
+      "fichier": "~/nexora-creative-data/promo/v3/audio/v3-musique-31.flac",
+      "de": 16.75,
+      "a": 18.09,
+      "t": 1.6,
+      "fondu_in": 0.005,
+      "fondu_out": 0.01
+     },
+     {
+      "fichier": "~/nexora-creative-data/promo/v3/audio/v3-musique-31.flac",
+      "de": 43.55,
+      "a": 51.25,
+      "t": 2.9399999999999995,
+      "fondu_in": 0.005,
+      "fondu_out": 0.04
+     }
+    ]
+   },
+   "sons": [
+    {
+     "t": 0.15,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 0
+    },
+    {
+     "t": 0.177,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 1
+    },
+    {
+     "t": 0.204,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 2
+    },
+    {
+     "t": 0.231,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 3
+    },
+    {
+     "t": 0.258,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 4
+    },
+    {
+     "t": 0.285,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 5
+    },
+    {
+     "t": 0.312,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 6
+    },
+    {
+     "t": 0.339,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 7
+    },
+    {
+     "t": 0.366,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 8
+    },
+    {
+     "t": 0.393,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 9
+    },
+    {
+     "t": 0.42,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 10
+    },
+    {
+     "t": 0.447,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 11
+    },
+    {
+     "t": 0.474,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 12
+    },
+    {
+     "t": 0.501,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 13
+    },
+    {
+     "t": 0.528,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 14
+    },
+    {
+     "t": 0.555,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 15
+    },
+    {
+     "t": 0.582,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 16
+    },
+    {
+     "t": 0.609,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 17
+    },
+    {
+     "t": 0.636,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 18
+    },
+    {
+     "t": 0.663,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 19
+    },
+    {
+     "t": 0.69,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 20
+    },
+    {
+     "t": 0.717,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 21
+    },
+    {
+     "t": 0.744,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 22
+    },
+    {
+     "t": 0.771,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 23
+    },
+    {
+     "t": 0.798,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 24
+    },
+    {
+     "t": 0.825,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 25
+    },
+    {
+     "t": 0.852,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 26
+    },
+    {
+     "t": 0.879,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 27
+    },
+    {
+     "t": 0.906,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 28
+    },
+    {
+     "t": 0.933,
+     "type": "frappe",
+     "duree": 0.05,
+     "db": -22,
+     "graine": 29
+    },
+    {
+     "t": 1.32,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -12
+    },
+    {
+     "t": 1.6,
+     "type": "impact",
+     "duree": 2.5,
+     "db": 0
+    },
+    {
+     "t": 11.34,
+     "type": "impact",
+     "duree": 4.0,
+     "db": 0
+    },
+    {
+     "t": 11.34,
+     "type": "boom",
+     "duree": 4.0,
+     "db": -4
+    },
+    {
+     "t": 3.8,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 101
+    },
+    {
+     "t": 4.22,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 102
+    },
+    {
+     "t": 4.66,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 103
+    },
+    {
+     "t": 5.08,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 104
+    },
+    {
+     "t": 5.93,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 105
+    },
+    {
+     "t": 6.37,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 106
+    },
+    {
+     "t": 6.79,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 107
+    },
+    {
+     "t": 7.23,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 108
+    },
+    {
+     "t": 8.08,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -8,
+     "graine": 109
+    },
+    {
+     "t": 8.94,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -6,
+     "graine": 110
+    },
+    {
+     "t": 2.94,
+     "type": "impact",
+     "duree": 3.0,
+     "db": -1
+    },
+    {
+     "t": 8.08,
+     "type": "boom",
+     "duree": 2.5,
+     "db": -6
+    }
+   ],
+   "silences": [
+    [
+     10.66,
+     11.32
+    ]
+   ]
+  }
+ }
+}

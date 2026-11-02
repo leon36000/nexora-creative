@@ -1,0 +1,128 @@
+[
+ {
+  "type": "h3",
+  "nom": "t01-passage",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5000,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. Handheld camera floating inside a dense space battle above the cloud tops of the Earth: three dark grey angular defender fighters scream past the lens from left to right at tremendous speed, firing streams of orange tracer fire, heavy motion blur, explosions flashing in the background, the camera whipping to follow them. No text, no logos.\n\noverall_soundscape: Three fighters roar past with a doppler whoosh, rapid cannon bursts, distant explosions.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "t02-poursuite",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5001,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. Chase camera right behind a dark grey defender fighter weaving through a field of burning wreckage above the Earth, firing orange tracers at a black angular enemy craft ahead; the enemy craft explodes into a fireball and shrapnel sprays toward the lens. Violent handheld shake, motion blur. No text, no logos.\n\noverall_soundscape: Engine roar, rapid cannon fire, a sharp explosion, debris clattering.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "t03-torpilles",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5002,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. Dozens of torpedoes launch in sequence from vertical tubes along the armoured spine of a huge gunmetal defender capital ship, each leaving a bright engine flare and a trail of white smoke, curving away in a swarm toward a distant dark crescent mothership above the Earth. Low angle, the camera rising slowly. No text, no logos.\n\noverall_soundscape: A rapid series of heavy launch thumps, hissing rocket motors, rumble of the ship.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "t04-explosion",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5003,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. An angular enemy craft explodes right in front of the camera above the Earth: an enormous orange-white fireball fills the frame, burning debris, sparks and smoke fly straight into the lens, the camera is knocked back by the blast with violent shake. No text, no logos.\n\noverall_soundscape: A huge close explosion, crackling fire, debris hitting the camera, a deep sub boom.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "t05-onde-choc",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5004,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. From high orbit: a colossal explosion detonates above the Earth, a flat ring-shaped shockwave of white-blue light expands across space over the cloud tops, hundreds of tiny defender ships silhouetted against the flash, debris racing outward. No text, no logos.\n\noverall_soundscape: A colossal deep boom rolling in, a roaring shockwave, then rumbling.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "t06-tourelle",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5005,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. Close-up on the hull of a gunmetal battleship: a massive twin-barrel gun turret swings toward camera and fires rapidly, huge orange-white muzzle flashes, blast smoke, recoil, sparks, the Earth's cloud-covered surface far below. Handheld shake on each shot. No text, no logos.\n\noverall_soundscape: Deafening cannon blasts with heavy recoil clanks, mechanical turret whine.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "t07-essaim",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5006,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. Wide shot: hundreds of black angular enemy craft dive like a swarm onto a long wall of defender warships above the Earth, the defenders answer with a dense curtain of orange tracer fire and blue plasma bolts, explosions sparkling across the formation. The camera pans fast to follow the dive. No text, no logos.\n\noverall_soundscape: A dense roar of battle, thousands of cannon shots crackling, explosions rumbling in waves.\n\nnon_diegetic_music: N/A"
+ }
+]

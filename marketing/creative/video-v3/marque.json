@@ -1,0 +1,36 @@
+{
+ "_note": "Seul endroit où vivent le nom, le slogan et les textes de la promo V3 : le nom et le logo de l'entreprise vont changer, il suffit de modifier ce fichier puis de relancer monter_v3.py (aucun texte n'est dans les images générées).",
+ "marque": "NEXORA",
+ "produit": "CREATIVE",
+ "couleurs": {"encre": [10, 10, 14], "os": [245, 244, 239], "brume": [168, 168, 182], "signal": [255, 90, 31]},
+ "carton_fin": "mosaique",
+ "polices": {"titre": "geist-latin-wght-normal.woff2", "texte": "inter-latin-wght-normal.woff2", "dossier": "~/Desktop/NexoraSite/web/src/fonts"},
+ "langues": {
+  "fr": {
+   "invite": "Décris ta scène : ce qu’on voit, ce qui bouge, la caméra…",
+   "prompt": "Des milliers de vaisseaux défendent la Terre. Tirs traçants, explosions, épaves en feu. Caméra à l’épaule.",
+   "bouton": "Tourner",
+   "rendu": "Rendu en cours",
+   "creations": "Tes créations",
+   "etiquette": "VIDÉO · MINIMAX H3 · 1344×768",
+   "carton_1": "Tu l’imagines.",
+   "carton_2": "Le studio le tourne.",
+   "slogan": "Tu l’imagines. Le studio le tourne.",
+   "sous_titre": "Image, vidéo et son par IA, dans ton navigateur.",
+   "mentions": "Images et sons 100 % générés par IA avec Nexora Creative · MiniMax H3 · Qwen-Image · MiniMax-Music3"
+  },
+  "en": {
+   "invite": "Describe your scene: what we see, what moves, the camera…",
+   "prompt": "Thousands of ships defend the Earth. Tracer fire, explosions, burning wrecks. Handheld camera.",
+   "bouton": "Shoot",
+   "rendu": "Rendering",
+   "creations": "Your creations",
+   "etiquette": "VIDEO · MINIMAX H3 · 1344×768",
+   "carton_1": "You imagine it.",
+   "carton_2": "The studio shoots it.",
+   "slogan": "You imagine it. The studio shoots it.",
+   "sous_titre": "AI image, video and sound, in your browser.",
+   "mentions": "Images and sound 100% AI-generated with Nexora Creative · MiniMax H3 · Qwen-Image · MiniMax-Music3"
+  }
+ }
+}

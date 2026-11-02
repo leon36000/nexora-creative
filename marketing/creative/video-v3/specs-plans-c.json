@@ -1,0 +1,40 @@
+[
+ {
+  "type": "h3",
+  "nom": "t08-tourelle",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5000,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k11-tourelle-311.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. Low angle on the battleship deck: the massive triple-barrel turret fires again and again, each shot a blinding orange-white muzzle blast with an expanding ring of smoke and a violent recoil, glowing shells streaking away into space, sparks raining on the deck; the camera shakes hard with every shot, handheld. No text, no logos.\n\noverall_soundscape:\nDeafening heavy cannon blasts, metallic recoil clanks, pressure thumps, debris rattling on the deck.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "t09-onde-choc",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 5001,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k12-onde-choc-312.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. The ring-shaped shockwave of white-blue light keeps expanding across space above the Earth, burning debris races outward past the line of defender warships, the light slowly fades to reveal the planet; the camera drifts slowly forward, then shakes as the wave passes. No text, no logos.\n\noverall_soundscape:\nA colossal deep boom rolling in, a roaring shockwave washing over, then a low rumble fading.\n\nnon_diegetic_music:\nN/A"
+ }
+]

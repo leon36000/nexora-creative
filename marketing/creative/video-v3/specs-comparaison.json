@@ -1,0 +1,51 @@
+[
+ {
+  "type": "h3",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage of a colossal space battle in low Earth orbit, filmed on a large-format film camera with anamorphic lenses, real exposure and fine film grain. Hundreds of matte gunmetal defender warships of original design hold a vast wall formation above the curved night side of the Earth, city lights glowing through thin cloud layers far below and the thin blue glow of the atmosphere along the horizon. Dense streams of orange-white tracer fire and blue plasma bolts criss-cross the black void toward a swarm of angular dark enemy craft. In the foreground a defender frigate is struck amidships: a blinding orange-white fireball blossoms, hull plates and burning debris tumble outward through billowing grey smoke, and secondary explosions ripple along its spine. The camera is handheld, tracking fast to the left with violent shake as the shockwave passes, motion blur on the debris flying past the lens, anamorphic lens flares streaking horizontally across the frame. No text, no logos.\n\noverall_soundscape: A deep sub-bass detonation rolls through the frame, metal shrapnel crackles and pings, heavy cannons thud in rapid bursts, plasma bolts whine past, and a roaring shockwave rumble swells and fades.\n\nnon_diegetic_music: N/A",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 7777,
+  "sortie": "~/nexora-creative-data/promo/v3/comparaison",
+  "nom": "A-officiel-ref2va-int8-24",
+  "checkpoint": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+  "etapes": 24,
+  "ref": true,
+  "echantillonneur": "res_multistep"
+ },
+ {
+  "type": "h3",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage of a colossal space battle in low Earth orbit, filmed on a large-format film camera with anamorphic lenses, real exposure and fine film grain. Hundreds of matte gunmetal defender warships of original design hold a vast wall formation above the curved night side of the Earth, city lights glowing through thin cloud layers far below and the thin blue glow of the atmosphere along the horizon. Dense streams of orange-white tracer fire and blue plasma bolts criss-cross the black void toward a swarm of angular dark enemy craft. In the foreground a defender frigate is struck amidships: a blinding orange-white fireball blossoms, hull plates and burning debris tumble outward through billowing grey smoke, and secondary explosions ripple along its spine. The camera is handheld, tracking fast to the left with violent shake as the shockwave passes, motion blur on the debris flying past the lens, anamorphic lens flares streaking horizontally across the frame. No text, no logos.\n\noverall_soundscape: A deep sub-bass detonation rolls through the frame, metal shrapnel crackles and pings, heavy cannons thud in rapid bursts, plasma bolts whine past, and a roaring shockwave rumble swells and fades.\n\nnon_diegetic_music: N/A",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 7777,
+  "sortie": "~/nexora-creative-data/promo/v3/comparaison",
+  "nom": "B-fasth3-nvfp4-8",
+  "checkpoint": "fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors",
+  "etapes": 8,
+  "decalage": [
+   10,
+   3
+  ],
+  "echantillonneur": "res_multistep"
+ },
+ {
+  "type": "h3",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action IMAX footage of a colossal space battle in low Earth orbit, filmed on a large-format film camera with anamorphic lenses, real exposure and fine film grain. Hundreds of matte gunmetal defender warships of original design hold a vast wall formation above the curved night side of the Earth, city lights glowing through thin cloud layers far below and the thin blue glow of the atmosphere along the horizon. Dense streams of orange-white tracer fire and blue plasma bolts criss-cross the black void toward a swarm of angular dark enemy craft. In the foreground a defender frigate is struck amidships: a blinding orange-white fireball blossoms, hull plates and burning debris tumble outward through billowing grey smoke, and secondary explosions ripple along its spine. The camera is handheld, tracking fast to the left with violent shake as the shockwave passes, motion blur on the debris flying past the lens, anamorphic lens flares streaking horizontally across the frame. No text, no logos.\n\noverall_soundscape: A deep sub-bass detonation rolls through the frame, metal shrapnel crackles and pings, heavy cannons thud in rapid bursts, plasma bolts whine past, and a roaring shockwave rumble swells and fades.\n\nnon_diegetic_music: N/A",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 7777,
+  "sortie": "~/nexora-creative-data/promo/v3/comparaison",
+  "nom": "C-prism-10eros-turbo-8",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "ref": true,
+  "echantillonneur": "euler"
+ }
+]

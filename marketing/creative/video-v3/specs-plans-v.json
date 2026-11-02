@@ -1,0 +1,154 @@
+[
+ {
+  "type": "h3",
+  "nom": "p01-orbite-nuit-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6000,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k01-orbite-nuit-101-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. Silent wide shot from high orbit over the night side of the Earth. The camera drifts forward very slowly. Hundreds of tiny dark warships hold a long wall formation above the planet, their small blue engine lights flickering. Golden city lights twinkle under thin moving cloud layers, the thin blue line of the atmosphere glows, and the sunrise flare on the right edge slowly grows brighter. Vertical framing. No text, no logos.\n\noverall_soundscape:\nNear silence: a very low hum of deep space and a faint distant radio crackle.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p02-mur-flotte-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6001,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k02-mur-flotte-102-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. The camera glides slowly along the flank of the kilometre-long battleship in the foreground, revealing rows upon rows of warships stretching to the horizon above the cloud-covered Earth. A wave of engine ignitions ripples through the formation, blue-white engine flares lighting up one after another as the whole fleet starts to move forward together. Vertical framing. No text, no logos.\n\noverall_soundscape:\nA deep rumbling of colossal engines swelling one after another, metallic hull groans, a low resonant thrum.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p03-vague-ennemie-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6002,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k03-vague-ennemie-103-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. The black swarm of thousands of small angular enemy craft pours toward the camera at great speed, filling more and more of the frame, while the colossal crescent mothership looms behind, its red veins pulsing. Handheld camera with nervous shake, motion blur on the closest craft streaking past. Vertical framing. No text, no logos.\n\noverall_soundscape:\nA rising roar of thousands of engines like an insect swarm, a deep ominous drone, sharp whooshes as craft pass close.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p04-bordee-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6003,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k04-bordee-104-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. The battleship's broadside fires again and again: muzzle flashes ripple down the whole flank in sequence, thick clouds of grey smoke burst out and drift, heavy tracer shells streak away into black space. The camera shakes violently with every salvo, handheld. Vertical framing. No text, no logos.\n\noverall_soundscape:\nThunderous cannon salvos in rapid sequence, deep concussive booms, metallic clanks of reloading, rumbling smoke.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p07-pilote-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6004,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k07-pilote-107-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. Close-up, handheld: the pilot's face is lit by flickering orange explosion light, she clenches her jaw, her eyes track something passing fast outside, then she exhales sharply; the cockpit vibrates and reflections of tracer fire slide over the glass. Vertical framing. No text, no logos.\n\noverall_soundscape:\nHeavy breathing inside the helmet, muffled explosions outside, cockpit rattle, a short alarm beep.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p08-vaisseau-mere-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6005,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k08-vaisseau-mere-108-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. A chain of gigantic explosions races along the hull of the colossal crescent mothership above the Earth: fireballs burst one after another, armour plates and burning debris blast outward, rings of shockwave light expand, the hull starts to crack open. Slow camera push-in with heavy shake. Vertical framing. No text, no logos.\n\noverall_soundscape:\nColossal detonations one after another, deep sub-bass booms, metal tearing, a roaring shockwave.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p09-rupture-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6006,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k09-rupture-109-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. The two halves of the broken cruiser drift apart in slow motion, secondary explosions burst from the inside, fire and burning debris spray toward the camera, sparks and hull plates tumble past the lens, the glowing atmosphere of the Earth below. Vertical framing. No text, no logos.\n\noverall_soundscape:\nDeep metal groaning, crackling fire, rumbling secondary explosions, debris pinging off the camera.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "p10-aube-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 6007,
+  "sortie": "~/nexora-creative-data/promo/v3/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v3/cles/k10-aube-110-v.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the ships, the planet and the lighting.\n\nsummary:\n[reference generation] A single continuous shot of a space battle above the Earth that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, ship designs, planet and lighting of the first frame are kept.\n\ndetailed_description:\nLive-action IMAX footage from a 2026 science-fiction blockbuster, large-format film camera with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light against hot orange-white fire, fine film grain, motion blur. Original ship designs. \n[Shot 1] The shot begins from <Picture 1>. Quiet aftermath: the sun rises over the Earth's horizon, warm golden light slowly floods the frame, a huge anamorphic lens flare spreads, burning wreckage tumbles slowly in the foreground, the surviving fleet stays silhouetted in formation. Vertical framing. No text, no logos.\n\noverall_soundscape:\nNear silence, a soft low hum, distant crackle of cooling metal.\n\nnon_diegetic_music:\nN/A"
+ }
+]

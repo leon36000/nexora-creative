@@ -1,0 +1,82 @@
+[
+ {
+  "type": "image",
+  "nom": "k01-orbite-nuit-101-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Silent wide shot from high orbit over the night side of planet Earth: glowing golden city lights spread across continents under thin cloud layers, the thin blue line of the atmosphere curving along the horizon, a razor sliver of sunrise on the far edge. In the foreground orbit, a long wall of hundreds of tiny dark warship silhouettes stretches into the distance, each with a faint blue engine glow, dwarfed by the planet. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 101,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k02-mur-flotte-102-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Low Earth orbit above the bright day side of the planet, layered white cloud systems and blue ocean far below. Hundreds of matte gunmetal defender warships hold a vast battle formation stretching to the horizon, rows upon rows receding into haze. In the foreground a kilometre-long capital battleship, its flank a city of armour plates, gun batteries and thousands of tiny lit windows, fills the left third of the frame. Hard sunlight rakes across the hulls. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 102,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k03-vague-ennemie-103-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Deep space beyond the Moon: a black storm of thousands of small angular dark enemy craft pours out of the darkness toward camera, like a swarm of locusts, faintly rim-lit by a distant sun. Behind them looms a colossal obsidian crescent-shaped mothership, tens of kilometres across, its underside veined with dim red glowing lines. Ominous, overwhelming scale. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 103,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k04-bordee-104-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Low-angle shot along the flank of a kilometre-long defender battleship as its entire broadside of heavy turret batteries fires at once: dozens of orange-white muzzle flashes and blast clouds of grey smoke ripple down the hull, tracer shells streaking away into black space. The curved blue rim of Earth with cloud layers fills the bottom of the frame. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 104,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k07-pilote-107-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Tight close-up of a young female fighter pilot inside a dark cockpit, wearing a matte grey flight helmet with the visor raised, face lit by flickering orange explosion light from outside, sweat on her skin, intense focused eyes, reflections of tracer fire in the glass beside her. Shallow depth of field. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 107,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k08-vaisseau-mere-108-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Above the curve of Earth, a colossal obsidian crescent-shaped enemy mothership, tens of kilometres long, is struck by a chain of defender torpedoes: huge orange-white explosions erupt in a line along its armoured hull, fire and debris blasting outward into space, shockwave rings of light. Dozens of tiny defender ships flying past for scale. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 108,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k09-rupture-109-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. A defender heavy cruiser breaking apart in low orbit: its long hull snapped in two in the middle, a massive internal fireball bursting from the break, burning debris, hull plates and sparks spraying outward, thick grey smoke, the bright cloud-covered Earth and the glowing atmosphere below. Dramatic backlight. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 109,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ },
+ {
+  "type": "image",
+  "nom": "k10-aube-110-v",
+  "prompt": "Photorealistic still frame from a 2026 Hollywood science-fiction blockbuster, shot on IMAX 65mm film with anamorphic lenses, real exposure, deep blacks, cold steel-blue space light, warm orange-white highlights, fine film grain, volumetric light, enormous sense of scale. Original ship designs, no franchise. Aftermath above Earth: the sun rising over the planet's horizon flooding the frame with warm golden light, a thin blue atmosphere glow, slowly drifting burning wreckage and debris in the foreground, the surviving defender fleet silhouetted in formation against the sunrise. Hopeful, majestic, quiet. Vertical portrait composition for a phone screen, tall frame, the main subject centred, scale emphasised from top to bottom.",
+  "negatif": "text, letters, words, numbers, captions, subtitles, logo, watermark, signature, user interface, HUD text, Star Wars, Star Destroyer, X-wing, TIE fighter, Millennium Falcon, Halo, Mass Effect, Transformers, Battlestar Galactica, cartoon, anime, toy, plastic, miniature, model kit, video game, 3D render, CGI look, low detail, blurry, deformed",
+  "largeur": 960,
+  "hauteur": 1680,
+  "graine": 110,
+  "sortie": "~/nexora-creative-data/promo/v3/cles"
+ }
+]

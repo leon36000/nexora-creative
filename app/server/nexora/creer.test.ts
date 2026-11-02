@@ -54,9 +54,8 @@ describe('choix du moteur : MiniMax H3 seul, selon la licence, le territoire et 
 
   it('le moteur cinéma rend en 1344×768 avec son point de contrôle et ses étapes', () => {
     const c = corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true, qualite: 'rapide' }, 'P', 'h3-max');
-    expect(c).toMatchObject({ videoModel: 'h3-max', width: 1344, height: 768, withAudio: true, steps: 24 });
-    expect(c.checkpoint).toBe('minimax_h3_fl2va_pruned_int8_convrot.safetensors');
-    expect(c).not.toHaveProperty('refMode');
+    expect(c).toMatchObject({ videoModel: 'h3-max', width: 1344, height: 768, withAudio: true, steps: 8, refMode: true });
+    expect(c.checkpoint).toBe('10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors');
     expect(corpsRendu({ intention: 'renard', format: '16:9', duree: 5, son: true }, 'P', 'h3-fast')).toMatchObject({ videoModel: 'h3-fast', withAudio: true, steps: 8 });
   });
 });

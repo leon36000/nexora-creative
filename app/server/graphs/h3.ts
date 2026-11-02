@@ -153,11 +153,15 @@ export const H3_MODELS = {
 };
 
 /**
- * Nexora : points de contrôle FastH3 déjà distillés (DMD2) et quantifiés, qui remplacent le modèle de base + LoRA turbo.
- * Réglages du modèle (carte FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy) : 8 étapes, décalage sigma 10 / 3.
+ * Nexora : points de contrôle déjà distillés et quantifiés, qui remplacent le modèle de base + LoRA turbo.
+ * - FastH3 V2 (famille fl2va, recette « h3-fast ») : carte FastVideo/FastVideo-FastH3-8-Step-V2-NVFP4-Comfy, 8 étapes, 10 / 3.
+ * - 10Eros-Max × Singularity V2, turbo 8 étapes beta7 int8HQ (famille ref2va, recette « h3-max ») : dépôt
+ *   OliviaRossi/Minimax-h3_Singularity-x-10Eros-Max_PRISM, renommé avec « ref2va » sur pc1 ; carte 10Eros-Max : 8 étapes,
+ *   décalage 12 / 3, euler/simple. Retenu par la ronde de comparaison du 02/11/2026 (marketing/creative/video-v3).
  */
-export const H3_DISTILLED_CHECKPOINTS: Record<string, { steps: number; shiftVideo: number; shiftAudio: number }> = {
-  'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors': { steps: 8, shiftVideo: 10, shiftAudio: 3 },
+export const H3_DISTILLED_CHECKPOINTS: Record<string, { family: 'fl2va' | 'ref2va'; steps: number; shiftVideo: number; shiftAudio: number; sampler?: string }> = {
+  'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors': { family: 'fl2va', steps: 8, shiftVideo: 10, shiftAudio: 3 },
+  '10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors': { family: 'ref2va', steps: 8, shiftVideo: 12, shiftAudio: 3, sampler: 'euler' },
 };
 
 /** Frame counts must sit on the model's 17k+5 grid (5, 22, ..., 124, ..., 362). */
@@ -180,7 +184,8 @@ export function buildH3Graph(p: H3Params): Record<string, unknown> {
   const family = useRef ? 'ref2va' : 'fl2va';
   // Checkpoint override is honored only within the correct model family —
   // an fl2va file can't drive the ref graph and vice versa.
-  const distilled = !useRef && p.checkpoint ? H3_DISTILLED_CHECKPOINTS[p.checkpoint] : undefined;
+  const candidat = p.checkpoint ? H3_DISTILLED_CHECKPOINTS[p.checkpoint] : undefined;
+  const distilled = candidat && candidat.family === family ? candidat : undefined;
   const unetName = distilled
     ? p.checkpoint!
     : p.checkpoint && p.checkpoint.toLowerCase().includes(family)
@@ -204,7 +209,7 @@ export function buildH3Graph(p: H3Params): Record<string, unknown> {
     c: { class_type: 'CLIPLoader', inputs: { clip_name: H3_MODELS.clip, type: 'minimax', device: 'default' } },
     vv: { class_type: 'VAELoader', inputs: { vae_name: H3_MODELS.videoVae } },
     va: { class_type: 'VAELoader', inputs: { vae_name: H3_MODELS.audioVae } },
-    sampler: { class_type: 'KSamplerSelect', inputs: { sampler_name: 'res_multistep' } },
+    sampler: { class_type: 'KSamplerSelect', inputs: { sampler_name: distilled?.sampler ?? 'res_multistep' } },
     sched: { class_type: 'BasicScheduler', inputs: { model: [modelSrc, 0], scheduler: 'simple', steps, denoise: 1.0 } },
     noise: { class_type: 'RandomNoise', inputs: { noise_seed: p.seed } },
     guider: { class_type: 'BasicGuider', inputs: { model: [modelSrc, 0], conditioning: ['gen', 0] } },
@@ -264,7 +269,8 @@ export function buildH3Graph(p: H3Params): Record<string, unknown> {
   if (useRef) {
     // Reference mode: each ref is its own dynamic dotted input slot
     // (ref_images.ref_image_N), per the official r2v template wiring.
-    const refs = (p.refImages || []).slice(0, 4);
+    // Nexora : une photo de départ sur un point de contrôle ref2va devient la première référence (première image du plan).
+    const refs = (p.refImages?.length ? p.refImages : p.startImage ? [p.startImage] : []).slice(0, 4);
     refs.forEach((name, i) => {
       g[`ref${i}`] = { class_type: 'LoadImage', inputs: { image: name } };
       genInputs[`ref_images.ref_image_${i}`] = [`ref${i}`, 0];
