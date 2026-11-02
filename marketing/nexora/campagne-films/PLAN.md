@@ -116,7 +116,9 @@ des photos (image vers vidéo, `h3-fast`). Aucun nom de fabricant ni de puce à 
 votre bureau. » · « Vos données restent ici. » · « Installé et suivi par Nexora. » (à confirmer par l'offre réelle avant
 rendu) ; en : “An AI server in your office.” · “Your data stays here.” · “Set up and monitored by Nexora.”
 
-### (e) Surveillance IA v2 — 40 → 30/15 s · facile · GPU 0
+### (e) Surveillance IA v2 — FAIT (33,3 / 29,1 / 14,9 s) · note sévère 7,6 · `films/surveillance/` (brief généré par `fabriquer_brief.py`)
+Avec les plaques et la musique de la refonte (piste surv-v2 mesurée à 86,5 BPM) : ouverture sur la détection qui passe au rouge à 2,08 s sur le coup de musique, puis problème, détection d'entrepôt, alerte (pile : texto, courriel, tableau de bord, application), consigne, rapport. Livré : `site-medias/film-surveillance-v2-*`, masters dans `promo/montage/Nexora-Surveillance-IA-v2-*`. Faiblesses : voir `brief.json › revue`.
+Plan d'origine :
 Le film existant (`refonte-medias/montages/film-surveillance-*.json`) garde ses plans ; on remplace ses textes par le
 système `typo.py` (titres révélés, surtitres « DÉTECTION EN DIRECT » en mono, preuve avant 5 s), on recoupe sur la grille de sa
 musique et on ajoute les versions 9:16 avec bande de texte haute. Un brief qui pointe vers les plaques existantes suffit.
@@ -130,7 +132,9 @@ Personnages : générer d'abord une banque d'entités (portraits détourés sur 
 panorama recadré en 3 angles), images clés avant toute vidéo, identité jugée par paires avec un seuil de fidélité (pas par
 similarité d'empreintes), petit banc de continuité.
 
-### (g) Modèles et API — 30/15 s · facile · GPU 0
+### (g) Modèles et API — FAIT MAIS NON PUBLIÉ (26,7 / 15,5 s) · note sévère 7,1 < 8 (porte) et < 7,5 · `films/modeles/`
+Le catalogue réel du site est vide et l'API n'est pas ouverte : le film montre un terminal en code (étiqueté Aperçu) et les captures réelles de /modeles. Non livré dans site-medias ni dans le manifeste ; à refaire quand un modèle est publié (fiche, filtres, appel réels). Brouillons : `~/nexora-creative-data/promo/v5/modeles/brouillons/`. Accès au site : `socat TCP-LISTEN:18081 … EXEC:"ssh -T pc5-proxmox nc 192.168.1.121 80"` (le `ssh -L` est refusé par le nœud).
+Plan d'origine :
 Réel : un vrai appel `curl` à la passerelle (terminal filmé en code, clé masquée), la réponse en streaming, la fiche de
 résidence des données d'un modèle sur le site. Le catalogue public est encore en brouillon : ne montrer que des modèles en
 service, ou étiqueter. Textes fr : « Une clé. Plusieurs modèles. » · « Hébergés au Québec ou ailleurs : c'est écrit. » ;
@@ -156,3 +160,9 @@ Ordre d'exécution conseillé pour les agents suivants : (e) puis (g) (aucun GPU
   received undefined », module `WorkflowResumeExecution`) pour une exécution lancée depuis l'éditeur.
 - Les blocs API refusent les adresses internes (`EGRESS_ALLOWED_HOSTS`) : pas d'envoi vers Mailpit sans réglage.
 - Workflow filmé : `films/workstudio/workflow.py` (créé par l'API interne avec `api.mjs`), capture : `capturer.mjs`.
+
+## 6. Extensions de l'usine ajoutées avec les films (e) et (g)
+- `plaque` / `plaque_v` : `{l}` = langue du rendu (plaques à texte incrusté, ex. boîtes de détection fr/en).
+- `voile` / `voile_v` : `{"v": 0.78, "h": 0.5, "haut": false}` assombrit le bas (ou le haut) d'un plan pour le texte.
+- typographie : `y_v` (position d'un surtitre en 9:16), `zone_v` (zone d'un texte en 9:16) ; `images_v` (captures propres au 9:16) ; `carte` / `carte_v` (rectangle de la carte d'un segment `ecran`).
+- limiteur de crête abaissé (0,76) : crête vraie ≤ −1,5 dBTP après l'AAC. Manque encore : un type de segment « terminal » natif (ici : images JPEG écrites par `films/modeles/terminal.py`), une couche d'interface dessinée en code sur un plan, et une écoute humaine de la musique.

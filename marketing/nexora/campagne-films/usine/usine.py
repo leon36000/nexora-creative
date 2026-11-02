@@ -51,6 +51,10 @@ def charger(brief_f):
 
 
 def captures(b, etiquette):
+    """« etiquette » : « repos » (tous les fichiers *-repos.jpg) ou « fr1:exec » (fichiers fr1-*-exec.jpg : une prise nommée par la capture)."""
+    if ":" in etiquette:
+        prise, et = etiquette.split(":", 1)
+        return sorted(str(f) for f in X(b["captures"]).glob(f"{prise}-*-{et}.jpg"))
     return sorted(str(f) for f in X(b["captures"]).glob(f"*-{etiquette}.jpg"))
 
 
@@ -75,11 +79,12 @@ def valider(b):
     for nom, seg in b["segments"].items():
         if seg.get("images"):
             for t0, t1, et, *_ in seg["images"]:
-                if not captures(b, et):
-                    v.append((f"segments.{nom}.images", f"aucune capture « {et} »", f"des fichiers *-{et}.jpg dans {b['captures']}",
-                              "lancer l'étape captures ou corriger l'étiquette"))
+                for l in langues:  # « {l} » dans l'étiquette = langue du rendu (captures d'interface dans chaque langue)
+                    if not captures(b, et.replace("{l}", l)):
+                        v.append((f"segments.{nom}.images", f"aucune capture « {et.replace('{l}', l)} »", f"des fichiers dans {b['captures']}",
+                                  "lancer l'étape captures ou corriger l'étiquette"))
         for k in ("plaque", "cle"):
-            if seg.get(k) and not X(seg[k]).exists():
+            if seg.get(k) and not all(X(seg[k].replace("{l}", l)).exists() for l in langues):
                 v.append((f"segments.{nom}.{k}", "fichier absent", seg[k], "lancer l'étape plaques"))
         if seg.get("en_preparation") and not any(x.get("style") == "prepa" for x in seg.get("textes", [])):
             v.append((f"segments.{nom}", "fonction non livrée montrée sans étiquette", "un texte de style « prepa »",
@@ -140,8 +145,13 @@ def montage(b):
             seg.update({"nom": f"{nom}-{nv}" if d != b["segments"][nom]["d"] else nom, "d": round(d, 4)})
             if seg.get("type") == "ecran":
                 seg["type"] = "ui"
-            if seg.get("images"):
-                seg["images"] = resoudre_images(b, seg["images"])
+            for k in ("images", "images_v"):
+                if seg.get(k):
+                    if any("{l}" in x[2] for x in seg[k]):  # une liste d'images par langue (interface capturée dans chaque langue)
+                        seg[k + "_l"] = {l: resoudre_images(b, [[a, z, e.replace("{l}", l), *r] for a, z, e, *r in seg[k]]) for l in b["langues"]}
+                        seg[k] = seg[k + "_l"][b["langues"][0]]
+                    else:
+                        seg[k] = resoudre_images(b, seg[k])
             for k in ("textes", "sfx"):
                 for x in seg.pop(k, []):
                     if x["t"] >= d:

@@ -13,6 +13,7 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 ICI = Path(__file__).resolve().parent
@@ -21,9 +22,12 @@ sys.path.insert(0, str(ICI))
 import monter_v4 as M  # noqa: E402
 from typo import Typo, ease_io, ease_out  # noqa: E402
 
-VERSION_RENDU = "v5.3"  # changer pour invalider le cache des segments
+VERSION_RENDU = "v5.6"  # changer pour invalider le cache des segments
 TY = None
 _UI_V4 = M.image_ui
+_PLAN_V4 = M.image_plan
+_RENDRE_V4 = M.rendre_segment
+LANGUE = "fr"
 
 
 def configurer(marque, produit, textes, cache):
@@ -36,6 +40,8 @@ def configurer(marque, produit, textes, cache):
     M.CACHE = Path(cache).expanduser()
     M.poser_textes = poser_textes
     M.image_ui = image_ecran
+    M.image_plan = image_plan
+    M.rendre_segment = rendre_segment
     M.image_fin = image_fin
     TY = Typo(marque)
     if not getattr(M.mixer, "_v5", False):
@@ -47,11 +53,36 @@ def limiter_crete(mixer_v4):
     def mixer(m, segs, duree, sortie_wav):
         mixer_v4(m, segs, duree, sortie_wav)
         tmp = sortie_wav.with_suffix(".lim.wav")
-        M.ff(["-i", str(sortie_wav), "-af", "aresample=192000,alimiter=limit=0.8:level=false:attack=1:release=60,aresample=48000",
+        M.ff(["-i", str(sortie_wav), "-af", "aresample=192000,alimiter=limit=0.76:level=false:attack=1:release=60,aresample=48000",
               str(tmp)])
         tmp.replace(sortie_wav)
     mixer._v5 = True
     return mixer
+
+
+def rendre_segment(args):
+    """Mémorise la langue du rendu (args[2]) pour résoudre « {l} » dans les chemins de plaques (plaques à texte incrusté)."""
+    global LANGUE
+    LANGUE = args[2]
+    return _RENDRE_V4(args)
+
+
+def image_plan(seg, t, W, H, vertical, animatique):
+    """Plan H3 : « {l} » dans « plaque »/« plaque_v » = langue du rendu ; « voile » = {"v": 0,72, "h": 0,45, "haut": false} assombrit le
+    bas (ou le haut) du cadre en dégradé pour que le texte reste lisible sur l'image."""
+    seg = dict(seg)
+    for k in ("plaque", "plaque_v"):
+        if seg.get(k):
+            seg[k] = seg[k].replace("{l}", LANGUE)
+    im = _PLAN_V4(seg, t, W, H, vertical, animatique)
+    v = seg.get("voile_v" if vertical and seg.get("voile_v") else "voile")
+    if v:
+        h = v.get("h", 0.45)
+        y = np.linspace(0, 1, H, dtype=np.float32)
+        r = np.clip(((y - (1 - h)) / h) if not v.get("haut") else ((h - y) / h), 0, 1)
+        a = (v.get("v", 0.72) * r * r * (3 - 2 * r))[:, None, None]
+        im = Image.fromarray((np.asarray(im, np.float32) * (1 - a)).astype(np.uint8))
+    return im
 
 
 def poser_textes(im, textes, t_glob, L, vertical):
@@ -105,7 +136,10 @@ def curseur(d, x, y, s, presse):
 def image_ecran(seg, t, W, H, vertical):
     if seg.get("plein"):
         return _UI_V4(seg, t, W, H, vertical)
-    imgs = seg["images"]
+    imgs = seg["images_v"] if vertical and seg.get("images_v") else seg["images"]  # « images_v » : captures propres au 9:16
+    par_langue = seg.get("images_v_l" if vertical and seg.get("images_v") else "images_l")  # captures d'interface dans chaque langue
+    if par_langue and par_langue.get(LANGUE):
+        imgs = par_langue[LANGUE]
     f = imgs[0][1]
     for ti, fi in imgs:
         if t >= ti:

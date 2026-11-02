@@ -104,12 +104,13 @@ class Typo:
         W, H = im.size
         v = H > W
         d_tot = spec["d"]
+        zn = spec["zone_v"] if v and spec.get("zone_v") else spec.get("zone", "auto")  # « zone_v » : zone propre au 9:16
         style = spec.get("style", "titre")
         sortie = ease_io((u - (d_tot - 0.22)) / 0.22)  # 0 → 1 pendant les 0,22 dernières secondes
         alpha_g = 1 - sortie
         if alpha_g <= 0:
             return im
-        (x0, y0, x1, y1), align, vert = self.zone(spec.get("zone", "auto"), W, H)
+        (x0, y0, x1, y1), align, vert = self.zone(zn, W, H)
         if spec.get("align"):
             align = spec["align"]
         s = min(W, H)
@@ -120,7 +121,7 @@ class Typo:
 
         if style in ("titre", "pile", "impact"):
             base = {"titre": 0.095, "pile": 0.072, "impact": 0.11}[style] * (1.0 if v else 0.86) * echelle
-            if not v and spec.get("zone", "auto") in ("auto", "colonne"):
+            if not v and zn in ("auto", "colonne"):
                 base *= 0.74
             track = -0.02
             blocs = txt.split("|")  # « | » = retour à la ligne voulu
@@ -184,8 +185,10 @@ class Typo:
             lw = self.larg(f, t2, track)
             p = ease_out(u / 0.3)
             x = x0 if align == "gauche" else (x0 + x1 - lw) / 2
-            y = y0 - f.size * 2.2 if spec.get("zone", "auto") != "centre" else (y0 + y1) / 2
-            if spec.get("y") is not None:
+            y = y0 - f.size * 2.2 if zn != "centre" else (y0 + y1) / 2
+            if spec.get("y_v") is not None and v:  # position verticale propre au format 9:16 (fraction de la hauteur)
+                y = spec["y_v"] * H
+            elif spec.get("y") is not None:
                 y = spec["y"] * H
             a = int(255 * p)
             if style == "prepa":

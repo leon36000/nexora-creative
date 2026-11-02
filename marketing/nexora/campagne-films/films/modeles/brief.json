@@ -1,0 +1,1073 @@
+{
+ "_gabarit": "Généré par fabriquer_brief.py ; éditer le script, pas ce fichier.",
+ "film": "modeles",
+ "titre": "Modèles et API : une clé, plusieurs modèles",
+ "nom_fichier": "Modeles-et-API-film",
+ "produit": "MODÈLES ET API",
+ "date": "2026-11-02",
+ "marque": "../../marque.json",
+ "travail": "~/nexora-creative-data/promo/v5/modeles",
+ "captures": "~/nexora-creative-data/promo/v5/modeles/ui",
+ "concept": "Un appel d'API tapé, la réponse en continu (terminal en code, étiqueté Aperçu : l'API n'est pas ouverte), puis une seule ligne qui change pour changer de modèle ; ensuite la vraie page /modeles du site : une fiche par modèle, prix en dollars canadiens et hébergement affichés, filtres, et l'état réel du catalogue (en préparation).",
+ "public": "développeurs et responsables techniques de PME qui veulent un point d'accès unique à plusieurs modèles",
+ "formats": [
+  "16x9",
+  "9x16"
+ ],
+ "langues": [
+  "fr",
+  "en"
+ ],
+ "affiche": {
+  "t": 9.4,
+  "langue": "fr"
+ },
+ "note_manifeste": "Aperçu : l'API n'est pas ouverte et le catalogue est en préparation. Captures réelles de la page /modeles du site en ligne (français) ; terminal rendu en code d'après l'exemple d'appel de la page (clé masquée, adresse et identifiants de modèles fictifs, réponse figurée). Aucun prix ni mesure.",
+ "commandes": {
+  "plaques": "",
+  "captures": "node capturer.mjs ~/nexora-creative-data/promo/v5/modeles/ui && python3 terminal.py ~/nexora-creative-data/promo/v5/modeles/ui"
+ },
+ "musique": {
+  "fichier": "~/nexora-creative-data/promo/v5/modeles/audio/mod-musique-72.flac",
+  "brief": "musique.py (graine 72), mesurée : 128,0 BPM (temps 0,46875 s), intro calme 0-14 s, coup fort à 14,99 s (mesure 16), groove jusqu'à 29 s, respiration puis coup final à 36,47 s et queue jusqu'à 44 s.",
+  "bpm": 128.0,
+  "subdivision": 0.5,
+  "repere_source": 14.99
+ },
+ "segments": {
+  "s1": {
+   "type": "ecran",
+   "d": 4.6875,
+   "images": [
+    [
+     0,
+     4.6875,
+     "t1"
+    ]
+   ],
+   "images_v": [
+    [
+     0,
+     4.6875,
+     "t1v"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.5,
+     0.43,
+     0.93
+    ],
+    [
+     4.688,
+     0.5,
+     0.43,
+     0.87
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "carte_v": [
+    0.04,
+    0.3,
+    0.96,
+    0.72
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 4.6875,
+     "cle": "prepa",
+     "style": "prepa"
+    },
+    {
+     "t": 0.2,
+     "d": 4.3875,
+     "cle": "t_cle",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.25,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.42,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.59,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.76,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.93,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.1,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.27,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.44,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.61,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.98,
+     "type": "clic",
+     "duree": 0.15,
+     "db": -14
+    },
+    {
+     "t": 2.5,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -22
+    }
+   ],
+   "preuve": true
+  },
+  "s2": {
+   "type": "ecran",
+   "d": 3.75,
+   "images": [
+    [
+     0,
+     3.75,
+     "t2"
+    ]
+   ],
+   "images_v": [
+    [
+     0,
+     3.75,
+     "t2v"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.5,
+     0.43,
+     0.93
+    ],
+    [
+     3.75,
+     0.5,
+     0.43,
+     0.87
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "carte_v": [
+    0.04,
+    0.3,
+    0.96,
+    0.72
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 3.75,
+     "cle": "prepa",
+     "style": "prepa"
+    },
+    {
+     "t": 0.1,
+     "d": 3.55,
+     "cle": "t_ligne",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 1.0,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.14,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.28,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.42,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.56,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.5,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    },
+    {
+     "t": 2.28,
+     "type": "clic",
+     "duree": 0.15,
+     "db": -14
+    },
+    {
+     "t": 1.3,
+     "type": "montee",
+     "duree": 2.45,
+     "db": -27
+    }
+   ]
+  },
+  "s3": {
+   "type": "ecran",
+   "d": 3.75,
+   "carte": [
+    0.33,
+    0.27,
+    0.962,
+    0.73
+   ],
+   "carte_v": [
+    0.06,
+    0.4,
+    0.94,
+    0.68
+   ],
+   "entree": true,
+   "images": [
+    [
+     0,
+     3.75,
+     "page"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.295,
+     0.121,
+     0.45
+    ],
+    [
+     3.75,
+     0.295,
+     0.121,
+     0.42
+    ]
+   ],
+   "cadre_v": [
+    [
+     0.0,
+     0.295,
+     0.106,
+     0.4
+    ],
+    [
+     3.75,
+     0.295,
+     0.106,
+     0.38
+    ]
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 3.75,
+     "cle": "reel",
+     "style": "sur"
+    },
+    {
+     "t": 0.1,
+     "d": 3.55,
+     "cle": "t_fiche",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "impact",
+     "duree": 1.8,
+     "db": -23
+    }
+   ]
+  },
+  "s4": {
+   "type": "ecran",
+   "d": 4.2188,
+   "carte": [
+    0.33,
+    0.3,
+    0.962,
+    0.7
+   ],
+   "carte_v": [
+    0.06,
+    0.42,
+    0.94,
+    0.62
+   ],
+   "images": [
+    [
+     0,
+     4.2188,
+     "page"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     1.055,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     2.109,
+     0.777,
+     0.345,
+     0.26
+    ],
+    [
+     4.219,
+     0.777,
+     0.345,
+     0.26
+    ]
+   ],
+   "cadre_v": [
+    [
+     0.0,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     1.055,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     2.109,
+     0.777,
+     0.345,
+     0.26
+    ],
+    [
+     4.219,
+     0.777,
+     0.345,
+     0.26
+    ]
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 4.2188,
+     "cle": "reel",
+     "style": "sur"
+    },
+    {
+     "t": 0.1,
+     "d": 4.0188,
+     "cle": "t_prix",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.35,
+     "db": -24
+    },
+    {
+     "t": 2.1094,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ]
+  },
+  "s5": {
+   "type": "ecran",
+   "d": 5.1562,
+   "carte": [
+    0.33,
+    0.3,
+    0.962,
+    0.7
+   ],
+   "carte_v": [
+    0.06,
+    0.4,
+    0.94,
+    0.62
+   ],
+   "images": [
+    [
+     0,
+     5.1562,
+     "page"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.33,
+     0.43,
+     0.5
+    ],
+    [
+     2.062,
+     0.33,
+     0.43,
+     0.5
+    ],
+    [
+     2.836,
+     0.74,
+     0.455,
+     0.34
+    ],
+    [
+     5.156,
+     0.74,
+     0.455,
+     0.34
+    ]
+   ],
+   "cadre_v": [
+    [
+     0.0,
+     0.33,
+     0.43,
+     0.5
+    ],
+    [
+     2.062,
+     0.33,
+     0.43,
+     0.5
+    ],
+    [
+     2.836,
+     0.74,
+     0.455,
+     0.34
+    ],
+    [
+     5.156,
+     0.74,
+     0.455,
+     0.34
+    ]
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 5.1562,
+     "cle": "reel",
+     "style": "sur"
+    },
+    {
+     "t": 0.1,
+     "d": 2.4438,
+     "cle": "t_filtres",
+     "style": "titre"
+    },
+    {
+     "t": 2.6781,
+     "d": 2.3781,
+     "cle": "t_statut",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.35,
+     "db": -24
+    },
+    {
+     "t": 2.5781,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ]
+  },
+  "silence": {
+   "type": "noir",
+   "d": 0.4688
+  },
+  "fin": {
+   "type": "fin",
+   "d": 4.6875,
+   "t_marque": 0.9375,
+   "sfx": [
+    {
+     "t": 0.9375,
+     "type": "impact",
+     "duree": 1.6,
+     "db": -20
+    }
+   ]
+  },
+  "s1c": {
+   "type": "ecran",
+   "d": 2.8125,
+   "images": [
+    [
+     0,
+     2.8125,
+     "t1"
+    ]
+   ],
+   "images_v": [
+    [
+     0,
+     2.8125,
+     "t1v"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.5,
+     0.43,
+     0.93
+    ],
+    [
+     4.688,
+     0.5,
+     0.43,
+     0.87
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "carte_v": [
+    0.04,
+    0.3,
+    0.96,
+    0.72
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.8125,
+     "cle": "prepa",
+     "style": "prepa"
+    },
+    {
+     "t": 0.15,
+     "d": 2.6125,
+     "cle": "t_cle",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.15,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.27,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.39,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.51,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.63,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.75,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.87,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.99,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.25,
+     "type": "clic",
+     "duree": 0.15,
+     "db": -14
+    }
+   ],
+   "preuve": true
+  },
+  "s2c": {
+   "type": "ecran",
+   "d": 2.8125,
+   "images": [
+    [
+     0,
+     2.8125,
+     "t2"
+    ]
+   ],
+   "images_v": [
+    [
+     0,
+     2.8125,
+     "t2v"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.5,
+     0.43,
+     0.93
+    ],
+    [
+     3.75,
+     0.5,
+     0.43,
+     0.87
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "carte_v": [
+    0.04,
+    0.3,
+    0.96,
+    0.72
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.8125,
+     "cle": "prepa",
+     "style": "prepa"
+    },
+    {
+     "t": 0.1,
+     "d": 2.6125,
+     "cle": "t_ligne",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.6,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.72,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.84,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 0.96,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.08,
+     "type": "frappe",
+     "duree": 0.08,
+     "db": -24
+    },
+    {
+     "t": 1.9,
+     "type": "clic",
+     "duree": 0.15,
+     "db": -14
+    }
+   ]
+  },
+  "s3c": {
+   "type": "ecran",
+   "d": 2.8125,
+   "carte": [
+    0.33,
+    0.27,
+    0.962,
+    0.73
+   ],
+   "carte_v": [
+    0.06,
+    0.4,
+    0.94,
+    0.68
+   ],
+   "entree": true,
+   "images": [
+    [
+     0,
+     2.8125,
+     "page"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.295,
+     0.121,
+     0.45
+    ],
+    [
+     3.75,
+     0.295,
+     0.121,
+     0.42
+    ]
+   ],
+   "cadre_v": [
+    [
+     0.0,
+     0.295,
+     0.106,
+     0.4
+    ],
+    [
+     3.75,
+     0.295,
+     0.106,
+     0.38
+    ]
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.8125,
+     "cle": "reel",
+     "style": "sur"
+    },
+    {
+     "t": 0.1,
+     "d": 2.6125,
+     "cle": "t_fiche",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "impact",
+     "duree": 1.8,
+     "db": -23
+    }
+   ]
+  },
+  "s4c": {
+   "type": "ecran",
+   "d": 3.2812,
+   "carte": [
+    0.33,
+    0.3,
+    0.962,
+    0.7
+   ],
+   "carte_v": [
+    0.06,
+    0.42,
+    0.94,
+    0.62
+   ],
+   "images": [
+    [
+     0,
+     3.2812,
+     "page"
+    ]
+   ],
+   "cadre": [
+    [
+     0.0,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     0.82,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     1.641,
+     0.777,
+     0.345,
+     0.26
+    ],
+    [
+     3.281,
+     0.777,
+     0.345,
+     0.26
+    ]
+   ],
+   "cadre_v": [
+    [
+     0.0,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     0.82,
+     0.5,
+     0.345,
+     0.26
+    ],
+    [
+     1.641,
+     0.777,
+     0.345,
+     0.26
+    ],
+    [
+     3.281,
+     0.777,
+     0.345,
+     0.26
+    ]
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 3.2812,
+     "cle": "reel",
+     "style": "sur"
+    },
+    {
+     "t": 0.1,
+     "d": 3.0812,
+     "cle": "t_prix",
+     "style": "titre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.35,
+     "db": -24
+    },
+    {
+     "t": 1.6406,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ]
+  }
+ },
+ "versions": {
+  "long": {
+   "cible": 30,
+   "ordre": [
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "silence",
+    "fin"
+   ],
+   "musique": {
+    "repere_segment": "s3",
+    "arret_segment": "silence",
+    "silence": "silence",
+    "queue": {
+     "segment": "fin",
+     "source": 35.532,
+     "db": -5
+    }
+   }
+  },
+  "15": {
+   "cible": 15,
+   "ordre": [
+    "s1c",
+    "s2c",
+    "s3c",
+    "s4c",
+    {
+     "id": "silence"
+    },
+    {
+     "id": "fin",
+     "d": 3.2812,
+     "t_marque": 0.7031
+    }
+   ],
+   "musique": {
+    "repere_segment": "s3c",
+    "arret_segment": "silence",
+    "silence": "silence",
+    "queue": {
+     "segment": "fin",
+     "source": 35.767,
+     "db": -5
+    }
+   }
+  }
+ },
+ "textes": {
+  "fr": {
+   "prepa": "Aperçu",
+   "t_cle": "Une clé.|Plusieurs *modèles.*",
+   "t_ligne": "Changez de modèle.|Changez *une ligne.*",
+   "t_fiche": "Une fiche|par *modèle.*",
+   "t_prix": "Prix en *dollars canadiens.*|Hébergement *affiché.*",
+   "t_filtres": "Filtrez par *capacité, licence, prix.*",
+   "t_statut": "Le catalogue est en *préparation.*",
+   "slogan": "Une clé.|Plusieurs *modèles.*",
+   "sous_titre": "Modèles et API par Nexora.",
+   "mentions": "Aperçu : l'API n'est pas encore ouverte · captures de la page Modèles et API · clé, adresse et modèles fictifs"
+  },
+  "en": {
+   "prepa": "Preview",
+   "t_cle": "One key.|Many *models.*",
+   "t_ligne": "Swap the model.|Change *one line.*",
+   "t_fiche": "A spec sheet|per *model.*",
+   "t_prix": "Prices in *Canadian dollars.*|Hosting *shown.*",
+   "t_filtres": "Filter by *capability, license, price.*",
+   "t_statut": "The catalogue is *in preparation.*",
+   "slogan": "One key.|Many *models.*",
+   "sous_titre": "Models and API by Nexora.",
+   "mentions": "Preview: the API is not open yet · screen captures of the Models and API page (French) · fictional key, address and models"
+  }
+ },
+ "revue": {
+  "date": "2026-11-02",
+  "grille_severe": {
+   "concept": 7,
+   "preuve_rapide": 6.5,
+   "textes": 7.5,
+   "rythme": 6.5,
+   "son": 6,
+   "finition": 7,
+   "authenticite": 9
+  },
+  "note": 7.1,
+  "livre": false,
+  "mesures": "long 26,7 s (PLAN : 30 s), 15 s = 15,5 s ; réponse en continu à 2,5 s (illustrative, étiquetée Aperçu) ; coup de musique au début de la page réelle (8,4 s) ; -14,7 LUFS ; plan moyen 3,8 s",
+  "faiblesses": [
+   "sous le seuil de livraison (7,5) : non publié dans site-medias ni dans le manifeste",
+   "le catalogue du site est vide (aucun modèle publié) : pas de fiche, de filtre en action ni de prix à filmer ; le film montre des cartes de texte sur fond sombre, d'aspect semblable",
+   "la preuve du début est un terminal en code (appel et réponse figurés), pas un appel réel : l'API n'est pas ouverte",
+   "captures du site en français dans la version anglaise (mentionné au carton) ; en-tête du site non montré (nom de marque et adresse ts.net)",
+   "musique et bruitages jugés aux chiffres, personne n'a écouté ; version 9:16 : grand vide sous les cartes",
+   "pour passer 7,5 : attendre un modèle publié et filmer sa fiche réelle, les filtres et un appel réel"
+  ]
+ }
+}
