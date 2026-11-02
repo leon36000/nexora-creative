@@ -1,0 +1,11 @@
+# Plaques de la vidéo vitrine v3 (toutes déjà tournées, MiniMax H3, 1344×768, 24 i/s ; aucune nouvelle génération)
+# Dossier : ~/nexora-creative-data/site-medias-travail/plans/   — ordre du montage, durée à l'écran (30 i/s)
+surv/entrepot-16x9-v1.mp4       3,8 s  VOIT   caméra de plafond, personne suivie par gabarit (hud.suivre), palette
+surv/stationnement-16x9-v1.mp4  3,6 s  VOIT   véhicules verrouillés, personne (images clés du film Surveillance) → alerte orange
+recep/telephone-16x9-v1.mp4     2,1 s  ÉCOUTE accueil de nuit, appel entrant
+recep/onde-16x9-v1.mp4          3,6 s  ÉCOUTE onde lumineuse + transcription tapée, intention, créneau
+surv/alerte-16x9-v3.mp4         3,8 s  AGIT   lueur rouge du téléphone passée au point chaud #FF6A2B, carte d'alerte + 3 envois
+hero/allee-16x9-v1.mp4          3,0 s  INFRA  allée de baies, 4/4 nœuds en ligne ; éclair de retour vers l'entrepôt
+# Transitions : fouet 8, éclair 8, fondu 10, fouet 8, éclair 8, éclair 10 (images). Boucle : 545 images, 18,2 s.
+# Écartées : hero/champ (nuage de points, déjà rejeté), recep/cliente et recep/transfert (visages proches),
+# surv/murs (mur d'écrans trop chargé), surv/rapport (bureau de jour, hors palette), surv/intervention (silhouette sombre).
