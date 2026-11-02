@@ -9,7 +9,7 @@ import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
-import { createReadStream, existsSync, mkdirSync, readFileSync, realpathSync, statSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { dirname, extname, join, resolve, sep } from 'path';
 import type { WebSocket } from 'ws';
 import * as comfy from './comfy.js';
@@ -56,6 +56,9 @@ import { buildReshootGraph, buildReshootWarpPreviewGraph } from './graphs/reshoo
 import { buildExtendGraph, buildSoundGraph, buildSpeakGraph, buildTransitionGraph } from './graphs/ltxtools.js';
 import { takes, projects, speed, preambles, takeWorkflows, cast as castDb, sessionsProducteur, type CastKind } from './jobs.js';
 import { analyserMedia } from './nexora/montage/analyse.js';
+import { dureeTotaleS } from './nexora/montage/editplan.js';
+import { rendreEditPlan } from './nexora/montage/rendu.js';
+import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
 import { ajusterProposition, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
 import {
@@ -1266,6 +1269,94 @@ app.get('/api/nexora/film/:id/export', async (req, reply) => {
   reply.header('content-type', 'video/quicktime');
   reply.header('content-disposition', `attachment; filename="${safeShotName(film.shot_name || 'film')}_prores.mov"`);
   return reply.send(createReadStream(sortie));
+});
+
+/**
+ * « Monter » (harnais de montage, server/nexora/montage/) : les plans tournés d'un film + sa bande originale deviennent un
+ * EditPlan (code seul), rendu en aperçu par le rendu ffmpeg du harnais. « Améliorer » = un tour critique → rustines.
+ * L'état (brief, plan) vit dans <données>/montages/<film>-<n>.json ; l'aperçu à côté. Rien n'est dépensé.
+ */
+const dossierMontages = () => { const d = join(config.dataDir, 'montages'); mkdirSync(d, { recursive: true }); return d; };
+const idMontage = (v: unknown) => (/^\d+-\d+$/.test(String(v)) ? String(v) : null);
+async function rendreApercuMontage(etat: EtatMontageFilm, id: string) {
+  const chemin = (src: string) => {
+    const t = /^\d+$/.test(src) ? takes.get(Number(src)) : undefined;
+    if (!t?.output_path || !existsSync(t.output_path)) throw new Error(`média ${src} introuvable`);
+    return t.output_path;
+  };
+  const sources = Object.fromEntries(etat.brief.clips.map((c) => [c.id, { duree_s: c.duree_s }]));
+  if (etat.brief.musique) sources[etat.brief.musique.id] = { duree_s: etat.brief.musique.duree_s };
+  const sortie = join(dossierMontages(), `${id}.mp4`);
+  const r = await rendreEditPlan(etat.plan, chemin, sortie, { apercu: true, ffmpeg: config.ffmpegBin, ctx: { inventaire: sources, duree_cible_s: etat.brief.duree_cible_s } });
+  if (!r.ok) throw new Error(`plan invalide : ${r.erreurs.slice(0, 2).join(' ; ')}`);
+  const lufs = (await analyserMedia(sortie, { ffmpeg: config.ffmpegBin, cache: false }).catch(() => null))?.loudness;
+  return { dureeS: r.dureeS, sonie: lufs ? { lufs: lufs.integre_lufs, crete_db: lufs.crete_db } : null };
+}
+const vueMontage = (id: string, etat: EtatMontageFilm, rendu: { dureeS: number; sonie: unknown }, extra: object = {}) => ({
+  id, film: etat.film, url: `/api/nexora/montage/${id}/apercu.mp4`, source: etat.source, tours: etat.tours, plafondTours: 2,
+  genre: etat.plan.genre, format: etat.plan.format, ...rendu, metriques: vueMetriques(etat.plan, etat.brief), ...extra,
+});
+const lireEtatMontage = (id: string): EtatMontageFilm | null => { try { return JSON.parse(readFileSync(join(dossierMontages(), `${id}.json`), 'utf8')); } catch { return null; } };
+
+app.post('/api/nexora/film/:id/monter', async (req, reply) => {
+  const film = takes.get(Number((req.params as any).id));
+  const b = (req.body ?? {}) as any;
+  if (!film) return reply.code(404).send({ error: 'Film introuvable.' });
+  const s = JSON.parse(film.settings);
+  if (!s.film || film.status !== 'done') return reply.code(409).send({ error: 'Le film doit être terminé pour être monté.' });
+  const genre = (GENRES_MONTAGE as readonly string[]).includes(b.genre) ? b.genre : 'pub';
+  const ids: number[] = ((s.storyboard?.plans ?? []) as any[]).map((p) => p.take).filter((x): x is number => typeof x === 'number');
+  const prises = ids.map((i) => takes.get(i)).filter((t): t is NonNullable<typeof t> => !!t && t.status === 'done' && !!t.output_path && existsSync(t.output_path));
+  if (!prises.length) return reply.code(409).send({ error: 'Aucun plan tourné à monter.' });
+  try {
+    const clips = await Promise.all(prises.map(async (t) => ({ id: String(t.id), analyse: await analyserMedia(t.output_path!, { ffmpeg: config.ffmpegBin }) })));
+    const m = typeof s.musiquePrise === 'number' ? takes.get(s.musiquePrise) : undefined;
+    const musique = m?.status === 'done' && m.output_path && existsSync(m.output_path)
+      ? { id: String(m.id), analyse: await analyserMedia(m.output_path, { ffmpeg: config.ffmpegBin }) } : undefined;
+    const dureeCibleS = Number(b.duree) > 0 ? Number(b.duree) : undefined;
+    const brief = briefDuFilm({ clips, musique, genre, format: s.format ?? '16:9', dureeCibleS, enonce: s.prompt ? String(s.prompt).slice(0, 300) : undefined });
+    const etat = monterEnCode(brief, film.id);
+    const n = readdirSync(dossierMontages()).filter((f) => f.startsWith(`${film.id}-`) && f.endsWith('.json')).length + 1;
+    const id = `${film.id}-${n}`;
+    const rendu = await rendreApercuMontage(etat, id);
+    writeFileSync(join(dossierMontages(), `${id}.json`), JSON.stringify(etat));
+    return vueMontage(id, etat, rendu, { musique: !!musique });
+  } catch (e) {
+    app.log.warn(`monter : ${e instanceof Error ? e.message : e}`);
+    return reply.code(500).send({ error: `Le montage a échoué : ${e instanceof Error ? e.message.slice(0, 200) : 'erreur'}` });
+  }
+});
+
+app.post('/api/nexora/montage/:mid/ameliorer', async (req, reply) => {
+  const id = idMontage((req.params as any).mid);
+  const etat = id ? lireEtatMontage(id) : null;
+  if (!id || !etat || !takes.get(etat.film)) return reply.code(404).send({ error: 'Montage introuvable.' });
+  if (etat.tours >= 2) return reply.code(409).send({ error: 'Deux tours d’amélioration au plus par montage : celui-ci est au maximum.' });
+  const r = await ameliorerMontage(etat, llmCourant());
+  try {
+    const rendu = r.gardee ? await rendreApercuMontage(r.etat, id) : { dureeS: dureeTotaleS(r.etat.plan), sonie: null };
+    writeFileSync(join(dossierMontages(), `${id}.json`), JSON.stringify(r.etat));
+    return vueMontage(id, r.etat, rendu, { amelioration: { avant: r.avant, apres: r.apres, gardee: r.gardee, message: r.message } });
+  } catch (e) {
+    return reply.code(500).send({ error: `Le rendu a échoué : ${e instanceof Error ? e.message.slice(0, 200) : 'erreur'}` });
+  }
+});
+
+app.get('/api/nexora/montage/:mid/apercu.mp4', async (req, reply) => {
+  const id = idMontage((req.params as any).mid);
+  const etat = id ? lireEtatMontage(id) : null;
+  const f = id ? join(dossierMontages(), `${id}.mp4`) : '';
+  if (!id || !etat || !takes.get(etat.film) || !existsSync(f)) return reply.code(404).send({ error: 'Aperçu introuvable.' });
+  const size = statSync(f).size;
+  const m = req.headers.range ? /bytes=(\d+)-(\d*)/.exec(req.headers.range) : null;
+  if (m) {
+    const start = parseInt(m[1], 10);
+    const end = m[2] ? parseInt(m[2], 10) : size - 1;
+    reply.code(206).headers({ 'Content-Range': `bytes ${start}-${end}/${size}`, 'Accept-Ranges': 'bytes', 'Content-Length': end - start + 1, 'Content-Type': 'video/mp4' });
+    return reply.send(createReadStream(f, { start, end }));
+  }
+  reply.headers({ 'Content-Length': size, 'Content-Type': 'video/mp4', 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' });
+  return reply.send(createReadStream(f));
 });
 
 /** Projet de montage d'un film : plans MP4 + séquence FCP7 XML + storyboard Nexora, dans un ZIP. */

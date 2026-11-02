@@ -7,7 +7,7 @@
  */
 import { Markdown } from './Markdown';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, mediaUrl, type FilmResume, type PropositionProducteur, type SessionProducteur, type VarianteProducteur } from '../api';
+import { api, mediaUrl, type FilmResume, type VueMontage, type PropositionProducteur, type SessionProducteur, type VarianteProducteur } from '../api';
 import { settingsOf, toast, useStore } from '../store';
 import { setParams } from '../router';
 import { MediaCard } from '../ui';
@@ -268,6 +268,20 @@ function CarteProduction({ filmId, film, format, occupe, ouvrir, variante }: {
   const take = useStore((s) => s.takes.find((t) => t.id === filmId));
   const faits = film?.plans.filter((x) => x.etat === 'done').length ?? 0;
   const fini = film?.etat === 'done';
+  const [montage, setMontage] = useState<null | 'rend' | 'ok'>(null);
+  const [vue, setVue] = useState<VueMontage | null>(null);
+  async function monter() {
+    setMontage('rend');
+    try { setVue(await api.monterFilm(filmId, { genre: 'pub' })); setMontage('ok'); }
+    catch (e) { setMontage(null); toast(e instanceof Error ? e.message : 'Le montage a échoué.', true); }
+  }
+  async function ameliorer() {
+    if (!vue) return;
+    setMontage('rend');
+    try { setVue(await api.ameliorerMontage(vue.id)); }
+    catch (e) { toast(e instanceof Error ? e.message : 'Amélioration impossible.', true); }
+    setMontage('ok');
+  }
   return (
     <div className="pr-prod">
       <div className="pr-prod-media">
@@ -296,11 +310,13 @@ function CarteProduction({ filmId, film, format, occupe, ouvrir, variante }: {
           ))}
           {film?.musique && <li className={film.musique}><span className="pr-num">♪</span><span className="pr-suivi-txt">Bande originale</span><span className="pr-etat">{film.musique === 'done' ? 'composée' : film.musique === 'failed' ? 'échec' : 'en cours'}</span></li>}
         </ul>
+        {vue && <ApercuMontage vue={vue} occupe={montage === 'rend'} ameliorer={() => void ameliorer()} fermer={() => { setVue(null); setMontage(null); }} />}
         {fini && film && (
           <div className="pr-variantes">
             <a className="st-bouton primaire" href={mediaUrl(filmId)} download>Télécharger</a>
             <button type="button" className="st-bouton" onClick={ouvrir}>Plans et montage</button>
             <a className="st-bouton" href="/mode-studio/" title="Montage expert : la vidéo est dans l’onglet Créations">Mode Studio</a>
+            <button type="button" className="st-bouton" disabled={occupe || montage === 'rend'} onClick={() => void monter()}>{montage === 'rend' ? 'Montage…' : 'Monter'}</button>
             <span className="pr-sep" aria-hidden />
             {VARIANTES.filter((v) => !v.si || v.si(film, film.format ?? format)).map((v) => (
               <button key={v.g} type="button" className="st-bouton" disabled={occupe} onClick={() => variante(v.g)}>{v.label}</button>
@@ -308,6 +324,38 @@ function CarteProduction({ filmId, film, format, occupe, ouvrir, variante }: {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+const pct = (v: number) => Math.round(v * 100);
+
+/** Aperçu du montage construit par le harnais (code seul) : lecteur, mesures en clair, un tour d'amélioration. */
+function ApercuMontage({ vue, occupe, ameliorer, fermer }: { vue: VueMontage; occupe: boolean; ameliorer: () => void; fermer: () => void }) {
+  const m = vue.metriques;
+  const mesures: [string, number][] = [['Rythme', m.rythme], ['Coupes sur le temps', m.battues], ['Variété des plans', m.doublons], ['Texte', m.texte], ['Audio', m.audio]];
+  const fini = vue.tours >= vue.plafondTours;
+  return (
+    <div className="pr-montage" aria-label="Aperçu du montage">
+      <div className="pr-carte-tete">
+        <div><span className="st-etiq">Montage sur la musique</span><h4>Score {pct(m.score)} / 100</h4></div>
+        <button type="button" className="nx-lien" onClick={fermer}>Fermer</button>
+      </div>
+      <video key={vue.url + vue.tours} className="pr-montage-video" src={`${vue.url}?v=${vue.tours}`} controls playsInline preload="metadata" />
+      <ul className="pr-mesures">
+        {mesures.map(([n, v]) => <li key={n}><span>{n}</span><i style={{ ['--v' as string]: `${pct(v)}%` }} /><b>{pct(v)}</b></li>)}
+      </ul>
+      <p className="pr-meta">
+        {m.plans} plans · {vue.dureeS.toFixed(1)} s · {m.dureeMoyennePlanS.toFixed(1)} s par plan · {m.coupesParMinute} coupes/min{m.bpm ? ` · ${Math.round(m.bpm)} BPM` : ''}
+        {vue.sonie ? ` · sonie ${vue.sonie.lufs.toFixed(1)} LUFS` : ''}{vue.musique === false ? ' · sans musique' : ''}
+      </p>
+      {m.ecarts.length > 0 && <ul className="pr-ecarts">{m.ecarts.slice(0, 3).map((e, i) => <li key={i}><small className={e.gravite === 'majeur' || e.gravite === 'bloquant' ? 'bad' : ''}>{e.message}</small></li>)}</ul>}
+      {vue.amelioration && <p className="pr-meta" role="status">{vue.amelioration.message}</p>}
+      <div className="pr-variantes">
+        <button type="button" className="st-bouton primaire" disabled={occupe || fini} onClick={ameliorer}>{occupe ? 'Un instant…' : fini ? 'Montage au maximum' : `Améliorer (${vue.tours}/${vue.plafondTours})`}</button>
+        <a className="st-bouton" href={`${vue.url}?v=${vue.tours}`} download>Télécharger l’aperçu</a>
+      </div>
+      <p className="pr-meta">Aperçu 720p : plans et bande originale ; le son propre des plans n’est pas mixé.</p>
     </div>
   );
 }

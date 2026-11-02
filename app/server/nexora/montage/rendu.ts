@@ -71,7 +71,7 @@ export function commandeRendu(plan: EditPlan, chemin: (src: string) => string, s
   plan.video.forEach((c, i) => {
     const k = index.get(c.src)!;
     const dureeClip = c.duree_f / fps;
-    const zoom = c.zoom && c.zoom.a !== c.zoom.de ? `,scale=w='trunc(iw*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':h='trunc(ih*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':eval=frame,crop=${W}:${H}` : '';
+    const zoom = c.zoom && c.zoom.a !== c.zoom.de ? `,scale=w='trunc(iw*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':h='trunc(ih*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':eval=frame,crop=${W}:${H},setsar=1` : '';
     if (c.rampe) {
       const morceaux: string[] = [];
       let lu = c.entree_f, restant = c.duree_f;
@@ -159,6 +159,6 @@ export async function rendreEditPlan(brut: unknown, chemin: (src: string) => str
   const fichierAss = join(dirname(sortie), `${sortie.split('/').pop()}.ass`);
   const cmd = commandeRendu(v.plan, chemin, sortie, o, fichierAss);
   if (cmd.ass) writeFileSync(fichierAss, cmd.ass);
-  await new Promise<void>((ok, ko) => execFile(o.ffmpeg ?? ffmpegParDefaut(), cmd.args, { maxBuffer: 1 << 26, timeout: 900_000 }, (e, _o, err) => (e ? ko(new Error(`ffmpeg : ${String(err).split('\n').filter(Boolean).slice(-4).join(' ')}`)) : ok())));
+  await new Promise<void>((ok, ko) => execFile(o.ffmpeg ?? ffmpegParDefaut(), cmd.args, { maxBuffer: 1 << 26, timeout: 900_000 }, (e, _o, err) => (e ? ko(new Error(`ffmpeg : ${String(err).split('\n').filter(Boolean).slice(-14).join(' ')}`)) : ok())));
   return { ok: true, sortie, dureeS: cmd.dureeS };
 }
