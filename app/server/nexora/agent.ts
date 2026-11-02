@@ -90,6 +90,8 @@ export function planVersStoryboard(p: PlanProduction): Storyboard {
 export interface Devis {
   /** null sur un poste sans crédits (développement, installation locale). */
   credits: number | null;
+  /** Estimation en crédits, toujours renseignée : sur un poste sans portail, rien n'est débité mais le coût réel est visible. */
+  creditsEstimes: number;
   /** Temps de calcul vidéo estimé (s), tous rendus confondus. */
   secondesGpu: number;
   /** Temps d'attente estimé (min), écriture des prompts et assemblage compris. */
@@ -113,6 +115,7 @@ export function devisProduction(p: PlanProduction, o: { moteur: MoteurVideo; cre
   }
   return {
     credits: o.creditsActifs ? credits : null,
+    creditsEstimes: credits,
     secondesGpu: secondes,
     minutes: Math.max(1, Math.ceil((secondes + 15 * p.plans.length + 30) / 60)),
     rendus, plans: p.plans.length, musique: !!p.musique, candidats: p.candidats,
@@ -295,7 +298,7 @@ async function executerOutil(s: SessionProducteur, nom: string, args: Record<str
       const film = Number(args.film);
       if (!s.productions.some((p) => p.filmId === film)) return { erreur: `le film ${film} n’appartient pas à cette production` };
       const ordre = (Array.isArray(args.ordre) ? args.ordre : []).map((x) => Number(x) - 1);
-      const devis: Devis = { credits: 0, secondesGpu: 0, minutes: 1, rendus: 0, plans: ordre.length, musique: false, candidats: 1 };
+      const devis: Devis = { credits: 0, creditsEstimes: 0, secondesGpu: 0, minutes: 1, rendus: 0, plans: ordre.length, musique: false, candidats: 1 };
       s.proposition = { id: randomUUID(), genre: 'remontage', film, ordre, transition: args.transition === 'fondu' ? 'fondu' : 'coupe', devis };
       return { ok: true, devis, note: 'montage sans nouveau rendu' };
     }
@@ -352,7 +355,7 @@ export function variante(session: SessionProducteur, filmId: number, genre: Genr
     // Version courte : le premier plan et les deux derniers (là où sont le produit et l'appel à l'action), sans rendu.
     const n = base.plans.length;
     const ordre = n <= 3 ? [0, n - 1].filter((v, i, a) => a.indexOf(v) === i) : [0, n - 2, n - 1];
-    s.proposition = { id: randomUUID(), genre: 'remontage', film: filmId, ordre, transition: 'coupe', devis: { credits: 0, secondesGpu: 0, minutes: 1, rendus: 0, plans: ordre.length, musique: false, candidats: 1 } };
+    s.proposition = { id: randomUUID(), genre: 'remontage', film: filmId, ordre, transition: 'coupe', devis: { credits: 0, creditsEstimes: 0, secondesGpu: 0, minutes: 1, rendus: 0, plans: ordre.length, musique: false, candidats: 1 } };
   } else {
     const plan: PlanProduction = structuredClone(base);
     if (genre.startsWith('format-')) plan.format = genre.slice(7) as PlanProduction['format'];

@@ -18,7 +18,7 @@ function llmQuiRejoue(tours: ReponseOutils[]): ClientLlm & { vus: string[] } {
 }
 const demande = { brief: b.enonce, genre: 'pub', format: '9:16', duree_cible_s: 20, medias: b.clips.map((c) => c.id), musique: 'musique', textes: b.textes_imposes };
 const deps = (llm: ClientLlm, extra: Partial<DepsAgent> = {}): DepsAgent => ({
-  llm, devis: () => ({ credits: 0, secondesGpu: 0, minutes: 1, rendus: 0, plans: 0, musique: false, candidats: 1 }), plafond: { credits: 500, secondes: 1800 }, outils: {},
+  llm, devis: () => ({ credits: 0, creditsEstimes: 0, secondesGpu: 0, minutes: 1, rendus: 0, plans: 0, musique: false, candidats: 1 }), plafond: { credits: 500, secondes: 1800 }, outils: {},
   montage: { analyser: async (ids) => Object.fromEntries(ids.map((i) => { if (!analyses[i]) throw new Error(`média ${i} hors projet`); return [i, analyses[i]]; })), plafondCredits: 100 }, ...extra,
 });
 

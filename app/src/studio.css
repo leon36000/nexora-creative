@@ -263,3 +263,10 @@ body { font-variation-settings: normal; letter-spacing: -0.003em; }
   .pr-carte { padding: 14px; }
   .pr-plans { grid-template-columns: 1fr; }
 }
+
+/* Markdown du Producteur et note de devis */
+.pr-md { display: grid; gap: 6px; }
+.pr-md p { margin: 0; white-space: normal; }
+.pr-md ul, .pr-md ol { margin: 0; padding-left: 20px; display: grid; gap: 3px; }
+.pr-md code { font: 500 12px var(--font-mono); background: var(--panel-3); padding: 1px 5px; border-radius: 4px; }
+.pr-devis-note { color: var(--dim); font: 500 11px/1.3 var(--font-mono); }

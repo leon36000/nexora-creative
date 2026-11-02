@@ -5,6 +5,7 @@
  * puis les productions en cours : progression plan par plan, choix du juge visuel, variantes en un clic.
  * Rien n'est dépensé sans un clic sur « Valider et lancer ».
  */
+import { Markdown } from './Markdown';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, mediaUrl, type FilmResume, type PropositionProducteur, type SessionProducteur, type VarianteProducteur } from '../api';
 import { settingsOf, toast, useStore } from '../store';
@@ -132,7 +133,7 @@ export default function Producteur({ onOuvrirFilm, objectif }: { onOuvrirFilm: (
           {session?.fil.map((b, i) => (
             <div key={i} className={`pr-bulle ${b.de}`}>
               {b.de === 'producteur' && <span className="pr-qui"><IcEtincelle />Producteur</span>}
-              <p>{b.texte}</p>
+              {b.de === 'producteur' ? <Markdown texte={b.texte} /> : <p>{b.texte}</p>}
               {b.production && <button type="button" className="nx-lien" onClick={() => onOuvrirFilm(b.production!)}>Voir les plans</button>}
             </div>
           ))}
@@ -191,7 +192,8 @@ function CarteProposition({ p, session, occupe, ajuster, valider }: {
   ajuster: (r: { candidats?: number; qualite?: string; format?: string; musique?: boolean }) => void; valider: () => void;
 }) {
   const d = p.devis;
-  const prix = d.credits === null ? 'Aucun crédit débité sur ce poste' : d.credits === 0 ? 'Gratuit' : `${d.credits} crédits`;
+  const nbr = (n: number) => `${n.toLocaleString('fr-FR')} crédit${n > 1 ? 's' : ''}`;
+  const prix = d.credits === null ? `≈ ${nbr(d.creditsEstimes)}` : d.credits === 0 ? 'Gratuit' : nbr(d.credits);
   return (
     <div className="pr-carte" aria-label="Plan proposé">
       {p.genre === 'production' ? (
@@ -241,7 +243,7 @@ function CarteProposition({ p, session, occupe, ajuster, valider }: {
         <div className="pr-carte-tete"><div><span className="st-etiq">Nouveau montage</span><h2>Plans {p.ordre.map((x) => x + 1).join(', ')}</h2><p className="pr-meta">{p.transition === 'fondu' ? 'Fondus enchaînés' : 'Coupes franches'} · aucun nouveau rendu</p></div></div>
       )}
       <div className="pr-devis">
-        <div><span className="st-etiq">Devis</span><b>{prix}</b></div>
+        <div><span className="st-etiq">Devis</span><b>{prix}</b>{d.credits === null && <small className="pr-devis-note">estimation · rien n’est débité sur ce poste</small>}</div>
         <div><span className="st-etiq">Attente</span><b>≈ {fmtMin(d.minutes)}</b></div>
         <div><span className="st-etiq">Rendus</span><b>{d.rendus}</b></div>
         <button type="button" className="st-go" disabled={occupe} onClick={valider}>{occupe ? <><IcRond /> Un instant…</> : 'Valider et lancer'}</button>

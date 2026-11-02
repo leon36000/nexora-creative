@@ -30,7 +30,7 @@ function fauxLlm(tours: ReponseOutils[]): ClientLlm & { appels: number; vus: any
 const outil = (nom: string, args: Record<string, unknown>, id = 'c1'): ReponseOutils => ({ texte: '', appels: [{ id, nom, arguments: args }], jetons: 100 });
 const texte = (t: string): ReponseOutils => ({ texte: t, appels: [], jetons: 50 });
 
-const devisFixe = (credits: number, secondes = 60) => () => ({ credits, secondesGpu: secondes, minutes: 1, rendus: 2, plans: 2, musique: true, candidats: 1 as const });
+const devisFixe = (credits: number, secondes = 60) => () => ({ credits, creditsEstimes: credits, secondesGpu: secondes, minutes: 1, rendus: 2, plans: 2, musique: true, candidats: 1 as const });
 function deps(llm: ClientLlm, extra: Partial<DepsAgent> = {}): DepsAgent {
   return {
     llm, devis: devisFixe(80), plafond: { credits: 500, secondes: 1800 },
@@ -77,9 +77,9 @@ describe('devis', () => {
     expect(d.secondesGpu).toBe(60);
   });
   it('signale un dépassement du plafond', () => {
-    expect(depassement({ credits: 900, secondesGpu: 10 } as any, { credits: 500, secondes: 1800 })).toMatch(/900/);
+    expect(depassement({ credits: 900, creditsEstimes: 900, secondesGpu: 10 } as any, { credits: 500, secondes: 1800 })).toMatch(/900/);
     expect(depassement({ credits: null, secondesGpu: 4000 } as any, { credits: 500, secondes: 1800 })).toMatch(/min/);
-    expect(depassement({ credits: 10, secondesGpu: 10 } as any, { credits: 500, secondes: 1800 })).toBeNull();
+    expect(depassement({ credits: 10, creditsEstimes: 10, secondesGpu: 10 } as any, { credits: 500, secondes: 1800 })).toBeNull();
   });
 });
 
