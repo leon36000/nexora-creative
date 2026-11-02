@@ -49,11 +49,38 @@ def configurer(marque, produit, textes, cache):
 
 
 def limiter_crete(mixer_v4):
-    """Après le mixage V4 (−14 LUFS) : limiteur suréchantillonné ×4, crête vraie ≤ −1,5 dBTP même après l'AAC."""
+    """Après le mixage V4 (−14 LUFS) : limiteur suréchantillonné ×4, crête vraie ≤ −1 dBTP même après l'AAC (limite 0,66)."""
     def mixer(m, segs, duree, sortie_wav):
-        mixer_v4(m, segs, duree, sortie_wav)
+        # « duck » d'un segment (dB, négatif) : la musique baisse sous une voix (son natif du plan), rampes de 0,25 s
+        ducks = [(s["t"], s["t"] + s["d"], s["duck"]) for s in segs if s.get("duck")]
+        fichiers = {str(M.chemin(mu["fichier"])) for mu in m.get("musique", [])}
+        lire0, poser0 = M.lire_audio, M.poser
+
+        class _Mus(np.ndarray):
+            pass
+
+        def lire(f, debut=0.0, duree=None):
+            a = lire0(f, debut, duree)
+            return a.view(_Mus) if ducks and str(M.chemin(f)) in fichiers else a
+
+        def poser(piste, son, t, db=0.0, fin=0.0):
+            if isinstance(son, _Mus):
+                son = np.asarray(son).copy()
+                tt = t + np.arange(len(son)) / M.SR
+                g = np.zeros(len(son), np.float32)
+                for a, b, dd in ducks:
+                    r = np.clip(np.minimum(tt - (a - 0.25), (b + 0.25) - tt) / 0.25, 0, 1)
+                    g = np.minimum(g, r * dd)
+                son *= (10 ** (g / 20))[:, None]
+            return poser0(piste, son, t, db, fin)
+
+        M.lire_audio, M.poser = lire, poser
+        try:
+            mixer_v4(m, segs, duree, sortie_wav)
+        finally:
+            M.lire_audio, M.poser = lire0, poser0
         tmp = sortie_wav.with_suffix(".lim.wav")
-        M.ff(["-i", str(sortie_wav), "-af", "aresample=192000,alimiter=limit=0.76:level=false:attack=1:release=60,aresample=48000",
+        M.ff(["-i", str(sortie_wav), "-af", "aresample=192000,alimiter=limit=0.66:level=false:attack=1:release=60,aresample=48000",
               str(tmp)])
         tmp.replace(sortie_wav)
     mixer._v5 = True
@@ -160,8 +187,9 @@ def image_ecran(seg, t, W, H, vertical):
     fx, fy, pw, ph = fenetre(src.width, src.height, cx, cy, cw, w, h)
     carte = src.transform((w, h), Image.EXTENT, (fx, fy, fx + pw, fy + ph), Image.BICUBIC)
     d = ImageDraw.Draw(carte)
-    if seg.get("curseur"):  # [[t, x, y], ...] en fractions de la source (positions réelles des clics de la capture)
-        cxs, cys = M.interp(seg["curseur"], t)
+    cur = seg.get("curseur_v") if vertical and seg.get("curseur_v") else seg.get("curseur")  # « curseur_v » : positions dans les captures en fenêtre étroite
+    if cur:  # [[t, x, y], ...] en fractions de la source (positions réelles des clics de la capture)
+        cxs, cys = M.interp(cur, t)
         px, py = (cxs * src.width - fx) / pw * w, (cys * src.height - fy) / ph * h
         presse = False
         for tc in seg.get("clics", []):

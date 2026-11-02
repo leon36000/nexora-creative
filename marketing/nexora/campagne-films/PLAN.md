@@ -76,15 +76,15 @@ sur 10, moyenne = note. Porte de livraison : 8. Noter comme un étranger qui n'a
 Estimations GPU : image clé Qwen ≈ 0,5 min ; plan H3 `h3-fast` ≈ 1,5 min, `h3-max` ≈ 3 min (5 s) ; Music3 ≈ 2,5 min par
 graine ; rendu complet des 12 fichiers ≈ 5 min CPU. Ce sont des estimations, sauf Music3 (153 s mesurées) et le rendu.
 
-### (a) WorkStudio : « Il fait le travail. Vous gardez la main. » — FAIT (41,7 / 29,5 / 14,0 s)
-Concept : un courriel de cliente arrive dans une boulangerie fictive ; le workflow réel « Tri du courrier entrant » le trie,
-rédige la réponse et s'arrête sur la validation humaine ; puis l'étendue (chaque étape est un bloc, la vue Étapes, cinq modèles
-PME). Tout est capture réelle de la VM 203 (exécution : Tri 0,64 s, Brouillon 0,70 s). Musique : électro minimale, coup sur
-l'accord. Structure : 0–2,9 courriel · 2,9–7,2 exécution · 7,2–11,5 accord (clic) · 11,5 coup « Chaque étape est un bloc. » ·
-blocs · Étapes · modèles · carton. 30 s et 15 s : même récit resserré, preuve à 2,2 s et 0 s.
-Textes : voir `films/workstudio/brief.json`. Note sévère : **7,8** (concept 8, preuve 8,5, textes 8, rythme 7,5, son 7,
-finition 7,5, authenticité 9). Pour passer 8,5 : réparer la reprise après accord (voir §5) et filmer l'envoi réel (SMTP de
-test autorisé) ; remplacer la série de modèles par 2 modèles **exécutés** ; voix ou bruitage d'interface enregistrés.
+### (a) WorkStudio : « Il fait le travail. Vous gardez la main. » — FAIT, v2 (46,7 / 29,8 / 15,5 s)
+Concept : deux vrais courriels de clients (boulangerie fictive) font tourner le workflow réel « Tri du courrier entrant » : tri,
+brouillon, pause de validation humaine, accord sur la page de reprise, envoi SMTP vers une boîte de test (Mailpit), journal
+d'exécution et trace ; puis l'étendue (vue Étapes, blocs ajoutés par glisser-déposer). Quatre exécutions capturées (fr-CA et en-CA :
+l'application suit l'en-tête Accept-Language, l'interface anglaise est donc réelle). Preuve à 0,4 s, clic d'accord à 9,3 s, courriel reçu
+à 14,4 s. Musique : celle de la v1 (83,478 BPM mesurés, coup à 11,5 s posé sur le clic d'accord). Master : loudnorm deux passes
+(étape `master`) −14 LUFS, crête ≤ −1,6 dBTP. Note sévère : **8,1** (voir `films/workstudio/brief.json › revue`, faiblesses comprises).
+Refaire : `node connexion.mjs <témoins>`, `python3 workflow.py creer en` (deuxième workflow), `capturer.mjs` (4 cycles + étendue, ≈ 8 min),
+`python3 construire_brief.py`, puis `usine.py brief.json valider montage rendu master revue livrer`.
 
 ### (b) Nexora, l'entreprise — 60/30/15 s · difficulté moyenne · GPU ≈ 25 min
 Concept : « Un seul compte. Vos outils d'IA, au Québec. » Le panneau Nexora dans le navigateur : on passe d'un outil à
@@ -149,20 +149,11 @@ Ordre d'exécution conseillé pour les agents suivants : (e) puis (g) (aucun GPU
 
 ## 5. Filmer WorkStudio (VM 203) : ce qu'il faut savoir
 
-- Accès : relais TLS local `socat openssl-listen:8443,bind=127.0.0.1,fork,cert=<cert auto-signé> tcp:192.168.1.123:80` et
-  Chromium lancé avec `--host-resolver-rules=MAP studio.nexora.ai:443 127.0.0.1:8443` (origine et témoins `Secure` exacts).
-- **Défaut trouvé : la connexion par navigateur échoue** (le formulaire répond « mot de passe incorrect ») : le proxy `front`
-  renvoie 502 « upstream sent too big header » sur `POST /api/auth/sign-in/email` (tampon d'en-têtes nginx trop petit pour les
-  témoins de Better Auth). Contournement utilisé : connexion faite sur la VM (lecture du mot de passe sur place, jamais
-  affiché), témoins de session copiés dans un fichier privé hors dépôt puis injectés dans Playwright. Correctif à poser par
-  l'exploitant : `proxy_buffer_size 16k; proxy_buffers 8 16k;` dans `default.conf.template` (non fait ici).
-- **Défaut trouvé : la reprise après validation humaine échoue** (« Validation error: Invalid input: expected string,
-  received undefined », module `WorkflowResumeExecution`) pour une exécution lancée depuis l'éditeur.
-- Les blocs API refusent les adresses internes (`EGRESS_ALLOWED_HOSTS`) : pas d'envoi vers Mailpit sans réglage.
-- Workflow filmé : `films/workstudio/workflow.py` (créé par l'API interne avec `api.mjs`), capture : `capturer.mjs`.
-
-## 6. Extensions de l'usine ajoutées avec les films (e) et (g)
-- `plaque` / `plaque_v` : `{l}` = langue du rendu (plaques à texte incrusté, ex. boîtes de détection fr/en).
-- `voile` / `voile_v` : `{"v": 0.78, "h": 0.5, "haut": false}` assombrit le bas (ou le haut) d'un plan pour le texte.
-- typographie : `y_v` (position d'un surtitre en 9:16), `zone_v` (zone d'un texte en 9:16) ; `images_v` (captures propres au 9:16) ; `carte` / `carte_v` (rectangle de la carte d'un segment `ecran`).
-- limiteur de crête abaissé (0,76) : crête vraie ≤ −1,5 dBTP après l'AAC. Manque encore : un type de segment « terminal » natif (ici : images JPEG écrites par `films/modeles/terminal.py`), une couche d'interface dessinée en code sur un plan, et une écoute humaine de la musique.
+- Accès : relais TLS local `socat openssl-listen:8443,bind=127.0.0.1,fork,cert=<cert auto-signé> tcp:192.168.1.123:80` et Chromium lancé
+  avec `--host-resolver-rules=MAP studio.nexora.ai:443 127.0.0.1:8443` (origine et témoins `Secure` exacts) ; Mailpit (sans port publié) par
+  `ssh -f -N -L 127.0.0.1:18025:<ip du conteneur>:8025 nexora-workstudio`. La connexion est limitée (429) : une seule session
+  (`connexion.mjs`, témoins dans un fichier privé hors dépôt, mot de passe lu sur la VM sans l'afficher).
+- Les défauts de la v1 sont corrigés (proxy `front`, reprise après validation, sortie `mailpit` autorisée, bloc SMTP à la place du bloc API) ;
+  la reprise puis l'envoi prennent environ 1,4 s après le clic.
+- Workflows filmés : `films/workstudio/workflow.py` (fr et en, courriel 1 ou 2), captures : `capturer.mjs`. L'exécution réelle dure ≈ 3 s :
+  le film l'étire (10 images) ; ne jamais ralentir un son ni prétendre que l'exécution est lente.

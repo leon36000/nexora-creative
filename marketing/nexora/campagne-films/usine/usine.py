@@ -31,7 +31,7 @@ import typo  # noqa: E402
 FFMPEG = str(Path.home() / "nexora-creative-data/engine/ffmpeg/ffmpeg-7.0.2-arm64-static/ffmpeg")
 FFPROBE = str(Path(FFMPEG).with_name("ffprobe"))
 INTERDITS = ["nvidia", "dgx", "geforce", "rtx", "openai", "chatgpt", "révolutionn", "revolutionar", "game-changer", "magique", "magic"]
-ETAPES = ["valider", "plaques", "captures", "montage", "animatique", "rendu", "revue", "livrer"]
+ETAPES = ["valider", "plaques", "captures", "montage", "animatique", "rendu", "master", "revue", "livrer"]
 
 
 def X(p):
@@ -204,6 +204,24 @@ def rendre(b, versions, animatique=False):
     return fichiers
 
 
+# -------------------------------------------------------------------------------------------------------------- master
+def masteriser(b, cible=-14.0, crete=-2.5):
+    """Loudnorm à deux passes sur chaque brouillon (image copiée, son seul recodé) : −14 LUFS intégrés, crête vraie ≤ −1 dBTP après le recodage AAC (limiteur suréchantillonné ×4 à −2,4 dBFS).
+    Le mixage du moteur V4 tombe entre −14,5 et −16 LUFS selon la durée du film (les 15 s sont trop courts pour la mesure) :
+    cette passe ramène toutes les versions à la même cible."""
+    for f in sorted((b["_travail"] / "brouillons").glob("*.mp4")):
+        r = subprocess.run([FFMPEG, "-hide_banner", "-i", str(f), "-af", f"loudnorm=I={cible}:TP={crete}:LRA=11:print_format=json", "-f", "null", "-"],
+                           capture_output=True, text=True)
+        m = json.loads(r.stderr[r.stderr.rfind("{"):r.stderr.rfind("}") + 1])
+        af = (f"loudnorm=I={cible + 0.15}:TP={crete}:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}:"
+              f"measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true,"
+              "aresample=192000,alimiter=limit=0.76:level=false:attack=1:release=60,aresample=48000")
+        tmp = f.with_suffix(".master.mp4")
+        subprocess.run([FFMPEG, "-v", "error", "-y", "-i", str(f), "-c:v", "copy", "-af", af, "-ar", "48000", "-c:a", "aac", "-b:a", "256k", str(tmp)], check=True)
+        tmp.replace(f)
+        print("master", f.name, f"{m['input_i']} LUFS → {cible}")
+
+
 # --------------------------------------------------------------------------------------------------------------- revue
 def image(film, t, largeur):
     from PIL import Image
@@ -306,6 +324,8 @@ if __name__ == "__main__":
             print(rendre(b, ["long"], animatique=True))
         elif e == "rendu":
             print(rendre(b, list(b["versions"])))
+        elif e == "master":
+            masteriser(b)
         elif e == "revue":
             revue(b)
         elif e == "livrer":
