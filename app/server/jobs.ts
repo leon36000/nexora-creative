@@ -378,3 +378,45 @@ export const meta = {
     db.prepare('DELETE FROM meta WHERE key=?').run(key);
   },
 };
+
+/**
+ * Nexora : conversations de l'agent Producteur (server/nexora/agent.ts), une ligne par conversation, l'état en JSON.
+ * Isolées par organisation comme les prises ; la file des rendus reste la table `takes` (l'agent n'y écrit que par les
+ * routes ordinaires du studio).
+ */
+db.exec(`
+CREATE TABLE IF NOT EXISTS producteur_sessions (
+  id TEXT PRIMARY KEY,
+  organisation_id TEXT NOT NULL DEFAULT 'local',
+  titre TEXT NOT NULL,
+  data TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS producteur_sessions_org ON producteur_sessions (organisation_id, updated_at);
+`);
+
+export const sessionsProducteur = {
+  get<T>(id: string): T | undefined {
+    const [w, a] = portee();
+    const r = db.prepare(`SELECT data FROM producteur_sessions WHERE id=?${w}`).get(id, ...a) as { data: string } | undefined;
+    return r ? (JSON.parse(r.data) as T) : undefined;
+  },
+  save(s: { id: string; titre: string }): void {
+    const [w, a] = portee();
+    const existe = db.prepare('SELECT organisation_id FROM producteur_sessions WHERE id=?').get(s.id) as { organisation_id: string } | undefined;
+    if (existe) {
+      db.prepare(`UPDATE producteur_sessions SET titre=?, data=?, updated_at=datetime('now') WHERE id=?${w}`).run(s.titre.slice(0, 120), JSON.stringify(s), s.id, ...a);
+    } else {
+      db.prepare('INSERT INTO producteur_sessions (id, organisation_id, titre, data) VALUES (?,?,?,?)').run(s.id, orgEcrite(), s.titre.slice(0, 120), JSON.stringify(s));
+    }
+  },
+  list(limit = 30): { id: string; titre: string; updated_at: string }[] {
+    const [w, a] = portee('WHERE');
+    return db.prepare(`SELECT id, titre, updated_at FROM producteur_sessions${w} ORDER BY updated_at DESC LIMIT ?`).all(...a, limit) as any[];
+  },
+  delete(id: string): void {
+    const [w, a] = portee();
+    db.prepare(`DELETE FROM producteur_sessions WHERE id=?${w}`).run(id, ...a);
+  },
+};

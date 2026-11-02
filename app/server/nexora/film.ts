@@ -8,6 +8,7 @@
  * L'état vit dans la prise « film » (settings), comme les coupes de scène d'OpenField : un redémarrage reprend.
  */
 import { type ClientLlm, lireJson } from './llm.js';
+import { avecCompetences } from './competences.js';
 
 export interface PlanFilm {
   resume: string;
@@ -16,6 +17,8 @@ export interface PlanFilm {
   camera: string;
   /** Le plan prolonge directement le précédent : il part de sa dernière image (H3 en image vers vidéo). */
   suite?: boolean;
+  /** Réplique (français) dite dans ce plan, recopiée mot pour mot dans le prompt H3 : voix synchronisée à l'image. */
+  replique?: string;
   /** Prise de rendu de ce plan, une fois en file. */
   take?: number;
 }
@@ -45,6 +48,7 @@ export function lireStoryboard(o: unknown, dureeCible: number): Storyboard {
       duree: (Number(p?.duree) >= 8 ? 10 : 5) as 5 | 10,
       camera: txt(p?.camera, 300),
       suite: p?.suite === true,
+      ...(txt(p?.replique, 200) ? { replique: txt(p?.replique, 200) } : {}),
     }))
     .filter((p: PlanFilm) => p.description || p.resume)
     .slice(0, MAX_PLANS);
@@ -111,7 +115,7 @@ export async function planifierFilm(
         const brut = await llm.completer(
           'realisation',
           [
-            { role: 'system', content: CONSIGNES },
+            { role: 'system', content: avecCompetences('realisation', CONSIGNES) },
             { role: 'user', content: JSON.stringify({ idee: d.intention, duree_cible_secondes: d.dureeCible }) },
           ],
           { json: true, temperature: 0.8 },
@@ -223,7 +227,7 @@ export function storyboardPourRefaire(sb: Storyboard, i: number, modif: { descri
     const base = { ...p } as PlanFilm & Record<string, unknown>;
     delete base.attente;
     // Un plan gardé garde aussi son contrôle qualité (pas de nouvelle reprise sur une prise déjà acceptée).
-    if (!garde) { delete base.take; delete base.corps; delete base.reservation; delete base.controle; delete base.reprises; delete base.controleRefuse; }
+    if (!garde) { delete base.take; delete base.corps; delete base.reservation; delete base.controle; delete base.reprises; delete base.controleRefuse; delete base.candidats; delete base.jugement; }
     if (k === i) {
       if (modif.description?.trim()) base.description = modif.description.trim().slice(0, 1200);
       if (modif.camera?.trim()) base.camera = modif.camera.trim().slice(0, 300);

@@ -63,7 +63,7 @@ describe('storyboard du Director', () => {
 
   it('demande au réalisateur de marquer les plans qui prolongent le précédent', async () => {
     let consignes = '';
-    const llm: ClientLlm = { completer: async (_r, m) => { consignes = m[0].content; return JSON.stringify(brut); } };
+    const llm: ClientLlm = { completer: async (_r, m) => { consignes = String(m[0].content); return JSON.stringify(brut); } };
     await planifierFilm({ intention: 'x', dureeCible: 20 }, llm);
     expect(consignes).toMatch(/"suite"/);
   });
