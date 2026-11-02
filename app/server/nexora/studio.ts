@@ -10,6 +10,7 @@
  */
 import type { ClientLlm } from './llm.js';
 import { lireJson } from './llm.js';
+import { avecCompetences } from './competences.js';
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Créations
@@ -150,7 +151,7 @@ export function lireDemandeAssistant(b: unknown): DemandeAssistant {
 export async function demanderAssistant(d: DemandeAssistant, llm: ClientLlm | null): Promise<ReponseAssistant> {
   if (!llm) return { reponse: 'L’assistant n’est pas disponible : aucun modèle de langage n’est configuré.', commandes: [], actions: [] };
   const texte = await llm.completer('assistant', [
-    { role: 'system', content: SYSTEME_ASSISTANT },
+    { role: 'system', content: avecCompetences('assistant', SYSTEME_ASSISTANT) },
     ...d.historique,
     { role: 'user', content: `État de la timeline :\n${JSON.stringify(d.etat)}\n\nDemande : ${d.demande}` },
   ], { json: true, temperature: 0.2, maxTokens: 4000 });

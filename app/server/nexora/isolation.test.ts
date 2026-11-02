@@ -55,4 +55,18 @@ describe('isolation des données entre organisations', () => {
       expect((jobs.projects.list() as { name: string }[]).length).toBe(1);
     });
   });
+  it('les conversations du Producteur restent dans leur organisation', () => {
+    compte.avecCompte(A, () => jobs.sessionsProducteur.save({ id: 's-a', titre: 'pub de A' }));
+    compte.avecCompte(B, () => {
+      expect(jobs.sessionsProducteur.get('s-a')).toBeUndefined();
+      expect(jobs.sessionsProducteur.list()).toEqual([]);
+      // Une écriture de B sur l'identifiant de A ne touche pas la conversation de A.
+      jobs.sessionsProducteur.save({ id: 's-a', titre: 'piraté' });
+      jobs.sessionsProducteur.delete('s-a');
+    });
+    compte.avecCompte(A, () => {
+      expect(jobs.sessionsProducteur.get<{ titre: string }>('s-a')?.titre).toBe('pub de A');
+      expect(jobs.sessionsProducteur.list().map((x) => x.id)).toEqual(['s-a']);
+    });
+  });
 });

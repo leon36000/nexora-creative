@@ -1,10 +1,31 @@
-# Nexora Creative — où nous en sommes (31/10/2026, mis à jour le soir)
+# Nexora Creative — où nous en sommes (mis à jour le 02/11/2026)
 
 Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'est pas. Détail jour par jour : `docs/JOURNAL.md`. Mesures : `recherche/08-mesures-gb10.md`.
 
 ## En une phrase
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
+
+## Mise à jour du 02/11 : Producteur IA, juge visuel, Prolonger et Raccord, mode simple refait
+
+Branche `feat/producteur` (feuille de route `recherche/07` : R9, R8, R3a, R2 en partie). Détail et mesures : `docs/JOURNAL.md`.
+
+| Fonction | État | Preuve |
+|---|---|---|
+| **Producteur IA** (onglet par défaut de Créer) : un objectif → plan (plans, réplique, musique, cartons de texte) → devis calculé par le code → validation d'un clic → tournage par les routes ordinaires → suivi plan par plan → variantes en un clic | **fait** | film réel « Chez Mado » (pub verticale, 2 plans × 2 prises, musique, 2 cartons) lancé depuis le navigateur ; plan proposé en ≈ 6 s par `z-ai/glm-5.3` ; ≈ 7 000 jetons par message [TEST navigateur + réel] |
+| Garde-fous de l'agent | **fait** | le LLM n'a aucun outil qui dépense ; plafond par production ; 6 étapes au plus par message ; budget de jetons ; validation exécutée une seule fois (15 tests) |
+| **Juge visuel** (option « 2 prises par plan », rôle LLM `juge`, `qwen/qwen3.8-27b`) | **fait** | plan 2 du film réel : prise B gardée, « évite le texte orange indésirable sur la vitrine » (le texte parasite de la prise A est visible) ; contrôle qualité d'abord, repli sans juge (10 tests) |
+| **Cartons de texte posés en code** (titre, appel à l'action) | **fait** | début et fin du film réel, libass (le `drawtext` manque au ffmpeg du poste) |
+| **Musique composée pendant le tournage** | **fait** | Music3 sur le GB10 en 35,5 s, mixée à l'assemblage |
+| **Prolonger** (I2VA depuis la dernière image) et **Raccord** (FL2VA entre deux clips), sur MiniMax H3 | **fait** | remplacent Extend et Transitions (LTX) ; voir le journal pour les rendus réels |
+| **Compétences versionnées** des rôles LLM (`server/nexora/competences/*.md`) | **fait** | producteur, réalisation, montage, publication, juge ; injectées dans les consignes existantes (4 tests) |
+| **Mode simple** : Explorer = 8 modèles prêts à produire (un clic → plan et devis), 16 mouvements de caméra à vignettes dans Vidéo, « Faire parler » (photo + réplique) | **fait** | captures `marketing/creative/captures-v3/` |
+| Apps qui reposaient sur LTX (Mirror, Reshoot, Effects, Stage, HDR, Swap/Restyle, Speak, Add sound, Dream, Director LTX, Vidéo LTX) | **retirées de l'interface** | leurs adresses mènent à l'outil qui les remplace ; 15 outils MCP correspondants ne sont plus exposés |
+| MCP : outils `nexora_*` (état, Producteur, valider, créer, prolonger, raccorder) | **fait** | 22 outils listés par un client MCP réel, `nexora_etat` appelé |
+| **Personnages persistants (R6, Ref2VA)** | **pas fait** | les points de contrôle `minimax_h3_ref2va_*` sont présents sur la RTX 5090 ; câblage à faire (voir journal) |
+| **Brouillon rapide H3 (R1)** | **pas fait** | « image d'abord » existe (plan clé Qwen → Animer) ; pas de brouillon 768p turbo |
+
+**Écart restant avec Higgsfield** : personnages `@` en vidéo (Soul ID), lip-sync sur un audio fourni et voix (TTS, doublage), édition d'une vidéo existante (échange, restyle, transfert de mouvement), un seul moteur vidéo, presets de caméra illustrés par des clips d'OpenField et non par des rendus H3, pas d'API publique ni de communauté. **Avance** : agent qui chiffre avant de dépenser et contrôle chaque plan, juge visuel, montage multipiste, moteurs hébergés.
 
 ## La base
 
@@ -49,7 +70,7 @@ Fork d'**OpenField** (MIT), comme WorkStudio est un fork de Sim : interface Reac
 | **Connexion unique** au portail (OIDC + PKCE, patron WorkStudio) | test de bout en bout avec un faux site Nexora (3 tests) |
 | **Crédits** des rendus (devis, réservation, validation ou libération) et **espace disque** par organisation | 4 + 2 tests contre une API de site simulée |
 
-**99 tests automatisés verts**, contrôle de types vert, code sur GitLab (`root/nexora-creative`, branche `developpement`, demande de fusion !1).
+**152 tests automatisés verts au 02/11** (99 au 31/10), contrôle de types vert, code sur GitLab (`root/nexora-creative`, branche `developpement`, demande de fusion !1).
 
 ## Ce qui n'est pas fait ou pas prouvé
 

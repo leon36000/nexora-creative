@@ -4,13 +4,15 @@
  * ordinaire étiquetée `nexoraFilm` ; quand un plan se termine, `avancerFilm` regarde s'il peut assembler.
  */
 import { execFile } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { config } from '../config.js';
 import { takes, type Take } from '../jobs.js';
 import { corpsRendu, type DemandeCreer, type MoteurVideo } from './creer.js';
 import { avecCompte } from './compte.js';
+import { argsCarton, fichierAss, type Carton } from './cartons.js';
 import { controlerFichier } from './controle.js';
+import { choisirCandidat, jugerCandidats, plancheDataUrl } from './juge.js';
 import type { CreditsPrise } from './credits.js';
 import { argsAssemblage, argsAvecMusique, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
@@ -32,7 +34,15 @@ const pousser = (id: number) => deps.broadcast({ type: 'take', take: takes.get(i
 
 export async function tournerFilm(
   sb: Storyboard,
-  opts: { format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: CreditsPrise[]; qualite?: 'rapide' | 'max' },
+  opts: {
+    format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: CreditsPrise[]; qualite?: 'rapide' | 'max';
+    /** 2 : deux prises par plan indépendant, le juge visuel garde la meilleure (juge.ts). */
+    candidats?: 1 | 2;
+    /** Réservations de la seconde prise de chaque plan (même index que les plans). */
+    reservationsCandidats?: (CreditsPrise | undefined)[];
+    /** Cartons de texte posés en code au début ou à la fin du film. */
+    cartons?: Carton[];
+  },
   llm: ClientLlm | null,
 ): Promise<number> {
   const filmId = takes.create({
@@ -42,6 +52,7 @@ export async function tournerFilm(
     settings: {
       app: 'nexora-film', film: true, storyboard: sb, format: opts.format, qualite: opts.qualite ?? 'rapide', son: opts.son, moteur: opts.moteur,
       prompt: opts.intention, userPrompt: sb.titre, seconds: sb.dureeTotale, shotName: sb.titre.slice(0, 40),
+      ...(opts.candidats === 2 ? { candidats: 2 } : {}), ...(opts.cartons?.length ? { cartons: opts.cartons } : {}),
     },
   });
   pousser(filmId);
@@ -49,7 +60,7 @@ export async function tournerFilm(
     // Les prompts des plans indépendants s'écrivent en parallèle, puis leurs rendus partent dans l'ordre. Un plan
     // « suite » attend la fin du précédent : il partira de sa dernière image (voir lancerSuite).
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p), ...dialoguesDe(p) }, llm))),
     );
     for (let i = 0; i < sb.plans.length; i++) {
       const p = sb.plans[i];
@@ -64,9 +75,11 @@ export async function tournerFilm(
         app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: ecrit.source,
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
-      const [id] = await deps.queueTakes(corps, 1);
-      if (opts.reservations?.[i]) takes.patchSettings(id, { nexoraCredits: opts.reservations[i] });
-      majPlan(filmId, i, { take: id, corps });
+      const n = opts.candidats === 2 ? 2 : 1;
+      const ids = await deps.queueTakes(corps, n);
+      if (opts.reservations?.[i]) takes.patchSettings(ids[0], { nexoraCredits: opts.reservations[i] });
+      if (ids[1] && opts.reservationsCandidats?.[i]) takes.patchSettings(ids[1], { nexoraCredits: opts.reservationsCandidats[i] });
+      majPlan(filmId, i, { take: ids[0], corps, ...(ids.length > 1 ? { candidats: ids } : {}) });
     }
   } catch (e) {
     takes.fail(filmId, `Les plans n'ont pas pu partir au tournage : ${e instanceof Error ? e.message : e}`);
@@ -75,6 +88,9 @@ export async function tournerFilm(
   }
   return filmId;
 }
+
+/** Réplique d'un plan pour le réécrivain H3 (voix française synchronisée). */
+const dialoguesDe = (p: PlanFilm) => (p.replique ? { dialogues: [{ texte: p.replique, langue: 'French' }] } : {});
 
 /** Durée effective d'un plan sur la grille de H3 (5 s → 124 images, 10 s → 243). */
 const dureePlan = (p: PlanFilm) => (p.duree === 10 ? 243 : 124) / 24;
@@ -96,14 +112,30 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
   );
   const jeton = await deps.televerser(`nexora_film_${film.id}_plan${i}.png`, readFileSync(image), 'image/png');
   const org = takes.organisationDe(film.id) ?? 'local';
+  // Raccord : le plan va aussi vers la première image du plan suivant (H3 première + dernière image, FL2VA).
+  let fin: string | undefined;
+  const suivant = (p as PlanFilm & { raccord?: boolean }).raccord ? sb.plans[i + 1]?.take : undefined;
+  const fichierSuivant = suivant ? takes.get(suivant)?.output_path : undefined;
+  if (fichierSuivant && existsSync(fichierSuivant)) {
+    const imageFin = join(dossier, `film_${film.id}_plan${i}_arrivee.png`);
+    await new Promise<void>((ok, ko) =>
+      execFile(config.ffmpegBin, ['-y', '-i', fichierSuivant, '-frames:v', '1', '-update', '1', imageFin], (err, _o, stderr) =>
+        err ? ko(new Error(`première image du plan ${i + 2} : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()),
+    );
+    fin = await deps.televerser(`nexora_film_${film.id}_plan${i}_fin.png`, readFileSync(imageFin), 'image/png');
+  }
   const ecrit = await reecrireH3({
-    intention: `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
-    mode: 'i2va',
+    intention: fin
+      ? `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame and ends exactly on the provided last frame: one continuous move that links them.`
+      : `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
+    mode: fin ? 'fl2va' : 'i2va',
     dureeS: dureePlan(p),
+    ...dialoguesDe(p),
   }, deps.llmPour(org));
   const corps = {
     ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite }, ecrit.prompt, s.moteur ?? 'h3-fast'),
     startImage: jeton,
+    ...(fin ? { endImage: fin } : {}),
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
     shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: film.project_id ?? undefined,
   };
@@ -145,6 +177,15 @@ async function etape(filmId: number) {
     }
     const t = takes.get(p.take);
     if (!t) throw new Error(`Plan ${i + 1} : sa prise a été supprimée`);
+    // Deux candidats : on attend les deux, le contrôle qualité puis le juge visuel choisissent la prise du plan.
+    const cands = (p as any).candidats as number[] | undefined;
+    if (cands?.length === 2 && !(p as any).jugement) {
+      const prises = cands.map((id) => takes.get(id));
+      if (prises.some((x) => !x || x.status === 'queued' || x.status === 'rendering')) return;
+      const choix = await departager(filmId, i, sb, prises as Take[]);
+      majPlan(filmId, i, { take: choix.take, jugement: choix });
+      return avancerFilmPlusTard(filmId);
+    }
     // Panne du moteur pendant un plan : on le relance (même prompt, même graine) jusqu'à 2 fois avant d'abandonner le film.
     const relances = Number((p as any).relances ?? 0);
     if (t.status === 'failed' && (p as any).corps && relances < 2) {
@@ -185,6 +226,34 @@ async function etape(filmId: number) {
     }
     fichiers.push(t.output_path);
   }
+  // Bande originale composée en même temps que les plans (Producteur) : on l'attend avant d'assembler.
+  if (typeof s.musiquePrise === 'number' && typeof s.musique !== 'string') {
+    const m = takes.get(s.musiquePrise);
+    if (m && (m.status === 'queued' || m.status === 'rendering')) return;
+    if (m?.status === 'done' && m.output_path && existsSync(m.output_path)) s.musique = m.output_path;
+    takes.patchSettings(filmId, { musique: s.musique ?? null });
+  }
+  const cartons = (Array.isArray(s.cartons) ? s.cartons : []) as Carton[];
+  const durees = sb.plans.map((p) => Number((p as any).controle?.duree) || dureePlan(p));
+  if (cartons.length) {
+    const m = await new Promise<string>((ok) => execFile(config.ffprobeBin, ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', fichiers[0]], (e, o) => ok(e ? '' : String(o).trim())));
+    const [w, h] = m.split(',').map(Number);
+    if (w > 0 && h > 0) {
+      const debut: string[] = [], fin: string[] = [];
+      for (const [k, c] of cartons.entries()) {
+        const dureeS = c.position === 'debut' ? 2 : 2.5;
+        const base = join(config.outputDir, 'films', `film_${filmId}_carton${k}`);
+        mkdirSync(join(config.outputDir, 'films'), { recursive: true });
+        writeFileSync(`${base}.ass`, fichierAss(c.texte, { w, h, dureeS }));
+        await new Promise<void>((ok, ko) => execFile(config.ffmpegBin, argsCarton(`${base}.ass`, `${base}.mp4`, { w, h, dureeS, son: !!s.son, dossierPolices: dossierPolices() }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
+          err ? ko(new Error(`carton : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()));
+        (c.position === 'debut' ? debut : fin).push(`${base}.mp4`);
+        (c.position === 'debut' ? durees.unshift.bind(durees) : durees.push.bind(durees))(dureeS);
+      }
+      fichiers.unshift(...debut);
+      fichiers.push(...fin);
+    }
+  }
   takes.patchSettings(filmId, { assemblage: 'en_cours' });
   pousser(filmId);
   const dossier = join(config.outputDir, 'films');
@@ -194,7 +263,7 @@ async function etape(filmId: number) {
   await new Promise<void>((ok, ko) =>
     execFile(config.ffmpegBin, argsAssemblage(fichiers, sortie, !!s.son, {
       transition: s.transition === 'fondu' ? 'fondu' : 'coupe',
-      durees: sb.plans.map((p) => Number((p as any).controle?.duree) || dureePlan(p)),
+      durees,
       fondu: 0.5,
     }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
       err ? ko(new Error(`ffmpeg : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
@@ -203,19 +272,53 @@ async function etape(filmId: number) {
   // Bande originale MiniMax-Music3 choisie pour cette version du film : mixée sous les sons des plans.
   if (typeof s.musique === 'string' && existsSync(s.musique)) {
     final = sortie.replace(/\.mp4$/, '_musique.mp4');
-    const duree = sb.plans.reduce((n, p) => n + (Number((p as any).controle?.duree) || dureePlan(p)), 0)
-      - (s.transition === 'fondu' ? 0.5 * (sb.plans.length - 1) : 0);
+    const duree = durees.reduce((n, d) => n + d, 0) - (s.transition === 'fondu' ? 0.5 * (fichiers.length - 1) : 0);
     await new Promise<void>((ok, ko) =>
       execFile(config.ffmpegBin, argsAvecMusique(sortie, s.musique, final, { dureeS: duree, sonDuFilm: !!s.son }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
         err ? ko(new Error(`ffmpeg (musique) : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
     );
   }
   takes.finish(filmId, final, (Date.now() - t0) / 1000);
-  takes.patchSettings(filmId, { assemblage: 'fait', planTakes: sb.plans.map((p) => p.take) });
+  const dureeReelle = durees.reduce((n, d) => n + d, 0) - (s.transition === 'fondu' ? 0.5 * (fichiers.length - 1) : 0);
+  takes.patchSettings(filmId, { assemblage: 'fait', planTakes: sb.plans.map((p) => p.take), seconds: Math.round(dureeReelle * 10) / 10 });
   pousser(filmId);
 }
 
 /** Films en attente de plans, pour la reprise après redémarrage. */
 export function filmsEnAttente(): number[] {
   return takes.active().filter((t) => reglages(t).film === true).map((t) => t.id);
+}
+
+/** Dossier des polices des cartons (DejaVu, présent sur le poste et sur la VM ; réglable). */
+function dossierPolices(): string | undefined {
+  const d = process.env.NEXORA_POLICES_CARTONS?.trim() || '/usr/share/fonts/truetype/dejavu';
+  return existsSync(d) ? d : undefined;
+}
+
+/** Une étape de plus tout de suite (le plan vient de recevoir sa prise gagnante). */
+function avancerFilmPlusTard(filmId: number) {
+  setTimeout(() => void avancerFilm(filmId), 0);
+}
+
+/** Contrôle qualité des deux prises puis juge visuel ; renvoie la prise gardée et pourquoi. */
+async function departager(filmId: number, i: number, sb: Storyboard, prises: Take[]) {
+  const plan = sb.plans[i] as PlanFilm & { corps?: Record<string, any> };
+  const images = Number(plan.corps?.lengthFrames);
+  const dureeAttendue = Number.isFinite(images) && images > 0 ? images / 24 : plan.duree;
+  const evals = await Promise.all(prises.map(async (t) => {
+    if (t.status !== 'done' || !t.output_path || !existsSync(t.output_path)) return { take: t.id, controleOk: false };
+    const c = await controlerFichier(config.ffmpegBin, t.output_path, { dureeAttendue, sonAttendu: !!plan.corps?.withAudio }).catch(() => null);
+    return { take: t.id, controleOk: !!c?.ok };
+  }));
+  let verdict = null;
+  if (evals.every((e) => e.controleOk)) {
+    const org = takes.organisationDe(filmId) ?? 'local';
+    const dossier = join(config.outputDir, 'films', 'images');
+    mkdirSync(dossier, { recursive: true });
+    try {
+      const planches = await Promise.all(prises.map((t, k) => plancheDataUrl(config.ffmpegBin, t.output_path!, dureeAttendue, join(dossier, `film_${filmId}_plan${i}_cand${k}.jpg`))));
+      verdict = await jugerCandidats(deps.llmPour(org), intentionDuPlan(sb, i), planches);
+    } catch { /* planche impossible : le code choisit seul */ }
+  }
+  return { ...choisirCandidat(evals, verdict), notes: verdict?.notes, candidats: prises.map((t) => t.id) };
 }

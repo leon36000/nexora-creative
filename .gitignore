@@ -2,6 +2,8 @@
 .claude/
 # Données locales (poids, rendus) : jamais dans le dépôt
 data/
+# … sauf le code source de FreeCut (changelog et types), nécessaire à la construction du Mode Studio
+!mode-studio/src/data/
 *.log
 .env
 node_modules/

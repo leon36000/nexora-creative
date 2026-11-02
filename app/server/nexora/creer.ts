@@ -20,6 +20,8 @@ export interface DemandeCreer {
   image?: string;
   /** Réplique à faire dire (français), recopiée mot pour mot dans le prompt H3 : la voix est synchronisée à l'image. */
   replique?: string;
+  /** Mouvement de caméra choisi parmi les vignettes (texte anglais du catalogue), ajouté à l'intention. */
+  camera?: string;
 }
 
 /** Point de contrôle FastH3 V2 distillé et quantifié NVFP4 (server/graphs/h3.ts, H3_DISTILLED_CHECKPOINTS). */
@@ -57,7 +59,8 @@ export function lireDemandeCreer(b: unknown): DemandeCreer {
   const duree: DureeCreer = o.duree === 10 || o.duree === 15 ? o.duree : 5;
   const image = typeof o.image === 'string' && /^asset:[0-9a-f-]{36}$/i.test(o.image) ? o.image : undefined;
   const replique = typeof o.replique === 'string' ? o.replique.trim().slice(0, 300) : '';
-  return { intention, format, duree, son: o.son !== false, qualite: o.qualite === 'max' ? 'max' : 'rapide', ...(image ? { image } : {}), ...(replique ? { replique } : {}) };
+  const camera = typeof o.camera === 'string' ? o.camera.trim().slice(0, 300) : '';
+  return { intention, format, duree, son: o.son !== false, qualite: o.qualite === 'max' ? 'max' : 'rapide', ...(image ? { image } : {}), ...(replique ? { replique } : {}), ...(camera ? { camera } : {}) };
 }
 
 export function corpsRenduH3(d: DemandeCreer, prompt: string) {
@@ -109,4 +112,9 @@ export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVide
   const m = reglagesH3Max();
   // Le moteur cinéma est toujours à pleine résolution.
   return { ...base, ...TAILLES.max[d.format], videoModel: 'h3-max' as const, checkpoint: m.checkpoint, steps: m.etapes, ...(m.ref ? { refMode: true } : {}) };
+}
+
+/** Intention envoyée au réécrivain H3 : la phrase de la personne, puis le mouvement de caméra choisi. */
+export function intentionAvecCamera(d: DemandeCreer): string {
+  return d.camera ? `${d.intention}\nCamera movement: ${d.camera}` : d.intention;
 }

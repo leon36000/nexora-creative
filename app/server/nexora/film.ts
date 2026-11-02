@@ -8,6 +8,7 @@
  * L'état vit dans la prise « film » (settings), comme les coupes de scène d'OpenField : un redémarrage reprend.
  */
 import { type ClientLlm, lireJson } from './llm.js';
+import { avecCompetences } from './competences.js';
 
 export interface PlanFilm {
   resume: string;
@@ -16,6 +17,8 @@ export interface PlanFilm {
   camera: string;
   /** Le plan prolonge directement le précédent : il part de sa dernière image (H3 en image vers vidéo). */
   suite?: boolean;
+  /** Réplique (français) dite dans ce plan, recopiée mot pour mot dans le prompt H3 : voix synchronisée à l'image. */
+  replique?: string;
   /** Prise de rendu de ce plan, une fois en file. */
   take?: number;
 }
@@ -45,6 +48,7 @@ export function lireStoryboard(o: unknown, dureeCible: number): Storyboard {
       duree: (Number(p?.duree) >= 8 ? 10 : 5) as 5 | 10,
       camera: txt(p?.camera, 300),
       suite: p?.suite === true,
+      ...(txt(p?.replique, 200) ? { replique: txt(p?.replique, 200) } : {}),
     }))
     .filter((p: PlanFilm) => p.description || p.resume)
     .slice(0, MAX_PLANS);
@@ -111,7 +115,7 @@ export async function planifierFilm(
         const brut = await llm.completer(
           'realisation',
           [
-            { role: 'system', content: CONSIGNES },
+            { role: 'system', content: avecCompetences('realisation', CONSIGNES) },
             { role: 'user', content: JSON.stringify({ idee: d.intention, duree_cible_secondes: d.dureeCible }) },
           ],
           { json: true, temperature: 0.8 },
@@ -184,8 +188,8 @@ export function argsAvecMusique(film: string, musique: string, sortie: string, o
   const fin = Math.max(0, o.dureeS - 1.5).toFixed(2);
   const mus = `[1:a]aresample=48000,afade=t=out:st=${fin}:d=1.5[m]`;
   const filtre = o.sonDuFilm
-    ? `${mus};[0:a]aresample=48000,volume=${o.sfxDb ?? -8}dB[s];[m][s]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1:LRA=11[a]`
-    : `${mus};[m]loudnorm=I=-14:TP=-1:LRA=11[a]`;
+    ? `${mus};[0:a]aresample=48000,volume=${o.sfxDb ?? -8}dB[s];[m][s]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,alimiter=limit=0.89:level=false[a]`
+    : `${mus};[m]loudnorm=I=-14:TP=-1.5:LRA=11,alimiter=limit=0.89:level=false[a]`;
   return ['-y', '-i', film, '-i', musique, '-filter_complex', filtre, '-map', '0:v', '-map', '[a]', '-t', o.dureeS.toFixed(3),
     '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', sortie];
 }
@@ -223,7 +227,7 @@ export function storyboardPourRefaire(sb: Storyboard, i: number, modif: { descri
     const base = { ...p } as PlanFilm & Record<string, unknown>;
     delete base.attente;
     // Un plan gardé garde aussi son contrôle qualité (pas de nouvelle reprise sur une prise déjà acceptée).
-    if (!garde) { delete base.take; delete base.corps; delete base.reservation; delete base.controle; delete base.reprises; delete base.controleRefuse; }
+    if (!garde) { delete base.take; delete base.corps; delete base.reservation; delete base.controle; delete base.reprises; delete base.controleRefuse; delete base.candidats; delete base.jugement; }
     if (k === i) {
       if (modif.description?.trim()) base.description = modif.description.trim().slice(0, 1200);
       if (modif.camera?.trim()) base.camera = modif.camera.trim().slice(0, 300);
@@ -231,4 +235,55 @@ export function storyboardPourRefaire(sb: Storyboard, i: number, modif: { descri
     return base as PlanFilm;
   });
   return { ...sb, plans };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Prolonger et Raccorder (feuille de route R3a) : les apps Extend et Transitions d'OpenField reposaient sur LTX-2.x,
+// bloqué par la politique de licences ; elles sont refaites sur MiniMax H3 avec la mécanique des films : le clip
+// d'origine garde sa prise, le nouveau plan part de sa dernière image (I2VA) ou, pour un raccord, va de la dernière
+// image du premier clip à la première image du second (FL2VA). Contrôle qualité, crédits et assemblage : ceux du film.
+
+interface PriseVideo { id: number; kind: string; status: string; output_path: string | null; settings: string }
+
+function lirePrise(t: PriseVideo) {
+  if (t.kind !== 'video' || t.status !== 'done' || !t.output_path) throw new Error('Choisis une vidéo terminée.');
+  const s = JSON.parse(t.settings) as Record<string, any>;
+  if (s.film) throw new Error('Choisis un clip, pas un film entier.');
+  const w = Number(s.width) || 832, h = Number(s.height) || 480;
+  const format: '16:9' | '9:16' | '1:1' = w > h * 1.1 ? '16:9' : h > w * 1.1 ? '9:16' : '1:1';
+  const duree: 5 | 10 = Number(s.lengthFrames) >= 200 ? 10 : 5;
+  return { s, format, duree, resume: txt(String(s.intention ?? s.userPrompt ?? 'Clip'), 80) };
+}
+
+export function storyboardProlonger(t: PriseVideo, o: { intention?: string; duree?: number }) {
+  const a = lirePrise(t);
+  const suite = txt(o.intention, 1200) || 'The same shot continues naturally: the action goes on, same subjects, same place, same light, same camera style.';
+  const storyboard = lireStoryboard({
+    titre: `${a.resume} (prolongé)`,
+    bible: { style: '', personnages: [], lieux: [] },
+    plans: [
+      { resume: a.resume, description: String(a.s.intention ?? a.resume), duree: a.duree },
+      { resume: o.intention ? txt(o.intention, 80) : 'La suite', description: suite, duree: Number(o.duree) >= 8 ? 10 : 5, suite: true },
+    ],
+  }, 0);
+  storyboard.plans[0].take = t.id;
+  return { storyboard, format: a.format, son: a.s.withAudio !== false, qualite: a.s.videoModel === 'h3-max' ? 'max' as const : 'rapide' as const };
+}
+
+export function storyboardRaccord(de: PriseVideo, vers: PriseVideo, o: { intention?: string }) {
+  const a = lirePrise(de), b = lirePrise(vers);
+  const transition = txt(o.intention, 1200) || 'One continuous shot: the first scene flows smoothly into the second without a cut, the camera keeps moving.';
+  const storyboard = lireStoryboard({
+    titre: `${a.resume} → ${b.resume}`.slice(0, 120),
+    bible: { style: '', personnages: [], lieux: [] },
+    plans: [
+      { resume: a.resume, description: String(a.s.intention ?? a.resume), duree: a.duree },
+      { resume: 'Raccord', description: transition, duree: 5, suite: true },
+      { resume: b.resume, description: String(b.s.intention ?? b.resume), duree: b.duree },
+    ],
+  }, 0);
+  storyboard.plans[0].take = de.id;
+  (storyboard.plans[1] as PlanFilm & { raccord?: boolean }).raccord = true;
+  storyboard.plans[2].take = vers.id;
+  return { storyboard, format: a.format, son: a.s.withAudio !== false || b.s.withAudio !== false, qualite: 'rapide' as const };
 }

@@ -12,11 +12,12 @@
  *  redaction   : prompts H3 et image (le plus exigeant)      realisation : découpage d'un film (Director)
  *  boost       : « Booster ma phrase »                        musique     : description de la bande originale
  *  moderation  : garde-fou avant rendu (licence H3, V.5)      publication : titres et textes pour les réseaux
- *  idees       : « Inspire-moi »                              juge        : contrôle visuel (réservé)
+ *  idees       : « Inspire-moi »                              juge        : juge visuel (deux candidats, modèle vision)
+ *  producteur  : agent Producteur (boucle d'outils bornée, server/nexora/agent.ts)
  * `prompt`, `intention` et `assistant` restent acceptés (anciens appels).
  */
-export type RoleLlm = 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees';
-export const ROLES_LLM: readonly RoleLlm[] = ['redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge'];
+export type RoleLlm = 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur';
+export const ROLES_LLM: readonly RoleLlm[] = ['redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur'];
 
 /** Réglages venus de l'administration du site (modèle par défaut et par rôle) ; ils passent avant l'environnement du poste. */
 let reglages: { defaut?: string; roles: Partial<Record<RoleLlm, string>> } = { roles: {} };
@@ -25,14 +26,43 @@ export function appliquerReglagesLlm(r: { defaut?: string | null; roles?: Partia
 }
 export const reglagesLlmCourants = () => ({ defaut: reglages.defaut ?? null, roles: { ...reglages.roles } });
 
-export interface MessageLlm {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
+/** Contenu multimodal (format OpenAI) : texte et images en data URL, pour le juge visuel. */
+export type PartieContenu = { type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } };
+
+export interface AppelOutil {
+  id: string;
+  nom: string;
+  arguments: Record<string, unknown>;
+  /** Arguments non JSON renvoyés par le modèle : l'outil répond par une erreur lisible au lieu de planter. */
+  illisible?: true;
 }
+
+export type MessageLlm =
+  | { role: 'system' | 'user'; content: string | PartieContenu[] }
+  | { role: 'assistant'; content: string; appels?: AppelOutil[] }
+  | { role: 'tool'; content: string; appelId: string };
+
+/** Description d'un outil pour le modèle (paramètres en JSON Schema). */
+export interface DefinitionOutil { nom: string; description: string; parametres: Record<string, unknown> }
+
+export interface ReponseOutils { texte: string; appels: AppelOutil[]; jetons: number }
 
 export interface ClientLlm {
   /** Renvoie le texte de la réponse ; `json` demande un objet JSON. */
   completer(role: RoleLlm, messages: MessageLlm[], options?: { json?: boolean; temperature?: number; maxTokens?: number }): Promise<string>;
+  /** Un tour d'appel de fonctions (« tools ») : texte éventuel et appels d'outils demandés par le modèle. */
+  completerAvecOutils?(role: RoleLlm, messages: MessageLlm[], outils: DefinitionOutil[], options?: { temperature?: number; maxTokens?: number }): Promise<ReponseOutils>;
+}
+
+/** Messages au format de l'API (tool_calls, tool_call_id). */
+function versApi(messages: MessageLlm[]) {
+  return messages.map((m) => {
+    if (m.role === 'tool') return { role: 'tool', tool_call_id: m.appelId, content: m.content };
+    if (m.role === 'assistant' && m.appels?.length) {
+      return { role: 'assistant', content: m.content || null, tool_calls: m.appels.map((a) => ({ id: a.id, type: 'function', function: { name: a.nom, arguments: JSON.stringify(a.arguments) } })) };
+    }
+    return { role: m.role, content: m.content };
+  });
 }
 
 export class ErreurLlm extends Error {}
@@ -46,28 +76,53 @@ export function clientLlmDepuisEnv(env: NodeJS.ProcessEnv = process.env, f: type
   const base = env.NEXORA_LLM_BASE_URL?.trim().replace(/\/+$/, '');
   const cle = env.NEXORA_LLM_CLE?.trim();
   if (!base || !cle || !modelePour('prompt', env)) return null;
+  const appeler = async (role: RoleLlm, corps: Record<string, unknown>) => {
+    const model = modelePour(role, env);
+    if (!model) throw new ErreurLlm(`aucun modèle configuré pour le rôle ${role}`);
+    const r = await f(`${base}/chat/completions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${cle}` },
+      body: JSON.stringify({ model, ...corps }),
+      signal: AbortSignal.timeout(180_000),
+    });
+    if (!r.ok) throw new ErreurLlm(`passerelle LLM : HTTP ${r.status}`);
+    return (await r.json()) as {
+      choices?: { message?: { content?: string | null; tool_calls?: { id?: string; function?: { name?: string; arguments?: string } }[] } }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+    };
+  };
   return {
     async completer(role, messages, options = {}) {
-      const model = modelePour(role, env);
-      if (!model) throw new ErreurLlm(`aucun modèle configuré pour le rôle ${role}`);
-      const r = await f(`${base}/chat/completions`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', authorization: `Bearer ${cle}` },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: options.temperature ?? 0.4,
-          // Sans plafond, la passerelle réserve le maximum du modèle sur les crédits à chaque appel.
-          max_tokens: options.maxTokens ?? 8000,
-          ...(options.json ? { response_format: { type: 'json_object' } } : {}),
-        }),
-        signal: AbortSignal.timeout(180_000),
+      const corps = await appeler(role, {
+        messages: versApi(messages),
+        temperature: options.temperature ?? 0.4,
+        // Sans plafond, la passerelle réserve le maximum du modèle sur les crédits à chaque appel.
+        max_tokens: options.maxTokens ?? 8000,
+        ...(options.json ? { response_format: { type: 'json_object' } } : {}),
       });
-      if (!r.ok) throw new ErreurLlm(`passerelle LLM : HTTP ${r.status}`);
-      const corps = (await r.json()) as { choices?: { message?: { content?: string } }[] };
       const texte = corps.choices?.[0]?.message?.content;
       if (typeof texte !== 'string' || !texte.trim()) throw new ErreurLlm('réponse LLM vide');
       return texte;
+    },
+    async completerAvecOutils(role, messages, outils, options = {}) {
+      const corps = await appeler(role, {
+        messages: versApi(messages),
+        temperature: options.temperature ?? 0.3,
+        max_tokens: options.maxTokens ?? 2000,
+        ...(outils.length ? { tools: outils.map((o) => ({ type: 'function', function: { name: o.nom, description: o.description, parameters: o.parametres } })), tool_choice: 'auto' } : {}),
+      });
+      const m = corps.choices?.[0]?.message;
+      const appels: AppelOutil[] = (m?.tool_calls ?? []).map((t, i) => {
+        const id = t.id || `appel_${i}`;
+        const nom = String(t.function?.name ?? '');
+        try {
+          const a = JSON.parse(t.function?.arguments || '{}');
+          return { id, nom, arguments: a && typeof a === 'object' && !Array.isArray(a) ? a : {} };
+        } catch {
+          return { id, nom, arguments: {}, illisible: true as const };
+        }
+      });
+      return { texte: typeof m?.content === 'string' ? m.content : '', appels, jetons: (corps.usage?.prompt_tokens ?? 0) + (corps.usage?.completion_tokens ?? 0) };
     },
   };
 }

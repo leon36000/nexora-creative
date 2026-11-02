@@ -115,12 +115,45 @@ export interface Storyboard {
 export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null }
 export interface MoteurGpu { id: string; nom: string; recettes: string[]; enLigne: boolean; enCours: number }
 
+/** Agent Producteur (server/nexora/agent.ts). */
+export interface PlanProduction {
+  titre: string; format: '16:9' | '9:16' | '1:1'; qualite: 'rapide' | 'max'; son: boolean;
+  bible: Storyboard['bible'];
+  plans: { resume: string; description: string; camera: string; duree: 5 | 10; suite?: boolean; replique?: string }[];
+  musique: { envie: string } | null; cartons: { texte: string; position: 'debut' | 'fin' }[]; candidats: 1 | 2;
+}
+export interface DevisProduction { credits: number | null; secondesGpu: number; minutes: number; rendus: number; plans: number; musique: boolean; candidats: 1 | 2 }
+export type PropositionProducteur =
+  | { id: string; genre: 'production'; plan: PlanProduction; devis: DevisProduction; base?: number }
+  | { id: string; genre: 'refaire'; film: number; plan: number; description?: string; camera?: string; devis: DevisProduction }
+  | { id: string; genre: 'remontage'; film: number; ordre: number[]; transition: 'coupe' | 'fondu'; devis: DevisProduction };
+export interface FilmResume {
+  film: number; titre: string; etat: string; erreur?: string; format?: string; qualite?: string; video?: string; musique: string | null; cartons: string[];
+  plans: { plan: number; resume: string; etat: string; controle?: 'ok' | string[]; juge?: { prise: number; source: 'juge' | 'controle' | 'repli'; raison: string }; reprises?: number }[];
+}
+export interface SessionProducteur {
+  id: string; titre: string;
+  fil: { de: 'personne' | 'producteur' | 'systeme'; texte: string; date: string; proposition?: string; production?: number }[];
+  proposition: PropositionProducteur | null;
+  productions: { filmId: number; lanceLe: string; genre?: string; plan?: PlanProduction; film: FilmResume | { erreur: string } }[];
+  plafond: { credits: number; secondes: number }; juge: boolean; credits: boolean;
+}
+export type VarianteProducteur = 'format-16:9' | 'format-9:16' | 'format-1:1' | 'nouvelle-prise' | 'cinema' | 'courte';
+
 export const api = {
   status: () => j<Status>('/api/status'),
   /** Nexora Creative : une intention en français devient une vidéo (prompt écrit par le LLM, rendu MiniMax H3). */
-  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string; musique?: boolean; replique?: string }) =>
+  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string; musique?: boolean; replique?: string; camera?: string }) =>
     j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
   nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
+  producteurListe: () => j<{ sessions: { id: string; titre: string; updated_at: string }[] }>('/api/nexora/producteur'),
+  producteurNouvelle: () => j<SessionProducteur>('/api/nexora/producteur', { method: 'POST', body: '{}' }),
+  producteurSession: (id: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}`),
+  producteurMessage: (id: string, texte: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}/message`, { method: 'POST', body: JSON.stringify({ texte }) }),
+  producteurValider: (id: string, proposition: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}/valider`, { method: 'POST', body: JSON.stringify({ proposition }) }),
+  producteurAjuster: (id: string, proposition: string, r: { candidats?: number; qualite?: string; format?: string; son?: boolean; musique?: boolean }) =>
+    j<SessionProducteur>(`/api/nexora/producteur/${id}/ajuster`, { method: 'POST', body: JSON.stringify({ proposition, ...r }) }),
+  producteurVariante: (id: string, film: number, genre: VarianteProducteur) => j<SessionProducteur>(`/api/nexora/producteur/${id}/variante`, { method: 'POST', body: JSON.stringify({ film, genre }) }),
   nexoraIdees: (b: { mode: 'video' | 'image' | 'film'; theme?: string }) =>
     j<{ idees: string[]; source: 'llm' | 'repli' }>('/api/nexora/idees', { method: 'POST', body: JSON.stringify(b) }),
   nexoraPublication: (b: { id: number; plateforme: string; langue: 'fr' | 'en' }) =>

@@ -4,6 +4,7 @@
  * par le LLM : « généré par IA » (AUP de H3, point 12) et les outils utilisés.
  */
 import { type ClientLlm, lireJson } from './llm.js';
+import { avecCompetences } from './competences.js';
 
 export type Plateforme = 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'x';
 export const PLATEFORMES: Record<Plateforme, { nom: string; limite: number; conseil: string }> = {
@@ -33,12 +34,12 @@ export async function ecrirePublication(idee: string, plateforme: Plateforme, la
   const p = PLATEFORMES[plateforme];
   try {
     const brut = await llm.completer('publication', [
-      { role: 'system', content: [
+      { role: 'system', content: avecCompetences('publication', [
         `Tu écris le texte de publication d’une courte vidéo pour ${p.nom} (${p.conseil}), en ${langue === 'en' ? 'anglais' : 'français québécois'}.`,
         `Le texte (hors hashtags) fait ${p.limite} caractères au plus. Accroche forte, concrète, sans exagération ni promesse fausse ;`,
         'ne cite aucune marque ni personne réelle ; n’écris pas la mention « généré par IA », elle est ajoutée ensuite.',
         'Réponds en JSON {"titre":"...","texte":"...","hashtags":["#..."]}.',
-      ].join(' ') },
+      ].join(' ')) },
       { role: 'user', content: idee.slice(0, 2000) },
     ], { json: true, temperature: 0.8 });
     const r = lireJson<{ titre?: unknown; texte?: unknown; hashtags?: unknown }>(brut);

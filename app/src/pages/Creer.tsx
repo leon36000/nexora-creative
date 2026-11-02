@@ -13,14 +13,18 @@ import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
 import FilmPlans from '../FilmPlans';
 import { Publication } from '../studio/Publication';
+import Producteur from '../studio/Producteur';
+import { CAMERAS } from '../studio/apps';
+import { setParams, useRoute } from '../router';
 import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
 
-type Mode = 'video' | 'image' | 'film';
+type Mode = 'producteur' | 'video' | 'image' | 'film';
+const MODES: Mode[] = ['producteur', 'video', 'image', 'film'];
 type Format = '16:9' | '9:16' | '1:1';
 type Depart = 'texte' | 'photo' | 'cle';
 type Filtre = 'tout' | 'videos' | 'films' | 'images';
 
-const IDEES: Record<Mode, string[]> = {
+const IDEES: Record<Exclude<Mode, 'producteur'>, string[]> = {
   video: [
     'Ma voiture rouge se transforme en robot géant pendant que la caméra tourne autour, au coucher du soleil.',
     'Un dragon d’obsidienne jaillit d’une mer de nuages d’orage et rugit vers la caméra.',
@@ -49,7 +53,9 @@ const SECONDES_PAR_PLAN_5S = 40;
 const fmtTemps = (s: number) => (s < 90 ? `${Math.round(s)} s` : `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')} s`);
 
 export default function Creer() {
-  const [mode, setMode] = useState<Mode>('video');
+  const { params } = useRoute();
+  const mode: Mode = MODES.includes(params.get('mode') as Mode) ? (params.get('mode') as Mode) : 'producteur';
+  const setMode = (m: Mode) => setParams({ mode: m === 'producteur' ? null : m });
   const [intention, setIntention] = useState('');
   const [format, setFormat] = useState<Format>('16:9');
   const [duree, setDuree] = useState<number>(5);
@@ -58,7 +64,8 @@ export default function Creer() {
   const [musique, setMusique] = useState(false);
   const [qualite, setQualite] = useState<'rapide' | 'max'>('rapide');
   const [nombreImages, setNombreImages] = useState(2);
-  const [depart, setDepart] = useState<Depart>('texte');
+  const [depart, setDepart] = useState<Depart>(() => (params.get('depart') === 'photo' ? 'photo' : 'texte'));
+  const [camera, setCamera] = useState<string | null>(null);
   const [cle, setCle] = useState<{ jeton: string; apercu: string } | null>(null);
   const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo'>(null);
   const [boost, setBoost] = useState<string | null>(null);
@@ -69,7 +76,7 @@ export default function Creer() {
   const [filtre, setFiltre] = useState<Filtre>('tout');
   const [replique, setReplique] = useState('');
   const [pub, setPub] = useState<number | null>(null);
-  const [idees, setIdees] = useState<Partial<Record<Mode, string[]>>>({});
+  const [idees, setIdees] = useState<Partial<Record<Exclude<Mode, 'producteur'>, string[]>>>({});
   const [inspire, setInspire] = useState(false);
   const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number | null } | null>(null);
   const toutes = useStore((s) => s.takes);
@@ -107,6 +114,13 @@ export default function Creer() {
   }, [toutes]);
 
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
+  // « Animer » depuis la Bibliothèque : /?mode=video&cle=<image> pose l'image comme plan clé.
+  useEffect(() => {
+    const id = Number(params.get('cle'));
+    if (!id) return;
+    setParams({ cle: null });
+    void animer(id);
+  }, [params.get('cle')]);
   const film = mode === 'film';
   const dureeClip = duree;
   useEffect(() => {
@@ -123,6 +137,7 @@ export default function Creer() {
   async function inspirer() {
     setInspire(true);
     try {
+      if (mode === 'producteur') return;
       const r = await api.nexoraIdees({ mode, theme: intention.trim() || undefined });
       setIdees((x) => ({ ...x, [mode]: r.idees }));
     } catch (e) {
@@ -136,6 +151,7 @@ export default function Creer() {
     if (!intention.trim()) return;
     setEnvoi('boost');
     try {
+      if (mode === 'producteur') return;
       const r = await api.nexoraAmeliorer({ intention: intention.trim(), mode });
       setBoost(r.texte);
     } catch (e) {
@@ -148,7 +164,8 @@ export default function Creer() {
   async function creerVideo() {
     setEnvoi('creer');
     try {
-      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined });
+      const cam = CAMERAS.find((c) => c.id === camera);
+      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined, camera: cam?.texte });
       toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : l’assistant est indisponible).');
       setCle(null);
     } catch (e) {
@@ -255,7 +272,9 @@ export default function Creer() {
       <section className="st-hero">
         <div>
           <h1>Écris-le. <em>Nexora</em> le filme.</h1>
-          <p>Une phrase en français suffit. L’IA écrit le scénario, dessine le plan clé, tourne avec son et compose la musique.</p>
+          <p>{mode === 'producteur'
+            ? 'Dis ce que tu veux produire. Le Producteur IA découpe, chiffre, tourne, contrôle chaque plan et assemble. Tu valides le devis d’un clic.'
+            : 'Une phrase en français suffit. L’IA écrit le scénario, dessine le plan clé, tourne avec son et compose la musique.'}</p>
         </div>
         <div className="st-pile" aria-label="Modèles utilisés">
           <span>Vidéo <b>MiniMax H3</b></span>
@@ -264,15 +283,19 @@ export default function Creer() {
         </div>
       </section>
 
+      <div className="st-modes st-modes-haut" role="tablist" aria-label="Que veux-tu créer ?">
+        {([['producteur', 'Producteur IA', IcEtincelle], ['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => (
+          <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
+            <Ic />{v === 'producteur' ? <>Producteur<span className="st-ia"> IA</span></> : label}
+          </button>
+        ))}
+      </div>
+
+      {mode === 'producteur' ? (
+        <div className="st-grid"><Producteur onOuvrirFilm={setFilmOuvert} objectif={params.get('objectif')} /></div>
+      ) : (
       <div className="st-grid">
         <aside className="st-composer" aria-label="Composeur">
-          <div className="st-modes" role="tablist" aria-label="Que veux-tu créer ?">
-            {([['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => (
-              <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
-                <Ic />{label}
-              </button>
-            ))}
-          </div>
 
           <div className="st-champ">
             <textarea
@@ -331,6 +354,20 @@ export default function Creer() {
                 </div>
               )}
               {depart === 'cle' && !cle && <span className="st-credit" style={{ textAlign: 'left' }}>Écris ta scène, clique « Dessiner », puis « Animer » sur le plan clé que tu préfères.</span>}
+            </div>
+          )}
+
+          {mode === 'video' && (
+            <div className="st-bloc">
+              <span className="st-etiq">Mouvement de caméra {camera && <button type="button" className="nx-lien" style={{ fontSize: 11, marginLeft: 6 }} onClick={() => setCamera(null)}>retirer</button>}</span>
+              <div className="st-cameras" role="group" aria-label="Mouvement de caméra">
+                {CAMERAS.map((c) => (
+                  <button key={c.id} type="button" className={`st-camera ${camera === c.id ? 'on' : ''}`} aria-pressed={camera === c.id} onClick={() => setCamera(camera === c.id ? null : c.id)} title={c.nom}>
+                    <video src={c.clip} muted loop playsInline preload="metadata" onMouseEnter={(e) => void e.currentTarget.play().catch(() => {})} onMouseLeave={(e) => e.currentTarget.pause()} />
+                    <span>{c.nom}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -509,6 +546,7 @@ export default function Creer() {
           )}
         </section>
       </div>
+      )}
 
       {pub !== null && <Publication id={pub} onClose={() => setPub(null)} />}
       {filmOuvert !== null && <FilmPlans filmId={filmOuvert} onClose={() => setFilmOuvert(null)} />}

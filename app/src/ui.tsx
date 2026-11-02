@@ -265,6 +265,12 @@ export function aspectOf(t: Take): string {
   return s.width && s.height ? `${s.width} / ${s.height}` : '16 / 9';
 }
 
+/** Durée affichée sur une carte : mesurée ou demandée, sinon déduite des images H3 (24 i/s). */
+function dureeCarte(s: any): string | null {
+  const d = Number(s.outSeconds ?? s.seconds) || (Number(s.lengthFrames) ? Number(s.lengthFrames) / 24 : 0);
+  return d ? `${Math.round(d * 10) / 10} s` : null;
+}
+
 export function MediaCard({ take, onOpen, actions, pendingLabel, tag }: { take: Take; onOpen?: () => void; actions?: ReactNode; pendingLabel?: string; tag?: string }) {
   const progress = useStore((s) => (take.prompt_id ? s.progress[take.prompt_id] : undefined));
   const started = useStore((st) => !!take.prompt_id && !!st.started[take.prompt_id]);
@@ -313,8 +319,8 @@ export function MediaCard({ take, onOpen, actions, pendingLabel, tag }: { take: 
       <div className="kind">
         {tag && <span className="badge" style={{ marginRight: 4 }}>{tag}</span>}
         {model && <span className="badge cool">3D</span>}
-        {!image && !model && <span className="badge cool">{s.outSeconds ?? s.seconds ? `${s.outSeconds ?? s.seconds}s` : 'video'}</span>}
-        {s.cut && <span className="badge cool" style={{ marginLeft: 4 }}>{(s.shots ?? []).length} shots</span>}
+        {!image && !model && <span className="badge cool">{dureeCarte(s) ?? 'vidéo'}</span>}
+        {s.cut && <span className="badge cool" style={{ marginLeft: 4 }}>{(s.shots ?? []).length} plans</span>}
         {!image && s.seam && <span className={`badge seam ${s.seam.verdict === 'seamless' ? 'ok' : 'bad'}`} title={`Loop point: ${s.seam.ratio}x a frame step`}>{s.seam.verdict === 'seamless' ? 'Seamless' : 'Visible seam'}</span>}
         {!image && s.app === 'hdr' && <span className="badge">HDR</span>}
       </div>

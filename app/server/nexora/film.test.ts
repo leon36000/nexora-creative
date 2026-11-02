@@ -63,7 +63,7 @@ describe('storyboard du Director', () => {
 
   it('demande au réalisateur de marquer les plans qui prolongent le précédent', async () => {
     let consignes = '';
-    const llm: ClientLlm = { completer: async (_r, m) => { consignes = m[0].content; return JSON.stringify(brut); } };
+    const llm: ClientLlm = { completer: async (_r, m) => { consignes = String(m[0].content); return JSON.stringify(brut); } };
     await planifierFilm({ intention: 'x', dureeCible: 20 }, llm);
     expect(consignes).toMatch(/"suite"/);
   });
@@ -123,3 +123,25 @@ describe('montage sans nouveau rendu', () => {
   });
 });
 
+
+describe('Prolonger et Raccorder sur H3 (remplacent Extend et Transitions LTX)', () => {
+  const clip = (id: number, w: number, h: number, lengthFrames = 124, videoModel = 'h3-fast') => ({ id, kind: 'video', status: 'done', output_path: `/r/${id}.mp4`, settings: JSON.stringify({ intention: `clip ${id}`, width: w, height: h, lengthFrames, videoModel, withAudio: true }) });
+  it('prolonger : le clip garde sa prise, la suite part de sa dernière image', async () => {
+    const { storyboardProlonger } = await import('./film.js');
+    const r = storyboardProlonger(clip(4, 480, 832, 243), { intention: 'elle se retourne et sourit', duree: 5 });
+    expect(r.format).toBe('9:16');
+    expect(r.son).toBe(true);
+    expect(r.storyboard.plans).toMatchObject([{ take: 4, duree: 10 }, { suite: true, duree: 5, description: 'elle se retourne et sourit' }]);
+  });
+  it('raccorder : un plan de transition entre deux clips, première et dernière image imposées', async () => {
+    const { storyboardRaccord } = await import('./film.js');
+    const r = storyboardRaccord(clip(1, 832, 480), clip(2, 832, 480, 124, 'h3-max'), {});
+    expect(r.storyboard.plans).toMatchObject([{ take: 1 }, { suite: true, raccord: true, duree: 5 }, { take: 2 }]);
+    expect(r.qualite).toBe('rapide');
+  });
+  it('refuse une prise qui n’est pas une vidéo terminée', async () => {
+    const { storyboardProlonger } = await import('./film.js');
+    expect(() => storyboardProlonger({ ...clip(3, 832, 480), status: 'rendering' }, {})).toThrow();
+    expect(() => storyboardProlonger({ ...clip(3, 832, 480), kind: 'still' }, {})).toThrow();
+  });
+});

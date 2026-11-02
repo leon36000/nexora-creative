@@ -58,6 +58,8 @@ const post = <T>(path: string, body?: unknown) =>
   j<T>(path, { method: 'POST', ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
 
 export const api = {
+  /** Nexora Creative : routes du studio (Producteur, Créer, Prolonger, Raccord). */
+  nexora: <T = Record<string, any>>(path: string, body?: unknown) => (body === undefined ? j<T>(`/api/nexora/${path}`) : post<T>(`/api/nexora/${path}`, body)),
   status: () => j<Record<string, any>>('/api/status'),
   /** Machine-wide settings: renderTier.tier is the default render size for every video tool. */
   settings: () => j<{ renderTier: { tier: '480p' | '720p' | '1080p'; source: string; auto: string } }>('/api/settings'),
