@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, mediaUrl, type FilmResume, type PropositionProducteur, type SessionProducteur, type VarianteProducteur } from '../api';
 import { settingsOf, toast, useStore } from '../store';
+import { setParams } from '../router';
 import { MediaCard } from '../ui';
 import { IcEtincelle, IcRond, Ratio } from './icons';
 
@@ -20,7 +21,7 @@ const EXEMPLES = [
 const CLE = 'nexora.producteur.session';
 const fmtMin = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`);
 
-export default function Producteur({ onOuvrirFilm }: { onOuvrirFilm: (id: number) => void }) {
+export default function Producteur({ onOuvrirFilm, objectif }: { onOuvrirFilm: (id: number) => void; objectif?: string | null }) {
   const [session, setSession] = useState<SessionProducteur | null>(null);
   const [liste, setListe] = useState<{ id: string; titre: string }[]>([]);
   const [texte, setTexte] = useState('');
@@ -33,11 +34,20 @@ export default function Producteur({ onOuvrirFilm }: { onOuvrirFilm: (id: number
     try { id = localStorage.getItem(CLE); } catch { /* stockage indisponible */ }
     if (id) void api.producteurSession(id).then(setSession).catch(() => { try { localStorage.removeItem(CLE); } catch { /* rien */ } });
   }, []);
+  // Modèle choisi dans Explorer : l'objectif part tout de suite au Producteur, dans une nouvelle conversation.
+  const lance = useRef(false);
+  useEffect(() => {
+    if (!objectif || lance.current) return;
+    lance.current = true;
+    setParams({ objectif: null });
+    setSession(null);
+    void envoyer(objectif, true);
+  }, [objectif]);
   useEffect(() => {
     if (!session) return;
     try { localStorage.setItem(CLE, session.id); } catch { /* rien */ }
   }, [session?.id]);
-  useEffect(() => { fil.current?.scrollTo({ top: fil.current.scrollHeight, behavior: 'smooth' }); }, [session?.fil.length, envoi]);
+  useEffect(() => { requestAnimationFrame(() => fil.current?.scrollTo({ top: fil.current.scrollHeight })); }, [session?.id, session?.fil.length, envoi]);
 
   // Les films de la conversation (et leurs plans, leur musique) changent d'état en direct : on relit la session.
   const filmIds = useMemo(() => new Set(session?.productions.map((p) => p.filmId) ?? []), [session]);
@@ -50,13 +60,13 @@ export default function Producteur({ onOuvrirFilm }: { onOuvrirFilm: (id: number
     return () => clearTimeout(t);
   }, [cleDirect]);
 
-  async function envoyer(message = texte) {
+  async function envoyer(message = texte, neuve = false) {
     const t = message.trim();
     if (!t || envoi) return;
     setEnvoi('message');
     setTexte('');
     try {
-      const s = session ?? (await api.producteurNouvelle());
+      const s = (!neuve && session) || (await api.producteurNouvelle());
       // La bulle de la personne s'affiche tout de suite, la réponse arrive ensuite.
       setSession({ ...s, fil: [...s.fil, { de: 'personne', texte: t, date: new Date().toISOString() }] });
       setSession(await api.producteurMessage(s.id, t));

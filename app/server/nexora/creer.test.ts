@@ -89,3 +89,13 @@ describe('profils Rapide et Qualité maximale', () => {
   });
 });
 
+
+describe('mouvement de caméra choisi en un clic', () => {
+  it('est lu, borné, et ajouté à l’intention envoyée au réécrivain H3', async () => {
+    const { lireDemandeCreer, intentionAvecCamera } = await import('./creer.js');
+    const d = lireDemandeCreer({ intention: 'Un café fume', camera: 'The camera pushes in slowly.' + 'x'.repeat(400) });
+    expect(d.camera?.length).toBe(300);
+    expect(intentionAvecCamera(lireDemandeCreer({ intention: 'Un café fume', camera: 'The camera pushes in.' }))).toBe('Un café fume\nCamera movement: The camera pushes in.');
+    expect(intentionAvecCamera(lireDemandeCreer({ intention: 'Un café fume' }))).toBe('Un café fume');
+  });
+});

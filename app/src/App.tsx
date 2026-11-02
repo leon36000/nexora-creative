@@ -1,26 +1,19 @@
 /** Coque de Nexora Creative (fork d'OpenField) : barre du haut + page routée. « Créer » est l'accueil. */
 import { lazy, Suspense, useEffect } from 'react';
-import { APPS, badgeLabel } from './catalog';
-import { linkProps, useRoute } from './router';
+import { APPS_NEXORA } from './studio/apps';
+import { linkProps, navigate, useRoute } from './router';
 import { startLive, useStore } from './store';
 import { useGlobalDrop } from './drop';
 import { JudgeBanner, Toast } from './ui';
 import { Marque } from './studio/icons';
 import { Moteurs } from './studio/Moteurs';
-import VideoPage from './pages/Video';
 import ImagePage from './pages/Image';
-import DirectorPage from './pages/Director';
-import MirrorPage from './pages/Mirror';
-import ReshootPage from './pages/Reshoot';
-import EffectsPage from './pages/Effects';
 import UpscalePage from './pages/Upscale';
-import ExtendPage from './pages/Extend';
-import SpeakPage from './pages/Speak';
+import Prolonger from './pages/Prolonger';
 import EditPage from './pages/Edit';
 import CastPage from './pages/Cast';
 import CutoutPage from './pages/Cutout';
 // three.js is only needed by Stage and Object: load them when opened, not on every page
-const StagePage = lazy(() => import('./pages/Stage'));
 const ObjectPage = lazy(() => import('./pages/Object'));
 import { Apps, Explore, Library, Soon } from './pages/Home';
 import Setup from './pages/Setup';
@@ -35,7 +28,15 @@ const SECTIONS = [
   { to: '/apps', label: 'Outils' },
   { to: '/library', label: 'Bibliothèque' },
 ];
-const APP_LINKS = APPS.filter((a) => ['director', 'stage', 'loop', 'mirror', 'reshoot', 'upscale'].includes(a.id));
+const APP_LINKS = APPS_NEXORA.filter((a) => ['parler', 'prolonger', 'raccord', 'cast', 'cutout', 'upscale', 'object'].includes(a.id));
+/**
+ * Pages d'OpenField qui reposaient sur LTX-2.x (bloqué par la politique de licences) : leur adresse mène à l'outil
+ * Nexora qui les remplace, jamais à un écran « indisponible ».
+ */
+const REMPLACEES: Record<string, string> = {
+  '/video': '/?mode=video', '/director': '/?mode=film', '/extend': '/prolonger', '/speak': '/?mode=video&depart=photo',
+  '/mirror': '/apps', '/reshoot': '/apps', '/effects': '/apps', '/stage': '/apps',
+};
 
 export default function App() {
   const { path, params } = useRoute();
@@ -43,20 +44,21 @@ export default function App() {
   const drop = useGlobalDrop();
   const judge = useStore((s) => !!s.status?.judge);
 
+  useEffect(() => {
+    const vers = REMPLACEES[path];
+    if (!vers) return;
+    const mode = path === '/extend' && params.get('mode') === 'transition' ? '/prolonger?mode=raccord' : vers;
+    navigate(mode, true);
+  }, [path]);
+
   const page = (() => {
+    if (REMPLACEES[path]) return null;
     if (path === '/image') return <ImagePage />;
-    if (path === '/video') return <VideoPage />;
-    if (path === '/director') return <DirectorPage />;
-    if (path === '/mirror') return <MirrorPage />;
-    if (path === '/reshoot') return <ReshootPage />;
-    if (path === '/effects') return <EffectsPage />;
+    if (path === '/prolonger') return <Prolonger />;
     if (path === '/upscale') return <UpscalePage />;
-    if (path === '/extend') return <ExtendPage />;
-    if (path === '/speak') return <SpeakPage />;
     if (path === '/edit') return <EditPage />;
     if (path === '/cast') return <CastPage />;
     if (path === '/cutout') return <CutoutPage />;
-    if (path === '/stage') return <StagePage />;
     if (path === '/object') return <ObjectPage />;
     if (path === '/apps') return <Apps />;
     if (path === '/library') return <Library />;
@@ -71,7 +73,7 @@ export default function App() {
   // the tab says where you are
   useEffect(() => {
     const name = path === '/' ? 'Créer' : path === '/setup' ? 'Réglages' : path === '/library' ? 'Bibliothèque'
-      : SECTIONS.find((s) => s.to === path)?.label ?? APPS.find((a) => a.route.split('?')[0] === path)?.name;
+      : SECTIONS.find((s) => s.to === path)?.label ?? APPS_NEXORA.find((a) => a.route.split('?')[0] === path)?.name;
     document.title = name ? `${name} · Nexora Creative` : 'Nexora Creative';
   }, [path]);
 
@@ -96,9 +98,14 @@ export default function App() {
           <details className="st-atelier">
             <summary className="st-link">Atelier ▾</summary>
             <div className="st-menu">
-              {SECTIONS.filter((x) => ['/image', '/edit', '/video', '/apps'].includes(x.to)).map((x) => <a key={x.to} {...linkProps(x.to)}>{x.label}</a>)}
+              <a {...linkProps('/?mode=video')}>Vidéo</a>
+              <a {...linkProps('/?mode=image')}>Image</a>
+              <a {...linkProps('/?mode=film')}>Film</a>
+              <a {...linkProps('/edit')}>Retouche</a>
               <hr />
-              {APP_LINKS.map((a) => <a key={a.id} {...linkProps(a.route)}>{a.name}{a.badge === 'new' && <span className="badge">{badgeLabel(a.badge)}</span>}</a>)}
+              {APP_LINKS.map((a) => <a key={a.id} {...linkProps(a.route)}>{a.name}{a.badge === 'new' && <span className="badge">Nouveau</span>}</a>)}
+              <hr />
+              <a {...linkProps('/apps')}>Tous les outils</a>
             </div>
           </details>
         </nav>

@@ -16,7 +16,7 @@ import * as comfy from './comfy.js';
 import * as eng from './engine.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
-import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
+import { besoinDe, intentionAvecCamera, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
 import { buildMusic3Graph } from './graphs/music3.js';
 import { reecrireImage } from './nexora/reecritureImage.js';
 import { demarrerLectureReglages } from './nexora/reglagesSite.js';
@@ -975,7 +975,7 @@ app.post('/api/nexora/creer', async (req, reply) => {
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
   const r = await reecrireH3({
-    intention: demande.intention, mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande),
+    intention: intentionAvecCamera(demande), mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande),
     ...(demande.replique ? { dialogues: [{ texte: demande.replique, langue: 'French' }] } : {}),
   }, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur, nexoraAutoMusique: (req.body as any)?.musique === true };

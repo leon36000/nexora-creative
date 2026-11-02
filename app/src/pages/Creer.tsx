@@ -14,6 +14,7 @@ import Viewer from '../Viewer';
 import FilmPlans from '../FilmPlans';
 import { Publication } from '../studio/Publication';
 import Producteur from '../studio/Producteur';
+import { CAMERAS } from '../studio/apps';
 import { setParams, useRoute } from '../router';
 import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
 
@@ -63,7 +64,8 @@ export default function Creer() {
   const [musique, setMusique] = useState(false);
   const [qualite, setQualite] = useState<'rapide' | 'max'>('rapide');
   const [nombreImages, setNombreImages] = useState(2);
-  const [depart, setDepart] = useState<Depart>('texte');
+  const [depart, setDepart] = useState<Depart>(() => (params.get('depart') === 'photo' ? 'photo' : 'texte'));
+  const [camera, setCamera] = useState<string | null>(null);
   const [cle, setCle] = useState<{ jeton: string; apercu: string } | null>(null);
   const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo'>(null);
   const [boost, setBoost] = useState<string | null>(null);
@@ -112,6 +114,13 @@ export default function Creer() {
   }, [toutes]);
 
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
+  // « Animer » depuis la Bibliothèque : /?mode=video&cle=<image> pose l'image comme plan clé.
+  useEffect(() => {
+    const id = Number(params.get('cle'));
+    if (!id) return;
+    setParams({ cle: null });
+    void animer(id);
+  }, [params.get('cle')]);
   const film = mode === 'film';
   const dureeClip = duree;
   useEffect(() => {
@@ -155,7 +164,8 @@ export default function Creer() {
   async function creerVideo() {
     setEnvoi('creer');
     try {
-      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined });
+      const cam = CAMERAS.find((c) => c.id === camera);
+      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined, camera: cam?.texte });
       toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : l’assistant est indisponible).');
       setCle(null);
     } catch (e) {
@@ -276,13 +286,13 @@ export default function Creer() {
       <div className="st-modes st-modes-haut" role="tablist" aria-label="Que veux-tu créer ?">
         {([['producteur', 'Producteur IA', IcEtincelle], ['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => (
           <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
-            <Ic />{label}
+            <Ic />{v === 'producteur' ? <>Producteur<span className="st-ia"> IA</span></> : label}
           </button>
         ))}
       </div>
 
       {mode === 'producteur' ? (
-        <div className="st-grid"><Producteur onOuvrirFilm={setFilmOuvert} /></div>
+        <div className="st-grid"><Producteur onOuvrirFilm={setFilmOuvert} objectif={params.get('objectif')} /></div>
       ) : (
       <div className="st-grid">
         <aside className="st-composer" aria-label="Composeur">
@@ -344,6 +354,20 @@ export default function Creer() {
                 </div>
               )}
               {depart === 'cle' && !cle && <span className="st-credit" style={{ textAlign: 'left' }}>Écris ta scène, clique « Dessiner », puis « Animer » sur le plan clé que tu préfères.</span>}
+            </div>
+          )}
+
+          {mode === 'video' && (
+            <div className="st-bloc">
+              <span className="st-etiq">Mouvement de caméra {camera && <button type="button" className="nx-lien" style={{ fontSize: 11, marginLeft: 6 }} onClick={() => setCamera(null)}>retirer</button>}</span>
+              <div className="st-cameras" role="group" aria-label="Mouvement de caméra">
+                {CAMERAS.map((c) => (
+                  <button key={c.id} type="button" className={`st-camera ${camera === c.id ? 'on' : ''}`} aria-pressed={camera === c.id} onClick={() => setCamera(camera === c.id ? null : c.id)} title={c.nom}>
+                    <video src={c.clip} muted loop playsInline preload="metadata" onMouseEnter={(e) => void e.currentTarget.play().catch(() => {})} onMouseLeave={(e) => e.currentTarget.pause()} />
+                    <span>{c.nom}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

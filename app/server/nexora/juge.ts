@@ -42,6 +42,15 @@ export function jugeDisponible(env: NodeJS.ProcessEnv = process.env): boolean {
 
 export async function jugerCandidats(llm: ClientLlm | null, description: string, planches: [string, string] | string[]): Promise<VerdictJuge | null> {
   if (!llm) return null;
+  // Deux essais : un modèle vision qui raisonne rend parfois une réponse vide ou tronquée.
+  for (let essai = 0; essai < 2; essai++) {
+    const v = await unAppel(llm, description, planches);
+    if (v) return v;
+  }
+  return null;
+}
+
+async function unAppel(llm: ClientLlm, description: string, planches: string[]): Promise<VerdictJuge | null> {
   try {
     const brut = await llm.completer('juge', [
       { role: 'system', content: avecCompetences('juge', 'You are the visual judge of Nexora Creative.') },

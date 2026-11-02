@@ -279,7 +279,8 @@ async function etape(filmId: number) {
     );
   }
   takes.finish(filmId, final, (Date.now() - t0) / 1000);
-  takes.patchSettings(filmId, { assemblage: 'fait', planTakes: sb.plans.map((p) => p.take) });
+  const dureeReelle = durees.reduce((n, d) => n + d, 0) - (s.transition === 'fondu' ? 0.5 * (fichiers.length - 1) : 0);
+  takes.patchSettings(filmId, { assemblage: 'fait', planTakes: sb.plans.map((p) => p.take), seconds: Math.round(dureeReelle * 10) / 10 });
   pousser(filmId);
 }
 

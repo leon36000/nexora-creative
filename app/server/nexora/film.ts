@@ -188,8 +188,8 @@ export function argsAvecMusique(film: string, musique: string, sortie: string, o
   const fin = Math.max(0, o.dureeS - 1.5).toFixed(2);
   const mus = `[1:a]aresample=48000,afade=t=out:st=${fin}:d=1.5[m]`;
   const filtre = o.sonDuFilm
-    ? `${mus};[0:a]aresample=48000,volume=${o.sfxDb ?? -8}dB[s];[m][s]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1:LRA=11[a]`
-    : `${mus};[m]loudnorm=I=-14:TP=-1:LRA=11[a]`;
+    ? `${mus};[0:a]aresample=48000,volume=${o.sfxDb ?? -8}dB[s];[m][s]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,alimiter=limit=0.89:level=false[a]`
+    : `${mus};[m]loudnorm=I=-14:TP=-1.5:LRA=11,alimiter=limit=0.89:level=false[a]`;
   return ['-y', '-i', film, '-i', musique, '-filter_complex', filtre, '-map', '0:v', '-map', '[a]', '-t', o.dureeS.toFixed(3),
     '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', sortie];
 }
