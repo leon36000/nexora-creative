@@ -1,0 +1,116 @@
+[
+ {
+  "type": "h3",
+  "nom": "g1-ville-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 7001,
+  "sortie": "~/nexora-creative-data/promo/v4/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v4/cles/g1-ville-v31.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the subjects and the lighting.\n\nsummary:\n[reference generation] A single continuous cinematic shot that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, subjects, art style and lighting of the first frame are kept.\n\ndetailed_description:\nCinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. A rainy night in a dense modern metropolis seen from street level: an elevated train glides on a bridge between glass towers, the wet asphalt below mirrors pools of magenta, cyan and amber light, a lone figure with a transparent umbrella crosses the foreground in silhouette, thick rain streaks lit by the lights, light haze, bokeh. All light panels are plain glowing colour with no writing at all.\n[Shot 1] The shot begins from <Picture 1>. The elevated train glides across the frame from left to right, its lit windows streaking past; rain falls hard and splashes in the puddles, reflections ripple; the silhouette with the transparent umbrella walks slowly across the foreground. The camera tracks slowly sideways at street level. Vertical framing. No text, no logos.\n\noverall_soundscape:\nHeavy rain on asphalt and on an umbrella, the rumble and electric whine of a passing elevated train, distant city hum.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "g2-chevaux-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 7001,
+  "sortie": "~/nexora-creative-data/promo/v4/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v4/cles/g2-chevaux-v31.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the subjects and the lighting.\n\nsummary:\n[reference generation] A single continuous cinematic shot that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, subjects, art style and lighting of the first frame are kept.\n\ndetailed_description:\nCinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Nature documentary: a herd of wild horses gallops through shallow water across a vast flat plain at sunset, huge sprays of water backlit in gold, manes flying, low-angle telephoto lens, the sun low on the horizon, glittering droplets, epic scale.\n[Shot 1] The shot begins from <Picture 1>. In slow motion the herd gallops through the shallow water towards the right of the frame, hooves throwing up huge golden sprays, manes and tails flowing, droplets glittering against the low sun. The telephoto camera pans smoothly with the herd. Vertical framing. No text, no logos.\n\noverall_soundscape:\nThundering hooves splashing through water in slow motion, deep rumble, wind.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "g3-chocolat-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 7001,
+  "sortie": "~/nexora-creative-data/promo/v4/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v4/cles/g3-chocolat-v31.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the subjects and the lighting.\n\nsummary:\n[reference generation] A single continuous cinematic shot that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, subjects, art style and lighting of the first frame are kept.\n\ndetailed_description:\nHigh-end food commercial photography, macro lens, high-speed camera: a thick glossy ribbon of molten dark chocolate pours onto a perfect pile of fresh red strawberries on a dark slate, warm golden rim light, black background, droplets of chocolate suspended in the air, luxurious, appetising, extremely detailed textures.\n[Shot 1] The shot begins from <Picture 1>. Extreme slow motion: the glossy ribbon of molten chocolate keeps pouring and folds over the strawberries, coating them in shining waves, a strawberry rolls and splashes into the chocolate, droplets fly. The macro camera slowly pushes in. Vertical framing. No text, no logos.\n\noverall_soundscape:\nSoft thick liquid pouring sound, a gentle splash, close and intimate.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "g4-robe-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 7001,
+  "sortie": "~/nexora-creative-data/promo/v4/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v4/cles/g4-robe-v31.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the subjects and the lighting.\n\nsummary:\n[reference generation] A single continuous cinematic shot that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, subjects, art style and lighting of the first frame are kept.\n\ndetailed_description:\nCinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Fashion film: a woman seen from behind in three-quarter view stands on the crest of a pale golden sand dune, her long flowing crimson silk dress and long train billow in a huge wave in the wind against a deep clear blue sky, wide shot, golden hour sunlight, sand blowing off the crest, editorial elegance. Her face is turned away from the camera.\n[Shot 1] The shot begins from <Picture 1>. The wind blows strongly: the long crimson silk train ripples and billows in huge slow waves behind her, sand streams off the dune crest, she slowly raises one arm. The camera slowly orbits around her at a distance. Vertical framing. No text, no logos.\n\noverall_soundscape:\nStrong desert wind, fluttering silk fabric, fine sand hissing.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "g5-vague-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 7001,
+  "sortie": "~/nexora-creative-data/promo/v4/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v4/cles/g5-vague-v31.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the subjects and the lighting.\n\nsummary:\n[reference generation] A single continuous cinematic shot that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, subjects, art style and lighting of the first frame are kept.\n\ndetailed_description:\nCinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Action sports cinematography: a surfer crouches low on his board deep inside the barrel of a huge curling turquoise wave, sunlight shining through the translucent wall of water, spray and mist, seen from inside the tube behind him, the bright opening ahead, crystal clear water.\n[Shot 1] The shot begins from <Picture 1>. The surfer rides fast through the curling barrel towards the bright opening, the translucent turquoise wall of water curls over his head, spray explodes around him. The camera follows him from behind inside the tube. Vertical framing. No text, no logos.\n\noverall_soundscape:\nRoaring crashing wave, rushing water inside the tube, spray hissing.\n\nnon_diegetic_music:\nN/A"
+ },
+ {
+  "type": "h3",
+  "nom": "g6-papier-v",
+  "largeur": 768,
+  "hauteur": 1344,
+  "images": 124,
+  "graine": 7001,
+  "sortie": "~/nexora-creative-data/promo/v4/plans",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v4/cles/g6-papier-v31.png",
+  "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], establishing the composition, the subjects and the lighting.\n\nsummary:\n[reference generation] A single continuous cinematic shot that begins from <Picture 1>.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - the composition, subjects, art style and lighting of the first frame are kept.\n\ndetailed_description:\nHandcrafted stop-motion animation still, original art style: a miniature papercraft village at dusk on layered paper hills, little folded paper houses with warm glowing windows, a winding river of crinkled blue cellophane with tiny paper boats, paper trees, paper stars hanging on threads in a deep blue paper sky, tilt-shift macro photography, soft warm light, cosy and magical.\n[Shot 1] The shot begins from <Picture 1>. One by one the little windows of the paper houses light up warm orange, the cellophane river shimmers and the tiny paper boats drift, the paper stars sway gently on their threads. The camera glides slowly forward over the miniature village. Vertical framing. No text, no logos.\n\noverall_soundscape:\nSoft paper rustling, a gentle music-box like chime, crickets, cosy evening.\n\nnon_diegetic_music:\nN/A"
+ }
+]

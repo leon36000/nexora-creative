@@ -1,0 +1,46 @@
+[
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "h1-goutte-21",
+  "prompt": "Luxury perfume commercial, macro cinematography, pure black background, warm golden light, extreme detail, photoreal. A single drop of liquid gold suspended in darkness, glowing, perfect sphere, tiny reflections.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 21,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "h2-chute-21",
+  "prompt": "Luxury perfume commercial, macro cinematography, pure black background, warm golden light, extreme detail, photoreal. A drop of liquid gold falling in slow motion through darkness, motion trail of light.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 21,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "h3-impact-21",
+  "prompt": "Luxury perfume commercial, macro cinematography, pure black background, warm golden light, extreme detail, photoreal. A drop of liquid gold hits a perfectly still surface of black water, a golden crown splash and concentric golden ripples, top-down macro.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 21,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "h4-flacon-21",
+  "prompt": "Luxury perfume commercial, macro cinematography, pure black background, warm golden light, extreme detail, photoreal. Under dark water, golden light rays, an elegant faceted glass perfume bottle without any label revealed in the light, bubbles.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 21,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ }
+]

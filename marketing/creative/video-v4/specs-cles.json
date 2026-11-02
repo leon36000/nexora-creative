@@ -1,0 +1,134 @@
+[
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g1-ville-11",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. A rainy night in a dense modern metropolis seen from street level: an elevated train glides on a bridge between glass towers, the wet asphalt below mirrors pools of magenta, cyan and amber light, a lone figure with a transparent umbrella crosses the foreground in silhouette, thick rain streaks lit by the lights, light haze, bokeh. All light panels are plain glowing colour with no writing at all.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 11,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g1-ville-12",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. A rainy night in a dense modern metropolis seen from street level: an elevated train glides on a bridge between glass towers, the wet asphalt below mirrors pools of magenta, cyan and amber light, a lone figure with a transparent umbrella crosses the foreground in silhouette, thick rain streaks lit by the lights, light haze, bokeh. All light panels are plain glowing colour with no writing at all.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 12,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g2-chevaux-11",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Nature documentary: a herd of wild horses gallops through shallow water across a vast flat plain at sunset, huge sprays of water backlit in gold, manes flying, low-angle telephoto lens, the sun low on the horizon, glittering droplets, epic scale.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 11,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g2-chevaux-12",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Nature documentary: a herd of wild horses gallops through shallow water across a vast flat plain at sunset, huge sprays of water backlit in gold, manes flying, low-angle telephoto lens, the sun low on the horizon, glittering droplets, epic scale.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 12,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g3-chocolat-11",
+  "prompt": "High-end food commercial photography, macro lens, high-speed camera: a thick glossy ribbon of molten dark chocolate pours onto a perfect pile of fresh red strawberries on a dark slate, warm golden rim light, black background, droplets of chocolate suspended in the air, luxurious, appetising, extremely detailed textures.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 11,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g3-chocolat-12",
+  "prompt": "High-end food commercial photography, macro lens, high-speed camera: a thick glossy ribbon of molten dark chocolate pours onto a perfect pile of fresh red strawberries on a dark slate, warm golden rim light, black background, droplets of chocolate suspended in the air, luxurious, appetising, extremely detailed textures.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 12,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g4-robe-11",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Fashion film: a woman seen from behind in three-quarter view stands on the crest of a pale golden sand dune, her long flowing crimson silk dress and long train billow in a huge wave in the wind against a deep clear blue sky, wide shot, golden hour sunlight, sand blowing off the crest, editorial elegance. Her face is turned away from the camera.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 11,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g4-robe-12",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Fashion film: a woman seen from behind in three-quarter view stands on the crest of a pale golden sand dune, her long flowing crimson silk dress and long train billow in a huge wave in the wind against a deep clear blue sky, wide shot, golden hour sunlight, sand blowing off the crest, editorial elegance. Her face is turned away from the camera.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 12,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g5-vague-11",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Action sports cinematography: a surfer crouches low on his board deep inside the barrel of a huge curling turquoise wave, sunlight shining through the translucent wall of water, spray and mist, seen from inside the tube behind him, the bright opening ahead, crystal clear water.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 11,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g5-vague-12",
+  "prompt": "Cinematic still frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field. Action sports cinematography: a surfer crouches low on his board deep inside the barrel of a huge curling turquoise wave, sunlight shining through the translucent wall of water, spray and mist, seen from inside the tube behind him, the bright opening ahead, crystal clear water.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 12,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g6-papier-11",
+  "prompt": "Handcrafted stop-motion animation still, original art style: a miniature papercraft village at dusk on layered paper hills, little folded paper houses with warm glowing windows, a winding river of crinkled blue cellophane with tiny paper boats, paper trees, paper stars hanging on threads in a deep blue paper sky, tilt-shift macro photography, soft warm light, cosy and magical.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 11,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ },
+ {
+  "type": "image",
+  "comfy": "http://127.0.0.1:37188",
+  "nom": "g6-papier-12",
+  "prompt": "Handcrafted stop-motion animation still, original art style: a miniature papercraft village at dusk on layered paper hills, little folded paper houses with warm glowing windows, a winding river of crinkled blue cellophane with tiny paper boats, paper trees, paper stars hanging on threads in a deep blue paper sky, tilt-shift macro photography, soft warm light, cosy and magical.",
+  "negatif": "text, letters, words, numbers, writing, signage with letters, logo, watermark, signature, brand name, label, caption, subtitles, cartoon franchise character, famous person, deformed, extra limbs, extra fingers, distorted face, lowres, blurry, oversaturated, plastic skin, 3d render look, video game look",
+  "largeur": 1664,
+  "hauteur": 928,
+  "graine": 12,
+  "sortie": "~/nexora-creative-data/promo/v4/cles"
+ }
+]

@@ -1,0 +1,3057 @@
+{
+ "_duree": 59.45,
+ "versions": {
+  "long": {
+   "segments": [
+    {
+     "type": "ui",
+     "nom": "saisie",
+     "d": 6.0,
+     "fondu_entree": 0.5,
+     "images": [
+      [
+       0.0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0000-vide.jpg"
+      ],
+      [
+       0.14,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0001-vide.jpg"
+      ],
+      [
+       0.28,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0002-vide.jpg"
+      ],
+      [
+       0.42,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0003-vide.jpg"
+      ],
+      [
+       0.56,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0004-vide.jpg"
+      ],
+      [
+       0.7,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0005-vide.jpg"
+      ],
+      [
+       0.8,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0006-saisie.jpg"
+      ],
+      [
+       0.912,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0007-saisie.jpg"
+      ],
+      [
+       1.024,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0008-saisie.jpg"
+      ],
+      [
+       1.137,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0009-saisie.jpg"
+      ],
+      [
+       1.249,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0010-saisie.jpg"
+      ],
+      [
+       1.361,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0011-saisie.jpg"
+      ],
+      [
+       1.473,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0012-saisie.jpg"
+      ],
+      [
+       1.585,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0013-saisie.jpg"
+      ],
+      [
+       1.698,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0014-saisie.jpg"
+      ],
+      [
+       1.81,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0015-saisie.jpg"
+      ],
+      [
+       1.922,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0016-saisie.jpg"
+      ],
+      [
+       2.034,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0017-saisie.jpg"
+      ],
+      [
+       2.146,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0018-saisie.jpg"
+      ],
+      [
+       2.259,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0019-saisie.jpg"
+      ],
+      [
+       2.371,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0020-saisie.jpg"
+      ],
+      [
+       2.483,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0021-saisie.jpg"
+      ],
+      [
+       2.595,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0022-saisie.jpg"
+      ],
+      [
+       2.707,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0023-saisie.jpg"
+      ],
+      [
+       2.82,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0024-saisie.jpg"
+      ],
+      [
+       2.932,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0025-saisie.jpg"
+      ],
+      [
+       3.044,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0026-saisie.jpg"
+      ],
+      [
+       3.156,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0027-saisie.jpg"
+      ],
+      [
+       3.268,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0028-saisie.jpg"
+      ],
+      [
+       3.38,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0029-saisie.jpg"
+      ],
+      [
+       3.493,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0030-saisie.jpg"
+      ],
+      [
+       3.605,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0031-saisie.jpg"
+      ],
+      [
+       3.717,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0032-saisie.jpg"
+      ],
+      [
+       3.829,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0033-saisie.jpg"
+      ],
+      [
+       3.941,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0034-saisie.jpg"
+      ],
+      [
+       4.054,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0035-saisie.jpg"
+      ],
+      [
+       4.166,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0036-saisie.jpg"
+      ],
+      [
+       4.278,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0037-saisie.jpg"
+      ],
+      [
+       4.39,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0038-saisie.jpg"
+      ],
+      [
+       4.502,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0039-saisie.jpg"
+      ],
+      [
+       4.615,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0040-saisie.jpg"
+      ],
+      [
+       4.727,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0041-saisie.jpg"
+      ],
+      [
+       4.839,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0042-saisie.jpg"
+      ],
+      [
+       4.951,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0043-saisie.jpg"
+      ],
+      [
+       5.063,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0044-saisie.jpg"
+      ],
+      [
+       5.176,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0045-saisie.jpg"
+      ],
+      [
+       5.288,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0046-saisie.jpg"
+      ],
+      [
+       5.4,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0047-saisie.jpg"
+      ],
+      [
+       5.6,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0048-saisie-fin.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.2,
+       0.875,
+       0.25
+      ],
+      [
+       6.0,
+       0.2,
+       0.87,
+       0.29
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.198,
+       0.62,
+       0.27
+      ],
+      [
+       6.0,
+       0.198,
+       0.66,
+       0.245
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "envoi",
+     "d": 2.35,
+     "clic": 0.0,
+     "images": [
+      [
+       0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0048-saisie-fin.jpg"
+      ],
+      [
+       0.15,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0049-reflexion.jpg"
+      ],
+      [
+       0.296,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0050-reflexion.jpg"
+      ],
+      [
+       0.443,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0051-reflexion.jpg"
+      ],
+      [
+       0.589,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0052-reflexion.jpg"
+      ],
+      [
+       0.736,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0053-reflexion.jpg"
+      ],
+      [
+       0.882,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0054-reflexion.jpg"
+      ],
+      [
+       1.029,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0055-reflexion.jpg"
+      ],
+      [
+       1.175,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0056-reflexion.jpg"
+      ],
+      [
+       1.321,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0057-reflexion.jpg"
+      ],
+      [
+       1.468,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0058-reflexion.jpg"
+      ],
+      [
+       1.614,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0059-reflexion.jpg"
+      ],
+      [
+       1.761,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0060-reflexion.jpg"
+      ],
+      [
+       1.907,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0061-reflexion.jpg"
+      ],
+      [
+       2.054,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0062-reflexion.jpg"
+      ],
+      [
+       2.2,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0063-reflexion.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.2,
+       0.87,
+       0.29
+      ],
+      [
+       2.0,
+       0.2,
+       0.55,
+       0.33
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.198,
+       0.66,
+       0.245
+      ],
+      [
+       2.35,
+       0.198,
+       0.6,
+       0.27
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "reponse",
+     "d": 3.0,
+     "images": [
+      [
+       0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0064-plan.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.19,
+       0.55,
+       0.33
+      ],
+      [
+       3.0,
+       0.19,
+       0.68,
+       0.33
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.186,
+       0.6,
+       0.245
+      ],
+      [
+       3.0,
+       0.186,
+       0.66,
+       0.245
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "cartes",
+     "d": 3.0,
+     "images": [
+      [
+       0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0067-plan.jpg"
+      ],
+      [
+       2.2,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0069-format.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       0.45
+      ],
+      [
+       3.0,
+       0.76,
+       0.55,
+       0.45
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.58,
+       0.53,
+       0.19
+      ],
+      [
+       1.0,
+       0.58,
+       0.53,
+       0.19
+      ],
+      [
+       1.6,
+       0.723,
+       0.53,
+       0.19
+      ],
+      [
+       2.2,
+       0.723,
+       0.53,
+       0.19
+      ],
+      [
+       2.8,
+       0.866,
+       0.55,
+       0.19
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "devis",
+     "d": 2.4,
+     "clic": 2.0,
+     "images": [
+      [
+       0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0069-format.jpg"
+      ],
+      [
+       0.5,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0070-cinema.jpg"
+      ],
+      [
+       1.4,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0071-valider-survol.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.62,
+       0.84,
+       0.46
+      ],
+      [
+       2.4,
+       0.75,
+       0.9,
+       0.34
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.55,
+       0.85,
+       0.22
+      ],
+      [
+       2.4,
+       0.79,
+       0.9,
+       0.2
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "tournage",
+     "d": 1.8,
+     "images": [
+      [
+       0.0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0073-tournage.jpg"
+      ],
+      [
+       0.3,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0079-tournage.jpg"
+      ],
+      [
+       0.6,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0085-tournage.jpg"
+      ],
+      [
+       0.9,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0091-tournage.jpg"
+      ],
+      [
+       1.2,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0097-tournage.jpg"
+      ],
+      [
+       1.5,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0098-tournage.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.72,
+       0.53,
+       0.48
+      ],
+      [
+       1.8,
+       0.745,
+       0.54,
+       0.44
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.81,
+       0.5,
+       0.26
+      ],
+      [
+       1.8,
+       0.81,
+       0.52,
+       0.25
+      ]
+     ]
+    },
+    {
+     "type": "ab",
+     "nom": "ab",
+     "d": 3.0,
+     "t_choix": 1.8,
+     "debut": 1.0,
+     "garde": "b",
+     "a": "~/nexora-creative-data/promo/v4/hero/plan3-a.mp4",
+     "b": "~/nexora-creative-data/promo/v4/hero/plan3-b.mp4",
+     "cle_a": "~/nexora-creative-data/promo/v4/cles/h3-impact-21.png",
+     "cle_b": "~/nexora-creative-data/promo/v4/cles/h3-impact-21.png"
+    },
+    {
+     "type": "chrono",
+     "nom": "chrono",
+     "d": 2.4,
+     "temps": [
+      0.0,
+      0.6,
+      1.2,
+      1.8
+     ],
+     "plans": [
+      {
+       "plaque": "~/nexora-creative-data/promo/v4/hero/plan1-a.mp4",
+       "cle": "~/nexora-creative-data/promo/v4/cles/h1-goutte-21.png",
+       "debut": 1.5
+      },
+      {
+       "plaque": "~/nexora-creative-data/promo/v4/hero/plan2-a.mp4",
+       "cle": "~/nexora-creative-data/promo/v4/cles/h2-chute-21.png",
+       "debut": 1.5
+      },
+      {
+       "plaque": "~/nexora-creative-data/promo/v4/hero/plan3-b.mp4",
+       "cle": "~/nexora-creative-data/promo/v4/cles/h3-impact-21.png",
+       "debut": 1.5
+      },
+      {
+       "plaque": "~/nexora-creative-data/promo/v4/hero/plan4-c.mp4",
+       "cle": "~/nexora-creative-data/promo/v4/cles/h4-flacon-21.png",
+       "debut": 1.5
+      }
+     ]
+    },
+    {
+     "type": "noir",
+     "nom": "souffle",
+     "d": 0.6
+    },
+    {
+     "type": "plan",
+     "nom": "h1",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan1-a.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h1-goutte-21.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/hero/plan1-v.mp4",
+     "debut": 0.4,
+     "vitesse": 1.0,
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "h2",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan2-a.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h2-chute-21.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/hero/plan2-v.mp4",
+     "debut": 0.9,
+     "vitesse": 1.0,
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "h3",
+     "d": 3.6,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan3-b.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h3-impact-21.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/hero/plan3-v.mp4",
+     "debut": 1.0,
+     "vitesse": [
+      [
+       0,
+       1.0
+      ],
+      [
+       0.6,
+       0.5
+      ],
+      [
+       3.6,
+       0.5
+      ]
+     ],
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       3.6,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       3.6,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "h4",
+     "d": 3.6,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan4-c.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h4-flacon-21.png",
+     "plaque_v": null,
+     "debut": 1.3,
+     "vitesse": 1.0,
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       3.6,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       3.6,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "noir",
+     "nom": "imagine",
+     "d": 2.4
+    },
+    {
+     "type": "plan",
+     "nom": "g1-ville",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g1-ville-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g1-ville-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g1-ville-v.mp4",
+     "cadre_vv": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ],
+     "debut": 0.3,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g2-chevaux",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g2-chevaux-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g2-chevaux-11.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g2-chevaux-v.mp4",
+     "cadre_vv": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ],
+     "debut": 0.3,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g3-chocolat",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g3-chocolat-p2.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g3-chocolat-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g3-chocolat-v.mp4",
+     "cadre_vv": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ],
+     "debut": 2.0,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g4-robe",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g4-robe-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g4-robe-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g4-robe-v.mp4",
+     "cadre_vv": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ],
+     "debut": 2.2,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g5-vague",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g5-vague-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g5-vague-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g5-vague-v.mp4",
+     "cadre_vv": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ],
+     "debut": 0.5,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g6-papier",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g6-papier-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g6-papier-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g6-papier-v.mp4",
+     "cadre_vv": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ],
+     "debut": 1.0,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.400000000000001,
+       0.5,
+       0.5,
+       0.93
+      ]
+     ]
+    },
+    {
+     "type": "noir",
+     "nom": "silence",
+     "d": 0.6
+    },
+    {
+     "type": "fin",
+     "nom": "fin",
+     "d": 5.5
+    }
+   ],
+   "textes": [
+    {
+     "t": 1.0,
+     "d": 5.0,
+     "cle": "phrase_hero",
+     "style": "phrase",
+     "frappe": 4.3,
+     "langues": [
+      "en"
+     ],
+     "pos_v": 0.18
+    },
+    {
+     "t": 8.75,
+     "d": 2.5,
+     "cle": "plan",
+     "pos": "haut"
+    },
+    {
+     "t": 14.549999999999999,
+     "d": 2.1,
+     "cle": "devis",
+     "pos": "haut"
+    },
+    {
+     "t": 16.95,
+     "d": 1.6,
+     "cle": "tournage",
+     "pos": "haut"
+    },
+    {
+     "t": 18.75,
+     "d": 1.5,
+     "cle": "prises",
+     "pos": "haut"
+    },
+    {
+     "t": 21.650000000000002,
+     "d": 2.3000000000000007,
+     "cle": "montage",
+     "pos": "haut"
+    },
+    {
+     "t": 24.85,
+     "d": 2.2,
+     "cle": "phrase_hero",
+     "style": "phrase",
+     "frappe": 0.8
+    },
+    {
+     "t": 34.75,
+     "d": 1.8,
+     "cle": "carton_film",
+     "style": "grand"
+    },
+    {
+     "t": 36.599999999999994,
+     "d": 2.3,
+     "cle": "imagine",
+     "style": "grand"
+    },
+    {
+     "t": 39.05,
+     "d": 2.250000000000001,
+     "cle": "phrase_g1-ville",
+     "style": "phrase",
+     "frappe": 0.45
+    },
+    {
+     "t": 41.449999999999996,
+     "d": 2.250000000000001,
+     "cle": "phrase_g2-chevaux",
+     "style": "phrase",
+     "frappe": 0.45
+    },
+    {
+     "t": 43.849999999999994,
+     "d": 2.250000000000001,
+     "cle": "phrase_g3-chocolat",
+     "style": "phrase",
+     "frappe": 0.45
+    },
+    {
+     "t": 46.24999999999999,
+     "d": 2.250000000000001,
+     "cle": "phrase_g4-robe",
+     "style": "phrase",
+     "frappe": 0.45
+    },
+    {
+     "t": 48.64999999999999,
+     "d": 2.250000000000001,
+     "cle": "phrase_g5-vague",
+     "style": "phrase",
+     "frappe": 0.45
+    },
+    {
+     "t": 51.04999999999999,
+     "d": 2.250000000000001,
+     "cle": "phrase_g6-papier",
+     "style": "phrase",
+     "frappe": 0.45
+    }
+   ],
+   "sfx": [
+    {
+     "type": "frappe",
+     "t": 0.8,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.9095238095238095,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.019047619047619,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.1285714285714286,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.2380952380952381,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.3476190476190477,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.4571428571428573,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.5666666666666667,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.676190476190476,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.7857142857142856,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.8952380952380954,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.0047619047619047,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.1142857142857143,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.223809523809524,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.442857142857143,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.552380952380952,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.6619047619047618,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.7714285714285714,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.8809523809523805,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.9904761904761905,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.0999999999999996,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.2095238095238097,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.319047619047619,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.428571428571429,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.538095238095238,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.647619047619047,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.757142857142857,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.8666666666666663,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.9761904761904754,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.085714285714285,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.195238095238095,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.304761904761905,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.414285714285714,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.523809523809524,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.633333333333334,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.742857142857143,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.852380952380952,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 4.961904761904761,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 5.07142857142857,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 5.180952380952381,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 5.29047619047619,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "clic",
+     "t": 6.0,
+     "duree": 0.2,
+     "db": -10
+    },
+    {
+     "type": "fouet",
+     "t": 11.2,
+     "duree": 0.5,
+     "db": -18
+    },
+    {
+     "type": "clic",
+     "t": 16.35,
+     "duree": 0.2,
+     "db": -8
+    },
+    {
+     "type": "fouet",
+     "t": 20.35,
+     "duree": 0.5,
+     "db": -16
+    },
+    {
+     "type": "clic",
+     "t": 21.55,
+     "duree": 0.15,
+     "db": -14
+    },
+    {
+     "type": "clic",
+     "t": 22.150000000000002,
+     "duree": 0.15,
+     "db": -14
+    },
+    {
+     "type": "clic",
+     "t": 22.75,
+     "duree": 0.15,
+     "db": -14
+    },
+    {
+     "type": "clic",
+     "t": 23.35,
+     "duree": 0.15,
+     "db": -14
+    },
+    {
+     "type": "montee",
+     "t": 21.55,
+     "duree": 3.0,
+     "db": -14
+    },
+    {
+     "type": "impact",
+     "t": 24.55,
+     "duree": 2.5,
+     "db": -6
+    },
+    {
+     "type": "fouet",
+     "t": 38.75,
+     "duree": 0.5,
+     "db": -12
+    },
+    {
+     "type": "boom",
+     "t": 53.94999999999999,
+     "duree": 4.0,
+     "db": -4
+    }
+   ],
+   "musique": [
+    {
+     "fichier": "~/nexora-creative-data/promo/v4/audio/v4-musique-42.flac",
+     "source": 0.0,
+     "pose": 7.550000000000001,
+     "d": 45.8,
+     "fondu_entree": 1.5,
+     "fondu_fin": 0.03
+    },
+    {
+     "fichier": "~/nexora-creative-data/promo/v4/audio/v4-musique-42.flac",
+     "source": 0.0,
+     "pose": 53.95,
+     "d": 5.5,
+     "db": -3,
+     "fondu_entree": 0.2,
+     "fondu_fin": 2.0
+    }
+   ],
+   "silence": [
+    53.35,
+    53.95
+   ]
+  },
+  "30": {
+   "segments": [
+    {
+     "type": "ui",
+     "nom": "saisie-30",
+     "d": 4.2,
+     "fondu_entree": 0.3,
+     "images": [
+      [
+       0.0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0000-vide.jpg"
+      ],
+      [
+       0.04,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0001-vide.jpg"
+      ],
+      [
+       0.08,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0002-vide.jpg"
+      ],
+      [
+       0.12,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0003-vide.jpg"
+      ],
+      [
+       0.16,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0004-vide.jpg"
+      ],
+      [
+       0.2,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0005-vide.jpg"
+      ],
+      [
+       0.3,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0006-saisie.jpg"
+      ],
+      [
+       0.385,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0007-saisie.jpg"
+      ],
+      [
+       0.471,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0008-saisie.jpg"
+      ],
+      [
+       0.556,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0009-saisie.jpg"
+      ],
+      [
+       0.641,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0010-saisie.jpg"
+      ],
+      [
+       0.727,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0011-saisie.jpg"
+      ],
+      [
+       0.812,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0012-saisie.jpg"
+      ],
+      [
+       0.898,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0013-saisie.jpg"
+      ],
+      [
+       0.983,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0014-saisie.jpg"
+      ],
+      [
+       1.068,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0015-saisie.jpg"
+      ],
+      [
+       1.154,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0016-saisie.jpg"
+      ],
+      [
+       1.239,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0017-saisie.jpg"
+      ],
+      [
+       1.324,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0018-saisie.jpg"
+      ],
+      [
+       1.41,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0019-saisie.jpg"
+      ],
+      [
+       1.495,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0020-saisie.jpg"
+      ],
+      [
+       1.58,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0021-saisie.jpg"
+      ],
+      [
+       1.666,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0022-saisie.jpg"
+      ],
+      [
+       1.751,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0023-saisie.jpg"
+      ],
+      [
+       1.837,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0024-saisie.jpg"
+      ],
+      [
+       1.922,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0025-saisie.jpg"
+      ],
+      [
+       2.007,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0026-saisie.jpg"
+      ],
+      [
+       2.093,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0027-saisie.jpg"
+      ],
+      [
+       2.178,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0028-saisie.jpg"
+      ],
+      [
+       2.263,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0029-saisie.jpg"
+      ],
+      [
+       2.349,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0030-saisie.jpg"
+      ],
+      [
+       2.434,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0031-saisie.jpg"
+      ],
+      [
+       2.52,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0032-saisie.jpg"
+      ],
+      [
+       2.605,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0033-saisie.jpg"
+      ],
+      [
+       2.69,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0034-saisie.jpg"
+      ],
+      [
+       2.776,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0035-saisie.jpg"
+      ],
+      [
+       2.861,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0036-saisie.jpg"
+      ],
+      [
+       2.946,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0037-saisie.jpg"
+      ],
+      [
+       3.032,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0038-saisie.jpg"
+      ],
+      [
+       3.117,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0039-saisie.jpg"
+      ],
+      [
+       3.202,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0040-saisie.jpg"
+      ],
+      [
+       3.288,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0041-saisie.jpg"
+      ],
+      [
+       3.373,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0042-saisie.jpg"
+      ],
+      [
+       3.459,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0043-saisie.jpg"
+      ],
+      [
+       3.544,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0044-saisie.jpg"
+      ],
+      [
+       3.629,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0045-saisie.jpg"
+      ],
+      [
+       3.715,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0046-saisie.jpg"
+      ],
+      [
+       3.8,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0047-saisie.jpg"
+      ],
+      [
+       3.95,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0048-saisie-fin.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.2,
+       0.875,
+       0.25
+      ],
+      [
+       4.2,
+       0.2,
+       0.87,
+       0.29
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.198,
+       0.62,
+       0.27
+      ],
+      [
+       4.2,
+       0.198,
+       0.66,
+       0.245
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "envoi-30",
+     "d": 1.2,
+     "clic": 0.0,
+     "images": [
+      [
+       0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0048-saisie-fin.jpg"
+      ],
+      [
+       0.1,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0049-reflexion.jpg"
+      ],
+      [
+       0.171,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0050-reflexion.jpg"
+      ],
+      [
+       0.243,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0051-reflexion.jpg"
+      ],
+      [
+       0.314,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0052-reflexion.jpg"
+      ],
+      [
+       0.386,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0053-reflexion.jpg"
+      ],
+      [
+       0.457,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0054-reflexion.jpg"
+      ],
+      [
+       0.529,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0055-reflexion.jpg"
+      ],
+      [
+       0.6,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0056-reflexion.jpg"
+      ],
+      [
+       0.671,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0057-reflexion.jpg"
+      ],
+      [
+       0.743,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0058-reflexion.jpg"
+      ],
+      [
+       0.814,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0059-reflexion.jpg"
+      ],
+      [
+       0.886,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0060-reflexion.jpg"
+      ],
+      [
+       0.957,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0061-reflexion.jpg"
+      ],
+      [
+       1.029,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0062-reflexion.jpg"
+      ],
+      [
+       1.1,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0063-reflexion.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.2,
+       0.87,
+       0.29
+      ],
+      [
+       1.2,
+       0.2,
+       0.55,
+       0.33
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.198,
+       0.66,
+       0.245
+      ],
+      [
+       1.2,
+       0.198,
+       0.6,
+       0.27
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "cartes-30",
+     "d": 2.4,
+     "images": [
+      [
+       0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0067-plan.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       0.45
+      ],
+      [
+       2.4,
+       0.74,
+       0.55,
+       0.45
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.58,
+       0.53,
+       0.19
+      ],
+      [
+       1.2,
+       0.58,
+       0.53,
+       0.19
+      ],
+      [
+       2.0,
+       0.723,
+       0.53,
+       0.19
+      ]
+     ]
+    },
+    {
+     "type": "ui",
+     "nom": "devis-30",
+     "d": 1.8,
+     "clic": 1.5,
+     "images": [
+      [
+       0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0070-cinema.jpg"
+      ],
+      [
+       0.9,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0071-valider-survol.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.62,
+       0.84,
+       0.46
+      ],
+      [
+       1.8,
+       0.75,
+       0.9,
+       0.34
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.55,
+       0.85,
+       0.22
+      ],
+      [
+       1.8,
+       0.79,
+       0.9,
+       0.2
+      ]
+     ]
+    },
+    {
+     "type": "noir",
+     "nom": "souffle",
+     "d": 0.6
+    },
+    {
+     "type": "plan",
+     "nom": "h1-30",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan1-a.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h1-goutte-21.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/hero/plan1-v.mp4",
+     "debut": 0.4,
+     "vitesse": 1.0,
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "h3-30",
+     "d": 3.6,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan3-b.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h3-impact-21.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/hero/plan3-v.mp4",
+     "debut": 1.0,
+     "vitesse": [
+      [
+       0,
+       1.0
+      ],
+      [
+       0.6,
+       0.5
+      ],
+      [
+       3.6,
+       0.5
+      ]
+     ],
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       3.6,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       3.6,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g1-ville-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g1-ville-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g1-ville-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g1-ville-v.mp4",
+     "debut": 0.3,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g2-chevaux-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g2-chevaux-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g2-chevaux-11.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g2-chevaux-v.mp4",
+     "debut": 0.3,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g3-chocolat-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g3-chocolat-p2.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g3-chocolat-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g3-chocolat-v.mp4",
+     "debut": 2.0,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g4-robe-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g4-robe-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g4-robe-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g4-robe-v.mp4",
+     "debut": 2.2,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g5-vague-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g5-vague-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g5-vague-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g5-vague-v.mp4",
+     "debut": 0.5,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g6-papier-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g6-papier-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g6-papier-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g6-papier-v.mp4",
+     "debut": 1.0,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "noir",
+     "nom": "silence",
+     "d": 0.6
+    },
+    {
+     "type": "fin",
+     "nom": "fin-30",
+     "d": 4.2
+    }
+   ],
+   "textes": [
+    {
+     "t": 0.3,
+     "d": 3.9000000000000004,
+     "cle": "phrase_hero",
+     "style": "phrase",
+     "frappe": 3.4000000000000004,
+     "langues": [
+      "en"
+     ],
+     "pos_v": 0.18
+    },
+    {
+     "t": 5.6000000000000005,
+     "d": 2.1,
+     "cle": "plan",
+     "pos": "haut"
+    },
+    {
+     "t": 7.9,
+     "d": 1.6,
+     "cle": "devis",
+     "pos": "haut"
+    },
+    {
+     "t": 10.4,
+     "d": 2.1,
+     "cle": "phrase_hero",
+     "style": "phrase",
+     "frappe": 0.7
+    },
+    {
+     "t": 16.250000000000004,
+     "d": 1.1,
+     "cle": "phrase_g1-ville",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 17.450000000000003,
+     "d": 1.1,
+     "cle": "phrase_g2-chevaux",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 18.650000000000002,
+     "d": 1.1,
+     "cle": "phrase_g3-chocolat",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 19.85,
+     "d": 1.1,
+     "cle": "phrase_g4-robe",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 21.05,
+     "d": 1.1,
+     "cle": "phrase_g5-vague",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 22.25,
+     "d": 1.1,
+     "cle": "phrase_g6-papier",
+     "style": "phrase",
+     "frappe": 0.3
+    }
+   ],
+   "sfx": [
+    {
+     "type": "frappe",
+     "t": 0.3,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.4666666666666667,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.6333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.8,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.9666666666666666,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.1333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.3,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.4666666666666668,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.6333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.8,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.9666666666666668,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.1333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.3,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.4666666666666663,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.6333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.8,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 2.9666666666666663,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.1333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.3,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.4666666666666663,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 3.6333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "clic",
+     "t": 4.2,
+     "duree": 0.2,
+     "db": -10
+    },
+    {
+     "type": "clic",
+     "t": 9.3,
+     "duree": 0.2,
+     "db": -8
+    },
+    {
+     "type": "montee",
+     "t": 7.600000000000001,
+     "duree": 2.0,
+     "db": -16
+    },
+    {
+     "type": "impact",
+     "t": 10.200000000000001,
+     "duree": 2.5,
+     "db": -6
+    },
+    {
+     "type": "boom",
+     "t": 24.0,
+     "duree": 3.5,
+     "db": -4
+    }
+   ],
+   "musique": [
+    {
+     "fichier": "~/nexora-creative-data/promo/v4/audio/v4-musique-42.flac",
+     "source": 6.799999999999999,
+     "pose": 0.0,
+     "d": 23.4,
+     "fondu_entree": 0.8,
+     "fondu_fin": 0.03
+    },
+    {
+     "fichier": "~/nexora-creative-data/promo/v4/audio/v4-musique-42.flac",
+     "source": 0.0,
+     "pose": 24.0,
+     "d": 4.200000000000001,
+     "db": -3,
+     "fondu_entree": 0.2,
+     "fondu_fin": 1.2
+    }
+   ],
+   "silence": [
+    23.4,
+    24.0
+   ]
+  },
+  "15": {
+   "segments": [
+    {
+     "type": "ui",
+     "nom": "saisie-15",
+     "d": 2.4,
+     "fondu_entree": 0.3,
+     "images": [
+      [
+       0.0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0000-vide.jpg"
+      ],
+      [
+       0.04,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0001-vide.jpg"
+      ],
+      [
+       0.08,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0002-vide.jpg"
+      ],
+      [
+       0.12,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0003-vide.jpg"
+      ],
+      [
+       0.16,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0004-vide.jpg"
+      ],
+      [
+       0.2,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0005-vide.jpg"
+      ],
+      [
+       0.3,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0006-saisie.jpg"
+      ],
+      [
+       0.341,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0007-saisie.jpg"
+      ],
+      [
+       0.383,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0008-saisie.jpg"
+      ],
+      [
+       0.424,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0009-saisie.jpg"
+      ],
+      [
+       0.466,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0010-saisie.jpg"
+      ],
+      [
+       0.507,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0011-saisie.jpg"
+      ],
+      [
+       0.549,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0012-saisie.jpg"
+      ],
+      [
+       0.59,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0013-saisie.jpg"
+      ],
+      [
+       0.632,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0014-saisie.jpg"
+      ],
+      [
+       0.673,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0015-saisie.jpg"
+      ],
+      [
+       0.715,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0016-saisie.jpg"
+      ],
+      [
+       0.756,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0017-saisie.jpg"
+      ],
+      [
+       0.798,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0018-saisie.jpg"
+      ],
+      [
+       0.839,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0019-saisie.jpg"
+      ],
+      [
+       0.88,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0020-saisie.jpg"
+      ],
+      [
+       0.922,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0021-saisie.jpg"
+      ],
+      [
+       0.963,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0022-saisie.jpg"
+      ],
+      [
+       1.005,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0023-saisie.jpg"
+      ],
+      [
+       1.046,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0024-saisie.jpg"
+      ],
+      [
+       1.088,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0025-saisie.jpg"
+      ],
+      [
+       1.129,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0026-saisie.jpg"
+      ],
+      [
+       1.171,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0027-saisie.jpg"
+      ],
+      [
+       1.212,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0028-saisie.jpg"
+      ],
+      [
+       1.254,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0029-saisie.jpg"
+      ],
+      [
+       1.295,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0030-saisie.jpg"
+      ],
+      [
+       1.337,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0031-saisie.jpg"
+      ],
+      [
+       1.378,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0032-saisie.jpg"
+      ],
+      [
+       1.42,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0033-saisie.jpg"
+      ],
+      [
+       1.461,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0034-saisie.jpg"
+      ],
+      [
+       1.502,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0035-saisie.jpg"
+      ],
+      [
+       1.544,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0036-saisie.jpg"
+      ],
+      [
+       1.585,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0037-saisie.jpg"
+      ],
+      [
+       1.627,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0038-saisie.jpg"
+      ],
+      [
+       1.668,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0039-saisie.jpg"
+      ],
+      [
+       1.71,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0040-saisie.jpg"
+      ],
+      [
+       1.751,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0041-saisie.jpg"
+      ],
+      [
+       1.793,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0042-saisie.jpg"
+      ],
+      [
+       1.834,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0043-saisie.jpg"
+      ],
+      [
+       1.876,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0044-saisie.jpg"
+      ],
+      [
+       1.917,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0045-saisie.jpg"
+      ],
+      [
+       1.959,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0046-saisie.jpg"
+      ],
+      [
+       2.0,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0047-saisie.jpg"
+      ],
+      [
+       2.15,
+       "/home/pc6/nexora-creative-data/promo/v4/ui/fr/0048-saisie-fin.jpg"
+      ]
+     ],
+     "cadre": [
+      [
+       0,
+       0.2,
+       0.875,
+       0.25
+      ],
+      [
+       2.4,
+       0.2,
+       0.87,
+       0.29
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.198,
+       0.62,
+       0.27
+      ],
+      [
+       2.4,
+       0.198,
+       0.66,
+       0.245
+      ]
+     ]
+    },
+    {
+     "type": "noir",
+     "nom": "souffle",
+     "d": 0.6
+    },
+    {
+     "type": "plan",
+     "nom": "h1-15",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan1-a.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h1-goutte-21.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/hero/plan1-v.mp4",
+     "debut": 0.4,
+     "vitesse": 1.0,
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "h3-15",
+     "d": 2.4,
+     "plaque": "~/nexora-creative-data/promo/v4/hero/plan3-b.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/h3-impact-21.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/hero/plan3-v.mp4",
+     "debut": 1.0,
+     "vitesse": [
+      [
+       0,
+       1.0
+      ],
+      [
+       0.6,
+       0.5
+      ],
+      [
+       3.6,
+       0.5
+      ]
+     ],
+     "son_h3": -16,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.92
+      ]
+     ],
+     "cadre_v": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       2.4,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g1-ville-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g1-ville-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g1-ville-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g1-ville-v.mp4",
+     "debut": 0.3,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g3-chocolat-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g3-chocolat-p2.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g3-chocolat-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g3-chocolat-v.mp4",
+     "debut": 2.0,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g4-robe-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g4-robe-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g4-robe-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g4-robe-v.mp4",
+     "debut": 2.2,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "plan",
+     "nom": "g6-papier-c",
+     "d": 1.2,
+     "plaque": "~/nexora-creative-data/promo/v4/plans/g6-papier-p1.mp4",
+     "cle": "~/nexora-creative-data/promo/v4/cles/g6-papier-12.png",
+     "plaque_v": "~/nexora-creative-data/promo/v4/plans/g6-papier-v.mp4",
+     "debut": 1.0,
+     "vitesse": 1.0,
+     "son_h3": -18,
+     "cadre": [
+      [
+       0,
+       0.5,
+       0.5,
+       1.0
+      ],
+      [
+       1.2,
+       0.5,
+       0.5,
+       0.95
+      ]
+     ]
+    },
+    {
+     "type": "noir",
+     "nom": "silence",
+     "d": 0.6
+    },
+    {
+     "type": "fin",
+     "nom": "fin-15",
+     "d": 2.4
+    }
+   ],
+   "textes": [
+    {
+     "t": 0.3,
+     "d": 2.1,
+     "cle": "phrase_hero",
+     "style": "phrase",
+     "frappe": 1.5999999999999999,
+     "langues": [
+      "en"
+     ],
+     "pos_v": 0.18
+    },
+    {
+     "t": 7.8500000000000005,
+     "d": 1.1,
+     "cle": "phrase_g1-ville",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 9.05,
+     "d": 1.1,
+     "cle": "phrase_g3-chocolat",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 10.25,
+     "d": 1.1,
+     "cle": "phrase_g4-robe",
+     "style": "phrase",
+     "frappe": 0.3
+    },
+    {
+     "t": 11.45,
+     "d": 1.1,
+     "cle": "phrase_g6-papier",
+     "style": "phrase",
+     "frappe": 0.3
+    }
+   ],
+   "sfx": [
+    {
+     "type": "frappe",
+     "t": 0.3,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.38095238095238093,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.46190476190476193,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.5428571428571428,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.6238095238095238,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.7047619047619047,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.7857142857142856,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.8666666666666667,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 0.9476190476190476,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.0285714285714285,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.1095238095238096,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.1904761904761905,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.2714285714285714,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.3523809523809522,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.4333333333333333,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.5142857142857142,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.5952380952380953,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.6761904761904762,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.7571428571428571,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.838095238095238,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "frappe",
+     "t": 1.9190476190476191,
+     "duree": 0.08,
+     "db": -16
+    },
+    {
+     "type": "montee",
+     "t": 0.3999999999999999,
+     "duree": 2.0,
+     "db": -16
+    },
+    {
+     "type": "impact",
+     "t": 3.0,
+     "duree": 2.5,
+     "db": -6
+    },
+    {
+     "type": "boom",
+     "t": 13.199999999999998,
+     "duree": 3.5,
+     "db": -4
+    }
+   ],
+   "musique": [
+    {
+     "fichier": "~/nexora-creative-data/promo/v4/audio/v4-musique-42.flac",
+     "source": 14.0,
+     "pose": 0.0,
+     "d": 12.599999999999998,
+     "fondu_entree": 0.8,
+     "fondu_fin": 0.03
+    },
+    {
+     "fichier": "~/nexora-creative-data/promo/v4/audio/v4-musique-42.flac",
+     "source": 0.0,
+     "pose": 13.199999999999998,
+     "d": 2.4,
+     "db": -3,
+     "fondu_entree": 0.2,
+     "fondu_fin": 1.2
+    }
+   ],
+   "silence": [
+    12.599999999999998,
+    13.199999999999998
+   ]
+  }
+ }
+}

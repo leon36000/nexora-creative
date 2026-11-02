@@ -1,0 +1,84 @@
+{
+ "_note": "Seul endroit où vivent le nom, le logo, l'adresse et tous les textes de la promo V4. Le nom de l'entreprise va changer : modifier ce fichier puis relancer monter_v4.py (aucun texte n'est dans les images ou vidéos générées). « url » vide = non affichée ; « logo » = chemin d'un PNG transparent ou null.",
+ "marque": "NEXORA",
+ "produit": "CREATIVE",
+ "logo": null,
+ "url": "",
+ "couleurs": {
+  "encre": [
+   8,
+   8,
+   10
+  ],
+  "os": [
+   246,
+   244,
+   238
+  ],
+  "brume": [
+   160,
+   160,
+   172
+  ],
+  "signal": [
+   255,
+   90,
+   31
+  ]
+ },
+ "polices": {
+  "dossier": "~/Desktop/NexoraSite/web/src/fonts",
+  "titre": "geist-latin-wght-normal.woff2",
+  "mono": "jetbrains-mono-latin-wght-normal.woff2"
+ },
+ "langues": {
+  "fr": {
+   "plan": "Il découpe, compose et chiffre.",
+   "devis": "Le devis avant le moindre rendu.",
+   "tournage": "Il tourne chaque plan.",
+   "prises": "Deux prises. On garde la meilleure.",
+   "prise_a": "PRISE A",
+   "prise_b": "PRISE B",
+   "gardee": "GARDÉE",
+   "montage": "Il monte sur la musique.",
+   "carton_film": "L'or en suspension.",
+   "phrase_hero": "Un spot de 20 s pour un parfum : une goutte d'or tombe dans l'eau noire, au ralenti.",
+   "rappel": "Une phrase.",
+   "imagine": "Et tout ce que tu imagines.",
+   "slogan_1": "Une phrase.",
+   "slogan_2": "Un film.",
+   "sous_titre": "Image, vidéo, musique et montage par IA.",
+   "mentions": "Images et sons générés par IA dans Nexora Creative · MiniMax H3 · Qwen-Image · MiniMax-Music3",
+   "phrase_g1-ville": "Une ville sous la pluie, la nuit.",
+   "phrase_g2-chevaux": "Des chevaux sauvages au coucher du soleil.",
+   "phrase_g3-chocolat": "Du chocolat, au ralenti.",
+   "phrase_g4-robe": "Une robe rouge dans le vent du désert.",
+   "phrase_g5-vague": "Un surfeur dans le tube.",
+   "phrase_g6-papier": "Un village de papier qui s'allume."
+  },
+  "en": {
+   "plan": "It breaks it down, scores it, prices it.",
+   "devis": "The quote comes before any render.",
+   "tournage": "It shoots every shot.",
+   "prises": "Two takes. Keep the best.",
+   "prise_a": "TAKE A",
+   "prise_b": "TAKE B",
+   "gardee": "KEPT",
+   "montage": "It cuts to the music.",
+   "carton_film": "Gold, suspended.",
+   "phrase_hero": "A 20 s perfume spot: a drop of gold falls into black water, in slow motion.",
+   "rappel": "One sentence.",
+   "imagine": "And anything you can imagine.",
+   "slogan_1": "One sentence.",
+   "slogan_2": "One film.",
+   "sous_titre": "AI image, video, music and editing.",
+   "mentions": "Images and sound AI-generated in Nexora Creative · MiniMax H3 · Qwen-Image · MiniMax-Music3",
+   "phrase_g1-ville": "A city in the rain, at night.",
+   "phrase_g2-chevaux": "Wild horses at sunset.",
+   "phrase_g3-chocolat": "Chocolate, in slow motion.",
+   "phrase_g4-robe": "A red dress in the desert wind.",
+   "phrase_g5-vague": "A surfer inside the barrel.",
+   "phrase_g6-papier": "A paper village lighting up."
+  }
+ }
+}
