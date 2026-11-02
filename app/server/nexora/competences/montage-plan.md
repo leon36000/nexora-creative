@@ -1,6 +1,6 @@
 ---
 name: montage-plan
-version: 1
+version: 2
 roles: [monteur]
 description: Format EditPlan v1 et règles dures pour planifier un montage.
 ---
@@ -10,6 +10,7 @@ Forme (toutes les durées sont des ENTIERS en images = secondes × fps) :
  "video":[{"id":"p1","src":"<id>","entree_f":0,"duree_f":48,"vitesse":1,"transition_in":{"type":"cut","duree_f":0},"zoom":{"de":1,"a":1.06},"section":"ouverture"}],
  "audio":{"musique":{"src":"<id>","entree_f":0,"duree_f":N,"gain_db":-8,"fondu_in_f":7,"fondu_out_f":36},"voix":[],"ducking":{"actif":false,"profondeur_db":0},"cible_lufs":-14,"crete_db":-1,"fondu_coupe_ms":30},
  "textes":[{"texte":"…","debut_f":12,"duree_f":36,"style":"titre|sous-titre|carton|bas","position":"haut|centre|bas","taille_pct":6}],"generations":[]}
+Voix off (si le brief en fournit une) : "voix":[{"src":"<id voix>","debut_f":12,"entree_f":0,"duree_f":84,"gain_db":0}] et "ducking":{"actif":true,"profondeur_db":10} ; profondeur_db est POSITIF (10 = la musique baisse de 10 dB sous la voix) ; debut_f est l'image de la séquence où la voix démarre.
 Règles dures :
 - Les plans se suivent sur une seule piste ; durée totale = Σ duree_f − Σ durées des fondus ; elle vaut la durée cible ±5 %.
 - Un plan lit entree_f … entree_f + duree_f × vitesse dans sa source : jamais au-delà de sa durée ; vitesse de 0,25 à 4.
