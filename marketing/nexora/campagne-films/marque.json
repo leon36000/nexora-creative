@@ -1,0 +1,12 @@
+{
+ "_note": "Seul endroit où vivent le nom, le logo, l'adresse, les couleurs et les polices de toute la campagne de films. Le nom de l'entreprise va changer : modifier ce fichier puis relancer « usine.py <brief> rendu revue livrer » (aucun texte n'est dans les images générées ni dans les captures montées). « url » vide = non affichée ; « logo » = chemin d'un PNG transparent ou null. Les textes propres à chaque film sont dans son brief.",
+ "marque": "NEXORA",
+ "logo": null,
+ "url": "",
+ "couleurs": {"encre": [8, 8, 10], "os": [246, 244, 238], "brume": [160, 160, 172], "signal": [255, 90, 31]},
+ "polices": {"dossier": "~/Desktop/NexoraSite/web/src/fonts", "titre": "geist-latin-wght-normal.woff2", "mono": "jetbrains-mono-latin-wght-normal.woff2"},
+ "langues": {
+  "fr": {"prepa": "En préparation", "reel": "Capture réelle"},
+  "en": {"prepa": "In preparation", "reel": "Real screen capture"}
+ }
+}
