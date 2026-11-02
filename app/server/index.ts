@@ -16,7 +16,7 @@ import * as comfy from './comfy.js';
 import * as eng from './engine.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
-import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type MoteurVideo } from './nexora/creer.js';
+import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
 import { buildMusic3Graph } from './graphs/music3.js';
 import { reecrireImage } from './nexora/reecritureImage.js';
 import { demarrerLectureReglages } from './nexora/reglagesSite.js';
@@ -33,7 +33,7 @@ import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, se
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { xmlFcp7 } from './nexora/projetExport.js';
 import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
-import { argsAvecMusique, argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire } from './nexora/film.js';
+import { argsAvecMusique, argsExport, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { lireCartons } from './nexora/cartons.js';
 import { buildLtxGraph } from './graphs/ltx.js';
@@ -55,7 +55,7 @@ import { checkerPreview } from './cutout.js';
 import { buildReshootGraph, buildReshootWarpPreviewGraph } from './graphs/reshoot.js';
 import { buildExtendGraph, buildSoundGraph, buildSpeakGraph, buildTransitionGraph } from './graphs/ltxtools.js';
 import { takes, projects, speed, preambles, takeWorkflows, cast as castDb, sessionsProducteur, type CastKind } from './jobs.js';
-import { devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
+import { ajusterProposition, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
 import {
   CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles,
@@ -1097,6 +1097,60 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
   return { filmId, take: takes.get(filmId) };
 });
 
+/**
+ * Prolonger un clip ou raccorder deux clips (remplacent Extend et Transitions, qui reposaient sur LTX) : un petit film
+ * dont les clips d'origine gardent leur prise ; seul le nouveau plan est tourné (MiniMax H3), contrôlé et facturé.
+ */
+async function lancerRaccord(req: FastifyRequest, reply: FastifyReply, r: { storyboard: Storyboard; format: FormatCreer; son: boolean; qualite: 'rapide' | 'max' }, intention: string) {
+  if (intention) {
+    const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
+    if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
+  }
+  const moteur = moteurDuCompte(r.qualite);
+  if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
+  const fac = facturationCourante();
+  const reservations: (CreditsPrise | undefined)[] = [];
+  for (const p of r.storyboard.plans) {
+    if (!fac || p.take) { reservations.push(undefined); continue; }
+    const corps = corpsRendu({ intention: p.resume, format: r.format, duree: p.duree, son: r.son, qualite: r.qualite }, '', moteur);
+    const res = await fac.reserver({ idempotence: randomUUID(), credits: devisCredits(corps, tarifDepuisEnv()), libelle: `Nexora Creative · ${r.storyboard.titre.slice(0, 40)}` });
+    if (!res.ok) {
+      for (const x of reservations) if (x) await fac.liberer(x.reservationId).catch(() => {});
+      return reply.code(402).send({ error: res.message });
+    }
+    reservations.push({ reservationId: res.reservationId, credits: res.credits, etat: 'reservee' });
+  }
+  const filmId = await tournerFilm(r.storyboard, { format: r.format, son: r.son, intention: intention || r.storyboard.titre, moteur, reservations: reservations as CreditsPrise[], qualite: r.qualite }, llmCourant());
+  takes.patchSettings(filmId, { app: 'nexora-raccord' });
+  void avancerFilm(filmId);
+  return { filmId };
+}
+
+app.post('/api/nexora/prolonger', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const t = takes.get(Number(b.take));
+  if (!t) return reply.code(404).send({ error: 'Vidéo introuvable.' });
+  try {
+    const intention = typeof b.intention === 'string' ? b.intention.trim().slice(0, 1200) : '';
+    return await lancerRaccord(req, reply, storyboardProlonger(t, { intention, duree: Number(b.duree) }), intention);
+  } catch (e) {
+    return reply.code(400).send({ error: e instanceof Error ? e.message : 'prolongement impossible' });
+  }
+});
+
+app.post('/api/nexora/raccord', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const de = takes.get(Number(b.de)), vers = takes.get(Number(b.vers));
+  if (!de || !vers) return reply.code(404).send({ error: 'Choisis deux vidéos.' });
+  if (de.id === vers.id) return reply.code(400).send({ error: 'Choisis deux vidéos différentes.' });
+  try {
+    const intention = typeof b.intention === 'string' ? b.intention.trim().slice(0, 1200) : '';
+    return await lancerRaccord(req, reply, storyboardRaccord(de, vers, { intention }), intention);
+  } catch (e) {
+    return reply.code(400).send({ error: e instanceof Error ? e.message : 'raccord impossible' });
+  }
+});
+
 /** Moteurs du registre pour une demande : ceux qui conviennent (classés) et ceux qui sont exclus, avec la raison. */
 app.post('/api/nexora/moteurs', async (req) => {
   const d = lireDemandeCreer({ ...(req.body as any), intention: 'x' });
@@ -1503,6 +1557,19 @@ app.post('/api/nexora/producteur/:id/valider', async (req, reply) => {
     return reply.code((e as any)?.statusCode ?? 409).send({ error: e instanceof Error ? e.message : 'validation impossible' });
   } finally {
     verrousProducteur.delete(id);
+  }
+});
+
+app.post('/api/nexora/producteur/:id/ajuster', async (req, reply) => {
+  const s = sessionOu404(String((req.params as any).id), reply);
+  if (!s) return;
+  const b = (req.body ?? {}) as any;
+  try {
+    const apres = ajusterProposition(s, String(b.proposition ?? ''), b, devisDuCompte);
+    sessionsProducteur.save(apres);
+    return vueSession(apres);
+  } catch (e) {
+    return reply.code(409).send({ error: e instanceof Error ? e.message : 'ajustement impossible' });
   }
 });
 

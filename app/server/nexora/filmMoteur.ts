@@ -112,15 +112,30 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
   );
   const jeton = await deps.televerser(`nexora_film_${film.id}_plan${i}.png`, readFileSync(image), 'image/png');
   const org = takes.organisationDe(film.id) ?? 'local';
+  // Raccord : le plan va aussi vers la première image du plan suivant (H3 première + dernière image, FL2VA).
+  let fin: string | undefined;
+  const suivant = (p as PlanFilm & { raccord?: boolean }).raccord ? sb.plans[i + 1]?.take : undefined;
+  const fichierSuivant = suivant ? takes.get(suivant)?.output_path : undefined;
+  if (fichierSuivant && existsSync(fichierSuivant)) {
+    const imageFin = join(dossier, `film_${film.id}_plan${i}_arrivee.png`);
+    await new Promise<void>((ok, ko) =>
+      execFile(config.ffmpegBin, ['-y', '-i', fichierSuivant, '-frames:v', '1', '-update', '1', imageFin], (err, _o, stderr) =>
+        err ? ko(new Error(`première image du plan ${i + 2} : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()),
+    );
+    fin = await deps.televerser(`nexora_film_${film.id}_plan${i}_fin.png`, readFileSync(imageFin), 'image/png');
+  }
   const ecrit = await reecrireH3({
-    intention: `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
-    mode: 'i2va',
+    intention: fin
+      ? `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame and ends exactly on the provided last frame: one continuous move that links them.`
+      : `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
+    mode: fin ? 'fl2va' : 'i2va',
     dureeS: dureePlan(p),
     ...dialoguesDe(p),
   }, deps.llmPour(org));
   const corps = {
     ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite }, ecrit.prompt, s.moteur ?? 'h3-fast'),
     startImage: jeton,
+    ...(fin ? { endImage: fin } : {}),
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
     shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: film.project_id ?? undefined,
   };

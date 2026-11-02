@@ -240,8 +240,14 @@ export async function tourProducteur(session: SessionProducteur, message: string
   const max = deps.maxEtapes ?? 6;
   let reponse = '';
   for (let etape = 0; etape < max; etape++) {
-    const r = await deps.llm.completerAvecOutils('producteur', [{ role: 'system', content: avecCompetences('producteur', CONSIGNES) }, ...s.messages], OUTILS_PRODUCTEUR, { maxTokens: 2500 });
+    // Les modèles qui raisonnent consomment une partie du plafond avant de répondre : 6 000 jetons au plus par étape.
+    const r = await deps.llm.completerAvecOutils('producteur', [{ role: 'system', content: avecCompetences('producteur', CONSIGNES) }, ...s.messages], OUTILS_PRODUCTEUR, { maxTokens: 6000 });
     s.jetons += r.jetons;
+    if (!r.appels.length && !r.texte.trim()) {
+      // Réponse vide (raisonnement coupé) : une relance courte, comptée dans les étapes.
+      s.messages.push({ role: 'user', content: 'Continue : appelle l’outil voulu ou réponds en 2 à 4 phrases.' });
+      continue;
+    }
     s.messages.push({ role: 'assistant', content: r.texte, ...(r.appels.length ? { appels: r.appels } : {}) });
     if (!r.appels.length) { reponse = r.texte.trim(); break; }
     for (const a of r.appels) {
@@ -345,5 +351,25 @@ export function variante(session: SessionProducteur, filmId: number, genre: Genr
     'nouvelle-prise': 'Nouvelle prise du même plan', cinema: 'Version qualité cinéma (H3 complet)', courte: 'Version courte, sans nouveau rendu',
   };
   bulle(s, { de: 'producteur', texte: `${libelles[genre]} : voici le devis.`, proposition: s.proposition!.id });
+  return s;
+}
+
+/** Réglages modifiables d'un clic sur la carte du devis (sans repasser par le LLM). */
+export function ajusterProposition(
+  session: SessionProducteur, id: string,
+  r: { candidats?: number; qualite?: string; format?: string; son?: boolean; musique?: boolean },
+  devis: (p: PlanProduction) => Devis,
+): SessionProducteur {
+  const s: SessionProducteur = structuredClone(session);
+  const p = s.proposition;
+  if (!p || p.id !== id || p.genre !== 'production') throw new Error('Cette proposition n’est plus valable.');
+  const plan = structuredClone(p.plan);
+  if (r.candidats !== undefined) plan.candidats = r.candidats >= 2 ? 2 : 1;
+  if (r.qualite === 'rapide' || r.qualite === 'max') plan.qualite = r.qualite;
+  if (r.format === '16:9' || r.format === '9:16' || r.format === '1:1') plan.format = r.format;
+  if (typeof r.son === 'boolean') plan.son = r.son;
+  if (r.musique === false) plan.musique = null;
+  if (r.musique === true && !plan.musique) plan.musique = { envie: '' };
+  s.proposition = { ...p, id: randomUUID(), plan, devis: devis(plan) };
   return s;
 }

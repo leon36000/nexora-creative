@@ -118,6 +118,13 @@ describe('boucle du Producteur', () => {
     expect(retour).toContain('arguments illisibles');
     expect(s.fil.at(-1)!.texte).toBe('ok');
   });
+  it('une réponse vide est relancée une fois, dans la limite des étapes', async () => {
+    const llm = fauxLlm([texte(''), outil('proposer_production', planBrut), texte('Plan prêt.')]);
+    const s = await tourProducteur(nouvelleSession(), 'pub', deps(llm));
+    expect(llm.appels).toBe(3);
+    expect(s.proposition).not.toBeNull();
+    expect(JSON.stringify(llm.vus[1])).toContain('Continue');
+  });
   it('s’arrête quand le budget de jetons de la session est épuisé', async () => {
     const llm = fauxLlm([outil('etat_studio', {})]);
     const s = nouvelleSession();
@@ -152,5 +159,18 @@ describe('validation et variantes', () => {
     const court = variante(s, 7, 'courte', devisFixe(0));
     expect(court.proposition).toMatchObject({ genre: 'remontage', film: 7 });
     expect(() => variante(s, 99, 'courte', devisFixe(0))).toThrow();
+  });
+});
+
+describe('ajustement d’une proposition avant validation', () => {
+  it('change candidats, qualité ou format et refait le devis, avec un nouvel identifiant', async () => {
+    const { ajusterProposition } = await import('./agent.js');
+    const s = nouvelleSession();
+    s.proposition = { id: 'p1', genre: 'production', plan: lirePlanProduction(planBrut), devis: devisFixe(10)() };
+    const a = ajusterProposition(s, 'p1', { candidats: 2, qualite: 'max', format: '1:1' }, (p) => ({ ...devisFixe(p.candidats === 2 ? 200 : 10)(), candidats: p.candidats }));
+    expect(a.proposition).toMatchObject({ genre: 'production', devis: { credits: 200 } });
+    expect((a.proposition as any).plan).toMatchObject({ candidats: 2, qualite: 'max', format: '1:1' });
+    expect(a.proposition!.id).not.toBe('p1');
+    expect(() => ajusterProposition(s, 'autre', {}, devisFixe(1))).toThrow();
   });
 });

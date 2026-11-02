@@ -45,6 +45,13 @@ const server = new McpServer(
   },
 );
 
+// ---------- Nexora : outils bloqués par la politique de licences ----------
+// Ces outils reposent sur LTX-2.x (server/nexora/licences.ts, échec fermé) : ils ne sont pas exposés aux agents externes.
+// Les remplaçants sur MiniMax H3 sont les outils nexora_* ci-dessous (Prolonger, Raccord, Producteur).
+const BLOQUES_LICENCE = new Set(['make_loop', 'direct_shot', 'direct_scene', 'mirror_motion', 'restyle_video', 'swap_object', 'reshoot', 'extend_video', 'make_transition', 'speak', 'add_sound', 'apply_effect', 'finish_hdr', 'stage_render', 'fix_seam']);
+const enregistrer = server.registerTool.bind(server);
+(server as any).registerTool = (nom: string, ...reste: unknown[]) => (BLOQUES_LICENCE.has(nom) ? undefined : (enregistrer as any)(nom, ...reste));
+
 // ---------- helpers ----------
 
 type Content = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string };
@@ -1070,6 +1077,60 @@ server.registerTool('cancel', {
   await api.cancelTake(take_id);
   return { content: [text({ ok: true, cancelled: take_id })] };
 }));
+
+// ---------- Nexora Creative (MiniMax H3, Qwen-Image, MiniMax-Music3) ----------
+// Mêmes routes que l'interface : modération, licences, crédits et file de rendus s'appliquent pareil.
+
+server.registerTool('nexora_etat', {
+  title: 'Nexora : état du studio',
+  description: 'Moteurs en ligne (vidéo MiniMax H3, image Qwen-Image, musique MiniMax-Music3) et territoire du compte.',
+  inputSchema: {}, annotations: RO,
+}, safe(async () => ({ content: [text(await api.nexora('etat'))] })));
+
+server.registerTool('nexora_producteur', {
+  title: 'Nexora : Producteur (objectif → plan + devis)',
+  description: 'Donne un objectif en français (« une pub de 20 s pour ma boulangerie, verticale »). Le Producteur répond par un plan de production (plans, musique, cartons) et un devis. Rien n’est lancé : appelle nexora_valider avec l’id de la proposition. Passe session pour continuer une conversation (retouches, raccourcir…).',
+  inputSchema: { objectif: z.string().min(3), session: z.string().optional().describe('id renvoyé par un appel précédent') },
+  annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+}, safe(async (a) => {
+  const id = a.session ?? (await api.nexora<{ id: string }>('producteur', {})).id;
+  const s = await api.nexora<any>(`producteur/${id}/message`, { texte: a.objectif });
+  return { content: [text({ session: id, reponse: s.fil.at(-1)?.texte, proposition: s.proposition })] };
+}));
+
+server.registerTool('nexora_valider', {
+  title: 'Nexora : valider un devis et lancer',
+  description: 'Lance la proposition du Producteur (dépense des crédits). Renvoie l’id du film ; suis-le avec wait_for_take puis get_take.',
+  inputSchema: { session: z.string(), proposition: z.string() },
+  annotations: GPU,
+}, safe(async (a) => {
+  const s = await api.nexora<any>(`producteur/${a.session}/valider`, { proposition: a.proposition });
+  return { content: [text({ film: s.productions.at(-1)?.filmId, suivi: s.productions.at(-1)?.film })] };
+}));
+
+server.registerTool('nexora_creer_video', {
+  title: 'Nexora : une phrase → une vidéo MiniMax H3',
+  description: 'Clip de 5, 10 ou 15 s avec son ; le prompt H3 est écrit par le studio depuis ta phrase en français. Image de départ facultative (take:<id> d’une image).',
+  inputSchema: {
+    intention: z.string().min(3), format: z.enum(['16:9', '9:16', '1:1']).default('16:9'), duree: z.union([z.literal(5), z.literal(10), z.literal(15)]).default(5),
+    son: z.boolean().default(true), qualite: z.enum(['rapide', 'max']).default('rapide'), replique: z.string().max(300).optional(),
+  },
+  annotations: GPU,
+}, safe(async (a) => ({ content: [text(await api.nexora('creer', a))] })));
+
+server.registerTool('nexora_prolonger', {
+  title: 'Nexora : prolonger un clip',
+  description: 'Prolonge une vidéo terminée de 5 ou 10 s depuis sa dernière image (MiniMax H3) ; renvoie un film assemblé.',
+  inputSchema: { take: z.number().int(), intention: z.string().optional(), duree: z.union([z.literal(5), z.literal(10)]).default(5) },
+  annotations: GPU,
+}, safe(async (a) => ({ content: [text(await api.nexora('prolonger', a))] })));
+
+server.registerTool('nexora_raccord', {
+  title: 'Nexora : raccorder deux clips',
+  description: 'Plan de transition de 5 s qui va de la dernière image du premier clip à la première du second (MiniMax H3), puis assemble les trois.',
+  inputSchema: { de: z.number().int(), vers: z.number().int(), intention: z.string().optional() },
+  annotations: GPU,
+}, safe(async (a) => ({ content: [text(await api.nexora('raccord', a))] })));
 
 await server.connect(new StdioServerTransport());
 console.error(`openfield-mcp: stdio ready, API ${BASE}`);

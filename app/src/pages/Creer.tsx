@@ -13,14 +13,17 @@ import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
 import FilmPlans from '../FilmPlans';
 import { Publication } from '../studio/Publication';
+import Producteur from '../studio/Producteur';
+import { setParams, useRoute } from '../router';
 import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
 
-type Mode = 'video' | 'image' | 'film';
+type Mode = 'producteur' | 'video' | 'image' | 'film';
+const MODES: Mode[] = ['producteur', 'video', 'image', 'film'];
 type Format = '16:9' | '9:16' | '1:1';
 type Depart = 'texte' | 'photo' | 'cle';
 type Filtre = 'tout' | 'videos' | 'films' | 'images';
 
-const IDEES: Record<Mode, string[]> = {
+const IDEES: Record<Exclude<Mode, 'producteur'>, string[]> = {
   video: [
     'Ma voiture rouge se transforme en robot géant pendant que la caméra tourne autour, au coucher du soleil.',
     'Un dragon d’obsidienne jaillit d’une mer de nuages d’orage et rugit vers la caméra.',
@@ -49,7 +52,9 @@ const SECONDES_PAR_PLAN_5S = 40;
 const fmtTemps = (s: number) => (s < 90 ? `${Math.round(s)} s` : `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')} s`);
 
 export default function Creer() {
-  const [mode, setMode] = useState<Mode>('video');
+  const { params } = useRoute();
+  const mode: Mode = MODES.includes(params.get('mode') as Mode) ? (params.get('mode') as Mode) : 'producteur';
+  const setMode = (m: Mode) => setParams({ mode: m === 'producteur' ? null : m });
   const [intention, setIntention] = useState('');
   const [format, setFormat] = useState<Format>('16:9');
   const [duree, setDuree] = useState<number>(5);
@@ -69,7 +74,7 @@ export default function Creer() {
   const [filtre, setFiltre] = useState<Filtre>('tout');
   const [replique, setReplique] = useState('');
   const [pub, setPub] = useState<number | null>(null);
-  const [idees, setIdees] = useState<Partial<Record<Mode, string[]>>>({});
+  const [idees, setIdees] = useState<Partial<Record<Exclude<Mode, 'producteur'>, string[]>>>({});
   const [inspire, setInspire] = useState(false);
   const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number | null } | null>(null);
   const toutes = useStore((s) => s.takes);
@@ -123,6 +128,7 @@ export default function Creer() {
   async function inspirer() {
     setInspire(true);
     try {
+      if (mode === 'producteur') return;
       const r = await api.nexoraIdees({ mode, theme: intention.trim() || undefined });
       setIdees((x) => ({ ...x, [mode]: r.idees }));
     } catch (e) {
@@ -136,6 +142,7 @@ export default function Creer() {
     if (!intention.trim()) return;
     setEnvoi('boost');
     try {
+      if (mode === 'producteur') return;
       const r = await api.nexoraAmeliorer({ intention: intention.trim(), mode });
       setBoost(r.texte);
     } catch (e) {
@@ -255,7 +262,9 @@ export default function Creer() {
       <section className="st-hero">
         <div>
           <h1>Écris-le. <em>Nexora</em> le filme.</h1>
-          <p>Une phrase en français suffit. L’IA écrit le scénario, dessine le plan clé, tourne avec son et compose la musique.</p>
+          <p>{mode === 'producteur'
+            ? 'Dis ce que tu veux produire. Le Producteur IA découpe, chiffre, tourne, contrôle chaque plan et assemble. Tu valides le devis d’un clic.'
+            : 'Une phrase en français suffit. L’IA écrit le scénario, dessine le plan clé, tourne avec son et compose la musique.'}</p>
         </div>
         <div className="st-pile" aria-label="Modèles utilisés">
           <span>Vidéo <b>MiniMax H3</b></span>
@@ -264,15 +273,19 @@ export default function Creer() {
         </div>
       </section>
 
+      <div className="st-modes st-modes-haut" role="tablist" aria-label="Que veux-tu créer ?">
+        {([['producteur', 'Producteur IA', IcEtincelle], ['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => (
+          <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
+            <Ic />{label}
+          </button>
+        ))}
+      </div>
+
+      {mode === 'producteur' ? (
+        <div className="st-grid"><Producteur onOuvrirFilm={setFilmOuvert} /></div>
+      ) : (
       <div className="st-grid">
         <aside className="st-composer" aria-label="Composeur">
-          <div className="st-modes" role="tablist" aria-label="Que veux-tu créer ?">
-            {([['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => (
-              <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
-                <Ic />{label}
-              </button>
-            ))}
-          </div>
 
           <div className="st-champ">
             <textarea
@@ -509,6 +522,7 @@ export default function Creer() {
           )}
         </section>
       </div>
+      )}
 
       {pub !== null && <Publication id={pub} onClose={() => setPub(null)} />}
       {filmOuvert !== null && <FilmPlans filmId={filmOuvert} onClose={() => setFilmOuvert(null)} />}

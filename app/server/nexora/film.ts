@@ -236,3 +236,54 @@ export function storyboardPourRefaire(sb: Storyboard, i: number, modif: { descri
   });
   return { ...sb, plans };
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Prolonger et Raccorder (feuille de route R3a) : les apps Extend et Transitions d'OpenField reposaient sur LTX-2.x,
+// bloqué par la politique de licences ; elles sont refaites sur MiniMax H3 avec la mécanique des films : le clip
+// d'origine garde sa prise, le nouveau plan part de sa dernière image (I2VA) ou, pour un raccord, va de la dernière
+// image du premier clip à la première image du second (FL2VA). Contrôle qualité, crédits et assemblage : ceux du film.
+
+interface PriseVideo { id: number; kind: string; status: string; output_path: string | null; settings: string }
+
+function lirePrise(t: PriseVideo) {
+  if (t.kind !== 'video' || t.status !== 'done' || !t.output_path) throw new Error('Choisis une vidéo terminée.');
+  const s = JSON.parse(t.settings) as Record<string, any>;
+  if (s.film) throw new Error('Choisis un clip, pas un film entier.');
+  const w = Number(s.width) || 832, h = Number(s.height) || 480;
+  const format: '16:9' | '9:16' | '1:1' = w > h * 1.1 ? '16:9' : h > w * 1.1 ? '9:16' : '1:1';
+  const duree: 5 | 10 = Number(s.lengthFrames) >= 200 ? 10 : 5;
+  return { s, format, duree, resume: txt(String(s.intention ?? s.userPrompt ?? 'Clip'), 80) };
+}
+
+export function storyboardProlonger(t: PriseVideo, o: { intention?: string; duree?: number }) {
+  const a = lirePrise(t);
+  const suite = txt(o.intention, 1200) || 'The same shot continues naturally: the action goes on, same subjects, same place, same light, same camera style.';
+  const storyboard = lireStoryboard({
+    titre: `${a.resume} (prolongé)`,
+    bible: { style: '', personnages: [], lieux: [] },
+    plans: [
+      { resume: a.resume, description: String(a.s.intention ?? a.resume), duree: a.duree },
+      { resume: o.intention ? txt(o.intention, 80) : 'La suite', description: suite, duree: Number(o.duree) >= 8 ? 10 : 5, suite: true },
+    ],
+  }, 0);
+  storyboard.plans[0].take = t.id;
+  return { storyboard, format: a.format, son: a.s.withAudio !== false, qualite: a.s.videoModel === 'h3-max' ? 'max' as const : 'rapide' as const };
+}
+
+export function storyboardRaccord(de: PriseVideo, vers: PriseVideo, o: { intention?: string }) {
+  const a = lirePrise(de), b = lirePrise(vers);
+  const transition = txt(o.intention, 1200) || 'One continuous shot: the first scene flows smoothly into the second without a cut, the camera keeps moving.';
+  const storyboard = lireStoryboard({
+    titre: `${a.resume} → ${b.resume}`.slice(0, 120),
+    bible: { style: '', personnages: [], lieux: [] },
+    plans: [
+      { resume: a.resume, description: String(a.s.intention ?? a.resume), duree: a.duree },
+      { resume: 'Raccord', description: transition, duree: 5, suite: true },
+      { resume: b.resume, description: String(b.s.intention ?? b.resume), duree: b.duree },
+    ],
+  }, 0);
+  storyboard.plans[0].take = de.id;
+  (storyboard.plans[1] as PlanFilm & { raccord?: boolean }).raccord = true;
+  storyboard.plans[2].take = vers.id;
+  return { storyboard, format: a.format, son: a.s.withAudio !== false || b.s.withAudio !== false, qualite: 'rapide' as const };
+}
