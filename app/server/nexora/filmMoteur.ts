@@ -14,6 +14,8 @@ import { argsCarton, fichierAss, type Carton } from './cartons.js';
 import { controlerFichier } from './controle.js';
 import { choisirCandidat, jugerCandidats, plancheDataUrl } from './juge.js';
 import type { CreditsPrise } from './credits.js';
+import { resoudrePersonnages } from './personnagesCast.js';
+import { convertirEnPromptRef } from './personnages.js';
 import { argsAssemblage, argsAvecMusique, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
@@ -59,8 +61,10 @@ export async function tournerFilm(
   try {
     // Les prompts des plans indépendants s'écrivent en parallèle, puis leurs rendus partent dans l'ordre. Un plan
     // « suite » attend la fin du précédent : il partira de sa dernière image (voir lancerSuite).
+    // Personnages @ : un plan qui cite @nom part en Ref2VA (moteur cinéma) avec les images du personnage.
+    const persos = await Promise.all(sb.plans.map((p, i) => (p.suite || p.take || opts.moteur !== 'h3-max' ? null : resoudrePersonnages(intentionDuPlan(sb, i)))));
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p), ...dialoguesDe(p) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p), ...dialoguesDe(p) }, llm))),
     );
     for (let i = 0; i < sb.plans.length; i++) {
       const p = sb.plans[i];
@@ -72,6 +76,7 @@ export async function tournerFilm(
       }
       const corps = {
         ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son, qualite: opts.qualite }, ecrit.prompt, opts.moteur),
+        ...(persos[i]?.sujets.length ? { prompt: convertirEnPromptRef(ecrit.prompt, persos[i]!.sujets), refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
         app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: ecrit.source,
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
@@ -265,6 +270,7 @@ async function etape(filmId: number) {
       transition: s.transition === 'fondu' ? 'fondu' : 'coupe',
       durees,
       fondu: 0.5,
+      ...(Array.isArray(s.taille) && s.taille.length === 2 ? { taille: [Number(s.taille[0]), Number(s.taille[1])] as [number, number] } : {}),
     }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
       err ? ko(new Error(`ffmpeg : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
   );

@@ -145,3 +145,17 @@ describe('Prolonger et Raccorder sur H3 (remplacent Extend et Transitions LTX)',
     expect(() => storyboardProlonger({ ...clip(3, 832, 480), kind: 'still' }, {})).toThrow();
   });
 });
+
+describe('assemblage à une taille imposée (un brouillon remplace un plan)', () => {
+  it('ramène chaque plan à la taille de sortie avant la concaténation', () => {
+    const a = argsAssemblage(['a.mp4', 'b.mp4'], 'o.mp4', true, { transition: 'coupe', durees: [5, 5], fondu: 0.5, taille: [1344, 768] });
+    const g = a[a.indexOf('-filter_complex') + 1];
+    expect(g).toContain('[0:v:0]scale=1344:768:force_original_aspect_ratio=increase,crop=1344:768,setsar=1,fps=24[t0]');
+    expect(g).toContain('[t0][0:a:0][t1][1:a:0]concat=n=2');
+  });
+  it('sans taille, le graphe reste celui d’avant', () => {
+    const g = argsAssemblage(['a.mp4', 'b.mp4'], 'o.mp4', true).join(' ');
+    expect(g).toContain('[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2');
+  });
+});
+

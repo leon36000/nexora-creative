@@ -7,7 +7,7 @@
  */
 import { Markdown } from './Markdown';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, mediaUrl, type FilmResume, type VueMontage, type PropositionProducteur, type SessionProducteur, type VarianteProducteur } from '../api';
+import { api, mediaUrl, type FilmResume, type VueMontage, type VuePrises, type PropositionProducteur, type SessionProducteur, type VarianteProducteur } from '../api';
 import { settingsOf, toast, useStore } from '../store';
 import { setParams } from '../router';
 import { MediaCard } from '../ui';
@@ -269,6 +269,12 @@ function CarteProduction({ filmId, film, format, occupe, ouvrir, variante }: {
   const faits = film?.plans.filter((x) => x.etat === 'done').length ?? 0;
   const fini = film?.etat === 'done';
   const [montage, setMontage] = useState<null | 'rend' | 'ok'>(null);
+  const [prises, setPrises] = useState<VuePrises | null>(null);
+  const [prisesOuvert, setPrisesOuvert] = useState(false);
+  async function chargerPrises() { try { setPrises(await api.prisesFilm(filmId)); } catch (e) { toast(e instanceof Error ? e.message : 'Prises indisponibles.', true); } }
+  async function agirPrises(f: () => Promise<VuePrises & { filmId?: number }>, ok: string) {
+    try { const r = await f(); setPrises(r); toast(r.filmId ? `${ok} Film n° ${r.filmId} dans la Bibliothèque.` : ok); } catch (e) { toast(e instanceof Error ? e.message : 'Action impossible.', true); }
+  }
   const [vue, setVue] = useState<VueMontage | null>(null);
   async function monter() {
     setMontage('rend');
@@ -310,12 +316,14 @@ function CarteProduction({ filmId, film, format, occupe, ouvrir, variante }: {
           ))}
           {film?.musique && <li className={film.musique}><span className="pr-num">♪</span><span className="pr-suivi-txt">Bande originale</span><span className="pr-etat">{film.musique === 'done' ? 'composée' : film.musique === 'failed' ? 'échec' : 'en cours'}</span></li>}
         </ul>
+        {prisesOuvert && prises && <PanneauPrises v={prises} occupe={occupe} agir={agirPrises} filmId={filmId} fermer={() => setPrisesOuvert(false)} />}
         {vue && <ApercuMontage vue={vue} occupe={montage === 'rend'} ameliorer={() => void ameliorer()} fermer={() => { setVue(null); setMontage(null); }} />}
         {fini && film && (
           <div className="pr-variantes">
             <a className="st-bouton primaire" href={mediaUrl(filmId)} download>Télécharger</a>
             <button type="button" className="st-bouton" onClick={ouvrir}>Plans et montage</button>
             <a className="st-bouton" href="/mode-studio/" title="Montage expert : la vidéo est dans l’onglet Créations">Mode Studio</a>
+            <button type="button" className="st-bouton" onClick={() => { setPrisesOuvert(true); void chargerPrises(); }}>Prises</button>
             <button type="button" className="st-bouton" disabled={occupe || montage === 'rend'} onClick={() => void monter()}>{montage === 'rend' ? 'Montage…' : 'Monter'}</button>
             <span className="pr-sep" aria-hidden />
             {VARIANTES.filter((v) => !v.si || v.si(film, film.format ?? format)).map((v) => (
@@ -356,6 +364,56 @@ function ApercuMontage({ vue, occupe, ameliorer, fermer }: { vue: VueMontage; oc
         <a className="st-bouton" href={`${vue.url}?v=${vue.tours}`} download>Télécharger l’aperçu</a>
       </div>
       <p className="pr-meta">Aperçu 720p : plans et bande originale ; le son propre des plans n’est pas mixé.</p>
+    </div>
+  );
+}
+
+const nombreFr = (n: number) => Math.round(n).toLocaleString('fr-FR');
+
+/** Prises par plan : brouillons rapides pour choisir, finale cinéma pour la prise gardée, coût du projet avec les écartées. */
+function PanneauPrises({ v, occupe, agir, filmId, fermer }: {
+  v: VuePrises; occupe: boolean; filmId: number; fermer: () => void;
+  agir: (f: () => Promise<VuePrises & { filmId?: number }>, ok: string) => Promise<void>;
+}) {
+  const c = v.compteur;
+  const unite = v.creditsActifs ? 'crédits' : 'crédits estimés';
+  return (
+    <div className="pr-montage" aria-label="Prises par plan">
+      <div className="pr-carte-tete">
+        <div><span className="st-etiq">Prises par plan</span>
+          <h4>{nombreFr(c.credits)} {unite} · {c.prises} prise{c.prises > 1 ? 's' : ''}</h4></div>
+        <button type="button" className="nx-lien" onClick={fermer}>Fermer</button>
+      </div>
+      <p className="pr-meta" role="status">
+        Dont {nombreFr(c.ecartees.credits)} pour {c.ecartees.prises} prise{c.ecartees.prises > 1 ? 's' : ''} écartée{c.ecartees.prises > 1 ? 's' : ''} ou en brouillon : tout ce qui est rendu se paie, gardé ou non. Un échec technique n’est pas facturé.
+      </p>
+      {v.plans.map((p) => (
+        <div key={p.plan} className="pr-prises-plan">
+          <div className="pr-prises-tete">
+            <b>Plan {p.plan}</b><span>{p.resume}</span>
+            <button type="button" className="st-bouton" disabled={occupe} onClick={() => void agir(() => api.brouillonsFilm(filmId, p.plan - 1, 2), '2 brouillons rapides en route.')}>+ 2 brouillons rapides</button>
+          </div>
+          <div className="pr-prises-grille">
+            {p.prises.map((x) => (
+              <figure key={x.take} className={`pr-prise${x.retenue ? ' retenue' : ''}${x.rejetee ? ' rejetee' : ''}`}>
+                {x.statut === 'done' ? <video src={mediaUrl(x.take)} muted loop playsInline preload="metadata" onMouseEnter={(e) => void e.currentTarget.play().catch(() => {})} onMouseLeave={(e) => e.currentTarget.pause()} /> : <div className="pr-prise-attente">{x.statut === 'failed' ? 'échec' : 'en cours…'}</div>}
+                <figcaption>
+                  <span>{x.brouillon ? 'Brouillon' : 'Cinéma'}{x.retenue ? ' · gardée' : x.rejetee ? ' · rejetée' : ''}</span>
+                  <small>{nombreFr(x.credits)} cr.</small>
+                </figcaption>
+                {x.statut === 'done' && (
+                  <div className="pr-prise-actions">
+                    {x.brouillon
+                      ? <button type="button" className="st-bouton primaire" disabled={occupe} onClick={() => void agir(() => api.prise(filmId, p.plan - 1, x.take, 'finaliser'), 'Finale en qualité cinéma lancée.')}>Finaliser</button>
+                      : !x.retenue && <button type="button" className="st-bouton primaire" disabled={occupe} onClick={() => void agir(() => api.prise(filmId, p.plan - 1, x.take, 'garder'), 'Nouvelle version du film avec cette prise.')}>Garder</button>}
+                    {!x.retenue && !x.rejetee && <button type="button" className="st-bouton" disabled={occupe} onClick={() => void agir(() => api.prise(filmId, p.plan - 1, x.take, 'rejeter'), 'Prise rejetée.')}>Rejeter</button>}
+                  </div>
+                )}
+              </figure>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

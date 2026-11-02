@@ -6,6 +6,21 @@ Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'es
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
 
+## Mise à jour du 02/11 (nuit) : vague 2 (Producteur, montage, personnages @, prises, projet long)
+
+Branche `feat/vague2` (recherche/12, 13, 14). Détail : `docs/JOURNAL.md`. Captures : `marketing/creative/captures-v3/v2-*.jpg`.
+
+| Brique | État | Preuve |
+|---|---|---|
+| Défauts du Producteur (Markdown brut, devis sans chiffre, juge grisé) | **fait** | v2-01 ; `qwen/qwen3.8-27b` par défaut pour le rôle `juge` |
+| **Monter** dans le Producteur (aperçu, mesures, Améliorer) | **fait** | film réel 354 : 8 plans, −13,2 LUFS, score 0,95 ; v2-02, v2-03 |
+| **Personnages @** (fiche Qwen-Image, Ref2VA) | **fait** | film réel de 2 plans, même visage et même tenue ; v2-04, v2-05, v2-07 |
+| **Brouillons, prises, compteur de projet** | **fait** | brouillon 28,7 s contre 129 s la finale ; v2-06 |
+| **Montre-moi** (image de départ ou de composition) | **fait (images seulement)** | deux brouillons réels ; pas de vidéo → vidéo |
+| **Projet long** (scénario → plans, bible, estimation, lots, Mode Studio) | **squelette réel** | test d'échelle 1 080 plans ; réel : 4 plans, 2 tournés ; v2-08 |
+
+**Écart restant avec Higgsfield** : voix et lip-sync sur audio fourni, édition d'une vidéo existante (échange, restyle, transfert de mouvement : H3 ne le fait pas), identité tenue sur un plan « suite » (I2VA) et sur FastH3 (pas de références), brouillon identique à la finale (la graine et le prompt sont repris, le modèle et la résolution changent : le résultat n'est pas le même plan), pas de communauté ni d'API publique.
+
 ## Mise à jour du 02/11 (soir) : harnais de montage pour LLM bon marché (tranche 1)
 
 Branche `feat/harness-montage` (recherche/13 et 14). Un modèle bon marché (`z-ai/glm-5.3`) peut piloter le montage grâce à un contrat typé, des outils gratuits et une mémoire à la AMD. Détail : `docs/JOURNAL.md`, `recherche/14` §12.

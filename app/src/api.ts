@@ -122,6 +122,17 @@ export interface PlanProduction {
   plans: { resume: string; description: string; camera: string; duree: 5 | 10; suite?: boolean; replique?: string }[];
   musique: { envie: string } | null; cartons: { texte: string; position: 'debut' | 'fin' }[]; candidats: 1 | 2;
 }
+export interface ResumeProjet {
+  id: string; titre: string; format: string; qualite: string; plans: number; tournes: number; creditsActifs: boolean;
+  estimation: { plans: number; scenes: number; sequences: number; dureeS: number; credits: number; secondesGpu: number; heuresGpu: number; restants: number; tournes: number; enCours: number };
+}
+export interface ArbreProjet { id: string; titre: string; scenes: { id: string; titre: string; plans: { id: string; resume: string; duree: number; etat: string; take: number | null }[] }[] }
+export interface PriseVue { take: number; statut: 'queued' | 'running' | 'done' | 'failed' | 'stopped'; brouillon: boolean; finalDe?: number; retenue: boolean; rejetee: boolean; credits: number; secondes: number }
+export interface VuePrises {
+  film: number; creditsActifs: boolean;
+  plans: { plan: number; resume: string; prises: PriseVue[] }[];
+  compteur: { credits: number; secondes: number; prises: number; brouillons: number; ecartees: { credits: number; secondes: number; prises: number } };
+}
 export interface VueMontage {
   id: string; film: number; url: string; source: 'code' | 'llm'; tours: number; plafondTours: number; genre: string; format: string;
   dureeS: number; sonie: { lufs: number; crete_db: number } | null; musique?: boolean;
@@ -159,6 +170,16 @@ export const api = {
   producteurValider: (id: string, proposition: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}/valider`, { method: 'POST', body: JSON.stringify({ proposition }) }),
   producteurAjuster: (id: string, proposition: string, r: { candidats?: number; qualite?: string; format?: string; son?: boolean; musique?: boolean }) =>
     j<SessionProducteur>(`/api/nexora/producteur/${id}/ajuster`, { method: 'POST', body: JSON.stringify({ proposition, ...r }) }),
+  creerPersonnage: (b: { nom: string; description: string }) => j<{ takeId: number; nom: string; apparence: string }>('/api/nexora/personnage', { method: 'POST', body: JSON.stringify(b) }),
+  statutPersonnage: (take: number) => j<{ etat: 'rendu' | 'pret' | 'echec'; membre?: CastMember; erreur?: string }>(`/api/nexora/personnage/${take}`),
+  prisesFilm: (film: number) => j<VuePrises>(`/api/nexora/film/${film}/prises`),
+  brouillonsFilm: (film: number, plan: number, nombre = 2) => j<VuePrises>(`/api/nexora/film/${film}/plan/${plan}/brouillon`, { method: 'POST', body: JSON.stringify({ nombre }) }),
+  prise: (film: number, plan: number, take: number, action: 'garder' | 'rejeter' | 'finaliser') =>
+    j<VuePrises & { filmId?: number }>(`/api/nexora/film/${film}/plan/${plan}/prise`, { method: 'POST', body: JSON.stringify({ take, action }) }),
+  projets: () => j<{ projets: ResumeProjet[] }>('/api/nexora/projets').then((r) => r.projets),
+  projet: (id: string) => j<ResumeProjet & { bible: { style: string; notes: string; personnages: { nom: string; description: string }[]; lieux: { nom: string; description: string }[] }; arbre: ArbreProjet[] }>(`/api/nexora/projet/${id}`),
+  creerProjet: (b: { titre: string; scenario: string; format: string; qualite: string; bible?: { style?: string } }) => j<ResumeProjet>('/api/nexora/projet', { method: 'POST', body: JSON.stringify(b) }),
+  lancerProjet: (id: string, taille: number) => j<{ lances: number; cout: number; secondes: number; projet: ResumeProjet }>(`/api/nexora/projet/${id}/lancer`, { method: 'POST', body: JSON.stringify({ taille }) }),
   monterFilm: (film: number, b: { genre?: string; duree?: number } = {}) => j<VueMontage>(`/api/nexora/film/${film}/monter`, { method: 'POST', body: JSON.stringify(b) }),
   ameliorerMontage: (id: string) => j<VueMontage>(`/api/nexora/montage/${id}/ameliorer`, { method: 'POST', body: '{}' }),
   producteurVariante: (id: string, film: number, genre: VarianteProducteur) => j<SessionProducteur>(`/api/nexora/producteur/${id}/variante`, { method: 'POST', body: JSON.stringify({ film, genre }) }),

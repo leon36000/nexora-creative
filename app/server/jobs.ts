@@ -420,3 +420,41 @@ export const sessionsProducteur = {
     db.prepare(`DELETE FROM producteur_sessions WHERE id=?${w}`).run(id, ...a);
   },
 };
+
+/**
+ * Projets longs (server/nexora/projet.ts) : scénario, bible, arbre séquences → scènes → plans et état de tournage,
+ * une ligne par projet (JSON), isolée par organisation. Aucune limite de taille codée au-delà de celle de SQLite.
+ */
+db.exec(`
+CREATE TABLE IF NOT EXISTS projets_longs (
+  id TEXT PRIMARY KEY,
+  organisation_id TEXT NOT NULL DEFAULT 'local',
+  titre TEXT NOT NULL,
+  data TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS projets_longs_org ON projets_longs (organisation_id, updated_at);
+`);
+
+export const projetsLongs = {
+  get<T>(id: string): T | undefined {
+    const [w, a] = portee();
+    const r = db.prepare(`SELECT data FROM projets_longs WHERE id=?${w}`).get(id, ...a) as { data: string } | undefined;
+    return r ? (JSON.parse(r.data) as T) : undefined;
+  },
+  save(s: { id: string; titre: string }): void {
+    const [w, a] = portee();
+    const existe = db.prepare('SELECT organisation_id FROM projets_longs WHERE id=?').get(s.id) as { organisation_id: string } | undefined;
+    if (existe) db.prepare(`UPDATE projets_longs SET titre=?, data=?, updated_at=datetime('now') WHERE id=?${w}`).run(s.titre.slice(0, 120), JSON.stringify(s), s.id, ...a);
+    else db.prepare('INSERT INTO projets_longs (id, organisation_id, titre, data) VALUES (?,?,?,?)').run(s.id, orgEcrite(), s.titre.slice(0, 120), JSON.stringify(s));
+  },
+  list<T>(limit = 100): T[] {
+    const [w, a] = portee('WHERE');
+    return (db.prepare(`SELECT data FROM projets_longs${w} ORDER BY updated_at DESC LIMIT ?`).all(...a, limit) as { data: string }[]).map((r) => JSON.parse(r.data) as T);
+  },
+  delete(id: string): void {
+    const [w, a] = portee();
+    db.prepare(`DELETE FROM projets_longs WHERE id=?${w}`).run(id, ...a);
+  },
+};
