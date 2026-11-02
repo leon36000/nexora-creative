@@ -14,6 +14,12 @@ describe('modèle LLM par rôle', () => {
     appliquerReglagesLlm({ defaut: 'site/defaut', roles: { boost: 'site/boost' } });
     expect(modelePour('boost', env)).toBe('site/boost');
   });
+  it('le juge a un modèle vision par défaut, remplaçable par rôle, jamais écrasé par le modèle général', () => {
+    expect(modelePour('juge', env)).toBe('qwen/qwen3.8-27b');
+    expect(modelePour('juge', { ...env, NEXORA_LLM_MODELE_JUGE: 'poste/vision' } as NodeJS.ProcessEnv)).toBe('poste/vision');
+    appliquerReglagesLlm({ defaut: 'site/defaut' });
+    expect(modelePour('juge', env)).toBe('qwen/qwen3.8-27b');
+  });
   it('sans aucun réglage, aucun modèle', () => {
     expect(modelePour('idees', {} as NodeJS.ProcessEnv)).toBeNull();
   });

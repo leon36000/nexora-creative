@@ -68,9 +68,16 @@ function versApi(messages: MessageLlm[]) {
 
 export class ErreurLlm extends Error {}
 
+/**
+ * Modèle par défaut d'un rôle qui exige une capacité que le modèle général n'a pas. Le juge regarde des images : le modèle
+ * par défaut (textuel) ne convient pas, `qwen/qwen3.8-27b` (vision) a été éprouvé sur de vraies prises.
+ */
+export const MODELES_PAR_DEFAUT_ROLE: Partial<Record<RoleLlm, string>> = { juge: 'qwen/qwen3.8-27b' };
+
 export function modelePour(role: RoleLlm, env: NodeJS.ProcessEnv = process.env): string | null {
-  // Ordre : réglage du site pour ce rôle, variable d'environnement du rôle, réglage du site par défaut, variable par défaut.
-  return reglages.roles[role]?.trim() || env[`NEXORA_LLM_MODELE_${role.toUpperCase()}`]?.trim() || reglages.defaut || env.NEXORA_LLM_MODELE?.trim() || null;
+  // Ordre : réglage du site pour ce rôle, variable d'environnement du rôle, modèle par défaut du rôle, réglage du site
+  // par défaut, variable par défaut.
+  return reglages.roles[role]?.trim() || env[`NEXORA_LLM_MODELE_${role.toUpperCase()}`]?.trim() || MODELES_PAR_DEFAUT_ROLE[role] || reglages.defaut || env.NEXORA_LLM_MODELE?.trim() || null;
 }
 
 export function clientLlmDepuisEnv(env: NodeJS.ProcessEnv = process.env, f: typeof fetch = fetch): ClientLlm | null {

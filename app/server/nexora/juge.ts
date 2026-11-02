@@ -35,9 +35,12 @@ export function choisirCandidat(c: { take: number; controleOk: boolean }[], v: V
   return { take: (valides[0] ?? c[0]).take, source: 'repli', raison: 'Juge indisponible : première prise valide gardée.' };
 }
 
-/** Le juge n'est proposé que si un modèle (vision) est réglé pour son rôle : le modèle par défaut est textuel. */
+/**
+ * Le juge est proposé dès qu'un LLM est branché : le rôle « juge » a un modèle vision par défaut (MODELES_PAR_DEFAUT_ROLE),
+ * que l'administration ou NEXORA_LLM_MODELE_JUGE remplace.
+ */
 export function jugeDisponible(env: NodeJS.ProcessEnv = process.env): boolean {
-  return !!(reglagesLlmCourants().roles.juge?.trim() || env.NEXORA_LLM_MODELE_JUGE?.trim());
+  return !!(reglagesLlmCourants().roles.juge?.trim() || env.NEXORA_LLM_MODELE_JUGE?.trim() || (env.NEXORA_LLM_BASE_URL?.trim() && env.NEXORA_LLM_CLE?.trim()));
 }
 
 export async function jugerCandidats(llm: ClientLlm | null, description: string, planches: [string, string] | string[]): Promise<VerdictJuge | null> {

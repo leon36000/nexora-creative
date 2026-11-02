@@ -122,7 +122,7 @@ export interface PlanProduction {
   plans: { resume: string; description: string; camera: string; duree: 5 | 10; suite?: boolean; replique?: string }[];
   musique: { envie: string } | null; cartons: { texte: string; position: 'debut' | 'fin' }[]; candidats: 1 | 2;
 }
-export interface DevisProduction { credits: number | null; secondesGpu: number; minutes: number; rendus: number; plans: number; musique: boolean; candidats: 1 | 2 }
+export interface DevisProduction { credits: number | null; creditsEstimes: number; secondesGpu: number; minutes: number; rendus: number; plans: number; musique: boolean; candidats: 1 | 2 }
 export type PropositionProducteur =
   | { id: string; genre: 'production'; plan: PlanProduction; devis: DevisProduction; base?: number }
   | { id: string; genre: 'refaire'; film: number; plan: number; description?: string; camera?: string; devis: DevisProduction }

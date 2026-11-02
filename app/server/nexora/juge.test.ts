@@ -47,6 +47,7 @@ describe('juge visuel : appel au modèle', () => {
   });
   it('n’est disponible que si un modèle vision est réglé pour le rôle « juge »', () => {
     expect(jugeDisponible({} as NodeJS.ProcessEnv)).toBe(false);
+    expect(jugeDisponible({ NEXORA_LLM_BASE_URL: 'http://p/v1', NEXORA_LLM_CLE: 'k' } as NodeJS.ProcessEnv)).toBe(true);
     expect(jugeDisponible({ NEXORA_LLM_MODELE_JUGE: 'qwen/qwen3.8-27b' } as NodeJS.ProcessEnv)).toBe(true);
   });
   it('la planche prend trois images réparties sur la durée', () => {
