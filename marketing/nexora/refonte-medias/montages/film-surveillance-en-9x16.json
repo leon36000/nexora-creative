@@ -1,0 +1,228 @@
+{
+ "sortie": "/home/pc6/nexora-creative-data/site-medias/masters/film-surveillance-en-9x16-master.mp4",
+ "format": "9:16",
+ "ips": 24,
+ "ambiance_db": -16,
+ "musique": {
+  "fichier": "/home/pc6/nexora-creative-data/site-medias-travail/musique/surv-v2.flac",
+  "debut": 0.0,
+  "db": -1,
+  "fondu_fin": 1.4
+ },
+ "segments": [
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/murs-9x16-v1.mp4",
+   "debut": 0.3,
+   "duree": 4.044,
+   "fondu": 0.0,
+   "zoom": 0.03,
+   "vitesse": 1.0
+  },
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/stockage-9x16-v1.mp4",
+   "debut": 0.3,
+   "duree": 3.676,
+   "fondu": 0.0,
+   "zoom": 0.03,
+   "vitesse": 1.0
+  },
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/chaise-9x16-v1.mp4",
+   "debut": 0.3,
+   "duree": 4.779,
+   "fondu": 0.0,
+   "zoom": 0.03,
+   "vitesse": 1.0
+  },
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/entrepot-16x9-v1-hud-en-9x16.mp4",
+   "debut": 0.0,
+   "duree": 4.8,
+   "fondu": 0.0,
+   "zoom": 0.0,
+   "vitesse": 1.0
+  },
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/stationnement-16x9-v1-hud-en-9x16.mp4",
+   "debut": 0.0,
+   "duree": 4.8,
+   "fondu": 0.0,
+   "zoom": 0.0,
+   "vitesse": 1.0
+  },
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/alerte-9x16-v1.mp4",
+   "debut": 0.3,
+   "duree": 4.4,
+   "fondu": 0.0,
+   "zoom": 0.03,
+   "vitesse": 1.0
+  },
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/intervention-9x16-v1.mp4",
+   "debut": 0.3,
+   "duree": 4.6,
+   "fondu": 0.0,
+   "zoom": 0.03,
+   "vitesse": 1.0
+  },
+  {
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/rapport-9x16-v1.mp4",
+   "debut": 0.3,
+   "duree": 5.0,
+   "fondu": 0.4,
+   "zoom": 0.03,
+   "vitesse": 1.0
+  },
+  {
+   "carton": "/home/pc6/nexora-creative-data/site-medias-travail/montage/carton-surveillance-en-9x16.mp4",
+   "duree": 5.5,
+   "fondu": 0.5
+  }
+ ],
+ "textes": [
+  {
+   "texte": "The best cameras.",
+   "debut": 0.35,
+   "duree": 3.444,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86
+  },
+  {
+   "texte": "Massive storage.",
+   "debut": 4.394,
+   "duree": 3.076,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86
+  },
+  {
+   "texte": "But no one watches\nthousands of hours of video.",
+   "debut": 8.071,
+   "duree": 4.179,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86
+  },
+  {
+   "texte": "Our AI does.\nIn real time.",
+   "debut": 12.85,
+   "duree": 4.2,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86,
+   "accent": "In real time."
+  },
+  {
+   "texte": "It spots suspicious behaviour\nas it happens.",
+   "debut": 17.65,
+   "duree": 4.2,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86
+  },
+  {
+   "texte": "Alerts by text, email\nor app.",
+   "debut": 22.45,
+   "duree": 3.8,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86
+  },
+  {
+   "texte": "Your guards, your monitoring centre or the police:\nas you instruct.",
+   "debut": 26.85,
+   "duree": 4.0,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86
+  },
+  {
+   "texte": "And a report\nfor every event.",
+   "debut": 31.45,
+   "duree": 4.0,
+   "style": "titre",
+   "taille": 0.0384,
+   "position": 0.72,
+   "largeur_max": 0.86
+  }
+ ],
+ "sfx": [
+  {
+   "type": "whoosh",
+   "duree": 0.9,
+   "db": -19,
+   "dt": -0.35,
+   "t": 3.694
+  },
+  {
+   "type": "whoosh",
+   "duree": 0.9,
+   "db": -19,
+   "dt": -0.35,
+   "t": 7.371
+  },
+  {
+   "type": "whoosh",
+   "duree": 0.9,
+   "db": -19,
+   "dt": -0.35,
+   "t": 16.95
+  },
+  {
+   "type": "tick",
+   "duree": 0.3,
+   "db": -14,
+   "dt": 0.9,
+   "t": 23.0
+  },
+  {
+   "type": "whoosh",
+   "duree": 0.9,
+   "db": -19,
+   "dt": -0.35,
+   "t": 26.15
+  },
+  {
+   "type": "whoosh",
+   "t": 34.9,
+   "duree": 1.0,
+   "db": -16
+  },
+  {
+   "type": "tick",
+   "t": 36.25,
+   "duree": 0.3,
+   "db": -20
+  },
+  {
+   "type": "riser",
+   "t": 10.1,
+   "duree": 2.4,
+   "db": -15
+  },
+  {
+   "type": "boom",
+   "t": 12.5,
+   "duree": 2.0,
+   "db": -6
+  }
+ ],
+ "noir_debut": 0.6,
+ "noir_fin": 0.8,
+ "degrade": {
+  "bas": 0.62,
+  "haut": 0.25,
+  "hauteur": 0.45
+ },
+ "_duree_prevue_s": 40.7,
+ "_impact_musique_s": 12.5
+}

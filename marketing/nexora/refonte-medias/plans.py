@@ -109,11 +109,13 @@ PLANS = {
       f"with a slight handheld feel. No readable text, no logos.",
       "Quiet kitchen ambience, a soft hum of a fridge, the faint indistinct sound of a calm voice on the phone line."),
     "artisan": (5, True,
-      f"[Shot 1] Live-action, cinematic, real actors. Daytime inside a work van parked on a residential street, a plumber in "
-      f"his forties wearing a work jacket and gloves is busy sorting tools in the back of the van; on the dashboard his phone "
-      f"in a holder lights up and rings; he glances at it, shrugs because his hands are full, and keeps working, relaxed. "
-      f"Medium shot, natural light. No readable text, no logos, no letters on the van.",
-      "Tools clinking in a metal box, a phone ringing, street ambience outside the van."),
+      f"[Shot 1] Live-action, cinematic, real actors, photorealistic skin and fabric. Daytime on a quiet residential street, "
+      f"a plumber in his forties wearing a completely plain dark work jacket with no logo, no patch and no lettering stands at "
+      f"the open rear doors of a plain white van with no markings, sorting copper fittings in a metal toolbox with work "
+      f"gloves; his phone lying on the van floor beside the toolbox lights up and rings; he glances at it, smiles and keeps "
+      f"working, relaxed. Medium shot, natural soft daylight, shallow depth of field. No readable text, no logos, no letters, "
+      f"no stickers, no license plate.",
+      "Tools and copper fittings clinking in a metal box, a phone ringing, a quiet residential street ambience."),
     "texto": (5, True,
       f"[Shot 1] Live-action, cinematic, photorealistic macro. A smartphone lies face up on a dark wooden table at night, its "
       f"screen lights up with a soft cyan glow and it vibrates once, the light spilling on the wood grain, shallow depth of "

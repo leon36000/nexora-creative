@@ -14,11 +14,11 @@ FILMS = {
       {"plan": "surv/chaise", "d": 5.2, "fr": "Mais personne ne regarde\ndes milliers d’heures de vidéo.",
        "en": "But no one watches\nthousands of hours of video.", "lignes16": True, "sfx": [W]},
       {"plan": "surv/entrepot", "d": 4.8, "hud": {"debut": 0.4, "alerte": 99, "camera": "CAM 12", "cible": [550, 632, 608, 748],
-                                        "vertical_par_recadrage": True, "recadre": 360}, "pos": 0.2, "gauche": True, "fr": "Nos IA, si.\nEn temps réel.",
+                                        "vertical_par_recadrage": True, "recadre": 360}, "droite": True, "fr": "Nos IA, si.\nEn temps réel.",
        "en": "Our AI does.\nIn real time.", "accent": {"fr": "En temps réel.", "en": "In real time."}, "z": 0.0, "src": 0.0},
       {"plan": "surv/stationnement", "d": 4.8, "hud": {"debut": 0.2, "alerte": 2.2, "camera": "CAM 03",
        "cles": "0:793,262,838,362;1.5:803,282,842,382;2.6:809,300,860,407;3.8:800,300,854,407;5.2:806,300,860,407",
-       "vertical_par_recadrage": True, "recadre": 610}, "z": 0.0, "src": 0.0, "pos": 0.2, "gauche": True,
+       "vertical_par_recadrage": True, "recadre": 610}, "z": 0.0, "src": 0.0,
        "fr": "Elles détectent les comportements\nsuspects, au moment où ils arrivent.",
        "en": "It spots suspicious behaviour\nas it happens.", "lignes16": True, "sfx": [W]},
       {"plan": "surv/alerte", "d": 4.4, "fr": "Alerte par texto, courriel\nou application.", "en": "Alerts by text, email\nor app.",
@@ -105,7 +105,11 @@ FILMS = {
 
 # Variant kept per shot after review (default v1); key "<group>/<name>" or "<group>/<name>-<fmt>"; music "musique-<film>".
 CHOIX = {
+  "recep/artisan-16x9": "v2",
+  "surv/alerte-16x9": "v3",  # v1, v2: insignia with letters / police-like crest on the monitor → phone shot with no character
   "musique-surveillance": "surv-v2.flac",  # silent 12 s then a +19 dB impact at 12.5 s: the "Our AI does" cut
   "musique-reception": "recep-v1.flac",     # natural ending at 39 s
   "musique-infrastructure": "infra-v1.flac",  # drop at 26 s: the "hosted with us" cut
+  "musique-workstudio": "work-v2.flac",  # gentle build, steps up at 21 s
+  "musique-code": "code-v1.flac",  # hypnotic, peak between 24 and 36 s
 }

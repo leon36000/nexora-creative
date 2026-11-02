@@ -100,7 +100,7 @@ def png_texte(t, W, H, chemin):
         # largeur de la ligne (interlettrage manuel pour le mono)
         def larg(s):
             return sum(f.getlength(c) + espace for c in s) if espace else f.getlength(s)
-        x = marge if gauche else (W - larg(ligne)) / 2
+        x = marge if gauche else ((W - marge - larg(ligne)) if t.get("alignement") == "droite" else (W - larg(ligne)) / 2)
         morceaux = [(ligne, False)]
         if accent and accent in ligne:
             a, b = ligne.split(accent, 1)
@@ -249,7 +249,7 @@ def monter(spec, rapide=False):
         pistes.append(f"[{idx}:a]aformat=sample_rates=48000:channel_layouts=stereo,volume={db}dB,adelay={int(t * 1000)}|{int(t * 1000)}[s{k}]")
         mix_in.append(f"[s{k}]")
         idx += 1
-    pistes.append(f"{''.join(mix_in)}amix=inputs={len(mix_in)}:normalize=0:duration=first,alimiter=limit=0.95,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[audio]")
+    pistes.append(f"{''.join(mix_in)}amix=inputs={len(mix_in)}:normalize=0:duration=first,alimiter=limit=0.95,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,alimiter=limit=0.84:level=false,aformat=sample_fmts=fltp:channel_layouts=stereo[audio]")
     graphe = ";".join(filtres + pistes)
     sortie = spec["sortie"]
     Path(sortie).parent.mkdir(parents=True, exist_ok=True)

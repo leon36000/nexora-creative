@@ -1,5 +1,5 @@
 {
- "sortie": "/home/pc6/nexora-creative-data/site-medias-travail/montage/film-surveillance-fr-16x9-apercu.mp4",
+ "sortie": "/home/pc6/nexora-creative-data/site-medias/masters/film-surveillance-fr-16x9-master.mp4",
  "format": "16:9",
  "ips": 24,
  "ambiance_db": -16,
@@ -51,7 +51,7 @@
    "vitesse": 1.0
   },
   {
-   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/alerte-16x9-v1.mp4",
+   "plan": "/home/pc6/nexora-creative-data/site-medias-travail/plans/surv/alerte-16x9-v3.mp4",
    "debut": 0.3,
    "duree": 4.4,
    "fondu": 0.0,
@@ -86,7 +86,7 @@
    "debut": 0.35,
    "duree": 3.444,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
    "alignement": "gauche"
   },
@@ -95,7 +95,7 @@
    "debut": 4.394,
    "duree": 3.076,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
    "alignement": "gauche"
   },
@@ -104,7 +104,7 @@
    "debut": 8.071,
    "duree": 4.179,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
    "alignement": "gauche"
   },
@@ -113,9 +113,9 @@
    "debut": 12.85,
    "duree": 4.2,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
-   "alignement": "gauche",
+   "alignement": "droite",
    "accent": "En temps réel."
   },
   {
@@ -123,7 +123,7 @@
    "debut": 17.65,
    "duree": 4.2,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
    "alignement": "gauche"
   },
@@ -132,7 +132,7 @@
    "debut": 22.45,
    "duree": 3.8,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
    "alignement": "gauche"
   },
@@ -141,7 +141,7 @@
    "debut": 26.85,
    "duree": 4.0,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
    "alignement": "gauche"
   },
@@ -150,7 +150,7 @@
    "debut": 31.45,
    "duree": 4.0,
    "style": "titre",
-   "taille": 0.056,
+   "taille": 0.064,
    "position": 0.8,
    "alignement": "gauche"
   }
@@ -218,6 +218,11 @@
  ],
  "noir_debut": 0.6,
  "noir_fin": 0.8,
+ "degrade": {
+  "bas": 0.62,
+  "haut": 0.25,
+  "hauteur": 0.45
+ },
  "_duree_prevue_s": 40.7,
  "_impact_musique_s": 12.5
 }

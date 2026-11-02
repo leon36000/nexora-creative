@@ -1,0 +1,19 @@
+infra-dgx-spark (essai 1) : boîtier cubique (ressemble à une enceinte), pas les proportions plates du DGX Spark → prompt refait
+hero-champ v1, v2 (premier prompt) : nuage de points trop dense, se lit comme de l'herbe la nuit, peu spectaculaire → prompt « lidar » refait
+infra-dgx-spark v1, v2 (essai 2) : boîtier trop mince (proportions de disque externe, 10:1) → prompt avec proportions 3:3:1
+infra-dgx-station v2 : correct mais cadrage plus serré et mousse plus grossière que v1 → v1 retenue
+infra-racks v1, v2 : trop sombres (serveurs à peine visibles) pour une carte produit → prompt « bien exposé »
+infra-dgx-spark v3, v4 (essai 3) : boîtier debout, cubique (lit comme une enceinte) → prompt « mini PC posé à plat »
+infra-racks v3 : moins lisible que v4 (porte fermée, plus sombre) → v4 retenue, ombres relevées
+surv/alerte v1 : écusson de poitrine avec lettres partiellement lisibles (« …ITY ») sur l'uniforme → refait sans aucun insigne
+hero-champ v3 : presque noir (nuage trop clairsemé, illisible) ; variantes verticales spark/station v2 écartées au profit des v1
+surveillance-entrepot v1, surveillance-stationnement v1 : trop sombres et moins lisibles que v2 ; tout le lot surveillance relevé au post-traitement (style « very low-key » abandonné pour les images suivantes)
+surv/alerte v2 : écran d'ordinateur avec un écusson de type police (ressemble à un logo réel) et interface de téléphone avec faux texte → plan refait sans personnage (téléphone posé à l'envers, lueur rouge)
+reception-accueil v1 (cadrage moins lisible), reception-onde v1 (micro qui sort de l'arceau : casque incohérent) écartées
+hero-ville v2 (ligne coupée, moins lisible), hero-datacenter v1 (balayage oblique moins net) écartées
+creative-atelier v2, creative-lumiere v1, workstudio-flux v2 : variantes moins fortes (cadrage, lumière) écartées
+methode-consultation v1 : logo de pomme (marque Apple) sur un portable → écartée
+methode-installation v2 : main qui traverse la grille du serveur → écartée
+code-poste v2 : écart de cadrage ; v1 retenue avec l'écran flouté au post-traitement (pseudo-code lisible)
+souverainete-serveur v1 (fenêtre unique, peu lisible), souverainete-coffre v1 (bloc déformé) écartées
+recep/artisan v1 : logo avec faux texte sur la veste, autocollant écrit sur le pare-soleil → refait (veste unie, arrière d'une fourgonnette blanche sans marquage)

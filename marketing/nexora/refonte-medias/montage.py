@@ -113,7 +113,9 @@ def construire(film, lang, fmt, sortie):
                             "position": b.get("pos", 0.80 if not vertical else 0.72)})
                 if vertical:
                     txt["largeur_max"] = 0.86
-                if not vertical and b.get("gauche", True):
+                if not vertical and b.get("droite"):
+                    txt["alignement"] = "droite"
+                elif not vertical and b.get("gauche", True):
                     txt["alignement"] = "gauche"
             if b.get("accent", {}).get(lang):
                 txt["accent"] = b["accent"][lang]
