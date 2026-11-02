@@ -1,0 +1,25 @@
+{
+  "_note": "Single place for the brand in the redesign films: change the name/signature here, then re-run montage.py (no new render). Temporary typographic logo: name in Geist + 'signal' mark (detection brackets around an ion point), never the pixel N.",
+  "nom": "Nexora AI",
+  "signature": {
+    "fr": "L’IA qui travaille pour votre entreprise.\nSous votre contrôle.",
+    "en": "AI that works for your business.\nUnder your control."
+  },
+  "couleurs": {
+    "abysse": "#05070B",
+    "surface": "#0B0F16",
+    "filet": "#1C2433",
+    "texte": "#EEF3FA",
+    "texte_2": "#8C97AA",
+    "ion": "#3EC8FF",
+    "flare": "#FF6A2B",
+    "alerte": "#FF4D5E",
+    "ok": "#3FE0A5"
+  },
+  "polices": {
+    "dossier": "~/Desktop/NexoraSite/web/src/fonts",
+    "titre": "geist-latin-wght-normal.woff2",
+    "texte": "inter-latin-wght-normal.woff2",
+    "mono": "jetbrains-mono-latin-wght-normal.woff2"
+  }
+}
