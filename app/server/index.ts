@@ -55,6 +55,7 @@ import { checkerPreview } from './cutout.js';
 import { buildReshootGraph, buildReshootWarpPreviewGraph } from './graphs/reshoot.js';
 import { buildExtendGraph, buildSoundGraph, buildSpeakGraph, buildTransitionGraph } from './graphs/ltxtools.js';
 import { takes, projects, speed, preambles, takeWorkflows, cast as castDb, sessionsProducteur, type CastKind } from './jobs.js';
+import { analyserMedia } from './nexora/montage/analyse.js';
 import { ajusterProposition, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
 import {
@@ -1497,6 +1498,15 @@ app.post('/api/nexora/producteur/:id/message', async (req, reply) => {
   try {
     const apres = await tourProducteur(s, texte, {
       llm: llmCourant(), devis: devisDuCompte, plafond: PLAFOND_PRODUCTEUR,
+      // Outils de montage (analyze_media, plan_edit, critique, revise) : un média du projet = une création terminée (id de prise).
+      montage: {
+        plafondCredits: PLAFOND_PRODUCTEUR.credits,
+        analyser: async (ids) => Object.fromEntries(await Promise.all(ids.map(async (id) => {
+          const t = /^\d+$/.test(id) ? takes.get(Number(id)) : undefined;
+          if (!t?.output_path || t.status !== 'done' || !existsSync(t.output_path)) throw new Error(`média ${id} introuvable ou non terminé : donne l’id d’une création terminée`);
+          return [id, await analyserMedia(t.output_path, { ffmpeg: config.ffmpegBin })] as const;
+        }))),
+      },
       outils: {
         etat_studio: async () => ({
           ...(await appelInterne(req, 'GET', '/api/nexora/etat')),

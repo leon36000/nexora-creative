@@ -12,7 +12,7 @@ describe('compétences (procédures versionnées des rôles LLM)', () => {
   });
   it('les fichiers du dépôt sont valides, versionnés et sous le plafond de 8 000 jetons par rôle', () => {
     const toutes = listeCompetences();
-    expect(toutes.map((c) => c.nom).sort()).toEqual(['juge', 'montage', 'producteur', 'publication', 'realisation']);
+    expect(toutes.map((c) => c.nom).sort()).toEqual(['juge', 'montage', 'montage-outils', 'montage-plan', 'producteur', 'publication', 'realisation']);
     for (const role of ['producteur', 'realisation', 'assistant', 'publication', 'juge'] as const) {
       const t = competencesPour(role);
       expect(t.length).toBeGreaterThan(100);

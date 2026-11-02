@@ -1,0 +1,5 @@
+{"outil":"revise","version":1,
+ "exemple":[{"op":"regler_plan","id":"p3","duree_f":30},{"op":"regler_plan","id":"p4","entree_f":96},{"op":"regler_texte","index":0,"duree_f":36},{"op":"regler_audio","cible_lufs":-14,"fondu_coupe_ms":30}],
+ "pieges":[
+  {"regle":"rustine","indice":"Opérations: regler_plan{id,...}, echanger{a,b}, supprimer{id}, inserer_apres{apres,plan}, regler_texte{index,...}, ajouter_texte{texte}, supprimer_texte{index}, regler_audio{...}. 12 rustines au plus."},
+  {"regle":"duree_cible","indice":"Si tu raccourcis un plan, rallonge un autre du même nombre d'images : la durée totale doit rester stable."}]}

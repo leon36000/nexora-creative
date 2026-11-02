@@ -1,0 +1,1 @@
+{"outil":"analyze_media","version":1,"exemple":{"medias":["m12","mus"]},"pieges":[{"regle":"media","indice":"Donne les identifiants de médias du projet ; les chemins libres sont refusés."}]}

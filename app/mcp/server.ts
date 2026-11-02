@@ -28,6 +28,7 @@ import { APP_MAX_TIER, RENDER_TIERS, appTier, tierCapNote, tiersUpTo, type Rende
 import { CAMERA_MOVES, LENS_MAX, LENS_MIN, MAX_KEYS, MAX_PROPS, MODEL_PROP_SIZE, PROP_DEFAULTS, STAGE_SECONDS, cleanStageScene, stageFrames, stageSize, stageTier, type CameraKey, type StageProp, type Vec3 } from '../src/stage.ts';
 import { BASE, api, finishFileUrl, getTake, localPath, mediaUrl, posterImage, resolveInput, settingsOf, type Asset, type Take } from './client.ts';
 import { OBJECT_DETAIL } from '../src/catalog.ts';
+import { enregistrerMontage } from './montage.ts';
 
 const server = new McpServer(
   { name: 'openfield', version: '0.1.0' },
@@ -1131,6 +1132,9 @@ server.registerTool('nexora_raccord', {
   inputSchema: { de: z.number().int(), vers: z.number().int(), intention: z.string().optional() },
   annotations: GPU,
 }, safe(async (a) => ({ content: [text(await api.nexora('raccord', a))] })));
+
+// Harnais de montage (EditPlan v1) : mêmes fonctions que l'élève.
+enregistrerMontage(server, text, safe);
 
 await server.connect(new StdioServerTransport());
 console.error(`openfield-mcp: stdio ready, API ${BASE}`);

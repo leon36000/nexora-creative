@@ -14,10 +14,11 @@
  *  moderation  : garde-fou avant rendu (licence H3, V.5)      publication : titres et textes pour les réseaux
  *  idees       : « Inspire-moi »                              juge        : juge visuel (deux candidats, modèle vision)
  *  producteur  : agent Producteur (boucle d'outils bornée, server/nexora/agent.ts)
+ *  monteur     : planification de montage (EditPlan v1, server/nexora/montage/)
  * `prompt`, `intention` et `assistant` restent acceptés (anciens appels).
  */
-export type RoleLlm = 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur';
-export const ROLES_LLM: readonly RoleLlm[] = ['redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur'];
+export type RoleLlm = 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur';
+export const ROLES_LLM: readonly RoleLlm[] = ['redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur'];
 
 /** Réglages venus de l'administration du site (modèle par défaut et par rôle) ; ils passent avant l'environnement du poste. */
 let reglages: { defaut?: string; roles: Partial<Record<RoleLlm, string>> } = { roles: {} };

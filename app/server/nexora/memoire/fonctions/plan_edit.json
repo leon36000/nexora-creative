@@ -1,0 +1,9 @@
+{"outil":"plan_edit","version":1,
+ "exemple":{"version":1,"fps":24,"format":"16:9","genre":"pub","sources":{"c1":{"kind":"video","duree_f":240},"c2":{"kind":"video","duree_f":240},"mus":{"kind":"audio","duree_f":960}},"video":[{"id":"p1","src":"c1","entree_f":0,"duree_f":48,"vitesse":1,"transition_in":{"type":"cut","duree_f":0}},{"id":"p2","src":"c2","entree_f":24,"duree_f":72,"vitesse":1,"transition_in":{"type":"fondu","duree_f":10}}],"audio":{"musique":{"src":"mus","entree_f":0,"duree_f":110,"gain_db":-8,"fondu_in_f":7,"fondu_out_f":36},"voix":[],"ducking":{"actif":false,"profondeur_db":0},"cible_lufs":-14,"crete_db":-1,"fondu_coupe_ms":30},"textes":[{"texte":"Une phrase courte.","debut_f":12,"duree_f":36,"style":"titre","position":"bas","taille_pct":6}],"generations":[]},
+ "pieges":[
+  {"regle":"schema","indice":"Toutes les durées sont des ENTIERS en images (secondes × fps). Chaque plan: id, src, entree_f, duree_f, vitesse, transition_in{type,duree_f}."},
+  {"regle":"duree_cible","indice":"Durée totale = somme des duree_f moins les durées des fondus. Vise duree_cible_s × fps images (±5 %)."},
+  {"regle":"dans_la_source","indice":"entree_f + duree_f × vitesse ne dépasse jamais la durée de la source (en images)."},
+  {"regle":"source_connue","indice":"Toute source utilisée est déclarée dans `sources` avec l'identifiant de l'inventaire."},
+  {"regle":"transition_duree","indice":"Un fondu dure au plus la moitié du plus court des deux plans voisins."},
+  {"regle":"fondu_audio_30ms","indice":"audio.fondu_coupe_ms vaut 30 au moins."}]}
