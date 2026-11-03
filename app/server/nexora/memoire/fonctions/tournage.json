@@ -1,0 +1,9 @@
+{"outil":"tournage","version":1,"origine":"professeur claude-opus-5.5 (trajectoires d'apprentissage prof-*)",
+ "exemple":{"resume":"Gros plan d'un roulement qui vibre","prompt":"Extreme close-up of a steel bearing vibrating slightly too fast, fine dust trembling on the metal surface, harsh side light, tension building","camera":"macro, locked-off","duree":5},
+ "pieges":[
+  {"regle":"nombre_de_plans","indice":"Compte les plans : film de 30 s → 7 au moins, 36 s → 8, 40 s → 9, 45 s → 11 ; vise 9 à 11, jamais plus de 14."},
+  {"regle":"longueur_prompt","indice":"Chaque prompt fait 20 à 55 mots : échelle + sujet + action, lieu, lumière, ambiance (voir l'exemple)."},
+  {"regle":"interdit_dans_le_prompt","indice":"Aucun mot text, logo, caption, subtitle, typography, lettering, slogan ni aucune marque : décris « a glowing screen », « an illuminated button », jamais ce qui y est écrit."},
+  {"regle":"prompt_en_anglais","indice":"Le prompt est en anglais ; seul le résumé est en français."},
+  {"regle":"plans_distincts","indice":"Commence chaque prompt différemment (échelle et sujet) : « Wide shot of… », « Extreme close-up of… », « Aerial night view of… »."},
+  {"regle":"schema","indice":"{\"titre\":\"…\",\"style\":\"…\",\"plans\":[{\"resume\":\"…\",\"prompt\":\"…\",\"camera\":\"…\",\"duree\":5}]}"}]}

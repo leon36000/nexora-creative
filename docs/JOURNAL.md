@@ -257,3 +257,11 @@ Espace libéré : **pc6 +37 Go** (9,3 → 46 Go libres), **pc1 +4,2 Go**, **pc5*
 - **Hors périmètre vu en passant** : un test de `reglagesSite.test.ts` échoue dans un arbre sans `app/.env` (dépend de l'environnement du poste, déjà rouge avant ce lot) ; le devis d'une image Qwen est extrapolé du calcul vidéo (≈ 60 crédits pour 1024² : à corriger avec une mesure d'image).
 - **Prochaine action** : brancher un modèle vision pour le juge et refaire un tour réel ; multi-images (Pixal3D, lot B) ; exports (OBJ, STL, 3MF) et polycount dans l'interface.
 
+## 03/11/2026 — mémoire AMD × ReasoningBank × harnais des paliers bon marché (recherche/20)
+- Lu à la source : ReasoningBank (2509.25140), ACE (2510.04618), AWM (2409.07429), abrégés de Reflexion, Voyager, A-MEM, Mem0 ; comparaison pour notre cas (recherche/20 §1).
+- Construit (`montage/memoires.ts`, `film.ts`) : `ModuleMemoire`, `MemoireProfesseur` (workflow, sous-tâches par phase anonymisées, fonction réactive), `BanqueStrategies` (juge = élève, réussites et échecs, k = 1),
+  meilleur-de-n, harnais décomposé (`structureVersListe`), politique par palier (`optionsPalier`) branchée sur `POST /api/nexora/agent/film`. 4 trajectoires du professeur, 2 fiches de fonction. 13 tests [TEST].
+- Banc `bench/memoires.ts` (A à H, 456 essais + 224 paires jugées, 2,09 USD) : Éco H 0,914 / Équilibré H 0,912 / Expert B 0,938 ; ReasoningBank et meilleur-de-4 sans gain à leur coût.
+- Échec connu non lié : `reglagesSite.test.ts` rouge sur `developpement` avant ce travail.
+- Déployé sur la VM 202 (`deploy/proxmox/mettre-a-jour-creative.sh` depuis la branche, base `developpement` f445d7b) ; un vrai run par palier sur `POST /api/nexora/agent/film` (pub de 30 s « Bureau virtuel », sans escalade) :
+  Éco 0,900, 3 appels, 0,00052 USD (0,080 crédit) ; Équilibré 0,900, 3 appels, 0,00109 USD ; Expert 0,915, 2 appels, 0,00761 USD ; trois montages du modèle, aucun repli.

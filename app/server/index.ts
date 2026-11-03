@@ -32,7 +32,7 @@ import { clientPalier, LIBELLES_PALIER, estPalier, type Palier } from './nexora/
 import { palierDuRole, paliersDisponibles, palierSuivant } from './nexora/paliers.js';
 import { devisLlm, executerSousReservation, ErreurPlafondLlm, GrandLivreUsage, type BilanRun } from './nexora/usage.js';
 import { BRIEFS_FILMS } from './nexora/bench/briefsFilms.js';
-import { escalader, MemoireFilm, type BriefFilm } from './nexora/montage/film.js';
+import { escalader, optionsPalier, type BriefFilm } from './nexora/montage/film.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
 import { actionEspace, espacePlein, espaceSite, marquerPlein } from './nexora/espace.js';
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
@@ -2126,7 +2126,7 @@ app.post('/api/nexora/agent/film', async (req, reply) => {
       { fac: facturationCourante(), devis: { ...devis, creditsReserves: devis.creditsReserves * facteur, plafondUsd: devis.plafondUsd * facteur * 2 }, ctx: { run, tache: 'film', projet: brief.id, utilisateur: compte?.utilisateurId, organisation: compte?.organisationId }, livre: livreUsage },
       async (rel) => {
         const clients = Object.fromEntries((['eco', 'equilibre', 'expert'] as Palier[]).map((p) => [p, clientPalier(p, { surveillant: rel })])) as Record<Palier, ClientLlm>;
-        return escalader(clients, depart, brief, { memoire: new MemoireFilm(), ordre: b.escalade === false ? [depart] : undefined });
+        return escalader(clients, depart, brief, { politique: (p) => optionsPalier(p), ordre: b.escalade === false ? [depart] : undefined });
       },
     );
     return {

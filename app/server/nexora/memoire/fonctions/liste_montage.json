@@ -1,0 +1,13 @@
+{"outil":"liste_montage","version":1,"origine":"professeur claude-opus-5.5 (trajectoires d'apprentissage prof-*)",
+ "exemple":{"plans":[{"src":"s1","in":0.5,"dur":1.8,"texte":"Vous parlez."},{"src":"s5","in":0,"dur":1.7},{"src":"s3","in":1.0,"dur":2.4,"texte":"Il vous entend."},{"src":"s9","in":0.5,"dur":3.0},{"src":"s3","in":3.5,"dur":1.3},{"src":"carton","in":0,"dur":3.8,"tr":"fondu","texte":"<MARQUE>"}],"gain_db":-8},
+ "pieges":[
+  {"regle":"texte_trop_long","indice":"Compte les caractères AVANT d'écrire : place (s) × 16 − 6 au plus. 1,8 s → 22 car. ; 2,4 s → 32 ; 3,0 s → 42. Un texte de 2 à 4 mots (« Vous parlez. », « Eux, si. ») ; sinon laisse le plan suivant SANS texte pour gagner sa durée."},
+  {"regle":"texte_lignes","indice":"Une ligne de 42 caractères au plus, deux lignes au maximum (« \\n » entre elles)."},
+  {"regle":"dans_la_source","indice":"Pour chaque plan, in + dur ≤ durée de la source : source de 5,1 s → in 0,5 + dur 2,4 = 2,9 ✓ ; second passage in 3,0 + dur 2,0 = 5,0 ✓ ; in 3,5 + dur 2,4 = 5,9 ✗."},
+  {"regle":"meme_source","indice":"Deux plans voisins ont toujours des src différents ; pour réemployer s3, intercale s7 puis reprends s3 à un autre in."},
+  {"regle":"bande_de_duree","indice":"Pub : 1,2 à 3,5 s par plan ; bande-annonce : 0,6 à 4,0 s ; le carton n'est pas compté."},
+  {"regle":"duree_cible","indice":"Additionne les dur ligne par ligne avant d'envoyer ; ajuste le carton (3 à 5 s) pour tomber pile sur la durée cible."},
+  {"regle":"texte_impose","indice":"Le dernier plan : {\"src\":\"carton\",\"in\":0,\"dur\":3.8,\"tr\":\"fondu\",\"texte\":\"<MARQUE>\"}, texte recopié mot pour mot."},
+  {"regle":"accroche","indice":"Premier plan de 1,5 à 2,0 s avec un texte de 2 à 4 mots."},
+  {"regle":"source_connue","indice":"N'utilise que les identifiants de l'inventaire (s1, s2…, carton)."},
+  {"regle":"schema","indice":"Un seul objet JSON : {\"plans\":[{\"src\":\"s1\",\"in\":0,\"dur\":2.0,\"tr\":\"cut\",\"texte\":\"…\"}],\"gain_db\":-8} ; nombres décimaux avec un point."}]}

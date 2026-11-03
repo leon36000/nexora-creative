@@ -1,0 +1,506 @@
+[
+ {
+  "id": "rb-eco-app-comptabilite-mw0l6nqa-0",
+  "titre": "Verrouiller le budget de durée avant de découper",
+  "description": "Calculer la somme des durées cibles et la réserver au carton final avant toute découpe, pour ne jamais dépasser la durée annoncée.",
+  "contenu": "Additionner les durées de tous les plans dès la première version et comparer au brief. Réserver explicitement la durée du carton de fin dans ce budget. Si le total dépasse, couper des plans entiers plutôt que raccourcir chaque plan.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.9226
+  }
+ },
+ {
+  "id": "rb-eco-app-comptabilite-mw0l6nqa-1",
+  "titre": "Interdire la répétition d'un plan au-delà de deux occurrences",
+  "description": "Un même plan réutilisé six fois transforme le montage en boucle hachée et trahit un manque de matière.",
+  "contenu": "Compter les occurrences de chaque source avant validation et plafonner à deux. Si un plan doit porter le rythme, l'étendre en une seule occurrence longue plutôt que le fragmenter. Recycler un plan en fin de montage uniquement s'il apporte un sens nouveau, pas pour remplir.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.9226
+  }
+ },
+ {
+  "id": "rb-eco-app-comptabilite-mw0l6nqa-2",
+  "titre": "Tourner des plans plus longs pour garder de la marge de découpe",
+  "description": "Des plans sources trop courts obligent à des coupes de 1,2 s et rendent tout rééquilibrage impossible.",
+  "contenu": "Prévoir chaque plan tourné à au moins 6 à 8 s, même si le montage final n'en garde que 2 à 3. Filmer des variantes de durée sur les plans clés (apogée, respiration). Cela permet d'allonger ou raccourcir sans recycler ni hacher.",
+  "etape": "tournage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.9226
+  }
+ },
+ {
+  "id": "rb-eco-app-recherche-mw0l7ps0-0",
+  "titre": "Vérifier la durée réelle de chaque source avant de caler un plan",
+  "description": "Un plan qui lit au-delà de la durée disponible d'une source provoque un échec de validation, même si le reste du montage est bon.",
+  "contenu": "Avant de figer la timeline, comparer pour chaque plan in+dur à la durée réelle de la source. Pour les cartons et génériques, calculer la durée en images et la confronter à la durée demandée. Si le dépassement est inévitable, raccourcir le plan ou prolonger la source en amont.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.9276
+  }
+ },
+ {
+  "id": "rb-eco-app-recherche-mw0l7ps0-1",
+  "titre": "Traiter les cartons et génériques comme des sources à durée finie",
+  "description": "Les éléments graphiques sont souvent supposés élastiques alors qu'ils ont un nombre d'images fixe, ce qui crée des lectures hors limites.",
+  "contenu": "Lister séparément les sources non filmées (cartons, titres, fonds) avec leur durée exacte en images. Ne jamais présumer qu'un carton peut être étiré pour couvrir un fondu de fin. Prévoir une marge de sécurité d'au moins quelques images sous la limite.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.9276
+  }
+ },
+ {
+  "id": "rb-eco-app-recherche-mw0l7ps0-2",
+  "titre": "Contrôler la cohérence in/dur des plans réutilisés",
+  "description": "Un même plan réutilisé avec des points d'entrée différents peut dépasser la source si la durée n'est pas recalculée.",
+  "contenu": "Pour chaque réemploi d'un plan, vérifier que in+dur reste dans les bornes de la source d'origine. Recalculer la durée disponible à partir du point d'entrée choisi, pas de la durée totale du plan. Valider la timeline complète avec un contrôle automatique des bornes avant soumission.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.9276
+  }
+ },
+ {
+  "id": "rb-eco-app-traduction-mw0l8n2y-0",
+  "titre": "Accroche visuelle dès le premier plan",
+  "description": "Ouvrir sur une image concrète et lisible qui matérialise le concept en une seconde.",
+  "contenu": "Choisir un plan où l'idée abstraite devient un objet visible (une onde, un geste, un regard). Le garder très court pour installer le sujet sans expliquer. Éviter tout plan d'ouverture qui demande un contexte préalable.",
+  "etape": "tournage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.8865
+  }
+ },
+ {
+  "id": "rb-eco-app-traduction-mw0l8n2y-1",
+  "titre": "Tourner des plans à double usage",
+  "description": "Prévoir des plans riches en début et fin de prise pour permettre plusieurs coupes dans le même plan.",
+  "contenu": "Laisser respirer le début et la fin de chaque prise afin de pouvoir entrer et sortir à des points différents. Cela permet de réutiliser un même plan à deux endroits du montage avec des cadrages ou instants distincts. Vérifier que chaque portion reste compréhensible seule.",
+  "etape": "tournage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.8865
+  }
+ },
+ {
+  "id": "rb-eco-app-traduction-mw0l8n2y-2",
+  "titre": "Rythme court et textes alignés",
+  "description": "Alterner des plans de 1 à 2,6 s et caler un texte court par plan pour garder la lecture fluide.",
+  "contenu": "Découper la liste en plans brefs qui se répondent, avec des retours sur des plans déjà vus pour créer du lien. Écrire un texte de quelques mots par plan, synchronisé sur l'action visible. Terminer par un carton de marque en fondu pour clore proprement.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.8865
+  }
+ },
+ {
+  "id": "rb-eco-app-usine-mw0l9t29-0",
+  "titre": "Vérifier la durée de lecture des textes avant validation",
+  "description": "Un texte inséré doit tenir dans la fenêtre disponible entre deux éléments, sinon le validateur le rejette et le montage bascule en repli.",
+  "contenu": "Calculer la durée d'affichage de chaque carton à partir du nombre de caractères et du débit de lecture retenu, puis la comparer à l'écart réel entre les plans voisins. Si ça dépasse, raccourcir le texte ou décaler le carton. Ne jamais valider une liste sans ce contrôle automatique.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0
+  }
+ },
+ {
+  "id": "rb-eco-app-usine-mw0l9t29-1",
+  "titre": "Borner les références d'images à la source réelle",
+  "description": "Un plan qui lit des images au-delà de la longueur de la source provoque une erreur dans_la_source et invalide toute la liste.",
+  "contenu": "Avant de générer la liste, interroger la longueur réelle de chaque média et plafonner les bornes de lecture à cette valeur. Ajouter une assertion qui rejette toute plage dépassant la source. Mieux vaut un plan plus court qu'un plan hors bornes.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0
+  }
+ },
+ {
+  "id": "rb-eco-app-usine-mw0l9t29-2",
+  "titre": "Prévoir un repli qui ne masque pas l'échec",
+  "description": "Quand la liste est refusée, le code monte un repli et la liste finale devient nulle, ce qui rend le film invalide sans correction possible.",
+  "contenu": "Faire échouer explicitement la génération plutôt que produire une liste nulle silencieuse. Journaliser la cause précise du rejet et régénérer la liste corrigée avant de rendre la main. Vérifier que la liste finale n'est jamais nulle en sortie.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0
+  }
+ },
+ {
+  "id": "rb-eco-app-comptabilite-mw0laup0-0",
+  "titre": "Calibrer le texte à la fenêtre réelle",
+  "description": "Un texte trop long pour l'intervalle avant le texte suivant est le défaut le plus fréquent ; il faut dimensionner chaque carton sur la durée disponible, pas sur la durée du plan.",
+  "contenu": "Compter les caractères avant de valider : viser environ 12 caractères par seconde disponible, avec une marge de sécurité. Calculer la fenêtre = durée du plan moins le point d'entrée, jusqu'au prochain texte. Raccourcir ou supprimer le texte plutôt que d'allonger le plan.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.8982
+  }
+ },
+ {
+  "id": "rb-eco-app-comptabilite-mw0laup0-1",
+  "titre": "Interdire deux fois la même source consécutive",
+  "description": "Réutiliser un plan déjà employé juste après lui-même crée une répétition visible et déclenche le rejet, même si les points d'entrée diffèrent.",
+  "contenu": "Tenir une trace de la dernière source utilisée et exclure cette source du choix suivant. Si un plan doit revenir, l'éloigner d'au moins un autre plan. Préférer un plan inédit plutôt qu'un remploi rapproché.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.8982
+  }
+ },
+ {
+  "id": "rb-eco-app-comptabilite-mw0laup0-2",
+  "titre": "Vérifier les bornes de lecture dans la source",
+  "description": "Un point d'entrée plus une durée qui dépasse la longueur du plan tourné provoque une lecture hors source ; cela arrive quand on étire un plan court pour combler un trou.",
+  "contenu": "Avant d'accepter un segment, contrôler que in + dur reste inférieur ou égal à la durée du plan source. Si le besoin est plus long, réduire la durée ou choisir un plan plus long. Ne jamais compenser un manque par un dépassement de borne.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0.8982
+  }
+ },
+ {
+  "id": "rb-eco-app-recherche-mw0lcis3-0",
+  "titre": "Rythme court, apogée unique",
+  "description": "Construire la bande-annonce sur des plans courts répétés puis un seul plan long d'apogée, pour créer une accélération puis un sommet mémorable.",
+  "contenu": "Enchaîner des plans de 1,8 à 2,4 s en cut pour installer le rythme, puis placer un plan nettement plus long (environ le double) au point culminant. Réserver les fondus aux respirations et aux fins de séquence, pas aux plans d'action.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.9299
+  }
+ },
+ {
+  "id": "rb-eco-app-recherche-mw0lcis3-1",
+  "titre": "Textes courts alignés sur l'image",
+  "description": "Écrire des cartons de 2 à 4 mots qui nomment l'action visible du plan, pour que le spectateur lise et voie la même chose.",
+  "contenu": "Chaque carton doit décrire ce qui se passe à l'écran au même instant, sans métaphore abstraite. Garder un verbe d'action par carton et éviter d'empiler deux idées dans un même texte.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.9299
+  }
+ },
+ {
+  "id": "rb-eco-app-recherche-mw0lcis3-2",
+  "titre": "Tourner des plans modulaires",
+  "description": "Prévoir des plans dont le début et la fin sont exploitables séparément, pour pouvoir les réutiliser à des points d'entrée différents.",
+  "contenu": "Tourner chaque plan avec une action continue et un point d'entrée décalé possible, en évitant les gestes uniques non répétables. Vérifier au tournage qu'un même plan peut fournir à la fois une version courte d'accroche et une version longue de rappel.",
+  "etape": "tournage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.9299
+  }
+ },
+ {
+  "id": "rb-eco-app-traduction-mw0lde2h-0",
+  "titre": "Tourner des plans courts et autonomes",
+  "description": "Privilégier des plans de 5 s environ, chacun porteur d'une idée unique et lisible hors contexte.",
+  "contenu": "Cadrer chaque plan autour d'un seul geste ou d'une seule émotion, sans dépendre du plan voisin. Varier les échelles (visage, détail, ensemble) pour donner de la matière au montage. Prévoir des marges de jeu avant et après l'action pour faciliter les coupes et les fondus.",
+  "etape": "tournage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.8984
+  }
+ },
+ {
+  "id": "rb-eco-app-traduction-mw0lde2h-1",
+  "titre": "Écrire des textes courts alignés sur l'image",
+  "description": "Chaque intertitre doit tenir en quelques mots et dire exactement ce que le plan montre.",
+  "contenu": "Rédiger un texte par plan, de 2 à 4 mots, qui commente l'action sans la doubler. Vérifier que le texte se lit dans la durée du plan, sans course. Garder un fil narratif simple : promesse, preuve, apaisement, signature.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.8984
+  }
+ },
+ {
+  "id": "rb-eco-app-traduction-mw0lde2h-2",
+  "titre": "Construire un rythme en trois temps",
+  "description": "Alterner coupes rapides, respiration et apogée pour tenir 30 s sans essoufflement.",
+  "contenu": "Ouvrir par des plans de 1,5 à 2,5 s pour accrocher, puis insérer un plan plus long en fondu comme respiration. Placer l'apogée collective juste après, en coupe franche, avant un final calme et le carton de marque. Contrôler qu'aucune source ne se répète immédiatement et que chaque coupe change d'échelle ou d'intention.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "eco",
+   "verdict": "succes",
+   "scoreCode": 0.8984
+  }
+ },
+ {
+  "id": "rb-eco-app-usine-mw0lehzr-0",
+  "titre": "Calibrer le texte à la durée dès l'écriture",
+  "description": "Ne jamais écrire un carton sans vérifier sa longueur contre la fenêtre de lecture réelle.",
+  "contenu": "Avant de valider un texte, calculer le nombre de caractères disponibles selon la durée entre deux cartons (environ 12 caractères par seconde en lecture confortable). Écrire d'abord la contrainte de durée, puis le texte qui rentre dedans, jamais l'inverse. Prévoir une marge de sécurité de 10 à 15 %.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0
+  }
+ },
+ {
+  "id": "rb-eco-app-usine-mw0lehzr-1",
+  "titre": "Découper plutôt que raccourcir",
+  "description": "Un message long se fragmente en plusieurs cartons courts synchronisés sur les plans.",
+  "contenu": "Si une idée dépasse la fenêtre, la scinder en deux cartons successifs plutôt que de la compresser en une phrase illisible. Aligner chaque fragment sur un plan ou un temps fort distinct. Vérifier que chaque fragment reste autonome et lisible seul.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0
+  }
+ },
+ {
+  "id": "rb-eco-app-usine-mw0lehzr-2",
+  "titre": "Prévoir un plan B de cartons courts",
+  "description": "Le repli automatique masque l'échec : mieux vaut une version de secours calibrée qu'un fallback subi.",
+  "contenu": "Préparer en amont une variante courte de chaque carton (mots-clés de 2 à 4 mots) prête à remplacer la version longue. Tester la timeline complète avec ces variantes avant validation. Si le validateur rejette, substituer la variante courte au lieu de laisser le code improviser un repli.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "eco",
+   "verdict": "echec",
+   "scoreCode": 0
+  }
+ }
+]
