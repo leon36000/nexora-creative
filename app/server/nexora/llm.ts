@@ -17,7 +17,7 @@
  *  monteur     : planification de montage (EditPlan v1, server/nexora/montage/)
  * `prompt`, `intention` et `assistant` restent acceptés (anciens appels).
  */
-export type RoleLlm = 'tournage' | 'montage' | 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur';
+export type RoleLlm = 'tournage' | 'montage' | 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur' | 'effets';
 export const ROLES_LLM: readonly RoleLlm[] = ['tournage', 'montage', 'redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur'];
 
 /** Réglages venus de l'administration du site (modèle par défaut et par rôle) ; ils passent avant l'environnement du poste. */

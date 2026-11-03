@@ -38,6 +38,7 @@ import { actionEspace, espacePlein, espaceSite, marquerPlein } from './nexora/es
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
 import { reecrireH3 } from './nexora/reecritureH3.js';
 import { xmlFcp7 } from './nexora/projetExport.js';
+import { demanderEffet, lireDemandeEffet } from './nexora/effets.js';
 import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
 import { argsAvecMusique, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
@@ -3805,6 +3806,18 @@ app.post('/api/studio/assistant', async (req, reply) => {
   catch (e) {
     app.log.warn(`assistant du Mode Studio : ${e instanceof Error ? e.message : e}`);
     return reply.code(502).send({ error: 'L’assistant n’a pas pu répondre. Réessaie dans un instant.' });
+  }
+});
+
+/** Bulle « Effet IA ici… » : phrase + contexte du clic → recette brute (validée et appliquée par le Mode Studio). */
+app.post('/api/studio/effet', async (req, reply) => {
+  let d;
+  try { d = lireDemandeEffet(req.body); }
+  catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
+  try { return await demanderEffet(d, llmCourant()); }
+  catch (e) {
+    app.log.warn(`bulle d'effet du Mode Studio : ${e instanceof Error ? e.message : e}`);
+    return reply.code(502).send({ error: 'Le compilateur d’effets n’a pas pu répondre. Essaie une recette Nexora ou réessaie.' });
   }
 });
 

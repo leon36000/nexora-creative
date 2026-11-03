@@ -96,6 +96,16 @@ export const nexora = {
     poster<{ takeId: number }>('/api/nexora/creer', { intention, duree, format, son: true }),
   creerImage: (intention: string, format: '16:9' | '9:16' | '1:1') =>
     poster<{ takeIds: number[]; takeId?: number }>('/api/nexora/image', { intention, format }),
+  effet: (
+    phrase: string,
+    catalogue: string,
+    contexte: { tS: number; fps: number; element?: { type: string; dureeS: number; nom?: string } },
+  ) =>
+    poster<{ resume: string; portee?: unknown; etapes: unknown[] }>('/api/studio/effet', {
+      phrase,
+      catalogue,
+      contexte,
+    }),
   creerMusique: (envie: string, dureeS: number) =>
     poster<{ takeId: number }>('/api/studio/musique', { envie, dureeS }),
 }

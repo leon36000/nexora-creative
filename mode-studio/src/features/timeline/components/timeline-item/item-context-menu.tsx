@@ -147,6 +147,8 @@ export interface ItemContextMenuProps {
   sceneDetectionActions?: SceneDetectionActionsConfig
   captionActions?: CaptionActionsConfig
   compositionActions?: CompositionActionsConfig
+  /** Nexora : « Effet IA ici… » ouvre la bulle d'effet au point du clic. */
+  effetIa?: { onOuvrir: (x: number, y: number) => void }
 }
 
 /**
@@ -170,6 +172,7 @@ export const ItemContextMenu = memo(function ItemContextMenu({
   sceneDetectionActions,
   captionActions,
   compositionActions,
+  effetIa,
 }: ItemContextMenuProps) {
   // Lazy mount: defer the full Radix ContextMenu tree until first right-click.
   // This eliminates ~10 Radix provider components per item from the render tree
@@ -204,6 +207,7 @@ export const ItemContextMenu = memo(function ItemContextMenu({
       sceneDetectionActions={sceneDetectionActions}
       captionActions={captionActions}
       compositionActions={compositionActions}
+      effetIa={effetIa}
       pendingActivation={pendingActivation}
       onPendingActivationHandled={() => setPendingActivation(null)}
     >
@@ -256,6 +260,7 @@ const ItemContextMenuFull = memo(function ItemContextMenuFull({
   sceneDetectionActions,
   captionActions,
   compositionActions,
+  effetIa,
   pendingActivation,
   onPendingActivationHandled,
 }: Omit<ItemContextMenuProps, 'children'> & {
@@ -295,6 +300,16 @@ const ItemContextMenuFull = memo(function ItemContextMenuFull({
         </span>
       </ContextMenuTrigger>
       <ContextMenuContent>
+        {effetIa && (
+          <>
+            <ContextMenuItem
+              onClick={(e) => effetIa.onOuvrir(e?.clientX ?? window.innerWidth / 2, e?.clientY ?? window.innerHeight / 2)}
+            >
+              ✨ Effet IA ici…
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+          </>
+        )}
         <JoinActions t={t} hotkeys={hotkeys} {...joinActions} />
         {linkActions && <LinkActions t={t} hotkeys={hotkeys} {...linkActions} />}
         <KeyframeActions
