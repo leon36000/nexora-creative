@@ -14,9 +14,10 @@ import { type Palier, PALIERS } from '../niveaux.js';
 import { ErreurPlafondLlm } from '../usage.js';
 import { montageAuto } from './auto.js';
 import { type EditPlan, type Violation, framesDe } from './editplan.js';
-import { type ListeMontage, listeVersPlan, planVersListe, reparerListe } from './liste.js';
+import { type ListeMontage, listeVersPlan, maxCaracteres, planVersListe, reparerListe, validerListe } from './liste.js';
 import { type Recette, type Segment, chargerMemoire, noteSegment } from './memoire.js';
 import { mesurer } from './metriques.js';
+import { MemoireProfesseur, type ModuleMemoire } from './memoires.js';
 import type { Brief } from './types.js';
 
 export interface BriefFilm {
@@ -83,14 +84,14 @@ export const exclusionPour = (b: BriefFilm) => (id: string) => (!!b.film && id.i
 // ---------------------------------------------------------------------------------------------------------------------
 // Appel JSON avec validateur : au plus `reparations` réparations, violations avec valeur attendue et correction
 
-export interface SortieJson<T> { valeur: T | null; premierCoup: boolean; appels: number; brutes: string[]; erreurs: Violation[]; notes: string[] }
+export interface SortieJson<T> { valeur: T | null; premierCoup: boolean; appels: number; brutes: string[]; erreurs: Violation[]; notes: string[]; /** Refus successifs du validateur (règles), pour la mémoire. */ journal: string[] }
 
 export async function appelerValide<T>(
   llm: ClientLlm, role: 'tournage' | 'montage', messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
   valider: (brut: unknown) => { ok: true; valeur: T } | { ok: false; erreurs: Violation[] },
-  o: { reparations: number; maxTokens: number; temperature?: number },
+  o: { reparations: number; maxTokens: number; temperature?: number; /** Mémoire de fonction (réactive) : indices joints au refus. */ indices?: (v: Violation[]) => string[] },
 ): Promise<SortieJson<T>> {
-  const sortie: SortieJson<T> = { valeur: null, premierCoup: false, appels: 0, brutes: [], erreurs: [], notes: [] };
+  const sortie: SortieJson<T> = { valeur: null, premierCoup: false, appels: 0, brutes: [], erreurs: [], notes: [], journal: [] };
   for (let essai = 0; essai <= o.reparations; essai++) {
     let texte: string;
     try {
@@ -103,7 +104,9 @@ export async function appelerValide<T>(
     try { r = valider(lireJson<unknown>(texte)); } catch (e) { r = { ok: false, erreurs: [{ regle: 'schema', chemin: '(racine)', message: `JSON illisible : ${e instanceof Error ? e.message : String(e)}`, indice: 'Réponds par un seul objet JSON.' }] }; }
     if (r.ok) { sortie.valeur = r.valeur; sortie.premierCoup = essai === 0; sortie.erreurs = []; return sortie; }
     sortie.erreurs = r.erreurs;
-    messages.push({ role: 'user', content: `Le validateur refuse :\n${r.erreurs.slice(0, 8).map((e) => `- [${e.regle}] ${e.chemin} : ${e.message}${e.indice ? ` → ${e.indice}` : ''}`).join('\n')}\nRenvoie le JSON COMPLET corrigé.` });
+    sortie.journal.push(r.erreurs.slice(0, 8).map((e) => `${e.regle} (${e.message})`).join(' ; '));
+    const ind = o.indices?.(r.erreurs) ?? [];
+    messages.push({ role: 'user', content: `Le validateur refuse :\n${r.erreurs.slice(0, 8).map((e) => `- [${e.regle}] ${e.chemin} : ${e.message}${e.indice ? ` → ${e.indice}` : ''}`).join('\n')}${ind.length ? `\nRappels du professeur :\n${ind.map((x) => `- ${x}`).join('\n')}` : ''}\nRenvoie le JSON COMPLET corrigé.` });
   }
   return sortie;
 }
@@ -150,13 +153,14 @@ function blocTournage(ex: ExemplaireTournage | null): string {
   return `[exemplaire d'un autre film : imite la STRUCTURE (progression, échelles, concision), jamais le sujet]\n${JSON.stringify(ex.sortie)}\n\n`;
 }
 
-export async function tournerPlans(llm: ClientLlm, b: BriefFilm, o: { memoire?: MemoireFilm; reparations?: number } = {}): Promise<SortieJson<Tournage>> {
-  const ex = o.memoire ? o.memoire.tournage(b, exclusionPour(b)) : null;
+export async function tournerPlans(llm: ClientLlm, b: BriefFilm, o: { memoire?: MemoireFilm; module?: ModuleMemoire; reparations?: number } = {}): Promise<SortieJson<Tournage>> {
+  const ex = o.module?.tournage?.(b) ?? (o.memoire ? o.memoire.tournage(b, exclusionPour(b)) : null);
+  const sys = o.module?.systeme?.('tournage', b);
   const messages = [
-    { role: 'system' as const, content: avecCompetences('tournage', 'Tu es le chef de plateau de Nexora Creative. Tu réponds uniquement par du JSON.') },
-    { role: 'user' as const, content: `${blocTournage(ex)}BRIEF : ${b.enonce}\nGenre ${b.genre}, format ${b.format}, durée du film ${b.duree_cible_s} s (carton final de la marque en plus de la matière, posé en code).\nÉcris la liste des plans.` },
+    { role: 'system' as const, content: avecCompetences('tournage', 'Tu es le chef de plateau de Nexora Creative. Tu réponds uniquement par du JSON.') + (sys ? `\n\n${sys}` : '') },
+    { role: 'user' as const, content: `${blocTournage(ex)}${o.module?.avant?.('tournage', b) ?? ''}BRIEF : ${b.enonce}\nGenre ${b.genre}, format ${b.format}, durée du film ${b.duree_cible_s} s (carton final de la marque en plus de la matière, posé en code).\nÉcris la liste des plans.` },
   ];
-  return appelerValide(llm, 'tournage', messages, (x) => validerTournage(x, b), { reparations: o.reparations ?? 2, maxTokens: 5000, temperature: 0.7 });
+  return appelerValide(llm, 'tournage', messages, (x) => validerTournage(x, b), { reparations: o.reparations ?? 2, maxTokens: 5000, temperature: 0.7, indices: o.module?.surErreur ? (v) => o.module!.surErreur!('tournage', v) : undefined });
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -203,33 +207,142 @@ function blocMontage(s: { segment: Segment | null; recette: Recette | null }): s
   return p.length ? `${p.join('\n\n')}\n\n` : '';
 }
 
-export interface ResultatMontage { plan: EditPlan; liste: ListeMontage | null; source: 'llm' | 'repli'; premierCoup: boolean; appels: number; brutes: string[]; notes: string[]; erreurs: Violation[] }
+export interface ResultatMontage { plan: EditPlan; liste: ListeMontage | null; source: 'llm' | 'repli'; premierCoup: boolean; appels: number; brutes: string[]; notes: string[]; erreurs: Violation[]; journal?: string[]; reparePar?: 'code' }
 
-export async function monterListe(llm: ClientLlm | null, bm: Brief, o: { savoir?: { segment: Segment | null; recette: Recette | null }; reparations?: number } = {}): Promise<ResultatMontage> {
-  const repli = (notes: string[], s?: Partial<SortieJson<unknown>>): ResultatMontage => ({ plan: montageAuto(bm), liste: null, source: 'repli', premierCoup: false, appels: s?.appels ?? 0, brutes: s?.brutes ?? [], notes, erreurs: s?.erreurs ?? [] });
+export interface OptionsMontage {
+  savoir?: { segment: Segment | null; recette: Recette | null }; reparations?: number;
+  /** Module de mémoire (AMD professeur, ReasoningBank…) et le brief de film pour le récupérer. */
+  module?: ModuleMemoire; brief?: BriefFilm;
+  /** Meilleur-de-n : n chaînes indépendantes, la meilleure note en code l'emporte (juge gratuit). */
+  candidats?: number;
+  /** Harnais décomposé : structure (sources, durées, phases) puis textes à budget de caractères calculé par le code. */
+  decompose?: boolean; temperature?: number;
+}
+
+/** Réparations mécaniques du code sur la dernière réponse, puis repli `montageAuto`. */
+function finir(bm: Brief, s: SortieJson<unknown>, dernier: unknown, repli: (n: string[], s?: Partial<SortieJson<unknown>>) => ResultatMontage): ResultatMontage {
+  try {
+    const rep = dernier ? reparerListe(dernier, bm) : null;
+    const r = rep ? listeVersPlan(rep.liste, bm) : null;
+    if (rep && r?.ok) {
+      r.plan.metadonnees = { modele: 'liste', savoir: [] };
+      return { plan: r.plan, liste: r.liste, source: 'llm', premierCoup: false, appels: s.appels, brutes: s.brutes, notes: [...s.notes, `réparé par le code : ${rep.faits.join(' ; ')}`], erreurs: [], journal: s.journal, reparePar: 'code' };
+    }
+  } catch { /* repli ci-dessous */ }
+  return repli([...s.notes, `liste invalide après ${s.appels} appel(s) : ${s.erreurs.slice(0, 3).map((e) => e.regle).join(', ')}`], s);
+}
+
+export async function monterListe(llm: ClientLlm | null, bm: Brief, o: OptionsMontage = {}): Promise<ResultatMontage> {
+  const repli = (notes: string[], s?: Partial<SortieJson<unknown>>): ResultatMontage => ({ plan: montageAuto(bm), liste: null, source: 'repli', premierCoup: false, appels: s?.appels ?? 0, brutes: s?.brutes ?? [], notes, erreurs: s?.erreurs ?? [], journal: s?.journal ?? [] });
   if (!llm) return repli(['aucun LLM']);
+  if ((o.candidats ?? 1) > 1) {
+    const n = o.candidats!;
+    const rs = await Promise.all(Array.from({ length: n }, () => monterListe(llm, bm, { ...o, candidats: 1, temperature: o.temperature ?? 0.8 })));
+    const note = (r: ResultatMontage) => (r.source === 'llm' ? 1 + mesurer(r.plan, bm).composite - (r.reparePar ? 0.5 : 0) : 0);
+    const best = rs.reduce((a, r) => (note(r) > note(a) ? r : a), rs[0]);
+    return { ...best, appels: rs.reduce((s, r) => s + r.appels, 0), premierCoup: rs.some((r) => r.premierCoup), notes: [...best.notes, `meilleur de ${n} (${rs.filter((r) => r.source === 'llm').length} valides)`] };
+  }
+  const sys = o.brief ? o.module?.systeme?.('montage', o.brief) : '';
+  const prefixe = `${blocMontage(o.savoir ?? { segment: null, recette: null })}${o.brief ? (o.module?.avant?.('montage', o.brief, bm) ?? '') : ''}`;
+  const indices = o.module?.surErreur ? (v: Violation[]) => o.module!.surErreur!('montage', v) : undefined;
+  const systeme = avecCompetences('montage', 'Tu es le monteur de Nexora Creative. Tu réponds uniquement par du JSON.') + (sys ? `\n\n${sys}` : '');
+  if (o.decompose) return monterDecompose(llm, bm, systeme, prefixe, indices, o, repli);
   const messages = [
-    { role: 'system' as const, content: avecCompetences('montage', 'Tu es le monteur de Nexora Creative. Tu réponds uniquement par du JSON.') },
-    { role: 'user' as const, content: `${blocMontage(o.savoir ?? { segment: null, recette: null })}${vueMontage(bm)}\nRéponds par la liste de montage JSON.` },
+    { role: 'system' as const, content: systeme },
+    { role: 'user' as const, content: `${prefixe}${vueMontage(bm)}\nRéponds par la liste de montage JSON.` },
   ];
   let obtenu: { plan: EditPlan; liste: ListeMontage } | null = null;
-  const s = await appelerValide(llm, 'montage', messages, (x) => { const r = listeVersPlan(x, bm); if (r.ok) { obtenu = { plan: r.plan, liste: r.liste }; return { ok: true as const, valeur: r.plan }; } return r; }, { reparations: o.reparations ?? 2, maxTokens: 4500, temperature: 0.4 });
+  const s = await appelerValide(llm, 'montage', messages, (x) => { const r = listeVersPlan(x, bm); if (r.ok) { obtenu = { plan: r.plan, liste: r.liste }; return { ok: true as const, valeur: r.plan }; } return r; }, { reparations: o.reparations ?? 2, maxTokens: 4500, temperature: o.temperature ?? 0.4, indices });
   if (!s.valeur || !obtenu) {
-    // Dernier recours avant le repli : réparations mécaniques du code sur la dernière liste du modèle.
-    try {
-      const rep = s.brutes.length ? reparerListe(lireJson<unknown>(s.brutes[s.brutes.length - 1]), bm) : null;
-      const r = rep ? listeVersPlan(rep.liste, bm) : null;
-      if (rep && r?.ok) {
-        r.plan.metadonnees = { modele: 'liste', savoir: [] };
-        return { plan: r.plan, liste: r.liste, source: 'llm', premierCoup: false, appels: s.appels, brutes: s.brutes, notes: [...s.notes, `réparé par le code : ${rep.faits.join(' ; ')}`], erreurs: [] };
-      }
-    } catch { /* repli ci-dessous */ }
+    let dernier: unknown = null;
+    try { dernier = s.brutes.length ? lireJson<unknown>(s.brutes[s.brutes.length - 1]) : null; } catch { /* illisible */ }
+    return finir(bm, s, dernier, repli);
   }
-  if (!s.valeur || !obtenu) return repli([...s.notes, `liste invalide après ${s.appels} appel(s) : ${s.erreurs.slice(0, 3).map((e) => e.regle).join(', ')}`], s);
   const o2 = obtenu as { plan: EditPlan; liste: ListeMontage };
   o2.plan.metadonnees = { modele: 'liste', savoir: [] };
-  return { plan: o2.plan, liste: o2.liste, source: 'llm', premierCoup: s.premierCoup, appels: s.appels, brutes: s.brutes, notes: s.notes, erreurs: [] };
+  return { plan: o2.plan, liste: o2.liste, source: 'llm', premierCoup: s.premierCoup, appels: s.appels, brutes: s.brutes, notes: s.notes, erreurs: [], journal: s.journal };
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Harnais décomposé (plan puis remplissage) : le modèle ne fait jamais l'arithmétique des passages ni des caractères
+
+type Structure = { plans: { src: string; dur: number; phase?: string }[]; gain_db?: number };
+
+/** Le code choisit les passages (in) : chaque réemploi d'une source reprend après le passage précédent, sinon au début. */
+export function structureVersListe(st: Structure, bm: Brief): ListeMontage {
+  const duree = new Map(bm.clips.map((c) => [c.id, c.duree_s] as const));
+  const fin = new Map<string, number>();
+  const plans = (Array.isArray(st?.plans) ? st.plans : []).map((p) => {
+    const src = String(p?.src ?? ''), d = duree.get(src) ?? 0;
+    let dur = Math.max(0.3, Number(p?.dur) || 2);
+    if (src === 'carton') return { src, in: 0, dur, tr: 'fondu' as const, texte: bm.textes_imposes[0] };
+    if (d) dur = Math.min(dur, Math.floor(d * 10) / 10);
+    const f = fin.get(src) ?? 0;
+    const entree = f + dur <= d ? f : Math.max(0, Math.floor((d - dur) * 100) / 100);
+    fin.set(src, entree + dur);
+    return { src, in: Math.round(entree * 100) / 100, dur, tr: 'cut' as const };
+  });
+  if (plans.length && plans[plans.length - 1].src !== 'carton' && duree.has('carton')) {
+    const reste = Math.max(3, bm.duree_cible_s - plans.reduce((s, p) => s + p.dur, 0));
+    plans.push({ src: 'carton', in: 0, dur: Math.round(Math.min(5, reste) * 100) / 100, tr: 'fondu', texte: bm.textes_imposes[0] });
+  }
+  return { plans, gain_db: typeof st?.gain_db === 'number' ? st.gain_db : -8 } as ListeMontage;
+}
+
+async function monterDecompose(
+  llm: ClientLlm, bm: Brief, systeme: string, prefixe: string, indices: ((v: Violation[]) => string[]) | undefined, o: OptionsMontage,
+  repli: (n: string[], s?: Partial<SortieJson<unknown>>) => ResultatMontage,
+): Promise<ResultatMontage> {
+  // Étape 1 : structure. Seules les règles de structure sont contrôlées (pas de texte encore).
+  const STRUCT = new Set(['schema', 'source_connue', 'meme_source', 'bande_de_duree', 'duree_cible', 'accroche', 'dans_la_source']);
+  let liste: ListeMontage | null = null;
+  const m1 = [
+    { role: 'system' as const, content: systeme },
+    { role: 'user' as const, content: `${prefixe}${vueMontage(bm)}\nÉTAPE 1 sur 2 — la STRUCTURE seulement, sans aucun texte ni point d'entrée (le code choisit les passages et pose le carton) :\n{"plans":[{"src":"s1","dur":1.8,"phase":"accroche"}],"gain_db":-8}\nphase = accroche | montee | respiration | apogee | resolution | carton ; termine par {"src":"carton","dur":3.8,"phase":"carton"}.` },
+  ];
+  const s1 = await appelerValide(llm, 'montage', m1, (x) => {
+    const l = structureVersListe(x as Structure, bm);
+    const v = validerListe(l, bm);
+    const e = v.erreurs.filter((z) => STRUCT.has(z.regle));
+    if (e.length) return { ok: false as const, erreurs: e };
+    liste = l; return { ok: true as const, valeur: l };
+  }, { reparations: o.reparations ?? 2, maxTokens: 2500, temperature: o.temperature ?? 0.4, indices });
+  if (!liste) {
+    let dernier: unknown = null;
+    try { dernier = s1.brutes.length ? structureVersListe(lireJson<Structure>(s1.brutes[s1.brutes.length - 1]), bm) : null; } catch { /* illisible */ }
+    return finir(bm, s1, dernier, repli);
+  }
+  const base = liste as ListeMontage;
+  // Étape 2 : textes, avec le budget de caractères de chaque plan calculé par le code.
+  const desc = new Map(bm.clips.map((c) => [c.id, c.description ?? ''] as const));
+  let t = 0;
+  const lignes = base.plans.map((p, i) => { const l = `${i}. ${f2(t)}-${f2(t + p.dur)} s, ${p.src} (${desc.get(p.src)?.slice(0, 60)}) : ${p.src === 'carton' ? `CARTON (texte imposé déjà posé)` : `${maxCaracteres(p.dur)} caractères au plus s'il est seul ; plus si les plans suivants n'ont pas de texte`}`; t += p.dur; return l; });
+  const m2 = [
+    { role: 'system' as const, content: systeme },
+    { role: 'user' as const, content: `${prefixe}BRIEF : ${bm.enonce}\nÉTAPE 2 sur 2 — les TEXTES posés sur ce montage (déjà validé) :\n${lignes.join('\n')}\nÉcris 4 à 7 textes de 2 à 5 mots, français du Québec, un par idée, le premier sur le plan 0, aucun pendant l'apogée ni sur le carton. Compte les caractères.\n{"textes":[{"i":0,"texte":"…"}]}` },
+  ];
+  let finale: { plan: EditPlan; liste: ListeMontage } | null = null;
+  const fusion = (x: any): ListeMontage => {
+    const l = { ...base, plans: base.plans.map((p) => ({ ...p })) } as ListeMontage;
+    for (const e of Array.isArray(x?.textes) ? x.textes : []) { const i = Number(e?.i); if (Number.isInteger(i) && l.plans[i] && l.plans[i].src !== 'carton' && typeof e?.texte === 'string' && e.texte.trim()) l.plans[i].texte = e.texte.trim().slice(0, 120); }
+    return l;
+  };
+  const s2 = await appelerValide(llm, 'montage', m2, (x) => {
+    const r = listeVersPlan(fusion(x), bm);
+    if (r.ok) { finale = { plan: r.plan, liste: r.liste }; return { ok: true as const, valeur: r.plan }; }
+    return { ok: false as const, erreurs: r.erreurs.map((e) => ({ ...e, indice: e.chemin.startsWith('plans.') ? `${e.indice ?? ''} (textes : {"i":${e.chemin.split('.')[1]},"texte":"…"})` : e.indice })) };
+  }, { reparations: o.reparations ?? 2, maxTokens: 1500, temperature: o.temperature ?? 0.4, indices });
+  const s: SortieJson<unknown> = { ...s2, appels: s1.appels + s2.appels, brutes: [...s1.brutes, ...s2.brutes], notes: [...s1.notes, ...s2.notes], journal: [...s1.journal, ...s2.journal], premierCoup: s1.premierCoup && s2.premierCoup };
+  if (!finale) {
+    let dernier: unknown = base;
+    try { if (s2.brutes.length) dernier = fusion(lireJson<unknown>(s2.brutes[s2.brutes.length - 1])); } catch { /* garde la structure */ }
+    return finir(bm, s, dernier, repli);
+  }
+  const fz = finale as { plan: EditPlan; liste: ListeMontage };
+  fz.plan.metadonnees = { modele: 'liste', savoir: [] };
+  return { plan: fz.plan, liste: fz.liste, source: 'llm', premierCoup: s.premierCoup, appels: s.appels, brutes: s.brutes, notes: s.notes, erreurs: [], journal: s.journal };
+}
+const f2 = (x: number) => (Math.round(x * 10) / 10).toString();
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Run complet et escalade
@@ -239,7 +352,7 @@ export interface RunFilm {
   score: number; porte: boolean; ecarts: number; appels: number; metriques: Record<string, number>; plan: EditPlan;
 }
 
-export interface OptionsRun { memoire?: MemoireFilm; reparations?: number; sansTournage?: Brief }
+export interface OptionsRun { memoire?: MemoireFilm; reparations?: number; sansTournage?: Brief; module?: ModuleMemoire; candidats?: number; decompose?: boolean }
 
 /** Un run à UN palier : tournage (sauf bibliothèque de plans fournie) puis montage, score en code. */
 export async function runFilm(llm: ClientLlm, palier: Palier, b: BriefFilm, o: OptionsRun = {}): Promise<RunFilm> {
@@ -247,7 +360,7 @@ export async function runFilm(llm: ClientLlm, palier: Palier, b: BriefFilm, o: O
   let bm: Brief;
   if (o.sansTournage) bm = o.sansTournage;
   else {
-    const t = await tournerPlans(llm, b, { memoire: o.memoire, reparations: o.reparations });
+    const t = await tournerPlans(llm, b, { memoire: o.memoire, module: o.module, reparations: o.reparations });
     appels += t.appels;
     tournage = t.valeur; tValide = !!t.valeur; tPremier = t.premierCoup;
     // Tournage invalide après réparations : le monteur travaille sur la matière que le modèle a produite, ou s'arrête.
@@ -260,7 +373,7 @@ export async function runFilm(llm: ClientLlm, palier: Palier, b: BriefFilm, o: O
     bm = briefDeMontage(b, clipsDuTournage(t.valeur));
   }
   const savoir = o.memoire ? o.memoire.montage(bm, exclusionPour(b)) : undefined;
-  const m = await monterListe(llm, bm, { savoir, reparations: o.reparations });
+  const m = await monterListe(llm, bm, { savoir, reparations: o.reparations, module: o.module, brief: b, candidats: o.candidats, decompose: o.decompose });
   appels += m.appels;
   const r = mesurer(m.plan, bm);
   return {
@@ -271,6 +384,20 @@ export async function runFilm(llm: ClientLlm, palier: Palier, b: BriefFilm, o: O
   };
 }
 
+/**
+ * Politique par palier, mesurée le 03/11/2026 (recherche/20, banc scellé de 8 briefs × 3) : Éco et Équilibré montent avec la
+ * mémoire du PROFESSEUR (AMD : workflow + sous-tâches + indices de fonction) et le harnais DÉCOMPOSÉ (structure puis textes) :
+ * Éco 0,914 au lieu de 0,832, 0 % de repli, 96 % de listes valides du premier coup, −34 % de coût ; Équilibré à égalité de note,
+ * 100 % du premier coup. Expert garde la mémoire existante (la mémoire du professeur y baisse la note en code de 0,025).
+ * `NEXORA_HARNAIS_FILM=v3` rend l'ancien comportement (mémoire existante partout).
+ */
+export function optionsPalier(p: Palier, env: NodeJS.ProcessEnv = process.env): OptionsRun {
+  if (env.NEXORA_HARNAIS_FILM === 'v3' || p === 'expert') return { memoire: new MemoireFilm() };
+  return { module: professeur(), decompose: true };
+}
+let profCache: MemoireProfesseur | null = null;
+const professeur = () => (profCache ??= new MemoireProfesseur());
+
 export interface ResultatEscalade { runs: RunFilm[]; final: RunFilm; palierFinal: Palier; escalades: number }
 
 /**
@@ -278,13 +405,13 @@ export interface ResultatEscalade { runs: RunFilm[]; final: RunFilm; palierFinal
  * est sous le seuil, on passe au suivant. S'arrête au plafond de dépense (`ErreurPlafondLlm` levée par le relevé).
  */
 export async function escalader(
-  clients: Record<Palier, ClientLlm>, depart: Palier, b: BriefFilm, o: OptionsRun & { seuil?: number; ordre?: readonly Palier[] } = {},
+  clients: Record<Palier, ClientLlm>, depart: Palier, b: BriefFilm, o: OptionsRun & { seuil?: number; ordre?: readonly Palier[]; /** Options propres à chaque palier (mémoire, harnais), appliquées par-dessus `o`. */ politique?: (p: Palier) => OptionsRun } = {},
 ): Promise<ResultatEscalade> {
   const ordre = (o.ordre ?? PALIERS).slice((o.ordre ?? PALIERS).indexOf(depart));
   const runs: RunFilm[] = [];
   for (const p of ordre) {
     let r: RunFilm;
-    try { r = await runFilm(clients[p], p, b, o); } catch (e) {
+    try { r = await runFilm(clients[p], p, b, { ...o, ...(o.politique?.(p) ?? {}) }); } catch (e) {
       if (e instanceof ErreurPlafondLlm) break;
       throw e;
     }

@@ -22,6 +22,13 @@ Branche `feat/mode-3d` (recherche/18). **Image → 3D** et **Texte → 3D** tour
 
 Limites : pas de multi-images, retexture, formats autres que GLB, ni polycount réglable dans l'interface ; le juge visuel attend un modèle vision branché sur le LLM ; la VM 202 ne porte pas la GB10 : le mode ne s'y active qu'avec le moteur GB10 déclaré (voir `deploy/proxmox/creative.env.example`).
 
+## Mise à jour du 03/11 (soir) : mémoire AMD du professeur + harnais décomposé (recherche/20)
+
+Branche `feat/memoire-amd-reasoningbank`. Banc scellé (4 briefs d'apprentissage écrits par Opus 5.5, 8 briefs de test × 3, juge Gemini en ordre inversé, 2,09 USD).
+**Éco, nouveau défaut H** (mémoire du professeur à trois niveaux + structure puis textes) : **0,914** [0,906 ; 0,923] au lieu de 0,832, 0 % de repli, 96 % de listes valides du premier coup,
+0,0006 $ (0,095 crédit) le film, juge 11-0-5 contre l'ancien défaut. Équilibré H : 0,912, 100 % du premier coup. Expert inchangé. ReasoningBank (stratégies de l'élève) et
+meilleur-de-4 : **sans gain** à ce coût, livrés éteints. `NEXORA_HARNAIS_FILM=v3` rétablit l'ancien comportement.
+
 ## Mise à jour du 03/11 : l'agent à trois paliers, facturé au jeton
 
 Branche `feat/agent-3-niveaux` (recherche/19). Éco (DeepSeek V4.1 Flash, DeepInfra), Équilibré (Muse Spark 1.3) et Expert (Gemini 4 Argon **Flex**, 1 $ / 5 $ par M) pour le tournage, le montage et le Producteur ; en ligne sur la VM 202.

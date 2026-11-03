@@ -1,0 +1,422 @@
+[
+ {
+  "id": "rb-equilibre-app-comptabilite-mw0l6ss3-0",
+  "titre": "Calibrer la longueur du texte au temps affiché",
+  "description": "une phrase",
+  "contenu": "Le piège est de valider un libellé trop dense pour une pastille courte, ce qui force une réparation automatique. Cela arrive quand on écrit pour le sens sans compter les caractères par seconde de lecture. La parade est d'imposer une limite stricte de caractères par durée avant montage et de raccourcir ou scinder tout texte dépassant le seuil.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9096
+  }
+ },
+ {
+  "id": "rb-equilibre-app-comptabilite-mw0l6ss3-1",
+  "titre": "Ne jamais dépasser la durée utile de la source",
+  "description": "une phrase",
+  "contenu": "Le piège est de programmer une lecture qui déborde de quelques images au-delà de la fin réelle du plan. Cela arrive par arrondi de durée ou cumul de chutes sans vérification du in+dur. La parade est de toujours contrôler que début plus durée reste inférieur ou égal à la durée source avec une marge de sécurité.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9096
+  }
+ },
+ {
+  "id": "rb-equilibre-app-comptabilite-mw0l6ss3-2",
+  "titre": "Viser le sans-réparation dès le premier export",
+  "description": "une phrase",
+  "contenu": "Le piège est de compter sur le correcteur pour rattraper textes et débordements et de considérer la liste comme réussie. Cela arrive quand on confond liste acceptée après repli et réussite nette. La parade est de rejouer un auto-contrôle complet et de ne livrer que si zéro alerte est remontée.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9096
+  }
+ },
+ {
+  "id": "rb-equilibre-app-recherche-mw0l7u24-0",
+  "titre": "Calibrer chaque texte à sa durée réelle",
+  "description": "Ne jamais poser un texte sans vérifier sa lisibilité dans le temps imparti.",
+  "contenu": "En montage, compter environ 12 à 15 caractères par seconde maximum pour un confort de lecture. Avant de valider, mesurer l'écart entre le texte et le plan suivant pour éviter tout chevauchement. Raccourcir ou découper le texte plutôt que de compter sur une réparation automatique.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9404
+  }
+ },
+ {
+  "id": "rb-equilibre-app-recherche-mw0l7u24-1",
+  "titre": "Budgéter la durée totale dès le premier assemblage",
+  "description": "Additionner toutes les durées avant d'ajouter transitions et cartons.",
+  "contenu": "En montage, tenir un total cumulé et garder une marge de sécurité sous la cible demandée. Si l'addition dépasse, couper en priorité les rappels et les plans répétés. Ne valider que lorsque le total avec fondu final reste dans le format imposé.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9404
+  }
+ },
+ {
+  "id": "rb-equilibre-app-recherche-mw0l7u24-2",
+  "titre": "Viser une validation nette sans réparation",
+  "description": "Considérer toute correction automatique comme un échec à corriger.",
+  "contenu": "En montage, relire le journal du validateur comme un signal de fragilité et non comme un filet. Reprendre le plan fautif en réduisant texte ou durée plutôt que de laisser le code réparer. L'objectif est une liste acceptée du premier coup, sans repli.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9404
+  }
+ },
+ {
+  "id": "rb-equilibre-app-traduction-mw0l8rgb-0",
+  "titre": "Calibrer le texte à la durée réelle",
+  "description": "Un texte trop long force une réparation automatique.",
+  "contenu": "Compter environ 12 à 14 caractères par seconde pour un confort de lecture en publicité. Raccourcir systématiquement chaque intention à une formule courte avant de verrouiller la liste. Viser toujours sous le seuil maximal plutôt que juste à la limite.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9214
+  }
+ },
+ {
+  "id": "rb-equilibre-app-traduction-mw0l8rgb-1",
+  "titre": "Valider l'autonomie sans repli code",
+  "description": "Ne jamais compter sur le validateur pour corriger.",
+  "contenu": "Relire chaque texte avec son timecode et vérifier qu'il tient seul à l'écran. Si un texte dépasse, le réécrire immédiatement au lieu d'espérer un ajustement. L'objectif est une liste acceptée du premier coup sans réparation.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9214
+  }
+ },
+ {
+  "id": "rb-equilibre-app-usine-mw0l9w0a-0",
+  "titre": "Protéger la montée dramatique du faux calme",
+  "description": "une phrase",
+  "contenu": "Ne jamais insérer un plan respiration lumineux et contemplatif au milieu d'une séquence d'alerte montante, car il casse la tension et désamorce l'urgence. Le réserver pour la retombée après la résolution, comme récompense visuelle. En montage bande-annonce, vérifier la courbe d'intensité plan par plan avant de valider.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9181
+  }
+ },
+ {
+  "id": "rb-equilibre-app-usine-mw0l9w0a-1",
+  "titre": "Bannir les plans muets et les remplissages par recyclage",
+  "description": "une phrase",
+  "contenu": "Chaque plan diffusé doit porter une information ou un texte, aucun plan sans intention ne doit subsister pour faire du temps. Limiter strictement la réutilisation d'un même plan à une seule reprise signifiante au lieu de boucler pour atteindre la durée. Mieux vaut raccourcir ou resserrer le rythme que diluer par répétition.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9181
+  }
+ },
+ {
+  "id": "rb-equilibre-app-usine-mw0l9w0a-2",
+  "titre": "Verrouiller un arc en trois actes lisible",
+  "description": "une phrase",
+  "contenu": "Structurer le montage en signaler le danger, décider et agir, puis reprise en main fluide, sans disperser le propos. Chaque texte doit faire avancer cet arc unique au lieu de multiplier les promesses génériques. Relire la liste finale en une phrase : si l'enchaînement ne se résume pas clairement, recouper.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9181
+  }
+ },
+ {
+  "id": "rb-equilibre-app-comptabilite-mw0laz00-0",
+  "titre": "Verrouiller la bande de durée du genre au dérushage",
+  "description": "Aucun plan monté sous le minimum vital du format publicitaire.",
+  "contenu": "En pub, tout plan sous 1,2 s casse la lisibilité et déclenche un rejet automatique de durée. Le piège arrive quand on raccourcit pour faire tenir le montage dans 36 s au lieu de recouper le nombre de plans. La parade est de régler le magnétisme de timeline sur 1,2 s minimum et de supprimer un plan plutôt que de l'écraser.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9016
+  }
+ },
+ {
+  "id": "rb-equilibre-app-comptabilite-mw0laz00-1",
+  "titre": "Viser zéro réparation au premier export",
+  "description": "Une liste acceptée après réparation reste un échec qualité.",
+  "contenu": "Le validateur corrige mais signale une dépendance au code, ce qui invalide la réussite nette. Cela arrive quand on compte sur le repli automatique au lieu de pré-contrôler durées, transitions et gain. La parade est de lancer une auto-vérification durées plus loudness avant tout envoi et de ne livrer qu'à 0 erreur.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-comptabilite",
+   "genre": "pub",
+   "mots": [
+    "comptabilite",
+    "factures",
+    "recus",
+    "banque",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9016
+  }
+ },
+ {
+  "id": "rb-equilibre-app-recherche-mw0lc2vu-0",
+  "titre": "Calibrer la longueur du texte au temps d'affichage",
+  "description": "Limiter strictement les caractères selon la durée du plan.",
+  "contenu": "Appliquer une règle de densité maximale d'environ 12 à 13 caractères par seconde pour tout texte incrusté. Pour un plan de 1,8 seconde, ne jamais dépasser 23 caractères espaces comprises. Compter systématiquement avant de valider la liste de montage.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9376
+  }
+ },
+ {
+  "id": "rb-equilibre-app-recherche-mw0lc2vu-1",
+  "titre": "Pré-valider chaque texte avant soumission",
+  "description": "Simuler le contrôle du validateur en local.",
+  "contenu": "Mesurer pour chaque plan l'intervalle disponible jusqu'au texte suivant et vérifier que le texte tient. Raccourcir ou reformuler immédiatement tout libellé trop long au lieu de laisser le code réparer. Viser zéro réparation automatique comme critère de réussite.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-recherche",
+   "genre": "bande-annonce",
+   "mots": [
+    "recherche",
+    "documents",
+    "pages",
+    "sources",
+    "nuit"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9376
+  }
+ },
+ {
+  "id": "rb-equilibre-app-traduction-mw0ld2x7-1",
+  "titre": "Viser le zéro réparation validateur",
+  "description": "Une liste réparée n'est pas une réussite autonome.",
+  "contenu": "Considérer toute correction automatique comme un échec à corriger en amont. Relire systématiquement durées, chevauchements et textes avant soumission. L'objectif est une acceptation directe sans intervention du code.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9152
+  }
+ },
+ {
+  "id": "rb-equilibre-app-traduction-mw0ld2x7-2",
+  "titre": "Prioriser la lisibilité sur l'exhaustivité",
+  "description": "Couper un mot vaut mieux que surcharger un plan court.",
+  "contenu": "Sur les plans de moins de 2 secondes, utiliser des formules très brèves et reporter le détail au plan suivant. Tester chaque texte à voix haute dans le temps imparti. Si ça ne tient pas à l'oral, ça ne tiendra pas à l'écran.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-traduction",
+   "genre": "pub",
+   "mots": [
+    "traduction",
+    "langue",
+    "appel",
+    "reunion",
+    "client"
+   ],
+   "palier": "equilibre",
+   "verdict": "echec",
+   "scoreCode": 0.9152
+  }
+ },
+ {
+  "id": "rb-equilibre-app-usine-mw0ldx4b-0",
+  "titre": "Tourner des rushes longs et sûrs",
+  "description": "Viser large au tournage pour rester libre au montage.",
+  "contenu": "Tourner chaque plan utile avec une marge de durée confortable pour permettre des in et dur variés sans sortir du rush. Prévoir un plan apogée nettement plus long pour y tailler plusieurs extraits dynamiques. Terminer par un plan calme et vide qui servira de fond propre au carton final.",
+  "etape": "tournage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "equilibre",
+   "verdict": "succes",
+   "scoreCode": 0.9359
+  }
+ },
+ {
+  "id": "rb-equilibre-app-usine-mw0ldx4b-1",
+  "titre": "Textes courts calés sur le brief",
+  "description": "Un message clair par acte pour garder le rythme bande-annonce.",
+  "contenu": "Limiter chaque incrustation à quelques mots qui reprennent les verbes clés du brief sans les répéter mot à mot. Répartir les textes sur les temps forts pour structurer la montée en puissance. Garder le dernier texte apaisé avant le carton pour faire retomber la tension.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "equilibre",
+   "verdict": "succes",
+   "scoreCode": 0.9359
+  }
+ },
+ {
+  "id": "rb-equilibre-app-usine-mw0ldx4b-2",
+  "titre": "Verrouiller durée et conformité technique",
+  "description": "Viser le minutage pile et des raccords valides du premier coup.",
+  "contenu": "Additionner les durées pour tomber exactement sur la durée cible avant de soumettre la liste. Vérifier que chaque in plus dur reste à l'intérieur du rush source pour éviter tout rejet. Finir par un carton en fondu suffisamment long pour laisser respirer la marque.",
+  "etape": "montage",
+  "source": {
+   "brief": "app-usine",
+   "genre": "bande-annonce",
+   "mots": [
+    "usine",
+    "machines",
+    "panne",
+    "agents",
+    "equipe"
+   ],
+   "palier": "equilibre",
+   "verdict": "succes",
+   "scoreCode": 0.9359
+  }
+ }
+]
