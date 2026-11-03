@@ -157,3 +157,11 @@ Ordre d'exécution conseillé pour les agents suivants : (e) puis (g) (aucun GPU
   la reprise puis l'envoi prennent environ 1,4 s après le clic.
 - Workflows filmés : `films/workstudio/workflow.py` (fr et en, courriel 1 ou 2), captures : `capturer.mjs`. L'exécution réelle dure ≈ 3 s :
   le film l'étire (10 images) ; ne jamais ralentir un son ni prétendre que l'exécution est lente.
+
+### (g) Modèles et API : « Une clé. Tous les modèles. » — FAIT (35,6 / 29,5 / 15,0 s) · note sévère 7,5 · `films/modeles/`
+Parcours réel de la page `/modeles` (et `/en/modeles`) du site : `capturer.mjs` enregistre le flux d'images (CDP screencast) et le journal des gestes
+(en-tête du site masqué : la marque va changer), `decouper.py` en tire des séquences à 30 images/s par segment et les temps du curseur, `fabriquer_brief.py`
+écrit le brief. Accueil (réponse en continu, preuve à 0 s) → 36 modèles, pastille Code (25) → recherche, tri par prix → fiche (prix en CAD, benchmarks avec
+source) → exemple d'appel étiqueté Aperçu, clic Copier → « une ligne » → carton. Piste mod-musique-72 mesurée à 127,7 BPM. L'usine mixe maintenant par
+loudnorm (−14 LUFS visés, crête −3 dBTP) : le limiteur seul laissait +2 dB de crête après l'AAC. Faiblesses : voir `brief.json › revue` (capture 1×, beat « une ligne »
+sans vrai changement de modèle tant que l'API n'est pas ouverte, son non écouté). Pour passer 8 : refaire la capture à 2× et filmer un appel réel dès l'ouverture de l'API.

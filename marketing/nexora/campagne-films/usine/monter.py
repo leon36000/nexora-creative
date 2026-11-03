@@ -49,7 +49,7 @@ def configurer(marque, produit, textes, cache):
 
 
 def limiter_crete(mixer_v4):
-    """Après le mixage V4 (−14 LUFS) : limiteur suréchantillonné ×4, crête vraie ≤ −1 dBTP même après l'AAC (limite 0,66)."""
+    """Après le mixage V4 (−14 LUFS) : loudnorm suréchantillonné (−14 LUFS, crête vraie visée −3 dBTP : l'encodage AAC ajoute jusqu'à 1,5 dB de dépassement, mesuré)."""
     def mixer(m, segs, duree, sortie_wav):
         # « duck » d'un segment (dB, négatif) : la musique baisse sous une voix (son natif du plan), rampes de 0,25 s
         ducks = [(s["t"], s["t"] + s["d"], s["duck"]) for s in segs if s.get("duck")]
@@ -80,7 +80,7 @@ def limiter_crete(mixer_v4):
         finally:
             M.lire_audio, M.poser = lire0, poser0
         tmp = sortie_wav.with_suffix(".lim.wav")
-        M.ff(["-i", str(sortie_wav), "-af", "aresample=192000,alimiter=limit=0.66:level=false:attack=1:release=60,aresample=48000",
+        M.ff(["-i", str(sortie_wav), "-af", "aresample=192000,loudnorm=I=-14:TP=-3.0:LRA=11,aresample=48000",
               str(tmp)])
         tmp.replace(sortie_wav)
     mixer._v5 = True
