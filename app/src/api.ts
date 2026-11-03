@@ -112,7 +112,11 @@ export interface Storyboard {
   plans: PlanFilm[];
   dureeTotale: number;
 }
-export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null }
+export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; objet3d?: { apercu: boolean; qualite: boolean; texte: boolean } | null }
+export interface ObjetTexteEtat {
+  etat: 'image' | 'objet' | 'jugement' | 'fini' | 'echec'; essai: number; image: number; objet: number | null;
+  notes: { take: number; note: number; defauts: string[]; raison: string }[]; erreur: string | null; qualite: 'draft' | 'quality'; intention: string;
+}
 export interface MoteurGpu { id: string; nom: string; recettes: string[]; enLigne: boolean; enCours: number }
 
 /** Agent Producteur (server/nexora/agent.ts). */
@@ -174,6 +178,9 @@ export const api = {
   producteurValider: (id: string, proposition: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}/valider`, { method: 'POST', body: JSON.stringify({ proposition }) }),
   producteurAjuster: (id: string, proposition: string, r: { candidats?: number; qualite?: string; format?: string; son?: boolean; musique?: boolean }) =>
     j<SessionProducteur>(`/api/nexora/producteur/${id}/ajuster`, { method: 'POST', body: JSON.stringify({ proposition, ...r }) }),
+  objetDevis: (b: { qualite: 'draft' | 'quality'; source: 'texte' | 'image' }) => j<{ secondesEstimees: number; credits: number | null; recette: string }>('/api/nexora/objet/devis', { method: 'POST', body: JSON.stringify(b) }),
+  objetTexte: (b: { intention: string; qualite: 'draft' | 'quality' }) => j<{ id: number; secondesEstimees: number; credits?: number }>('/api/nexora/objet/texte', { method: 'POST', body: JSON.stringify(b) }),
+  objetTexteEtat: (id: number) => j<ObjetTexteEtat>(`/api/nexora/objet/${id}`),
   creerPersonnage: (b: { nom: string; description: string }) => j<{ takeId: number; nom: string; apparence: string }>('/api/nexora/personnage', { method: 'POST', body: JSON.stringify(b) }),
   statutPersonnage: (take: number) => j<{ etat: 'rendu' | 'pret' | 'echec'; membre?: CastMember; erreur?: string }>(`/api/nexora/personnage/${take}`),
   prisesFilm: (film: number) => j<VuePrises>(`/api/nexora/film/${film}/prises`),

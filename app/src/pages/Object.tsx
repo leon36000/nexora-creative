@@ -6,7 +6,7 @@
  * Viewer and the Stage all read it from /api/media/<take>.
  */
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { api, downloadUrl, mediaUrl, posterUrl, subjectUrl, type Take } from '../api';
+import { api, downloadUrl, mediaUrl, posterUrl, subjectUrl, type ObjetTexteEtat, type Take } from '../api';
 import { OBJECT_DETAIL } from '../catalog';
 import { setParams, useRoute } from '../router';
 import { SourceSlot, loadFile, useTakeParam, type Source } from '../SourcePick';
@@ -37,6 +37,47 @@ export default function ObjectPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [look, setLook] = useState<ModelLook>('lit');
   const [viewing, setViewing] = useState<number | null>(null);
+  // Texte → 3D : une image de référence propre, puis le modèle, puis le contrôle du juge sur quatre côtés.
+  const [mode, setMode] = useState<'image' | 'texte'>('image');
+  const [intention, setIntention] = useState('');
+  const [chaine, setChaine] = useState<ObjetTexteEtat | null>(null);
+  const [devisT, setDevisT] = useState<{ secondesEstimees: number; credits: number | null } | null>(null);
+  const [chaineId, setChaineId] = useState<number | null>(null);
+  useEffect(() => {
+    let mort = false;
+    api.objetDevis({ qualite: quality, source: mode }).then((d) => { if (!mort) setDevisT(d); }).catch(() => {});
+    return () => { mort = true; };
+  }, [quality, mode]);
+  useEffect(() => {
+    if (chaineId === null) return;
+    let mort = false;
+    const tour = async () => {
+      try {
+        const e = await api.objetTexteEtat(chaineId);
+        if (mort) return;
+        setChaine(e);
+        if (e.etat === 'fini' && e.objet) { setSelected(e.objet); return; }
+        if (e.etat === 'echec') { toast(e.erreur ?? 'La création 3D a échoué', true); return; }
+      } catch { /* réessaie au prochain tour */ }
+      if (!mort) setTimeout(() => void tour(), 2500);
+    };
+    void tour();
+    return () => { mort = true; };
+  }, [chaineId]);
+
+  async function creerDepuisTexte() {
+    setBusy('Lancement...');
+    try {
+      const r = await api.objetTexte({ intention, qualite: quality });
+      setChaine(null);
+      setChaineId(r.id);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'échec', true);
+    } finally {
+      setBusy(null);
+    }
+  }
+  const enCours = chaine !== null && chaine.etat !== 'fini' && chaine.etat !== 'echec' || (chaineId !== null && chaine === null);
 
   // Deep link from the Viewer's Make 3D: /object?take=44 preloads that still.
   useTakeParam(params.get('take'), (s) => { setSource(s); setParams({ take: null }); });
@@ -95,8 +136,24 @@ export default function ObjectPage() {
         <div className="display" style={{ fontSize: 26 }}>Object</div>
         <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>One still becomes a textured 3D model you can turn, download as GLB and drop into a scene. TRELLIS.2, on your GPU.</div>
 
-        <SourceSlot label="Still" value={source} onChange={setSource} accept={['image']}
-          title="Add a still of the thing" sub="One subject, whole in frame, on a plain background works best." />
+        <div className="seg" role="group" aria-label="Point de départ">
+          <button type="button" className={mode === 'image' ? 'on' : ''} onClick={() => setMode('image')}>Image → 3D</button>
+          <button type="button" className={mode === 'texte' ? 'on' : ''} onClick={() => setMode('texte')}>Texte → 3D</button>
+        </div>
+
+        {mode === 'texte' ? (
+          <div className="rail-section">
+            <div className="label">L’objet</div>
+            <div className="st-champ">
+              <textarea value={intention} onChange={(e) => setIntention(e.target.value)} maxLength={1000} style={{ minHeight: 90 }}
+                placeholder="Une chaise en bois clair aux pieds fuselés, un robot jouet en métal rouge…" aria-label="Description de l’objet" />
+            </div>
+            <div className="dim" style={{ fontSize: 12 }}>Nexora dessine d’abord une photo de produit propre de l’objet seul, puis la reconstruit en 3D, puis vérifie quatre côtés. Une seule relance si le contrôle est sévère.</div>
+          </div>
+        ) : (
+          <SourceSlot label="Still" value={source} onChange={setSource} accept={['image']}
+            title="Add a still of the thing" sub="One subject, whole in frame, on a plain background works best." />
+        )}
 
         <div className="rail-section">
           <div className="label">Detail</div>
@@ -106,7 +163,7 @@ export default function ObjectPage() {
           <div className="dim" style={{ fontSize: 12 }}>{q.note}</div>
         </div>
 
-        {source && (
+        {mode === 'image' && source && (
           <div className="rail-section">
             {cutReady && (
               <>
@@ -129,7 +186,7 @@ export default function ObjectPage() {
           </div>
         )}
 
-        {!usingCut && <div className="rail-section">
+        {mode === 'image' && !usingCut && <div className="rail-section">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
             <span className="dim" style={{ fontSize: 12.5 }}>Cut the subject out first</span>
             <Switch on={cutout} onChange={setCutout} label="cut the subject out first" />
@@ -139,15 +196,25 @@ export default function ObjectPage() {
           </div>
         </div>}
 
-        <div className="chip-row" style={{ alignItems: 'center' }}>
+        {mode === 'image' && <div className="chip-row" style={{ alignItems: 'center' }}>
           <Stepper value={count} min={1} max={4} onChange={setCount} fmt={(v) => `${v}/4`} />
           <span className="dim" style={{ fontSize: 12 }}>Each take uses a new seed.</span>
-        </div>
+        </div>}
 
-        <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source} onClick={() => void go()}>
-          <span>{busy ?? (count > 1 ? `Make 3D · ${count}` : 'Make 3D')}</span>
-          <span className="cost">{est ? fmtSeconds(est * count) : 'TRELLIS.2'}</span>
-        </button>
+        {mode === 'texte' ? (
+          <>
+            {chaine && <EtapesTexte e={chaine} />}
+            <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || enCours || intention.trim().length < 3} onClick={() => void creerDepuisTexte()}>
+              <span>{busy ?? (enCours ? 'En cours…' : 'Créer en 3D')}</span>
+              <span className="cost">{devisT ? `${devisT.credits !== null ? `${devisT.credits} crédits · ` : ''}≈ ${fmtSeconds(devisT.secondesEstimees)}` : 'TRELLIS.2'}</span>
+            </button>
+          </>
+        ) : (
+          <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source} onClick={() => void go()}>
+            <span>{busy ?? (count > 1 ? `Make 3D · ${count}` : 'Make 3D')}</span>
+            <span className="cost">{devisT?.credits != null ? `${devisT.credits * count} crédits · ` : ''}{est ? fmtSeconds(est * count) : devisT ? `≈ ${fmtSeconds(devisT.secondesEstimees * count)}` : 'TRELLIS.2'}</span>
+          </button>
+        )}
       </aside>
 
       <section className="canvas">
@@ -211,6 +278,28 @@ function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLo
         <a className="btn sm accent" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download GLB</a>
         <button type="button" className="btn sm" onClick={onOpen}><Icon name="sparkle" size={14} />Open</button>
       </div>
+    </div>
+  );
+}
+
+/** Les trois temps du texte → 3D, avec la note du juge quand elle est tombée. */
+function EtapesTexte({ e }: { e: ObjetTexteEtat }) {
+  const ordre = ['image', 'objet', 'jugement', 'fini'] as const;
+  const rang = e.etat === 'echec' ? -1 : ordre.indexOf(e.etat);
+  const lignes = [
+    ['Image de référence', 0], ['Modèle 3D', 1], ['Contrôle sur quatre côtés', 2],
+  ] as const;
+  const derniere = e.notes[e.notes.length - 1];
+  return (
+    <div className="rail-section" aria-live="polite">
+      {lignes.map(([nom, i]) => (
+        <div key={nom} style={{ display: 'flex', gap: 8, fontSize: 12.5, opacity: rang >= i || e.etat === 'fini' ? 1 : 0.5 }}>
+          <span aria-hidden="true">{e.etat === 'fini' || rang > i ? '✓' : rang === i ? '…' : '·'}</span>
+          <span>{nom}{i === 1 && e.essai > 1 ? ' (2e essai)' : ''}</span>
+        </div>
+      ))}
+      {derniere && <div className="dim" style={{ fontSize: 12 }}>Juge : {derniere.note}/10{derniere.raison ? ` · ${derniere.raison}` : ''}</div>}
+      {e.etat === 'echec' && <div style={{ fontSize: 12.5, color: 'var(--danger, #e5534b)' }}>{e.erreur ?? 'Échec.'}</div>}
     </div>
   );
 }

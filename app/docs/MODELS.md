@@ -20,7 +20,7 @@ folder, and `HF_TOKEN` for the gated repos. Downloads resume, so an
 interrupted 21 GB pull does not start over.
 
 The core install is **LTX-2.5 video + Qwen-Image 2512 stills**, about 
-**72 GB**. Everything here is about 348 GB.
+**72 GB**. Everything here is about 360 GB.
 
 ## Bundles
 
@@ -52,6 +52,19 @@ Still mode. Also the cheapest way to make a start frame for a video, which is ho
 | `qwen_2.5_vl_7b_fp8_scaled.safetensors` | `models/text_encoders/` | 9.4 GB | [Comfy-Org/Qwen-Image_ComfyUI](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/blob/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors) |
 | `qwen_image_vae.safetensors` | `models/vae/` | 0.3 GB | [Comfy-Org/Qwen-Image_ComfyUI](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/blob/main/split_files/vae/qwen_image_vae.safetensors) |
 | `Qwen-Image-Lightning-8steps-V1.0.safetensors` | `models/loras/` | 1.7 GB | [lightx2v/Qwen-Image-Lightning](https://huggingface.co/lightx2v/Qwen-Image-Lightning/blob/main/Qwen-Image-Lightning-8steps-V1.0.safetensors) |
+
+### Qwen-Image 2.1 `qwen21`
+
+Nexora Creative : image de plan clé la plus puissante en poids ouverts (arène 1225), sortie native jusqu'à 2K.
+
+- **Size** 17.4 GB · optional
+- **License** Qwen RESEARCH LICENSE AGREEMENT (30/09/2026) : usage non commercial (recherche ou évaluation) ; tout usage commercial exige une licence séparée (model-business@notice.qwencloud.com). Mention « Built with Qwen » si un modèle dérivé est distribué.
+
+| File | Goes in | Size | Source |
+| --- | --- | --- | --- |
+| `qwen_image_2.1_int8_convrot.safetensors` | `models/diffusion_models/` | 7.3 GB | [Comfy-Org/Qwen-Image-2.1](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/blob/main/diffusion_models/qwen_image_2.1_int8_convrot.safetensors) |
+| `qwen3vl_8b_int8_convrot.safetensors` | `models/text_encoders/` | 9.4 GB | [Comfy-Org/Qwen-Image-2.1](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/blob/main/text_encoders/qwen3vl_8b_int8_convrot.safetensors) |
+| `qwen_image_2.1_vae_bf16.safetensors` | `models/vae/` | 0.7 GB | [Comfy-Org/Qwen-Image-2.1](https://huggingface.co/Comfy-Org/Qwen-Image-2.1/blob/main/vae/qwen_image_2.1_vae_bf16.safetensors) |
 
 ### Qwen-Image-Edit stills `edit`
 
@@ -354,14 +367,14 @@ The look frame for a Stage shot: Z-Image Turbo with the Fun ControlNet Union rea
 
 ### Object (image to 3D, TRELLIS.2) `trellis2`
 
-The Object app and Make 3D on any still: TRELLIS.2 builds a textured mesh (GLB, PBR base color, metallic, roughness; High adds a baked normal map and AO) from one picture, through ComfyUI 0.38 built-in nodes. BiRefNet cuts the subject out first. bf16 weights, about 14 GB.
+The Object app and Make 3D on any still: TRELLIS.2 builds a textured mesh (GLB, PBR base color, metallic, roughness; High adds a baked normal map and AO) from one picture, through ComfyUI built-in nodes (pinned to 0.43.2 on the GB10). BiRefNet cuts the subject out first. int8 weights (convrot), about 9 GB; the bf16 variant (10.34 GB instead of 5.25 GB) works too with NEXORA_TRELLIS_MODELE.
 
-- **Size** 14 GB · optional
+- **Size** 9 GB · optional
 - **License** TRELLIS.2 (microsoft/TRELLIS.2-4B, repackaged by Comfy-Org/TRELLIS.2): MIT, the DiT and both VAEs. BiRefNet (ZhengPeng7/BiRefNet, repackaged by Comfy-Org/BiRefNet): MIT. The DINOv3 ViT-L image encoder (facebook/dinov3, repackaged in Comfy-Org/TRELLIS.2) is under the Meta DINOv3 License: royalty-free, commercial use allowed, with acceptable-use exclusions (military and ITAR uses, reverse engineering); the Comfy repo tags it MIT, but the upstream weights carry the DINOv3 License (and Meta gates its own repo behind a manual approval).
 
 | File | Goes in | Size | Source |
 | --- | --- | --- | --- |
-| `trellis_2_bf16.safetensors` | `models/diffusion_models/` | 10.34 GB | [Comfy-Org/TRELLIS.2](https://huggingface.co/Comfy-Org/TRELLIS.2/blob/main/diffusion_models/trellis_2_bf16.safetensors) |
+| `trellis_2_int8_convrot.safetensors` | `models/diffusion_models/` | 5.25 GB | [Comfy-Org/TRELLIS.2](https://huggingface.co/Comfy-Org/TRELLIS.2/blob/main/diffusion_models/trellis_2_int8_convrot.safetensors) |
 | `trellis_2_shape_vae_bf16.safetensors` | `models/vae/` | 1.1 GB | [Comfy-Org/TRELLIS.2](https://huggingface.co/Comfy-Org/TRELLIS.2/blob/main/vae/trellis_2_shape_vae_bf16.safetensors) |
 | `trellis_2_texture_vae_bf16.safetensors` | `models/vae/` | 0.95 GB | [Comfy-Org/TRELLIS.2](https://huggingface.co/Comfy-Org/TRELLIS.2/blob/main/vae/trellis_2_texture_vae_bf16.safetensors) |
 | `dino_v3_vit_l.safetensors` | `models/clip_vision/` | 1.21 GB | [Comfy-Org/TRELLIS.2](https://huggingface.co/Comfy-Org/TRELLIS.2/blob/main/clip_vision/dino_v3_vit_l.safetensors) |

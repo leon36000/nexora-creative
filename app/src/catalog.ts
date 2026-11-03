@@ -161,8 +161,8 @@ export function compilePrompt(parts: (string | undefined | false)[]): string {
 
 /** Object app detail levels; the numbers mirror server/graphs/trellis.ts OBJECT_QUALITY. */
 export const OBJECT_DETAIL = [
-  { id: 'draft', label: 'Draft', note: 'Up to 150k faces, 2K textures. About 2 minutes on a 5090. Check the shape here.' },
-  { id: 'quality', label: 'High', note: 'Up to 400k faces, 4K textures plus baked normal and AO maps. About 5 minutes on a 5090.' },
+  { id: 'draft', label: 'Draft', note: 'Up to 150k faces, 2K textures. About 40 seconds on the GB10. Check the shape here.' },
+  { id: 'quality', label: 'High', note: 'Up to 400k faces, 4K textures plus baked normal and AO maps. About 3 minutes on the GB10.' },
 ] as const;
 
 /** The app gallery. `route` is where Try opens; `soon` apps are listed but locked. */
