@@ -265,3 +265,10 @@ Espace libéré : **pc6 +37 Go** (9,3 → 46 Go libres), **pc1 +4,2 Go**, **pc5*
 - Échec connu non lié : `reglagesSite.test.ts` rouge sur `developpement` avant ce travail.
 - Déployé sur la VM 202 (`deploy/proxmox/mettre-a-jour-creative.sh` depuis la branche, base `developpement` f445d7b) ; un vrai run par palier sur `POST /api/nexora/agent/film` (pub de 30 s « Bureau virtuel », sans escalade) :
   Éco 0,900, 3 appels, 0,00052 USD (0,080 crédit) ; Équilibré 0,900, 3 appels, 0,00109 USD ; Expert 0,915, 2 appels, 0,00761 USD ; trois montages du modèle, aucun repli.
+
+## 03/11 (soir tard) — Feuille de route maître et vague 1
+
+- Audit complet et plan unique : `docs/FEUILLE-DE-ROUTE-MAITRE.md` (nous 2,4/5 sur 35 variables ; Higgsfield ≈ 2,7 ; CapCut ≈ 3,3). Backlog GitLab #1 à #57, suivi #58 (`scripts/creer-backlog-gitlab.mjs`, idempotent).
+- Bulle « Effet IA ici… » v0 (MR !12, fusionnée) : 15 tests Studio + 4 serveur ; navigateur intégré : couche de 4 effets créée puis retirée d'un Ctrl+Z, Glitch posé sur un clip. Le navigateur intégré n'a pas d'adaptateur WebGPU : effets appliqués mais invisibles dans le moniteur, sans message (#8).
+- Déployé sur la VM 202 (service relancé 18:58). Route réelle : « ambiance de film d'horreur, froid et inquiétant » → `gpu-temperature −0,8`, `gpu-saturation 0,5`, `gpu-vignette 0,9`, `gpu-grain 0,3`, `gpu-exposure −0,4`, portée clip : identifiants et bornes respectés du premier coup.
+- Échecs préexistants notés, sans lien : `reglagesSite.test.ts` (1 test), `tsc` serveur `montage/memoires.ts:84`.
