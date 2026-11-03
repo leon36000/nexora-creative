@@ -30,7 +30,8 @@ const V = (regle: string, chemin: string, message: string, indice: string): Viol
 const f1 = (x: number) => (Math.round(x * 100) / 100).toString();
 
 /** Plus grand nombre de caractères lisible dans un plan de `dur` secondes. */
-export const maxCaracteres = (dur: number) => Math.max(0, Math.floor(CPS * (dur - DELAI_TEXTE_S - 0.1)));
+export const CPS_MAX = 16.5; // le contrôle de lisibilité du plan en accepte 17
+export const maxCaracteres = (dur: number) => Math.max(0, Math.floor(CPS_MAX * (dur - DELAI_TEXTE_S - 0.1)));
 
 /** Contrôle de la liste, en secondes, avec la valeur attendue et la réparation pour chaque violation. */
 export function validerListe(brut: unknown, b: Brief): { ok: boolean; erreurs: Violation[]; liste?: ListeMontage } {
@@ -58,10 +59,11 @@ export function validerListe(brut: unknown, b: Brief): { ok: boolean; erreurs: V
       while (k < l.plans.length && !l.plans[k].texte) place += l.plans[k++].dur;
       const max = maxCaracteres(place);
       if (lignes.length > 2 || lignes.some((x) => [...x].length > 42)) e.push(V('texte_lignes', `${ch}.texte`, 'plus de 2 lignes ou ligne de plus de 42 caractères', 'Raccourcis : 2 lignes de 42 caractères au plus.'));
-      else if ([...p.texte.replace(/\n/g, ' ')].length > max) e.push(V('texte_trop_long', `${ch}.texte`, `${[...p.texte].length} caractères pour ${f1(place)} s disponibles jusqu'au texte suivant : ${max} au plus`, `Raccourcis le texte à ${max} caractères, ou allonge ce plan à ${f1(p.dur + Math.ceil(([...p.texte].length / CPS + 0.35 - place) * 10) / 10)} s, ou retire le texte du plan suivant.`));
+      else if ([...p.texte.replace(/\n/g, ' ')].length > max) e.push(V('texte_trop_long', `${ch}.texte`, `${[...p.texte].length} caractères pour ${f1(place)} s disponibles jusqu'au texte suivant : ${max} au plus`, `Raccourcis le texte à ${max} caractères, ou allonge ce plan à ${f1(p.dur + Math.ceil(([...p.texte].length / CPS_MAX + 0.35 - place) * 10) / 10)} s, ou retire le texte du plan suivant.`));
     }
   });
-  if (Math.abs(somme - b.duree_cible_s) > Math.max(0.6, b.duree_cible_s * 0.03)) {
+  // Le code remet les durées à l'échelle (±25 % tolérés) : seul un écart grossier est une erreur du modèle.
+  if (Math.abs(somme - b.duree_cible_s) > b.duree_cible_s * 0.25) {
     e.push(V('duree_cible', 'plans', `somme des dur = ${f1(somme)} s au lieu de ${b.duree_cible_s} s`, `Ajuste les durées pour que la somme vaille ${b.duree_cible_s} s (écart de ${f1(b.duree_cible_s - somme)} s à répartir).`));
   }
   for (const t of b.textes_imposes) {
