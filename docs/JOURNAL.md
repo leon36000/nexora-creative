@@ -263,3 +263,5 @@ Espace libéré : **pc6 +37 Go** (9,3 → 46 Go libres), **pc1 +4,2 Go**, **pc5*
   meilleur-de-n, harnais décomposé (`structureVersListe`), politique par palier (`optionsPalier`) branchée sur `POST /api/nexora/agent/film`. 4 trajectoires du professeur, 2 fiches de fonction. 13 tests [TEST].
 - Banc `bench/memoires.ts` (A à H, 456 essais + 224 paires jugées, 2,09 USD) : Éco H 0,914 / Équilibré H 0,912 / Expert B 0,938 ; ReasoningBank et meilleur-de-4 sans gain à leur coût.
 - Échec connu non lié : `reglagesSite.test.ts` rouge sur `developpement` avant ce travail.
+- Déployé sur la VM 202 (`deploy/proxmox/mettre-a-jour-creative.sh` depuis la branche, base `developpement` f445d7b) ; un vrai run par palier sur `POST /api/nexora/agent/film` (pub de 30 s « Bureau virtuel », sans escalade) :
+  Éco 0,900, 3 appels, 0,00052 USD (0,080 crédit) ; Équilibré 0,900, 3 appels, 0,00109 USD ; Expert 0,915, 2 appels, 0,00761 USD ; trois montages du modèle, aucun repli.
