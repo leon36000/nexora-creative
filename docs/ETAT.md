@@ -1,10 +1,24 @@
-# Nexora Creative — où nous en sommes (mis à jour le 02/11/2026)
+# Nexora Creative — où nous en sommes (mis à jour le 03/11/2026)
 
 Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'est pas. Détail jour par jour : `docs/JOURNAL.md`. Mesures : `recherche/08-mesures-gb10.md`.
 
 ## En une phrase
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
+
+## Mise à jour du 03/11 : l'agent à trois paliers, facturé au jeton
+
+Branche `feat/agent-3-niveaux` (recherche/19). Éco (DeepSeek V4.1 Flash, DeepInfra), Équilibré (Muse Spark 1.3) et Expert (Gemini 4 Argon **Flex**, 1 $ / 5 $ par M) pour le tournage, le montage et le Producteur ; en ligne sur la VM 202.
+
+| Brique | État | Preuve |
+|---|---|---|
+| **Mesure et facturation de chaque jeton** (grand livre, devis, réservation, règlement, libération, plafond dur ; prix = coût × 1,10 × 1,4025) | **fait, testé** | 19 tests ; ligne « jetons, crédits » dans le Producteur ; **rien débité en réel** (VM sans portail de crédits) |
+| **Palier par rôle et par projet** (Éco / Équilibré / Expert), escalade automatique | **fait** | un vrai tour du Producteur par palier sur la VM (0,0006 / 0,0006 / 0,010 USD) |
+| **Harnais compact** (liste en secondes compilée par le code, validateur parlant, réparations du code, mémoire k = 1 enseignée par Claude et par les paliers chers) | **fait** | Éco : 0 plan valide sans harnais → **0,92** avec (0,0007 $ le film) |
+| **Campagne** 3 paliers × 8 briefs × mémoire × 3 tours (≈ 1,3 USD) | **faite** | Éco 0,63 / Équilibré 0,90 / Expert 0,94 (tous essais) ; la mémoire apporte +0,35 à Éco |
+| **9 films rendus** (Réception, Surveillance, OPSYS-AI × 3 paliers) | **faits** | `~/nexora-creative-data/promo/montage/Test-agents-*` ; plans de la bibliothèque, aucune génération |
+
+Limites : notes du code seulement (pas de juge visuel), bibliothèque de plaques petite, Éco dépend du harnais. Défauts : tournage et montage en Éco avec escalade, Producteur en Expert.
 
 ## Mise à jour du 02/11 (nuit) : vague 2 (Producteur, montage, personnages @, prises, projet long)
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ClientLlm } from '../llm.js';
-import { compilerListe, listeVersPlan, planVersListe, validerListe, aimanter } from './liste.js';
+import { compilerListe, listeVersPlan, planVersListe, validerListe, aimanter, reparerListe } from './liste.js';
 import { BRIEFS_FILMS } from '../bench/briefsFilms.js';
 import { MemoireFilm, briefDeMontage, clipsDuTournage, escalader, exclusionPour, validerTournage, type Tournage } from './film.js';
 import { ErreurPlafondLlm } from '../usage.js';
@@ -68,6 +68,23 @@ describe('liste de montage', () => {
     const liste = planVersListe(r.plan);
     expect(liste.plans).toHaveLength(r.plan.video.length);
     expect(compilerListe(liste, bm()).video).toHaveLength(r.plan.video.length);
+  });
+});
+
+describe('réparations du code', () => {
+  it('borne la lecture, retire un texte qui ne tient pas, sépare deux plans de même source, et la liste devient valide', () => {
+    const l = bonneListe();
+    l.plans[2].in = 5;
+    l.plans[3].src = l.plans[2].src;
+    l.plans[4].texte = 'Un texte beaucoup trop long pour le temps disponible ici';
+    expect(validerListe(l, bm()).ok).toBe(false);
+    const r = reparerListe(l, bm())!;
+    expect(r.faits.length).toBeGreaterThanOrEqual(2);
+    const v = listeVersPlan(r.liste, bm());
+    expect(v.ok ? [] : v.erreurs.map((e) => `${e.regle} ${e.message}`)).toEqual([]);
+  });
+  it('ne touche pas aux textes imposés et ne renvoie rien si rien à réparer', () => {
+    expect(reparerListe(bonneListe(), bm())).toBeNull();
   });
 });
 

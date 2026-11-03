@@ -170,3 +170,36 @@ export function planVersListe(p: EditPlan): ListeMontage {
     ...(p.audio.musique ? { gain_db: p.audio.musique.gain_db } : {}),
   };
 }
+
+/**
+ * Réparations mécaniques, appliquées par le code quand le modèle n'a pas su corriger après ses réparations : bornes de
+ * lecture dans la source, texte non imposé qui ne tient pas dans le temps disponible (retiré), deux plans de suite sur la
+ * même source (le second est échangé avec le prochain plan d'une autre source). Rend la liste réparée et ce qui a été fait.
+ */
+export function reparerListe(brut: unknown, b: Brief): { liste: ListeMontage; faits: string[] } | null {
+  const lu = ListeMontageSchema.safeParse(brut);
+  if (!lu.success) return null;
+  const l = structuredClone(lu.data);
+  const faits: string[] = [];
+  const dureeSrc = new Map(b.clips.map((c) => [c.id, c.duree_s] as const));
+  for (const p of l.plans) {
+    const d = dureeSrc.get(p.src);
+    if (d === undefined) continue;
+    if (p.dur > d) { p.dur = Math.floor(d * 10) / 10; faits.push(`${p.src} : dur ramenée à ${p.dur}`); }
+    if (p.in + p.dur > d) { p.in = Math.max(0, Math.floor((d - p.dur) * 100) / 100); faits.push(`${p.src} : in ramené à ${p.in}`); }
+  }
+  for (let i = 1; i < l.plans.length; i++) {
+    if (l.plans[i].src !== l.plans[i - 1].src) continue;
+    const j = l.plans.findIndex((p, k) => k > i && p.src !== l.plans[i - 1].src && (k + 1 >= l.plans.length || l.plans[k + 1].src !== l.plans[i].src) && p.src !== 'carton');
+    if (j > 0) { [l.plans[i], l.plans[j]] = [l.plans[j], l.plans[i]]; faits.push(`plans ${i + 1} et ${j + 1} échangés (même source de suite)`); }
+  }
+  for (let i = 0; i < l.plans.length; i++) {
+    const p = l.plans[i];
+    if (!p.texte || b.textes_imposes.some((t) => t.replace(/\s+/g, ' ').trim() === p.texte!.replace(/\s+/g, ' ').trim())) continue;
+    let place = p.dur, k = i + 1;
+    while (k < l.plans.length && !l.plans[k].texte) place += l.plans[k++].dur;
+    const lignes = p.texte.split('\n');
+    if (lignes.length > 2 || lignes.some((x) => [...x].length > 42) || [...p.texte.replace(/\n/g, ' ')].length > maxCaracteres(place)) { delete p.texte; faits.push(`plan ${i + 1} : texte trop long retiré`); }
+  }
+  return faits.length ? { liste: l, faits } : null;
+}
