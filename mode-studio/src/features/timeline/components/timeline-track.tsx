@@ -87,6 +87,7 @@ import { isDragPointInsideElement } from '../utils/effect-drop'
 import { frameToPixelsNow, pixelsToFrameNow } from '@/features/timeline/utils/zoom-conversions'
 import type { LazyContextMenuEventInit } from '../utils/lazy-context-menu'
 import { captureContextMenuEventInit, replayContextMenuEvent } from '../utils/lazy-context-menu'
+import { useBulleEffetStore } from '@/features/nexora/effets/appliquer'
 import {
   getTrackKind,
   isTrackDisabled as getIsTrackDisabled,
@@ -116,10 +117,12 @@ interface TrackGapContextMenuRequest {
 function TrackGapContextMenu({
   request,
   onCloseGap,
+  onEffetIa,
   onDismiss,
 }: {
   request: TrackGapContextMenuRequest
   onCloseGap: () => void
+  onEffetIa: () => void
   onDismiss: () => void
 }) {
   const { t } = useTranslation()
@@ -155,6 +158,7 @@ function TrackGapContextMenu({
         />
       </ContextMenuTrigger>
       <ContextMenuContent>
+        <ContextMenuItem onClick={onEffetIa}>✨ Effet IA ici…</ContextMenuItem>
         <ContextMenuItem onClick={onCloseGap}>
           {t('timeline.contextMenu.rippleDelete')}
         </ContextMenuItem>
@@ -1284,6 +1288,13 @@ export const TimelineTrack = memo(function TimelineTrack({ track }: TimelineTrac
           key={gapContextMenuRequest.token}
           request={gapContextMenuRequest}
           onCloseGap={handleCloseGap}
+          onEffetIa={() =>
+            useBulleEffetStore.getState().ouvrir({
+              x: gapContextMenuRequest.pointer.clientX,
+              y: gapContextMenuRequest.pointer.clientY,
+              frame: gapContextMenuRequest.frame,
+            })
+          }
           onDismiss={() => setGapContextMenuRequest(null)}
         />
       )}

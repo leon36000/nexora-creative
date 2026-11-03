@@ -4,6 +4,7 @@ import type { SceneDetectionMethod, VerificationModel } from '@/features/timelin
 import { usePlaybackStore } from '@/shared/state/playback'
 import type { CaptionDialogState } from './use-caption-dialog-state'
 import type { ItemContextMenuProps } from './item-context-menu'
+import { useBulleEffetStore } from '@/features/nexora/effets/appliquer'
 
 export type TimelineItemContextMenuProps = Omit<ItemContextMenuProps, 'children'>
 
@@ -92,6 +93,15 @@ export function buildTimelineItemContextMenuProps({
 }: TimelineItemContextMenuParams): TimelineItemContextMenuProps {
   return {
     trackLocked,
+    effetIa: {
+      onOuvrir: (x: number, y: number) =>
+        useBulleEffetStore.getState().ouvrir({
+          x,
+          y,
+          itemId: item.id,
+          frame: usePlaybackStore.getState().currentFrame,
+        }),
+    },
     joinActions: {
       canJoinSelected: getCanJoinSelected(),
       hasJoinableLeft,

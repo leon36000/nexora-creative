@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback, memo, lazy, Suspense } from 'react'
+import { BulleEffetHote } from '@/features/nexora/effets/bulle-effet'
 import { useRouter } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { createLogger, createOperationId } from '@/shared/logging/logger'
@@ -307,6 +308,7 @@ const EditorDialogHost = memo(function EditorDialogHost({ projectId }: { project
 
   return (
     <>
+      <BulleEffetHote />
       {clearKeyframesDialogOpen && (
         <Suspense fallback={null}>
           <LazyClearKeyframesDialog />
