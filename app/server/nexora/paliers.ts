@@ -1,13 +1,14 @@
 /**
  * Choix du palier (Éco / Équilibré / Expert) par rôle et par projet. Ordre : le projet (session) > le réglage du site
  * pour le rôle (valeur « palier:eco ») > la variable NEXORA_PALIER_<ROLE> > NEXORA_PALIER > le défaut du rôle.
- * Défauts : voir recherche/19 (mesurés sur la campagne). Les trois modèles sont puissants : Expert (Argon Flex) est
- * assez bon marché pour servir de défaut ; Éco est le premier essai de l'escalade.
+ * Défauts (recherche/19, mesurés) : tournage et montage partent d'Éco avec la mémoire allumée et escaladent d'eux-mêmes
+ * (0,92 pour 0,0007 $ le film) ; le Producteur, qui converse et appelle des outils, part d'Expert (Argon Flex, ≈ 0,01 $
+ * le tour) ; Équilibré est le palier de repli le moins cher quand Éco échoue.
  */
 import { type RoleLlm, reglagesLlmCourants } from './llm.js';
 import { type Palier, PALIERS, estPalier, palierDisponible } from './niveaux.js';
 
-export const PALIER_PAR_DEFAUT: Partial<Record<RoleLlm, Palier>> = { tournage: 'expert', montage: 'expert', producteur: 'expert', monteur: 'expert' };
+export const PALIER_PAR_DEFAUT: Partial<Record<RoleLlm, Palier>> = { tournage: 'eco', montage: 'eco', monteur: 'eco', producteur: 'expert' };
 
 export function palierDuRole(role: RoleLlm, o: { projet?: Palier | null; env?: NodeJS.ProcessEnv; reglages?: Partial<Record<RoleLlm, string>> } = {}): Palier | null {
   const env = o.env ?? process.env;

@@ -14,7 +14,7 @@ import { type Palier, PALIERS } from '../niveaux.js';
 import { ErreurPlafondLlm } from '../usage.js';
 import { montageAuto } from './auto.js';
 import { type EditPlan, type Violation, framesDe } from './editplan.js';
-import { type ListeMontage, listeVersPlan, planVersListe } from './liste.js';
+import { type ListeMontage, listeVersPlan, planVersListe, reparerListe } from './liste.js';
 import { type Recette, type Segment, chargerMemoire, noteSegment } from './memoire.js';
 import { mesurer } from './metriques.js';
 import type { Brief } from './types.js';
@@ -214,6 +214,17 @@ export async function monterListe(llm: ClientLlm | null, bm: Brief, o: { savoir?
   ];
   let obtenu: { plan: EditPlan; liste: ListeMontage } | null = null;
   const s = await appelerValide(llm, 'montage', messages, (x) => { const r = listeVersPlan(x, bm); if (r.ok) { obtenu = { plan: r.plan, liste: r.liste }; return { ok: true as const, valeur: r.plan }; } return r; }, { reparations: o.reparations ?? 2, maxTokens: 4500, temperature: 0.4 });
+  if (!s.valeur || !obtenu) {
+    // Dernier recours avant le repli : réparations mécaniques du code sur la dernière liste du modèle.
+    try {
+      const rep = s.brutes.length ? reparerListe(lireJson<unknown>(s.brutes[s.brutes.length - 1]), bm) : null;
+      const r = rep ? listeVersPlan(rep.liste, bm) : null;
+      if (rep && r?.ok) {
+        r.plan.metadonnees = { modele: 'liste', savoir: [] };
+        return { plan: r.plan, liste: r.liste, source: 'llm', premierCoup: false, appels: s.appels, brutes: s.brutes, notes: [...s.notes, `réparé par le code : ${rep.faits.join(' ; ')}`], erreurs: [] };
+      }
+    } catch { /* repli ci-dessous */ }
+  }
   if (!s.valeur || !obtenu) return repli([...s.notes, `liste invalide après ${s.appels} appel(s) : ${s.erreurs.slice(0, 3).map((e) => e.regle).join(', ')}`], s);
   const o2 = obtenu as { plan: EditPlan; liste: ListeMontage };
   o2.plan.metadonnees = { modele: 'liste', savoir: [] };
