@@ -6,6 +6,10 @@ Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'es
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
 
+## Mise à jour du 03/11 (nuit) : les deux GPU de pc5 au travail (VM 204 `nexora-gpu`)
+
+Les RTX 2080 SUPER et 2070 SUPER de pc5 sont en passthrough dans une VM minimale (4 vCPU, 8 Go, 60 Go) ; ComfyUI 0.43.2 figé, un travailleur par carte (ports 8188 et 8189, LAN seulement) et des services STT/TTS/Demucs/embeddings (8190). **TRELLIS.2 int8 tourne sur Turing** : aperçu 126 s (GB10 : 38 s), qualité 531 s (GB10 : 162 s), pic VRAM 7,2 et 7,8 Go sur 8,2. Whisper, Kokoro et Chatterbox fr répondent en 0,1 à 2 s pour une phrase. `gpu-unlock` échoue sur Turing (à ne pas activer). **Brancher Creative** : ajouter les deux moteurs à `NEXORA_MOTEURS_GPU` (ligne prête dans `deploy/proxmox/creative.env.example`), puis relancer `nexora-creative` ; **non fait** sur la VM 202 (le routage enverrait aussi du « qualité » sur la 2070 SUPER, 3,3 fois plus lente que la GB10). Détail, mesures et retour arrière : `docs/gpu-pc5.md`.
+
 ## Mise à jour du 03/11 (soir) : le mode « 3D » à la façon de Meshy, première tranche
 
 Branche `feat/mode-3d` (recherche/18). **Image → 3D** et **Texte → 3D** tournent de bout en bout sur la GB10 (TRELLIS.2, nœuds ComfyUI 0.43.2, pur PyTorch, aucun noyau à compiler).

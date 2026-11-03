@@ -1,6 +1,6 @@
 # Ressources Nexora : conventions, registre d'allocation, plan HDD
 
-Mis à jour le 02/11/2026. Règle du fondateur : ne jamais allouer plus que le besoin réel ; tout est classé, étiqueté, propre ; aucun fichier épars ; chaque Mo a une affectation. pc5 (Proxmox `pve`) est le vrai serveur Nexora : tout ce qui est Nexora y vit, sauf les modèles (pc1, pc6), les GPU et le poste de développement. Le code est sur GitLab (pc4). Tests et expériences se font sur pc1 et pc6 et sont supprimés à la fin.
+Mis à jour le 03/11/2026 (VM 204 `nexora-gpu` et les deux GPU, §8). Règle du fondateur : ne jamais allouer plus que le besoin réel ; tout est classé, étiqueté, propre ; aucun fichier épars ; chaque Mo a une affectation. pc5 (Proxmox `pve`) est le vrai serveur Nexora : tout ce qui est Nexora y vit, sauf les modèles (pc1, pc6), les GPU et le poste de développement. Le code est sur GitLab (pc4). Tests et expériences se font sur pc1 et pc6 et sont supprimés à la fin.
 
 Qui vit où : `docs/ENVIRONNEMENTS.md`. Journal des suppressions : `docs/JOURNAL.md` (entrée « ménage d'infrastructure : conventions »). Inventaire automatique : `ressources/inventaire.sh` (lecture seule).
 
@@ -135,3 +135,16 @@ Ordre : 2 (risque de perte), 1 (inconnu), 4, 5, 3.
 - VM 9100 : supprimer ou confirmer.
 - Appliquer ou non le dimensionnement du §4 (redémarrage de chaque VM).
 - Confirmer le RAG (§6.1) et les 4 conteneurs arrêtés de pc6.
+
+## 8. Les deux GPU de pc5 et la VM 204 `nexora-gpu` (03/11/2026)
+
+| Ressource | Affectation | Détails |
+|---|---|---|
+| VM 204 `nexora-gpu` | moteur GPU LAN | 4 vCPU, **8 Go fixes** (ballon coupé : le passthrough épingle la RAM), disque 60 Go fin `ssd-1tb` (≈ 40 Go utilisés : modèles 8,4 Go, deux venv), swap 8 Go interne, `onboot`, étiquettes `nexora;gpu;prod`, **hors vzdump** (tout se régénère ; modèles : sources sur la GB10) ; 192.168.1.124 |
+| RTX 2080 SUPER (hôte 06:00.0-.3, lien x4) | travailleur ComfyUI 0, port 8188 | `vfio-pci` sur l'hôte, pilote `nvidia` 595 dans la VM ; 243 W max mesurés, 35 W au repos |
+| RTX 2070 SUPER (hôte 01:00.0-.3, lien x16) | travailleur ComfyUI 1, port 8189, et services audio/texte, port 8190 | 212 W max mesurés, 14 W au repos |
+| Ports LAN | 8188, 8189, 8190 | pare-feu Proxmox : seulement 192.168.1.0/24 (+ SSH) ; jamais exposés ailleurs |
+| Hôte `pve` | `intel_iommu=on iommu=pt`, `vfio*`, `nouveau`/`nvidia` en liste noire | copies d'origine : `/root/backup-gpu-pc5/` (retour arrière : `docs/gpu-pc5.md`) |
+| Mémoire hôte | engagée : 22 Go → **30 Go** sur 62 Go | une seule VM nouvelle, 8 Go non ballonnables |
+
+Rétention : sorties ComfyUI dans `/srv/nexora-gpu/output/gpu{0,1}` à purger à la main (rien n'est sauvegardé) ; modèles non dupliqués inutilement (le lot A1 de 8,9 Go est copié une fois, seuls les 5 fichiers nécessaires). VM 9100 non touchée par ce travail, mais **arrêtée par le redémarrage de l'hôte** (pas de `onboot`) : à relancer ou supprimer par le fondateur.
