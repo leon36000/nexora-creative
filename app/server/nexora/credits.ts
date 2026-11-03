@@ -5,6 +5,8 @@
  * Les tarifs sont une **proposition** à valider par le fondateur ; ils vivent dans la configuration.
  */
 
+import { secondesObjet } from './objet3d.js';
+
 /** Secondes de calcul mesurées sur le DGX Spark GB10 (recherche/08), par moteur, nombre d'images et taille. */
 const MESURES_GB10: Record<string, Record<string, number>> = {
   // FastH3 : DGX Spark GB10 (anciennes mesures) ; RTX 5090 (31/10/2026) : 5 s en 832×480 en 23 s à chaud, 40 s à froid.
@@ -15,7 +17,7 @@ const MESURES_GB10: Record<string, Record<string, number>> = {
   'h3-max': { '124@1344x768': 129, '124@768x448': 29 },
 };
 
-export interface CorpsDevis { videoModel?: string; lengthFrames?: number; frames?: number; width?: number; height?: number }
+export interface CorpsDevis { kind?: string; quality?: string; videoModel?: string; lengthFrames?: number; frames?: number; width?: number; height?: number }
 
 /**
  * Temps GPU estimé : la mesure quand elle existe ; sinon extrapolation depuis la mesure de référence du moteur
@@ -23,6 +25,8 @@ export interface CorpsDevis { videoModel?: string; lengthFrames?: number; frames
  * ×4 pour 2,6× les pixels).
  */
 export function secondesGpuEstimees(c: CorpsDevis): number {
+  // Mode 3D (TRELLIS.2 sur la GB10) : secondes mesurées par détail, indépendantes de la taille de l'image.
+  if (c.kind === 'object') return secondesObjet(c.quality === 'quality' ? 'quality' : 'draft');
   const images = Number(c.lengthFrames ?? c.frames ?? 124);
   const w = c.width ?? 832;
   const h = c.height ?? 480;

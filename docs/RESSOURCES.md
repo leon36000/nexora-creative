@@ -45,6 +45,7 @@ Qui vit où : `docs/ENVIRONNEMENTS.md`. Journal des suppressions : `docs/JOURNAL
 |---|---|---|---|---|
 | `~/nexora-creative-data/models` | Nexora | 28 Go | permanente | garder |
 | `…/engine` | Nexora | 13 Go | permanente | garder |
+| `…/models/diffusion_models/trellis_2_int8_convrot.safetensors` (5,25 Go), `…/models/vae/trellis_2_{shape,texture}_vae_bf16.safetensors` (1,10 + 0,95 Go), `…/engine/ComfyUI/models/clip_vision/dino_v3_vit_l.safetensors` (1,21 Go), `…/models/background_removal/birefnet.safetensors` (0,44 Go) | Nexora Creative (mode 3D, TRELLIS.2) | 8,95 Go au total | permanente | lot A1 du 03/11/2026 (autorisé par le fondateur), variante int8 retenue au lieu du bf16 (10,34 Go, non téléchargé) ; dépôts Comfy-Org/TRELLIS.2 et Comfy-Org/BiRefNet (MIT ; DINOv3 sous licence Meta, copie Comfy-Org sans accès restreint) ; reste ≥ 21 Go libres sur `/` |
 | `…/promo`, `rendus`, `output` | Nexora / agent OPSYS-AI | 2,2 Go, 0,4 Go, 0,4 Go | finals vers pc5 | agent en cours : ne pas toucher |
 | `…/site-medias*` | Nexora site | 1,2 Go | jusqu'à publication | à archiver |
 | `…/app-data, input, apercus, logs, producteur-dev, cache-analyse` | Nexora Creative | 0,2 Go | 14 jours | README posé |

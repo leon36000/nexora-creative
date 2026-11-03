@@ -463,11 +463,11 @@ export const BUNDLES: Bundle[] = [
   {
     id: 'trellis2',
     label: 'Object (image to 3D, TRELLIS.2)',
-    purpose: 'The Object app and Make 3D on any still: TRELLIS.2 builds a textured mesh (GLB, PBR base color, metallic, roughness; High adds a baked normal map and AO) from one picture, through ComfyUI 0.38 built-in nodes. BiRefNet cuts the subject out first. bf16 weights, about 14 GB.',
+    purpose: 'The Object app and Make 3D on any still: TRELLIS.2 builds a textured mesh (GLB, PBR base color, metallic, roughness; High adds a baked normal map and AO) from one picture, through ComfyUI built-in nodes (pinned to 0.43.2 on the GB10). BiRefNet cuts the subject out first. int8 weights (convrot), about 9 GB; the bf16 variant (10.34 GB instead of 5.25 GB) works too with NEXORA_TRELLIS_MODELE.',
     license: 'TRELLIS.2 (microsoft/TRELLIS.2-4B, repackaged by Comfy-Org/TRELLIS.2): MIT, the DiT and both VAEs. BiRefNet (ZhengPeng7/BiRefNet, repackaged by Comfy-Org/BiRefNet): MIT. The DINOv3 ViT-L image encoder (facebook/dinov3, repackaged in Comfy-Org/TRELLIS.2) is under the Meta DINOv3 License: royalty-free, commercial use allowed, with acceptable-use exclusions (military and ITAR uses, reverse engineering); the Comfy repo tags it MIT, but the upstream weights carry the DINOv3 License (and Meta gates its own repo behind a manual approval).',
     optional: true,
     files: [
-      { file: 'trellis_2_bf16.safetensors', dir: 'diffusion_models', ...HF('Comfy-Org/TRELLIS.2', 'diffusion_models/trellis_2_bf16.safetensors', 10.34) },
+      { file: 'trellis_2_int8_convrot.safetensors', dir: 'diffusion_models', ...HF('Comfy-Org/TRELLIS.2', 'diffusion_models/trellis_2_int8_convrot.safetensors', 5.25) },
       { file: 'trellis_2_shape_vae_bf16.safetensors', dir: 'vae', ...HF('Comfy-Org/TRELLIS.2', 'vae/trellis_2_shape_vae_bf16.safetensors', 1.10) },
       { file: 'trellis_2_texture_vae_bf16.safetensors', dir: 'vae', ...HF('Comfy-Org/TRELLIS.2', 'vae/trellis_2_texture_vae_bf16.safetensors', 0.95) },
       { file: 'dino_v3_vit_l.safetensors', dir: 'clip_vision', ...HF('Comfy-Org/TRELLIS.2', 'clip_vision/dino_v3_vit_l.safetensors', 1.21) },

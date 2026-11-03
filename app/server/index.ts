@@ -72,6 +72,7 @@ import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, mo
 import type { DepsAgent } from './nexora/agent.js';
 import { ajusterProposition, depassement, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
+import { TOURNETTE_JUGE, jugerVuesObjet, plancheVuesDataUrl, prochaineEtapeTexte3D, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
 import {
   CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles, storeRef,
   setCastQueue, sheetPlan, type HeroOpts,
@@ -1703,6 +1704,7 @@ app.get('/api/nexora/etat', async () => {
     cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
     image: modeleImage() ? (modeleImage() === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
     musique: eng.recettesEnLigne().has('music3') ? 'MiniMax-Music3' : null,
+    objet3d: eng.recettesEnLigne().has('objet-apercu') || eng.recettesEnLigne().has('*') ? { apercu: true, qualite: eng.recettesEnLigne().has('objet-qualite') || eng.recettesEnLigne().has('*'), texte: !!modeleImage() || eng.recettesEnLigne().has('*') } : null,
   };
 });
 
@@ -1736,6 +1738,126 @@ app.post('/api/nexora/image', async (req, reply) => {
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
   return { ...res, prompt: r.prompt, source: r.source, modele: modele === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512' };
+});
+
+/**
+ * Mode 3D (TRELLIS.2 sur la GB10, recettes « objet-apercu » et « objet-qualite »).
+ * Image → 3D passe par /api/generate (kind « object »). Texte → 3D : une image de référence propre (objet seul, fond uni)
+ * par Qwen-Image, puis TRELLIS.2, puis le juge visuel note quatre côtés de l'objet ; une relance au plus si la note est basse.
+ * L'avancement est piloté par le statut (GET) : idempotent et sans état en mémoire, un redémarrage ne perd rien.
+ * Chaque prise GPU porte sa propre réservation de crédits, validée ou libérée par la boucle de réconciliation.
+ */
+app.post('/api/nexora/objet/devis', async (req) => {
+  const b = (req.body ?? {}) as any;
+  const q: QualiteObjet = b.qualite === 'quality' ? 'quality' : 'draft';
+  const secondes = b.source === 'texte' ? secondesTexteVers3D(q) : secondesObjet(q);
+  const t = tarifDepuisEnv();
+  return { secondesEstimees: secondes, credits: configAuth ? Math.max(1, Math.ceil(secondes * t.creditsParSecondeGpu)) : null, recette: recetteObjet(q) };
+});
+
+/** Réserve le devis d'une prise GPU lancée par le serveur, puis la met en file. */
+async function lancerPriseNexora(corps: any, libelle: string, devis: number): Promise<{ ok: true; takeId: number } | { ok: false; message: string }> {
+  const fac = facturationCourante();
+  let res: CreditsPrise | null = null;
+  if (fac) {
+    const r = await fac.reserver({ idempotence: randomUUID(), credits: devis, libelle });
+    if (!r.ok) return { ok: false, message: r.message };
+    res = { reservationId: r.reservationId, credits: r.credits, etat: 'reservee' };
+  }
+  try {
+    const [takeId] = await queueTakes(corps, 1);
+    if (res) takes.patchSettings(takeId, { nexoraCredits: res });
+    return { ok: true, takeId };
+  } catch (e) {
+    if (res) await fac?.liberer(res.reservationId).catch(() => {});
+    return { ok: false, message: e instanceof Error ? e.message : 'lancement impossible' };
+  }
+}
+
+app.post('/api/nexora/objet/texte', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
+  if (intention.length < 3) return reply.code(400).send({ error: 'Décris l’objet que tu veux en 3D (une chaise en bois, un robot jouet…).' });
+  if (intention.length > 1000) return reply.code(400).send({ error: 'Description trop longue (1 000 caractères au plus).' });
+  const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
+  if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
+  const qualite: QualiteObjet = b.qualite === 'quality' ? 'quality' : 'draft';
+  const manque = await blockingReasonFor(eng.isLocal() && eng.recetteSurPrincipal(recetteObjet(qualite)), bundlesFor({ kind: 'object' }));
+  if (manque) return reply.code(412).send({ error: manque });
+  const modele = modeleImage() ?? 'qwen21';
+  const corps: any = {
+    kind: 'still', model: modele, quality: 'quality', prompt: promptReferenceObjet(intention), width: 1024, height: 1024, count: 1,
+    intention, app: 'nexora-objet-ref', shotName: `objet_${intention.slice(0, 40)}`,
+  };
+  const res = await generate(corps, reply);
+  if (reply.sent || (res && (res as any).error)) return res;
+  const id = (res as any).takeIds[0] as number;
+  const etat: EtatTexte3D = { phase: 'image', essai: 1, tentatives: [], notes: [] };
+  takes.patchSettings(id, { objet3d: { intention, qualite, etat } });
+  return { id, secondesEstimees: secondesTexteVers3D(qualite), credits: (res as any).credits };
+});
+
+const chaines3d = new Set<number>();
+
+async function avancerTexte3D(id: number): Promise<void> {
+  for (let tour = 0; tour < 5; tour++) {
+    const t = takes.get(id);
+    const o = t ? JSON.parse(t.settings).objet3d : null;
+    if (!t || !o) return;
+    const e = o.etat as EtatTexte3D;
+    const derniere = e.tentatives[e.tentatives.length - 1];
+    const etape = prochaineEtapeTexte3D(e, { image: t.status as any, objet: derniere ? (takes.get(derniere)?.status as any) : undefined });
+    const ecrire = (patch: Record<string, unknown>) => takes.patchSettings(id, { objet3d: { ...o, ...patch, etat: { ...e, ...(patch.etat as object ?? {}) } } });
+    if (etape.action === 'attendre') return;
+    if (etape.action === 'echec') { ecrire({ erreur: etape.motif, etat: { phase: 'echec' } }); return; }
+    if (etape.action === 'finir') { ecrire({ retenu: etape.retenu, etat: { phase: 'fini' } }); return; }
+    if (etape.action === 'lancer-objet') {
+      const q: QualiteObjet = o.qualite;
+      const r = await lancerPriseNexora(
+        { kind: 'object', app: 'nexora-objet', quality: q, sourceTake: id, removeBackground: true, tournette: TOURNETTE_JUGE.frames, ...(etape.essai > 1 ? { seed: Math.floor(Math.random() * 1e9) } : {}),
+          shotName: `objet3d_${String(o.intention).slice(0, 30)}`, userPrompt: `3D : ${String(o.intention).slice(0, 80)}`, nexoraObjetDe: id },
+        'Nexora Creative · objet 3D', Math.max(1, Math.ceil(secondesObjet(q) * tarifDepuisEnv().creditsParSecondeGpu)));
+      if (!r.ok) { ecrire({ erreur: r.message, etat: { phase: 'echec' } }); return; }
+      ecrire({ etat: { phase: 'objet', essai: etape.essai, tentatives: [...e.tentatives, r.takeId] } });
+      continue;
+    }
+    // juger : quatre côtés tirés de la tournette, une note du juge ; sans juge ou sans tournette, l'objet est gardé tel quel
+    const objet = takes.get(derniere);
+    let note: { take: number; note: number } | null = null;
+    let verdict: Awaited<ReturnType<typeof jugerVuesObjet>> = null;
+    try {
+      const tournette = objet?.output_path ? `${objet.output_path}.turntable.mp4` : '';
+      if (tournette && existsSync(tournette)) {
+        const planche = await plancheVuesDataUrl(config.ffmpegBin, tournette, `${tournette}.vues.jpg`);
+        verdict = await jugerVuesObjet(llmCourant(), String(o.intention), planche);
+      }
+    } catch (err) {
+      app.log.warn(`[objet3d] juge indisponible : ${err instanceof Error ? err.message : err}`);
+    }
+    if (verdict) note = { take: derniere, note: verdict.note };
+    const decision = decisionApresJuge(e.essai, verdict);
+    const jugements = [...(o.jugements ?? []), ...(verdict ? [{ take: derniere, ...verdict }] : [])];
+    ecrire({ jugements, etat: { phase: 'jugement', notes: note ? [...e.notes, note] : e.notes } });
+    if (decision === 'garder' && !note) { ecrire({ jugements, retenu: derniere, etat: { phase: 'fini', notes: e.notes } }); return; }
+  }
+}
+
+app.get('/api/nexora/objet/:take', async (req, reply) => {
+  const id = Number((req.params as any).take);
+  const lire = () => { const t = takes.get(id); return t ? { t, o: JSON.parse(t.settings).objet3d } : null; };
+  let cur = lire();
+  if (!cur?.o) return reply.code(404).send({ error: 'Création 3D introuvable.' });
+  if (cur.o.etat.phase !== 'fini' && cur.o.etat.phase !== 'echec' && !chaines3d.has(id)) {
+    chaines3d.add(id);
+    try { await avancerTexte3D(id); } finally { chaines3d.delete(id); }
+    cur = lire()!;
+  }
+  const { t, o } = cur;
+  const e = o.etat as EtatTexte3D;
+  return {
+    etat: e.phase, essai: e.essai, image: t.id, objet: e.phase === 'fini' ? o.retenu : e.tentatives[e.tentatives.length - 1] ?? null,
+    notes: o.jugements ?? [], erreur: o.erreur ?? null, qualite: o.qualite, intention: o.intention,
+  };
 });
 
 /**
@@ -2164,6 +2286,7 @@ function recettesDuParc(): Set<string> {
 /** Recette d'une demande : ce qui décide du moteur GPU (H3 → RTX 5090 ; image et musique → GB10). */
 function recetteDe(b: any): string | undefined {
   if (b?.kind === 'musique') return 'music3';
+  if (b?.kind === 'object') return recetteObjet(b.quality === 'quality' ? 'quality' : 'draft');
   if (b?.kind === 'still') return b.model === 'flux2' ? 'flux2' : b.model === 'qwen21' ? 'qwen21' : 'qwen';
   return typeof b?.videoModel === 'string' ? b.videoModel : undefined;
 }
@@ -2650,7 +2773,7 @@ async function objectGraph(b: any, seed: number): Promise<Built> {
   const q = OBJECT_QUALITY[quality];
   return {
     kind: 'object', parent,
-    graph: buildTrellisGraph({ image, seed, quality, removeBackground }),
+    graph: buildTrellisGraph({ image, seed, quality, removeBackground, ...(Number.isFinite(Number(b.tournette)) ? { turntableFrames: Math.max(0, Math.min(TURNTABLE.frames, Math.floor(Number(b.tournette)))) } : {}) }),
     settings: {
       app: 'object', quality, removeBackground, image, sourceTake: parent, ...named,
       faces: q.faces, texture: q.texture, resolution: q.resolution,

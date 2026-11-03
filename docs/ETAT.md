@@ -6,6 +6,22 @@ Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'es
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
 
+## Mise à jour du 03/11 (soir) : le mode « 3D » à la façon de Meshy, première tranche
+
+Branche `feat/mode-3d` (recherche/18). **Image → 3D** et **Texte → 3D** tournent de bout en bout sur la GB10 (TRELLIS.2, nœuds ComfyUI 0.43.2, pur PyTorch, aucun noyau à compiler).
+
+| Brique | État | Preuve |
+|---|---|---|
+| Poids lot A1 en **int8** (5,25 Go au lieu de 10,34 Go ; 8,95 Go au total) | **téléchargés, fonctionnent sur sm_121** | `docs/RESSOURCES.md` ; ≥ 21 Go libres après |
+| Mesure TRELLIS.2 sur GB10 (chaise en chêne, image Qwen-Image-2.1) | **faite** | aperçu **38 s** à chaud (46 s à froid), 150 000 faces, GLB 9,9 Mo ; qualité **162 s**, 400 000 faces, GLB 45 Mo ; image de référence 24 s |
+| Recettes `objet-apercu` et `objet-qualite`, devis en crédits (secondes mesurées), `NEXORA_MOTEUR_RECETTES` | **faits, testés** (18 tests) | `server/nexora/objet3d.ts` ; ComfyUI **figé à 0.43.2** (les noms de nœuds du graphe `trellis.ts` sont ceux de cette version : relancer le banc `scripts/bench-3d.ts` à chaque mise à jour du moteur) |
+| Page Object : visionneuse 3D, textures / argile / fil de fer, téléchargement GLB | **vérifiée** dans Chromium (WebGL logiciel) | `marketing/creative/captures-v3/3d-*.jpg` |
+| **Texte → 3D** : image de référence propre, TRELLIS.2, juge sur 4 côtés, une relance au plus | **de bout en bout prouvé** (« chaise en bois clair », « robot jouet ») ; **juge non prouvé en réel** | le passerelle LLM de développement n'a aucun modèle vision : sans juge, l'objet est gardé sans note (repli prévu et testé) |
+
+**Qualité honnête** : aperçu 7,5/10, qualité 7/10 sur la chaise (forme cohérente des quatre côtés, pieds et dossier propres ; en qualité la texture bruitée laisse des taches et des bavures sous l'assise). Planches : `marketing/creative/captures-v3/3d-planche-chaise-*.jpg` (outil `scripts/planche-3d.mjs`). Plafond connu : pas de topologie quad, pas de rigging (rapport 18).
+
+Limites : pas de multi-images, retexture, formats autres que GLB, ni polycount réglable dans l'interface ; le juge visuel attend un modèle vision branché sur le LLM ; la VM 202 ne porte pas la GB10 : le mode ne s'y active qu'avec le moteur GB10 déclaré (voir `deploy/proxmox/creative.env.example`).
+
 ## Mise à jour du 03/11 : l'agent à trois paliers, facturé au jeton
 
 Branche `feat/agent-3-niveaux` (recherche/19). Éco (DeepSeek V4.1 Flash, DeepInfra), Équilibré (Muse Spark 1.3) et Expert (Gemini 4 Argon **Flex**, 1 $ / 5 $ par M) pour le tournage, le montage et le Producteur ; en ligne sur la VM 202.

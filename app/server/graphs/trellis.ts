@@ -31,7 +31,11 @@
 type Graph = Record<string, unknown>;
 type Link = [string, number];
 
-export const TRELLIS_MODEL = 'trellis_2_bf16.safetensors';
+/**
+ * Poids de forme/texture. GB10 : variante int8 (5,25 Go, moitié moins de disque), la seule installée ;
+ * le bf16 d'origine reste utilisable en posant NEXORA_TRELLIS_MODELE=trellis_2_bf16.safetensors.
+ */
+export const TRELLIS_MODEL = process.env.NEXORA_TRELLIS_MODELE ?? 'trellis_2_int8_convrot.safetensors';
 export const TRELLIS_SHAPE_VAE = 'trellis_2_shape_vae_bf16.safetensors';
 export const TRELLIS_TEXTURE_VAE = 'trellis_2_texture_vae_bf16.safetensors';
 export const TRELLIS_ENCODER = 'dino_v3_vit_l.safetensors';
