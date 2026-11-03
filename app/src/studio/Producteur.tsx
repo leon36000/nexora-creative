@@ -117,6 +117,15 @@ export default function Producteur({ onOuvrirFilm, objectif }: { onOuvrirFilm: (
                 {liste.map((x) => <option key={x.id} value={x.id}>{x.titre.slice(0, 40)}</option>)}
               </select>
             )}
+            {session && Object.values(session.paliers).some(Boolean) && (
+              <div className="pr-paliers" role="group" aria-label="Niveau de l’agent">
+                {(['eco', 'equilibre', 'expert'] as const).filter((p) => session.paliers[p]).map((p) => (
+                  <button key={p} type="button" className={`st-bouton${(session.palier ?? session.palierEffectif) === p ? ' actif' : ''}`} aria-pressed={(session.palier ?? session.palierEffectif) === p}
+                    title={{ eco: 'Le moins cher : DeepSeek V4.1 Flash', equilibre: 'Muse Spark 1.3', expert: 'Gemini 4 Argon (Flex)' }[p]}
+                    onClick={() => void api.producteurPalier(session.id, p).then(setSession).catch(() => {})}>{{ eco: 'Éco', equilibre: 'Équilibré', expert: 'Expert' }[p]}</button>
+                ))}
+              </div>
+            )}
             <button type="button" className="st-bouton" onClick={nouvelle} disabled={!session}>Nouvelle</button>
           </div>
         </div>
@@ -248,6 +257,12 @@ function CarteProposition({ p, session, occupe, ajuster, valider }: {
         <div><span className="st-etiq">Rendus</span><b>{d.rendus}</b></div>
         <button type="button" className="st-go" disabled={occupe} onClick={valider}>{occupe ? <><IcRond /> Un instant…</> : 'Valider et lancer'}</button>
       </div>
+      {session.usage && (
+        <p className="st-credit" data-testid="usage-agent">
+          Agent {session.usage.dernier?.palier ?? ''} · {session.usage.entree.toLocaleString('fr-CA')} jetons lus, {session.usage.sortie.toLocaleString('fr-CA')} écrits ({session.usage.appels} appels)
+          {' '}· {session.usage.creditsExacts.toFixed(2)} crédit{session.usage.creditsExacts >= 2 ? 's' : ''} d’IA{session.credits ? `, ${session.usage.creditsFactures} facturé${session.usage.creditsFactures > 1 ? 's' : ''}` : ' (rien n’est débité sur ce poste)'}.
+        </p>
+      )}
       {session.credits && <p className="st-credit">Plafond : {session.plafond.credits} crédits par production. Les échecs techniques ne sont pas facturés.</p>}
     </div>
   );

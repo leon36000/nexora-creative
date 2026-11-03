@@ -181,8 +181,11 @@ describe('mémoire AMD', () => {
   });
   it('récupère UN exemplaire adapté au genre et au format, et respecte l’exclusion', () => {
     const b = BRIEFS.find((x) => x.id === 'bande-annonce-c')!;
-    expect(recupererSavoir(b).segment?.id).toBe('seg-bande-annonce-bataille');
-    expect(recupererSavoir(b, { exclure: ['seg-bande-annonce-bataille'] }).segment?.id).not.toBe('seg-bande-annonce-bataille');
+    // Les graines du professeur (seg-claude-*) concourent aussi : on les écarte pour tester la sélection des graines d'origine.
+    const claude = chargerMemoire().segments.map((s) => s.id).filter((i) => i.startsWith('seg-claude-'));
+    expect(recupererSavoir(b, { exclure: claude }).segment?.id).toBe('seg-bande-annonce-bataille');
+    expect(recupererSavoir(b).segment?.genre).toContain('bande-annonce');
+    expect(recupererSavoir(b, { exclure: [...claude, 'seg-bande-annonce-bataille'] }).segment?.id).not.toBe('seg-bande-annonce-bataille');
     expect(recupererSavoir(BRIEFS.find((x) => x.id === 'social-a')!).segment?.id).toBe('seg-social-surveillance-9x16');
     expect(recupererSavoir(BRIEFS.find((x) => x.id === 'explicatif-b')!).segment?.id).toBe('seg-explicatif-voix-musique');
   });
