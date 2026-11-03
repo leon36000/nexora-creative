@@ -203,7 +203,7 @@ class Typo:
         elif style == "citation":
             f = self.police("mono", s * (0.046 if v else 0.042) * echelle, "Medium")
             n = int(len(txt) * min(1.0, u / max(0.2, spec.get("frappe", 0.04 * len(txt)))))
-            ls, esp = self.lignes([(m, False) for m in ("« " + txt[:n] + (" »" if n == len(txt) else "▍")).split()], f, x1 - x0, 0)
+            ls, esp = self.lignes([(m, False) for m in ((("« " if spec.get("guillemets", True) else "") + txt[:n] + ((" »" if spec.get("guillemets", True) else "") if n == len(txt) else "▍")).split())], f, x1 - x0, 0)
             pas = f.size * 1.4
             hh = len(ls) * pas
             yb = {"haut": y0, "bas": y1 - hh, "centre": (y0 + y1 - hh) / 2}[vert]

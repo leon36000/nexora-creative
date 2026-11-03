@@ -51,6 +51,7 @@ def configurer(marque, produit, textes, cache):
 def limiter_crete(mixer_v4):
     """Après le mixage V4 (−14 LUFS) : loudnorm suréchantillonné (−14 LUFS, crête vraie visée −3 dBTP : l'encodage AAC ajoute jusqu'à 1,5 dB de dépassement, mesuré)."""
     def mixer(m, segs, duree, sortie_wav):
+        segs = [dict(s, plaque=s["plaque"].replace("{l}", LANGUE)) if isinstance(s.get("plaque"), str) else s for s in segs]
         # « duck » d'un segment (dB, négatif) : la musique baisse sous une voix (son natif du plan), rampes de 0,25 s
         ducks = [(s["t"], s["t"] + s["d"], s["duck"]) for s in segs if s.get("duck")]
         fichiers = {str(M.chemin(mu["fichier"])) for mu in m.get("musique", [])}
@@ -241,6 +242,8 @@ def image_fin(seg, t, W, H, L):
 
 
 def construire(montage, marque, produit, textes, cache, fmt, langue, sortie, version="long", animatique=False, jobs=10):
+    global LANGUE
+    LANGUE = langue  # le mixage lit aussi les sons natifs des plaques « {l} » (voix de l'avatar par langue)
     configurer(marque, produit, textes, cache)
     M.construire(montage, fmt, langue, sortie, version, animatique, jobs)
 

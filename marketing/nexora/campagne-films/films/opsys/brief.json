@@ -1,0 +1,1908 @@
+{
+ "_gabarit": "Généré par fabriquer_brief.py ; éditer le script, pas ce fichier.",
+ "film": "opsys",
+ "titre": "OPSYS-AI : Ils travaillent. Vous vivez.",
+ "nom_fichier": "OPSYS-AI",
+ "produit": "OPSYS-AI",
+ "date": "2026-11-02",
+ "marque": "../../marque.json",
+ "travail": "~/nexora-creative-data/promo/v6/opsys/film",
+ "captures": "~/nexora-creative-data/promo/v6/opsys/captures",
+ "concept": "Film de vision : la journée d'un entrepreneur pendant que ses dix départements OPSYS travaillent ; au centre, l'avatar (visage animé par Audio2Face-3D à partir de sa voix) répond et demande l'accord. Voir CONCEPT.md et FAITS.md.",
+ "public": "propriétaires de PME de services (rénovation au Québec d'abord) qui font tout eux-mêmes",
+ "formats": [
+  "16x9",
+  "9x16"
+ ],
+ "langues": [
+  "fr",
+  "en"
+ ],
+ "affiche": {
+  "t": 6.0,
+  "langue": "fr"
+ },
+ "note_manifeste": "Film de vision. Plans de vie et de chantier générés par IA (Qwen-Image puis H3). Avatar : visage animé par NVIDIA Audio2Face-3D v2.3.1 (modèle ouvert, exécuté localement en ONNX), rendu « Signal » maison, voix synthétique Kokoro-82M ; répliques écrites pour le film. La conversation vocale avec un avatar n'existe pas encore dans OPSYS-AI (vision) ; aucun composant NVIDIA ACE autre qu'Audio2Face-3D n'est utilisé.",
+ "commandes": {
+  "plaques": "",
+  "captures": ""
+ },
+ "musique": {
+  "fichier": "~/nexora-creative-data/promo/v6/opsys/audio/opsys-musique-71.flac",
+  "brief": "MiniMax-Music3 graine 71 (demandé 100 BPM, 94 s ; rendu 76,9 s), mesuré 88,63 BPM (demi-temps 0,3385 s, phase 0,095 s) ; coups à 6,19 s, 33,0 s, 36,25 s, 53,5 s ; cassure 34-37 s.",
+  "bpm": 88.63,
+  "subdivision": 0.5,
+  "repere_source": 6.1885
+ },
+ "segments": {
+  "q1": {
+   "type": "noir",
+   "d": 3.3849,
+   "textes": [
+    {
+     "t": 0.25,
+     "d": 3.1349,
+     "cle": "q1",
+     "style": "citation",
+     "zone": "centre",
+     "align": "centre",
+     "guillemets": false,
+     "frappe": 1.1,
+     "taille": 1.9
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.25,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.33999999999999997,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.43,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.52,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.61,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.7,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.79,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.88,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.97,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.06,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.15,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.24,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.6,
+     "type": "montee",
+     "duree": 1.7849,
+     "db": -24
+    }
+   ]
+  },
+  "a": {
+   "type": "plan",
+   "d": 8.8006,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-a-{l}-16x9.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-a-{l}-9x16.mp4",
+   "debut": 0.0,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     8.8006,
+     0.52,
+     0.48,
+     0.94
+    ]
+   ],
+   "cadre_vv": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     8.8006,
+     0.5,
+     0.47,
+     0.94
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "son_h3": 3.0,
+   "duck": -11.0,
+   "en_preparation": true,
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 8.8006,
+     "cle": "vision",
+     "style": "prepa",
+     "zone": "bas",
+     "y": 0.9,
+     "y_v": 0.93
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "impact",
+     "duree": 1.6,
+     "db": -18
+    }
+   ]
+  },
+  "a15": {
+   "type": "plan",
+   "d": 5.0773,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-a15-{l}-16x9.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-a15-{l}-9x16.mp4",
+   "debut": 0.0,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     5.0773,
+     0.52,
+     0.48,
+     0.94
+    ]
+   ],
+   "cadre_vv": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     5.0773,
+     0.5,
+     0.47,
+     0.94
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "son_h3": 3.0,
+   "duck": -11.0,
+   "en_preparation": true,
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 5.0773,
+     "cle": "vision",
+     "style": "prepa",
+     "zone": "bas",
+     "y": 0.9,
+     "y_v": 0.93
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "impact",
+     "duree": 1.6,
+     "db": -18
+    }
+   ]
+  },
+  "dix": {
+   "type": "noir",
+   "d": 2.7079,
+   "textes": [
+    {
+     "t": 0.05,
+     "d": 2.6579,
+     "cle": "dix",
+     "style": "impact",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 0.9
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "impact",
+     "duree": 1.4,
+     "db": -19
+    }
+   ]
+  },
+  "l1-course": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/l1-course-max.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/l1-course-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.55,
+    "h": 1.0
+   },
+   "voile_v": {
+    "v": 0.6,
+    "h": 1.0
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "v1h",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.7,
+     "y": 0.38,
+     "y_v": 0.4
+    },
+    {
+     "t": 0.1,
+     "d": 2.6079,
+     "cle": "v1",
+     "style": "impact",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.0
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ]
+  },
+  "l2-dejeuner": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/l2-dejeuner-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/l2-dejeuner-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.55,
+    "h": 1.0
+   },
+   "voile_v": {
+    "v": 0.6,
+    "h": 1.0
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "v2h",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.7,
+     "y": 0.38,
+     "y_v": 0.4
+    },
+    {
+     "t": 0.1,
+     "d": 2.6079,
+     "cle": "v2",
+     "style": "impact",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.0
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ]
+  },
+  "l3-terrasse": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/l3-terrasse-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/l3-terrasse-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.55,
+    "h": 1.0
+   },
+   "voile_v": {
+    "v": 0.6,
+    "h": 1.0
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "v3h",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.7,
+     "y": 0.38,
+     "y_v": 0.4
+    },
+    {
+     "t": 0.1,
+     "d": 2.6079,
+     "cle": "v3",
+     "style": "impact",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.0
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ]
+  },
+  "l4-hockey": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/l4-hockey-max2.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/l4-hockey-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.55,
+    "h": 1.0
+   },
+   "voile_v": {
+    "v": 0.6,
+    "h": 1.0
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "v4h",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.7,
+     "y": 0.38,
+     "y_v": 0.4
+    },
+    {
+     "t": 0.1,
+     "d": 2.6079,
+     "cle": "v4",
+     "style": "impact",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.0
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ]
+  },
+  "m1-appel": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m1-appel-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m1-appel-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d1m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d1",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "m3-maison": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m3-maison-max.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m3-maison-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d3m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d3",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "m4-camion": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m4-camion-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m4-camion-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d4m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d4",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "m6-entrepot": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m6-entrepot-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m6-entrepot-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d6m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d6",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "m5-bureau": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m5-bureau-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m5-bureau-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d5m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d5",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "m7-photo": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m7-photo-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m7-photo-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d7m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d7",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "m2-porte": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m2-porte-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m2-porte-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d2m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d2",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "m9-matin": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/plaques/m9-matin-rapide.mp4",
+   "cle": "~/nexora-creative-data/promo/v6/opsys/plaques/m9-matin-cle.png",
+   "debut": 0.2,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.93
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.7079,
+     0.5,
+     0.5,
+     0.95
+    ]
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   },
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d9m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d9",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    },
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.12,
+     "db": -20
+    }
+   ]
+  },
+  "q2": {
+   "type": "noir",
+   "d": 2.7079,
+   "textes": [
+    {
+     "t": 0.2,
+     "d": 2.5079,
+     "cle": "q2",
+     "style": "citation",
+     "zone": "centre",
+     "align": "centre",
+     "guillemets": false,
+     "frappe": 1.2,
+     "taille": 1.9
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.2,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.29000000000000004,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.38,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.47000000000000003,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.56,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.6499999999999999,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.74,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.8300000000000001,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 0.9199999999999999,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.01,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.0999999999999999,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.19,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    },
+    {
+     "t": 1.28,
+     "type": "clic",
+     "duree": 0.05,
+     "db": -30
+    }
+   ]
+  },
+  "b": {
+   "type": "plan",
+   "d": 6.7697,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-b-{l}-16x9.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-b-{l}-9x16.mp4",
+   "debut": 0.0,
+   "cadre": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     6.7697,
+     0.52,
+     0.48,
+     0.94
+    ]
+   ],
+   "cadre_vv": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     6.7697,
+     0.5,
+     0.47,
+     0.94
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "son_h3": 3.0,
+   "duck": -11.0,
+   "en_preparation": true,
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 6.7697,
+     "cle": "vision",
+     "style": "prepa",
+     "zone": "bas",
+     "y": 0.9,
+     "y_v": 0.93
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "impact",
+     "duree": 1.6,
+     "db": -18
+    }
+   ]
+  },
+  "ok": {
+   "type": "noir",
+   "d": 1.3539,
+   "textes": [
+    {
+     "t": 0.05,
+     "d": 1.3039,
+     "cle": "ok",
+     "style": "impact",
+     "zone": "centre",
+     "align": "centre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.15,
+     "db": -12
+    },
+    {
+     "t": 0.02,
+     "type": "impact",
+     "duree": 1.2,
+     "db": -18
+    }
+   ]
+  },
+  "m10": {
+   "type": "plan",
+   "d": 2.7079,
+   "plaque": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-a-{l}-16x9.mp4",
+   "plaque_v": "~/nexora-creative-data/promo/v6/opsys/avatar/avatar-a-{l}-9x16.mp4",
+   "debut": 3.0,
+   "cadre": [
+    [
+     0,
+     0.62,
+     0.5,
+     0.42
+    ],
+    [
+     2.7079,
+     0.62,
+     0.5,
+     0.34
+    ]
+   ],
+   "cadre_vv": [
+    [
+     0,
+     0.44,
+     0.36,
+     0.5
+    ],
+    [
+     2.7079,
+     0.44,
+     0.36,
+     0.42
+    ]
+   ],
+   "cadre_v": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ]
+   ],
+   "son_h3": null,
+   "duck": null,
+   "en_preparation": false,
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 2.7079,
+     "cle": "d10m",
+     "style": "sur",
+     "zone": "bas",
+     "y": 0.585,
+     "y_v": 0.585,
+     "taille": 1.5
+    },
+    {
+     "t": 0.12,
+     "d": 2.5879,
+     "cle": "d10",
+     "style": "titre",
+     "zone": "bas",
+     "taille": 1.25
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "fouet",
+     "duree": 0.3,
+     "db": -26
+    }
+   ],
+   "voile": {
+    "v": 0.8,
+    "h": 0.5
+   },
+   "voile_v": {
+    "v": 0.82,
+    "h": 0.44
+   }
+  },
+  "liste": {
+   "type": "noir",
+   "d": 4.0618,
+   "textes": [
+    {
+     "t": 0.0,
+     "d": 4.0618,
+     "cle": "n1",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.12,
+     "y_v": 0.25
+    },
+    {
+     "t": 0.27,
+     "d": 3.7918,
+     "cle": "n2",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.196,
+     "y_v": 0.302
+    },
+    {
+     "t": 0.54,
+     "d": 3.5218,
+     "cle": "n3",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.272,
+     "y_v": 0.354
+    },
+    {
+     "t": 0.81,
+     "d": 3.2518,
+     "cle": "n4",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.348,
+     "y_v": 0.406
+    },
+    {
+     "t": 1.08,
+     "d": 2.9818,
+     "cle": "n5",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.424,
+     "y_v": 0.458
+    },
+    {
+     "t": 1.35,
+     "d": 2.7117999999999998,
+     "cle": "n6",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.5,
+     "y_v": 0.51
+    },
+    {
+     "t": 1.62,
+     "d": 2.4417999999999997,
+     "cle": "n7",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.576,
+     "y_v": 0.562
+    },
+    {
+     "t": 1.89,
+     "d": 2.1718,
+     "cle": "n8",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.652,
+     "y_v": 0.614
+    },
+    {
+     "t": 2.16,
+     "d": 1.9017999999999997,
+     "cle": "n9",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.728,
+     "y_v": 0.666
+    },
+    {
+     "t": 2.43,
+     "d": 1.6317999999999997,
+     "cle": "n10",
+     "style": "sur",
+     "zone": "centre",
+     "align": "centre",
+     "taille": 1.9,
+     "y": 0.804,
+     "y_v": 0.718
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 0.27,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 0.54,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 0.81,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 1.08,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 1.35,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 1.62,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 1.89,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 2.16,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 2.43,
+     "type": "clic",
+     "duree": 0.08,
+     "db": -22
+    },
+    {
+     "t": 0.0,
+     "type": "montee",
+     "duree": 4.0618,
+     "db": -22
+    }
+   ]
+  },
+  "grande": {
+   "type": "noir",
+   "d": 3.3849,
+   "textes": [
+    {
+     "t": 0.05,
+     "d": 3.3349,
+     "cle": "grande",
+     "style": "titre",
+     "zone": "centre",
+     "align": "centre"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 0.0,
+     "type": "impact",
+     "duree": 1.6,
+     "db": -18
+    }
+   ]
+  },
+  "silence": {
+   "type": "noir",
+   "d": 0.3385
+  },
+  "fin": {
+   "type": "fin",
+   "d": 5.4158,
+   "t_marque": 1.3539,
+   "sfx": [
+    {
+     "t": 1.3539,
+     "type": "impact",
+     "duree": 1.8,
+     "db": -17
+    }
+   ]
+  }
+ },
+ "versions": {
+  "long": {
+   "cible": 90,
+   "ordre": [
+    "q1",
+    "a",
+    "dix",
+    "l1-course",
+    "m1-appel",
+    "m3-maison",
+    "l2-dejeuner",
+    "m4-camion",
+    "m6-entrepot",
+    "m5-bureau",
+    "l3-terrasse",
+    "m7-photo",
+    "m2-porte",
+    "m9-matin",
+    "l4-hockey",
+    "q2",
+    "b",
+    "ok",
+    "m10",
+    "liste",
+    "grande",
+    "silence",
+    "fin"
+   ],
+   "musique": {
+    "repere_segment": "a",
+    "repere_decalage": 0.0,
+    "arret_segment": "silence",
+    "silence": "silence",
+    "queue": {
+     "segment": "fin",
+     "source": 69.0,
+     "db": -2
+    }
+   }
+  },
+  "30": {
+   "cible": 30,
+   "ordre": [
+    "q1",
+    "a15",
+    "dix",
+    "m1-appel",
+    "m3-maison",
+    "m5-bureau",
+    "l4-hockey",
+    "silence",
+    {
+     "id": "fin",
+     "d": 4.7388,
+     "t_marque": 1.0155
+    }
+   ],
+   "musique": {
+    "repere_segment": "a15",
+    "repere_decalage": 0.0,
+    "arret_segment": "silence",
+    "silence": "silence",
+    "queue": {
+     "segment": "fin",
+     "source": 69.0,
+     "db": -2
+    }
+   }
+  },
+  "15": {
+   "cible": 15,
+   "ordre": [
+    "a15",
+    "m3-maison",
+    "l4-hockey",
+    "silence",
+    {
+     "id": "fin",
+     "d": 4.0618,
+     "t_marque": 1.0155
+    }
+   ],
+   "musique": {
+    "repere_segment": "a15",
+    "repere_decalage": 0.0,
+    "arret_segment": "silence",
+    "silence": "silence",
+    "queue": {
+     "segment": "fin",
+     "source": 69.0,
+     "db": -2
+    }
+   }
+  }
+ },
+ "textes": {
+  "fr": {
+   "q1": "« Opsys, on en est où ? »",
+   "vision": "Vision · en développement",
+   "dix": "Dix départements.|*Une seule équipe.*",
+   "v1h": "06 h 12",
+   "v1": "Vous *courez.*",
+   "v2h": "07 h 40",
+   "v2": "Vous *déjeunez.*",
+   "v3h": "17 h 45",
+   "v3": "Vous *respirez.*",
+   "v4h": "19 h 30",
+   "v4": "Vous êtes *là.*",
+   "d1m": "M1 · Réception",
+   "d1": "Chaque demande,|*qualifiée.*",
+   "d3m": "M3 · Estimation",
+   "d3": "La soumission,|*prête* au réveil.",
+   "d4m": "M4 · Terrain",
+   "d4": "L'équipe,|au *bon* chantier.",
+   "d6m": "M6 · Matériel",
+   "d6": "Le matériel,|*réservé.*",
+   "d5m": "M5 · Finance",
+   "d5": "Chantier fini.|Facture *prête.*",
+   "d7m": "M7 · Marketing",
+   "d7": "Votre chantier devient|une *publication.*",
+   "d2m": "M2 · CRM",
+   "d2": "Aucun client|*oublié.*",
+   "d9m": "M9 · Stratégie",
+   "d9": "Votre briefing,|à *7 h.*",
+   "q2": "« Le deuxième camion, on peut ? »",
+   "ok": "*Approuvé.*",
+   "d10m": "M10 · Mémoire",
+   "d10": "Chaque décision,|*retenue.*",
+   "grande": "Une grande entreprise.|À *votre* taille.",
+   "slogan": "Ils travaillent.|Vous *vivez.*",
+   "sous_titre": "Dix départements IA pour votre PME.",
+   "mentions": "Film de vision : avatar et envois en développement · plans générés par IA · visage animé par Audio2Face-3D · voix synthétique",
+   "n1": "M1 Réception",
+   "n2": "M2 CRM",
+   "n3": "M3 Estimation",
+   "n4": "M4 Terrain",
+   "n5": "M5 Finance",
+   "n6": "M6 Matériel",
+   "n7": "M7 Marketing",
+   "n8": "M8 Analytique",
+   "n9": "M9 Stratégie",
+   "n10": "M10 Mémoire"
+  },
+  "en": {
+   "q1": "“Opsys, where are we?”",
+   "vision": "Vision · in development",
+   "dix": "Ten departments.|*One team.*",
+   "v1h": "6:12 a.m.",
+   "v1": "You *run.*",
+   "v2h": "7:40 a.m.",
+   "v2": "You have *breakfast.*",
+   "v3h": "5:45 p.m.",
+   "v3": "You *breathe.*",
+   "v4h": "7:30 p.m.",
+   "v4": "You're *there.*",
+   "d1m": "M1 · Front office",
+   "d1": "Every request,|*qualified.*",
+   "d3m": "M3 · Estimating",
+   "d3": "The quote,|*ready* by morning.",
+   "d4m": "M4 · Field ops",
+   "d4": "The crew,|at the *right* job.",
+   "d6m": "M6 · Materials",
+   "d6": "Materials,|*reserved.*",
+   "d5m": "M5 · Finance",
+   "d5": "Job done.|Invoice *ready.*",
+   "d7m": "M7 · Marketing",
+   "d7": "Your finished job|becomes a *post.*",
+   "d2m": "M2 · CRM",
+   "d2": "No client|*forgotten.*",
+   "d9m": "M9 · Strategy",
+   "d9": "Your briefing,|at *7 a.m.*",
+   "q2": "“Can we afford a second truck?”",
+   "ok": "*Approved.*",
+   "d10m": "M10 · Memory",
+   "d10": "Every decision,|*remembered.*",
+   "grande": "Big-company muscle.|At *your* size.",
+   "slogan": "They work.|You *live.*",
+   "sous_titre": "Ten AI departments for your business.",
+   "mentions": "Vision film: avatar and outbound sending in development · AI-generated footage · face animated by Audio2Face-3D · synthetic voice",
+   "n1": "M1 Front office",
+   "n2": "M2 CRM",
+   "n3": "M3 Estimating",
+   "n4": "M4 Field ops",
+   "n5": "M5 Finance",
+   "n6": "M6 Materials",
+   "n7": "M7 Marketing",
+   "n8": "M8 Analytics",
+   "n9": "M9 Strategy",
+   "n10": "M10 Memory"
+  }
+ },
+ "revue": {
+  "date": "2026-11-02",
+  "grille_severe": {
+   "concept": 8,
+   "reve_emotion": 7.5,
+   "avatar": 6.5,
+   "rythme": 7.5,
+   "spectacle": 6.5,
+   "textes": 8,
+   "son": 6.5,
+   "finition": 7.5,
+   "authenticite": 6
+  },
+  "note": 7.1,
+  "mesures": "long 74,1 s, 30 s = 27,1 s, 15 s = 14,9 s ; avatar à 3,4 s (long), 0 s (15) ; coupes sur la grille de 88,63 BPM (demi-temps 0,3385 s) ; montage des départements : 12 plans de 2,71 s (une mesure) ; plan moyen 3,2 s ; avatar a 8,8 s, b 6,8 s ; -14,5/-14,6 LUFS (long), -14,3 (30), -15,2 (15) ; crête vraie ≤ -2,0 dBTP ; musique baissée de 11 dB sous la voix (vérifié à l'enveloppe : voix ≈ -15 dB, musique seule ≈ -33 dB avant réglage à -11).",
+  "faiblesses": [
+   "aucune capture réelle d'OPSYS : aucune instance ne tourne ici ; c'est un film de vision (authenticité 6)",
+   "avatar : visage générique « Claire » du modèle NVIDIA, sans cheveux ni peau, rendu en points ; synchronisation labiale réelle (Audio2Face-3D) mais personne ne l'a regardée avec le son ; tête animée par code, pas par le modèle",
+   "voix Kokoro française (accent de France), pas québécoise ; anglaise correcte ; aucune écoute humaine",
+   "musique Music3 graine 71 : structure demandée non respectée (76,9 s au lieu de 94, 88,6 BPM au lieu de 100) ; bruitages synthétiques ; 15 s à -15,2 LUFS",
+   "image très sombre et toute bleue : peu de contraste de lumière entre les séquences ; pas de grand mouvement de caméra",
+   "plans 9:16 recadrés dans le 16:9 (432 px de large avant agrandissement) : mous",
+   "titres des départements tous sur le même gabarit (surtitre + deux lignes en bas à gauche)"
+  ]
+ }
+}
