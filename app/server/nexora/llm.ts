@@ -17,8 +17,8 @@
  *  monteur     : planification de montage (EditPlan v1, server/nexora/montage/)
  * `prompt`, `intention` et `assistant` restent acceptés (anciens appels).
  */
-export type RoleLlm = 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur';
-export const ROLES_LLM: readonly RoleLlm[] = ['redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur'];
+export type RoleLlm = 'tournage' | 'montage' | 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur';
+export const ROLES_LLM: readonly RoleLlm[] = ['tournage', 'montage', 'redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur'];
 
 /** Réglages venus de l'administration du site (modèle par défaut et par rôle) ; ils passent avant l'environnement du poste. */
 let reglages: { defaut?: string; roles: Partial<Record<RoleLlm, string>> } = { roles: {} };
@@ -56,7 +56,7 @@ export interface ClientLlm {
 }
 
 /** Messages au format de l'API (tool_calls, tool_call_id). */
-function versApi(messages: MessageLlm[]) {
+export function versApi(messages: MessageLlm[]) {
   return messages.map((m) => {
     if (m.role === 'tool') return { role: 'tool', tool_call_id: m.appelId, content: m.content };
     if (m.role === 'assistant' && m.appels?.length) {
@@ -77,7 +77,8 @@ export const MODELES_PAR_DEFAUT_ROLE: Partial<Record<RoleLlm, string>> = { juge:
 export function modelePour(role: RoleLlm, env: NodeJS.ProcessEnv = process.env): string | null {
   // Ordre : réglage du site pour ce rôle, variable d'environnement du rôle, modèle par défaut du rôle, réglage du site
   // par défaut, variable par défaut.
-  return reglages.roles[role]?.trim() || env[`NEXORA_LLM_MODELE_${role.toUpperCase()}`]?.trim() || MODELES_PAR_DEFAUT_ROLE[role] || reglages.defaut || env.NEXORA_LLM_MODELE?.trim() || null;
+  const reglage = reglages.roles[role]?.trim();
+  return (reglage && !reglage.startsWith('palier:') ? reglage : '') || env[`NEXORA_LLM_MODELE_${role.toUpperCase()}`]?.trim() || MODELES_PAR_DEFAUT_ROLE[role] || reglages.defaut || env.NEXORA_LLM_MODELE?.trim() || null;
 }
 
 export function clientLlmDepuisEnv(env: NodeJS.ProcessEnv = process.env, f: typeof fetch = fetch): ClientLlm | null {

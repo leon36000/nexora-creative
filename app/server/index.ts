@@ -27,7 +27,12 @@ import { ecrirePublication, PLATEFORMES, type Plateforme } from './nexora/public
 import { ecrireMusique } from './nexora/musique.js';
 import { planifierMoteurs } from './nexora/registre.js';
 import { compteCourant, territoireDuCompte } from './nexora/compte.js';
-import { clientLlmCourant } from './nexora/llm.js';
+import { clientLlmCourant, type ClientLlm } from './nexora/llm.js';
+import { clientPalier, LIBELLES_PALIER, estPalier, type Palier } from './nexora/niveaux.js';
+import { palierDuRole, paliersDisponibles, palierSuivant } from './nexora/paliers.js';
+import { devisLlm, executerSousReservation, ErreurPlafondLlm, GrandLivreUsage, type BilanRun } from './nexora/usage.js';
+import { BRIEFS_FILMS } from './nexora/bench/briefsFilms.js';
+import { escalader, MemoireFilm, type BriefFilm } from './nexora/montage/film.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
 import { actionEspace, espacePlein, espaceSite, marquerPlein } from './nexora/espace.js';
 import { actionFacturation, type CreditsPrise, devisCredits, facturationSite, secondesGpuEstimees, tarifDepuisEnv } from './nexora/credits.js';
@@ -64,6 +69,7 @@ import { convertirEnPromptRef, decoupeFiche, promptFiche } from './nexora/person
 import { dureeTotaleS } from './nexora/montage/editplan.js';
 import { rendreEditPlan } from './nexora/montage/rendu.js';
 import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
+import type { DepsAgent } from './nexora/agent.js';
 import { ajusterProposition, depassement, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
 import {
@@ -1693,7 +1699,7 @@ app.get('/api/nexora/film/:id/projet', async (req, reply) => {
 app.get('/api/nexora/etat', async () => {
   const moteur = moteurDuCompte('rapide');
   return {
-    llm: !!llmCourant(), moteur: moteur ? 'MiniMax H3' : null, son: !!moteur, territoire: territoireDuCompte(),
+    llm: !!llmCourant() || Object.values(paliersDisponibles()).some(Boolean), paliers: paliersDisponibles(), moteur: moteur ? 'MiniMax H3' : null, son: !!moteur, territoire: territoireDuCompte(),
     cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
     image: modeleImage() ? (modeleImage() === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
     musique: eng.recettesEnLigne().has('music3') ? 'MiniMax-Music3' : null,
@@ -1926,6 +1932,7 @@ function sessionOu404(id: string, reply: FastifyReply): SessionProducteur | null
 const vueSession = (s: SessionProducteur) => ({
   id: s.id, titre: s.titre, fil: s.fil, proposition: s.proposition, productions: s.productions.map((p) => ({ ...p, film: resumeFilm(p.filmId) })),
   plafond: PLAFOND_PRODUCTEUR, juge: jugeDisponible(), credits: !!configAuth,
+  palier: s.palier ?? null, palierEffectif: palierDuRole('producteur', { projet: s.palier }), paliers: paliersDisponibles(), usage: s.usage ?? null,
 });
 
 app.get('/api/nexora/producteur', async () => ({ sessions: sessionsProducteur.list() }));
@@ -1939,6 +1946,76 @@ app.get('/api/nexora/producteur/:id', async (req, reply) => {
   return s ? vueSession(s) : undefined;
 });
 
+const livreUsage = new GrandLivreUsage(join(config.dataDir, 'usage-llm.jsonl'));
+function cumulerUsage(u: SessionProducteur['usage'], b: BilanRun, palier: Palier): NonNullable<SessionProducteur['usage']> {
+  const t = b.totaux;
+  return {
+    appels: (u?.appels ?? 0) + t.appels, entree: (u?.entree ?? 0) + t.entree, sortie: (u?.sortie ?? 0) + t.sortie, raisonnement: (u?.raisonnement ?? 0) + t.raisonnement,
+    usd: (u?.usd ?? 0) + t.coutUsd, creditsExacts: (u?.creditsExacts ?? 0) + t.credits, creditsFactures: (u?.creditsFactures ?? 0) + b.factures,
+    dernier: { palier: LIBELLES_PALIER[palier], entree: t.entree, sortie: t.sortie, credits: Math.round(t.credits * 100) / 100, factures: b.factures, reserves: b.reserves },
+  };
+}
+
+app.post('/api/nexora/producteur/:id/palier', async (req, reply) => {
+  const s = sessionOu404(String((req.params as any).id), reply);
+  if (!s) return;
+  const v = ((req.body ?? {}) as any).palier;
+  if (v !== null && !estPalier(v)) return reply.code(400).send({ error: 'Palier inconnu (eco, equilibre, expert).' });
+  if (v && !paliersDisponibles()[v as Palier]) return reply.code(409).send({ error: `Le palier ${LIBELLES_PALIER[v as Palier]} n’est pas disponible sur ce serveur.` });
+  if (v) s.palier = v; else delete s.palier;
+  sessionsProducteur.save(s);
+  return vueSession(s);
+});
+
+/** Devis LLM d'un palier pour une tâche (avant de lancer) : jetons, USD fournisseur, crédits, plafond réservé. */
+app.get('/api/nexora/agent/devis', async (req) => {
+  const q = req.query as any;
+  const p: Palier = estPalier(q.palier) ? q.palier : palierDuRole('producteur') ?? 'expert';
+  return { ...devisLlm(String(q.tache ?? 'film'), p, { livre: livreUsage }), libelle: LIBELLES_PALIER[p] };
+});
+
+/** Usage LLM du compte (grand livre) : par palier, avec totaux. */
+app.get('/api/nexora/agent/usage', async () => {
+  const l = livreUsage.lignes();
+  return { total: livreUsage.total(), parPalier: Object.fromEntries((['eco', 'equilibre', 'expert'] as Palier[]).map((p) => [p, livreUsage.total({ palier: p })])), dernieres: l.slice(-20) };
+});
+
+/**
+ * Agent monteur de bout en bout (tournage → montage), avec escalade automatique du moins cher au plus capable.
+ * Corps : { briefId } d'un brief de la campagne, ou { enonce, genre, format, duree, bpm } ; { palier, escalade }.
+ */
+app.post('/api/nexora/agent/film', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const base = BRIEFS_FILMS.find((x) => x.id === b.briefId);
+  const brief: BriefFilm = base ?? {
+    id: `libre-${Date.now()}`, titre: String(b.titre ?? 'Film').slice(0, 80), enonce: String(b.enonce ?? '').slice(0, 1500), genre: ['pub', 'bande-annonce', 'explicatif', 'social'].includes(b.genre) ? b.genre : 'pub',
+    format: ['9:16', '1:1'].includes(b.format) ? b.format : '16:9', duree_cible_s: Math.max(15, Math.min(60, Number(b.duree) || 30)), bpm: Math.max(70, Math.min(140, Number(b.bpm) || 100)), marque: String(b.marque ?? 'NEXORA').slice(0, 40), mots: [],
+  };
+  if (!brief.enonce) return reply.code(400).send({ error: 'Décris le film (enonce) ou donne un briefId.' });
+  const depart = (estPalier(b.palier) ? b.palier : palierDuRole('tournage')) as Palier | null;
+  if (!depart || !paliersDisponibles()[depart]) return reply.code(409).send({ error: 'Aucun palier LLM disponible sur ce serveur.' });
+  const compte = compteCourant();
+  const run = randomUUID();
+  const devis = devisLlm('film', depart, { livre: livreUsage });
+  // Plafond : le devis du palier de départ, multiplié par le nombre de paliers possibles si l'escalade est permise.
+  const facteur = b.escalade === false ? 1 : 3;
+  try {
+    const { resultat, bilan } = await executerSousReservation(
+      { fac: facturationCourante(), devis: { ...devis, creditsReserves: devis.creditsReserves * facteur, plafondUsd: devis.plafondUsd * facteur * 2 }, ctx: { run, tache: 'film', projet: brief.id, utilisateur: compte?.utilisateurId, organisation: compte?.organisationId }, livre: livreUsage },
+      async (rel) => {
+        const clients = Object.fromEntries((['eco', 'equilibre', 'expert'] as Palier[]).map((p) => [p, clientPalier(p, { surveillant: rel })])) as Record<Palier, ClientLlm>;
+        return escalader(clients, depart, brief, { memoire: new MemoireFilm(), ordre: b.escalade === false ? [depart] : undefined });
+      },
+    );
+    return {
+      palierFinal: resultat.palierFinal, escalades: resultat.escalades, score: resultat.final.score, source: resultat.final.montage.source, tournage: resultat.final.tournage, plan: resultat.final.plan,
+      usage: { ...bilan.totaux, reserves: bilan.reserves, factures: bilan.factures, liberes: bilan.liberes, creditsExacts: bilan.totaux.credits },
+    };
+  } catch (e) {
+    return reply.code(502).send({ error: `L’agent n’a pas pu terminer (${e instanceof Error ? e.message : 'erreur'}).` });
+  }
+});
+
 app.post('/api/nexora/producteur/:id/message', async (req, reply) => {
   const id = String((req.params as any).id);
   const texte = String(((req.body ?? {}) as any).texte ?? '').trim();
@@ -1950,8 +2027,8 @@ app.post('/api/nexora/producteur/:id/message', async (req, reply) => {
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   verrousProducteur.add(id);
   try {
-    const apres = await tourProducteur(s, texte, {
-      llm: llmCourant(), devis: devisDuCompte, plafond: PLAFOND_PRODUCTEUR,
+    const construireDeps = (llm: ClientLlm | null): DepsAgent => ({
+      llm, devis: devisDuCompte, plafond: PLAFOND_PRODUCTEUR,
       personnages: {
         liste: () => {
           const l = castDb.list().filter((m) => m.kind === 'character');
@@ -1988,6 +2065,26 @@ app.post('/api/nexora/producteur/:id/message', async (req, reply) => {
         },
       },
     });
+    // Palier choisi (projet > réglage > serveur) : le tour est mesuré jeton par jeton, réservé au plafond du devis, réglé
+    // au réel. En cas d'échec du palier (point de terminaison saturé), un seul essai au palier supérieur.
+    const palier = palierDuRole('producteur', { projet: s.palier });
+    let apres: SessionProducteur;
+    if (palier) {
+      const compte = compteCourant();
+      const lancer = (p: Palier) => executerSousReservation(
+        { fac: facturationCourante(), devis: devisLlm('producteur', p, { livre: livreUsage }), ctx: { run: `${randomUUID()}-${p}`, tache: 'producteur', projet: id, utilisateur: compte?.utilisateurId, organisation: compte?.organisationId }, livre: livreUsage },
+        (rel) => tourProducteur(s, texte, construireDeps(clientPalier(p, { surveillant: rel }))),
+      );
+      let r: Awaited<ReturnType<typeof lancer>>;
+      let utilise = palier;
+      try { r = await lancer(palier); } catch (e) {
+        const suivant = e instanceof ErreurPlafondLlm ? null : palierSuivant(palier);
+        if (!suivant) throw e;
+        utilise = suivant; r = await lancer(suivant);
+      }
+      apres = r.resultat;
+      apres.usage = cumulerUsage(s.usage, r.bilan, utilise);
+    } else apres = await tourProducteur(s, texte, construireDeps(llmCourant()));
     sessionsProducteur.save(apres);
     return vueSession(apres);
   } catch (e) {

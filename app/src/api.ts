@@ -154,7 +154,10 @@ export interface SessionProducteur {
   proposition: PropositionProducteur | null;
   productions: { filmId: number; lanceLe: string; genre?: string; plan?: PlanProduction; film: FilmResume | { erreur: string } }[];
   plafond: { credits: number; secondes: number }; juge: boolean; credits: boolean;
+  palier: PalierLlm | null; palierEffectif: PalierLlm | null; paliers: Record<PalierLlm, boolean>;
+  usage: { appels: number; entree: number; sortie: number; raisonnement: number; usd: number; creditsExacts: number; creditsFactures: number; dernier?: { palier: string; entree: number; sortie: number; credits: number; factures: number; reserves: number } } | null;
 }
+export type PalierLlm = 'eco' | 'equilibre' | 'expert';
 export type VarianteProducteur = 'format-16:9' | 'format-9:16' | 'format-1:1' | 'nouvelle-prise' | 'cinema' | 'courte';
 
 export const api = {
@@ -167,6 +170,7 @@ export const api = {
   producteurNouvelle: () => j<SessionProducteur>('/api/nexora/producteur', { method: 'POST', body: '{}' }),
   producteurSession: (id: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}`),
   producteurMessage: (id: string, texte: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}/message`, { method: 'POST', body: JSON.stringify({ texte }) }),
+  producteurPalier: (id: string, palier: PalierLlm | null) => j<SessionProducteur>(`/api/nexora/producteur/${id}/palier`, { method: 'POST', body: JSON.stringify({ palier }) }),
   producteurValider: (id: string, proposition: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}/valider`, { method: 'POST', body: JSON.stringify({ proposition }) }),
   producteurAjuster: (id: string, proposition: string, r: { candidats?: number; qualite?: string; format?: string; son?: boolean; musique?: boolean }) =>
     j<SessionProducteur>(`/api/nexora/producteur/${id}/ajuster`, { method: 'POST', body: JSON.stringify({ proposition, ...r }) }),

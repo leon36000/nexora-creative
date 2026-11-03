@@ -315,3 +315,6 @@ body { font-variation-settings: normal; letter-spacing: -0.003em; }
 .projet-arbre li.tourne { color: var(--dim); }
 .projet-arbre small { color: var(--dim); margin-left: 6px; }
 @media (max-width: 800px) { .projet-grille { grid-template-columns: 1fr; } }
+
+.pr-paliers { display: inline-flex; gap: 4px; }
+.pr-paliers .st-bouton.actif { border-color: var(--accent, #ff5a1f); color: var(--accent, #ff5a1f); }

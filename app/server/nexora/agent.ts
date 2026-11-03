@@ -150,7 +150,13 @@ export interface SessionProducteur {
   jetons: number;
   /** Montage en cours (outils de montage : plan_edit, critique, revise). */
   montage?: EtatMontage;
+  /** Palier choisi pour ce projet (Éco / Équilibré / Expert) ; absent = défaut du serveur. */
+  palier?: 'eco' | 'equilibre' | 'expert';
+  /** Usage LLM cumulé de la conversation : tout est facturé, jeton par jeton. */
+  usage?: UsageSession;
 }
+
+export interface UsageSession { appels: number; entree: number; sortie: number; raisonnement: number; usd: number; creditsExacts: number; creditsFactures: number; dernier?: { palier: string; entree: number; sortie: number; credits: number; factures: number; reserves: number } }
 
 export function nouvelleSession(): SessionProducteur {
   return { id: randomUUID(), titre: 'Nouvelle production', messages: [], fil: [], proposition: null, productions: [], jetons: 0 };
