@@ -1,0 +1,28 @@
+{
+  "name": "gitspace-mcp",
+  "version": "0.1.0",
+  "description": "Serveur MCP (stdio) pour piloter GitLab Nexora (aujourd'hui) puis Gitspace/Forgejo (plus tard) avec les mêmes outils.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "gitspace-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "login": "node dist/index.js login",
+    "doctor": "node dist/index.js doctor",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}
