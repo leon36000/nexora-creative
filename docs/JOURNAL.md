@@ -216,3 +216,28 @@ Consigne du fondateur : ce qui prend de la place sur pc6 et pc1 et peut vivre su
 - **Copies de travail du site** `NexoraSite-demo` et `NexoraSite-domaine` retirées (branches déjà sur GitLab, arbres propres). Demande de fusion !19 de `feat/domaine-caddy` fusionnée dans `main` de nexora-web (le script `deploy/domaine.sh` n'est pas exécuté).
 - **Code non poussé trouvé** : `~/Desktop/NexoraCode/src`, branche `feat/rebrand` (10 commits, dépôt nexora-code-agent) ; le serveur refuse le push (« shallow update not allowed », dépôt local tronqué). Sauvegarde du `.git` sur pc5 (`pc6/depots-non-pousses/`). À régler : repartir d'un clone complet ou pousser la branche en dépôt complet.
 - Tableau « qui vit où » : `docs/ENVIRONNEMENTS.md`.
+
+## 02/11/2026 (nuit) — ménage d'infrastructure : conventions, dimensionnement de pc5, nettoyage des trois machines
+Consigne du fondateur : aucune sauvegarde sur NVMe (un HDD de 10 à 20 To arrive), ne jamais allouer plus que le besoin, tout classé et étiqueté, pc5 est le serveur Nexora, tout fichier inutile supprimé. Détail des conventions et du registre : `docs/RESSOURCES.md` ; inventaire : `ressources/inventaire.sh`.
+
+**pc5 (Proxmox)**
+- Volume `ssd-1tb/nexora-archives` ramené de 250 à **40 Go** (21,6 Go occupés) : démontage, `e2fsck -f`, `resize2fs`, `lvreduce`, puis rejet (`blkdiscard`) des blocs de la queue, que `lvreduce` laissait alloués dans le pool fin (+20 Go d'occupation constatés puis rendus). Vérifié : 131 058 fichiers avant et après, liste (taille et chemin) identique par somme de contrôle, `e2fsck` propre, `MANIFESTE.md` intact.
+- Sauvegardes NVMe : stockage `backup-nvme0` passé de `keep-daily=7,keep-weekly=4` à `keep-last=1` ; la tâche `nexora-nightly` (03:30) est conservée. Élagage vérifié à blanc (`--dry-run`) puis exécuté : le point de restauration du 02/11 de chaque VM est gardé. Volume `pve/backups` ramené de 200 à **80 Go**, puis `fstrim` (occupation du pool 65 → 31 Go). Commandes de bascule vers le HDD : RESSOURCES.md §3.
+- VM 201, 202, 203 et gabarit 9000 : étiquettes (`nexora;prod;<produit>`) et descriptions posées (métadonnées seules, sans redémarrage). VM 9100 non touchée.
+
+| Machine | Chemin | Taille | Pourquoi | Vérification |
+|---|---|---|---|---|
+| pc5 | sauvegardes vzdump 201 (01/11), 202 (01/11), 203 (01/11) | 18,0 + 3,7 + 12,9 Go | rétention `keep-last=1` | à blanc, plus récente de chaque VM gardée |
+| pc5 | `/var/lib/vz/template/iso/noble-server-cloudimg-amd64.img` + `SHA256SUMS`, `sum.txt` | 0,6 Go | image de téléchargement, gabarit 9000 déjà créé, aucune VM ne la référence (`grep` des `.conf`) | grep, re-téléchargeable |
+| pc5 | `/root` : fichiers temporaires de la vérification et `vzdump-203-essai.log` | < 1 Mo | restes de nos essais | contenus lus |
+| pc6 | 256 volumes Docker anonymes sans conteneur (195 Postgres, 4 Redis, 57 vides) | 12,1 Go | `docker volume ls -f dangling=true` : non référencés même par un conteneur arrêté ; âge 31 h à 942 h, aucun de moins de 24 h ; aucun volume nommé ; origine non attribuable (anonymes, sans étiquette Compose) ; contenu classé par montage en lecture seule | `docker volume rm` refuse un volume en usage ; 0 restant, 17 volumes nommés ou actifs intacts |
+| pc6 | `~/.cache/uv` | 6,7 Go | cache régénérable | aucun lien symbolique du moteur vers lui ; ComfyUI 37188 répond 200, `import torch` OK dans le venv |
+| pc6 | caches pip (4,9 Go), npm `_cacache` (1,8 Go), bun (4,5 Go) | 11,2 Go | régénérables, > 200 Mo | `pip cache purge`, `npm cache clean`, aucun installeur en cours ; `~/.npm/_npx` (1,8 Go) gardé, utilisé par des serveurs MCP |
+| pc6 | scratchpad de cette session : `repos/` (clones d'étude, 7,2 Go), `ws/`, `objets/`, `venv/` | 8,6 Go | sondages open source du 02/11 (00:20), terminés, régénérables par `git clone` | aucun processus ni descripteur ouvert, arbres propres, aucun commit non poussé |
+| pc6 | `~/Desktop/Nexora` | 0 | dossier vide | `rmdir` |
+| pc1 | `~/.cache/pip` | 4,2 Go | cache régénérable | pas de pip en cours, ComfyUI 18388 intact |
+
+Espace libéré : **pc6 +37 Go** (9,3 → 46 Go libres), **pc1 +4,2 Go**, **pc5** : −34,6 Go sur le NVMe de sauvegarde, plafonds virtuels −330 Go (archives −210, sauvegardes −120), ISO 0,6 Go, occupation du pool `ssd-1tb` stable à 12,6 %.
+
+**Non touché volontairement** : `/tmp/claude-1000/-tmp/…/scratchpad/wt-*` (10 Go, copies de travail d'OPSYS-AI, sept processus actifs) ; `promo/v6`, `rendus`, `campagne-films/films/opsys` (agent film) ; VM 9100 (pas à Nexora) ; `~/.cache/pc5-mass-ingestion` (RAG), images `pc5-rag*`, `~/.cache/huggingface`, `ms-playwright` ; `~/.cache/tracker3` (9,5 Go) et `/tmp/nvidia-r595-*` de pc1 (pas à Nexora) ; quatre conteneurs arrêtés de pc6 ; images Docker étiquetées ; volumes des autres projets du fondateur autres que les anonymes orphelins.
+**Conventions posées** : README racine et README par dossier dans `~/nexora-creative-data` (sauf `promo`, `rendus`, `output`, en cours d'écriture). **Leçon** : sur un volume fin, réduire le système de fichiers puis `lvreduce` ne libère pas les blocs de la queue ; il faut les rejeter (`blkdiscard`) avant ou rétablir la taille, rejeter, puis réduire.
