@@ -1,0 +1,14 @@
+[Unit]
+Description=Nexora : RTX 5090 de pc1, plafond de puissance et ventilateur maximal (proprietaire Nexora, 2026-11-03)
+Documentation=file:///usr/local/share/doc/nexora-gpu-5090/LISEZMOI.txt
+After=nvidia-persistenced.service multi-user.target
+Wants=nvidia-persistenced.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/nexora-gpu-5090.sh apply
+ExecStop=/usr/local/sbin/nexora-gpu-5090.sh revert
+
+[Install]
+WantedBy=multi-user.target

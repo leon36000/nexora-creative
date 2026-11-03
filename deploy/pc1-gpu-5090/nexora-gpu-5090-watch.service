@@ -1,0 +1,8 @@
+[Unit]
+Description=Nexora : surveillance RTX 5090 de pc1 (re-applique les reglages, repli automatique) (proprietaire Nexora, 2026-11-03)
+After=nexora-gpu-5090.service
+
+[Service]
+Type=oneshot
+ExecCondition=/usr/bin/systemctl is-active --quiet nexora-gpu-5090.service
+ExecStart=/usr/local/sbin/nexora-gpu-5090.sh watch

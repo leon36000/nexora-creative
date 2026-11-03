@@ -1,0 +1,8 @@
+Nexora - RTX 5090 de pc1 : plafond de puissance + ventilateur au maximum (03/11/2026)
+Reglage : /etc/default/nexora-gpu-5090 puis `sudo systemctl restart nexora-gpu-5090.service`.
+Retour en arriere complet :
+  sudo systemctl disable --now nexora-gpu-5090-watch.timer nexora-gpu-5090.service
+  (l'arret du service remet le ventilateur en automatique et le plafond a 600 W)
+  Manuel : sudo nvidia-smi -pl 600
+Etat : systemctl status nexora-gpu-5090.service ; journalctl -t nexora-gpu-5090 -n 20 ; nvidia-smi -q -d POWER,TEMPERATURE
+Docs : docs/RESSOURCES.md et docs/ENVIRONNEMENTS.md (depot nexora-creative).

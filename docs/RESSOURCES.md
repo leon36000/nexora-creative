@@ -65,6 +65,19 @@ Qui vit où : `docs/ENVIRONNEMENTS.md`. Journal des suppressions : `docs/JOURNAL
 | `…/reprise-revues-20261030` | 125 Mo | fin de revue | à supprimer sur ordre |
 | `~/.cache/tracker3` (index GNOME) | 9,5 Go | n/a | pas à Nexora : proposé au fondateur |
 | `/tmp/nvidia-r595-*` | ~2 Go | n/a | pas à Nexora : proposé au fondateur |
+| RTX 5090 : plafond 475 W + ventilateur 100 % permanent (`nexora-gpu-5090.service` + minuterie `-watch.timer`, script `/usr/local/sbin/nexora-gpu-5090.sh`, réglage `/etc/default/nexora-gpu-5090`) | n/a | permanente | Nexora, créé le 03/11/2026, ordre du fondateur : préserver la carte plutôt que les ventilateurs ; sources et retour arrière dans `deploy/pc1-gpu-5090/` ; mesures dans ce tableau |
+
+### pc1, RTX 5090 : plafond de puissance (mesures du 03/11/2026)
+Banc : multiplications bf16 8192×8192 (GPU saturé, pire cas), 60 s par palier après 10 s de chauffe, ventilateur en automatique, ComfyUI 18388 au repos (file vide). Aucun job H3 réel chronométré : la carte était occupée par les modèles du film (30 Go de VRAM), le banc ne fait que le calcul brut.
+| Plafond | Débit (TFLOPS) | Perte | Puissance | Horloge SM | Température |
+|---|---|---|---|---|---|
+| 600 W | 228,8 | 0 % | 600 W | 2736 MHz | 51 °C (max 55) |
+| 525 W | 213,9 | -6,5 % | 525 W | 2552 MHz | 57 °C (max 59) |
+| **475 W (appliqué)** | 197,5 | -13,7 % | 475 W | 2355 MHz | 58,5 °C (max 59) |
+| 450 W | 188,5 | -17,6 % | 450 W | 2248 MHz | 58 °C (max 59) |
+| 400 W | 170,7 | -25,4 % | 400 W | 2033 MHz | 57 °C (max 57) |
+| 475 W, ventilateur 100 % | 199,7 | -12,7 % | 475 W | 2377 MHz | **48 °C** (max 48) |
+Lecture : 475 W économise 125 W (21 %) pour 13,7 % de calcul brut perdu (pire cas : un vrai job H3 passe aussi du temps hors des multiplications, la perte réelle est plus faible, non mesurée). Le rendement par watt monte de 0,38 à 0,42 TFLOPS/W. Le ventilateur à 100 % retire 10 °C en charge (en automatique il plafonnait à 30-37 %). Pour 525 W (-6,5 %) : mettre `POWER_LIMIT_W=525` dans `/etc/default/nexora-gpu-5090` puis `sudo systemctl restart nexora-gpu-5090.service`. Retour complet : `sudo systemctl disable --now nexora-gpu-5090-watch.timer nexora-gpu-5090.service` (remet le ventilateur en automatique et 600 W).
 
 ## 3. Sauvegardes : NVMe réduit, bascule vers le HDD
 

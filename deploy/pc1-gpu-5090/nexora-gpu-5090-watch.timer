@@ -1,0 +1,10 @@
+[Unit]
+Description=Nexora : minuterie de surveillance RTX 5090 de pc1 (toutes les minutes) (proprietaire Nexora, 2026-11-03)
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=60s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

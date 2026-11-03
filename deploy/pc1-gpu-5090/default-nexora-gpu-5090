@@ -1,0 +1,5 @@
+# Nexora - RTX 5090 de pc1 (propriétaire : Nexora ; créé le 03/11/2026)
+# Plafond de puissance en watts (400 à 600) et ventilateur en pourcentage (30 à 100).
+# Après modification : sudo systemctl restart nexora-gpu-5090.service
+POWER_LIMIT_W=475
+FAN_PERCENT=100
