@@ -1,0 +1,30 @@
+{
+ "brief": "workstudio",
+ "palier": "equilibre",
+ "modele": "meta/muse-spark-1.3-contributor",
+ "appels": [
+  {
+   "etape": "auteur",
+   "entree": 2334,
+   "sortie": 15771,
+   "raisonnement": 11452,
+   "usd": 0.003388,
+   "cout_rapporte": true,
+   "latence_s": 107.9,
+   "fournisseur": "Meta"
+  }
+ ],
+ "reparations_modele": [],
+ "reparations_code": [],
+ "effort_essais": [],
+ "effort": "max",
+ "violations": [
+  []
+ ],
+ "violations_finales": [],
+ "usd": 0.003388,
+ "credits_client": 0.523,
+ "jetons_entree": 2334,
+ "jetons_sortie": 15771,
+ "latence_s": 107.9
+}

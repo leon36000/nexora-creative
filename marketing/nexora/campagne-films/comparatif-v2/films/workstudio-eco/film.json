@@ -1,0 +1,293 @@
+{
+ "concept": "Une nuit dans un bureau vide : pendant que la ville dort, des lignes de lumière invisibles trient, rédigent et préparent les réponses — puis, au matin, un seul pouce humain approuve. WorkStudio vend le sommeil tranquille : l'équipe d'agents travaille, vous gardez la main.",
+ "accroche": "2 h 00. La boîte de réception déborde — puis la lumière se met à travailler.",
+ "produit_evident": "Dès 4 s, l'écran d'ordinateur allumé dans le bureau noir montre une pile de courriels et des lignes de lumière qui la traversent : on comprend qu'un outil travaille le courriel à notre place, et le carton « WorkStudio » arrive avant 5 s.",
+ "mode": "texte",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 3.2,
+   "intention": "Poser la nuit et le problème : un bureau vide, un écran qui déborde.",
+   "image": "Wide cinematic shot of a dark open-plan office at night, rows of empty desks, one single monitor glowing cold blue in the middle distance, city lights blurred through floor-to-ceiling windows, deep shadows, teal and amber palette, anamorphic lens flare, 35mm lens, low angle, film grain, no people, no readable text on screen, moody photorealistic",
+   "mouvement": "Slow dolly push through the dark office toward the single glowing monitor, dust motes drifting in the light beam, subtle handheld float, city bokeh shimmering behind glass",
+   "son": "Low room hum, distant city traffic, faint electrical buzz",
+   "camera": "35mm, travelling avant lent",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.6,
+   "intention": "Accroche chiffrée : l'heure de la nuit où tout s'accumule.",
+   "image": "Extreme close-up of a dark desk surface, a small analog desk clock glowing faintly, blurred blue screen light spilling from the left, shallow depth of field, dust, teal shadows with a single warm rim light, 85mm macro lens, photorealistic, cinematic",
+   "mouvement": "Slow lateral slide across the desk toward the clock, shallow focus rack, light flicker from the screen",
+   "son": "Clock ticking, soft hum",
+   "camera": "85mm macro, glissement latéral",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p03",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "La boîte de réception déborde : lignes de courriels qui s'empilent en lumière.",
+   "image": "Abstract cinematic shot of hundreds of thin horizontal light bars stacking rapidly in dark space like an overflowing inbox, glowing white and pale blue, one amber bar among them, black background, volumetric haze, extreme depth, 50mm lens, centered composition, photorealistic light painting, no text",
+   "mouvement": "The light bars multiply and stack upward toward camera, slow push-in, bars flickering as they appear, camera tilting up with the growing pile",
+   "son": "Soft digital pings layering, rising hum",
+   "camera": "50mm, poussée avant",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Le produit entre en scène : des lignes de lumière sortent de l'écran et traversent le bureau.",
+   "image": "Cinematic wide shot of a dark office corridor, glowing thin light lines streaming out of a doorway and flowing along the floor and walls like luminous threads, teal and amber light, volumetric fog, reflections on polished concrete, 24mm lens, low angle, photorealistic, no text",
+   "mouvement": "Light threads flow from the doorway toward camera and past it, slow orbit of the camera around the streaming lines, fog swirling",
+   "son": "Airy whoosh, soft synth swell",
+   "camera": "24mm, orbite lente",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p05",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Le travail invisible traverse la ville : les agents à l'œuvre, vus comme un réseau de lumière.",
+   "image": "Aerial night shot of a city skyline seen from above, thin glowing light lines arcing between buildings like neural pathways, deep blue night, amber windows, volumetric clouds, 35mm lens, wide composition, photorealistic, cinematic, no text",
+   "mouvement": "Slow aerial push over the skyline, light lines pulsing and travelling between towers, clouds drifting, subtle camera roll",
+   "son": "Distant city rumble, airy shimmer",
+   "camera": "35mm, grue aérienne",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p06",
+   "type": "ui",
+   "duree": 2.4,
+   "intention": "Preuve : le vrai écran de tri, triage → brouillon → approbation.",
+   "image": "Cinematic close-up of a dark office monitor on a desk at night, screen glowing with soft blue and amber luminous shapes, thin light threads hovering above the keyboard, shallow depth of field, teal shadows, 85mm lens, photorealistic, no readable text, no face",
+   "mouvement": "Slow push-in toward the glowing monitor, light threads drifting above the keyboard, faint screen glow pulsing gently",
+   "son": "Soft UI clicks",
+   "camera": "85mm, poussée avant",
+   "transition": "coupe",
+   "heros": false,
+   "ui": "ui-tri"
+  },
+  {
+   "id": "p07",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Le brouillon se rédige tout seul dans le noir, ligne de lumière qui écrit.",
+   "image": "Close-up of a dark desk with a glowing keyboard, thin amber light threads hovering above the keys and weaving into the air like handwriting made of light, shallow depth of field, teal ambient light, 85mm lens, photorealistic, cinematic, no text",
+   "mouvement": "Light threads weave and curl above the keyboard, slow push-in, faint glow pulsing with each thread, dust in the light",
+   "son": "Soft keystroke whispers, warm synth note",
+   "camera": "85mm, poussée avant",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "L'attente : les lignes de lumière s'immobilisent devant une porte fermée, en attente du humain.",
+   "image": "Cinematic shot of luminous light threads converging and stopping in front of a closed frosted glass door in a dark office, soft glow pooling on the floor, teal and amber, volumetric haze, 35mm lens, symmetrical composition, photorealistic, no text",
+   "mouvement": "Light threads flow in from the sides and halt before the door, gentle pulsing, slow push toward the door, fog drifting",
+   "son": "Low sustained synth, soft air",
+   "camera": "35mm, travelling avant",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 3.2,
+   "intention": "Le matin : la lumière froide devient chaude, le bureau revit.",
+   "image": "Wide cinematic shot of the same open-plan office at sunrise, warm golden light flooding through the windows, long shadows across empty desks, one monitor still glowing, dust in sunbeams, 35mm lens, low angle, photorealistic, hopeful mood, no people, no text",
+   "mouvement": "Slow dolly forward as sunlight sweeps across the desks, shadows shortening, dust motes rising in the beams, gentle camera float",
+   "son": "Morning birds distant, warm room tone",
+   "camera": "35mm, travelling avant",
+   "transition": "fondu",
+   "heros": true
+  },
+  {
+   "id": "p10",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Le geste décisif : un pouce humain s'approche de l'écran.",
+   "image": "Close-up over-the-shoulder shot of a hand with a thumb approaching a glowing tablet screen in warm morning light, screen showing only blurred luminous shapes, shallow depth of field, warm amber and teal, 50mm lens, photorealistic, cinematic, no readable text, no face",
+   "mouvement": "The thumb moves slowly toward the screen, camera slight push-in, warm light shifting across the hand, shallow focus breathing",
+   "son": "Soft breath, faint UI hover tone",
+   "camera": "50mm, poussée avant",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p11",
+   "type": "ui",
+   "duree": 2.0,
+   "intention": "Preuve : la vraie carte d'approbation, le bouton « Approuver ».",
+   "image": "Cinematic close-up of a warm morning desk, a tablet screen glowing with a soft amber approval card shape, a thumb hovering just above the glass, shallow depth of field, warm light, 50mm lens, photorealistic, no readable text, no face",
+   "mouvement": "The thumb presses gently toward the screen, camera slight push-in, warm glow blooming across the glass, focus breathing softly",
+   "son": "Crisp UI click",
+   "camera": "50mm, poussée avant",
+   "transition": "flash",
+   "heros": false,
+   "ui": "ui-approuver"
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "L'envoi : une ligne de lumière traverse la ville et sort au loin.",
+   "image": "Cinematic shot of a single bright amber light line shooting out from a building window across a dawn city skyline, thin trail of light arcing into the pink and blue sky, volumetric clouds, 35mm lens, wide composition, photorealistic, no text",
+   "mouvement": "The light line accelerates away from the building and across the sky, camera tilting up to follow it, clouds drifting, slow push",
+   "son": "Soft whoosh fading into airy shimmer",
+   "camera": "35mm, contre-plongée",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Récompense : le bureau au matin, calme, la lumière du jour, plus rien qui déborde.",
+   "image": "Wide cinematic shot of a bright modern office at morning, desks tidy, warm sunlight, one person seen from behind in silhouette standing calmly by the window, teal and amber palette, 35mm lens, photorealistic, serene mood, no faces, no text",
+   "mouvement": "Slow dolly back revealing the calm office, sunlight shimmering, the silhouette still, dust in the air, gentle camera float",
+   "son": "Warm room tone, distant coffee machine",
+   "camera": "35mm, travelling arrière",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Dernière image forte : les lignes de lumière veillent, prêtes pour la prochaine nuit.",
+   "image": "Cinematic close-up of thin glowing light threads curling gently in dark space above a desk at dusk, amber and teal, volumetric haze, shallow depth of field, 85mm lens, photorealistic, elegant, no text",
+   "mouvement": "Light threads slowly curl and drift, camera very slow push-in, glow pulsing softly, haze swirling",
+   "son": "Soft sustained synth, airy texture",
+   "camera": "85mm, poussée lente",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [],
+ "textes": [
+  {
+   "texte": "2 h 00",
+   "style": "impact",
+   "debut": 0.6,
+   "duree": 1.6
+  },
+  {
+   "texte": "La boîte déborde",
+   "style": "titre",
+   "debut": 3.4,
+   "duree": 1.8
+  },
+  {
+   "texte": "WorkStudio",
+   "style": "impact",
+   "debut": 5.4,
+   "duree": 1.6
+  },
+  {
+   "texte": "Vos agents trient",
+   "style": "titre",
+   "debut": 7.8,
+   "duree": 1.8
+  },
+  {
+   "texte": "rédigent",
+   "style": "impact",
+   "debut": 10.4,
+   "duree": 1.2
+  },
+  {
+   "texte": "et attendent",
+   "style": "titre",
+   "debut": 12.4,
+   "duree": 1.8
+  },
+  {
+   "texte": "Votre pouce décide",
+   "style": "titre",
+   "debut": 17.0,
+   "duree": 2.0
+  },
+  {
+   "texte": "Envoyé",
+   "style": "impact",
+   "debut": 20.6,
+   "duree": 1.2
+  },
+  {
+   "texte": "Pendant que vous dormez,|votre équipe travaille.",
+   "style": "titre",
+   "debut": 23.4,
+   "duree": 3.0
+  },
+  {
+   "texte": "Vous gardez la main.",
+   "style": "impact",
+   "debut": 27.4,
+   "duree": 2.2
+  }
+ ],
+ "musique": {
+  "genre": "cinematic electronic, modern minimal synth",
+  "tempo_bpm": 108,
+  "description": "EN: Deep sub bass, pulsing analog synth arpeggio, soft piano notes, airy pads, subtle percussive ticks and whooshes synced to the light lines; energy rises from intimate night pulse to warm hopeful swell at sunrise; clean wide mix, cinematic reverb, no vocals.",
+  "sections": [
+   {
+    "debut": 0,
+    "nom": "Intro nuit",
+    "description": "EN: Low drone, sparse piano, ticking pulse, intimate"
+   },
+   {
+    "debut": 5.4,
+    "nom": "Montée",
+    "description": "EN: Analog arpeggio enters, soft kick, energy building, light whooshes"
+   },
+   {
+    "debut": 12.4,
+    "nom": "Attente",
+    "description": "EN: Strip back to sustained pad and pulse, tension held"
+   },
+   {
+    "debut": 17.0,
+    "nom": "Décision",
+    "description": "EN: Beat drops with warm bass, uplifting chord change, piano motif"
+   },
+   {
+    "debut": 23.4,
+    "nom": "Aube",
+    "description": "EN: Full warm swell, strings pad, shimmering highs, hopeful"
+   },
+   {
+    "debut": 29.6,
+    "nom": "Résolution",
+    "description": "EN: Gentle decay, sustained pad, final soft piano note"
+   }
+  ],
+  "coups": [
+   3.4,
+   5.4,
+   10.4,
+   17.0,
+   20.6,
+   23.4,
+   27.4
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Vous gardez la main.",
+  "sous_titre": "WorkStudio — concevez vos agents et vos flux de travail",
+  "mentions": "Fonction d'approbation humaine démontrée en direct sur serveur."
+ }
+}

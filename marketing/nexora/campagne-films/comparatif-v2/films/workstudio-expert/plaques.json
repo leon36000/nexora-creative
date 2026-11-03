@@ -1,0 +1,149 @@
+{
+ "plaques": {
+  "p01": {
+   "cle": "p01-cle-0.png",
+   "cle_s": 27.1,
+   "controle_image": null,
+   "video": "p01-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p03": {
+   "cle": "p03-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p03-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p04": {
+   "cle": "p04-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p04-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p05": {
+   "cle": "p05-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p05-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p06": {
+   "cle": "p06-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p06-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p08": {
+   "cle": "p08-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p08-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p09": {
+   "cle": "p09-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p09-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p10": {
+   "cle": "p10-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p10-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p11": {
+   "cle": "p11-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p11-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p12": {
+   "cle": "p12-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p12-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p13": {
+   "cle": "p13-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p13-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p14": {
+   "cle": "p14-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p14-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p15": {
+   "cle": "p15-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p15-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p16": {
+   "cle": "p16-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p16-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p17": {
+   "cle": "p17-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p17-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  }
+ },
+ "gpu_s": {
+  "gb10-qwen": 323.40000000000003,
+  "gb10-music3": 99.2,
+  "pc1-h3-fast": 1429.1999999999998,
+  "pc1-h3-max": 396.29999999999995
+ },
+ "musique": {
+  "description": "Global Metadata: Cinematic Neo-Classical Electronic, 120 BPM, Cinematic and emotional instrumental score at 120 BPM. Starts with a nocturnal felt piano ostinato and crisp analog synth arpeggios evoking precision work in the night, building with warm cello and propelling electronic percussion at 6.5s, pausing briefly for the approval reveal at 14.0s, then blooming into a radiant, driving morning orchestral and electronic anthem from 26.0s to a warm resolving chord at 41.0s. Loud polished master.\n\nVocal Details: Instrumental, no lyrics, no vocals, no choir.\n\nArrangement: [Veille nocturne] at 0 seconds: Intimate felt piano notes and precise, crystalline synth plucks establishing a 120 BPM pulse in the quiet night. [Flux en mouvement] at 6 seconds: Warm sub-bass, flowing cello lines, and steady kinetic electronic percussion driving the invisible night workflow. [Aube et architecture] at 16 seconds: Brightening acoustic piano, layered strings, and rising harmonic tension as morning light enters the studio. [Approbation et envol] at 26 seconds: Crisp percussive hit on the thumb press followed by a soaring, triumphant orchestral and electronic climax that resolves warmly at 41 seconds. Strong hits at 2.0, 6.5, 14.0, 16.0, 21.0, 26.0, 28.5, 31.0, 38.5, 41.0 seconds. Clean ending at 47 seconds.",
+  "secondes": 99.2
+ }
+}

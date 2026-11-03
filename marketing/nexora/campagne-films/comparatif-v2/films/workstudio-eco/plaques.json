@@ -1,0 +1,124 @@
+{
+ "plaques": {
+  "p01": {
+   "cle": "p01-cle-0b.png",
+   "cle_s": 21.3,
+   "controle_image": null,
+   "regen_cle": 1,
+   "video": "p01-max-0b.mp4",
+   "recette": "h3-max",
+   "video_s": 126.2,
+   "controle_video": "image noire dans la vidéo",
+   "regen_video": 2
+  },
+  "p02": {
+   "cle": "p02-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p02-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p03": {
+   "cle": "p03-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p03-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p04": {
+   "cle": "p04-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p04-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.2,
+   "controle_video": null
+  },
+  "p05": {
+   "cle": "p05-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p05-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 123.2,
+   "controle_video": null
+  },
+  "p07": {
+   "cle": "p07-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p07-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p08": {
+   "cle": "p08-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p08-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p09": {
+   "cle": "p09-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p09-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.2,
+   "controle_video": null
+  },
+  "p10": {
+   "cle": "p10-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p10-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p12": {
+   "cle": "p12-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p12-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p13": {
+   "cle": "p13-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p13-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p14": {
+   "cle": "p14-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p14-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  }
+ },
+ "gpu_s": {
+  "gb10-qwen": 299.29999999999995,
+  "gb10-music3": 105.3,
+  "pc1-h3-fast": 1066.4,
+  "pc1-h3-max": 523.0999999999999
+ },
+ "musique": {
+  "description": "Global Metadata: cinematic electronic, modern minimal synth, 108 BPM, EN: Deep sub bass, pulsing analog synth arpeggio, soft piano notes, airy pads, subtle percussive ticks and whooshes synced to the light lines; energy rises from intimate night pulse to warm hopeful swell at sunrise; clean wide mix, cinematic reverb, no vocals. Loud polished master.\n\nVocal Details: Instrumental, no lyrics, no vocals, no choir.\n\nArrangement: [Intro nuit] at 0 seconds: EN: Low drone, sparse piano, ticking pulse, intimate [Montée] at 5 seconds: EN: Analog arpeggio enters, soft kick, energy building, light whooshes [Attente] at 12 seconds: EN: Strip back to sustained pad and pulse, tension held [Décision] at 17 seconds: EN: Beat drops with warm bass, uplifting chord change, piano motif [Aube] at 23 seconds: EN: Full warm swell, strings pad, shimmering highs, hopeful [Résolution] at 30 seconds: EN: Gentle decay, sustained pad, final soft piano note Strong hits at 3.4, 5.4, 10.4, 17.0, 20.6, 23.4, 27.4 seconds. Clean ending at 45 seconds.",
+  "secondes": 105.3
+ }
+}

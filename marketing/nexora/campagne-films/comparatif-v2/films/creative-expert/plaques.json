@@ -1,0 +1,159 @@
+{
+ "plaques": {
+  "p01": {
+   "cle": "p01-cle-0.png",
+   "cle_s": 33.2,
+   "controle_image": null,
+   "video": "p01-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p02": {
+   "cle": "p02-cle-0.png",
+   "cle_s": 24.3,
+   "controle_image": null,
+   "video": "p02-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p03": {
+   "cle": "p03-cle-0.png",
+   "cle_s": 24.3,
+   "controle_image": null,
+   "video": "p03-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p04": {
+   "cle": "p04-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p04-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p05": {
+   "cle": "p05-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p05-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p06": {
+   "cle": "p06-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p06-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p07": {
+   "cle": "p07-cle-0.png",
+   "cle_s": 21.3,
+   "controle_image": null,
+   "video": "p07-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p08": {
+   "cle": "p08-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p08-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p09": {
+   "cle": "p09-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p09-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p10": {
+   "cle": "p10-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p10-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p11": {
+   "cle": "p11-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p11-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p12": {
+   "cle": "p12-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p12-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p13": {
+   "cle": "p13-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p13-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p14": {
+   "cle": "p14-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p14-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p15": {
+   "cle": "p15-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p15-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p16": {
+   "cle": "p16-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p16-rapide-0b.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": "image noire dans la vidéo",
+   "regen_video": 2
+  }
+ },
+ "gpu_s": {
+  "gb10-qwen": 357.09999999999997,
+  "gb10-music3": 120.3,
+  "pc1-h3-fast": 1657.3999999999996,
+  "pc1-h3-max": 396.29999999999995
+ },
+ "musique": {
+  "description": "Global Metadata: Cinematic Indie Electronic & Warm Acoustic, 112 BPM, Warm, inspiring cinematic score starting with intimate felt piano and subtle analog synth pulses at 5 a.m., building with crisp rhythmic percussion, acoustic guitar harmonics, and lush orchestral strings into a radiant, uplifting sunrise climax. Clean mix leaving warm midrange space for the voiceover. Loud polished master.\n\nVocal Details: Instrumental, no lyrics, no vocals, no choir.\n\nArrangement: [Éveil à l'aube] at 0 seconds: Intimate felt piano notes and a soft, ticking analog pulse evoking 5 a.m. quiet focus. [Étincelle créative] at 8 seconds: Warm sub-bass, shimmering arpeggios, and a crisp snare groove enter as the sketch transforms into 3D and video. [Prendre forme] at 21 seconds: Driving rhythmic acoustic guitar, rich cello phrases, and tactile percussive hits accompanying the print transformations. [Ouverture au soleil] at 32 seconds: Full, radiant cinematic swell with soaring strings and warm brass, resolving on a bright, resonant final piano chord at 42.5s. Strong hits at 2.5, 7.5, 10.5, 13.0, 18.5, 23.5, 31.5, 37.0, 42.5 seconds. Clean ending at 48 seconds.",
+  "secondes": 120.3
+ }
+}

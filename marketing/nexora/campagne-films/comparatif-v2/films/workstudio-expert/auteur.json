@@ -1,0 +1,30 @@
+{
+ "brief": "workstudio",
+ "palier": "expert",
+ "modele": "google/gemini-4-argon",
+ "appels": [
+  {
+   "etape": "auteur",
+   "entree": 2452,
+   "sortie": 16402,
+   "raisonnement": 10908,
+   "usd": 0.084462,
+   "cout_rapporte": true,
+   "latence_s": 179.0,
+   "fournisseur": "Google AI Studio"
+  }
+ ],
+ "reparations_modele": [],
+ "reparations_code": [],
+ "effort_essais": [],
+ "effort": "high",
+ "violations": [
+  []
+ ],
+ "violations_finales": [],
+ "usd": 0.084462,
+ "credits_client": 13.03,
+ "jetons_entree": 2452,
+ "jetons_sortie": 16402,
+ "latence_s": 179.0
+}

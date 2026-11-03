@@ -1,0 +1,342 @@
+{
+ "concept": "Alors que la ville dort et que les courriels s'accumulent à deux heures du matin, des flux lumineux d'agents intelligents trient les messages et préparent les réponses dans l'ombre. Au matin, l'humain garde le dernier mot : un seul geste du pouce sur « Approuver » suffit pour lancer le travail accompli et reprendre le contrôle de sa journée.",
+ "accroche": "À 2 h du matin, un écran s'illumine sous un flot de courriels entrants qui se transforment instantanément en un flux de tri structuré.",
+ "produit_evident": "Dès 2,0 s, l'insert réel du canevas de flux (ui-tri) montre le tri automatique d'un courriel entrant, la rédaction du brouillon par l'agent et la mise en attente d'approbation humaine.",
+ "mode": "texte",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Accroche nocturne : l'accumulation incessante des courriels à 2 h du matin dans un bureau désert.",
+   "image": "Dark modern architectural office at two in the morning, rain droplets streaking down floor-to-ceiling glass windows overlooking a blurred midnight city skyline. In the foreground, a sleek walnut desk holds an ultrawide curved monitor glowing with cascading ribbons of warm amber and cool cyan light, completely abstract blurred luminous bars with no text or letters. Moody cinematic low-key lighting, deep navy shadows and golden reflections on the polished wood, shot on 35mm anamorphic lens, shallow depth of field, rule of thirds composition.",
+   "mouvement": "Slow cinematic dolly push-in toward the glowing monitor as soft amber light ribbons glide smoothly across the screen and rain trickles down the dark windowpane.",
+   "son": "Quiet night rain against glass and subtle low digital hum",
+   "camera": "35mm anamorphic, travelling avant lent",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p02",
+   "type": "ui",
+   "duree": 2.0,
+   "intention": "Révélation immédiate du produit avant 4 s : le canevas réel de flux d'agents qui trie le courriel et prépare le brouillon.",
+   "son": "Crisp rhythmic synth pulse and soft interface activation chime",
+   "camera": "Insert direct plein écran du canevas de flux",
+   "transition": "coupe",
+   "heros": false,
+   "ui": "ui-tri"
+  },
+  {
+   "id": "p03",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Visualiser le travail d'organisation et de rédaction par les agents sous forme de filaments lumineux structurés.",
+   "image": "Extreme macro angle of a dark glass monitor surface in a dimly lit studio, reflecting streams of disorganized amber sparks entering from the left and weaving into three neat, structured horizontal filaments of calm cyan and gold light on the right. Abstract luminous geometry only, completely devoid of text, numbers, or icons. Crisp specular highlights on dark anti-glare glass, volumetric dust motes catching the warm glow, shot on 85mm macro lens, f/2.8 aperture, rich teal and amber color palette.",
+   "mouvement": "Subtle lateral camera slide to the right while chaotic light sparks smoothly align and flow into three parallel golden streams across the dark glass reflection.",
+   "son": "Soft crystalline whoosh of light streams aligning in harmony",
+   "camera": "85mm macro, glissement latéral fluide",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Ampleur cinématographique : pendant que la ville dort, l'équipe d'agents travaille en silence.",
+   "image": "Spectacular high-angle aerial night view of a snow-dusted northern metropolis with illuminated stone bridges and glass office towers under a deep indigo sky. Graceful, continuous threads of warm golden and soft cyan light flow like silk ribbons above the streets, linking quiet office buildings across the sleeping city. Cinematic aerial photography, 24mm wide-angle lens, high contrast between the dark winter architecture and the vibrant warm luminous pathways, atmospheric mist rising from the river, rich midnight blue and gold palette.",
+   "mouvement": "Smooth aerial drone glide forward over the night city skyline as golden ribbons of light stream steadily between the buildings and across the bridge.",
+   "son": "Deep atmospheric night wind and warm resonant bass pulse",
+   "camera": "24mm grand-angle aérien, survol avant majestueux",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p05",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Le travail invisible dans les bureaux endormis : les tâches répétitives sont triées et classées.",
+   "image": "Wide interior view of a quiet open-plan creative studio at night, rows of minimalist oak desks and dark ergonomic chairs bathed in deep twilight shadows. Floating gracefully above the desks, luminous golden threads weave through the air and arrange translucent, textless rectangles of soft warm light into orderly hovering stacks. Architectural interior photography, 35mm lens, soft volumetric glow illuminating potted indoor plants and acoustic wood panels, serene navy and warm amber palette, balanced symmetrical composition.",
+   "mouvement": "Gentle tracking shot gliding down the central aisle of the dark office while golden light lines softly sort floating luminous rectangles into neat stacks.",
+   "son": "Gentle rhythmic rustle of light and quiet nocturnal room tone",
+   "camera": "35mm, travelling avant dans l'allée centrale",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p06",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Le brouillon est prêt et s'arrête : l'agent attend patiemment la décision humaine.",
+   "image": "Close-up tabletop shot of a sleek dark smartphone resting on a warm walnut desk beside a ceramic mug and a brass desk lamp in the pre-dawn darkness. A single ribbon of golden light arrives and settles into a calm, steady breathing halo of warm amber illumination on the blank glass screen, with no text, numbers, or interface symbols visible. Intimate low-angle composition, 50mm prime lens, shallow depth of field, soft warm bokeh in the background, cozy amber and charcoal palette.",
+   "mouvement": "Slow push-in toward the smartphone on the wooden desk as the warm amber halo on the glass screen pulses gently and steadily in place.",
+   "son": "Warm suspended harmonic chord holding softly in silence",
+   "camera": "50mm, poussée lente sur le téléphone en attente",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p07",
+   "type": "ui",
+   "duree": 2.0,
+   "intention": "Preuve produit avant 15 s : l'insert réel de la carte d'approbation (ui-approuver) avec le brouillon prêt et le bouton « Approuver ».",
+   "son": "Clear warm notification chime and crisp beat drop",
+   "camera": "Insert direct plein écran de la carte d'approbation",
+   "transition": "coupe",
+   "heros": false,
+   "ui": "ui-approuver"
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Montrer l'aspect studio de conception : à l'aube, on assemble ses propres flux d'agents sur mesure.",
+   "image": "Over-the-shoulder view from behind a designer silhouetted against tall industrial windows as the first pink and gold light of dawn breaks over the city. The designer's hands rest on a minimalist aluminum keyboard and trackpad, while the large curved monitor displays blurred, glowing modular blocks linked by luminous golden threads, completely free of any legible text or labels. Warm rim lighting on the silhouette, 50mm lens, cinematic depth of field, sunrise gold, coral, and slate gray color palette.",
+   "mouvement": "Slow arcing camera movement behind the designer's shoulder as one hand glides on the trackpad and two glowing light nodes connect on the blurred display.",
+   "son": "Soft tactile trackpad click and rising morning strings",
+   "camera": "50mm, orbite lente de dos à contre-jour",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "La sérénité retrouvée au matin pendant que les flux d'agents gèrent le tri en arrière-plan.",
+   "image": "Medium shot from behind an architect standing at a concrete and timber drafting table in early morning light, both hands wrapped around a warm stoneware mug with delicate white steam rising. In the soft-focus background, a desktop screen glows calmly with three harmonious streams of amber and emerald light flowing in parallel, with no text or characters. Natural morning window light casting long soft shadows, 50mm lens, warm earthy tones of terracotta, oak, and golden sunlight.",
+   "mouvement": "Subtle dolly forward as delicate white steam curls upward from the ceramic mug in the foreground and soft light streams flow calmly in the background.",
+   "son": "Quiet morning studio ambiance and gentle acoustic pulse",
+   "camera": "50mm, poussée douce sur les mains et la vapeur",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p10",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Polyvalence pour toutes les équipes : les flux préparent les actions sur le terrain jusqu'à la tablette du superviseur.",
+   "image": "Cinematic wide shot inside a modern sunlit distribution hub with high timber ceilings and tall windows streaming golden morning sunbeams through the air. Luminous golden light threads travel smoothly alongside quiet conveyor lines and converge softly onto a glass tablet held by a supervisor seen from behind in a dark work jacket, the tablet screen showing only a warm diffused amber glow without text. Shot on 28mm lens, dramatic volumetric sun rays, warm amber and steel blue palette.",
+   "mouvement": "Smooth lateral tracking shot following the golden light threads through the sunbeams as they converge onto the glowing tablet held in the supervisor's hand.",
+   "son": "Spacious warehouse morning acoustics and warm synth swell",
+   "camera": "28mm, travelling latéral dans les rayons du matin",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p11",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Le matin à la maison ou au bureau : tout est prêt, rien ne part sans la décision humaine.",
+   "image": "Warm morning lifestyle shot from behind a woman in a natural beige linen shirt standing at a sunlit wooden kitchen island, pouring dark coffee from a glass carafe into a cup with one hand while holding a smartphone in the other. The smartphone screen emits a gentle, steady warm orange glow with no text, icons, or letters visible. Bright natural morning backlight creating a soft halo on her hair and rising coffee steam, 50mm lens, creamy highlights and warm honey palette.",
+   "mouvement": "Gentle camera drift to the left as dark coffee pours into the cup with rising steam and the smartphone screen glows warmly in her hand.",
+   "son": "Fresh coffee pouring into ceramic cup and warm morning room tone",
+   "camera": "50mm, glissement latéral doux à contre-jour",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Le geste décisif : le pouce appuie pour approuver, déclenchant une onde lumineuse.",
+   "image": "Extreme close-up of a human hand in crisp golden morning sunlight, the thumb pressing decisively onto the center of a sleek dark smartphone glass screen. At the exact point of contact, a brilliant concentric ripple of warm golden light expands across the smooth dark glass surface, with no text, buttons, or letters visible anywhere. Macro cinematography, 85mm lens, f/2.0 shallow depth of field, rich skin texture illuminated by warm sunrise rim light, glowing gold and deep obsidian palette.",
+   "mouvement": "Slow-motion macro push-in as the thumb presses firmly onto the glass screen and a bright golden light ripple expands outward across the surface.",
+   "son": "Satisfying tactile glass tap followed by a resonant golden wave",
+   "camera": "85mm macro, poussée franche sur le pouce",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Raccord de mouvement : l'onde du pouce devient le courriel approuvé qui s'élance dans la ville au soleil levant.",
+   "image": "Wide architectural exterior shot of a sunlit glass apartment building at golden hour, as a single radiant beam of warm golden light launches upward from a window and arcs gracefully across the bright morning sky toward downtown office towers, joining a subtle network of golden light trails. Crisp morning atmosphere, lens flare from the low rising sun, shot on 35mm lens, expansive sky composition, vibrant gold, warm white, and clear cerulean blue palette.",
+   "mouvement": "Upward crane tilt following the brilliant golden light beam as it launches from the window and arcs smoothly across the sunlit city skyline.",
+   "son": "Soaring luminous whoosh and uplifting orchestral brass swell",
+   "camera": "35mm, mouvement de grue ascendant",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Bénéfice humain : libérée du travail répétitif, l'équipe se consacre enfin à la création et à la collaboration.",
+   "image": "Sun-drenched creative studio in the morning, three colleagues seen from the back and side silhouettes gathered around a large oak table covered with physical architectural wood models and blank paper rolls. They gesture naturally in lively conversation while a closed laptop sits untouched at the corner of the table. Warm directional sunlight streaming through tall loft windows, floating dust motes, shot on 35mm lens, shallow depth of field, natural warm wood, cream, and sunlit gold palette.",
+   "mouvement": "Slow orbital tracking shot around the oak table as the silhouetted colleagues gesture naturally over the architectural wood models in the warm sunbeams.",
+   "son": "Warm collaborative studio atmosphere and uplifting rhythmic groove",
+   "camera": "35mm, orbite lente autour de la table d'équipe",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Le plaisir du vrai métier retrouvé : la main trace librement sur le papier pendant que le système veille en silence.",
+   "image": "Close-up of an artisan's hands drawing sweeping architectural curves with a dark charcoal pencil on heavy textured cream paper bathed in warm morning sunlight. In the softly blurred background, a desktop monitor displays a calm, steady ambient glow of warm amber light with no text or sharp details. Tactile photographic detail on the paper grain and wooden desk, 50mm lens, f/2.2 aperture, peaceful and focused atmosphere, warm ivory, charcoal, and golden amber color palette.",
+   "mouvement": "Gentle overhead pan following the hand as it draws a smooth curve with the charcoal pencil across the sunlit textured paper.",
+   "son": "Crisp charcoal pencil stroke on textured paper",
+   "camera": "50mm, panoramique doux sur la main qui dessine",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p16",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Respiration et clarté : un espace de travail apaisé qui avance au même rythme.",
+   "image": "Wide cinematic view of an airy, plant-filled modern timber-frame workspace in bright morning light, with expansive windows overlooking a sparkling river. Warm golden sunlight reflects off the polished concrete floor and wooden ceiling beams as two silhouetted team members walk calmly along a glass walkway. High dynamic range architectural photography, 24mm wide-angle lens, deep perspective lines leading toward the sunlit river, lush green foliage, warm honey wood, and bright daylight palette.",
+   "mouvement": "Smooth wide steadicam push forward through the sunlit timber workspace as silhouetted figures walk calmly along the bright glass walkway.",
+   "son": "Bright airy room ambiance with uplifting piano and strings",
+   "camera": "24mm grand-angle, travelling avant ample",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p17",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Plan final iconique : la maîtrise sereine face à la ville où tout circule en harmonie.",
+   "image": "Cinematic medium-wide shot from behind a team leader standing calmly in silhouette before a massive floor-to-ceiling window at golden hour, hands resting relaxed in jacket pockets, looking out over a vibrant sunlit city where delicate filaments of warm golden light flow in tranquil harmony between buildings. Warm golden rim light outlining the silhouette, subtle anamorphic lens flare, 35mm lens, centered symmetrical composition, inspiring and serene mood, rich amber, bronze, and warm twilight blue palette.",
+   "mouvement": "Slow, majestic dolly push-in toward the silhouetted figure by the window as golden light filaments glide serenely across the city below.",
+   "son": "Warm resolving orchestral chord with a gentle golden shimmer",
+   "camera": "35mm anamorphic, poussée lente centrée vers la fenêtre",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [],
+ "textes": [
+  {
+   "texte": "COURRIELS ENTRANTS LA NUIT",
+   "style": "sur",
+   "debut": 0.2,
+   "duree": 1.7
+  },
+  {
+   "texte": "Vos agents *trient* vos courriels.",
+   "style": "titre",
+   "debut": 2.1,
+   "duree": 2.3
+  },
+  {
+   "texte": "PRÉPARENT LES BROUILLONS",
+   "style": "sur",
+   "debut": 4.6,
+   "duree": 1.7
+  },
+  {
+   "texte": "Pendant que vous *dormez*,|l'équipe travaille.",
+   "style": "titre",
+   "debut": 6.6,
+   "duree": 2.7
+  },
+  {
+   "texte": "Chaque réponse attend votre *accord*.",
+   "style": "titre",
+   "debut": 9.8,
+   "duree": 3.5
+  },
+  {
+   "texte": "VALIDATION HUMAINE REQUISE",
+   "style": "sur",
+   "debut": 14.1,
+   "duree": 1.7
+  },
+  {
+   "texte": "Concevez vos *propres* flux d'agents.",
+   "style": "titre",
+   "debut": 16.2,
+   "duree": 2.6
+  },
+  {
+   "texte": "Du tri jusqu'au *brouillon*.",
+   "style": "titre",
+   "debut": 19.4,
+   "duree": 2.6
+  },
+  {
+   "texte": "AUCUN ENVOI SANS VOUS",
+   "style": "sur",
+   "debut": 23.6,
+   "duree": 2.1
+  },
+  {
+   "texte": "Un geste. Approuvé.",
+   "style": "impact",
+   "debut": 26.0,
+   "duree": 2.2
+  },
+  {
+   "texte": "RÉPONSE ENVOYÉE",
+   "style": "sur",
+   "debut": 28.6,
+   "duree": 2.0
+  },
+  {
+   "texte": "Vos agents préparent.|Vous *décidez*.",
+   "style": "titre",
+   "debut": 31.2,
+   "duree": 3.0
+  },
+  {
+   "texte": "Reprenez le *contrôle* de vos journées.",
+   "style": "titre",
+   "debut": 35.0,
+   "duree": 3.0
+  },
+  {
+   "texte": "Vous gardez la main.",
+   "style": "impact",
+   "debut": 38.5,
+   "duree": 2.2
+  }
+ ],
+ "musique": {
+  "genre": "Cinematic Neo-Classical Electronic",
+  "tempo_bpm": 120,
+  "description": "Cinematic and emotional instrumental score at 120 BPM. Starts with a nocturnal felt piano ostinato and crisp analog synth arpeggios evoking precision work in the night, building with warm cello and propelling electronic percussion at 6.5s, pausing briefly for the approval reveal at 14.0s, then blooming into a radiant, driving morning orchestral and electronic anthem from 26.0s to a warm resolving chord at 41.0s.",
+  "sections": [
+   {
+    "debut": 0.0,
+    "nom": "Veille nocturne",
+    "description": "Intimate felt piano notes and precise, crystalline synth plucks establishing a 120 BPM pulse in the quiet night."
+   },
+   {
+    "debut": 6.5,
+    "nom": "Flux en mouvement",
+    "description": "Warm sub-bass, flowing cello lines, and steady kinetic electronic percussion driving the invisible night workflow."
+   },
+   {
+    "debut": 16.0,
+    "nom": "Aube et architecture",
+    "description": "Brightening acoustic piano, layered strings, and rising harmonic tension as morning light enters the studio."
+   },
+   {
+    "debut": 26.0,
+    "nom": "Approbation et envol",
+    "description": "Crisp percussive hit on the thumb press followed by a soaring, triumphant orchestral and electronic climax that resolves warmly at 41 seconds."
+   }
+  ],
+  "coups": [
+   2.0,
+   6.5,
+   14.0,
+   16.0,
+   21.0,
+   26.0,
+   28.5,
+   31.0,
+   38.5,
+   41.0
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Vos agents travaillent. Vous gardez la main.",
+  "sous_titre": "Le studio de conception d'agents et de flux de travail avec approbation humaine",
+  "mentions": ""
+ }
+}

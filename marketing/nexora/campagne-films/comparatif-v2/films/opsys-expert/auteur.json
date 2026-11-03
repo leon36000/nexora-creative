@@ -1,0 +1,30 @@
+{
+ "brief": "opsys",
+ "palier": "expert",
+ "modele": "google/gemini-4-argon",
+ "appels": [
+  {
+   "etape": "auteur",
+   "entree": 2981,
+   "sortie": 18566,
+   "raisonnement": 12067,
+   "usd": 0.095811,
+   "cout_rapporte": true,
+   "latence_s": 192.6,
+   "fournisseur": "Google AI Studio"
+  }
+ ],
+ "reparations_modele": [],
+ "reparations_code": [],
+ "effort_essais": [],
+ "effort": "high",
+ "violations": [
+  []
+ ],
+ "violations_finales": [],
+ "usd": 0.095811,
+ "credits_client": 14.781,
+ "jetons_entree": 2981,
+ "jetons_sortie": 18566,
+ "latence_s": 192.6
+}

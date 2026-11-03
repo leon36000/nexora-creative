@@ -1,0 +1,463 @@
+{
+ "concept": "À 6 h du matin sur un toit du Québec, un entrepreneur lance sa journée d'un simple coup de pouce pendant que ses dix départements IA (M1 à M10) préparent soumissions, matériel, factures et briefing en brouillon. Quand le soleil se couche à 17 h, le chantier a avancé, l'administratif est prêt et sa soirée en famille lui appartient vraiment.",
+ "accroche": "Six heures du matin sur la charpente d'un toit glacé : l'entrepreneur est déjà là-haut, et ses dix départements s'allument.",
+ "produit_evident": "Dès les 5 premières secondes, on voit un entrepreneur en construction sur un toit à l'aube avec plans et tablette, suivi immédiatement du tableau vivant des 10 départements IA (M1 à M10) dédiés aux chantiers.",
+ "mode": "narration",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Accroche immédiate à 6 h du matin : ancrer le film dans le vrai quotidien d'un entrepreneur en toiture au Québec.",
+   "image": "Wide cinematic back-view shot of a roofing contractor standing on the timber frame of a residential roof at dawn in Quebec winter. Heavy leather tool belt at his waist, insulated work coat, breath condensing in the freezing air. Below him, frosty rooftops and white pickup trucks with warm amber headlights on a snowy street. Deep twilight blue sky with golden horizon light, 35mm lens, slate blue and amber palette, no text.",
+   "mouvement": "Slow forward dolly push toward the contractor from behind as cold morning steam rises from his breath and golden dawn light gently brightens the frosty timber beams.",
+   "son": "Crisp winter morning wind, distant truck engine idling, boots creaking on frosty wood",
+   "camera": "35mm anamorphic, travelling avant lent",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Rendre le produit indissociable du chantier avant 5 s : plans d'architecture, gants de cuir et tablette robuste.",
+   "image": "Close-up over-the-shoulder shot of a contractor's thick leather-gloved hands resting on rolled blue architectural paper plans with pure geometric lines and no text, holding a rugged dark construction tablet on a wooden roof deck. The tablet screen displays only soft blurred glowing amber and cyan rectangular tiles with no letters or numbers. Frost crystals sparkle on the raw spruce wood in crisp early morning sunlight, 50mm macro lens, natural contrast, warm gold and deep charcoal palette.",
+   "mouvement": "Subtle handheld camera push-in as the leather-gloved thumb smoothly taps a glowing amber tile on the blurred tablet screen while cold wind stirs the edge of the paper plan.",
+   "son": "Leather glove rustling against paper blueprint, single soft tactile chime",
+   "camera": "50mm macro, poussée douce",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p03",
+   "type": "tableau",
+   "duree": 2.5,
+   "intention": "Montrer immédiatement l'architecture M1 à M10 qui capte la demande client et prépare la soumission en brouillon.",
+   "image": "Dark architectural command aesthetic background with ten subtle matte slate modular rectangular tiles arranged on a deep obsidian surface, three tiles softly illuminated with warm amber and cyan rim light, completely blank without any text, letters, or numbers, lit by dramatic side light, 50mm lens, clean geometric composition, charcoal and amber palette.",
+   "mouvement": "Slow steady camera push-in as warm amber light pulses sequentially across three matte modular tiles in the dark space.",
+   "son": "Three warm sequential digital pulses over a low resonant bass hum",
+   "camera": "Tableau vivant M1-M10, poussée centrée",
+   "transition": "flash",
+   "heros": false,
+   "tableau": [
+    {
+     "m": "M1",
+     "action": "Appel client qualifié"
+    },
+    {
+     "m": "M2",
+     "action": "Dossier prêt à chiffrer"
+    },
+    {
+     "m": "M3",
+     "action": "Soumission en brouillon"
+    }
+   ]
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Ancrer la chaîne opérationnelle dans le terrain : camion de service, tuyaux de cuivre, échelles et équipe au travail.",
+   "image": "Medium interior shot from behind a plumbing contractor sitting in the cab of a stationary work truck at sunrise, wearing a high-visibility wool-lined jacket. On the dashboard mount, a rugged tablet glows with soft abstract luminous blocks and no legible text. Through the frost-rimmed windshield in soft focus, two workers in hard hats unload copper pipes and aluminum ladders beside a snowy Quebec house, 35mm lens, warm cabin glow against cold blue morning light.",
+   "mouvement": "Slow lateral tracking movement inside the truck cab while outside the windshield the silhouettes of workers lift copper pipes through the golden morning mist.",
+   "son": "Metallic clink of copper pipes and aluminum ladders outside, warm cab heater hum",
+   "camera": "35mm, travelling latéral doux",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p05",
+   "type": "tableau",
+   "duree": 2.5,
+   "intention": "Illustrer la chaîne réelle : de la soumission vérifiée sur 11 critères à l'intervention terrain et aux matériaux réservés.",
+   "image": "Minimalist dark slate architectural grid surface in a dimly lit studio environment, modular rectangular blocks arranged in neat rows with warm copper and cyan light lines connecting three active modules, no text or symbols anywhere, crisp rim lighting, 50mm lens, deep obsidian and glowing amber palette.",
+   "mouvement": "Smooth luminous energy lines travel from one glowing tile to the next as the camera glides gently upward.",
+   "son": "Crisp rhythmic interface clicks connecting in a triad chord",
+   "camera": "Tableau vivant M1-M10, glissement ascendant",
+   "transition": "coupe",
+   "heros": false,
+   "tableau": [
+    {
+     "m": "M3",
+     "action": "Soumission vérifiée onze points"
+    },
+    {
+     "m": "M4",
+     "action": "Intervention terrain créée"
+    },
+    {
+     "m": "M6",
+     "action": "Besoins matériaux réservés"
+    }
+   ]
+  },
+  {
+   "id": "p06",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Récompense avant 15 s : le pouce ganté valide le brouillon et la ferme de toit s'élève dans le soleil d'hiver.",
+   "image": "Dynamic low-angle cinematic shot on a snowy Quebec residential construction site in bright morning sun. In the close foreground, a contractor's weathered leather-gloved hand holds a rugged tablet showing a single bright emerald and amber glowing bar with no text, thumb pressing down. In the background, two carpenters in silhouettes guide a massive spruce roof truss rising into the sky against radiant sunbeams and cold mist, 24mm wide lens, dramatic golden and steel blue palette.",
+   "mouvement": "The gloved thumb presses firmly on the glowing tablet screen while the camera cranes upward as the wooden roof truss rises steadily into the bright morning sunbeams.",
+   "son": "Satisfying confirmation tone, crane cable tension, timber truss rising into the wind",
+   "camera": "24mm grand-angle, mouvement de grue ascendant",
+   "transition": "flash",
+   "heros": true
+  },
+  {
+   "id": "p07",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Introduire le briefing du matin sur le chantier pendant que l'entrepreneur inspecte la charpente.",
+   "image": "Medium-wide back-view shot of a renovation contractor in a canvas work jacket and hard hat walking through the open timber framing of a house under construction. One hand holds a smartphone at chest level displaying a soft warm circular amber light wave with no text. Sawdust particles float in bright diagonal shafts of winter sunlight cutting through raw spruce studs, 35mm lens, shallow depth of field, warm wood tones and crisp winter light.",
+   "mouvement": "Steady gimbal tracking shot following the contractor from behind through the wooden framing as golden sawdust drifts slowly across the sunbeams and the phone screen pulses softly.",
+   "son": "Footsteps on wooden subfloor, distant circular saw, soft acoustic activation chime",
+   "camera": "35mm, suivi arrière au stabilisateur",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Faire entendre l'unique réplique de l'assistant qui livre l'état exact de l'entreprise pendant la montée sur l'échafaudage.",
+   "image": "Low-angle close tracking shot of heavy leather work boots stepping firmly onto frosty wooden scaffolding planks beside a red brick and cedar house under renovation. Above the boots, the contractor's gloved hand at his side holds a dark smartphone glowing with a soft amber acoustic ring and no text. Crisp morning light catches the frost on the timber and brick texture, 50mm lens, cinematic contrast, earthy rust and cold blue palette.",
+   "mouvement": "Low camera tracks upward with the heavy work boots climbing the scaffolding planks while the warm amber light ring on the smartphone pulses in rhythm.",
+   "son": "Heavy boots stepping on wooden scaffolding planks, metallic scaffold ring",
+   "camera": "50mm, contre-plongée en suivi ascendant",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Montrer le savoir-faire de plomberie et rénovation en pleine exécution pendant que l'entreprise gère la suite.",
+   "image": "Cinematic medium shot inside an unfinished residential bathroom and kitchen renovation, seen from an angled side silhouette. A plumber in protective goggles and work gear solders a gleaming copper pipe joint with a small blue torch flame. Bright sparks and warm orange reflections illuminate chrome wrenches, stacked ceramic tiles, and a frost-edged window in the background, 50mm prime lens, rich copper, teal, and warm amber lighting, no text or logos.",
+   "mouvement": "Slow orbit around the silhouetted plumber as the blue torch flame heats the copper pipe and warm steam curls upward into the sunlit room.",
+   "son": "Hiss of soldering torch flame, subtle metallic tap on copper pipe",
+   "camera": "50mm, orbite lente à contre-jour",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p10",
+   "type": "tableau",
+   "duree": 2.5,
+   "intention": "Montrer la fin de la chaîne réelle : travaux terminés déclenchant facture brouillon, contenu marketing, analytique, stratégie et mémoire.",
+   "image": "Deep charcoal architectural board composition with ten sleek dark glass tiles suspended over a matte black surface, five tiles glowing brightly with warm gold and cyan edge illumination linked by fine light threads, completely free of text or numbers, 50mm lens, high-contrast obsidian and gold palette.",
+   "mouvement": "Five dark glass tiles illuminate one after another with warm golden light while the camera performs a slow centered push-in.",
+   "son": "Five cascading harmonic chimes building a warm chord",
+   "camera": "Tableau vivant M1-M10, poussée progressive",
+   "transition": "raccord",
+   "heros": false,
+   "tableau": [
+    {
+     "m": "M5",
+     "action": "Facture prête en brouillon"
+    },
+    {
+     "m": "M7",
+     "action": "Publication chantier proposée"
+    },
+    {
+     "m": "M8",
+     "action": "Vue exécutive à jour"
+    },
+    {
+     "m": "M9",
+     "action": "Briefing stratégique prêt"
+    },
+    {
+     "m": "M10",
+     "action": "Historique client mémorisé"
+    }
+   ]
+  },
+  {
+   "id": "p11",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Plan spectaculaire de la maison qui s'élève sous la lumière dorée du Québec, symbole d'une entreprise qui avance vite et bien.",
+   "image": "Spectacular wide architectural shot of a two-story timber-frame house under construction on a snow-covered Quebec lot surrounded by pine trees. Fresh spruce rafters, plywood sheathing, and scaffolding glow warmly as golden afternoon sunlight sweeps across the structure. Two work trucks sit parked in the foreground snow, dramatic winter clouds painted in gold and slate blue above, 24mm wide-angle lens, epic cinematic composition, rich amber and cool snow-blue palette, no text.",
+   "mouvement": "Majestic time-lapse style crane movement rising slowly as golden afternoon sunlight sweeps rapidly across the timber house frame and fast-moving clouds glide across the sky.",
+   "son": "Rhythmic nail guns echoing, sweeping wind, warm orchestral swell",
+   "camera": "24mm grand-angle, grue ascendante majestueuse",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Illustrer la logistique terrain sans friction : livraison de bardeaux de cèdre et de bois d'œuvre à l'heure dorée.",
+   "image": "Low-angle three-quarter shot of a heavy flatbed delivery truck rolling slowly onto a snowy residential jobsite at golden hour, with no logos or license plate markings. Neat stacks of fresh cedar shingle bundles and wrapped timber beams are strapped tightly to the flatbed. Powdery snow kicks up around the heavy rubber tires, backlit by low warm amber sun rays, 35mm lens, dynamic contrast, golden orange and deep shadow blue palette.",
+   "mouvement": "Low tracking camera moves alongside the heavy tires rolling through fresh powder snow as golden sunset rays flare softly behind the stacked lumber.",
+   "son": "Heavy tires crunching on packed snow, deep diesel rumble",
+   "camera": "35mm, suivi bas au ras des roues",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Clore la journée de chantier au coucher du soleil sur le faîte du toit : la fierté du métier accompli.",
+   "image": "Dramatic silhouette shot of a roofer kneeling near the peak of a steep gabled roof at sunset in Quebec, holding a pneumatic nailer against the ridge cap. Behind him, the winter sky blazes with deep amber, crimson, and twilight violet over distant snowy evergreens. A wisp of warm breath rises from his silhouette in the crisp air, 85mm telephoto lens, compressed perspective, striking dark silhouette against fiery sunset palette, no text.",
+   "mouvement": "Slow telephoto pan across the roof ridge as the silhouetted roofer lowers the nailer once and warm breath drifts into the glowing sunset sky.",
+   "son": "Single crisp pneumatic nailer strike echoing into the quiet sunset air",
+   "camera": "85mm téléobjectif, panoramique lent en silhouette",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "tableau",
+   "duree": 2.5,
+   "intention": "Montrer que les dossiers de fin de journée sont déjà consignés et prêts pour le lendemain avant même le retour à la maison.",
+   "image": "Sleek dark obsidian architectural grid with ten geometric modules in soft twilight lighting, four modules glowing with calm amber and emerald rim light, no text or characters anywhere on the surface, shallow depth of field, 50mm lens, serene charcoal, amber, and deep blue palette.",
+   "mouvement": "Four modular tiles settle into a calm steady amber glow as the camera slowly pulls back in smooth motion.",
+   "son": "Calm resolving digital chord, soft evening ambiance",
+   "camera": "Tableau vivant M1-M10, recul doux",
+   "transition": "coupe",
+   "heros": false,
+   "tableau": [
+    {
+     "m": "M1",
+     "action": "Appels manqués consignés"
+    },
+    {
+     "m": "M5",
+     "action": "Comptes clients suivis"
+    },
+    {
+     "m": "M9",
+     "action": "Priorités de demain prêtes"
+    },
+    {
+     "m": "M10",
+     "action": "Registre chantier chaîné"
+    }
+   ]
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Montrer le temps redonné par l'heure du jour : retour à la maison dès le crépuscule de 17 h, et non tard la nuit.",
+   "image": "Wide cinematic twilight shot at five in the afternoon in a quiet Quebec neighborhood under fresh snow. A clean white pickup truck with a roof ladder rack pulls into the driveway of a warm two-story cedar and stone family house. Soft golden lamplight pours from the living room windows onto the snowy porch, while the sky above still holds the deep cobalt blue of early dusk, 35mm lens, inviting cobalt and warm gold palette, no text.",
+   "mouvement": "Smooth crane-down shot as the pickup truck rolls gently to a stop in the snowy driveway and its brake lights glow softly against the dusk snow.",
+   "son": "Tires stopping softly on snow, engine turning off, peaceful evening quiet",
+   "camera": "35mm, descente de grue douce",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p16",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Émotion pure : l'entrepreneur dépose ses gants et sa tablette éteinte pour retrouver son enfant, libre de toute paperasse du soir.",
+   "image": "Warm intimate close-up inside the wooden entryway of a Quebec home at early evening. In sharp foreground focus, the contractor's weathered hands pull off heavy leather work gloves and set a dark, switched-off tablet face-down on a rustic oak console table beside brass truck keys. In the soft-focus golden background, the silhouette of a young child runs joyfully into the contractor's open arms, 50mm lens, emotional warm tungsten and honey amber palette, no text.",
+   "mouvement": "Slow push-in on the hands placing the dark tablet and leather gloves down on the oak table while in the warm blurred background the contractor embraces his child.",
+   "son": "Keys and tablet set gently on wood, warm footsteps and joyful child laughter",
+   "camera": "50mm, poussée intime à faible profondeur de champ",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p17",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Image finale apaisante de la maison illuminée sous la neige pendant que le camion de travail se repose dehors.",
+   "image": "Serene wide exterior shot at early evening looking toward the warm glowing dining room window of the Quebec house while gentle snowflakes fall through the twilight air. Inside the golden lit window in soft silhouette, a family gathers around the dinner table. In the foreground driveway, the work truck sits quietly covered in a light dusting of snow, 35mm lens, peaceful cinematic framing, deep twilight blue and warm hearth gold palette, no text.",
+   "mouvement": "Slow gentle camera pull-back through softly falling snow as warm golden light shines steadily from the family dining room window into the calm blue evening.",
+   "son": "Soft winter evening breeze, warm acoustic guitar resonance fading out",
+   "camera": "35mm, travelling arrière lent sous la neige",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [
+  {
+   "id": "n01",
+   "role": "narrateur",
+   "texte": "Six heures du matin sur le chantier.",
+   "debut": 0.3
+  },
+  {
+   "id": "n02",
+   "role": "narrateur",
+   "texte": "Vous êtes déjà sur le toit.",
+   "debut": 3.2
+  },
+  {
+   "id": "n03",
+   "role": "narrateur",
+   "texte": "Pendant ce temps, vos dix départements s'activent.",
+   "debut": 5.8
+  },
+  {
+   "id": "n04",
+   "role": "narrateur",
+   "texte": "De la soumission acceptée jusqu'au matériel réservé, tout se prépare en brouillon.",
+   "debut": 8.9
+  },
+  {
+   "id": "n05",
+   "role": "narrateur",
+   "texte": "Un coup de pouce, et le chantier avance.",
+   "debut": 13.7
+  },
+  {
+   "id": "n06",
+   "role": "narrateur",
+   "texte": "Briefing du matin, dans votre poche.",
+   "debut": 17.1
+  },
+  {
+   "id": "n07",
+   "role": "assistant",
+   "texte": "Trois soumissions prêtes, matériel réservé, une facture à approuver.",
+   "debut": 19.7
+  },
+  {
+   "id": "n08",
+   "role": "narrateur",
+   "texte": "Travaux finis? La facture et la publication sont déjà prêtes à réviser.",
+   "debut": 23.5
+  },
+  {
+   "id": "n09",
+   "role": "narrateur",
+   "texte": "Pendant que vous bâtissez, rien ne tombe entre deux chaises.",
+   "debut": 28.4
+  },
+  {
+   "id": "n10",
+   "role": "narrateur",
+   "texte": "Et quand le soleil se couche, votre journée est vraiment finie.",
+   "debut": 32.6
+  },
+  {
+   "id": "n11",
+   "role": "narrateur",
+   "texte": "Votre entreprise tourne pendant que vous travaillez.",
+   "debut": 37.1
+  },
+  {
+   "id": "n12",
+   "role": "narrateur",
+   "texte": "Bâtissez l'esprit tranquille.",
+   "debut": 40.1
+  }
+ ],
+ "textes": [
+  {
+   "texte": "Vision · en développement",
+   "style": "prepa",
+   "debut": 0.3,
+   "duree": 1.6
+  },
+  {
+   "texte": "Dix départements IA | pour *bâtir*",
+   "style": "titre",
+   "debut": 2.1,
+   "duree": 2.3
+  },
+  {
+   "texte": "SOUMISSION ET TERRAIN",
+   "style": "sur",
+   "debut": 7.1,
+   "duree": 2.2
+  },
+  {
+   "texte": "L'IA prépare. | *Vous* validez.",
+   "style": "titre",
+   "debut": 12.1,
+   "duree": 2.7
+  },
+  {
+   "texte": "En préparation",
+   "style": "prepa",
+   "debut": 15.1,
+   "duree": 2.2
+  },
+  {
+   "texte": "BRIEFING DU MATIN",
+   "style": "impact",
+   "debut": 17.6,
+   "duree": 2.6
+  },
+  {
+   "texte": "Votre entreprise *tourne* | avec vous",
+   "style": "titre",
+   "debut": 25.6,
+   "duree": 2.7
+  },
+  {
+   "texte": "ZÉRO SOIRÉE PERDUE",
+   "style": "impact",
+   "debut": 30.6,
+   "duree": 1.8
+  },
+  {
+   "texte": "Vos soirées *vous* appartiennent",
+   "style": "titre",
+   "debut": 37.5,
+   "duree": 2.4
+  },
+  {
+   "texte": "Vision · en développement",
+   "style": "prepa",
+   "debut": 40.1,
+   "duree": 1.8
+  }
+ ],
+ "musique": {
+  "genre": "Cinematic Organic Indie Rock & Pulse Electronic",
+  "tempo_bpm": 120,
+  "description": "Driving warm acoustic and electric baritone guitar pulse blended with deep cinematic analog synth bass, crisp percussive stomps and rimshots, building into an uplifting orchestral brass and string swell at 15 seconds, then resolving into a warm acoustic piano and guitar outro at 35 seconds. Clean mix leaving space for warm male voiceover.",
+  "sections": [
+   {
+    "debut": 0.0,
+    "nom": "Aube sur le chantier",
+    "description": "Atmospheric cold morning synth pad with a steady muted baritone guitar pulse and subtle clockwork percussion."
+   },
+   {
+    "debut": 7.0,
+    "nom": "Activation des départements",
+    "description": "Crisp kick drum and rhythmic rimshots enter at 120 BPM, driving forward momentum with warm bass."
+   },
+   {
+    "debut": 15.0,
+    "nom": "Validation et essor",
+    "description": "Full cinematic anthem drop with soaring strings, warm brass, and driving percussion as the roof truss rises."
+   },
+   {
+    "debut": 35.0,
+    "nom": "Retour à la maison",
+    "description": "Warm emotional resolution with intimate acoustic guitar, soft felt piano chords, and gentle ambient glow."
+   }
+  ],
+  "coups": [
+   2.0,
+   4.5,
+   7.0,
+   12.0,
+   15.0,
+   20.5,
+   25.5,
+   30.5,
+   32.5,
+   35.0,
+   37.5,
+   42.0
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Votre entreprise tourne pendant que vous travaillez.",
+  "sous_titre": "Une équipe d'agents IA en dix départements pour les entrepreneurs d'ici.",
+  "mentions": "Vision · en développement. Brouillons préparés par l'IA et validés par l'humain."
+ }
+}

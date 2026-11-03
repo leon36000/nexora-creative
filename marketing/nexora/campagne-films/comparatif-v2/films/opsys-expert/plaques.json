@@ -1,0 +1,131 @@
+{
+ "plaques": {
+  "p01": {
+   "cle": "p01-cle-0.png",
+   "cle_s": 24.2,
+   "controle_image": null,
+   "video": "p01-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p02": {
+   "cle": "p02-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p02-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p04": {
+   "cle": "p04-cle-0.png",
+   "cle_s": 24.2,
+   "controle_image": null,
+   "video": "p04-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p06": {
+   "cle": "p06-cle-0.png",
+   "cle_s": 24.2,
+   "controle_image": null,
+   "video": "p06-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p07": {
+   "cle": "p07-cle-0.png",
+   "cle_s": 24.3,
+   "controle_image": null,
+   "video": "p07-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p08": {
+   "cle": "p08-cle-0.png",
+   "cle_s": 24.4,
+   "controle_image": null,
+   "video": "p08-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p09": {
+   "cle": "p09-cle-0.png",
+   "cle_s": 24.3,
+   "controle_image": null,
+   "video": "p09-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p11": {
+   "cle": "p11-cle-0.png",
+   "cle_s": 27.5,
+   "controle_image": null,
+   "video": "p11-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p12": {
+   "cle": "p12-cle-0.png",
+   "cle_s": 24.6,
+   "controle_image": null,
+   "video": "p12-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p13": {
+   "cle": "p13-cle-0.png",
+   "cle_s": 24.4,
+   "controle_image": null,
+   "video": "p13-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p15": {
+   "cle": "p15-cle-0.png",
+   "cle_s": 24.4,
+   "controle_image": null,
+   "video": "p15-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.1,
+   "controle_video": null
+  },
+  "p16": {
+   "cle": "p16-cle-0.png",
+   "cle_s": 24.2,
+   "controle_image": null,
+   "video": "p16-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.1,
+   "controle_video": null
+  },
+  "p17": {
+   "cle": "p17-cle-0.png",
+   "cle_s": 21.3,
+   "controle_image": null,
+   "video": "p17-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  }
+ },
+ "gpu_s": {
+  "gb10-qwen": 313.2,
+  "gb10-music3": 120.3,
+  "pc1-h3-fast": 1195.1,
+  "pc1-h3-max": 396.29999999999995
+ },
+ "musique": {
+  "description": "Global Metadata: Cinematic Organic Indie Rock & Pulse Electronic, 120 BPM, Driving warm acoustic and electric baritone guitar pulse blended with deep cinematic analog synth bass, crisp percussive stomps and rimshots, building into an uplifting orchestral brass and string swell at 15 seconds, then resolving into a warm acoustic piano and guitar outro at 35 seconds. Clean mix leaving space for warm male voiceover. Loud polished master.\n\nVocal Details: Instrumental, no lyrics, no vocals, no choir.\n\nArrangement: [Aube sur le chantier] at 0 seconds: Atmospheric cold morning synth pad with a steady muted baritone guitar pulse and subtle clockwork percussion. [Activation des départements] at 7 seconds: Crisp kick drum and rhythmic rimshots enter at 120 BPM, driving forward momentum with warm bass. [Validation et essor] at 15 seconds: Full cinematic anthem drop with soaring strings, warm brass, and driving percussion as the roof truss rises. [Retour à la maison] at 35 seconds: Warm emotional resolution with intimate acoustic guitar, soft felt piano chords, and gentle ambient glow. Strong hits at 2.0, 4.5, 7.0, 12.0, 15.0, 20.5, 25.5, 30.5, 32.5, 35.0, 37.5, 42.0 seconds. Clean ending at 48 seconds.",
+  "secondes": 120.3
+ }
+}

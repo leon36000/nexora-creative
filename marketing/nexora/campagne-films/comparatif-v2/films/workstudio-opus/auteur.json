@@ -1,0 +1,17 @@
+{
+ "brief": "workstudio",
+ "palier": "opus",
+ "modele": "claude-opus-5-5 (sous-agent Claude Code, effort high, à l'aveugle)",
+ "effort": "high",
+ "appels": [],
+ "reparations_modele": [],
+ "reparations_code": [],
+ "violations_finales": [],
+ "usd": null,
+ "credits_client": null,
+ "jetons_sous_agent_total": 98264,
+ "jetons_entree": null,
+ "jetons_sortie": null,
+ "latence_s": 185.8,
+ "note": "coût fournisseur non mesuré (abonnement de l'outil) ; jetons = total du sous-agent, lecture du prompt et du brief comprise"
+}

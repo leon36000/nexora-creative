@@ -1,0 +1,322 @@
+{
+ "concept": "À 5 h du matin, une boulangère tape une seule phrase dans son navigateur. Pendant que le four chauffe, un studio complet se met au travail : croquis, rendu, logo imprimé, affiche de rue, modèle 3D du gâteau. Quand la première cliente entre, tout est déjà entre ses mains.",
+ "accroche": "Une main tape une phrase sur un clavier éclairé par le four, et déjà l'image se transforme.",
+ "produit_evident": "Le studio dans le navigateur : à l'écran, une interface de création s'ouvre et le croquis du gâteau devient un rendu, puis une carte imprimée, puis une affiche dans la rue.",
+ "mode": "narration",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 3.05,
+   "intention": "Accroche : la main tape la phrase, le four rougeoie derrière.",
+   "image": "Extreme close-up of a woman's hand resting on a laptop keyboard in a warm dark bakery kitchen at dawn, flour dust in the air, a red-orange oven glow behind, a few handwritten recipe cards blurred in the foreground, shallow depth of field, 35mm lens, cinematic warm amber palette with deep shadows, soft rim light on the knuckles, photographic, high detail, no text, no logos, no readable screen.",
+   "mouvement": "Slow push-in toward the hand and keyboard, flour dust drifting through the warm light, oven glow pulsing gently, camera steady and smooth.",
+   "son": "Quiet bakery room tone, soft keyboard clicks, low oven hum.",
+   "camera": "35mm, slow dolly-in",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.64,
+   "intention": "Le produit apparaît : l'interface du studio s'ouvre, formes lumineuses.",
+   "image": "Over-the-shoulder shot of a laptop screen glowing in a dark bakery kitchen, the screen filled with soft abstract luminous panels and blurred thumbnails of a cake sketch, a hand hovering above the trackpad, warm bokeh of oven lights in the background, 50mm lens, shallow depth of field, cinematic amber and teal contrast, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Gentle orbit from behind the shoulder toward the screen, screen panels lighting up one by one, camera gliding slowly.",
+   "son": "Soft interface chime, quiet room tone.",
+   "camera": "50mm, slow orbit",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p03",
+   "type": "plan",
+   "duree": 2.44,
+   "intention": "Le croquis : la boulangère dessine son gâteau sur une serviette.",
+   "image": "Top-down shot of a flour-dusted wooden counter, a pencil sketching a three-tier cake on a paper napkin, a real pastry brush and a bowl of berries at the edge of frame, warm morning light from the left, 50mm macro lens, shallow depth of field, amber and cream palette, photographic, no text, no letters.",
+   "mouvement": "Slow overhead push-in on the pencil line growing, flour particles settling, light shifting softly.",
+   "son": "Pencil on paper, soft kitchen ambience.",
+   "camera": "50mm macro, top-down push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 2.44,
+   "intention": "Transformation : le croquis devient un rendu 3D photoréaliste, même composition.",
+   "image": "Top-down shot of the same three-tier cake now rendered photorealistic on a dark studio background, glossy icing, fresh berries, soft rim light, same overhead composition as the sketch, 50mm lens, shallow depth of field, cinematic amber and cream palette, photographic, no text, no logos.",
+   "mouvement": "Slow overhead push-in, a soft light sweep crossing the cake icing, subtle rotation of the cake stand.",
+   "son": "Soft shimmer transition, low warm tone.",
+   "camera": "50mm, top-down push-in",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p05",
+   "type": "plan",
+   "duree": 2.24,
+   "intention": "Le logo : un trait à plat devient une carte d'affaires imprimée.",
+   "image": "Close-up of a flat matte business card on a warm wooden counter, embossed abstract circular mark catching the light, a stack of crisp cards beside it, flour dust and a linen napkin in the background, 85mm lens, shallow depth of field, amber and cream palette, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow lateral slider past the card, light glinting across the embossed mark, cards settling softly.",
+   "son": "Soft paper tap, quiet room tone.",
+   "camera": "85mm, lateral slider",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p06",
+   "type": "plan",
+   "duree": 2.44,
+   "intention": "L'affiche : la rue vide se remplit d'une affiche de la boulangerie.",
+   "image": "Wide shot of an empty small-town street at blue dawn, a single lit poster panel on a brick wall glowing warm amber with an abstract cake graphic, wet pavement reflections, 24mm lens, deep focus, cinematic teal and amber palette, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow crane down from the skyline to the glowing poster panel, streetlights flickering, reflections shimmering.",
+   "son": "Distant morning birds, soft wind, low city hum.",
+   "camera": "24mm, slow crane down",
+   "transition": "flash",
+   "heros": true
+  },
+  {
+   "id": "p07",
+   "type": "plan",
+   "duree": 2.03,
+   "intention": "Le papier : un dépliant sort de l'imprimante, chaud.",
+   "image": "Close-up of a warm flyer sliding out of a small printer in a bakery back room, crisp paper edge, abstract cake graphic in warm amber ink, steam from a nearby oven softening the light, 85mm lens, shallow depth of field, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow push-in as the flyer slides out, steam drifting across the frame, light catching the paper edge.",
+   "son": "Printer whir, paper sliding, soft steam hiss.",
+   "camera": "85mm, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 2.24,
+   "intention": "Le film : la vitrine de la boulangerie s'éclaire comme un écran de tournage.",
+   "image": "Exterior night shot of a small bakery storefront, warm interior light spilling onto the sidewalk, a soft glowing rectangular panel above the window like a screen showing an abstract cake silhouette, 35mm lens, shallow depth of field, cinematic amber and deep blue palette, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow lateral dolly past the storefront, the glowing panel brightening, reflections on wet sidewalk.",
+   "son": "Night ambience, soft electrical hum, distant traffic.",
+   "camera": "35mm, lateral dolly",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 2.24,
+   "intention": "Le modèle 3D du gâteau tourne dans la main, comme un objet réel.",
+   "image": "Close-up of a hand holding a small 3D-printed cake model on a wooden counter, warm morning light, flour dust, a laptop glowing softly out of focus behind, 85mm lens, shallow depth of field, amber and cream palette, photographic, no text, no letters, no logos.",
+   "mouvement": "Slow rotation of the model in the hand, light sweeping across the layers, camera steady.",
+   "son": "Soft handling sound, quiet room tone.",
+   "camera": "85mm, slow orbit",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p10",
+   "type": "plan",
+   "duree": 2.24,
+   "intention": "La porte s'ouvre : la première cliente entre, la boulangère tient tout.",
+   "image": "Wide shot from inside the bakery toward the glass door, a customer silhouette entering in cold blue morning light, the owner's back in the foreground holding a stack of printed flyers and cards, warm interior amber against the blue exterior, 24mm lens, deep focus, cinematic, photographic, no text, no letters, no logos.",
+   "mouvement": "Slow push-in toward the opening door, warm light spilling out, the owner's silhouette steady.",
+   "son": "Door bell chime, morning street ambience, soft footsteps.",
+   "camera": "24mm, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p11",
+   "type": "plan",
+   "duree": 2.24,
+   "intention": "Les mains remettent la carte et le dépliant à la cliente.",
+   "image": "Close-up of two pairs of hands exchanging a crisp business card and a warm flyer over a wooden counter, a paper bag of pastries beside them, warm morning light, 85mm lens, shallow depth of field, amber and cream palette, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow push-in on the hands and the card, soft light shifting, paper edges glinting.",
+   "son": "Soft paper rustle, quiet bakery ambience.",
+   "camera": "85mm, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 2.44,
+   "intention": "Le gâteau réel, sous la cloche, comme la promesse tenue.",
+   "image": "Close-up of a real three-tier cake under a glass cloche on a wooden counter, morning light streaming in, flour dust and a linen cloth, 85mm lens, shallow depth of field, warm amber palette, photographic, no text, no letters, no logos.",
+   "mouvement": "Slow lateral slider around the cake, light sweeping across the glass cloche, soft reflections.",
+   "son": "Soft glass clink, warm room tone.",
+   "camera": "85mm, lateral slider",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.44,
+   "intention": "Le studio dans le navigateur, vu de dos, comme une fenêtre ouverte sur tout.",
+   "image": "Over-the-shoulder shot of the owner's back at the counter, a laptop glowing with soft abstract panels of a cake, a flyer and cards laid out beside it, warm bakery light, 35mm lens, shallow depth of field, cinematic amber palette, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow pull-back from the laptop to reveal the flyer, cards and cake model on the counter, light glowing.",
+   "son": "Soft interface tone, quiet bakery ambience.",
+   "camera": "35mm, slow pull-back",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "plan",
+   "duree": 2.44,
+   "intention": "La rue au petit matin, l'affiche et la vitrine vivent ensemble.",
+   "image": "Wide exterior shot of the bakery at sunrise, warm light on the brick facade, the glowing poster panel and the lit window, a few passersby silhouettes, wet sidewalk reflections, 24mm lens, deep focus, cinematic teal and amber palette, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow crane up from the sidewalk to the storefront, sunrise light warming the bricks, silhouettes passing.",
+   "son": "Morning street ambience, birds, soft wind.",
+   "camera": "24mm, slow crane up",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 2.44,
+   "intention": "Dernier gros plan émouvant : la main de la boulangère pose la carte sur le comptoir.",
+   "image": "Close-up of a flour-dusted hand placing a crisp business card on a wooden counter beside a warm flyer and a small cake model, morning light, shallow depth of field, 85mm lens, amber and cream palette, photographic, no readable text, no letters, no logos.",
+   "mouvement": "Slow push-in as the hand sets the card down, light glinting on the embossed mark, dust settling.",
+   "son": "Soft card tap on wood, quiet room tone.",
+   "camera": "85mm, slow push-in",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [
+  {
+   "id": "n01",
+   "role": "narrateur",
+   "texte": "Cinq heures du matin. La boulangère a une idée.",
+   "debut": 0.5
+  },
+  {
+   "id": "n02",
+   "role": "narrateur",
+   "texte": "Elle l'écrit. Une phrase, pis c'est parti.",
+   "debut": 3.8
+  },
+  {
+   "id": "n03",
+   "role": "narrateur",
+   "texte": "Le studio se met au travail pendant que le four chauffe.",
+   "debut": 7.4
+  },
+  {
+   "id": "n04",
+   "role": "narrateur",
+   "texte": "Le croquis devient un gâteau. Le logo devient une carte.",
+   "debut": 12.0
+  },
+  {
+   "id": "n05",
+   "role": "narrateur",
+   "texte": "La rue vide devient une affiche. Le gâteau, un modèle qu'on peut tenir.",
+   "debut": 16.6
+  },
+  {
+   "id": "n06",
+   "role": "narrateur",
+   "texte": "Quand la première cliente entre, tout est déjà prêt.",
+   "debut": 21.8
+  },
+  {
+   "id": "n07",
+   "role": "narrateur",
+   "texte": "Votre pub, votre marque, votre film. En une conversation.",
+   "debut": 27.2
+  }
+ ],
+ "textes": [
+  {
+   "texte": "5 h du matin",
+   "style": "sur",
+   "debut": 0.6,
+   "duree": 2.2
+  },
+  {
+   "texte": "Une phrase.|*Tout* part de là.",
+   "style": "titre",
+   "debut": 3.6,
+   "duree": 3.0
+  },
+  {
+   "texte": "Le studio travaille",
+   "style": "sur",
+   "debut": 7.4,
+   "duree": 2.0
+  },
+  {
+   "texte": "Croquis → *rendu*",
+   "style": "impact",
+   "debut": 10.6,
+   "duree": 1.6
+  },
+  {
+   "texte": "Logo → *carte*",
+   "style": "impact",
+   "debut": 13.4,
+   "duree": 1.6
+  },
+  {
+   "texte": "Rue vide → *affiche*",
+   "style": "impact",
+   "debut": 17.0,
+   "duree": 1.8
+  },
+  {
+   "texte": "Votre marque,|*entre vos mains*",
+   "style": "titre",
+   "debut": 24.0,
+   "duree": 3.2
+  }
+ ],
+ "musique": {
+  "genre": "Warm cinematic pop with light electronic textures",
+  "tempo_bpm": 112,
+  "description": "EN: intimate felt piano and soft analog synth pads, upright bass, brushed drums entering at 7s, a warm string swell at 16s, subtle hand percussion, building to a bright emotional climax at 24s, then a soft piano resolve; warm analog mix, gentle compression, spacious reverb.",
+  "sections": [
+   {
+    "debut": 0,
+    "nom": "Intro",
+    "description": "Solo felt piano, oven hum, sparse and intimate"
+   },
+   {
+    "debut": 7,
+    "nom": "Build",
+    "description": "Bass and brushed drums enter, synth pad warms, forward motion"
+   },
+   {
+    "debut": 16,
+    "nom": "Rise",
+    "description": "String swell, hand percussion, energy climbing"
+   },
+   {
+    "debut": 24,
+    "nom": "Climax",
+    "description": "Full warm ensemble, bright and emotional, then resolve"
+   },
+   {
+    "debut": 38,
+    "nom": "Outro",
+    "description": "Piano alone, soft sustained pad, fade"
+   }
+  ],
+  "coups": [
+   3.0,
+   7.4,
+   11.4,
+   16.6,
+   24.0,
+   31.0
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Votre pub, votre marque, votre film.",
+  "sous_titre": "Un studio complet dans votre navigateur, avec un producteur IA qui pense avant de dépenser.",
+  "mentions": ""
+ }
+}

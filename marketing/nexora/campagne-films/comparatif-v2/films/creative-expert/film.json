@@ -1,0 +1,332 @@
+{
+ "concept": "À cinq heures du matin, dans le calme de son fournil, une boulangère orchestre toute sa campagne de lancement depuis un seul studio dans son navigateur. Au fil de raccords visuels spectaculaires où les croquis deviennent des modèles 3D, des films montés sur la musique et des imprimés dorés, tout son univers de marque prend vie avant l'arrivée du premier client.",
+ "accroche": "À 5 h du matin, entre la farine et le fournil sombre, l'écran d'une boulangère déploie simultanément un montage vidéo, un gâteau en 3D et des gabarits d'impression.",
+ "produit_evident": "Dès les 5 premières secondes, on voit sur l'écran du portable les quatre piliers visuels du studio créatif tout-en-un : une ligne de temps vidéo, un maillage 3D en rotation, une onde sonore et des maquettes de cartes d'affaires.",
+ "mode": "narration",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Accroche à 5 h du matin : ancrer l'artisane dans son atelier réel face à son studio créatif lumineux.",
+   "image": "Over-the-shoulder medium shot from behind a female baker wearing a flour-dusted linen apron sitting at a rustic oak counter in a dark artisan bakery before dawn. On the counter, an open sleek laptop glows brightly, displaying a dark-mode creative studio interface made of abstract glowing colour blocks, a multi-track timeline, and a luminous wireframe pastry model, completely free of any text or numbers. Warm tungsten pendant light mixes with cool cyan screen glow, 35mm lens, shallow depth of field, cinematic amber and slate blue palette.",
+   "mouvement": "Slow dolly push-in over the baker's shoulder toward the glowing laptop screen while fine flour dust floats gently in the warm beam of light.",
+   "son": "Quiet early morning bakery hum, soft crackle of a warm oven, gentle room tone.",
+   "camera": "35mm, travelling avant lent par-dessus l'épaule",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Rendre le produit évident avant 5 secondes : montrer l'étendue du studio (vidéo, 3D, son, imprimé) et le chiffrage par l'agent.",
+   "image": "Close-up of flour-dusted hands resting on a dark laptop keyboard as the glossy screen displays four distinct visual workspace quadrants without any text or letters: a glowing golden 3D cake mesh, dual video preview frames, an amber audio waveform, and a print layout showing a geometric wheat emblem on a card template. A small luminous green confirmation node pulses at the centre of the screen. Macro 50mm lens, crisp glass reflections, rich dark obsidian, gold, and teal colour palette.",
+   "mouvement": "The index finger presses the return key and the four glowing workspace quadrants pulse with warm golden light as the camera glides slowly sideways.",
+   "son": "Single crisp mechanical key press followed by a warm, resonant low chime.",
+   "camera": "50mm macro, glissement latéral doux",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p03",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Amorcer la première transformation : le point de départ artisanal sur papier.",
+   "image": "Top-down close-up of an open textured sketchbook resting on a flour-dusted wooden workbench under a warm vintage brass lamp. The page features a hand-drawn charcoal and gold-pencil illustration of a three-tiered berry cake, completely free of any writing, letters, or numbers. A charcoal pencil rests beside the drawing. 50mm lens, centered symmetrical composition, warm sepia, charcoal black, and cream colour palette, dramatic chiaroscuro lighting.",
+   "mouvement": "Slow overhead crane push-in toward the centered charcoal cake illustration as a hand pulls the pencil away from the paper.",
+   "son": "Soft scratch of charcoal on textured paper, quiet morning ambience.",
+   "camera": "50mm plongée verticale, poussée lente",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Raccord de forme spectaculaire : du croquis au modèle 3D photoréaliste dans le studio.",
+   "image": "Exact same centered composition as the previous shot, now inside a dark 3D viewport where a luminous golden wireframe of the three-tiered berry cake solidifies into a photorealistic glazed pastry topped with glistening raspberries and gold leaf. Subtle glowing grid lines surround the base on a dark obsidian surface, with no text or UI labels visible. 50mm lens, volumetric studio rim lighting, rich crimson, gold, and deep charcoal palette.",
+   "mouvement": "The 3D cake rotates smoothly on its axis while a wave of golden light sweeps upward from base to top, turning wireframe geometry into glossy icing.",
+   "son": "Crystalline shimmer and a deep, warm sub-bass swell.",
+   "camera": "50mm, orbite circulaire fluide",
+   "transition": "flash",
+   "heros": true
+  },
+  {
+   "id": "p05",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Illustrer l'agent producteur qui compare deux prises vidéo et retient la plus forte.",
+   "image": "Medium close-up of a wide glossy monitor in a dimly lit room showing two side-by-side cinematic video frames, free of any text or numbers. Both frames show the silhouette of a baker tossing a cloud of flour into a dramatic sunbeam at slightly different angles. The right-hand frame glows with a bright amber selection border while the left frame dims into shadow. 50mm lens, over-the-shoulder angle, high-contrast amber and midnight blue lighting.",
+   "mouvement": "Slow push-in toward the right-hand video frame as its golden border illuminates and the flour cloud inside the frame moves in slow motion.",
+   "son": "Soft whoosh and a decisive, warm acoustic click.",
+   "camera": "50mm, poussée lente vers l'écran de droite",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p06",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Plonger dans le film publicitaire généré (Récompense avant 15 s) : premier décor avec le personnage récurrent.",
+   "image": "Cinematic wide shot of a silhouetted female artisan seen from behind, wearing a distinctive terracotta linen apron and braided hair, walking through a sunlit golden wheat field at dawn. Tall wheat stalks catch the fiery orange rim light of the low sun, with soft morning mist hovering in the background. Anamorphic 40mm lens, shallow depth of field, golden hour lens flare, rich terracotta, amber, and warm gold palette.",
+   "mouvement": "Smooth lateral tracking shot moving alongside the silhouetted artisan as her hand brushes across the glowing wheat stalks in the morning breeze.",
+   "son": "Warm cinematic breeze through wheat stalks, distant gentle birdsong.",
+   "camera": "40mm anamorphique, travelling latéral fluide",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p07",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Raccord de personnage : démontrer la cohérence du même personnage d'un décor à l'autre.",
+   "image": "Exact same camera angle and framing on the same silhouetted female artisan in the identical terracotta linen apron and braided hair, now standing inside a dramatic stone-walled artisanal bakery lit by glowing hearth fire. She holds a warm copper tray with fresh golden croissants as steam rises into a shaft of sunlight. Anamorphic 40mm lens, warm copper, terracotta, and deep shadow palette.",
+   "mouvement": "Continuous lateral tracking motion matching the previous shot as golden steam rises from the copper tray into the sunbeam.",
+   "son": "Crackling stone hearth fire, crisp crust sound, warm room resonance.",
+   "camera": "40mm anamorphique, travelling latéral en raccord de mouvement",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Montrer le montage automatique calé sur le rythme de la musique.",
+   "image": "Extreme close-up of a dark ceramic espresso cup steaming on the wooden counter next to the laptop screen. Reflected in the glossy dark surface of the screen and the cup's rim is a vibrant amber audio waveform with vertical golden beat markers and colour-coded video blocks aligned to the peaks, with zero text or numbers. 85mm macro lens, shallow depth of field, warm amber and espresso brown tones.",
+   "mouvement": "The amber audio waveform pulses rhythmically to the beat while a glowing vertical playhead glides across the reflection and steam curls upward.",
+   "son": "Tight rhythmic percussive pulse synced with a gentle espresso steam hiss.",
+   "camera": "85mm macro, mise au point fixe avec léger mouvement de panoramique",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Amorcer la transformation vers l'imprimé : la création du symbole graphique à l'écran.",
+   "image": "Close-up of the dark studio screen displaying a clean vector illustration of a minimalist golden wheat crown framing a crescent moon emblem at the centre of a cream card rectangle, surrounded by floating geometric colour swatches in gold, cream, and terracotta, with no text or letters anywhere. 50mm lens, straight-on composition, glowing golden lines against a deep slate background.",
+   "mouvement": "Slow camera zoom-in on the golden wheat emblem as the geometric lines gleam with a metallic sheen.",
+   "son": "Subtle harmonic synth chord and a delicate metallic shimmer.",
+   "camera": "50mm, zoom avant lent centré",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p10",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Raccord de forme : le logo numérique devient une vraie carte d'affaires dorée à chaud et des circulaires imprimées.",
+   "image": "Exact same centered composition, now a macro photograph of a real thick cream cotton business card resting on top of a neat stack of printed cards and graphic flyers on the oak bakery counter. The identical golden wheat crown emblem is embossed in shimmering gold foil at the centre of the card, completely free of any text, letters, or numbers. Morning sunlight rakes across the textured paper. 60mm macro lens, warm gold, cream, and natural wood palette.",
+   "mouvement": "A baker's hand gently sets the top gold-foil card onto the stack as warm morning light glints across the embossed metallic wheat emblem.",
+   "son": "Crisp, tactile sound of thick textured cardstock sliding and settling onto a stack.",
+   "camera": "60mm macro, léger recul révélant la pile d'imprimés",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p11",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Montrer la variété des supports imprimés : l'accroche-porte en situation réelle.",
+   "image": "Close-up of a vintage polished brass doorknob on a dark teal wooden residential door in the crisp morning light. Hanging from the brass knob is a thick die-cut cream cardstock door hanger featuring the same embossed golden wheat and berry cake illustration, completely free of any text or numbers. 50mm lens, shallow depth of field, soft golden hour side lighting, teal, brass gold, and cream palette.",
+   "mouvement": "The printed door hanger sways gently on the brass knob in the morning breeze as warm sunlight creeps across the door panel.",
+   "son": "Soft morning breeze and a faint, pleasant clink of paper against brass.",
+   "camera": "50mm, travelling latéral lent",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Amorcer la transformation finale : la rue déserte avant le lancement.",
+   "image": "Wide cinematic shot of a charming cobblestone street in Montreal at blue hour dawn, showing the stone facade and large glass window of the corner bakery. The interior is dimly lit, the street is quiet and empty with a thin veil of morning mist, and no signs, letters, or street numbers are visible on the building. 28mm wide-angle lens, tripod locked composition, cool slate blue and muted amber palette.",
+   "mouvement": "Locked wide frame with a very slow push-in as mist drifts across the quiet cobblestones.",
+   "son": "Quiet city dawn ambience, distant gentle wind.",
+   "camera": "28mm grand-angle, poussée très lente",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Raccord de lieu au lever du soleil : la vitrine s'illumine avec l'affiche grand format et attire les passants.",
+   "image": "Exact same wide-angle framing of the stone corner bakery, now bathed in vibrant golden sunrise light. The bakery window glows warmly, showcasing a large hanging art poster with the colourful berry cake illustration (no text or words) alongside the real tiered cake on a pedestal. Two silhouetted pedestrians pause on the sunlit cobblestone sidewalk looking toward the glowing display. 28mm lens, radiant gold, warm stone, and amber palette.",
+   "mouvement": "Continuation of the slow push-in toward the brightly lit bakery window as golden sunlight floods the cobblestone street.",
+   "son": "Warm swelling morning street life, footsteps on cobblestones.",
+   "camera": "28mm grand-angle, poussée lente en raccord",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Réunir toutes les créations sur le comptoir : le film, les cartes, les circulaires et le vrai gâteau.",
+   "image": "Medium shot across the sunlit oak bakery counter at morning opening. Arranged together in warm shafts of sunlight are a sleek tablet playing the wheat-field film (no UI text), a fan of graphic flyers with pastry illustrations, a brass holder with gold-foil emblem business cards, and the real three-tiered berry cake on a ceramic stand. 35mm lens, shallow depth of field, rich golden morning light.",
+   "mouvement": "Smooth lateral camera pan across the counter, passing from the glowing tablet to the stack of gold-foil cards and the berry cake.",
+   "son": "Cheerful warm room ambience, subtle paper rustle.",
+   "camera": "35mm, panoramique latéral fluide",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Concrétiser la promesse : le premier client entre et prend une carte d'affaires.",
+   "image": "Medium shot from behind the silhouetted baker at the counter as the glass front door swings open in a burst of golden morning sunlight. The silhouette of the first customer steps inside, and in the foreground, a hand reaches down to pick up one of the gold-foil wheat emblem business cards from the wooden counter. 35mm lens, warm backlit flare, inviting amber and cream palette.",
+   "mouvement": "The glass door opens in the background letting in a flare of sunlight while a customer's hand lifts a gold-foil card in the foreground.",
+   "son": "Clear brass shop bell chiming as the door opens, warm welcoming atmosphere.",
+   "camera": "35mm, léger mouvement de recul",
+   "transition": "fondu",
+   "heros": false
+  },
+  {
+   "id": "p16",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Plan de clôture poétique et chaleureux avant le carton final.",
+   "image": "Wide atmospheric shot from the back of the sunlit artisan bakery looking toward the glowing counter and front window. Golden steam rises from fresh pastries next to the open laptop and the neatly displayed printed cards, while silhouettes of the baker and customer interact in the warm morning haze. No text or signage anywhere. 35mm lens, cinematic golden hour glow.",
+   "mouvement": "Slow, graceful dolly pull-back through the warm sunbeams and rising pastry steam, gradually fading to black.",
+   "son": "Warm acoustic guitar and piano resonance fading gently with the morning ambience.",
+   "camera": "35mm, travelling arrière lent",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [
+  {
+   "id": "n01",
+   "role": "narrateur",
+   "texte": "Cinq heures du matin. La boulangerie dort encore, mais votre studio s'allume.",
+   "debut": 0.4
+  },
+  {
+   "id": "n02",
+   "role": "narrateur",
+   "texte": "Vous décrivez votre idée. L'agent chiffre le projet avant de lancer.",
+   "debut": 5.4
+  },
+  {
+   "id": "n03",
+   "role": "narrateur",
+   "texte": "Il génère deux prises et retient la plus forte.",
+   "debut": 10.2
+  },
+  {
+   "id": "n04",
+   "role": "narrateur",
+   "texte": "Votre personnage reste identique d'un décor à l'autre, monté sur la musique.",
+   "debut": 14.2
+  },
+  {
+   "id": "n05",
+   "role": "narrateur",
+   "texte": "Du modèle trois D au carton doré, des circulaires aux accroche-portes.",
+   "debut": 20.0
+  },
+  {
+   "id": "n06",
+   "role": "narrateur",
+   "texte": "Image, vidéo, son et imprimé prennent forme au même endroit.",
+   "debut": 25.5
+  },
+  {
+   "id": "n07",
+   "role": "narrateur",
+   "texte": "Quand le premier client pousse la porte, tout est sur le comptoir.",
+   "debut": 31.0
+  },
+  {
+   "id": "n08",
+   "role": "narrateur",
+   "texte": "Votre pub, votre marque, votre film : en une conversation.",
+   "debut": 36.8
+  }
+ ],
+ "textes": [
+  {
+   "texte": "STUDIO CRÉATIF COMPLET",
+   "style": "sur",
+   "debut": 2.5,
+   "duree": 2.3
+  },
+  {
+   "texte": "Du croquis | au *rendu* 3D",
+   "style": "titre",
+   "debut": 7.5,
+   "duree": 2.8
+  },
+  {
+   "texte": "Deux prises. Un choix.",
+   "style": "impact",
+   "debut": 13.0,
+   "duree": 2.8
+  },
+  {
+   "texte": "De l'écran | au *papier* imprimé",
+   "style": "titre",
+   "debut": 23.5,
+   "duree": 2.8
+  },
+  {
+   "texte": "IMAGE · VIDÉO · 3D · IMPRIMÉ",
+   "style": "sur",
+   "debut": 31.5,
+   "duree": 2.5
+  },
+  {
+   "texte": "Votre marque. | En une *conversation*.",
+   "style": "titre",
+   "debut": 37.5,
+   "duree": 3.2
+  }
+ ],
+ "musique": {
+  "genre": "Cinematic Indie Electronic & Warm Acoustic",
+  "tempo_bpm": 112,
+  "description": "Warm, inspiring cinematic score starting with intimate felt piano and subtle analog synth pulses at 5 a.m., building with crisp rhythmic percussion, acoustic guitar harmonics, and lush orchestral strings into a radiant, uplifting sunrise climax. Clean mix leaving warm midrange space for the voiceover.",
+  "sections": [
+   {
+    "debut": 0.0,
+    "nom": "Éveil à l'aube",
+    "description": "Intimate felt piano notes and a soft, ticking analog pulse evoking 5 a.m. quiet focus."
+   },
+   {
+    "debut": 7.5,
+    "nom": "Étincelle créative",
+    "description": "Warm sub-bass, shimmering arpeggios, and a crisp snare groove enter as the sketch transforms into 3D and video."
+   },
+   {
+    "debut": 21.0,
+    "nom": "Prendre forme",
+    "description": "Driving rhythmic acoustic guitar, rich cello phrases, and tactile percussive hits accompanying the print transformations."
+   },
+   {
+    "debut": 31.5,
+    "nom": "Ouverture au soleil",
+    "description": "Full, radiant cinematic swell with soaring strings and warm brass, resolving on a bright, resonant final piano chord at 42.5s."
+   }
+  ],
+  "coups": [
+   2.5,
+   7.5,
+   10.5,
+   13.0,
+   18.5,
+   23.5,
+   31.5,
+   37.0,
+   42.5
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Votre marque. En une conversation.",
+  "sous_titre": "Studio d'image, vidéo, son, 3D et imprimé dans votre navigateur.",
+  "mentions": ""
+ }
+}

@@ -1,0 +1,104 @@
+{
+ "plaques": {
+  "p01": {
+   "cle": "p01-cle-0.png",
+   "cle_s": 30.2,
+   "controle_image": null,
+   "video": "p01-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.4,
+   "controle_video": null
+  },
+  "p02": {
+   "cle": "p02-cle-0.png",
+   "cle_s": 24.2,
+   "controle_image": null,
+   "video": "p02-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 123.3,
+   "controle_video": null
+  },
+  "p03": {
+   "cle": "p03-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p03-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 135.3,
+   "controle_video": null
+  },
+  "p06": {
+   "cle": "p06-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p06-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 123.4,
+   "controle_video": null
+  },
+  "p08": {
+   "cle": "p08-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p08-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p09": {
+   "cle": "p09-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p09-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.4,
+   "controle_video": null
+  },
+  "p11": {
+   "cle": "p11-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p11-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p13": {
+   "cle": "p13-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p13-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.1,
+   "controle_video": null
+  },
+  "p15": {
+   "cle": "p15-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p15-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p16": {
+   "cle": "p16-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p16-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  }
+ },
+ "gpu_s": {
+  "gb10-qwen": 223.89999999999995,
+  "gb10-music3": 129.3,
+  "pc1-h3-fast": 844.6,
+  "pc1-h3-max": 400.1
+ },
+ "musique": {
+  "description": "Global Metadata: Cinematic electronic with folk textures (Quebec winter), 110 BPM, EN: warm analog synth pads, felt piano, low sub pulse, hand percussion and a distant stomp-clap, frosty high string harmonics, building from intimate dawn to a wide emotional uplift; mix wide and warm, bass gentle, no vocals, no brass stabs. Loud polished master.\n\nVocal Details: Instrumental, no lyrics, no vocals, no choir.\n\nArrangement: [Dawn intro] at 0 seconds: EN: felt piano and cold wind texture, sub pulse enters at 2.5s, intimate [First build] at 5 seconds: EN: hand percussion and synth arpeggio join, momentum rising [Approval drop] at 13 seconds: EN: beat drops on the thumb press, warm bass and clap enter, confident [Chantier lift] at 22 seconds: EN: full groove, string harmonics soaring, wide stereo, uplifting [Briefing peak] at 30 seconds: EN: peak energy, layered percussion, piano motif returns [Emotional resolve] at 36 seconds: EN: strip back to piano and pads, warm sunrise chord, then soft tail Strong hits at 3.0, 13.0, 16.0, 22.0, 29.0, 36.0 seconds. Clean ending at 48 seconds.",
+  "secondes": 129.3
+ }
+}

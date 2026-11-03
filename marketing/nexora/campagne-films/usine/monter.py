@@ -54,7 +54,9 @@ def limiter_crete(mixer_v4):
         segs = [dict(s, plaque=s["plaque"].replace("{l}", LANGUE)) if isinstance(s.get("plaque"), str) else s for s in segs]
         # « duck » d'un segment (dB, négatif) : la musique baisse sous une voix (son natif du plan), rampes de 0,25 s
         ducks = [(s["t"], s["t"] + s["d"], s["duck"]) for s in segs if s.get("duck")]
-        fichiers = {str(M.chemin(mu["fichier"])) for mu in m.get("musique", [])}
+        # narration (entrées « voix » de la musique, comparatif v2) : la musique baisse sous chaque phrase, la voix n'est pas baissée
+        ducks += [(mu["pose"], mu["pose"] + mu["d"], mu.get("duck", -11)) for mu in m.get("musique", []) if mu.get("voix")]
+        fichiers = {str(M.chemin(mu["fichier"])) for mu in m.get("musique", []) if not mu.get("voix")}
         lire0, poser0 = M.lire_audio, M.poser
 
         class _Mus(np.ndarray):
@@ -109,6 +111,8 @@ def image_plan(seg, t, W, H, vertical, animatique):
         y = np.linspace(0, 1, H, dtype=np.float32)
         r = np.clip(((y - (1 - h)) / h) if not v.get("haut") else ((h - y) / h), 0, 1)
         a = (v.get("v", 0.72) * r * r * (3 - 2 * r))[:, None, None]
+        if v.get("centre"):  # voile centré (texte « impact ») : bande sombre douce au milieu du cadre
+            a = (v["v"] * np.exp(-((y - 0.5) / 0.22) ** 2))[:, None, None]
         im = Image.fromarray((np.asarray(im, np.float32) * (1 - a)).astype(np.uint8))
     return im
 

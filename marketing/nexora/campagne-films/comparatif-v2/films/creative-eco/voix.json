@@ -1,0 +1,93 @@
+[
+  {
+    "id": "n01",
+    "fichier": "/home/pc6/nexora-creative-data/work/films-v2/creative-eco/usine/voix/n01.wav",
+    "duree": 3.46,
+    "texte": "Cinq heures du matin. La boulangère a une idée.",
+    "transcription": "Cinq heures du matin. La boulangère a une idée.",
+    "wer": 0.0,
+    "prises": 1,
+    "secondes_calcul": 8.32,
+    "machine": "pc1 (CPU, chatterbox)",
+    "role": "narrateur",
+    "moteur": "chatterbox"
+  },
+  {
+    "id": "n02",
+    "fichier": "/home/pc6/nexora-creative-data/work/films-v2/creative-eco/usine/voix/n02.wav",
+    "duree": 2.98,
+    "texte": "Elle l'écrit. Une phrase, pis c'est parti.",
+    "transcription": "Elle l'écrit. Une phrase, pis c'est parti.",
+    "wer": 0.0,
+    "prises": 2,
+    "secondes_calcul": 13.74,
+    "machine": "pc1 (CPU, chatterbox)",
+    "role": "narrateur",
+    "moteur": "chatterbox"
+  },
+  {
+    "id": "n03",
+    "fichier": "/home/pc6/nexora-creative-data/work/films-v2/creative-eco/usine/voix/n03.wav",
+    "duree": 2.98,
+    "texte": "Le studio se met au travail pendant que le four chauffe.",
+    "transcription": "Le studio se met au travail pendant que le four chauffe.",
+    "wer": 0.0,
+    "prises": 1,
+    "secondes_calcul": 7.33,
+    "machine": "pc1 (CPU, chatterbox)",
+    "role": "narrateur",
+    "moteur": "chatterbox"
+  },
+  {
+    "id": "n04",
+    "fichier": "/home/pc6/nexora-creative-data/work/films-v2/creative-eco/usine/voix/n04.wav",
+    "duree": 4.26,
+    "texte": "Le croquis devient un gâteau. Le logo devient une carte.",
+    "transcription": "Le croquise devient un gâteau, le logo devient une carte.",
+    "wer": 0.1,
+    "prises": 1,
+    "secondes_calcul": 10.18,
+    "machine": "pc1 (CPU, chatterbox)",
+    "role": "narrateur",
+    "moteur": "chatterbox"
+  },
+  {
+    "id": "n05",
+    "fichier": "/home/pc6/nexora-creative-data/work/films-v2/creative-eco/usine/voix/n05.wav",
+    "duree": 3.99,
+    "texte": "La rue vide devient une affiche. Le gâteau, un modèle qu'on peut tenir.",
+    "transcription": "La rue vide devient une affiche. Le gâteau, un modèle qu'on peut tenir.",
+    "wer": 0.0,
+    "prises": 1,
+    "secondes_calcul": 9.29,
+    "machine": "pc1 (CPU, chatterbox)",
+    "role": "narrateur",
+    "moteur": "chatterbox"
+  },
+  {
+    "id": "n06",
+    "fichier": "/home/pc6/nexora-creative-data/work/films-v2/creative-eco/usine/voix/n06.wav",
+    "duree": 2.58,
+    "texte": "Quand la première cliente entre, tout est déjà prêt.",
+    "transcription": "Quand la première cliente entre, tout est déjà prêt.",
+    "wer": 0.0,
+    "prises": 1,
+    "secondes_calcul": 6.82,
+    "machine": "pc1 (CPU, chatterbox)",
+    "role": "narrateur",
+    "moteur": "chatterbox"
+  },
+  {
+    "id": "n07",
+    "fichier": "/home/pc6/nexora-creative-data/work/films-v2/creative-eco/usine/voix/n07.wav",
+    "duree": 3.49,
+    "texte": "Votre pub, votre marque, votre film. En une conversation.",
+    "transcription": "Votre pub, votre marque, votre film, en une conversation.",
+    "wer": 0.0,
+    "prises": 1,
+    "secondes_calcul": 8.35,
+    "machine": "pc1 (CPU, chatterbox)",
+    "role": "narrateur",
+    "moteur": "chatterbox"
+  }
+]

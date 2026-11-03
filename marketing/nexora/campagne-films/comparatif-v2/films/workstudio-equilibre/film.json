@@ -1,0 +1,319 @@
+{
+ "concept": "La ville dort, vos agents veillent. En une nuit, des filets de lumière trient vos courriels jusqu'au pouce levé du matin.",
+ "accroche": "Ville endormie à 2h, une boîte qui se remplit seule — vos agents déjà au travail.",
+ "produit_evident": "Dès 2,6 s le titre dit que vos agents travaillent pendant que vous dormez, puis insert réel du canevas tri → brouillon → approbation à 5 s.",
+ "mode": "texte",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Accroche : ville la nuit, tout dort sauf le travail invisible",
+   "image": "Spectacular aerial night view of a Quebec city downtown, river reflections, glowing office towers with a few lit windows, light trails from cars on bridge, deep blue night sky, cinematic haze, photorealistic, wide establishing shot, 24mm lens, symmetrical composition, cold blue and warm amber palette, high detail, moody atmosphere",
+   "mouvement": "Slow forward drone push over city lights, subtle parallax, lights flickering, thin clouds drifting gently",
+   "son": "Night wind, distant city hum, low rumble",
+   "camera": "24mm wide, slow drone push-in",
+   "transition": "fondu",
+   "heros": false
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Bureau vide à 2h, un portable veille seul",
+   "image": "Empty modern open-space office at night in Montreal, single desk with glowing laptop screen blurred, office chair, large panoramic windows showing city lights, moonlight streaks on floor, cinematic low-key lighting, photorealistic interior, 35mm lens, wide composition with foreground desk, deep blue and warm desk lamp palette, quiet solitude",
+   "mouvement": "Slow push-in across empty office toward glowing laptop, city lights shimmering outside, faint dust drifting",
+   "son": "Quiet office hum, faint ventilation, distant traffic",
+   "camera": "35mm wide, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p03",
+   "type": "ui",
+   "duree": 1.8,
+   "intention": "Preuve produit : vrai canevas tri → brouillon → approbation",
+   "image": "Real product interface insert showing workflow canvas with three connected nodes for triage draft approval on dark modern studio background, glowing connectors, clean sans-serif labels, laptop screen context, photorealistic, centered composition, 35mm lens, blue and amber palette, sharp focus, professional lighting",
+   "mouvement": "Subtle slow push-in on interface, gentle glow pulse on connectors, static framing keeping focus sharp and stable over time",
+   "son": "Soft digital blips, quiet office hum",
+   "camera": "35mm, slow push-in",
+   "transition": "flash",
+   "heros": false,
+   "ui": "ui-tri"
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "La boîte se remplit : vagues de messages en lumière",
+   "image": "Overhead view of office desk at night with closed laptop emitting soft blurred glow, dozens of translucent light trails rising like incoming messages, floating particles, dark office background with city windows, cinematic volumetric lighting, photorealistic long exposure feel, 28mm lens, top-down composition, deep navy and cyan gold palette, magical calm",
+   "mouvement": "Slow orbital drift above desk, light trails rising and swirling gently, particles floating upward, camera breathing",
+   "son": "Soft email chimes, airy whooshes, night silence",
+   "camera": "28mm overhead, slow orbit",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p05",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Le tri invisible : rubans de lumière qui traversent le bureau",
+   "image": "Spectacular empty corporate corridor at night transformed by long flowing ribbons of cyan and amber light crossing the space like data streams, desks silhouettes on sides, glass walls reflecting city, volumetric haze, photorealistic cinematic, 24mm wide lens, leading lines composition, deep blue night with warm highlights, sense of invisible work",
+   "mouvement": "Slow forward crane glide through corridor, light ribbons flowing past camera, reflections shimmering, haze drifting smoothly",
+   "son": "Deep airy flow, soft shimmer, low pulse",
+   "camera": "24mm wide, crane glide forward",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p06",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Les flux traversent la ville endormie",
+   "image": "Night aerial over river bridge connecting glowing business district, long exposure light trails of cyan and gold flowing above streets like invisible workflows, cars with blurred headlights below, mist, photorealistic cinematic drone view, 28mm lens, diagonal composition, deep indigo sky, amber city glow, epic quiet energy",
+   "mouvement": "Slow aerial push forward along bridge, light trails streaming overhead, city lights shimmering below, gentle drift",
+   "son": "Wind, distant bridge traffic, airy synth wash",
+   "camera": "28mm aerial, slow push forward",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p07",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Pendant que vous dormez, contraste intime",
+   "image": "Back view silhouette of person sleeping in dark bedroom while soft blue glow from distant office window reflects, bedside calm, city night bokeh outside window, moonlight, photorealistic cinematic, 50mm lens, intimate wide composition, deep navy palette with warm bedside lamp, peaceful contrast work and rest",
+   "mouvement": "Very slow push-in toward window, sleeper breathing still, city bokeh shimmering softly, glow pulsing faintly",
+   "son": "Calm breathing, soft night crickets, faint hum",
+   "camera": "50mm, very slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "L'aube : le bureau se réveille, tout est prêt",
+   "image": "Same modern open-space office at dawn, warm sunrise washing through panoramic windows, empty desks with soft glowing screens blurred, light dust in air, coffee steam rising on desk, photorealistic cinematic, 35mm lens, wide hopeful composition, soft peach and pale blue palette, calm morning clarity, renewal",
+   "mouvement": "Slow crane rise with sunrise flare sweeping across desks, dust motes floating, steam rising gently",
+   "son": "Morning birds, soft air, distant city waking",
+   "camera": "35mm wide, crane rise",
+   "transition": "fondu",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Silhouette du matin, téléphone en main, décision",
+   "image": "Back silhouette of woman standing before huge office windows at sunrise holding glowing phone with blurred light, city waking below, hair lit by sun, bright lens flare, photorealistic cinematic, 50mm lens, medium wide composition, warm gold and soft blue palette, decisive hopeful morning moment, shallow depth",
+   "mouvement": "Slow orbit around silhouette, sunrise flare blooming, city awakening below, phone glow pulsing softly gently",
+   "son": "Soft morning breeze, faint city awakening, warm tone",
+   "camera": "50mm, slow orbit",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p10",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Mains près du portable, avant d'approuver",
+   "image": "Close view of hands of office worker resting near laptop and coffee cup on bright morning desk, screen showing soft blurred luminous shapes, sunlight streaks, shallow depth, photorealistic cinematic detail, 50mm macro lens, over-shoulder composition, warm wood and white palette with blue glow, calm focus before decision",
+   "mouvement": "Slow push-in toward hands and glowing screen, steam rising from coffee, sunlight shifting gently softly",
+   "son": "Coffee cup clink, soft tap, morning office calm",
+   "camera": "50mm macro, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p11",
+   "type": "ui",
+   "duree": 1.6,
+   "intention": "Le geste décisif : vrai bouton Approuver",
+   "image": "Real product interface insert showing approval card with large approve button and draft message preview on clean modern background, soft shadows, glowing accent, professional studio lighting, photorealistic sharp capture, centered composition, 35mm lens, light theme with blue and warm orange palette, clarity and trust",
+   "mouvement": "Static hold with subtle push-in, approve button glow pulsing gently, keeping interface sharp and readable",
+   "son": "Soft click, bright confirmation chime",
+   "camera": "35mm, subtle push-in",
+   "transition": "flash",
+   "heros": false,
+   "ui": "ui-approuver"
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Ça part : impulsion lumineuse du courriel envoyé",
+   "image": "Bright morning office desk with laptop emitting soft blurred glow, single brilliant light pulse shooting upward like sent email, airy particles, sun flare through windows, photorealistic cinematic, 35mm lens, low angle composition, white and gold palette with cyan accent, relief and success, crisp clarity",
+   "mouvement": "Quick upward tilt following light pulse, particles bursting outward, flare blooming then settling softly gently",
+   "son": "Whoosh upward, bright sent chime, air release",
+   "camera": "35mm low angle, upward tilt",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Équipe soulagée qui se retrouve le matin",
+   "image": "Bright modern office in morning with three teammates seen from back walking toward sunlit windows laughing, laptops open on desks with blurred glows, plants, warm daylight, photorealistic cinematic, 28mm lens, wide joyful composition, white wood and green palette with golden light, human relief and complicity",
+   "mouvement": "Slow tracking forward behind team, daylight sweeping in, subtle bounce, atmosphere brightening softly and warmly",
+   "son": "Soft laughter, footsteps, bright office ambience",
+   "camera": "28mm wide, tracking forward",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "La ville au jour, énergie retrouvée",
+   "image": "Spectacular daytime aerial of Quebec city river and downtown towers under clear blue sky, sunlight glinting on glass, bridge traffic with soft motion blur, parks green, photorealistic cinematic drone view, 24mm wide lens, expansive composition, fresh blue white and green palette, energy and optimism, ultra sharp",
+   "mouvement": "Smooth forward drone glide over river toward towers, clouds drifting, light shimmering on water gently",
+   "son": "Day wind, city life, bright airy tone",
+   "camera": "24mm aerial, forward glide",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Bureau apaisé, travail terminé",
+   "image": "Serene close view of tidy morning desk with closed laptop, empty coffee cup with faint steam, soft sunlight stripes, blurred city window background, plant shadow, photorealistic cinematic still life, 50mm lens, minimal centered composition, warm beige and soft blue palette, calm accomplishment, breathing space",
+   "mouvement": "Very slow push-out revealing calm desk, steam curling upward, sunlight stripes shifting softly in quiet stillness",
+   "son": "Soft steam, quiet room tone, faint birds",
+   "camera": "50mm, very slow pull-out",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p16",
+   "type": "plan",
+   "duree": 2.9,
+   "intention": "Ouverture finale vers l'avenir",
+   "image": "Wide cinematic view of empty luminous office at golden hour opening onto city skyline, sheer curtains breathing, desks with soft blurred glows, sun flare bursting through glass, dust floating, photorealistic, 24mm lens, symmetrical hopeful composition, gold white and pale blue palette, open future and freedom",
+   "mouvement": "Slow crane up and push toward windows, curtains swaying gently, flare blooming, dust drifting in light",
+   "son": "Warm swell, airy curtains, hopeful shimmer",
+   "camera": "24mm wide, crane up push",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [],
+ "textes": [
+  {
+   "texte": "2 HEURES DU MATIN",
+   "style": "sur",
+   "debut": 0.4,
+   "duree": 1.8
+  },
+  {
+   "texte": "Vos *agents* travaillent | pendant que vous dormez",
+   "style": "titre",
+   "debut": 2.6,
+   "duree": 2.6
+  },
+  {
+   "texte": "Tout est trié",
+   "style": "impact",
+   "debut": 6.9,
+   "duree": 1.8
+  },
+  {
+   "texte": "Un agent *trie* | rédige et attend",
+   "style": "titre",
+   "debut": 9.4,
+   "duree": 2.4
+  },
+  {
+   "texte": "LE TRAVAIL INVISIBLE",
+   "style": "sur",
+   "debut": 12.2,
+   "duree": 1.8
+  },
+  {
+   "texte": "Vous gardez la *main*",
+   "style": "titre",
+   "debut": 14.8,
+   "duree": 2.0
+  },
+  {
+   "texte": "Le matin, | *tout* est prêt",
+   "style": "titre",
+   "debut": 17.5,
+   "duree": 2.0
+  },
+  {
+   "texte": "UN GESTE SUFFIT",
+   "style": "impact",
+   "debut": 20.0,
+   "duree": 1.8
+  },
+  {
+   "texte": "Vous *approuvez,* | ça part",
+   "style": "titre",
+   "debut": 24.5,
+   "duree": 2.2
+  },
+  {
+   "texte": "Votre équipe | ne dort *jamais*",
+   "style": "titre",
+   "debut": 28.7,
+   "duree": 2.4
+  },
+  {
+   "texte": "GARDEZ LA MAIN",
+   "style": "impact",
+   "debut": 34.6,
+   "duree": 2.0
+  }
+ ],
+ "musique": {
+  "genre": "cinematic electronic pop, night to sunrise arc",
+  "tempo_bpm": 112,
+  "description": "EN: pulsing synths, felt piano, strings, deep warm drums, building energy from intimate nocturne to bright euphoric climax, clean modern mix with wide stereo and airy glow",
+  "sections": [
+   {
+    "debut": 0,
+    "nom": "Night intro",
+    "description": "EN: soft piano and airy pads, low pulse, mysterious calm"
+   },
+   {
+    "debut": 5,
+    "nom": "Build triage",
+    "description": "EN: adding pulsing synth arps and soft drums, flowing forward motion"
+   },
+   {
+    "debut": 14.6,
+    "nom": "Sunrise lift",
+    "description": "EN: strings enter, drums open, warm hopeful lift"
+   },
+   {
+    "debut": 24.4,
+    "nom": "Approval drop",
+    "description": "EN: full beat drop, bright synths and drums hit on approve then sent whoosh"
+   },
+   {
+    "debut": 31.3,
+    "nom": "Outro glow",
+    "description": "EN: euphoric but soft piano-strings glow fading to calm"
+   }
+  ],
+  "coups": [
+   2.5,
+   5.0,
+   9.3,
+   14.6,
+   19.6,
+   24.4,
+   26.0,
+   31.3
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Vous gardez la main.",
+  "sous_titre": "Vos agents trient vos courriels et préparent chaque réponse.",
+  "mentions": ""
+ }
+}

@@ -1,0 +1,53 @@
+{
+ "brief": "creative",
+ "palier": "eco",
+ "modele": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+ "appels": [
+  {
+   "etape": "auteur",
+   "entree": 2433,
+   "sortie": 4135,
+   "raisonnement": 0,
+   "usd": 0.001454,
+   "cout_rapporte": true,
+   "latence_s": 96.2,
+   "fournisseur": null
+  },
+  {
+   "etape": "reparation1",
+   "entree": 6645,
+   "sortie": 4135,
+   "raisonnement": 0,
+   "usd": 0.001246,
+   "cout_rapporte": true,
+   "latence_s": 66.2,
+   "fournisseur": null
+  }
+ ],
+ "reparations_modele": [
+  [
+   "4 plans héros ; 3 au maximum",
+   "durée totale 35.2 s ; attendu 40 à 50 s (ajuster les durées des plans)"
+  ]
+ ],
+ "reparations_code": [
+  "durées ×1.02 (total 39.4 → 40.0 s)"
+ ],
+ "effort_essais": [],
+ "effort": "défaut du fournisseur",
+ "violations": [
+  [
+   "plans : 4 plans héros ; 3 au maximum",
+   "durees : durée totale 35.2 s ; attendu 40 à 50 s (ajuster les durées des plans)"
+  ],
+  [
+   "durees : durée totale 39.4 s ; attendu 40 à 50 s (ajuster les durées des plans)"
+  ]
+ ],
+ "violations_finales": [],
+ "usd": 0.0027,
+ "credits_client": 0.417,
+ "jetons_entree": 9078,
+ "jetons_sortie": 8270,
+ "latence_s": 162.4
+}

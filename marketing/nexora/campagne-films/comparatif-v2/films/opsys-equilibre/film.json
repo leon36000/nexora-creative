@@ -1,0 +1,391 @@
+{
+ "concept": "Un couvreur monte sur un toit glacé à six heures du matin pendant que sa compagnie s'allume derrière lui. Dix départements préparent tout en brouillons, il valide d'un pouce et la maison monte.",
+ "accroche": "Six heures, sur le toit — ta compagnie est déjà allumée.",
+ "produit_evident": "Toit enneigé à l'aube, gants, camion, échelle et tablette lumineuse + titre Ton entreprise tourne déjà avant 5 s : une entreprise de construction qui tourne en parallèle, impossible à confondre.",
+ "mode": "narration",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Accroche spectaculaire : couvreur seul sur toit à l'aube d'hiver",
+   "image": "Cinematic photograph at blue dawn on a snowy Quebec suburban rooftop, a contractor silhouette in winter workwear and tool belt standing near a ladder, overlooking pickup trucks and houses below, cold breath in air, pink and steel-blue winter light, frost on shingles, wide low-angle shot, 35mm lens, deep depth, teal orange palette, realistic texture, no text, no logos",
+   "mouvement": "Slow crane push-in toward silhouette on roof edge, cold mist drifting, distant truck lights flicker, dawn sky brightens gradually",
+   "son": "Freezing dawn wind, distant traffic, ladder creak",
+   "camera": "35mm wide, low-angle crane push-in",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Produit évident : les mains gantées tiennent la compagnie dans une tablette",
+   "image": "Close photograph of gloved work hands holding a rugged tablet on a snowy rooftop at sunrise, screen showing soft blurred glowing shapes with no readable text, blueprints and measuring tools beside boots, contractor legs and trucks blurred below, cold golden side light, shallow depth, 50mm lens, detailed leather texture, winter work atmosphere, no faces, no logos",
+   "mouvement": "Slow push-in on tablet in hands, soft glow pulsing, snow particles drifting, background trucks slightly shifting",
+   "son": "Cold wind, gloves on tablet, soft electronic hum",
+   "camera": "50mm shallow depth, slow push-in",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p03",
+   "type": "tableau",
+   "duree": 2.8,
+   "intention": "La compagnie s'allume : réception, client, soumission en brouillon",
+   "tableau": [
+    {
+     "m": "M1",
+     "action": "Appel qualifié"
+    },
+    {
+     "m": "M2",
+     "action": "Client prêt"
+    },
+    {
+     "m": "M3",
+     "action": "Soumission en brouillon"
+    }
+   ],
+   "camera": "locked tableau, tiles light sequentially",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Preuve estimation : mesure réelle sur le toit",
+   "image": "Photograph of a contractor in winter jacket kneeling on snowy roof ridge measuring shingles with yellow tape measure, rolled blueprints weighted by toolbox, breath vapor in cold morning light, Quebec houses and bare trees behind, overcast golden dawn, medium wide shot, 35mm lens, crisp details, muted blue amber palette, no text, no faces, no logos",
+   "mouvement": "Slow lateral tracking along roof ridge, tape slightly retracting, vapor drifting, camera keeps steady focus on hands",
+   "son": "Wind gusts, tape measure click, boots on snow",
+   "camera": "35mm medium wide, lateral tracking",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p05",
+   "type": "plan",
+   "duree": 2.2,
+   "intention": "Appels manqués pris en note pendant qu'il travaille",
+   "image": "Photograph inside a work pickup cabin at dawn, work gloves and thermos beside a smartphone showing blurred glowing call interface with no text, snowy job site and ladder visible through windshield, cold blue interior with warm dashboard glow, 40mm lens, shallow focus on phone, realistic winter details, no readable text, no logos, no faces",
+   "mouvement": "Subtle push-in toward phone glowing softly, frost melting on windshield, background workers loading ladder outside",
+   "son": "Truck idle, phone vibration, distant hammer",
+   "camera": "40mm shallow, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p06",
+   "type": "tableau",
+   "duree": 3.0,
+   "intention": "Chaîne réelle : chantier lancé, matériaux, facture en brouillon",
+   "tableau": [
+    {
+     "m": "M4",
+     "action": "Équipe réservée"
+    },
+    {
+     "m": "M6",
+     "action": "Matériaux prévus"
+    },
+    {
+     "m": "M5",
+     "action": "Facture en brouillon"
+    }
+   ],
+   "camera": "locked tableau, tiles light sequentially",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p07",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Équipe réservée : les gars chargent l'échelle au lever du jour",
+   "image": "Cinematic photograph of two contractor silhouettes in winter workwear loading aluminum ladders onto a white work truck at sunrise, snowy Quebec street with houses, breath vapor and exhaust mist, low golden backlight with long shadows, wide shot, 32mm lens, cold blue shadows warm highlights, no faces, no text, no logos",
+   "mouvement": "Slow orbit around truck side, workers lifting ladder smoothly, mist swirling, sun flaring through ladder rungs",
+   "son": "Metal clank, boots crunching snow, truck beep",
+   "camera": "32mm wide, slow orbit",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Matériel prévu : les bardeaux attendent déjà sur la palette",
+   "image": "Photograph of work-gloved hands stacking dark asphalt shingle bundles on snowy pallets beside a work truck, lumber and rolls in blurred background, fine snow falling, bright overcast winter light, medium close shot on hands, 50mm lens, tactile texture, slate blue and wood brown palette, no faces, no readable text, no logos",
+   "mouvement": "Gentle push-in on hands placing bundle, snowflakes drifting steadily down, background truck door closing slowly",
+   "son": "Snow crunch, cardboard thud, winter wind",
+   "camera": "50mm medium, gentle push-in",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "tableau",
+   "duree": 2.8,
+   "intention": "Contenu proposé, vue d'ensemble, briefing et mémoire",
+   "tableau": [
+    {
+     "m": "M7",
+     "action": "Contenu proposé"
+    },
+    {
+     "m": "M8",
+     "action": "Vue d'ensemble prête"
+    },
+    {
+     "m": "M9",
+     "action": "Briefing du matin"
+    },
+    {
+     "m": "M10",
+     "action": "Mémoire à jour"
+    }
+   ],
+   "camera": "locked tableau, tiles light sequentially",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p10",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Humain qui approuve : le pouce ganté valide",
+   "image": "Photograph of a contractor gloved thumb hovering over a rugged tablet showing soft blurred luminous approval interface with no text, snowy rooftop and tools out of focus behind, bright cold daylight with warm reflection on glove, extreme focus on thumb and tablet edge, 60mm macro lens, shallow depth, no faces, no logos, no readable text",
+   "mouvement": "Slow push-in as thumb presses down gently, glow brightens subtly, snow dust blows across background",
+   "son": "Glove tap, soft confirmation chime, wind",
+   "camera": "60mm macro, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p11",
+   "type": "plan",
+   "duree": 2.2,
+   "intention": "Briefing du matin sur le toit, la ville se réveille",
+   "image": "Wide photograph from behind a contractor in winter gear standing on snowy roof at golden morning, holding tablet with blurred glow under arm, looking over Quebec suburb with trucks and church steeple, steam breath, pink gold sky, 35mm lens, silhouette back view, serene powerful mood, cold blue snow warm sky, no faces, no text",
+   "mouvement": "Slow crane lift revealing neighborhood below, breath vapor rising, light sweeping across snow rooftops slowly",
+   "son": "Morning wind, distant church bell, crows",
+   "camera": "35mm wide back view, crane lift",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Récompense : la maison monte en accéléré sous le ciel d'hiver",
+   "image": "Epic time-lapse style photograph of a Quebec house under construction with exposed wooden frame and scaffolding, dramatic winter sunset sky with moving clouds, snow ground with tools and trucks around, warm work lights glowing, ultra wide 24mm lens, towering composition, amber blue contrast, hyper detailed, no workers faces, no text, no logos",
+   "mouvement": "Fast drifting clouds and sweeping shadows across frame, work lights flickering warmly, slow forward dolly toward rising frame",
+   "son": "Construction rumble, wind rush, hammer echoes",
+   "camera": "24mm ultra wide, forward dolly",
+   "transition": "flash",
+   "heros": true
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Facture en brouillon prête après l'ouvrage",
+   "image": "Photograph of work hands in fingerless gloves holding a tablet with soft blurred glowing document shapes and no readable text inside a warm truck cabin, invoices and plans blurred on seat, snowy windshield glow behind, cozy amber interior against cold blue exterior, 40mm lens, shallow depth, realistic texture, no faces, no logos",
+   "mouvement": "Slight handheld sway inside cabin, tablet glow pulsing gently, snow light shifting softly through windshield",
+   "son": "Truck heater hum, paper rustle, soft tap",
+   "camera": "40mm shallow, handheld sway",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Contenu proposé : photo du toit fini pour les clients",
+   "image": "Photograph from behind a contractor in winter coat photographing a finished snowy Quebec house with new dark roof using a smartphone showing blurred glowing image preview, golden late afternoon light, ladder and truck nearby, pristine snow, 35mm lens, over-shoulder composition, warm nostalgic mood, no faces, no readable text, no logos",
+   "mouvement": "Slow push-in over shoulder toward finished house, phone held steady, light flare sweeping gently, snow glinting brightly",
+   "son": "Camera click, cold breeze, distant dog bark",
+   "camera": "35mm over-shoulder, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Émotion : il rentre chez lui à la tombée du jour",
+   "image": "Cinematic photograph of a contractor silhouette in winter gear walking toward a warm glowing Quebec home at blue dusk, work truck parked with ladders, snow path lit by porch light, children silhouette blurred in doorway, cold blue twilight against amber windows, wide 35mm lens, emotional contrast, snow falling lightly, no faces, no text",
+   "mouvement": "Slow forward tracking following silhouette home, snow falling gently, warm porch light flickering invitingly softly",
+   "son": "Snow crunch steps, door opening, warm laughter inside",
+   "camera": "35mm wide, forward tracking",
+   "transition": "fondu",
+   "heros": false
+  },
+  {
+   "id": "p16",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Climax : debout sur les toits, maître de son entreprise",
+   "image": "Powerful wide photograph of a contractor from behind standing on a snowy rooftop at bright winter sunrise, arms relaxed, tool belt and rolled plans at feet, vast Quebec rooftops and river light beyond, crisp clear air, soaring hopeful sky, 28mm lens, majestic composition, blue gold palette, sharp details, no faces, no text, no logos",
+   "mouvement": "Slow majestic crane rise above rooftop, sunrise light sweeping brightly across snow, clouds opening widely above",
+   "son": "Strong wind lift, deep breath, bright morning silence",
+   "camera": "28mm wide, crane rise",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [
+  {
+   "id": "n01",
+   "role": "narrateur",
+   "texte": "Il est six heures du matin, t'es déjà sur le toit.",
+   "debut": 0.4
+  },
+  {
+   "id": "n02",
+   "role": "narrateur",
+   "texte": "Pendant que tu travailles, ta compagnie s'allume.",
+   "debut": 5.0
+  },
+  {
+   "id": "n03",
+   "role": "narrateur",
+   "texte": "Dix départements qui préparent ta journée, en brouillons à valider.",
+   "debut": 8.0
+  },
+  {
+   "id": "n04",
+   "role": "narrateur",
+   "texte": "La soumission acceptée lance le chantier, le matériel, la facture.",
+   "debut": 12.5
+  },
+  {
+   "id": "n05",
+   "role": "narrateur",
+   "texte": "Tu restes le boss. Rien part sans ton pouce.",
+   "debut": 17.0
+  },
+  {
+   "id": "n06",
+   "role": "assistant",
+   "texte": "Trois chantiers prêts, ton briefing est prêt.",
+   "debut": 21.0
+  },
+  {
+   "id": "n07",
+   "role": "narrateur",
+   "texte": "Le soir, la maison a monté, les papiers sont prêts.",
+   "debut": 24.5
+  },
+  {
+   "id": "n08",
+   "role": "narrateur",
+   "texte": "Tu travailles sur le toit, ton entreprise tourne avec toi.",
+   "debut": 29.0
+  },
+  {
+   "id": "n09",
+   "role": "narrateur",
+   "texte": "Reprends tes journées, garde le contrôle.",
+   "debut": 34.0
+  }
+ ],
+ "textes": [
+  {
+   "texte": "Six heures, sur le toit",
+   "style": "impact",
+   "debut": 0.2,
+   "duree": 2.2
+  },
+  {
+   "texte": "Ton entreprise *tourne* déjà",
+   "style": "titre",
+   "debut": 3.0,
+   "duree": 2.0
+  },
+  {
+   "texte": "Dix départements allumés",
+   "style": "sur",
+   "debut": 6.0,
+   "duree": 2.5
+  },
+  {
+   "texte": "Soumission acceptée, chantier parti",
+   "style": "impact",
+   "debut": 12.8,
+   "duree": 2.2
+  },
+  {
+   "texte": "Vision · en développement",
+   "style": "prepa",
+   "debut": 15.2,
+   "duree": 3.0
+  },
+  {
+   "texte": "Rien part sans *toi*",
+   "style": "titre",
+   "debut": 20.5,
+   "duree": 2.3
+  },
+  {
+   "texte": "Briefing du matin",
+   "style": "sur",
+   "debut": 23.2,
+   "duree": 2.0
+  },
+  {
+   "texte": "La maison *monte*",
+   "style": "titre",
+   "debut": 26.0,
+   "duree": 2.2
+  },
+  {
+   "texte": "Travaille, on *prépare* | la suite",
+   "style": "titre",
+   "debut": 32.5,
+   "duree": 3.0
+  }
+ ],
+ "musique": {
+  "genre": "cinematic motivational orchestral electronic hybrid",
+  "tempo_bpm": 112,
+  "description": "EN: driving strings, deep taiko drums, piano and warm brass, soaring synth pads, energetic build, clear mix with punchy low end",
+  "sections": [
+   {
+    "debut": 0,
+    "nom": "Intro",
+    "description": "EN: cold piano and strings, sparse, dawn atmosphere"
+   },
+   {
+    "debut": 5,
+    "nom": "Build",
+    "description": "EN: drums enter, rising strings, growing momentum"
+   },
+   {
+    "debut": 15.5,
+    "nom": "Drive",
+    "description": "EN: full drums brass and synths, powerful forward motion"
+   },
+   {
+    "debut": 31,
+    "nom": "Emotional",
+    "description": "EN: soaring strings and piano, warm hopeful finale"
+   }
+  ],
+  "coups": [
+   2.5,
+   5.0,
+   12.5,
+   15.5,
+   23.3,
+   31.0,
+   38.5
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Votre entreprise tourne pendant que vous travaillez.",
+  "sous_titre": "Une équipe d'agents pour entrepreneurs, validée par vous.",
+  "mentions": ""
+ }
+}

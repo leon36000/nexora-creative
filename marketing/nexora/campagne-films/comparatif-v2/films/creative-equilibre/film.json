@@ -1,0 +1,345 @@
+{
+ "concept": "À 5h du matin, une boulangère raconte son idée à son navigateur. À 7h, son gâteau existe partout : en vitrine, sur papier et à l'écran, monté sur la musique.",
+ "accroche": "La porte du four s'ouvre dans le noir, vague de lumière et de farine — 5H DU MATIN.",
+ "produit_evident": "Dès 2 secondes, le portable ouvert sur le comptoir montre un studio dans le navigateur, confirmé par le titre Son studio tient dans son navigateur.",
+ "mode": "narration",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 2.0,
+   "intention": "Accroche : le four s'ouvre à 5h, chaleur et farine",
+   "image": "Cinematic interior of a dark artisan bakery at dawn, massive old stone oven door opening with intense orange glow bursting out, clouds of flour dust floating in backlight, silhouette of a woman baker seen from behind in apron, wooden counters, warm amber and deep shadow palette, volumetric light, photorealistic, 35mm lens, wide composition, shallow depth, no readable text, no faces visible",
+   "mouvement": "Slow push-in toward glowing oven as heat shimmer rises, flour dust drifts through light beam, orange glow flickers and intensifies, silhouette slightly shifts",
+   "son": "deep oven rumble, crackling fire, early morning bakery silence",
+   "camera": "35mm, slow push-in",
+   "transition": "fondu",
+   "heros": true
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Révélation produit : son studio est dans son navigateur",
+   "image": "Over-shoulder wide shot from behind a woman in apron sitting at rustic wooden bakery counter before dawn, open laptop glowing with soft colorful blurred abstract shapes with no readable text, warm desk lamp, trays of unbaked croissants nearby, dark bakery with blue window light, cozy amber and slate palette, photorealistic, 35mm, no faces, no logos",
+   "mouvement": "Gentle slow push toward laptop screen, soft glow pulses, steam rises from coffee cup, background bakery lights flicker on",
+   "son": "quiet laptop hum, distant fridge buzz, soft morning ambience",
+   "camera": "35mm, slow push-in",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p03",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Elle raconte ce qu'elle veut, simplement",
+   "image": "Close view of hands of a baker hovering over laptop keyboard on wooden counter, flour on fingers, coffee cup with rising steam beside, laptop screen showing blurred glowing pastel shapes with no readable text, warm morning lamp light, shallow depth of field, amber and cream palette, photorealistic, 50mm macro detail, no faces, no text",
+   "mouvement": "Fingers tap lightly, steam curls upward, camera drifts slowly left, screen glow shifts softly with warm reflections",
+   "son": "soft keyboard taps, coffee steam hiss, warm room tone",
+   "camera": "50mm macro, slow lateral drift",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p04",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Premier état : le croquis du gâteau",
+   "image": "Top-down view of a hand-drawn pencil sketch of a strawberry layer cake on white paper on rustic wooden bakery table, flour dust, pencil beside, soft warm side light at dawn, shallow shadows, cream and graphite palette, photorealistic, 50mm lens, centered composition, no readable text, no faces, cozy artisan mood",
+   "mouvement": "Static overhead with very slow push-in, soft daylight grows slightly, paper texture shimmers, pencil shadow moves faintly",
+   "son": "soft paper rustle, faint pencil scratch, quiet bakery",
+   "camera": "50mm overhead, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p05",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Transformation 1 : croquis vers gâteau réel, raccord",
+   "image": "Identical top-down view on same rustic wooden bakery table, now a photorealistic strawberry layer cake with glossy glaze and fresh strawberries on white ceramic plate, same framing as pencil sketch, flour dust, soft warm side light, cream and red palette, photorealistic, 50mm lens, centered, no readable text, no faces",
+   "mouvement": "Slow push-in continues, glossy highlights shimmer, a strawberry gleams, light steam rises gently from fresh cake",
+   "son": "soft kitchen ambience, faint cool air, gentle chime",
+   "camera": "50mm overhead, matched push-in",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p06",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Le producteur propose deux prises",
+   "image": "Medium shot from behind of baker looking at laptop on wooden counter, screen displaying two side-by-side blurred glowing images of cakes with soft pastel colors and no readable text, warm lamp glow, dark bakery background with ovens, amber and teal palette, photorealistic, 35mm, shallow depth, no faces, no logos",
+   "mouvement": "Camera orbits slowly right around shoulder, screen glow pulses gently, background oven lights flicker warmly in darkness",
+   "son": "laptop fan hum, soft interface blips, oven warmth",
+   "camera": "35mm, slow orbit right",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p07",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Il en choisit une, la lumière s'installe",
+   "image": "Close over-shoulder view of a flour-dusted hand on laptop trackpad, laptop screen now showing one large blurred luminous cake image with warm colors and no readable text, wooden bakery counter, coffee steam, warm side light, amber palette, photorealistic, 50mm, shallow focus, no faces, no logos",
+   "mouvement": "Finger taps gently, screen glow brightens and settles, steam drifts, camera pushes in very slowly toward screen",
+   "son": "soft click, warm confirmation tone, quiet room",
+   "camera": "50mm, slow push-in",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Rue vide à l'aube, avant",
+   "image": "Wide cinematic view of empty Quebec street at blue hour before sunrise, closed artisan bakery storefront with dark windows, wet cobblestones reflecting cold blue light, street lamp glowing, no people, moody slate and indigo palette, photorealistic, 24mm wide lens, symmetrical composition, no readable text, no faces",
+   "mouvement": "Slow crane drift forward, cold mist moves low, lamp flickers softly, blue reflections shimmer on wet stones",
+   "son": "cold dawn wind, distant traffic, empty street silence",
+   "camera": "24mm wide, slow crane forward",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Transformation 2 : rue vide vers vitrine vivante",
+   "image": "Identical wide view of same Quebec street at golden sunrise, same bakery storefront now warmly lit with glowing windows showing blurred cakes with no readable text, open door spilling warm light, silhouettes of two passersby from behind, wet stones reflecting amber, joyful dawn palette, photorealistic, 24mm wide, symmetrical, no faces, no text",
+   "mouvement": "Slow crane continues forward, warm light spills and breathes, silhouettes walk gently, curtains of light shimmer in morning mist",
+   "son": "morning birds, door chime, warm street life",
+   "camera": "24mm wide, crane forward",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p10",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Le même gâteau en 3D, balayé de lumière",
+   "image": "Close view of a strawberry layer cake on a rotating wooden stand in dark bakery workshop, thin lines of golden light sweeping across cake surface suggesting 3D scan, hands of baker adjusting stand from side, dramatic side lighting, amber and black palette, photorealistic, 50mm macro, shallow depth, no readable text, no faces",
+   "mouvement": "Cake stand rotates slowly, golden light lines sweep across, camera orbits slowly left, crumbs glint in backlight",
+   "son": "soft motor whir, light sweep hum, quiet workshop",
+   "camera": "50mm macro, slow orbit left",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p11",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Montage qui se cale sur la musique",
+   "image": "From behind silhouette of baker wearing apron watching laptop on wooden table, screen glowing with blurred horizontal timeline bars and soft waveform shapes in orange and teal with no readable text, fairy lights in dark bakery, flour dust in air, cinematic teal and amber palette, photorealistic, 35mm, wide, no faces, no logos",
+   "mouvement": "Timeline glow pulses rhythmically, flour dust floats in light beams, camera pushes in slowly as lights twinkle softly",
+   "son": "muffled rhythmic beat, soft laptop hum, room tone",
+   "camera": "35mm, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p12",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Transformation 3 : l'image devient imprimé",
+   "image": "Close view of baker's hands fanning out a set of freshly printed cards and flyers on wooden counter, showing blurred pastel cake photos and abstract shapes with no readable text, morning side light, flour dust, shallow depth, cream and strawberry palette, photorealistic, 50mm, top angle, no faces, no logos",
+   "mouvement": "Hands spread cards slowly in fan motion, paper flutters lightly, camera drifts overhead, light catches glossy paper texture",
+   "son": "paper shuffle, soft card snap, morning quiet",
+   "camera": "50mm overhead, slow drift",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.8,
+   "intention": "Détail : l'accroche-porte sur la porte vitrée",
+   "image": "Close view of a blank door hanger with blurred warm cake illustration and no readable text hanging on glass bakery door handle, soft morning backlight glowing through glass, silhouette of street outside, shallow focus, amber and cream palette, photorealistic, 50mm, centered detail, no faces, no logos",
+   "mouvement": "Hanger sways gently in draft, backlight breathes softly, camera holds with micro push-in, dust motes float",
+   "son": "soft door creak, faint bell, gentle air movement",
+   "camera": "50mm, micro push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "plan",
+   "duree": 2.5,
+   "intention": "Tout est prêt : gâteau, imprimés, film",
+   "image": "Hero still life on rustic wooden bakery counter at sunrise, strawberry layer cake beside fanned printed cards and flyers with blurred images and no readable text, open laptop glowing softly behind, warm window light with flour dust, rich amber and cream palette, photorealistic, 35mm, low angle, no faces, no logos",
+   "mouvement": "Slow majestic push-in across counter, steam and dust drift through sunbeam, laptop glow and paper gloss shimmer gently",
+   "son": "warm sunrise ambience, soft paper rustle, oven warmth",
+   "camera": "35mm low angle, slow push-in",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "7h : la première cliente entre",
+   "image": "Wide interior of cozy artisan bakery at morning opening, seen from behind counter, glass door opening with flood of golden daylight, silhouette of first customer entering from behind with child, baker silhouette from behind offering paper bag, cakes in display, warm amber palette, photorealistic, 28mm wide, no faces, no readable text",
+   "mouvement": "Door swings open slowly, daylight floods and blooms, silhouettes step forward gently, camera drifts right softly",
+   "son": "door bell chime, warm greetings murmur, morning bustle",
+   "camera": "28mm wide, slow drift right",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p16",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Finale large : la boulangerie brille comme un cinéma",
+   "image": "Epic wide exterior of small Quebec bakery at sunrise, warm windows glowing like cinema screen, street alive with soft morning mist, silhouettes of passersby from behind, string lights, fresh snow melting on stones, amber and blue dawn palette, photorealistic, 24mm wide, elevated view, no readable text, no faces",
+   "mouvement": "Slow crane lift upward revealing street awakening, mist drifts, lights twinkle, warm glow breathes against blue dawn",
+   "son": "uplifting morning street, birds, soft city wake",
+   "camera": "24mm wide, crane lift up",
+   "transition": "flash",
+   "heros": true
+  }
+ ],
+ "narration": [
+  {
+   "id": "n01",
+   "role": "narrateur",
+   "texte": "Il est cinq heures. La ville dort encore.",
+   "debut": 0.4
+  },
+  {
+   "id": "n02",
+   "role": "narrateur",
+   "texte": "Léa ouvre son four, pis son portable.",
+   "debut": 4.0
+  },
+  {
+   "id": "n03",
+   "role": "narrateur",
+   "texte": "Elle dit ce qu'elle veut, avec ses mots à elle.",
+   "debut": 7.2
+  },
+  {
+   "id": "n04",
+   "role": "narrateur",
+   "texte": "Son producteur chiffre tout avant de dépenser.",
+   "debut": 11.5
+  },
+  {
+   "id": "n05",
+   "role": "narrateur",
+   "texte": "Il tourne deux prises, il en choisit une.",
+   "debut": 14.8
+  },
+  {
+   "id": "n06",
+   "role": "narrateur",
+   "texte": "Le même gâteau, du croquis jusqu'à la vitrine.",
+   "debut": 19.0
+  },
+  {
+   "id": "n07",
+   "role": "narrateur",
+   "texte": "Il coupe tout ça sur la musique.",
+   "debut": 23.0
+  },
+  {
+   "id": "n08",
+   "role": "narrateur",
+   "texte": "À sept heures, quand la porte s'ouvre, tout est prêt.",
+   "debut": 31.5
+  },
+  {
+   "id": "n09",
+   "role": "narrateur",
+   "texte": "Votre pub, votre marque, votre film. En une conversation.",
+   "debut": 36.5
+  }
+ ],
+ "textes": [
+  {
+   "texte": "5H DU MATIN",
+   "style": "sur",
+   "debut": 0.5,
+   "duree": 1.8
+  },
+  {
+   "texte": "Son *studio* tient | dans son navigateur",
+   "style": "titre",
+   "debut": 4.2,
+   "duree": 2.8
+  },
+  {
+   "texte": "Ça prend forme",
+   "style": "impact",
+   "debut": 13.5,
+   "duree": 2.0
+  },
+  {
+   "texte": "IMAGE · VIDÉO · SON · 3D",
+   "style": "sur",
+   "debut": 20.0,
+   "duree": 2.0
+  },
+  {
+   "texte": "Le même gâteau, *partout*",
+   "style": "titre",
+   "debut": 28.0,
+   "duree": 3.0
+  },
+  {
+   "texte": "Prête pour ouvrir",
+   "style": "impact",
+   "debut": 36.5,
+   "duree": 2.5
+  }
+ ],
+ "musique": {
+  "genre": "warm cinematic electro-acoustic uplift",
+  "tempo_bpm": 102,
+  "description": "EN: intimate piano and soft pads, acoustic guitar, light brushed drums, warm strings and subtle synth bass, hopeful and human, clean mix with breathing dynamics",
+  "sections": [
+   {
+    "debut": 0,
+    "nom": "Intro",
+    "description": "EN: soft piano and bakery room tone, intimate and quiet"
+   },
+   {
+    "debut": 7,
+    "nom": "Build",
+    "description": "EN: acoustic guitar and light percussion join, curiosity grows"
+   },
+   {
+    "debut": 14.5,
+    "nom": "Rise",
+    "description": "EN: strings and steady beat, transformations unfold with energy"
+   },
+   {
+    "debut": 27.9,
+    "nom": "Chorus",
+    "description": "EN: full warm anthem with drums, strings and piano, proud and emotional"
+   },
+   {
+    "debut": 36,
+    "nom": "Resolve",
+    "description": "EN: stripped back to piano and soft strings, tender morning opening"
+   },
+   {
+    "debut": 39,
+    "nom": "Outro",
+    "description": "EN: final lift with bright piano and airy pad into end card"
+   }
+  ],
+  "coups": [
+   2.0,
+   7.0,
+   14.5,
+   27.9,
+   36.0,
+   39.0
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Votre pub, votre marque, votre film",
+  "sous_titre": "Images, vidéo, son, 3D et imprimés, en une conversation",
+  "mentions": ""
+ }
+}

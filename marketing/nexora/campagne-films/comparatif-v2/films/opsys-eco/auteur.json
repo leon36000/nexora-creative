@@ -1,0 +1,49 @@
+{
+ "brief": "opsys",
+ "palier": "eco",
+ "modele": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+ "appels": [
+  {
+   "etape": "auteur",
+   "entree": 2973,
+   "sortie": 4567,
+   "raisonnement": 0,
+   "usd": 0.001634,
+   "cout_rapporte": true,
+   "latence_s": 105.5,
+   "fournisseur": null
+  },
+  {
+   "etape": "reparation1",
+   "entree": 7618,
+   "sortie": 4567,
+   "raisonnement": 0,
+   "usd": 0.001384,
+   "cout_rapporte": true,
+   "latence_s": 85.4,
+   "fournisseur": null
+  }
+ ],
+ "reparations_modele": [
+  [
+   "4 plans héros ; 3 au maximum",
+   "« Vision · en développement » déborde sur le carton (fin 43.6 s > 41.6 s)"
+  ]
+ ],
+ "reparations_code": [],
+ "effort_essais": [],
+ "effort": "défaut du fournisseur",
+ "violations": [
+  [
+   "plans : 4 plans héros ; 3 au maximum",
+   "lecture : « Vision · en développement » déborde sur le carton (fin 43.6 s > 41.6 s)"
+  ],
+  []
+ ],
+ "violations_finales": [],
+ "usd": 0.003018,
+ "credits_client": 0.466,
+ "jetons_entree": 10591,
+ "jetons_sortie": 9134,
+ "latence_s": 190.9
+}

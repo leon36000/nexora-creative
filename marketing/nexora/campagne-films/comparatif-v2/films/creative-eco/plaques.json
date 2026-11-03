@@ -1,0 +1,153 @@
+{
+ "plaques": {
+  "p01": {
+   "cle": "p01-cle-0.png",
+   "cle_s": 27.2,
+   "controle_image": null,
+   "video": "p01-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 141.3,
+   "controle_video": null
+  },
+  "p02": {
+   "cle": "p02-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p02-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.2,
+   "controle_video": null
+  },
+  "p03": {
+   "cle": "p03-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p03-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 123.2,
+   "controle_video": null
+  },
+  "p04": {
+   "cle": "p04-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p04-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p05": {
+   "cle": "p05-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p05-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p06": {
+   "cle": "p06-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p06-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.2,
+   "controle_video": null
+  },
+  "p07": {
+   "cle": "p07-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p07-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 123.2,
+   "controle_video": null
+  },
+  "p08": {
+   "cle": "p08-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p08-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p09": {
+   "cle": "p09-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p09-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p10": {
+   "cle": "p10-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p10-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p11": {
+   "cle": "p11-cle-1.png",
+   "cle_s": 48.3,
+   "controle_image": null,
+   "recette": "h3-fast",
+   "video_s": 198.2,
+   "controle_video": null,
+   "rejet_visuel": true,
+   "tour": 1,
+   "video": "p11-rapide-1.mp4"
+  },
+  "p12": {
+   "cle": "p12-cle-0.png",
+   "cle_s": 24.3,
+   "controle_image": null,
+   "video": "p12-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p13": {
+   "cle": "p13-cle-0.png",
+   "cle_s": 24.3,
+   "controle_image": null,
+   "video": "p13-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p14": {
+   "cle": "p14-cle-0.png",
+   "cle_s": 21.3,
+   "controle_image": null,
+   "video": "p14-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p15": {
+   "cle": "p15-cle-1.png",
+   "cle_s": 42.3,
+   "controle_image": null,
+   "recette": "h3-fast",
+   "video_s": 231.2,
+   "controle_video": null,
+   "rejet_visuel": true,
+   "tour": 1,
+   "video": "p15-rapide-1.mp4"
+  }
+ },
+ "gpu_s": {
+  "gb10-qwen": 420.5,
+  "gb10-music3": 111.2,
+  "pc1-h3-fast": 1859.8000000000004,
+  "pc1-h3-max": 405.7
+ },
+ "musique": {
+  "description": "Global Metadata: Warm cinematic pop with light electronic textures, 112 BPM, EN: intimate felt piano and soft analog synth pads, upright bass, brushed drums entering at 7s, a warm string swell at 16s, subtle hand percussion, building to a bright emotional climax at 24s, then a soft piano resolve; warm analog mix, gentle compression, spacious reverb. Loud polished master.\n\nVocal Details: Instrumental, no lyrics, no vocals, no choir.\n\nArrangement: [Intro] at 0 seconds: Solo felt piano, oven hum, sparse and intimate [Build] at 7 seconds: Bass and brushed drums enter, synth pad warms, forward motion [Rise] at 16 seconds: String swell, hand percussion, energy climbing [Climax] at 24 seconds: Full warm ensemble, bright and emotional, then resolve [Outro] at 38 seconds: Piano alone, soft sustained pad, fade Strong hits at 3.0, 7.4, 11.4, 16.6, 24.0, 31.0 seconds. Clean ending at 42 seconds.",
+  "secondes": 111.2
+ }
+}

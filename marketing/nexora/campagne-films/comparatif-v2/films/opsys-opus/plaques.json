@@ -1,0 +1,122 @@
+{
+ "plaques": {
+  "p01": {
+   "cle": "p01-cle-0.png",
+   "cle_s": 24.2,
+   "controle_image": null,
+   "video": "p01-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.3,
+   "controle_video": null
+  },
+  "p03": {
+   "cle": "p03-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p03-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 123.2,
+   "controle_video": null
+  },
+  "p05": {
+   "cle": "p05-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p05-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p06": {
+   "cle": "p06-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p06-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.2,
+   "controle_video": null
+  },
+  "p08": {
+   "cle": "p08-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p08-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p09": {
+   "cle": "p09-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p09-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p10": {
+   "cle": "p10-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p10-max-0.mp4",
+   "recette": "h3-max",
+   "video_s": 132.2,
+   "controle_video": null
+  },
+  "p11": {
+   "cle": "p11-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p11-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 120.2,
+   "controle_video": null
+  },
+  "p13": {
+   "cle": "p13-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p13-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p14": {
+   "cle": "p14-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p14-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p16": {
+   "cle": "p16-cle-0.png",
+   "cle_s": 21.1,
+   "controle_image": null,
+   "video": "p16-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  },
+  "p17": {
+   "cle": "p17-cle-0.png",
+   "cle_s": 21.2,
+   "controle_image": null,
+   "video": "p17-rapide-0.mp4",
+   "recette": "h3-fast",
+   "video_s": 117.2,
+   "controle_video": null
+  }
+ },
+ "gpu_s": {
+  "gb10-qwen": 256.99999999999994,
+  "gb10-music3": 102.2,
+  "pc1-h3-fast": 1072.8000000000002,
+  "pc1-h3-max": 396.7
+ },
+ "musique": {
+  "description": "Global Metadata: cinematic hybrid orchestral with pulsing electronic bass, 96 BPM, EN: Opens cold and sparse with felt piano and airy wind texture, then a ticking pulse and deep synth bass drive the board scenes, each tile marked by a bright pluck; full drums, low toms and a driving string ostinato for the job site; a warm solo piano breath for the evening at home; a final lift with big drums, warm brass and a wordless choir pad. Clean mix leaving room for a spoken voice, hard accents on the announced hits, ringing final chord. Loud polished master.\n\nVocal Details: Instrumental, no lyrics, no vocals, no choir.\n\nArrangement: [Intro] at 0 seconds: EN: cold felt piano, wind texture, single low drone [Pulse] at 2 seconds: EN: ticking hi-hat pulse, deep synth bass, bright plucks on each tile [Drive] at 15 seconds: EN: full drums and low toms enter, string ostinato, forward momentum [Rise] at 22 seconds: EN: strings swell upward, cymbal rolls, time-lapse energy [Breath] at 30 seconds: EN: drums drop out, warm solo piano with soft strings, intimate [Morning] at 34 seconds: EN: soft pulse returns under the piano, building anticipation [Finale] at 40 seconds: EN: big drum hit, warm brass, wordless choir pad, full and proud [Outro] at 45 seconds: EN: final ringing chord, long decay into silence Strong hits at 2.5, 15.0, 22.5, 30.0, 40.0, 45.0 seconds. Clean ending at 51 seconds.",
+  "secondes": 102.2
+ }
+}

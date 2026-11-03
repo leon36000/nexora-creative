@@ -1,0 +1,61 @@
+{
+ "brief": "workstudio",
+ "palier": "eco",
+ "modele": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+ "appels": [
+  {
+   "etape": "auteur",
+   "entree": 2442,
+   "sortie": 3590,
+   "raisonnement": 0,
+   "usd": 0.001295,
+   "cout_rapporte": true,
+   "latence_s": 64.6,
+   "fournisseur": null
+  },
+  {
+   "etape": "reparation1",
+   "entree": 6189,
+   "sortie": 3766,
+   "raisonnement": 0,
+   "usd": 0.001142,
+   "cout_rapporte": true,
+   "latence_s": 50.7,
+   "fournisseur": null
+  }
+ ],
+ "reparations_modele": [
+  [
+   "p06.image : 0 mots ; attendu 25 à 110",
+   "p06.mouvement : 0 mots ; attendu 8 à 60",
+   "p11.image : 0 mots ; attendu 25 à 110",
+   "p11.mouvement : 0 mots ; attendu 8 à 60",
+   "0 insert(s) d'interface ; le brief en veut 1 ou 2",
+   "durée totale 33.8 s ; attendu 40 à 50 s (ajuster les durées des plans)"
+  ]
+ ],
+ "reparations_code": [],
+ "effort_essais": [],
+ "effort": "défaut du fournisseur",
+ "violations": [
+  [
+   "prompts : p06.image : 0 mots ; attendu 25 à 110",
+   "prompts : p06.mouvement : 0 mots ; attendu 8 à 60",
+   "prompts : p11.image : 0 mots ; attendu 25 à 110",
+   "prompts : p11.mouvement : 0 mots ; attendu 8 à 60",
+   "plans : 0 insert(s) d'interface ; le brief en veut 1 ou 2",
+   "durees : durée totale 33.8 s ; attendu 40 à 50 s (ajuster les durées des plans)"
+  ],
+  [
+   "durees : p06 : un insert d'interface dure 1 à 2 s"
+  ]
+ ],
+ "violations_finales": [
+  "durees : p06 : un insert d'interface dure 1 à 2 s"
+ ],
+ "usd": 0.002437,
+ "credits_client": 0.376,
+ "jetons_entree": 8631,
+ "jetons_sortie": 7356,
+ "latence_s": 115.3
+}

@@ -1,0 +1,47 @@
+{
+ "brief": "creative",
+ "palier": "expert",
+ "modele": "google/gemini-4-argon",
+ "appels": [
+  {
+   "etape": "auteur",
+   "entree": 2436,
+   "sortie": 9916,
+   "raisonnement": 4567,
+   "usd": 0.052016,
+   "cout_rapporte": true,
+   "latence_s": 118.2,
+   "fournisseur": "Google AI Studio"
+  },
+  {
+   "etape": "reparation1",
+   "entree": 7854,
+   "sortie": 5613,
+   "raisonnement": 264,
+   "usd": 0.033604,
+   "cout_rapporte": true,
+   "latence_s": 83.5,
+   "fournisseur": "Google AI Studio"
+  }
+ ],
+ "reparations_modele": [
+  [
+   "p11 : « lettering » interdit dans un prompt (marque, ou texte demandé dans l'image) ; réécrire sans"
+  ]
+ ],
+ "reparations_code": [],
+ "effort_essais": [],
+ "effort": "high",
+ "violations": [
+  [
+   "prompts : p11 : « lettering » interdit dans un prompt (marque, ou texte demandé dans l'image) ; réécrire sans"
+  ],
+  []
+ ],
+ "violations_finales": [],
+ "usd": 0.08562,
+ "credits_client": 13.209,
+ "jetons_entree": 10290,
+ "jetons_sortie": 15529,
+ "latence_s": 201.7
+}

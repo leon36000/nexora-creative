@@ -1,0 +1,445 @@
+{
+ "concept": "À 6 h, un entrepreneur est déjà sur le toit. Pendant qu'il travaille de ses mains, sa compagnie tourne en parallèle : dix départements s'allument un à un sur un tableau vivant, du devis accepté à la facture brouillon, jusqu'au briefing du matin qu'il approuve du pouce. Le film vend une équipe d'agents IA qui donne du temps, pas des chiffres.",
+ "accroche": "6 h 00. Le toit est gelé, la lumière est bleue, et pourtant l'entreprise est déjà réveillée.",
+ "produit_evident": "Dès les premières secondes : un entrepreneur sur un toit à l'aube, tablette dans des mains gantées, et le tableau vivant des dix départements M1–M10 qui s'allument et exécutent chacun sa tâche.",
+ "mode": "narration",
+ "plans": [
+  {
+   "id": "p01",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Accroche : poser l'heure, le froid, le métier et la tablette dans les mains gantées.",
+   "image": "Cinematic wide shot at blue hour, 6 a.m. Quebec winter, a roofer in a heavy work jacket seen from behind on a steep snow-dusted roof, silhouette against a cold indigo sky turning faint amber at the horizon, a tablet glowing softly in his gloved hands, ladder and truck barely visible below, 24mm lens, deep depth of field, frost in the air, palette of steel blue, warm amber accent, film grain",
+   "mouvement": "Slow push-in toward the roofer's back and the glowing tablet, faint breath vapour rising, camera drifts slightly right, snow dust lifting in the wind",
+   "son": "Cold wind over rooftops, distant truck idle, faint snow crunch",
+   "camera": "24mm, poussée lente",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p02",
+   "type": "plan",
+   "duree": 2.2,
+   "intention": "Le geste du métier : la main gantée pose une tuile, on comprend le chantier.",
+   "image": "Extreme close-up of thick work gloves laying a shingle on a roof deck, frost crystals on the surface, morning blue light raking across the texture, a hammer resting nearby, shallow depth of field, 50mm lens, muted steel and rust palette, hyper-detailed material, cinematic",
+   "mouvement": "Macro shot, gloved hand presses the shingle down, camera tilts slightly with the motion, breath of wind moves loose frost",
+   "son": "Glove on shingle, soft scrape, wind",
+   "camera": "50mm macro, léger tilt",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p03",
+   "type": "plan",
+   "duree": 2.6,
+   "intention": "Révéler le produit : le tableau vivant des dix départements, encore sombre, prêt à s'allumer.",
+   "image": "Dark cinematic control-room-like board floating in a dim space, ten unlit rectangular tiles arranged in a grid, each tile a matte dark surface with a faint rim light, thin circuit-like lines connecting them, a soft blue glow from below, no text no letters no logos, 35mm lens, symmetrical composition, palette of near-black, cold blue and a single warm amber edge, volumetric haze",
+   "mouvement": "Slow orbital drift around the dark board, rim lights flicker faintly, haze moves, camera settles facing the grid",
+   "son": "Low room tone, faint electrical hum, distant wind",
+   "camera": "35mm, orbite lente",
+   "transition": "coupe",
+   "heros": true
+  },
+  {
+   "id": "p04",
+   "type": "tableau",
+   "duree": 2.4,
+   "intention": "M1 et M2 s'allument : la réception qualifie, le CRM propose la prochaine action.",
+   "tableau": [
+    {
+     "m": "M1",
+     "action": "Appel qualifié"
+    },
+    {
+     "m": "M2",
+     "action": "Prochaine action"
+    }
+   ],
+   "image": "",
+   "mouvement": "",
+   "son": "Soft digital chime, low pulse",
+   "camera": "",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p05",
+   "type": "tableau",
+   "duree": 2.6,
+   "intention": "M3 s'allume : le devis est bâti et attend l'approbation humaine.",
+   "tableau": [
+    {
+     "m": "M3",
+     "action": "Devis prêt"
+    },
+    {
+     "m": "M3",
+     "action": "Approbation humaine"
+    }
+   ],
+   "image": "",
+   "mouvement": "",
+   "son": "Chime, paper-like tick, pulse",
+   "camera": "",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p06",
+   "type": "plan",
+   "duree": 2.4,
+   "intention": "Le pouce ganté approuve sur la tablette : la validation humaine, cœur de la promesse.",
+   "image": "Close-up over-the-shoulder of a gloved thumb hovering over a rugged tablet screen showing only blurred luminous shapes, no readable text, cold morning light on the glove seams, roof shingles in soft background bokeh, 85mm lens, shallow depth of field, steel blue and warm amber palette, cinematic",
+   "mouvement": "Thumb presses down slowly, screen glow pulses brighter, camera holds steady with a tiny handheld drift",
+   "son": "Soft tap on glass, wind, faint digital confirm",
+   "camera": "85mm, caméra épaule légère",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p07",
+   "type": "tableau",
+   "duree": 2.4,
+   "intention": "M4 et M6 : l'intervention naît du devis accepté, le matériel est réservé.",
+   "tableau": [
+    {
+     "m": "M4",
+     "action": "Intervention créée"
+    },
+    {
+     "m": "M6",
+     "action": "Matériel réservé"
+    }
+   ],
+   "image": "",
+   "mouvement": "",
+   "son": "Chime, low mechanical pulse",
+   "camera": "",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p08",
+   "type": "plan",
+   "duree": 2.6,
+   "intention": "Preuve par l'image : la cour à matériaux, le camion se charge, la chaîne avance sans lui.",
+   "image": "Cinematic wide shot of a Quebec construction yard at dawn, a flatbed truck being loaded with bundled shingles and lumber by a forklift, frost on the ground, warm work lights against cold blue air, seen from a low angle, 28mm lens, deep depth of field, palette of steel blue, sodium amber, raw wood, cinematic haze",
+   "mouvement": "Slow lateral travelling past the truck as the forklift lifts a pallet, exhaust vapour drifting, work lights flaring softly",
+   "son": "Forklift beep, diesel idle, wood thud, wind",
+   "camera": "28mm, travelling latéral",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p09",
+   "type": "plan",
+   "duree": 2.4,
+   "intention": "Le chantier avance : la maison se couvre, le métier reprend ses droits.",
+   "image": "Cinematic mid shot of a residential roof under construction at sunrise, fresh shingles half-laid in clean rows, ladders and safety lines, two workers in silhouette seen from behind at the ridge, warm sun breaking over the treeline, 35mm lens, palette of amber, steel blue, asphalt grey, film grain",
+   "mouvement": "Slow crane rise along the roof slope toward the ridge and the sunrise, workers in silhouette, light warming across the shingles",
+   "son": "Wind, distant hammering, birds",
+   "camera": "35mm, grue lente",
+   "transition": "raccord",
+   "heros": true
+  },
+  {
+   "id": "p10",
+   "type": "tableau",
+   "duree": 2.4,
+   "intention": "M5 et M7 : facture brouillon après le travail, contenu proposé après le chantier.",
+   "tableau": [
+    {
+     "m": "M5",
+     "action": "Facture brouillon"
+    },
+    {
+     "m": "M7",
+     "action": "Contenu proposé"
+    }
+   ],
+   "image": "",
+   "mouvement": "",
+   "son": "Chime, soft paper tick, warm pulse",
+   "camera": "",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p11",
+   "type": "plan",
+   "duree": 2.6,
+   "intention": "Le temps redonné : la maison finie, la lumière dorée, le travail accompli.",
+   "image": "Cinematic exterior of a finished Quebec house at golden hour, new shingle roof catching warm low sun, snow on the lawn, a work truck parked in the driveway seen from a distance, no people, 24mm lens, deep depth of field, palette of honey gold, deep blue shadows, crisp winter air, cinematic",
+   "mouvement": "Slow push-in toward the finished roof and the glowing windows, light sweeping across the shingles, faint chimney smoke",
+   "son": "Quiet evening wind, distant traffic, warm room tone",
+   "camera": "24mm, poussée lente",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p12",
+   "type": "tableau",
+   "duree": 2.4,
+   "intention": "M8 et M9 : la vue exécutive se remplit, le briefing du matin se prépare.",
+   "tableau": [
+    {
+     "m": "M8",
+     "action": "Vue exécutive"
+    },
+    {
+     "m": "M9",
+     "action": "Briefing prêt"
+    }
+   ],
+   "image": "",
+   "mouvement": "",
+   "son": "Chime, low warm pulse",
+   "camera": "",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p13",
+   "type": "plan",
+   "duree": 2.6,
+   "intention": "Le briefing du matin, lu dans la main, à la lumière du jour qui se lève.",
+   "image": "Over-the-shoulder close-up of a rugged tablet held in a bare hand inside a warm truck cab at dawn, screen showing only soft blurred luminous blocks, no readable text, coffee steam rising from a cup in the holder, windshield fogged at the edges, 50mm lens, shallow depth of field, palette of warm amber dashboard glow and cold blue outside, cinematic",
+   "mouvement": "Slow push-in over the shoulder toward the glowing screen, steam curling upward, faint defroster haze shifting",
+   "son": "Idle engine, soft heater fan, quiet morning",
+   "camera": "50mm, poussée lente",
+   "transition": "raccord",
+   "heros": false
+  },
+  {
+   "id": "p14",
+   "type": "tableau",
+   "duree": 2.6,
+   "intention": "M10 : la mémoire relie les dossiers, le contexte de la compagnie se conserve.",
+   "tableau": [
+    {
+     "m": "M10",
+     "action": "Dossiers reliés"
+    },
+    {
+     "m": "M9",
+     "action": "Briefing approuvé"
+    },
+    {
+     "m": "M10",
+     "action": "Contexte gardé"
+    }
+   ],
+   "image": "",
+   "mouvement": "",
+   "son": "Deep soft chime, warm pulse fading",
+   "camera": "",
+   "transition": "coupe",
+   "heros": false
+  },
+  {
+   "id": "p15",
+   "type": "plan",
+   "duree": 3.0,
+   "intention": "Le pouce approuve le briefing : la boucle humaine se ferme, la journée peut commencer.",
+   "image": "Extreme close-up of a weathered thumb pressing a rugged tablet edge in a warm truck cab, blurred luminous shapes on the screen, no readable text, morning sun flaring through the windshield, dust motes in the light beam, 100mm lens, very shallow depth of field, palette of amber, warm grey, steel blue rim",
+   "mouvement": "Thumb presses, light flare blooms across the lens, camera holds with a gentle drift, dust motes floating",
+   "son": "Soft tap, heater fan, distant morning birds",
+   "camera": "100mm, caméra fixe, flare",
+   "transition": "flash",
+   "heros": false
+  },
+  {
+   "id": "p16",
+   "type": "plan",
+   "duree": 3.4,
+   "intention": "Plan émotion : l'entrepreneur redescend, la journée lui appartient, la maison est finie derrière.",
+   "image": "Cinematic wide shot from behind of a contractor walking away from a finished house toward his truck at sunrise, tool bag on his shoulder, long shadow across the frost, warm sun flaring over the roofline, 35mm lens, deep depth of field, palette of amber, steel blue, frosted white, film grain",
+   "mouvement": "Slow tracking shot following him from behind as he walks, sun flare growing, shadow stretching, camera gradually rising",
+   "son": "Boots on frost, wind, distant truck start",
+   "camera": "35mm, travelling arrière",
+   "transition": "fondu",
+   "heros": false
+  }
+ ],
+ "narration": [
+  {
+   "id": "n01",
+   "role": "narrateur",
+   "texte": "Six heures du matin. Le toit est gelé.",
+   "debut": 0.4
+  },
+  {
+   "id": "n02",
+   "role": "narrateur",
+   "texte": "Pis ton entreprise, elle, est déjà réveillée.",
+   "debut": 3.4
+  },
+  {
+   "id": "n03",
+   "role": "narrateur",
+   "texte": "Dix départements d'agents travaillent en parallèle.",
+   "debut": 6.6
+  },
+  {
+   "id": "n04",
+   "role": "narrateur",
+   "texte": "La réception qualifie. Le CRM propose la prochaine action.",
+   "debut": 9.6
+  },
+  {
+   "id": "n05",
+   "role": "narrateur",
+   "texte": "Le devis se bâtit. Toi, tu approuves.",
+   "debut": 13.0
+  },
+  {
+   "id": "n06",
+   "role": "assistant",
+   "texte": "Devis prêt. Approbation humaine requise.",
+   "debut": 16.0
+  },
+  {
+   "id": "n07",
+   "role": "narrateur",
+   "texte": "Devis accepté, l'intervention se crée. Le matériel se réserve.",
+   "debut": 18.6
+  },
+  {
+   "id": "n08",
+   "role": "narrateur",
+   "texte": "Le chantier avance pendant que tu travailles.",
+   "debut": 22.2
+  },
+  {
+   "id": "n09",
+   "role": "narrateur",
+   "texte": "Après le chantier, la facture brouillon est déjà là.",
+   "debut": 25.6
+  },
+  {
+   "id": "n10",
+   "role": "narrateur",
+   "texte": "Le contenu aussi. Le briefing du matin t'attend.",
+   "debut": 29.0
+  },
+  {
+   "id": "n11",
+   "role": "narrateur",
+   "texte": "Tu approuves. La mémoire garde le fil.",
+   "debut": 32.6
+  },
+  {
+   "id": "n12",
+   "role": "narrateur",
+   "texte": "Ton entreprise tourne pendant que tu travailles.",
+   "debut": 36.4
+  }
+ ],
+ "textes": [
+  {
+   "texte": "6 h 00",
+   "style": "impact",
+   "debut": 0.6,
+   "duree": 1.6
+  },
+  {
+   "texte": "Votre entreprise | se réveille *avant* vous",
+   "style": "titre",
+   "debut": 3.6,
+   "duree": 2.8
+  },
+  {
+   "texte": "10 départements",
+   "style": "sur",
+   "debut": 7.0,
+   "duree": 1.6
+  },
+  {
+   "texte": "Devis prêt",
+   "style": "impact",
+   "debut": 13.6,
+   "duree": 1.8
+  },
+  {
+   "texte": "Approbation humaine",
+   "style": "sur",
+   "debut": 15.6,
+   "duree": 1.8
+  },
+  {
+   "texte": "Le chantier avance",
+   "style": "impact",
+   "debut": 22.6,
+   "duree": 1.8
+  },
+  {
+   "texte": "Facture brouillon",
+   "style": "sur",
+   "debut": 26.0,
+   "duree": 1.8
+  },
+  {
+   "texte": "Briefing du matin",
+   "style": "impact",
+   "debut": 29.6,
+   "duree": 2.0
+  },
+  {
+   "texte": "Vision · en développement",
+   "style": "prepa",
+   "debut": 38.0,
+   "duree": 3.0
+  }
+ ],
+ "musique": {
+  "genre": "Cinematic electronic with folk textures (Quebec winter)",
+  "tempo_bpm": 110,
+  "description": "EN: warm analog synth pads, felt piano, low sub pulse, hand percussion and a distant stomp-clap, frosty high string harmonics, building from intimate dawn to a wide emotional uplift; mix wide and warm, bass gentle, no vocals, no brass stabs.",
+  "sections": [
+   {
+    "debut": 0,
+    "nom": "Dawn intro",
+    "description": "EN: felt piano and cold wind texture, sub pulse enters at 2.5s, intimate"
+   },
+   {
+    "debut": 5,
+    "nom": "First build",
+    "description": "EN: hand percussion and synth arpeggio join, momentum rising"
+   },
+   {
+    "debut": 13,
+    "nom": "Approval drop",
+    "description": "EN: beat drops on the thumb press, warm bass and clap enter, confident"
+   },
+   {
+    "debut": 22,
+    "nom": "Chantier lift",
+    "description": "EN: full groove, string harmonics soaring, wide stereo, uplifting"
+   },
+   {
+    "debut": 30,
+    "nom": "Briefing peak",
+    "description": "EN: peak energy, layered percussion, piano motif returns"
+   },
+   {
+    "debut": 36,
+    "nom": "Emotional resolve",
+    "description": "EN: strip back to piano and pads, warm sunrise chord, then soft tail"
+   }
+  ],
+  "coups": [
+   3.0,
+   13.0,
+   16.0,
+   22.0,
+   29.0,
+   36.0
+  ]
+ },
+ "fin": {
+  "duree": 4.0,
+  "slogan": "Votre entreprise tourne pendant que vous travaillez.",
+  "sous_titre": "Une équipe d'agents IA pour les entrepreneurs du Québec — dix départements, approbation humaine.",
+  "mentions": "Vision · en développement"
+ }
+}

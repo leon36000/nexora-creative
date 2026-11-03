@@ -1,0 +1,21 @@
+{
+ "brief": "opsys",
+ "palier": "opus",
+ "modele": "claude-opus-5-5 (sous-agent Claude Code, effort high, à l'aveugle)",
+ "effort": "high",
+ "appels": [],
+ "reparations_modele": [
+  [
+   "1 (mot « lettering » dans un prompt, corrigé par le modèle)"
+  ]
+ ],
+ "reparations_code": [],
+ "violations_finales": [],
+ "usd": null,
+ "credits_client": null,
+ "jetons_sous_agent_total": 100751,
+ "jetons_entree": null,
+ "jetons_sortie": null,
+ "latence_s": 195.1,
+ "note": "coût fournisseur non mesuré (abonnement de l'outil) ; jetons = total du sous-agent, lecture du prompt et du brief comprise"
+}
