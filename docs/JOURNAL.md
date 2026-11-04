@@ -355,3 +355,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Director : 80 tests ciblés passent ; règle live-action globale à corriger pour respecter les autres styles demandés. Finish : 14 tests TypeScript passent, Python bloqué par FastAPI absent localement ; aucune modification de code ou production.
 
 - VM204 : files Comfy sur adresse LAN vides, services actifs ; le refus localhost était lié à l'adresse d'écoute. Inventaire pc1 : 101 lignes portent une raison de non-copie, aucune extension d'image dans les chemins ; audit des infographies à faire. Script ciblé CPU pc1 préparé et syntaxiquement valide, pas exécuté.
+
+- Conservation : corrigé cinq lignes CSV décalées, original sauvegardé. Sur le périmètre Creative/OPSYS recensé, 104 contenus déjà vérifiés et 621 copiés sur pc1, chaque SHA-256 contrôlé et ajouté à l'inventaire (2 326 entrées) ; deux dossiers d'essai ne contiennent qu'un manifeste et sont conservés. Couverture totale du parc non démontrée.
