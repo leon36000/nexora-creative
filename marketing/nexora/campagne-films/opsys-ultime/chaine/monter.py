@@ -8,12 +8,12 @@ rampes avec mélange d'images, transitions cut / fondu / dip / glisse, étalonna
 (`marketing/creative/video-v3/couches.py`), puis textes de l'EditPlan, incrustations de l'annexe (typographie cinétique
 `usine/typo.py` + `chaine/incrustations.py`). Son : musique (entrée, gain, fondus), voix, ducking (rampes de 0,25 s), son natif
 des plans (`son_plans`), bruitages synthétiques (`video-v3/sfx_v3.py`), normalisation loudnorm deux passes (cible et crête du plan).
-Le rendu se fait par tranches d'images en parallèle ; les tranches sont supprimées après l'assemblage.
+Le rendu se fait par tranches d'images en parallèle ; les tranches et le mix restent sous
+`montage/tranches-<équipe>-<version>-<mode>-<horodatage>/` avec l'export du film.
 """
 import argparse
 import json
 import math
-import shutil
 import subprocess
 import sys
 import time
@@ -137,6 +137,24 @@ def verifier_sources_video(equipe, version, sources):
             "Générez les plans manquants ou corrigez l'EditPlan avant le rendu."
         )
     return manquants
+
+
+def verifier_sortie_libre(sortie):
+    """Refuse de remplacer un export déjà présent, y compris un lien symbolique cassé."""
+    sortie = Path(sortie)
+    if sortie.exists() or sortie.is_symlink():
+        raise FileExistsError(f"Refus d'écraser l'export existant : {sortie}")
+    return sortie
+
+
+def creer_dossier_tranches(out_dir, equipe, version, brouillon):
+    """Réserve un dossier propre et étiqueté pour garder les vidéos intermédiaires."""
+    horodatage = time.strftime("%Y%m%d-%H%M%S", time.localtime())
+    mode = "brouillon" if brouillon else "final"
+    label = f"tranches-{equipe}-{version}-{mode}-{horodatage}-{time.time_ns()}"
+    dossier = Path(out_dir) / label
+    dossier.mkdir(parents=True, exist_ok=False)
+    return dossier
 
 
 def sonder(f):
@@ -455,24 +473,24 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     t0 = time.time()
     ctx = Contexte(equipe, version, brouillon)
     manquants = verifier_sources_video(equipe, version, ctx.vid)
+    nom_sortie = f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
+    chemin_defaut = T.TRAVAIL / equipe / "montage" / nom_sortie
+    sortie = verifier_sortie_libre(sortie if sortie is not None else chemin_defaut)
     rapport = valider_ts(ctx.plan)
     out_dir = T.dossier_travail(equipe, "montage")
-    sortie = Path(sortie) if sortie else out_dir / f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
-    tmp = out_dir / f"tranches-{version}-{int(t0)}"
-    tmp.mkdir(parents=True, exist_ok=True)
+    tranches = creer_dossier_tranches(out_dir, equipe, version, brouillon)
     pas = 36
-    taches = [(equipe, version, brouillon, a, min(ctx.total, a + pas), tmp / f"t{a:06d}.mp4") for a in range(0, ctx.total, pas)]
+    taches = [(equipe, version, brouillon, a, min(ctx.total, a + pas), tranches / f"t{a:06d}.mp4") for a in range(0, ctx.total, pas)]
     with ProcessPoolExecutor(jobs) as ex:
         list(ex.map(rendre_tranche, taches))
-    (tmp / "liste.txt").write_text("".join(f"file '{x[-1]}'\n" for x in taches))
-    wav = tmp / "mix.wav"
+    (tranches / "liste.txt").write_text("".join(f"file '{x[-1]}'\n" for x in taches))
+    wav = tranches / "mix.wav"
     mixer(ctx, wav)
-    subprocess.run([FF, "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(tmp / "liste.txt"), "-i", str(wav), "-map", "0:v", "-map", "1:a",
+    subprocess.run([FF, "-v", "error", "-n", "-f", "concat", "-safe", "0", "-i", str(tranches / "liste.txt"), "-i", str(wav), "-map", "0:v", "-map", "1:a",
                     "-c:v", "libx264", "-preset", "fast" if brouillon else "slow", "-crf", "23" if brouillon else "16", "-pix_fmt", "yuv420p",
                     "-c:a", "aac", "-b:a", "256k", "-movflags", "+faststart", "-shortest", str(sortie)], check=True)
-    shutil.rmtree(tmp)
     res = {"film": str(sortie), "equipe": equipe, "version": version, "duree_s": round(ctx.total / FPS, 2), "plans": len(ctx.plan["video"]),
-           "manquants": manquants, "validation": rapport, "secondes": round(time.time() - t0, 1)}
+           "tranches": str(tranches), "manquants": manquants, "validation": rapport, "secondes": round(time.time() - t0, 1)}
     print(json.dumps(res, ensure_ascii=False))
     with (T.TRAVAIL / "journal-montage.jsonl").open("a") as fh:
         fh.write(json.dumps(res, ensure_ascii=False) + "\n")
@@ -489,6 +507,6 @@ if __name__ == "__main__":
     o = a.parse_args()
     try:
         construire(o.equipe, o.version, o.brouillon, o.sortie, o.jobs)
-    except PlansVideoManquants as e:
+    except (PlansVideoManquants, FileExistsError) as e:
         print(f"ERREUR : {e}", file=sys.stderr)
         raise SystemExit(2)
