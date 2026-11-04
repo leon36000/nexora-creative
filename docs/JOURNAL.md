@@ -484,3 +484,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Détourage réel : Creative répond 200 mais annonce rapide indisponible et aucun moteur rapide déclaré, tandis que l’état général dit détourage configuré. Pc3 répond 401 sans jeton depuis VM202 : joignable, santé authentifiée non prouvée. Sources déployées comparées par hash ; aucune modification de production.
 - Relecture de `5d27dc6` : ancien travail sur moteur seulement pro contournait le refus ; régression reproduite et correctif complémentaire local en vérification.
+
+- Détourage : `826b604` protège lancement/reprise des anciens travaux liés à un moteur seulement pro ; `575e5cd` bloque aussi la reprise de paramètres pro explicites sur moteur mixte. 24 tests ciblés et typecheck passent ; anciennes données sans palier restent ambiguës. Pas de déploiement.
