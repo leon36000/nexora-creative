@@ -1,0 +1,76 @@
+[
+ {
+  "type": "h3",
+  "nom": "d1-pilote-fr",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 7301,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/rushes/dialogues",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, IMAX science-fiction blockbuster, a tight close-up inside the cramped cockpit of a battered space fighter during a massive space battle. A female pilot in her thirties with a dark flight helmet and an open visor (S1), sweat on her face, is violently shaken as explosions flash orange and blue across her visor and the canopy glass. She grips the controls, turns her head toward the camera and screams with fierce urgency (S1): <d>[French] Bouclier ! Maintenant !</d> Red warning lights pulse, sparks burst from the console, the whole cockpit shudders. Handheld camera with strong shake.\n\noverall_soundscape: Deafening engine roar, muffled explosions hitting the hull, alarm beeps, metal rattling, her heavy breathing.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "d2-duel-fr",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v6-creative/rushes/771.png",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 7302,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/rushes/dialogues",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, night storm, heavy rain. The hooded duelist from <Picture 1> (S1), a grinning man in a soaked dark hooded cloak, holds a glowing orange energy blade that hisses in the rain, locked blade against blade with his opponent; sparks explode at the crossing point and light his face. He leans in and taunts with a cocky, gravelly voice (S1): <d>[French] C'est tout ?!</d> then shoves the opponent back with a burst of sparks. Lightning flashes behind them. The camera pushes in fast on his face.\n\noverall_soundscape: Pouring rain, rolling thunder, the deep electric hum and crackle of the energy blades, a heavy clash.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "d1-pilote-en",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 7301,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/rushes/dialogues",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, IMAX science-fiction blockbuster, a tight close-up inside the cramped cockpit of a battered space fighter during a massive space battle. A female pilot in her thirties with a dark flight helmet and an open visor (S1), sweat on her face, is violently shaken as explosions flash orange and blue across her visor and the canopy glass. She grips the controls, turns her head toward the camera and screams with fierce urgency (S1): <d>[English] Shields! Now!</d> Red warning lights pulse, sparks burst from the console, the whole cockpit shudders. Handheld camera with strong shake.\n\noverall_soundscape: Deafening engine roar, muffled explosions hitting the hull, alarm beeps, metal rattling, her heavy breathing.\n\nnon_diegetic_music: N/A"
+ },
+ {
+  "type": "h3",
+  "nom": "d2-duel-en",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "image": "~/nexora-creative-data/promo/v6-creative/rushes/771.png",
+  "largeur": 1344,
+  "hauteur": 768,
+  "images": 124,
+  "graine": 7302,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/rushes/dialogues",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, night storm, heavy rain. The hooded duelist from <Picture 1> (S1), a grinning man in a soaked dark hooded cloak, holds a glowing orange energy blade that hisses in the rain, locked blade against blade with his opponent; sparks explode at the crossing point and light his face. He leans in and taunts with a cocky, gravelly voice (S1): <d>[English] Is that all?!</d> then shoves the opponent back with a burst of sparks. Lightning flashes behind them. The camera pushes in fast on his face.\n\noverall_soundscape: Pouring rain, rolling thunder, the deep electric hum and crackle of the energy blades, a heavy clash.\n\nnon_diegetic_music: N/A"
+ }
+]

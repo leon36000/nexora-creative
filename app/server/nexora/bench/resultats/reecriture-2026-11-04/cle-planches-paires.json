@@ -1,0 +1,82 @@
+{
+ "vfx-sabre": {
+  "X": "vfx-sabre-B",
+  "Y": "vfx-sabre-A"
+ },
+ "vfx-sabre-inv": {
+  "X": "vfx-sabre-A",
+  "Y": "vfx-sabre-B"
+ },
+ "vfx-explosion-usine": {
+  "X": "vfx-explosion-usine-A",
+  "Y": "vfx-explosion-usine-B"
+ },
+ "vfx-explosion-usine-inv": {
+  "X": "vfx-explosion-usine-B",
+  "Y": "vfx-explosion-usine-A"
+ },
+ "vfx-dragon-chateau": {
+  "X": "vfx-dragon-chateau-B",
+  "Y": "vfx-dragon-chateau-A"
+ },
+ "vfx-dragon-chateau-inv": {
+  "X": "vfx-dragon-chateau-A",
+  "Y": "vfx-dragon-chateau-B"
+ },
+ "vfx-bataille-spatiale": {
+  "X": "vfx-bataille-spatiale-A",
+  "Y": "vfx-bataille-spatiale-B"
+ },
+ "vfx-bataille-spatiale-inv": {
+  "X": "vfx-bataille-spatiale-B",
+  "Y": "vfx-bataille-spatiale-A"
+ },
+ "pub-poutine": {
+  "X": "pub-poutine-A",
+  "Y": "pub-poutine-B"
+ },
+ "pub-poutine-inv": {
+  "X": "pub-poutine-B",
+  "Y": "pub-poutine-A"
+ },
+ "prod-parfum": {
+  "X": "prod-parfum-A",
+  "Y": "prod-parfum-B"
+ },
+ "prod-parfum-inv": {
+  "X": "prod-parfum-B",
+  "Y": "prod-parfum-A"
+ },
+ "prod-montre": {
+  "X": "prod-montre-B",
+  "Y": "prod-montre-A"
+ },
+ "prod-montre-inv": {
+  "X": "prod-montre-A",
+  "Y": "prod-montre-B"
+ },
+ "film-retrouvailles": {
+  "X": "film-retrouvailles-B",
+  "Y": "film-retrouvailles-A"
+ },
+ "film-retrouvailles-inv": {
+  "X": "film-retrouvailles-A",
+  "Y": "film-retrouvailles-B"
+ },
+ "social-chat": {
+  "X": "social-chat-A",
+  "Y": "social-chat-B"
+ },
+ "social-chat-inv": {
+  "X": "social-chat-B",
+  "Y": "social-chat-A"
+ },
+ "cours-volcan": {
+  "X": "cours-volcan-A",
+  "Y": "cours-volcan-B"
+ },
+ "cours-volcan-inv": {
+  "X": "cours-volcan-B",
+  "Y": "cours-volcan-A"
+ }
+}

@@ -104,7 +104,12 @@ async function j<T>(url: string, init?: RequestInit): Promise<T> {
   return d as T;
 }
 
-export interface CreerReponse { takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number; moteur: 'h3-fast' | 'h3-max' }
+/** Ce que le réalisateur a compris d'une demande (server/nexora/realisateur.ts). */
+export interface Comprehension { compris: string; famille: string; hypotheses: string[]; variantes: string[]; plans: { debut: number; cadrage: string }[] }
+export interface CreerReponse {
+  takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number; moteur: 'h3-fast' | 'h3-max';
+  comprehension?: Comprehension; usageRedaction?: { credits: number; usd: number; jetons: number; palier: string };
+}
 export interface PlanFilm { resume: string; description: string; duree: 5 | 10; camera: string; take?: number }
 export interface Storyboard {
   titre: string;
