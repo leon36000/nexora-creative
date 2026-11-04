@@ -510,3 +510,7 @@ Après contrôle des prérequis et de la file vide, un seul rendu a été lancé
 `p26-r1.mp4` rendu en 158,8 s de moteur, sans erreur rapportée ; fichier effectivement présent, H.264 1344×768, AAC, 5,166688 s. Vidéo et planche de cinq images ont été copiées sur le SSD Infrastructure de pc1, contrôlées par SHA-256 et ajoutées à l'inventaire (**3 743 entrées**). La planche montre bien une maison et un anneau lumineux demandés ; l'image est sombre, l'évaluation du mouvement et du son reste à faire, aucune note humaine ni acceptation. Originaux conservés.
 
 Après contrôle des références, de la voix et de la file vide, **p27** a été lancé seul (`--max-file 1`) ; il est en cours, sans résultat encore attesté. Poursuivre un plan à la fois, vérifier puis archiver chaque sortie et tout essai, sans utiliser les scripts automatiques qui poussent ou appellent des fournisseurs.
+
+### OPSYS : contrôle du montage après p26
+
+Validation réelle des sources du dossier DeepSeek, sans rendu : le **court** a ses plans, voix référencées et musique ; le long manque `p27–p32` pendant que `p27` tourne ; le vertical manque toujours `v01–v06`. Le garde-fou refuse bien les absents. Toutefois `monter.py` supprime actuellement le répertoire de tranches MP4 après assemblage et utilise une sortie écrasable. **Ne pas lancer le montage tant que ces comportements ne sont pas corrigés** : l'agent films prépare un correctif pour conserver les segments et éviter l'écrasement.
