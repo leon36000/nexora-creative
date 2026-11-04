@@ -451,3 +451,8 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - pc6 : caches (~25 Gio), journaux (~4 Gio) et cache APT (~1,1 Gio) contribuent à l’occupation. Les dates observées ne prouvent pas la cause de la baisse pendant cette reprise. Aucun nettoyage ni déplacement effectué.
 
 - Détourage/LTX : preuves historiques retrouvées pc3 ; rapide 224 images/120 s, LTX Alpha-Gen essayé sur 5080 avec VRAM quasi pleine et comparatif synthétique contrasté. Parcours réel et intégration pro restent à prouver.
+
+## 04/11/2026 — Objectif de R&D triple A activé
+
+- Le fondateur demande recherches approfondies sur sources primaires et projets open source, intégration et amélioration de toutes les technologies ; trois agents Luna max mobilisés en parallèle.
+- Son « OK » autorise uniquement la lecture technique interne de la clé de passerelle, sans exposition, pour utiliser DeepSeek, Muse et Gemini ; aucune autre clé ou fichier .env réel ne doit être lu ou affiché.
