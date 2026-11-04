@@ -318,3 +318,10 @@ body { font-variation-settings: normal; letter-spacing: -0.003em; }
 
 .pr-paliers { display: inline-flex; gap: 4px; }
 .pr-paliers .st-bouton.actif { border-color: var(--accent, #ff5a1f); color: var(--accent, #ff5a1f); }
+
+/* Ce que l'IA a compris (réalisateur, recherche/25) */
+.st-compris-plans { color: var(--dim); font-size: 12.5px !important; }
+.st-compris-choix { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.st-compris-choix li { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--dim); }
+.st-compris-variantes { display: grid; gap: 6px; }
+.st-compris-prompt { margin: 0; max-height: 220px; overflow: auto; white-space: pre-wrap; word-break: break-word; font: 400 11.5px/1.5 var(--font-mono); color: var(--dim); background: var(--panel-2); border-radius: 8px; padding: 10px; }
