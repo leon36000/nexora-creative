@@ -37,7 +37,7 @@ import { compteCourant, territoireDuCompte } from './nexora/compte.js';
 import { clientLlmCourant, type ClientLlm } from './nexora/llm.js';
 import { clientPalier, LIBELLES_PALIER, estPalier, type Palier } from './nexora/niveaux.js';
 import { palierDuRole, paliersDisponibles, palierSuivant } from './nexora/paliers.js';
-import { devisLlm, executerSousReservation, ErreurPlafondLlm, GrandLivreUsage, type BilanRun } from './nexora/usage.js';
+import { coutJuge3dUsd, devisJuge3d, devisLlm, executerSousReservation, ErreurPlafondLlm, GrandLivreUsage, type BilanRun } from './nexora/usage.js';
 import { BRIEFS_FILMS } from './nexora/bench/briefsFilms.js';
 import { escalader, optionsPalier, type BriefFilm } from './nexora/montage/film.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
@@ -80,7 +80,10 @@ import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, mo
 import type { DepsAgent } from './nexora/agent.js';
 import { ajusterProposition, depassement, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
-import { TOURNETTE_JUGE, jugerVuesObjet, plancheVuesDataUrl, prochaineEtapeTexte3D, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
+import { MESURES_OBJET_PC5, recetteMultivue } from './nexora/objet3d.js';
+import { PRODUIT_3D } from '../src/produit3d.js';
+import { analyser, cartesPbr, cibleTriangles, decimerGlb, EXTENSION_RELIEF, exporter, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief } from './nexora/relief.js';
+import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
 import {
   CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles, storeRef,
   setCastQueue, sheetPlan, type HeroOpts,
@@ -1712,7 +1715,7 @@ app.get('/api/nexora/etat', async () => {
     cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
     image: modeleImage() ? (modeleImage() === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
     musique: eng.recettesEnLigne().has('music3') ? 'MiniMax-Music3' : null,
-    objet3d: eng.recettesEnLigne().has('objet-apercu') || eng.recettesEnLigne().has('*') ? { apercu: true, qualite: eng.recettesEnLigne().has('objet-qualite') || eng.recettesEnLigne().has('*'), texte: !!modeleImage() || eng.recettesEnLigne().has('*') } : null,
+    objet3d: eng.recettesEnLigne().has('objet-apercu') || eng.recettesEnLigne().has('*') ? { nom: PRODUIT_3D, formats: FORMATS_RELIEF, multivue: eng.moteursPour(recetteMultivue()).length > 0, vuesMax: Math.max(2, Math.min(4, Number(process.env.NEXORA_RELIEF_VUES_MAX) || 3)), apercu: true, qualite: eng.recettesEnLigne().has('objet-qualite') || eng.recettesEnLigne().has('*'), texte: !!modeleImage() || eng.recettesEnLigne().has('*') } : null,
   };
 });
 
@@ -1757,10 +1760,17 @@ app.post('/api/nexora/image', async (req, reply) => {
  */
 app.post('/api/nexora/objet/devis', async (req) => {
   const b = (req.body ?? {}) as any;
-  const q: QualiteObjet = b.qualite === 'quality' ? 'quality' : 'draft';
-  const secondes = b.source === 'texte' ? secondesTexteVers3D(q) : secondesObjet(q);
+  const q: QualiteObjet = b.qualite === 'quality' && b.source !== 'vues' ? 'quality' : 'draft';
+  const multi = b.source === 'vues';
+  const secondes = b.source === 'texte' ? secondesTexteVers3D(q) : multi ? MESURES_OBJET_PC5.multivue : secondesObjet(q);
   const t = tarifDepuisEnv();
-  return { secondesEstimees: secondes, credits: configAuth ? Math.max(1, Math.ceil(secondes * t.creditsParSecondeGpu)) : null, recette: recetteObjet(q) };
+  // Crédits sur la mesure de la GB10 (le client ne paie pas plus cher parce que le brouillon déborde sur un Turing) ; le temps
+  // annoncé est celui du moteur que le routage choisirait maintenant.
+  const recette = multi ? recetteMultivue() : recetteObjet(q);
+  const moteur = eng.moteursPour(recette)[0];
+  const sec = b.source === 'texte' ? secondes : (moteur?.secondes?.[recette] ?? secondes);
+  const enFile = eng.moteursPour(recette).length > 1;
+  return { secondesEstimees: sec, credits: configAuth ? Math.max(1, Math.ceil(secondes * t.creditsParSecondeGpu)) : null, recette, moteur: moteur ? { id: moteur.id, nom: moteur.nom } : null, debordement: q === 'draft' && enFile, produit: PRODUIT_3D };
 });
 
 /** Réserve le devis d'une prise GPU lancée par le serveur, puis la met en file. */
@@ -1832,12 +1842,11 @@ async function avancerTexte3D(id: number): Promise<void> {
     // juger : quatre côtés tirés de la tournette, une note du juge ; sans juge ou sans tournette, l'objet est gardé tel quel
     const objet = takes.get(derniere);
     let note: { take: number; note: number } | null = null;
-    let verdict: Awaited<ReturnType<typeof jugerVuesObjet>> = null;
+    let verdict: Awaited<ReturnType<typeof evaluerRelief>> = null;
     try {
       const tournette = objet?.output_path ? `${objet.output_path}.turntable.mp4` : '';
       if (tournette && existsSync(tournette)) {
-        const planche = await plancheVuesDataUrl(config.ffmpegBin, tournette, `${tournette}.vues.jpg`);
-        verdict = await jugerVuesObjet(llmCourant(), String(o.intention), planche);
+        verdict = await evaluerRelief(derniere, String(o.intention), tournette);
       }
     } catch (err) {
       app.log.warn(`[objet3d] juge indisponible : ${err instanceof Error ? err.message : err}`);
@@ -1866,6 +1875,138 @@ app.get('/api/nexora/objet/:take', async (req, reply) => {
     etat: e.phase, essai: e.essai, image: t.id, objet: e.phase === 'fini' ? o.retenu : e.tentatives[e.tentatives.length - 1] ?? null,
     notes: o.jugements ?? [], erreur: o.erreur ?? null, qualite: o.qualite, intention: o.intention,
   };
+});
+
+// ---------- Relief : rapport, exports, cartes PBR, GIF de la tournette, juge ----------
+
+type PriseRelief = { id: number; glb: string; t: NonNullable<ReturnType<typeof takes.get>> };
+function priseRelief(req: FastifyRequest, reply: FastifyReply): PriseRelief | null {
+  const id = Number((req.params as any).take);
+  const t = takes.get(id);
+  if (!t?.output_path || !/\.glb$/i.test(t.output_path) || t.status !== 'done') { void reply.code(404).send({ error: `${PRODUIT_3D} : modèle introuvable ou pas encore prêt.` }); return null; }
+  if (!existsSync(t.output_path)) { void reply.code(410).send({ error: 'Le fichier du modèle n’est plus sur le disque.' }); return null; }
+  return { id, glb: t.output_path, t };
+}
+const execFichier = (bin: string, args: string[]) => new Promise<string>((ok, ko) => execFile(bin, args, { maxBuffer: 1 << 24 }, (e, o, err) => (e ? ko(new Error(String(err).slice(-300))) : ok(String(o)))));
+const enCalculRelief = new Map<string, Promise<unknown>>();
+/** Un calcul à la fois par fichier de sortie : deux demandes identiques partagent le même travail. */
+function unSeulCalcul<T>(cle: string, travail: () => Promise<T>): Promise<T> {
+  const en = enCalculRelief.get(cle) as Promise<T> | undefined;
+  if (en) return en;
+  const p = travail().finally(() => enCalculRelief.delete(cle));
+  enCalculRelief.set(cle, p);
+  return p;
+}
+
+app.get('/api/nexora/relief/:take/rapport', async (req, reply) => {
+  const p = priseRelief(req, reply); if (!p) return;
+  const q = req.query as any;
+  const dir = `${p.glb}.relief`;
+  mkdirSync(dir, { recursive: true });
+  const octets = readFileSync(p.glb);
+  const lire = async (cible: number | null) => {
+    const fichier = join(dir, `rapport-${cible ?? 'plein'}.json`);
+    if (existsSync(fichier)) return JSON.parse(readFileSync(fichier, 'utf8'));
+    const r = await unSeulCalcul(fichier, async () => analyser(await lireGlb(cible ? await decimerGlb(octets, cible) : octets)));
+    writeFileSync(fichier, JSON.stringify(r));
+    return r;
+  };
+  const plein = await lire(null);
+  const cible = cibleTriangles(q.faces, plein.triangles);
+  const s = JSON.parse(p.t.settings ?? '{}');
+  return {
+    rapport: plein, decime: cible ? await lire(cible) : null, cible,
+    formats: FORMATS_RELIEF, extensions: EXTENSION_RELIEF, tailleMm: TAILLE_MM_DEFAUT,
+    // Les exports sont calculés par le serveur (CPU, quelques secondes) : aucun crédit GPU.
+    credits: 0, juge: s.relief?.juge ?? null,
+  };
+});
+
+app.get('/api/nexora/relief/:take/export', async (req, reply) => {
+  const p = priseRelief(req, reply); if (!p) return;
+  const q = req.query as any;
+  const format = String(q.format ?? 'glb').toLowerCase() as FormatRelief;
+  if (!FORMATS_RELIEF.includes(format)) return reply.code(400).send({ error: `Format inconnu : ${FORMATS_RELIEF.join(', ')}.` });
+  const taille = Math.max(1, Math.min(2000, Number(q.taille) || TAILLE_MM_DEFAUT));
+  const dir = `${p.glb}.relief`;
+  mkdirSync(dir, { recursive: true });
+  const octets = readFileSync(p.glb);
+  const cible = cibleTriangles(q.faces, analyser(await lireGlb(octets)).triangles);
+  const fichier = join(dir, `export-${format}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`);
+  if (!existsSync(fichier)) {
+    const sortie = await unSeulCalcul(fichier, () => exporter(octets, format, { nom: `relief-${p.id}`, tailleMm: taille, cible }));
+    writeFileSync(fichier, sortie);
+  }
+  reply.headers({ 'Content-Type': TYPE_MIME_RELIEF[format === 'obj' ? 'zip' : format], 'Content-Length': statSync(fichier).size, 'Content-Disposition': `attachment; filename="relief-${p.id}${cible ? `-${cible}` : ''}.${EXTENSION_RELIEF[format]}"` });
+  return reply.send(createReadStream(fichier));
+});
+
+app.get('/api/nexora/relief/:take/cartes', async (req, reply) => {
+  const p = priseRelief(req, reply); if (!p) return;
+  const c = await cartesPbr(readFileSync(p.glb));
+  return { cartes: c.map((x) => ({ nom: x.nom, mime: x.mime, largeur: x.largeur, octets: x.octets.length })) };
+});
+app.get('/api/nexora/relief/:take/cartes/:nom', async (req, reply) => {
+  const p = priseRelief(req, reply); if (!p) return;
+  const c = (await cartesPbr(readFileSync(p.glb))).find((x) => x.nom === (req.params as any).nom);
+  if (!c) return reply.code(404).send({ error: 'Carte absente de ce modèle.' });
+  reply.headers({ 'Content-Type': c.mime, 'Cache-Control': 'max-age=86400' });
+  return reply.send(Buffer.from(c.octets));
+});
+
+/** GIF animé de la tournette (palette optimisée, 384 px de large) ; la vignette est l'affiche déjà servie par /api/poster/:id. */
+app.get('/api/nexora/relief/:take/gif', async (req, reply) => {
+  const p = priseRelief(req, reply); if (!p) return;
+  const tournette = `${p.glb}.turntable.mp4`;
+  if (!existsSync(tournette)) return reply.code(404).send({ error: 'Ce modèle n’a pas de tournette.' });
+  const gif = `${p.glb}.relief/tournette.gif`;
+  mkdirSync(dirname(gif), { recursive: true });
+  if (!existsSync(gif)) await unSeulCalcul(gif, () => execFichier(config.ffmpegBin, argsGif(tournette, gif)));
+  reply.headers({ 'Content-Type': 'image/gif', 'Content-Length': statSync(gif).size, 'Content-Disposition': `${(req.query as any).download ? 'attachment' : 'inline'}; filename="relief-${p.id}.gif"` });
+  return reply.send(createReadStream(gif));
+});
+
+/**
+ * Juge de Relief : quatre côtés de la tournette, une note de 0 à 10, les jetons mesurés un à un et facturés comme les autres
+ * appels LLM (réservation au plafond du devis, règlement du réel, ligne au grand livre). Sans LLM : null, rien n'est dû.
+ */
+async function evaluerRelief(takeId: number, description: string, tournette: string): Promise<(VerdictVues & { credits: number }) | null> {
+  const llm = llmCourant();
+  if (!llm || !existsSync(tournette)) return null;
+  let images: readonly number[] = TOURNETTE_JUGE.images;
+  try {
+    const n = Number((await execFichier(config.ffprobeBin, ['-v', 'error', '-select_streams', 'v:0', '-count_packets', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', tournette])).trim());
+    if (n >= 4) images = indicesQuatreVues(n);
+  } catch { /* huit images par défaut */ }
+  const planche = await plancheVuesDataUrl(config.ffmpegBin, tournette, `${tournette}.vues.jpg`, images);
+  const compte = compteCourant();
+  const t0 = Date.now();
+  const { resultat, bilan } = await executerSousReservation(
+    { fac: facturationCourante(), devis: devisJuge3d(), ctx: { run: randomUUID(), tache: 'juge3d', projet: String(takeId), utilisateur: compte?.utilisateurId, organisation: compte?.organisationId }, livre: livreUsage },
+    async (rel) => {
+      const v = await jugerVuesObjet(llm, description, planche);
+      const u = v?.usage;
+      if (u && u.entree + u.sortie > 0) {
+        rel.apres({ role: 'juge3d', palier: 'direct', modele: u.modele, endpoint: 'passerelle', usage: { entree: u.entree, sortie: u.sortie, raisonnement: 0, coutFournisseurUsd: null }, coutUsd: coutJuge3dUsd(u), source: 'tarif', ms: Date.now() - t0, repli: false });
+      }
+      return v;
+    },
+  );
+  return resultat ? { ...resultat, credits: bilan.totaux.credits } : null;
+}
+
+app.post('/api/nexora/relief/:take/juger', async (req, reply) => {
+  const p = priseRelief(req, reply); if (!p) return;
+  const tournette = `${p.glb}.turntable.mp4`;
+  if (!existsSync(tournette)) return reply.code(404).send({ error: 'Pas de tournette à juger : refais le modèle.' });
+  const s = JSON.parse(p.t.settings ?? '{}');
+  const description = String(s.objet3d?.intention ?? (typeof s.userPrompt === 'string' && s.userPrompt.startsWith('3D: ') ? s.userPrompt.slice(4) : 'a 3D object reconstructed from one photo')).slice(0, 600);
+  let v: Awaited<ReturnType<typeof evaluerRelief>>;
+  try { v = await evaluerRelief(p.id, description, tournette); } catch (e) { return reply.code(502).send({ error: `Le juge n’a pas pu répondre (${e instanceof Error ? e.message : 'erreur'}).` }); }
+  if (!v) return reply.code(503).send({ error: 'Aucun modèle vision n’est branché : le juge est indisponible.' });
+  const juge = { note: v.note, defauts: v.defauts, raison: v.raison, modele: v.usage?.modele ?? null, jetons: v.usage ? v.usage.entree + v.usage.sortie : 0, credits: v.credits, le: new Date().toISOString() };
+  takes.patchSettings(p.id, { relief: { ...(s.relief ?? {}), juge } });
+  return { ...juge, relancer: v.note < NOTE_MINIMALE };
 });
 
 /**
@@ -2295,7 +2436,7 @@ function recettesDuParc(): Set<string> {
 /** Recette d'une demande : ce qui décide du moteur GPU (H3 → RTX 5090 ; image et musique → GB10). */
 function recetteDe(b: any): string | undefined {
   if (b?.kind === 'musique') return 'music3';
-  if (b?.kind === 'object') return recetteObjet(b.quality === 'quality' ? 'quality' : 'draft');
+  if (b?.kind === 'object') return b.vues ? recetteMultivue() : recetteObjet(b.quality === 'quality' ? 'quality' : 'draft');
   if (b?.kind === 'still') return b.model === 'flux2' ? 'flux2' : b.model === 'qwen21' ? 'qwen21' : 'qwen';
   return typeof b?.videoModel === 'string' ? b.videoModel : undefined;
 }
@@ -2746,7 +2887,7 @@ async function upscaleGraph(b: any, seed: number): Promise<Built> {
   };
 }
 
-// ---------- Object (image to 3D) ----------
+// ---------- Relief (image to 3D; ex-Object) ----------
 
 const ASSET_TOKEN_RE = /^asset:[0-9a-f-]{36}$/i;
 
@@ -2757,34 +2898,46 @@ const ASSET_TOKEN_RE = /^asset:[0-9a-f-]{36}$/i;
  */
 async function objectGraph(b: any, seed: number): Promise<Built> {
   if (!eng.isLocal()) throw new Error('Make 3D collects its GLB from a local ComfyUI; it does not run on a cloud engine yet.');
-  const quality: ObjectQuality = b.quality === 'quality' ? 'quality' : 'draft';
+  // Plusieurs vues (Pixal3D) : brouillon seulement, sur les moteurs qui portent ces poids.
+  const multi = b.vues && typeof b.vues === 'object' ? b.vues : null;
+  if (multi && !eng.moteursPour(recetteMultivue()).length) throw new Error(`${PRODUIT_3D} multi-image (Pixal3D) needs a GPU engine that declares the recipe ${recetteMultivue()}: none is configured.`);
+  const quality: ObjectQuality = multi ? 'draft' : b.quality === 'quality' ? 'quality' : 'draft';
   const removeBackground = b.removeBackground !== false;
-  let image: string;
   let parent: number | undefined;
   let named: { shotName?: string } = {};
-  if (b.sourceTake) {
-    const src = takes.get(Number(b.sourceTake));
-    if (!src?.output_path || src.status !== 'done') throw new Error(`take ${b.sourceTake} not found or unfinished`);
-    if (src.kind !== 'still') throw new Error(`Make 3D starts from a still; take ${src.id} is a ${src.kind === 'object' ? '3D model' : 'video'}.`);
-    if (!existsSync(src.output_path)) throw new Error(`take ${src.id}'s file is no longer on disk: ${src.output_path}`);
-    image = await stageTakeFile(src, 'object');
-    parent = src.id;
-    const ss = settingsOf(src);
-    named = { shotName: b.shotName || ss.shotName || src.shot_name };
-  } else if (typeof b.image === 'string' && ASSET_TOKEN_RE.test(b.image)) {
-    const inp = await eng.readInput(b.image);
-    if (!inp) throw new Error('That image is no longer on this machine. Add it again.');
-    if (!imageDims(inp.data)) throw new Error('Make 3D needs a PNG, JPEG or WebP still');
-    image = b.image;
-  } else {
+  const preparer = async (spec: { sourceTake?: unknown; image?: unknown }, premiere: boolean): Promise<string> => {
+    if (spec.sourceTake) {
+      const src = takes.get(Number(spec.sourceTake));
+      if (!src?.output_path || src.status !== 'done') throw new Error(`take ${spec.sourceTake} not found or unfinished`);
+      if (src.kind !== 'still') throw new Error(`Make 3D starts from a still; take ${src.id} is a ${src.kind === 'object' ? '3D model' : 'video'}.`);
+      if (!existsSync(src.output_path)) throw new Error(`take ${src.id}'s file is no longer on disk: ${src.output_path}`);
+      if (premiere) { parent = src.id; const ss = settingsOf(src); named = { shotName: b.shotName || ss.shotName || src.shot_name }; }
+      return stageTakeFile(src, 'object');
+    }
+    if (typeof spec.image === 'string' && ASSET_TOKEN_RE.test(spec.image)) {
+      const inp = await eng.readInput(spec.image);
+      if (!inp) throw new Error('That image is no longer on this machine. Add it again.');
+      if (!imageDims(inp.data)) throw new Error('Make 3D needs a PNG, JPEG or WebP still');
+      return spec.image;
+    }
     throw new Error('Make 3D needs a still: an uploaded image or a take');
+  };
+  const image = await preparer(b, true);
+  const vues: { left?: string; back?: string; right?: string; fov?: number } | undefined = multi ? { fov: Number.isFinite(Number(multi.fov)) ? Number(multi.fov) : 20 } : undefined;
+  if (multi && vues) {
+    for (const cote of ['left', 'back', 'right'] as const) if (multi[cote]) vues[cote] = await preparer(multi[cote], false);
+    const nb = 1 + (vues.left ? 1 : 0) + (vues.back ? 1 : 0) + (vues.right ? 1 : 0);
+    if (nb < 2) throw new Error('Multi-image needs at least a second view (left, back or right).');
+    // Mesuré le 04/11/2026 : 2 et 3 vues passent sur les GPU Turing (VM de 8 Go de RAM), 4 vues font tuer ComfyUI par le noyau (mémoire).
+    const max = Math.max(2, Math.min(4, Number(process.env.NEXORA_RELIEF_VUES_MAX) || 3));
+    if (nb > max) throw new Error(`${PRODUIT_3D} accepte ${max} vues au plus pour l’instant (mémoire des GPU Turing) : retire une vue.`);
   }
   const q = OBJECT_QUALITY[quality];
   return {
     kind: 'object', parent,
-    graph: buildTrellisGraph({ image, seed, quality, removeBackground, ...(Number.isFinite(Number(b.tournette)) ? { turntableFrames: Math.max(0, Math.min(TURNTABLE.frames, Math.floor(Number(b.tournette)))) } : {}) }),
+    graph: buildTrellisGraph({ image, seed, quality, removeBackground, ...(vues ? { vues } : {}), ...(Number.isFinite(Number(b.tournette)) ? { turntableFrames: Math.max(0, Math.min(TURNTABLE.frames, Math.floor(Number(b.tournette)))) } : {}) }),
     settings: {
-      app: 'object', quality, removeBackground, image, sourceTake: parent, ...named,
+      app: 'object', quality, removeBackground, image, sourceTake: parent, ...named, ...(vues ? { multiVue: Object.keys(vues).filter((k) => k !== 'fov').length + 1, moteur3d: 'pixal3d' } : {}),
       faces: q.faces, texture: q.texture, resolution: q.resolution,
       width: TURNTABLE.size, height: TURNTABLE.size,
     },

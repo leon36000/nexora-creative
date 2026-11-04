@@ -1,3 +1,4 @@
+import { PRODUIT_3D, ROUTE_3D } from './produit3d.js';
 /**
  * What the UI offers: models, motion presets, aspect/resolution menus.
  * Every model here is open weights and runs on the local engine.
@@ -214,7 +215,7 @@ export const APPS: AppDef[] = [
   { id: 'transition', name: 'Transitions', blurb: 'Bridge two takes or stills with a generated move such as a morph or a whip pan.', route: '/extend?mode=transition', icon: 'loop', hue: 300, cat: 'finish', cover: 'whip-pan', clip: '/apps/transition.mp4' },
   { id: 'upscale', name: 'Upscale', blurb: 'Sharpen, redraw or dream any take or file at a higher resolution.', route: '/upscale', icon: 'up', hue: 50, cat: 'finish', cover: 'rack-focus', clip: '/apps/upscale.mp4' },
   { id: 'speak', name: 'Speak', blurb: 'Turn a face and a voice track into a talking shot that follows the audio.', route: '/speak', icon: 'person', hue: 12, cat: 'transform', cover: 'handheld' },
-  { id: 'object', name: 'Object', blurb: 'Turn one still into a textured 3D model you can spin, download or place in Stage.', route: '/object', icon: 'cube', hue: 30, cat: 'create', cover: 'turntable', clip: '/apps/object.mp4' },
+  { id: 'object', name: PRODUIT_3D, blurb: 'Turn one still, several views or a sentence into a textured 3D model you can spin, export (GLB, OBJ, STL, 3MF, USDZ) or place in Stage.', route: ROUTE_3D, icon: 'cube', hue: 30, cat: 'create', cover: 'turntable', clip: '/apps/object.mp4' },
   { id: 'sound', name: 'Add sound', blurb: 'Generate a soundtrack for a silent take and keep the picture as it is.', route: '/speak?mode=sound', icon: 'audio', hue: 190, cat: 'create', cover: 'storm' },
 ];
 

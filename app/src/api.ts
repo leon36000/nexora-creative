@@ -112,11 +112,18 @@ export interface Storyboard {
   plans: PlanFilm[];
   dureeTotale: number;
 }
-export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; objet3d?: { apercu: boolean; qualite: boolean; texte: boolean } | null }
+export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; objet3d?: { nom?: string; formats?: string[]; multivue?: boolean; vuesMax?: number; apercu: boolean; qualite: boolean; texte: boolean } | null }
 export interface ObjetTexteEtat {
   etat: 'image' | 'objet' | 'jugement' | 'fini' | 'echec'; essai: number; image: number; objet: number | null;
   notes: { take: number; note: number; defauts: string[]; raison: string }[]; erreur: string | null; qualite: 'draft' | 'quality'; intention: string;
 }
+export type FormatRelief = 'glb' | 'obj' | 'stl' | '3mf' | 'usdz';
+export interface RapportMaillage {
+  sommets: number; triangles: number; degeneres: number; aretesOuvertes: number; aretesNonVariete: number; composantes: number;
+  etanche: boolean; taille: [number, number, number]; volume: number | null; avertissements: string[];
+}
+export interface JugeRelief { note: number; defauts: string[]; raison: string; modele: string | null; jetons: number; credits: number; relancer?: boolean }
+export interface RapportRelief { rapport: RapportMaillage; decime: RapportMaillage | null; cible: number | null; formats: FormatRelief[]; extensions: Record<FormatRelief, string>; tailleMm: number; credits: number; juge: JugeRelief | null }
 export interface MoteurGpu { id: string; nom: string; recettes: string[]; enLigne: boolean; enCours: number }
 
 /** Agent Producteur (server/nexora/agent.ts). */
@@ -178,8 +185,11 @@ export const api = {
   producteurValider: (id: string, proposition: string) => j<SessionProducteur>(`/api/nexora/producteur/${id}/valider`, { method: 'POST', body: JSON.stringify({ proposition }) }),
   producteurAjuster: (id: string, proposition: string, r: { candidats?: number; qualite?: string; format?: string; son?: boolean; musique?: boolean }) =>
     j<SessionProducteur>(`/api/nexora/producteur/${id}/ajuster`, { method: 'POST', body: JSON.stringify({ proposition, ...r }) }),
-  objetDevis: (b: { qualite: 'draft' | 'quality'; source: 'texte' | 'image' }) => j<{ secondesEstimees: number; credits: number | null; recette: string }>('/api/nexora/objet/devis', { method: 'POST', body: JSON.stringify(b) }),
+  objetDevis: (b: { qualite: 'draft' | 'quality'; source: 'texte' | 'image' | 'vues' }) => j<{ secondesEstimees: number; credits: number | null; recette: string; moteur?: { id: string; nom: string } | null; debordement?: boolean }>('/api/nexora/objet/devis', { method: 'POST', body: JSON.stringify(b) }),
   objetTexte: (b: { intention: string; qualite: 'draft' | 'quality' }) => j<{ id: number; secondesEstimees: number; credits?: number }>('/api/nexora/objet/texte', { method: 'POST', body: JSON.stringify(b) }),
+  reliefRapport: (id: number, faces?: number) => j<RapportRelief>(`/api/nexora/relief/${id}/rapport${faces ? `?faces=${faces}` : ''}`),
+  reliefJuger: (id: number) => j<JugeRelief>(`/api/nexora/relief/${id}/juger`, { method: 'POST', body: '{}' }),
+  reliefCartes: (id: number) => j<{ cartes: { nom: string; mime: string; largeur: number | null; octets: number }[] }>(`/api/nexora/relief/${id}/cartes`),
   objetTexteEtat: (id: number) => j<ObjetTexteEtat>(`/api/nexora/objet/${id}`),
   creerPersonnage: (b: { nom: string; description: string }) => j<{ takeId: number; nom: string; apparence: string }>('/api/nexora/personnage', { method: 'POST', body: JSON.stringify(b) }),
   statutPersonnage: (take: number) => j<{ etat: 'rendu' | 'pret' | 'echec'; membre?: CastMember; erreur?: string }>(`/api/nexora/personnage/${take}`),
@@ -365,6 +375,10 @@ export function connectLive(ev: LiveEvents): () => void {
 export const mediaUrl = (id: number) => `/api/media/${id}`;
 export const posterUrl = (id: number) => `/api/poster/${id}`;
 export const downloadUrl = (id: number) => `/api/media/${id}?download=1`;
+export const reliefExportUrl = (id: number, format: FormatRelief, faces?: number | null, tailleMm?: number) =>
+  `/api/nexora/relief/${id}/export?format=${format}${faces ? `&faces=${faces}` : ''}${tailleMm ? `&taille=${tailleMm}` : ''}`;
+export const reliefGifUrl = (id: number, telecharger = false) => `/api/nexora/relief/${id}/gif${telecharger ? '?download=1' : ''}`;
+export const reliefCarteUrl = (id: number, nom: string) => `/api/nexora/relief/${id}/cartes/${nom}`;
 /** An Object take's sidecars: the turntable render and the isolated subject it was built from. */
 export const turntableUrl = (id: number) => `/api/takes/${id}/turntable`;
 export const subjectUrl = (id: number) => `/api/takes/${id}/subject`;

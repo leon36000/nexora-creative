@@ -40,6 +40,11 @@ export const TRELLIS_SHAPE_VAE = 'trellis_2_shape_vae_bf16.safetensors';
 export const TRELLIS_TEXTURE_VAE = 'trellis_2_texture_vae_bf16.safetensors';
 export const TRELLIS_ENCODER = 'dino_v3_vit_l.safetensors';
 export const BG_REMOVAL_MODEL = 'birefnet.safetensors';
+/** Relief multi-images : Pixal3D multi-vues (5,58 Go int8, nœud natif ComfyUI 0.43.2) et son encodeur DINOv3 + NAF (1,21 Go). Moteurs Turing de pc5. */
+export const PIXAL3D_MODEL = 'pixal3d_multiview_int8_convrot.safetensors';
+export const PIXAL3D_ENCODER = 'dino_v3_L_naf_fp32.safetensors';
+/** Ordre des vues acceptées par Pixal3DMultiViewConditioning. */
+export const VUES_RELIEF = ['front', 'left', 'back', 'right'] as const;
 
 export type ObjectQuality = 'draft' | 'quality';
 
@@ -69,6 +74,11 @@ export interface TrellisParams {
   removeBackground: boolean;
   /** Frames in the turntable; 0 skips it. */
   turntableFrames?: number;
+  /**
+   * Relief multi-images (Pixal3D) : jusqu'à quatre vues du même objet (face, gauche, dos, droite), dans cet ordre ; `image`
+   * est la vue de face. `fov` : 20 pour des rendus ou des générateurs multi-vues, plus large pour des photos.
+   */
+  vues?: { left?: string; back?: string; right?: string; fov?: number };
   filenamePrefix?: string;
 }
 
@@ -77,10 +87,10 @@ export function buildTrellisGraph(p: TrellisParams): Graph {
   const seed = Math.max(0, Math.floor(p.seed)) % 2 ** 32;
   const g: Graph = {
     img: { class_type: 'LoadImage', inputs: { image: p.image } },
-    unet: { class_type: 'UNETLoader', inputs: { unet_name: TRELLIS_MODEL, weight_dtype: 'default' } },
+    unet: { class_type: 'UNETLoader', inputs: { unet_name: p.vues ? PIXAL3D_MODEL : TRELLIS_MODEL, weight_dtype: 'default' } },
     svae: { class_type: 'VAELoader', inputs: { vae_name: TRELLIS_SHAPE_VAE } },
     tvae: { class_type: 'VAELoader', inputs: { vae_name: TRELLIS_TEXTURE_VAE } },
-    dino: { class_type: 'CLIPVisionLoader', inputs: { clip_name: TRELLIS_ENCODER } },
+    dino: { class_type: 'CLIPVisionLoader', inputs: { clip_name: p.vues ? PIXAL3D_ENCODER : TRELLIS_ENCODER } },
   };
 
   // ---- the subject ----
@@ -99,7 +109,28 @@ export function buildTrellisGraph(p: TrellisParams): Graph {
     inputs: { images: ['img', 0], masks: mask, width: 1024, height: 1024, pad_factor: 1.1, grow_mask: 0, background: '#000000' },
   };
   g.subject = { class_type: 'PreviewImage', inputs: { images: ['crop', 0] } };
-  g.cond = { class_type: 'Trellis2Conditioning', inputs: { clip_vision_model: ['dino', 0], image: ['crop', 0] } };
+  if (p.vues) {
+    // Chaque vue est détourée et cadrée comme la vue de face ; une vue absente reste débranchée.
+    const entrees: Record<string, Link> = { front: ['crop', 0] };
+    (['left', 'back', 'right'] as const).forEach((cote) => {
+      const nom = p.vues![cote];
+      if (!nom) return;
+      g[`img_${cote}`] = { class_type: 'LoadImage', inputs: { image: nom } };
+      let m: Link;
+      if (p.removeBackground) {
+        g[`bg_${cote}`] = { class_type: 'RemoveBackground', inputs: { bg_removal_model: ['bgm', 0], image: [`img_${cote}`, 0] } };
+        m = [`bg_${cote}`, 0];
+      } else {
+        g[`alpha_${cote}`] = { class_type: 'InvertMask', inputs: { mask: [`img_${cote}`, 1] } };
+        m = [`alpha_${cote}`, 0];
+      }
+      g[`crop_${cote}`] = { class_type: 'ImageCropToMask', inputs: { images: [`img_${cote}`, 0], masks: m, width: 1024, height: 1024, pad_factor: 1.1, grow_mask: 0, background: '#000000' } };
+      entrees[cote] = [`crop_${cote}`, 0];
+    });
+    g.cond = { class_type: 'Pixal3DMultiViewConditioning', inputs: { clip_vision_model: ['dino', 0], fov: p.vues.fov ?? 20, ...entrees } };
+  } else {
+    g.cond = { class_type: 'Trellis2Conditioning', inputs: { clip_vision_model: ['dino', 0], image: ['crop', 0] } };
+  }
 
   // ---- 1. sparse structure ----
   // The template's CFG override and rescale reproduce the reference pipeline's guidance schedule.

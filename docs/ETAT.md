@@ -31,6 +31,21 @@ Audit complet (35 variables, notes contre Higgsfield, Runway, Krea, CapCut, Prem
 
 Les RTX 2080 SUPER et 2070 SUPER de pc5 sont en passthrough dans une VM minimale (4 vCPU, 8 Go, 60 Go) ; ComfyUI 0.43.2 figé, un travailleur par carte (ports 8188 et 8189, LAN seulement) et des services STT/TTS/Demucs/embeddings (8190). **TRELLIS.2 int8 tourne sur Turing** : aperçu 126 s (GB10 : 38 s), qualité 531 s (GB10 : 162 s), pic VRAM 7,2 et 7,8 Go sur 8,2. Whisper, Kokoro et Chatterbox fr répondent en 0,1 à 2 s pour une phrase. `gpu-unlock` échoue sur Turing (à ne pas activer). **Brancher Creative** : ajouter les deux moteurs à `NEXORA_MOTEURS_GPU` (ligne prête dans `deploy/proxmox/creative.env.example`), puis relancer `nexora-creative` ; **non fait** sur la VM 202 (le routage enverrait aussi du « qualité » sur la 2070 SUPER, 3,3 fois plus lente que la GB10). Détail, mesures et retour arrière : `docs/gpu-pc5.md`.
 
+## Mise à jour du 04/11 : Relief (le mode 3D complété), banc comparatif
+
+Nom du mode : **Relief** (constante unique `app/src/produit3d.ts`, `PRODUIT_3D` ; la marque produit changera plus tard). Route `/relief`, `/object` reste un alias. Branche `feat/relief` (recherche/21).
+
+| Brique | État | Preuve |
+|---|---|---|
+| Renommage « Relief » : interface, titres, outils MCP, poids, compétence du Producteur | **fait** | `produit3d.ts`, page vérifiée dans le navigateur, `captures-v3/relief-ui-*.jpg` |
+| GPU Turing de pc5 branchés (brouillons et multi-vues), routage « finit le plus tôt » avec secondes mesurées, écarte un moteur hors ligne | **fait, testé** (6 tests) ; brouillon réel sur la 2080 SUPER par l'application : 183 s | `server/engine.ts`, `docs/gpu-pc5.md` ; **déployé sur la VM 202** (voir journal) |
+| Juge vision `juge3d` sur 4 côtés, jetons mesurés et facturés, note dans l'interface | **fait, prouvé en réel** (qwen3.8-27b, OpenRouter) ; relance automatique prouvée en texte → 3D | `server/nexora/objet3d.ts`, `usage.ts` |
+| Exports **GLB, OBJ (zip), STL, 3MF, USDZ**, polycount réglable (décimation meshoptimizer), contrôle étanchéité / non-variété / morceaux, rapport, cartes PBR, GIF de la tournette | **fait, testé** (11 tests + essais sur de vrais GLB de 150 k faces : 0,1 à 0,5 s) | `server/nexora/relief.ts` |
+| Multi-images (Pixal3D multi-vues, 2 à 3 vues) | **fait, prouvé en réel** (204 s et 195 s) ; 4 vues : mémoire de la VM insuffisante | recherche/21 §3 |
+| Banc comparatif TRELLIS.2 / Pixal3D sur six sujets | **fait** ; autres candidats non lancés (poids, disque) | recherche/21 |
+
+Limites : pas de gréement (rigging), pas de retopologie en quadrangles, pas de bibliothèque d'animations, pas de retexture ; 3MF et STL sans couleur ; étanchéité fréquemment fausse sur les maillages de TRELLIS.2 (non-variété) : le rapport le dit, il ne répare pas ; relance automatique seulement en texte → 3D ; 4 vues impossibles sur la VM de 8 Go de RAM.
+
 ## Mise à jour du 03/11 (soir) : le mode « 3D » à la façon de Meshy, première tranche
 
 Branche `feat/mode-3d` (recherche/18). **Image → 3D** et **Texte → 3D** tournent de bout en bout sur la GB10 (TRELLIS.2, nœuds ComfyUI 0.43.2, pur PyTorch, aucun noyau à compiler).

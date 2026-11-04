@@ -56,3 +56,11 @@ describe('API de crédits du site Nexora', () => {
     expect(appels[0].corps).toEqual({ idempotencyKey: 'k1', credits: 43, label: 'Nexora Creative · vidéo' });
   });
 });
+
+describe('Relief : devis des options', () => {
+  it('plusieurs vues = temps mesuré sur les GPU Turing ; qualité > aperçu', async () => {
+    const { secondesGpuEstimees } = await import('./credits.js');
+    expect(secondesGpuEstimees({ kind: 'object', quality: 'draft', vues: { back: {} } })).toBe(200);
+    expect(secondesGpuEstimees({ kind: 'object', quality: 'quality' })).toBeGreaterThan(secondesGpuEstimees({ kind: 'object', quality: 'draft' }));
+  });
+});

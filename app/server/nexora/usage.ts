@@ -27,7 +27,7 @@ export const creditsFactures = (usd: number, t: TarifClient = tarifClientDepuisE
 
 export interface ContexteUsage { utilisateur?: string; organisation?: string; projet?: string; run: string; tache: string }
 export interface LigneUsage extends ContexteUsage {
-  ts: string; role: RoleLlm; palier: Palier; modele: string; endpoint: string; repli: boolean;
+  ts: string; role: RoleLlm; palier: Palier | 'direct'; modele: string; endpoint: string; repli: boolean;
   entree: number; sortie: number; raisonnement: number; coutUsd: number; source: 'fournisseur' | 'tarif'; credits: number; ms: number;
 }
 
@@ -88,6 +88,8 @@ export const JETONS_TACHE: Record<string, { entree: number; sortie: number }> = 
   marketing_propositions: { entree: 2400, sortie: 1700 },
   marketing_logos: { entree: 1700, sortie: 3600 },
   marketing_variantes: { entree: 1900, sortie: 900 },
+  // Juge de Relief : une planche 2×2 (≈ 900 jetons d'image) et la consigne ; réponse JSON courte.
+  juge3d: { entree: 1500, sortie: 300 },
 };
 
 export interface Devis { tache: string; palier: Palier; entree: number; sortie: number; usd: number; credits: number; creditsReserves: number; plafondUsd: number; source: 'historique' | 'tables' }
@@ -110,6 +112,21 @@ export function devisLlm(tache: string, palier: Palier, o: { livre?: GrandLivreU
   const usd = (entree * a.prixEntreeUsdM + sortie * a.prixSortieUsdM) / 1e6;
   const plafondUsd = usd * (o.marge ?? 2);
   return { tache, palier, entree, sortie, usd, credits: creditsFactures(usd, tarif), creditsReserves: creditsFactures(plafondUsd, tarif), plafondUsd, source };
+}
+
+/**
+ * Juge de Relief : prix de liste du modèle vision (USD par million de jetons, entrée puis sortie), réglables par
+ * NEXORA_PRIX_JUGE3D_ENTREE_USD_M / NEXORA_PRIX_JUGE3D_SORTIE_USD_M (à confirmer sur la facture du fournisseur).
+ */
+export function coutJuge3dUsd(u: { entree: number; sortie: number }, env: NodeJS.ProcessEnv = process.env): number {
+  const p = (k: string, d: number) => { const x = Number(env[k]); return Number.isFinite(x) && x >= 0 ? x : d; };
+  return (u.entree * p('NEXORA_PRIX_JUGE3D_ENTREE_USD_M', 0.4) + u.sortie * p('NEXORA_PRIX_JUGE3D_SORTIE_USD_M', 1.6)) / 1e6;
+}
+export function devisJuge3d(tarif: TarifClient = tarifClientDepuisEnv(), env: NodeJS.ProcessEnv = process.env): Devis {
+  const { entree, sortie } = JETONS_TACHE.juge3d;
+  const usd = coutJuge3dUsd({ entree, sortie }, env);
+  const plafondUsd = usd * 3; // deux essais de lecture de la réponse, avec de la marge
+  return { tache: 'juge3d', palier: 'eco', entree, sortie, usd, credits: creditsFactures(usd, tarif), creditsReserves: creditsFactures(plafondUsd, tarif), plafondUsd, source: 'tables' };
 }
 
 export interface BilanRun { reservationId: string | null; reserves: number; factures: number; liberes: number; totaux: Totaux }

@@ -2,6 +2,7 @@
 import { Fragment, Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { api, downloadUrl, finishFileUrl, mediaUrl, posterUrl, subjectUrl, takeAsInput, turntableUrl, workflowUrl, type SeamMeasure, type Take } from './api';
 import { navigate } from './router';
+import { ROUTE_3D } from './produit3d.js';
 import { getState, isImage, isModel, refreshTakes, setHandoff, settingsOf, toast, useStore } from './store';
 import type { ModelLook } from './ModelView';
 // three.js loads only when a 3D take is opened.
@@ -261,7 +262,7 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
         ) : (
         <div className="viewer-actions">
           {s.app === 'stage' && s.scene && <button type="button" className="btn sm accent" onClick={() => { onClose(); navigate(`/stage?take=${take.id}`); }} title="Load this take's set, camera and look back into Stage"><Icon name="camera" size={14} />Open in Stage</button>}
-          {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/object?take=${take.id}`); }} title="A textured 3D model of the subject, from this still"><Icon name="cube" size={14} />Make 3D</button>}
+          {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`${ROUTE_3D}?take=${take.id}`); }} title="A textured 3D model of the subject, from this still"><Icon name="cube" size={14} />Make 3D</button>}
           {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/stage?look=${take.id}`); }} title="Open Stage with this still as the look frame, cropped to the shot if it needs to be"><Icon name="camera" size={14} />Use as Stage look frame</button>}
           {image && <button type="button" className={`btn sm ${s.app === 'stage' ? '' : 'accent'}`} onClick={act(() => animate(take))}><Icon name="video" size={14} />Animate</button>}
           {image && <button type="button" className="btn sm" onClick={act(() => animate(take, true))}><Icon name="loop" size={14} />Make a loop</button>}

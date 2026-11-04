@@ -80,14 +80,17 @@ Groupes IOMMU propres : chaque carte (4 fonctions) est seule dans son groupe (15
 
 ## Brancher Creative (VM 202)
 
-Le serveur lance lui-même un `comfy-api-proxy` par moteur dont `baseUrl` est local, vers le `comfyUrl` donné : pas de tunnel pour ce moteur. Dans `/etc/nexora/creative.env` de la VM 202, ajouter au JSON de `NEXORA_MOTEURS_GPU` (exemple dans `deploy/proxmox/creative.env.example`) :
+Le serveur lance lui-même un `comfy-api-proxy` par moteur dont `baseUrl` est local, vers le `comfyUrl` donné : pas de tunnel pour ce moteur. Dans `/etc/nexora/creative.env` de la VM 202 (déployé le 04/11/2026, voir `docs/JOURNAL.md`) :
 
 ```
-{"id":"turing-2080s","nom":"RTX 2080 SUPER (pc5)","comfyUrl":"http://192.168.1.124:8188","baseUrl":"http://127.0.0.1:37388","recettes":["objet-apercu"]},
-{"id":"turing-2070s","nom":"RTX 2070 SUPER (pc5)","comfyUrl":"http://192.168.1.124:8189","baseUrl":"http://127.0.0.1:37389","recettes":["objet-apercu","objet-qualite"]}
+NEXORA_MOTEUR_SECONDES={"objet-apercu":46,"objet-qualite":189}
+NEXORA_MOTEURS_GPU=[…, {"id":"turing-2080s","nom":"RTX 2080 SUPER (pc5)","comfyUrl":"http://192.168.1.124:8188","baseUrl":"http://127.0.0.1:37388","recettes":["objet-apercu","objet-multivue"],"secondes":{"objet-apercu":190,"objet-multivue":190}},
+  {"id":"turing-2070s","nom":"RTX 2070 SUPER (pc5)","comfyUrl":"http://192.168.1.124:8189","baseUrl":"http://127.0.0.1:37389","recettes":["objet-apercu","objet-multivue"],"secondes":{"objet-apercu":220,"objet-multivue":220}}]
 ```
 
-puis `sudo systemctl restart nexora-creative`. **Pas activé sur la VM 202** (aucun redéploiement) : le routage envoie la recette au moteur le moins chargé parmi ceux qui la déclarent, donc une fois activé, un job « qualité » peut partir sur la 2070 SUPER (531 s au lieu de 162 s) alors que la GB10 est libre. À décider par le fondateur ; pour laisser la GB10 seule sur « qualité », ne déclarer que `objet-apercu`. Les services STT/TTS/Demucs (port 8190) ne sont pas dans le parc ComfyUI : Creative (ou un autre agent) les appelle en HTTP sur `http://192.168.1.124:8190` ; le code de Creative n'a pas encore de client pour eux.
+Règle de routage (`moteursPour`, `server/engine.ts`) : le moteur qui **finit le plus tôt** = (tâches en cours + 1) × secondes de la recette sur ce moteur. Un brouillon 3D reste sur la GB10 (46 s) tant que sa file ne dépasse pas trois tâches, puis déborde sur la 2080 SUPER (190 s) puis la 2070 SUPER ; la **qualité** (`objet-qualite`) n'est déclarée que sur la GB10 (531 s sur une 2070 SUPER contre 189 s). `objet-multivue` (Pixal3D, plusieurs vues) n'existe que sur ces deux moteurs : c'est là que vivent les poids Pixal3D. Les services STT/TTS/Demucs (port 8190) ne sont pas dans le parc ComfyUI : Creative (ou un autre agent) les appelle en HTTP sur `http://192.168.1.124:8190` ; le code de Creative n'a pas encore de client pour eux.
+
+**Disque de la VM** : 58 Go dont ≈ 4 Go libres (04/11/2026, après purge du cache pip) ; les poids Pixal3D (5,58 Go) y remplacent un fichier de même taille. Un nouveau modèle de 6 Go demande d'agrandir le disque (`qm resize`, décision du fondateur).
 
 ## Chaleur, bruit, consommation
 

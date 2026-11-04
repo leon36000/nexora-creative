@@ -7,6 +7,7 @@
  */
 import { presetById, type AppDef } from '../catalog';
 
+import { PRODUIT_3D, ROUTE_3D } from '../produit3d.js';
 export const CATEGORIES_NEXORA = [
   { id: 'all', label: 'Tout' },
   { id: 'create', label: 'Créer' },
@@ -35,7 +36,7 @@ export const APPS_NEXORA: AppDef[] = [
   { id: 'expand', name: 'Agrandir le cadre', blurb: 'Passe à un autre format et peins ce qui était hors champ.', route: '/edit?app=expand', icon: 'aspect', hue: 220, cat: 'transform', cover: 'pull-back' },
   { id: 'cutout', name: 'Détourer', blurb: 'Sors le sujet d’une image ou d’un clip, sur fond transparent ou nouveau.', route: '/cutout', icon: 'cutout', hue: 120, cat: 'transform', cover: 'static' },
   { id: 'upscale', name: 'Netteté et taille', blurb: 'Rends une image ou un clip plus net et plus grand (Real-ESRGAN, SeedVR2).', route: '/upscale', icon: 'up', hue: 50, cat: 'finish', cover: 'rack-focus', clip: '/apps/upscale.mp4' },
-  { id: 'object', name: 'Objet 3D', blurb: 'Une image devient un modèle 3D texturé, à tourner ou télécharger.', route: '/object', icon: 'cube', hue: 30, cat: 'create', cover: 'turntable', clip: '/apps/object.mp4' },
+  { id: 'object', name: PRODUIT_3D, blurb: 'Une image, plusieurs vues ou une phrase deviennent un modèle 3D texturé : à tourner, à exporter (GLB, OBJ, STL, 3MF, USDZ).', route: ROUTE_3D, icon: 'cube', hue: 30, cat: 'create', cover: 'turntable', clip: '/apps/object.mp4' },
 ];
 
 /** Modèles prêts à produire (façon Higgsfield) : un clic envoie l'objectif au Producteur, qui propose plan et devis. */

@@ -163,3 +163,15 @@ describe('devis, réservation, règlement', () => {
     expect(livre.total({ run: 'z' }).credits).toBeGreaterThan(0);
   });
 });
+
+describe('juge de Relief : coût et devis', () => {
+  it('le coût suit les jetons et les prix réglables', async () => {
+    const { coutJuge3dUsd, devisJuge3d } = await import('./usage.js');
+    expect(coutJuge3dUsd({ entree: 1_000_000, sortie: 0 }, {})).toBeCloseTo(0.4, 6);
+    expect(coutJuge3dUsd({ entree: 0, sortie: 1_000_000 }, { NEXORA_PRIX_JUGE3D_SORTIE_USD_M: '2' })).toBeCloseTo(2, 6);
+    const d = devisJuge3d(undefined, {});
+    expect(d.tache).toBe('juge3d');
+    expect(d.creditsReserves).toBeGreaterThanOrEqual(d.credits);
+    expect(d.credits).toBeGreaterThanOrEqual(1);
+  });
+});

@@ -1,4 +1,5 @@
 /** Coque de Nexora Creative (fork d'OpenField) : barre du haut + page routée. « Créer » est l'accueil. */
+import { estRoute3D } from './produit3d.js';
 import { lazy, Suspense, useEffect } from 'react';
 import { APPS_NEXORA } from './studio/apps';
 import { linkProps, navigate, useRoute } from './router';
@@ -62,7 +63,7 @@ export default function App() {
     if (path === '/cast') return <CastPage />;
     if (path === '/projet') return <ProjetPage />;
     if (path === '/cutout') return <CutoutPage />;
-    if (path === '/object') return <ObjectPage />;
+    if (estRoute3D(path)) return <ObjectPage />;
     if (path === '/marketing') return <MarketingPage />;
     if (path === '/apps') return <Apps />;
     if (path === '/library') return <Library />;

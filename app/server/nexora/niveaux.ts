@@ -79,7 +79,7 @@ export function lireUsage(usage: any): UsageBrut {
 
 /** Un appel mesuré : ce qui part au grand livre. */
 export interface AppelMesure {
-  role: RoleLlm; palier: Palier; modele: string; endpoint: string; usage: UsageBrut; coutUsd: number;
+  role: RoleLlm; palier: Palier | 'direct'; modele: string; endpoint: string; usage: UsageBrut; coutUsd: number;
   /** « fournisseur » : coût rapporté par le fournisseur ; « tarif » : calculé au prix de liste. */
   source: 'fournisseur' | 'tarif'; ms: number; repli: boolean;
 }
