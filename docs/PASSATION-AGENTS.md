@@ -478,3 +478,15 @@ Sur VM204, `/srv/nexora-gpu/essais-sortie/` contient trois sources MKV, 12 encod
 
 - OPSYS DeepSeek : sept plans du long (`p26` à `p32`) sont absents, soit environ 39,2 s ; le court manque `p26`. Le montage actuel peut remplacer un plan absent par un fond sombre sans échec explicite : ne pas interpréter un export comme film complet. Vertical : six sources dédiées absentes et repli à vérifier. Les voix et une musique référencées existent. Agent films chargé de corriger les contrôles et d'ajouter des tests sans GPU ; aucun brouillon vide lancé. Les scripts automatiques mélangent rendus, appels modèles et commit/push : ne pas les lancer aveuglément.
 - Finish : 12 encodages NVENC sur trois clips retrouvés (H.264 et HEVC 10 bits, p4/p7, 12 s, 24 i/s). Les tailles et débits concordent avec le JSON mais dépassent les cibles annoncées ; SSIM comparés à la source ne prouvent pas l'équivalence face à x264. Aucun résultat de comparaison à débit égal retrouvé ; les scripts VM et les copies locales ont des empreintes différentes, sans manifeste liant le JSON aux scripts/sources. Les mesures sont donc partielles ; garder les deux codecs désactivés jusqu'au banc concluant.
+
+### Finish : six comparaisons à débit égal, CPU isolé
+
+Sur pc6, sources et six sorties NVENC p7 copiées depuis VM204 et contrôlées SHA-256 ; six sorties x264 medium deux passes ont été créées sur Storage, avec deux threads CPU et aucun GPU. Débits mesurés à ±0,41 % des vidéos NVENC. SSIM en yuv420p, images synchronisées par index à 24 i/s :
+
+| Clip | H.264 NVENC / x264 | HEVC 10 bits NVENC / x264 |
+|---|---:|---:|
+| action | 0,992998 / 0,993582 | 0,992477 / 0,993391 |
+| bureau | 0,965466 / 0,971140 | 0,965511 / 0,970249 |
+| espace | 0,992070 / 0,993554 | 0,991942 / 0,993412 |
+
+FFmpeg 7.0.2 arm64 statique ; sources 12 s, vidéo seule ; H.264 x264 deux passes sur pc6 contre résultats NVENC existants VM204 : ne pas comparer les temps comme s'il s'agissait de la même machine ni extrapoler au HDR/422/audio. Le SSIM seul ne prouve ni qualité perçue équivalente ni export complet. Sur `action-h264-p7`, le même fichier et FFmpeg donnent 0,948635 avec l'ancien alignement PTS et 0,992998 avec alignement par index : l'ancien JSON mesurait différemment. Résultats, empreintes et sorties sous `/media/pc6/Storage/Nexora/travail/finish-banc-egalite-codex-20261104/`, script dans le répertoire `work` de cette conversation. Les six nouveaux MP4 ont été archivés sur le SSD Infrastructure de pc1 et inscrits dans l'inventaire, désormais **3 741 entrées** ; sources conservées. Codecs non activés : revue visuelle et validation produit restent à faire.

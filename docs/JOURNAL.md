@@ -381,3 +381,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Banc Finish retrouvé sur VM204 : 15 vidéos d'essai copiées sur le SSD Infrastructure de pc1, vérifiées SHA-256 et ajoutées à l'inventaire (3 735 entrées). Mesures en cours d'examen ; pas encore de verdict qualité.
 
 - OPSYS DeepSeek : sept plans du long absents ; le montage peut masquer ces absences par des fonds sombres. Correction ciblée en cours ; aucun export incomplet lancé. Finish : banc NVENC retrouvé mais absence de x264 à débit égal et divergence des scripts ; activation non justifiée.
+
+- Finish : six comparaisons x264/NVENC à débit mesuré égal (±0,41 %) sur trois clips, CPU pc6 deux threads. SSIM indexé légèrement favorable à x264 ; ancien écart SSIM reproduit avec alignement PTS. Résultats et six vidéos conservés, inventaire pc1 3 741 entrées ; avis visuel/activation restent ouverts.
