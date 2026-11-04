@@ -81,7 +81,7 @@ export const instancier = (t: string, b: Pick<BriefFilm, 'marque' | 'duree_cible
 
 /** Liste du professeur prête à compiler pour SON brief d'apprentissage (contrôle de santé). */
 export function listeDuProfesseur(t: TrajectoireProfesseur, marque: string): ListeMontage {
-  return { gain_db: t.liste.gain_db ?? -8, plans: t.liste.plans.map(({ phase: _p, ...p }) => ({ tr: 'cut', ...p, texte: p.texte ? instancier(p.texte, { marque, duree_cible_s: t.brief.duree_cible_s }) : undefined })) as ListeMontage['plans'] };
+  return { gain_db: t.liste.gain_db ?? -8, plans: t.liste.plans.map(({ phase: _p, ...p }) => ({ ...p, tr: p.tr ?? 'cut', texte: p.texte ? instancier(p.texte, { marque, duree_cible_s: t.brief.duree_cible_s }) : undefined })) as ListeMontage['plans'] };
 }
 
 /** Sous-tâche distillée : les lignes d'une phase, sources anonymisées (<SRC_A>…), durée des sources et place du texte annotées. */

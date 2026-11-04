@@ -8,7 +8,7 @@
 import { type RoleLlm, reglagesLlmCourants } from './llm.js';
 import { type Palier, PALIERS, estPalier, palierDisponible } from './niveaux.js';
 
-export const PALIER_PAR_DEFAUT: Partial<Record<RoleLlm, Palier>> = { tournage: 'eco', montage: 'eco', monteur: 'eco', producteur: 'expert' };
+export const PALIER_PAR_DEFAUT: Partial<Record<RoleLlm, Palier>> = { tournage: 'eco', montage: 'eco', monteur: 'eco', design: 'eco', producteur: 'expert' };
 
 export function palierDuRole(role: RoleLlm, o: { projet?: Palier | null; env?: NodeJS.ProcessEnv; reglages?: Partial<Record<RoleLlm, string>> } = {}): Palier | null {
   const env = o.env ?? process.env;

@@ -392,3 +392,35 @@ export async function takeAsInput(id: number, name = `take_${id}.png`): Promise<
   const blob = await (await fetch(mediaUrl(id))).blob();
   return uploadFile(new File([blob], name, { type: blob.type }));
 }
+
+// ---------- Mode Marketing (vague 2) ----------
+export interface KitMarque {
+  nom: string;
+  logo: { svg?: string; png?: string; largeurPx?: number; hauteurPx?: number };
+  couleurs: { primaire: string; secondaire: string; accent: string; encre: string; papier: string };
+  polices: { titre: string; texte: string };
+  ton: { adjectifs: string[]; interdits: string[] };
+  contact: { entreprise: string; nom: string; titre: string; adresse: string; telephone: string; courriel: string; web: string };
+  langue: 'fr' | 'en';
+}
+export interface ControlesKit { contrastes: { texte: string; fond: string; ratio: number; aa: boolean; aaGrandTexte: boolean }[]; logo: { ok: boolean; avertissements: string[] } | null; contacts: { cle: string; libelle: string; valeur: string }[] }
+export interface FormatMarketing { id: string; nom: string; largeur: number; hauteur: number; fondPerdu: number; faces: number; gabarits: { id: string; nom: string; description: string }[] }
+export interface MarqueEtat { kit: KitMarque | null; polices: { id: string; nom: string; genre: string }[]; formats: FormatMarketing[]; controles: ControlesKit | null; cmjn: boolean }
+export interface CalqueTexteUi { type: 'texte'; id: string; texte: string; taille: number; police: string; poids: number; interligne: number; [k: string]: unknown }
+export interface SpecUi { version: 1; format: string; gabarit: string; variables: Record<string, string>; faces: { nom: string; genre: 'art' | 'decoupe'; calques: ({ type: string; id: string } & Record<string, unknown>)[] }[]; [k: string]: unknown }
+export interface Constat { gravite: 'erreur' | 'avertissement' | 'info'; code: string; face: number; calque?: string; message: string }
+export interface DevisMarketing { credits: number; creditsReserves: number; usd: number; libelle: string; note: string; palier: string }
+export interface UsageMarketing { credits: number; usd: number; devisCredits: number; palier: string | null }
+export interface PropositionUi { gabarit: string; nom: string; pourquoi: string; variables: Record<string, string>; spec: SpecUi; retires: string[] }
+export interface RenduMarketing { id: string; fichiers: { nom: string; url: string; octets: number; genre: string }[]; controle: { ok: boolean; erreurs: number; avertissements: number; constats: Constat[] }; ms: number; cmjn: boolean }
+const post = <T>(u: string, b: unknown) => j<T>(u, { method: 'POST', body: JSON.stringify(b) });
+export const marketing = {
+  marque: () => j<MarqueEtat>('/api/nexora/marque'),
+  enregistrer: (k: KitMarque) => j<{ kit: KitMarque; controles: ControlesKit }>('/api/nexora/marque', { method: 'PUT', body: JSON.stringify(k) }),
+  logo: (type: 'svg' | 'png', donnees: string) => post<{ logo: KitMarque['logo']; controle: { ok: boolean; avertissements: string[] }; couleurs: string[]; palette: KitMarque['couleurs'] }>('/api/nexora/marque/logo', { type, donnees }),
+  devis: (action: 'propositions' | 'logos' | 'variantes' | 'rendu') => post<DevisMarketing>('/api/nexora/marketing/devis', { action }),
+  propositions: (phrase: string, format: string) => post<{ propositions: PropositionUi[]; sansIA: boolean; palier: string | null; escalades: number; avertissements: string[]; usage: UsageMarketing }>('/api/nexora/marketing/propositions', { phrase, format }),
+  logos: (idee: string) => post<{ pistes: { nom: string; idee: string; svg: string; origine: 'ia' | 'code' }[]; palier: string | null; avertissements: string[]; usage: UsageMarketing }>('/api/nexora/marketing/logos', { idee }),
+  spec: (b: { gabarit: string; format: string; variables?: Record<string, string>; palette?: 'defaut' | 'inverse' | 'sombre' }) => post<{ spec: SpecUi }>('/api/nexora/marketing/spec', b),
+  rendu: (spec: SpecUi, cmjn: boolean) => post<RenduMarketing>('/api/nexora/marketing/rendu', { spec, cmjn }),
+};

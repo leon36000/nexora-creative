@@ -17,6 +17,7 @@ export const CATEGORIES_NEXORA = [
 
 export const APPS_NEXORA: AppDef[] = [
   { id: 'producteur', name: 'Producteur IA', blurb: 'Un objectif en une phrase : l’IA découpe, chiffre, tourne, contrôle chaque plan et assemble.', route: '/', icon: 'sparkle', hue: 18, cat: 'create', badge: 'new', cover: 'golden', clip: '/apps/scene.mp4' },
+  { id: 'marketing', name: 'Marketing', blurb: 'Cartes, dépliants et accroche-portes sur ta marque : une phrase, trois propositions, PDF prêt pour l’imprimeur.', route: '/marketing', icon: 'grid', hue: 24, cat: 'create', badge: 'new', cover: 'static' },
   { id: 'video', name: 'Vidéo', blurb: 'Une phrase devient un plan MiniMax H3 avec son, avec ou sans image de départ.', route: '/?mode=video', icon: 'video', hue: 32, cat: 'create', badge: 'top', cover: 'embers', clip: '/apps/video.mp4' },
   { id: 'image', name: 'Image', blurb: 'Des images Qwen-Image d’une phrase ; anime celle que tu préfères en un clic.', route: '/?mode=image', icon: 'image', hue: 200, cat: 'create', cover: 'golden', clip: '/apps/image.mp4' },
   { id: 'film', name: 'Film', blurb: 'Une idée devient un storyboard relisible, tourné plan par plan et assemblé.', route: '/?mode=film', icon: 'film', hue: 18, cat: 'direct', cover: 'noir', clip: '/apps/director.mp4' },

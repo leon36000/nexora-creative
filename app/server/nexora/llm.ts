@@ -15,10 +15,11 @@
  *  idees       : « Inspire-moi »                              juge        : juge visuel (deux candidats, modèle vision)
  *  producteur  : agent Producteur (boucle d'outils bornée, server/nexora/agent.ts)
  *  monteur     : planification de montage (EditPlan v1, server/nexora/montage/)
+ *  design      : mode Marketing, rôle « design » : gabarit, accroches, idées de logo (server/nexora/marketing/)
  * `prompt`, `intention` et `assistant` restent acceptés (anciens appels).
  */
-export type RoleLlm = 'tournage' | 'montage' | 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur' | 'effets';
-export const ROLES_LLM: readonly RoleLlm[] = ['tournage', 'montage', 'redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur'];
+export type RoleLlm = 'tournage' | 'montage' | 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur' | 'effets' | 'design';
+export const ROLES_LLM: readonly RoleLlm[] = ['tournage', 'montage', 'redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur', 'design'];
 
 /** Réglages venus de l'administration du site (modèle par défaut et par rôle) ; ils passent avant l'environnement du poste. */
 let reglages: { defaut?: string; roles: Partial<Record<RoleLlm, string>> } = { roles: {} };

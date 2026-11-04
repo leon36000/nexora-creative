@@ -10,7 +10,7 @@ import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
 import { execFile } from 'child_process';
-import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'fs';
 import { dirname, extname, join, resolve, sep } from 'path';
 import type { WebSocket } from 'ws';
 import * as comfy from './comfy.js';
@@ -23,6 +23,13 @@ import { reecrireImage } from './nexora/reecritureImage.js';
 import { demarrerLectureReglages } from './nexora/reglagesSite.js';
 import { lireJson } from './nexora/llm.js';
 import { moderer } from './nexora/moderation.js';
+import { KitMarqueSchema, POLICES, assainirSvg, contactsActifs, controlerLogo, couleursDePng, couleursDeSvg, decoderPng, paletteDepuisCouleurs, resumeMarque, variantePalette, verifierContrastes, type KitMarque } from './nexora/marketing/kit.js';
+import { StoreKit } from './nexora/marketing/store.js';
+import { FORMATS, lireSpec } from './nexora/marketing/spec.js';
+import { GABARITS, construireSpec, gabaritsPour } from './nexora/marketing/modeles.js';
+import { ghostscriptDisponible, rendre, type ResultatRendu } from './nexora/marketing/rendu.js';
+import { devisMarketing, type ActionMarketing } from './nexora/marketing/devis.js';
+import { idearLogos, lireBrief, proposer, type ClientPalier } from './nexora/marketing/assistant.js';
 import { ecrirePublication, PLATEFORMES, type Plateforme } from './nexora/publication.js';
 import { ecrireMusique } from './nexora/musique.js';
 import { planifierMoteurs } from './nexora/registre.js';
@@ -2152,6 +2159,7 @@ app.post('/api/nexora/producteur/:id/message', async (req, reply) => {
   try {
     const construireDeps = (llm: ClientLlm | null): DepsAgent => ({
       llm, devis: devisDuCompte, plafond: PLAFOND_PRODUCTEUR,
+      marque: () => { const k = kitsMarque.lire(compteCourant()?.organisationId); return k ? resumeMarque(k) : ''; },
       personnages: {
         liste: () => {
           const l = castDb.list().filter((m) => m.kind === 'character');
@@ -3807,6 +3815,155 @@ app.post('/api/studio/assistant', async (req, reply) => {
     app.log.warn(`assistant du Mode Studio : ${e instanceof Error ? e.message : e}`);
     return reply.code(502).send({ error: 'L’assistant n’a pas pu répondre. Réessaie dans un instant.' });
   }
+});
+
+
+// ---------- Mode Marketing (vague 2) : kit de marque, gabarits, propositions IA, rendu PDF/PNG ----------
+const kitsMarque = new StoreKit(join(config.dataDir, 'marque'));
+const dossierMarketing = join(config.dataDir, 'marketing');
+const orgMarque = () => compteCourant()?.organisationId ?? null;
+const kitOu409 = (reply: any): KitMarque | null => {
+  const k = kitsMarque.lire(orgMarque());
+  if (!k) { reply.code(409).send({ error: 'Renseigne d’abord ta marque (nom, logo, couleurs) : c’est elle qui habille chaque pièce.' }); return null; }
+  return k;
+};
+
+app.get('/api/nexora/marque', async () => {
+  const kit = kitsMarque.lire(orgMarque());
+  return {
+    kit, polices: POLICES.map(({ id, nom, genre }) => ({ id, nom, genre })),
+    formats: Object.values(FORMATS).filter((f) => gabaritsPour(f.id).length || f.type === 'logo').map((f) => ({ id: f.id, nom: f.nom, largeur: f.largeur, hauteur: f.hauteur, fondPerdu: f.fondPerdu, faces: f.faces, gabarits: gabaritsPour(f.id).map((g) => ({ id: g.id, nom: g.nom, description: g.description })) })),
+    controles: kit ? { contrastes: verifierContrastes(kit), logo: kit.logo.svg || kit.logo.png ? controlerLogo(kit.logo) : null, contacts: contactsActifs(kit.contact, kit.langue) } : null,
+    cmjn: await ghostscriptDisponible(),
+  };
+});
+
+app.put('/api/nexora/marque', { bodyLimit: 6_000_000 }, async (req, reply) => {
+  const r = KitMarqueSchema.safeParse(req.body);
+  if (!r.success) return reply.code(400).send({ error: r.error.issues.slice(0, 3).map((i) => `${i.path.join('.') || 'kit'} : ${i.message}`).join(' ; ') });
+  const kit = r.data;
+  try { if (kit.logo.svg) kit.logo.svg = assainirSvg(kit.logo.svg); } catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'logo invalide' }); }
+  kitsMarque.ecrire(orgMarque(), kit);
+  return { kit, controles: { contrastes: verifierContrastes(kit), logo: kit.logo.svg || kit.logo.png ? controlerLogo(kit.logo) : null, contacts: contactsActifs(kit.contact, kit.langue) } };
+});
+
+/** Téléversement du logo (SVG ou PNG en base64) : assainissement, contrôles, couleurs dominantes et palette proposée. */
+app.post('/api/nexora/marque/logo', { bodyLimit: 8_000_000 }, async (req, reply) => {
+  const b = (req.body ?? {}) as { type?: string; donnees?: string };
+  if (typeof b.donnees !== 'string' || b.donnees.length > 4_000_000) return reply.code(400).send({ error: 'Logo manquant ou trop gros (3 Mo au plus).' });
+  try {
+    if (b.type === 'svg') {
+      const svg = assainirSvg(b.donnees);
+      const logo = { svg };
+      const dom = couleursDeSvg(svg);
+      return { logo, controle: controlerLogo(logo), couleurs: dom, palette: paletteDepuisCouleurs(dom) };
+    }
+    const buf = Buffer.from(b.donnees, 'base64');
+    const img = decoderPng(buf);
+    const logo = { png: `data:image/png;base64,${buf.toString('base64')}`, largeurPx: img.w, hauteurPx: img.h };
+    const dom = couleursDePng(buf);
+    return { logo, controle: controlerLogo(logo), couleurs: dom, palette: paletteDepuisCouleurs(dom) };
+  } catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'logo illisible' }); }
+});
+
+app.post('/api/nexora/marketing/devis', async (req) => {
+  const b = (req.body ?? {}) as any;
+  const p: Palier = estPalier(b.palier) ? b.palier : palierDuRole('design') ?? 'eco';
+  return { ...devisMarketing((['propositions', 'logos', 'variantes', 'rendu'].includes(b.action) ? b.action : 'propositions') as ActionMarketing, p, { livre: livreUsage }), libelle: LIBELLES_PALIER[p] };
+});
+
+/** Spec d'un gabarit (sans appel au modèle, gratuit) : changer de composition, de palette ou de texte en un clic. */
+app.post('/api/nexora/marketing/spec', async (req, reply) => {
+  const b = (req.body ?? {}) as any;
+  const kit0 = kitOu409(reply);
+  if (!kit0) return;
+  try {
+    const kit = variantePalette(kit0, ['inverse', 'sombre'].includes(b.palette) ? b.palette : 'defaut');
+    return { spec: construireSpec(String(b.gabarit), String(b.format), kit, b.variables && typeof b.variables === 'object' ? b.variables : {}) };
+  } catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'spec invalide' }); }
+});
+
+/** Clients LLM du palier de départ puis des suivants (escalade), mesurés et réservés sous un même devis. */
+async function avecPaliers<T>(action: ActionMarketing, tache: string, travail: (clients: ClientPalier[]) => Promise<T>): Promise<{ resultat: T; usage: { credits: number; usd: number; devisCredits: number; palier: Palier | null } }> {
+  const depart = palierDuRole('design');
+  const compte = compteCourant();
+  const ordre: Palier[] = depart ? [depart, ...(['eco', 'equilibre', 'expert'] as Palier[]).filter((p) => p !== depart && paliersDisponibles()[p]).slice(0, 1)] : [];
+  if (!depart) return { resultat: await travail([]), usage: { credits: 0, usd: 0, devisCredits: 0, palier: null } };
+  const devis = devisMarketing(action, depart, { livre: livreUsage });
+  const { resultat, bilan } = await executerSousReservation(
+    { fac: facturationCourante(), devis: { ...devis.llm!, creditsReserves: devis.creditsReserves * 2, plafondUsd: devis.llm!.plafondUsd * 2 }, ctx: { run: randomUUID(), tache, utilisateur: compte?.utilisateurId, organisation: compte?.organisationId }, livre: livreUsage },
+    (rel) => travail(ordre.map((p) => ({ palier: p, client: clientPalier(p, { surveillant: rel }) }))),
+  );
+  return { resultat, usage: { credits: bilan.totaux.credits, usd: bilan.totaux.coutUsd, devisCredits: devis.credits, palier: depart } };
+}
+
+app.post('/api/nexora/marketing/propositions', async (req, reply) => {
+  const kit = kitOu409(reply);
+  if (!kit) return;
+  let brief;
+  try { brief = lireBrief(req.body); } catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'demande invalide' }); }
+  const verdict = await moderer(brief.phrase, llmCourant(), (m) => app.log.warn(m));
+  if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
+  try {
+    const { resultat, usage } = await avecPaliers('propositions', 'marketing_propositions', (clients) => proposer(brief, kit, clients));
+    return { ...resultat, usage };
+  } catch (e) {
+    app.log.warn(`marketing propositions : ${e instanceof Error ? e.message : e}`);
+    return reply.code(502).send({ error: e instanceof Error ? e.message : 'Les propositions n’ont pas pu être préparées.' });
+  }
+});
+
+app.post('/api/nexora/marketing/logos', async (req, reply) => {
+  const kit = kitOu409(reply);
+  if (!kit) return;
+  const idee = String(((req.body ?? {}) as any).idee ?? '').slice(0, 300);
+  try {
+    const { resultat, usage } = await avecPaliers('logos', 'marketing_logos', (clients) => idearLogos(kit, idee, clients));
+    return { ...resultat, usage };
+  } catch (e) { return reply.code(502).send({ error: e instanceof Error ? e.message : 'Les pistes de logo n’ont pas pu être préparées.' }); }
+});
+
+const nettoyerMarketing = () => {
+  try {
+    for (const d of readdirSync(dossierMarketing)) { const p = join(dossierMarketing, d); if (Date.now() - statSync(p).mtimeMs > 24 * 3600_000) rmSync(p, { recursive: true, force: true }); }
+  } catch { /* dossier absent */ }
+};
+
+/** Rend une spec : PDF (impression avec traits de coupe, sans traits), PNG des faces, SVG de la face avant, contrôle préliminaire. */
+app.post('/api/nexora/marketing/rendu', { bodyLimit: 16_000_000 }, async (req, reply) => {
+  const kit = kitOu409(reply);
+  if (!kit) return;
+  const b = (req.body ?? {}) as any;
+  let spec;
+  try { spec = lireSpec(b.spec); } catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'spec invalide' }); }
+  const id = randomUUID().slice(0, 12), dossier = join(dossierMarketing, id);
+  try {
+    const cmjn = !!b.cmjn;
+    const r: ResultatRendu = await rendre(spec, kit, { cmjn });
+    mkdirSync(dossier, { recursive: true });
+    const fichiers: { nom: string; url: string; octets: number; genre: string }[] = [];
+    const ecrire = (nom: string, buf: Buffer, genre: string) => { writeFileSync(join(dossier, nom), buf); fichiers.push({ nom, url: `/api/nexora/marketing/fichier/${id}/${nom}`, octets: buf.length, genre }); };
+    for (const p of r.pdfs) ecrire(`${spec.gabarit}-${p.variante}.pdf`, p.pdf, p.variante === 'impression' ? 'pdf-impression' : 'pdf-sans-traits');
+    r.pngs.forEach((p, i) => ecrire(`${spec.gabarit}-${i + 1}-${p.face}.png`, p.png, 'png'));
+    // SVG de la première face (pdftocairo, s'il est installé) : texte en contours, utile pour retoucher dans un autre outil.
+    const sansTraits = join(dossier, `${spec.gabarit}-sans-traits.pdf`);
+    const svg = await executer('pdftocairo', ['-svg', '-f', '1', '-l', '1', sansTraits, join(dossier, `${spec.gabarit}-avant.svg`)], 30_000).then(() => true, () => false);
+    if (svg) { const nom = `${spec.gabarit}-avant.svg`; fichiers.push({ nom, url: `/api/nexora/marketing/fichier/${id}/${nom}`, octets: statSync(join(dossier, nom)).size, genre: 'svg' }); }
+    nettoyerMarketing();
+    return { id, fichiers, controle: r.controle, ms: r.ms, cmjn: r.pdfs[0]?.cmjn ?? false };
+  } catch (e) {
+    app.log.warn(`rendu marketing : ${e instanceof Error ? e.message : e}`);
+    return reply.code(500).send({ error: 'Le rendu a échoué sur ce serveur (Chromium indisponible ?).' });
+  }
+});
+
+app.get('/api/nexora/marketing/fichier/:id/:nom', async (req, reply) => {
+  const { id, nom } = req.params as { id: string; nom: string };
+  if (!/^[a-f0-9-]{12}$/.test(id) || !/^[\w.-]+$/.test(nom)) return reply.code(400).send({ error: 'fichier invalide' });
+  const p = join(dossierMarketing, id, nom);
+  if (!existsSync(p)) return reply.code(404).send({ error: 'Fichier expiré : relance le rendu.' });
+  const type = nom.endsWith('.pdf') ? 'application/pdf' : nom.endsWith('.png') ? 'image/png' : 'image/svg+xml';
+  return reply.header('content-type', type).header('content-disposition', `${req.url.includes('telecharger') ? 'attachment' : 'inline'}; filename="${nom}"`).send(createReadStream(p));
 });
 
 /** Bulle « Effet IA ici… » : phrase + contexte du clic → recette brute (validée et appliquée par le Mode Studio). */
