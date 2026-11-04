@@ -375,3 +375,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - GitLab : le StatefulSet demande bien une sonde PostgreSQL à 240, mais le pod utilise l'ancienne révision à 30 ; service encore 502, Garage en boucle. Aucune intervention en production et cause complète non établie.
 
 - Quatre suites ciblées auth/crédits/Studio/transcription GPU : 30 tests passent avec services fictifs ; débit réel et parcours utilisateur restent à prouver.
+
+- Précision AMD pc4 : limites lisibles 240/300 W et 152/190 W par défaut ; troisième carte illisible. Le 330 W observé plus tôt est une limite maximale autorisée, non le défaut.

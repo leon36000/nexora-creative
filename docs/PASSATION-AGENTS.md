@@ -465,3 +465,7 @@ Pour ménager la racine pc1, cette vague est physiquement dans `/run/media/pc1/I
 ### Tests produit ciblés
 
 Sur le worktree Director basé sur `da27fa4`, exécution Vitest sous environnement vide des tests `auth`, `credits`, `studio` et `transcriptionGpu` : **30/30 passent** (4 fichiers). Les collaborateurs réseau et les jetons utilisés dans les tests sont fictifs ; ceci n'est ni une vérification de bout en bout dans la VM, ni une preuve de débit réel ou d'isolation complète du Studio.
+
+### Complément de mesure AMD
+
+Les deux limites lisibles sur pc4 sont **240/300 W par défaut** et **152/190 W par défaut**, soit 80 % chacune (le 330 W cité plus haut était le maximum autorisé de la première carte, pas son réglage d'usine par défaut). Les deux cartes lues étaient à 0 % d'activité au relevé ; une troisième carte restait occupée/illisible, plafond et activité non établis. Ne pas déduire de cette lecture que toutes les cartes AMD sont limitées.
