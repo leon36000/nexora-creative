@@ -3,6 +3,7 @@ import { estRoute3D } from './produit3d.js';
 import { lazy, Suspense, useEffect } from 'react';
 import { APPS_NEXORA } from './studio/apps';
 import { linkProps, navigate, useRoute } from './router';
+import { prolongerRedirect } from './prolongerRedirect';
 import { startLive, useStore } from './store';
 import { useGlobalDrop } from './drop';
 import { JudgeBanner, Toast } from './ui';
@@ -51,8 +52,8 @@ export default function App() {
   useEffect(() => {
     const vers = REMPLACEES[path];
     if (!vers) return;
-    const mode = path === '/extend' && params.get('mode') === 'transition' ? '/prolonger?mode=raccord' : vers;
-    navigate(mode, true);
+    const destination = path === '/extend' ? prolongerRedirect(params) : vers;
+    navigate(destination, true);
   }, [path]);
 
   const page = (() => {
