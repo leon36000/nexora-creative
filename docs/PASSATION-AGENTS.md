@@ -1003,3 +1003,8 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 ### Reprise Codex — correctifs Director dans la MR, 4 novembre 2026
 
 - Commit `d988a9d` poussé sur la MR brouillon !42 : distinctions anime/photo FR/EN, citations simples, négations directes de vaisseau et scène spatiale citée. Revue indépendante des cas corrigés; 114 tests ciblés relancés sans chargement `.env`, typecheck signalé réussi. Les citations imbriquées/multilignes et négations complexes restent des limites lexicales. Pipeline du nouveau SHA en cours au relevé. La MR comprend aussi les deux commits Director historiques; essais navigateur/HTTP, routage H3 et revue complète restent nécessaires avant intégration.
+
+### Reprise Codex — sauvegarde Git partielle vérifiée, 4 novembre 2026
+
+- Nouveau jeu sur Storage `Nexora/sauvegardes/gitlab/20261104T2247Z-partiel-cTcehyBf/` : miroir et bundle Creative, miroir du dépôt public pc4-ci-securite, restaurations Git isolées. Creative : 18 branches comparées aux SHA de l'API, bundle SHA-256 `687850a3414b1a55390f400c3da885e5b6767660c68c6eb59468c74b85688ad9`, vérification bundle et `git fsck` réussies sur miroir et restauration. Dépôt public restauré et fsck réussi. Pas de modification de production ni de secret affiché.
+- Cette sauvegarde est partielle : dix autres projets non vides et quatre vides, PostgreSQL, issues/MR, droits, objets Garage/LFS/artefacts, registres et configuration ne sont pas couverts. Les sondes HTTPS privées sans identifiants ont échoué; aucun accès d'autre projet n'a été réparé. Un clone Git restauré n'est pas une restauration GitLab. Copie pc1 du bundle Creative en cours. Sauvegarde complète et restauration d'instance restent à faire avant migration/formatage.
