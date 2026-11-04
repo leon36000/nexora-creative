@@ -1,0 +1,20 @@
+{
+ "format": 1,
+ "usage": "palier pro du détourage (LTX-2.5 22B distilled + IC-LoRA Alpha-Gen) et SAM 3.1 ; dépôts officiels seulement",
+ "acces": "dépôts protégés : conditions acceptées par le fondateur (compte Hugging Face du fondateur) ; jeton de lecture hors git (Secret hf-jeton ou fichier mode 600)",
+ "profils": {
+  "rtx5080": ["transformeur-nvfp4", "encodeur-texte-int8", "vae-video", "vae-video-conv", "vae-audio", "lora-alpha-gen"],
+  "32go": ["transformeur-int8", "encodeur-texte-int8", "vae-video", "vae-video-conv", "vae-audio", "lora-alpha-gen"],
+  "sam3.1": ["sam3.1"]
+ },
+ "fichiers": {
+  "transformeur-nvfp4": {"depot": "Lightricks/LTX-2.5", "revision": "49b093a39c19169a8a81721dcc541e07e945232f", "chemin": "diffusion_models/ltx-2.5-22b-distilled-transformer-nvfp4.safetensors", "octets": 18721548408, "dossier_comfy": "diffusion_models", "licence": "ltx-2.x-community-license"},
+  "transformeur-int8": {"depot": "Lightricks/LTX-2.5", "revision": "49b093a39c19169a8a81721dcc541e07e945232f", "chemin": "diffusion_models/ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors", "octets": 21504034224, "dossier_comfy": "diffusion_models", "licence": "ltx-2.x-community-license"},
+  "encodeur-texte-int8": {"depot": "Lightricks/LTX-2.5", "revision": "49b093a39c19169a8a81721dcc541e07e945232f", "chemin": "text_encoders/gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors", "octets": 15372969374, "dossier_comfy": "text_encoders", "licence": "ltx-2.x-community-license"},
+  "vae-video": {"depot": "Lightricks/LTX-2.5", "revision": "49b093a39c19169a8a81721dcc541e07e945232f", "chemin": "vae/ltx-2.5-video-vae-bf16.safetensors", "octets": 1472223346, "dossier_comfy": "vae", "licence": "ltx-2.x-community-license"},
+  "vae-video-conv": {"depot": "Lightricks/LTX-2.5", "revision": "49b093a39c19169a8a81721dcc541e07e945232f", "chemin": "vae/ltx-2.5-video-vae-conv-bf16.safetensors", "octets": 1452269922, "dossier_comfy": "vae", "licence": "ltx-2.x-community-license"},
+  "vae-audio": {"depot": "Lightricks/LTX-2.5", "revision": "49b093a39c19169a8a81721dcc541e07e945232f", "chemin": "vae/ltx-2.5-audio-vae-bf16.safetensors", "octets": 364866540, "dossier_comfy": "vae", "licence": "ltx-2.x-community-license"},
+  "lora-alpha-gen": {"depot": "Lightricks/LTX-2.5-22b-IC-LoRA-Alpha-Gen", "revision": "4cc554f7f8dd858b50e80f1d37d70ce0103f5c94", "chemin": "ltx-2.5-22b-ic-lora-alpha-gen-0.9.safetensors", "octets": 1308787472, "dossier_comfy": "loras", "licence": "ltx-2.x-community-license"},
+  "sam3.1": {"depot": "facebook/sam3.1", "revision": "daa63191845a41281374e725f4c9e51c7a824460", "chemin": "sam3.1_multiplex.pt", "octets": 3502755717, "dossier_comfy": null, "licence": "SAM License", "accompagnement": ["config.json", "processor_config.json", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "vocab.json", "merges.txt", "LICENSE"]}
+ }
+}

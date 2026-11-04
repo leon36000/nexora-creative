@@ -1,9 +1,9 @@
 # Construction de l'image du détourage sur pc3, sans démon ni root sur l'hôte (kaniko), poussée au registre provisoire.
-# Gabarit : construire.sh remplace __TAG__, __TORCH_INDEX__ et __CONTEXTE__ puis applique ce Job.
+# Gabarit : construire.sh remplace __IMAGE__, __TAG__, __TORCH_INDEX__ et __CONTEXTE__ puis applique ce Job.
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: construction-detourage-__TAG__
+  name: construction-__IMAGE__-__TAG__
   namespace: nexora
   labels: {app: construction-detourage}
 spec:
@@ -23,7 +23,7 @@ spec:
           args:
             - --context=dir:///contexte
             - --dockerfile=/contexte/Dockerfile
-            - --destination=127.0.0.1:5000/nexora/detourage:__TAG__
+            - --destination=127.0.0.1:5000/nexora/__IMAGE__:__TAG__
             - --build-arg=TORCH_INDEX=__TORCH_INDEX__
             - --insecure
             - --skip-tls-verify
@@ -31,7 +31,7 @@ spec:
             - --snapshot-mode=redo
             - --use-new-run
             - --cache=true
-            - --cache-repo=127.0.0.1:5000/nexora/cache-detourage
+            - --cache-repo=127.0.0.1:5000/nexora/cache-__IMAGE__
           resources:
             requests: {cpu: "2", memory: 2Gi}
             limits: {memory: 10Gi}
