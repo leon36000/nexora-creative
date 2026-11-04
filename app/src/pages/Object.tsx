@@ -5,11 +5,10 @@
  * Each result is an ordinary take whose file is a GLB, so the Library, the
  * Viewer and the Stage all read it from /api/media/<take>.
  */
-import { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import { api, downloadUrl, mediaUrl, posterUrl, subjectUrl, uploadFile, type ObjetTexteEtat, type Take } from '../api';
-import { FONDS_PLAN_CLE, planCleDepuisCanevas, type FondPlanCle } from '../planCle3d';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { api, downloadUrl, mediaUrl, posterUrl, subjectUrl, type ObjetTexteEtat, type Take } from '../api';
 import { OBJECT_DETAIL } from '../catalog';
-import { navigate, setParams, useRoute } from '../router';
+import { setParams, useRoute } from '../router';
 import { SourceSlot, loadFile, useTakeParam, type Source } from '../SourcePick';
 import { inFeed, isModel, settingsOf, toast, useStore } from '../store';
 import { Icon, MediaCard, Spill, Stepper, Switch, fmtSeconds, presetClip, useEstimate } from '../ui';
@@ -297,29 +296,9 @@ export default function ObjectPage() {
 /** The selected model, big: grab to orbit, switch looks, see what it was made from. */
 function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void; onOpen: () => void }) {
   const s = settingsOf(take);
-  const vue = useRef<HTMLDivElement>(null);
-  const [fond, setFond] = useState<FondPlanCle>('studio');
-  const [envoi, setEnvoi] = useState(false);
-  async function animer() {
-    const canevas = vue.current?.querySelector('canvas');
-    if (!canevas) { toast('La vue 3D n’est pas prête.', true); return; }
-    setEnvoi(true);
-    try {
-      const png = await planCleDepuisCanevas(canevas, fond);
-      const jeton = await uploadFile(new File([png], `plan-cle-relief-${take.id}.png`, { type: 'image/png' }));
-      // Aperçu en data URL : il survit à un rechargement de page, contrairement à une URL de blob.
-      const apercu = await new Promise<string>((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.onerror = () => ok(''); r.readAsDataURL(png); });
-      try { sessionStorage.setItem('nexora-plan-cle-apercu', apercu); } catch { /* aperçu facultatif */ }
-      navigate(`/?mode=video&jeton=${encodeURIComponent(jeton)}&intention=${encodeURIComponent('L’objet de l’image, exactement le même, tourne lentement sur lui-même pendant que la caméra fait un arc autour de lui ; éclairage studio haut de gamme, reflets qui glissent sur ses matières.')}`);
-    } catch (e) {
-      toast(e instanceof Error ? e.message : 'Capture impossible.', true);
-    } finally {
-      setEnvoi(false);
-    }
-  }
   return (
     <>
-    <div className="object-focus" ref={vue}>
+    <div className="object-focus">
       <Suspense fallback={<div className="model-view"><img className="model-poster" src={posterUrl(take.id)} alt="" /></div>}>
         <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} />
       </Suspense>
@@ -337,15 +316,6 @@ function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLo
         </div>
         <a className="btn sm accent" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download GLB</a>
         <button type="button" className="btn sm" onClick={onOpen}><Icon name="sparkle" size={14} />Open</button>
-        {take.status === 'done' && (
-          <div className="relief-animer" title="Tourne le modèle à l’angle voulu, puis anime-le : la vidéo part exactement de cette vue">
-            <div className="label">Animer en vidéo</div>
-            <div className="seg">
-              {(Object.keys(FONDS_PLAN_CLE) as FondPlanCle[]).map((f) => <button key={f} type="button" className={fond === f ? 'on' : ''} onClick={() => setFond(f)}>{FONDS_PLAN_CLE[f].nom}</button>)}
-            </div>
-            <button type="button" className="btn sm accent" disabled={envoi} onClick={() => void animer()}><Icon name="sparkle" size={14} />{envoi ? 'Capture…' : 'Animer avec H3'}</button>
-          </div>
-        )}
       </div>
     </div>
     <ReliefOutils take={take} />
