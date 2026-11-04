@@ -39,8 +39,30 @@ class PlansVideoManquantsTests(unittest.TestCase):
         self.assertIn("deepseek/long", str(err.exception))
         self.assertIn("p26, p27", str(err.exception))
 
+    def test_video_reference_missing_from_plan_sources_is_refused(self):
+        with self.assertRaisesRegex(monter.PlansVideoManquants, "p99"):
+            monter.verifier_sources_video("gemini", "long", {}, video=[{"src": "p99"}])
+
+    def test_construire_rejects_video_reference_missing_from_source_map(self):
+        ctx = SimpleNamespace(
+            vid={}, voix={}, musique=None,
+            plan={"video": [{"src": "p99"}], "audio": {}}, annexe={}, total=24,
+            W=960, H=540,
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            with (
+                patch.object(monter, "Contexte", return_value=ctx),
+                patch.object(monter, "valider_ts") as valider,
+                patch.object(monter, "ProcessPoolExecutor") as pool,
+            ):
+                with self.assertRaisesRegex(monter.PlansVideoManquants, "p99"):
+                    monter.construire("gemini", "long", sortie=Path(tmp) / "draft.mp4", jobs=1)
+
+        valider.assert_not_called()
+        pool.assert_not_called()
+
     def test_construire_stops_before_editplan_validation_or_rendering(self):
-        ctx = type("Context", (), {"vid": {"p26": None}})()
+        ctx = type("Context", (), {"vid": {"p26": None}, "plan": {"video": [{"src": "p26"}]}})()
         with tempfile.TemporaryDirectory() as tmp:
             montage = Path(tmp) / "montage"
             sortie = montage / "draft.mp4"
@@ -59,6 +81,30 @@ class PlansVideoManquantsTests(unittest.TestCase):
             pool.assert_not_called()
             dossier_travail.assert_not_called()
             self.assertFalse(sortie.exists())
+
+    def test_explicit_ts_validation_failure_stops_before_allocating_or_rendering(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "p01.mp4"
+            source.write_bytes(b"video")
+            output = root / "custom-name.mp4"
+            ctx = SimpleNamespace(
+                vid={"p01": source}, voix={}, musique=None,
+                plan={"video": [{"src": "p01"}], "audio": {}}, annexe={}, total=24,
+                W=960, H=540,
+            )
+            with (
+                patch.object(monter, "Contexte", return_value=ctx),
+                patch.object(monter, "valider_ts", return_value={"ok": False, "erreurs": [{"regle": "test", "message": "invalid"}]}),
+                patch.object(monter, "ProcessPoolExecutor") as pool,
+                patch.object(monter.T, "dossier_travail") as dossier_travail,
+            ):
+                with self.assertRaises(monter.EditPlanInvalide):
+                    monter.construire("gemini", "long", sortie=output, jobs=1)
+
+            pool.assert_not_called()
+            dossier_travail.assert_not_called()
+            self.assertFalse(output.exists())
 
 
 
@@ -114,7 +160,7 @@ class ExportPreservationTests(unittest.TestCase):
             source.write_bytes(b"source")
             output = root / "film.mp4"
             output.write_bytes(b"existing export")
-            ctx = SimpleNamespace(vid={"p01": source})
+            ctx = SimpleNamespace(vid={"p01": source}, plan={"video": [{"src": "p01"}]})
 
             with (
                 patch.object(monter, "Contexte", return_value=ctx),
@@ -159,11 +205,11 @@ class ExportPreservationTests(unittest.TestCase):
             out_dir.mkdir()
             source = root / "p01-r1.mp4"
             source.write_bytes(b"source")
-            output = out_dir / "deepseek-long-brouillon.mp4"
+            output = out_dir / "custom-output.mp4"
             ctx = SimpleNamespace(vid={"p01": source}, voix={}, musique=None,
                                   plan={"video": [{"src": "p01"}], "audio": {}},
                                   annexe={"etalonnage": {"contraste": 1.03}, "incrustations": [{"type": "titre", "texte": "DÉMO"}]},
-                                  total=36)
+                                  total=36, W=960, H=540)
             commandes = []
 
             def mixer_factice(_ctx, fichier):
@@ -194,6 +240,8 @@ class ExportPreservationTests(unittest.TestCase):
             self.assertIn("-n", commandes[0][0])
             self.assertNotIn("-y", commandes[0][0])
             self.assertTrue(commandes[0][1])
+            self.assertIs(result["brouillon"], True)
+            self.assertEqual({"largeur": 960, "hauteur": 540}, result["resolution"])
 
             provenance = result["provenance"]
             self.assertEqual(monter.empreinte_editplan(ctx.plan), provenance["editplan_sha256"])
@@ -209,6 +257,11 @@ class ExportPreservationTests(unittest.TestCase):
             self.assertIs(pools[0].initializer, monter.initialiser_contexte_rendu)
             self.assertEqual(monter.empreinte_editplan(ctx.plan), monter.empreinte_editplan(pools[0].initargs[-1]["plan"]))
             self.assertEqual({"p01": source}, pools[0].initargs[-1]["vid"])
+            self.assertTrue(result["film"].endswith("custom-output.mp4"))
+            self.assertTrue(result["brouillon"])
+            self.assertEqual({"largeur": 960, "hauteur": 540}, result["resolution"])
+            self.assertTrue(journal["brouillon"])
+            self.assertEqual({"largeur": 960, "hauteur": 540}, journal["resolution"])
 
     def test_source_change_during_render_blocks_success_record_and_keeps_export(self):
         class FakePool:
@@ -344,6 +397,15 @@ class ProvenanceTests(unittest.TestCase):
 
         self.assertEqual({"video": [], "voix": ["v01"], "musique": ["m01"]}, resultat["sources_absentes"])
         self.assertEqual({"video": {}, "voix": {}, "musique": {}}, resultat["sources_sha256"])
+
+    def test_empty_voice_source_id_is_not_silently_omitted(self):
+        ctx = SimpleNamespace(
+            plan={"video": [], "audio": {"voix": [{"src": ""}]}},
+            vid={}, voix={"": None}, musique=None,
+        )
+
+        with self.assertRaisesRegex(monter.ErreurProvenance, "identifiant.*voix"):
+            monter.empreintes_sources_utilisees(ctx)
 
 
 if __name__ == "__main__":

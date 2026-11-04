@@ -126,13 +126,25 @@ class PlansVideoManquants(ValueError):
     """Le montage référence des plans vidéo qui ne sont pas encore disponibles."""
 
 
-def verifier_sources_video(equipe, version, sources):
+class EditPlanInvalide(ValueError):
+    """Le validateur TypeScript a explicitement refusé l'EditPlan."""
+
+
+def verifier_sources_video(equipe, version, sources, video=None):
     """Refuse un rendu quand un plan manque au lieu de remplir ses images d'encre."""
-    manquants = sorted(
-        sid for sid, fichier in sources.items()
-        if sid not in ("noir", "carton")
-        and (not fichier or not Path(fichier).is_file())
-    )
+    manquants = set()
+    for sid, fichier in sources.items():
+        if sid not in ("noir", "carton") and (not fichier or not Path(fichier).is_file()):
+            manquants.add(sid)
+    for plan in video or []:
+        sid = plan.get("src")
+        if not isinstance(sid, str) or not sid.strip():
+            manquants.add("(source vidéo sans identifiant)")
+        elif sid not in ("noir", "carton") and (
+            sid not in sources or not sources[sid] or not Path(sources[sid]).is_file()
+        ):
+            manquants.add(sid)
+    manquants = sorted(manquants)
     if manquants:
         liste = ", ".join(manquants)
         raise PlansVideoManquants(
@@ -204,16 +216,19 @@ def empreintes_sources_utilisees(ctx):
     absentes = {"video": set(), "voix": set(), "musique": set()}
     for plan in ctx.plan.get("video", []):
         sid = plan.get("src")
-        if not sid or sid in ("noir", "carton"):
+        if not isinstance(sid, str) or not sid.strip():
+            raise ErreurProvenance("Plan vidéo sans identifiant de source valide.")
+        if sid in ("noir", "carton"):
             continue
         chemin = ctx.vid.get(sid)
-        if chemin is not None:
-            references["video"][sid] = chemin
+        if chemin is None:
+            raise ErreurProvenance(f"Source vidéo non résolue pour le plan {sid}.")
+        references["video"][sid] = chemin
     audio = ctx.plan.get("audio", {})
     for voix in audio.get("voix", []):
         sid = voix.get("src")
-        if not sid:
-            continue
+        if not isinstance(sid, str) or not sid.strip():
+            raise ErreurProvenance("Entrée sans identifiant de source voix valide.")
         chemin = ctx.voix.get(sid)
         if chemin is None:
             absentes["voix"].add(sid)
@@ -591,15 +606,17 @@ def mixer(ctx, sortie_wav):
 def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     t0 = time.time()
     ctx = Contexte(equipe, version, brouillon)
-    manquants = verifier_sources_video(equipe, version, ctx.vid)
+    manquants = verifier_sources_video(equipe, version, ctx.vid, ctx.plan.get("video", []))
     nom_sortie = f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
     chemin_defaut = T.TRAVAIL / equipe / "montage" / nom_sortie
     sortie = verifier_sortie_libre(sortie if sortie is not None else chemin_defaut)
+    rapport = valider_ts(ctx.plan)
+    if isinstance(rapport, dict) and rapport.get("ok") is False:
+        raise EditPlanInvalide("EditPlan refusé par validerEditPlan (ok=false).")
     editplan_sha256 = empreinte_editplan(ctx.plan)
     annexe_sha256 = empreinte_annexe(ctx.annexe)
     sources_initiales = empreintes_sources_utilisees(ctx)
     instantane = instantane_contexte_rendu(ctx)
-    rapport = valider_ts(ctx.plan)
     out_dir = T.dossier_travail(equipe, "montage")
     tranches = creer_dossier_tranches(out_dir, equipe, version, brouillon)
     pas = 36
@@ -635,7 +652,9 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
             "modification transitoire d'une source suivie d'une restauration avant la seconde empreinte",
         ],
     }
-    res = {"film": str(sortie), "equipe": equipe, "version": version, "duree_s": round(ctx.total / FPS, 2), "plans": len(ctx.plan["video"]),
+    res = {"film": str(sortie), "equipe": equipe, "version": version, "brouillon": bool(brouillon),
+           "resolution": {"largeur": ctx.W, "hauteur": ctx.H},
+           "duree_s": round(ctx.total / FPS, 2), "plans": len(ctx.plan["video"]),
            "tranches": str(tranches), "manquants": manquants, "validation": rapport, "secondes": round(time.time() - t0, 1),
            "provenance": provenance}
     print(json.dumps(res, ensure_ascii=False))
@@ -654,6 +673,6 @@ if __name__ == "__main__":
     o = a.parse_args()
     try:
         construire(o.equipe, o.version, o.brouillon, o.sortie, o.jobs)
-    except (PlansVideoManquants, FileExistsError, ErreurProvenance) as e:
+    except (PlansVideoManquants, EditPlanInvalide, FileExistsError, ErreurProvenance) as e:
         print(f"ERREUR : {e}", file=sys.stderr)
         raise SystemExit(2)
