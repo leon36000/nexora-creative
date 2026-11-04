@@ -496,3 +496,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Agent DeepSeek outillé et isolé : premier essai a atteint la limite de tours sans livrer sa revue ; second essai borné lancé.
 
 - OPSYS : commits locaux `7585b81`/`9f8f13f` ajoutent une traçabilité partielle des plans, annexes, sources et export ; 14 tests relancés. Essai réel vertical séparé : plan, annexe, 7 sources et export vérifiés indépendamment ; vidéo et dix segments archivés sur pc1. Pas de verdict humain ni push.
+
+- Sous-agent DeepSeek outillé isolé : seconde tentative terminée avec revue ; limites du compteur GLB examinées, 34 primitives du lot en mode 4 et comptes tous multiples de trois. Aucun score de qualité déduit.
