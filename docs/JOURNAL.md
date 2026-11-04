@@ -603,3 +603,10 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Copie et correctif candidats sous Storage `Nexora/travail/rnd-codex-20261104/sync-gpu-guard-isolated/`; original pc1 inchangé, SHA-256 `829b5820262288feae8d2fb2baf39418ca9d855338a21c9b433fa44e3146a449`. Six tests CPU repassés indépendamment pour l'échéance; aucun accès GPU ou service.
 - Revue bloquante : le candidat conservait l'appel original `POST /free` à ComfyUI, susceptible de décharger des modèles partagés. Il ne doit pas être exécuté ni intégré ainsi durant le diagnostic; suppression de cet effet en cours et test demandé. Une file vide ne constitue pas une réservation exclusive. L'échéance historique déjà expirée bloquerait toute future exécution jusqu'à sa mise à jour explicite.
+
+
+### Reprise Codex — revue Terra de la veille GPU, 4 novembre 2026
+
+- La copie isolée lipsync a retiré `POST /free`; sept tests CPU passent, mais ils ne prouvent pas l'absence générale de tout effet. Aucun script GPU exécuté ni original pc1 modifié.
+- Revue indépendante par GPT-6.1 Terra élevé : `killpg` hérité pouvait signaler un groupe de processus entier, contraire à la règle « seulement ses propres PID »; délai susceptible d'expirer pendant des appels lents avant `Popen`, et échéance mémorisée perdue entre tentatives. Ces points bloquent toute utilisation/intégration du candidat. Correctif et tests isolés demandés; une file GPU vide ne réserve pas le GPU.
+- Le fondateur demande désormais deux sous-agents GPT-6 Luna max et un GPT-6.1 Terra élevé pour l'orchestration, en plus des modèles DeepSeek/Muse et Gemini disponibles. Il demande l'envoi Gmail à lui-même lorsque des vidéos sont terminées; aucun film final n'a encore le verdict humain requis, donc aucun envoi n'a été fait.
