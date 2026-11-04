@@ -111,13 +111,22 @@ function sommetsSoudes(m: Maillage): Uint32Array {
   return sortie;
 }
 
+/** Identifie une arête non orientée : a et b sont des indices Uint32 dans [0, nombreSommets). */
+export function cleArete(a: number, b: number, nombreSommets: number): number | bigint {
+  const bas = Math.min(a, b), haut = Math.max(a, b);
+  // Tant que nombreSommets² reste dans les entiers exacts, une clé numérique est rapide.
+  // Au-delà, deux indices Uint32 restent représentables sans perte dans une clé BigInt.
+  if (nombreSommets <= 94_906_265) return bas * nombreSommets + haut;
+  return (BigInt(bas) << 32n) | BigInt(haut);
+}
+
 export function analyser(m: Maillage): RapportMaillage {
   const soude = sommetsSoudes(m);
   const nTri = m.indices.length / 3;
-  const aretes = new Map<number, number>();
-  const cle = (a: number, b: number) => (a < b ? a * 4_294_967_296 + b : b * 4_294_967_296 + a);
+  const aretes = new Map<number | bigint, number>();
   // union-find sur les sommets soudés
   const nbSoudes = soude.reduce((x, y) => (y > x ? y : x), 0) + 1;
+  const cle = (a: number, b: number) => cleArete(a, b, nbSoudes);
   const p = new Int32Array(nbSoudes).map((_, i) => i);
   const racine = (x: number): number => { while (p[x] !== x) { p[x] = p[p[x]]; x = p[x]; } return x; };
   let degeneres = 0;

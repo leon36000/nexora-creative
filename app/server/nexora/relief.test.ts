@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Document, NodeIO } from '@gltf-transform/core';
 import { unzipSync } from 'fflate';
-import { analyser, cartesPbr, cibleTriangles, decimerGlb, exporter, lireGlb, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
+import { analyser, cartesPbr, cibleTriangles, cleArete, decimerGlb, exporter, lireGlb, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
 
 /** Sphère UV (étanche une fois les sommets soudés), avec une texture 1×1 PNG. */
 async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
@@ -30,6 +30,27 @@ async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
 }
 
 describe('Relief : contrôle du maillage', () => {
+  it('distingue les arêtes des grands maillages et ignore leur orientation', () => {
+    const a = 2 ** 21, b = a + 3, n = a + 10;
+    expect(cleArete(a, b, n)).not.toBe(cleArete(a, b + 1, n));
+    expect(cleArete(a, b, n)).toBe(cleArete(b, a, n));
+    for (const limite of [94_906_265, 94_906_266, 2 ** 32]) {
+      expect(cleArete(limite - 3, limite - 2, limite)).not.toBe(cleArete(limite - 3, limite - 1, limite));
+      expect(cleArete(limite - 3, limite - 1, limite)).toBe(cleArete(limite - 1, limite - 3, limite));
+    }
+    const grand = 100_000_000;
+    expect(cleArete(grand - 3, grand - 2, grand)).not.toBe(cleArete(grand - 3, grand - 1, grand));
+    for (let taille = 2; taille <= 15; taille++) {
+      const cles = new Set<number | bigint>();
+      for (let x = 0; x < taille; x++) for (let y = x + 1; y < taille; y++) {
+        const cle = cleArete(x, y, taille);
+        expect(cle).toBe(cleArete(y, x, taille));
+        expect(cles.has(cle)).toBe(false);
+        cles.add(cle);
+      }
+      expect(cles.size).toBe(taille * (taille - 1) / 2);
+    }
+  });
   it('une sphère UV : un seul morceau, 2 de haut, triangles écrasés des pôles comptés', async () => {
     const m = await lireGlb(await glbSphere());
     const r = analyser(m);
