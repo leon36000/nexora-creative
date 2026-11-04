@@ -8,7 +8,7 @@ Objectif : l'ingénieur en chef (Claude Code) délègue du travail routinier ou 
 |---|---|---|---|---|
 | `eco-deepseek` (`deepseek`) | `deepseek-ai/DeepSeek-V4.1-Flash-1017` | DeepInfra | 0,20 $ / 0,60 $ | modifications en masse, tests, corrections simples |
 | `eco-muse` (`muse`) | `meta/muse-spark-1.3-contributor` | OpenRouter | 0,10 $ / 0,20 $ | le moins cher : lots de dizaines, résumés, lectures, tâches courtes |
-| `eco-gemini` (`gemini`) | `google/gemini-4-argon` | OpenRouter | 2 $ / 10 $ (la version `:batch` à moitié prix n'est pas interactive, non utilisée) | le plus fort : tâches difficiles, revues |
+| `eco-gemini` (`gemini`), `eco-gemini-eleve` (`gemini-eleve`) | `google/gemini-4-argon`, point de terminaison Flex seulement, effort moyen ou élevé | OpenRouter | 1 $ / 5 $ | le plus fort : tâches difficiles, revues |
 
 Les prix sont ceux relevés le 03/11/2026 (API publique de DeepInfra et d'OpenRouter) et inscrits dans `litellm/config.yaml`. Le coût journalisé compte les jetons en cache au plein tarif : c'est une estimation haute.
 
