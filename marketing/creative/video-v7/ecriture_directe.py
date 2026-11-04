@@ -11,19 +11,29 @@ import urllib.request
 from pathlib import Path
 
 W, EQ, MODELE, EFFORT = Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4]
-FICHIERS = ["PROMPT.md", "BRIEF-V7.md", "README-montage.md", "exemple-montage.json", "marque-v7.json", "captures-disponibles.md",
+FICHIERS = ["PROMPT.md", "equipes/deepseek/fabrique.py", "BRIEF-V7.md", "README-montage.md", "exemple-montage.json", "marque-v7.json", "captures-disponibles.md",
             "voix/PALETTE.md", "recette/recette_live.py", "recette/mesures-cles.json"]
 
 
+import os
+BASE = os.environ.get("V7_BASE", "https://openrouter.ai/api/v1")
+
+
 def cle():
+    if os.environ.get("V7_CLE_FICHIER"):
+        return Path(os.environ["V7_CLE_FICHIER"]).expanduser().read_text().strip()
     for l in open(Path.home() / "Desktop/Deepinfra.env"):
-        if ":" in l and l.split(":", 1)[0].strip().lower() == "openrouter":
+        if ":" in l and l.split(":", 1)[0].strip().lower() == os.environ.get("V7_CLE_NOM", "openrouter"):
             return l.split(":", 1)[1].strip()
 
 
 def appel(messages):
-    corps = {"model": MODELE, "messages": messages, "reasoning": {"effort": EFFORT}, "max_tokens": 60000}
-    r = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=json.dumps(corps).encode(),
+    corps = {"model": MODELE, "messages": messages, "max_tokens": 60000}
+    if EFFORT.startswith("re:"):  # fournisseur au format OpenAI (DeepInfra) : reasoning_effort
+        corps["reasoning_effort"] = EFFORT[3:]
+    elif EFFORT != "passerelle":  # la passerelle des sous-agents règle elle-même l'effort
+        corps["reasoning"] = {"effort": EFFORT}
+    r = urllib.request.Request(BASE + "/chat/completions", data=json.dumps(corps).encode(),
                                headers={"Authorization": "Bearer " + cle(), "Content-Type": "application/json"})
     with urllib.request.urlopen(r, timeout=1800) as x:
         j = json.loads(x.read())
