@@ -4,6 +4,7 @@
 #   -w  : attendre la fin (sinon : lancement en arrière-plan, la commande rend la main et affiche le dossier de résultat).
 # Sortie : $SA_OUT (défaut ~/.local/share/nexora-sous-agents/runs/<id>/) contenant pid, result.json, transcript.jsonl, summary.txt, stderr.log.
 # Variables : SA_TIMEOUT (secondes, défaut 900), SA_OUT, SA_TAG (préfixe d'identifiant, utilisé par lot.sh), SA_EXTRA_RO (dossiers montés en lecture seule, séparés par « : »).
+#             SA_EFFORT (low|medium|high|xhigh|max : niveau d'effort de Claude Code, traduit en effort de raisonnement par la passerelle).
 set -u; export LC_ALL=C
 WAIT=0; [ "${1:-}" = "-w" ] && { WAIT=1; shift; }
 [ $# -ge 3 ] || { sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2; }
@@ -44,7 +45,7 @@ runner() {
     --setenv CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 1 --setenv CLAUDE_CODE_DISABLE_AUTO_MEMORY 1 --setenv NO_COLOR 1 \
     --setenv CLAUDE_CODE_MAX_OUTPUT_TOKENS 16000 \
     sh -c 'mkdir -p /tmp/home/.claude; socat TCP-LISTEN:'"$SA_PORT"',bind=127.0.0.1,fork,reuseaddr UNIX-CONNECT:/run/sa/gw.sock & sleep 0.3; exec "$@"' sh \
-    /opt/claude -p "$(cat "$PROMPT")" --bare --model "$ALIAS" --output-format stream-json --verbose \
+    /opt/claude -p "$(cat "$PROMPT")" --bare --model "$ALIAS" ${SA_EFFORT:+--effort "$SA_EFFORT"} --output-format stream-json --verbose \
       --max-turns "$TURNS" --no-session-persistence --permission-mode dontAsk \
       --tools "Read,Edit,Write,Glob,Grep,Bash" --allowedTools "Read Edit Write Glob Grep Bash" \
       --disallowedTools "WebFetch WebSearch Agent Task Bash(git push:*) Bash(ssh:*) Bash(scp:*) Bash(sudo:*) Bash(curl:*) Bash(wget:*)" \

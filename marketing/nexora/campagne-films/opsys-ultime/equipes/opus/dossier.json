@@ -1,0 +1,2687 @@
+{
+ "equipe": "opus",
+ "titre": "Le siège social",
+ "logline": "Une photo prise devant une maison de Laval met au travail, en dix secondes, une entreprise entière qui vit dans un serveur.",
+ "personnages": [
+  {
+   "id": "etienne",
+   "nom": "Étienne",
+   "role": "sales representative",
+   "voix": "eleven-thomas",
+   "fiche": "Étienne, a 29-year-old Québécois sales representative for a renovation company: short dark-brown hair, short light beard, friendly open face, plain navy-blue softshell jacket over a plain grey t-shirt, dark work pants, brown leather boots."
+  },
+  {
+   "id": "luc",
+   "nom": "Luc",
+   "role": "company owner",
+   "voix": "drama3-adamqc",
+   "fiche": "Luc, a 52-year-old Québécois owner of a renovation company: salt-and-pepper short hair, clean-shaven, strong jaw, warm eyes, plain charcoal quarter-zip sweater over a white collared shirt, dark jeans."
+  },
+  {
+   "id": "kevin",
+   "nom": "Kevin",
+   "role": "siding installer",
+   "fiche": "Kevin, a 34-year-old Québécois siding installer: athletic build, short blond hair under a plain grey knit beanie, stubble, plain dark-green work jacket with silver reflective strips, beige canvas work pants, tool belt."
+  },
+  {
+   "id": "morin",
+   "nom": "Monsieur Morin",
+   "role": "homeowner",
+   "voix": "eleven-alexandre",
+   "fiche": "Monsieur Morin, a 67-year-old Québécois retired homeowner: short white hair, thin metal glasses, kind wrinkled face, plain beige cardigan over a red and navy plaid flannel shirt, grey trousers."
+  },
+  {
+   "id": "comptable",
+   "nom": "the AI accountant",
+   "role": "holographic avatar",
+   "voix": "eleven-amelie",
+   "fiche": "A holographic AI accountant avatar: a confident woman in her early forties with short elegant dark hair, realistic human face, entirely made of translucent ion-blue light with fine horizontal scan lines and floating particles, a tailored blazer made of light, faint orange rim light, on a plain dark grey background."
+  }
+ ],
+ "lieux": [
+  {
+   "id": "maison",
+   "nom": "the Morin house",
+   "fiche": "A two-storey suburban house in Laval, Québec, at golden hour in October: the front wall is covered with old, faded, cracked beige vinyl siding with several damaged and missing panels, white trim, a maple tree with red leaves, a paved driveway, a small front porch with two steps, quiet residential street."
+  },
+  {
+   "id": "atelier",
+   "nom": "the renovation company's work shop",
+   "fiche": "The exterior of a renovation company's work shop in a Québec industrial park at dawn: a large metal building with an open garage door, warm light inside, stacks of siding boxes and ladders, a white pickup truck with no logo parked in front, frost on the asphalt, blue dawn sky."
+  },
+  {
+   "id": "hq",
+   "nom": "the virtual headquarters inside the server",
+   "fiche": "The interior of a colossal virtual corporate headquarters inside a computer server: a vertical atrium hundreds of metres tall, ten stacked open floors of glass and warm white light, each floor a busy department with rows of luminous desks, translucent holographic workers made of ion-blue light, floating holographic sheets of light, a central column of white light rising through every floor, polished black glass floor reflecting everything, epic clean architecture."
+  }
+ ],
+ "cles": [],
+ "voix": [
+  {
+   "id": "n01",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "texte": "Une photo.",
+   "direction": "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, rythme vif.",
+   "vitesse": 1.1,
+   "prises": 2
+  },
+  {
+   "id": "n02",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "texte": "Et toute une entreprise se met au travail.",
+   "direction": "Énergique, l'excitation qui monte, rythme vif, accent québécois.",
+   "vitesse": 1.1,
+   "prises": 2
+  },
+  {
+   "id": "n03",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "texte": "Dedans : dix départements. Une seule équipe.",
+   "direction": "Énergique, émerveillé, punché, accent québécois.",
+   "vitesse": 1.1,
+   "prises": 2
+  },
+  {
+   "id": "n04",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "texte": "Elle mesure. Elle chiffre. Elle vérifie… et elle attend votre accord.",
+   "direction": "Énergique et précis, frappé sur chaque verbe, un sourire à la fin, accent québécois.",
+   "vitesse": 1.1,
+   "prises": 2
+  },
+  {
+   "id": "n05",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "texte": "Dix départements qui ne dorment jamais. Et c'est vous qui décidez.",
+   "direction": "Fier, énergique, accent québécois.",
+   "vitesse": 1.1,
+   "prises": 2
+  },
+  {
+   "id": "n06",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "texte": "Les ressources d'une grande entreprise.",
+   "direction": "Puissant, assuré, accent québécois.",
+   "vitesse": 1.05,
+   "prises": 2
+  },
+  {
+   "id": "n07",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "texte": "OPSYS-AI.",
+   "direction": "Assuré, chaleureux, prononcé « op-sisse A-I ».",
+   "vitesse": 1.0,
+   "prises": 2
+  },
+  {
+   "id": "e01",
+   "role": "etienne",
+   "voix": "eleven-thomas",
+   "texte": "Monsieur Morin… votre soumission est prête.",
+   "direction": "[proud, friendly, casual]",
+   "vitesse": 1.0,
+   "prises": 2
+  },
+  {
+   "id": "m01",
+   "role": "morin",
+   "voix": "eleven-alexandre",
+   "texte": "Déjà?!",
+   "direction": "[surprised, delighted, older man]",
+   "vitesse": 1.0,
+   "prises": 2
+  },
+  {
+   "id": "l01",
+   "role": "luc",
+   "voix": "drama3-adamqc",
+   "texte": "Pis, les profits, ça donne quoi?",
+   "direction": "Patron québécois décontracté et curieux, naturel, parle vite.",
+   "vitesse": 1.1,
+   "prises": 2
+  },
+  {
+   "id": "c01",
+   "role": "comptable",
+   "voix": "eleven-amelie",
+   "texte": "Voici les profits anticipés, mis à jour avec les nouveaux ratios de productivité des employés : leur productivité a augmenté de 7 %.",
+   "direction": "[confident, precise, upbeat]",
+   "vitesse": 1.0,
+   "prises": 2
+  },
+  {
+   "id": "g01",
+   "role": "gestion",
+   "voix": "eleven-marieline",
+   "texte": "Voici la cédule des trois prochaines semaines.",
+   "direction": "[clear, upbeat, organized]",
+   "vitesse": 1.0,
+   "prises": 2
+  },
+  {
+   "id": "a01",
+   "role": "adjointe",
+   "voix": "eleven-jeannemance",
+   "texte": "Vous avez un rendez-vous avec monsieur Thibault à 14 h, et j'ai déplacé votre rendez-vous de 16 h comme vous me l'avez demandé.",
+   "direction": "[warm, professional, efficient]",
+   "vitesse": 1.0,
+   "prises": 2
+  },
+  {
+   "id": "e02",
+   "role": "etienne",
+   "voix": "eleven-thomas",
+   "texte": "Parfait, merci!",
+   "direction": "[happy, casual]",
+   "vitesse": 1.0,
+   "prises": 2
+  },
+  {
+   "id": "l02",
+   "role": "luc",
+   "voix": "drama3-adamqc",
+   "texte": "Bon travail, Kevin.",
+   "direction": "Chaleureux, fier, patron québécois.",
+   "vitesse": 1.05,
+   "prises": 2
+  }
+ ],
+ "plans": [
+  {
+   "id": "p01",
+   "sequence": "S1 la photo",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5011,
+   "format": "16:9",
+   "refs": [
+    "etienne",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a sales representative photographs a damaged house wall with his phone.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Late afternoon golden hour on a quiet Québec street. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Extreme close-up over the shoulder of @etienne: his hand raises a black smartphone towards the damaged beige siding of @maison; the phone screen shows only the live camera image of the cracked siding; his thumb taps, a soft white flash, and a tiny orange spark of light lifts off the phone. Rack focus from the phone to the house. No text, no logos.\n\noverall_soundscape:\nCamera shutter click, wind in the maple leaves, distant street ambience.\n\nnon_diegetic_music:\nN/A",
+   "camera": "macro, mise au point qui bascule",
+   "effets": "étincelle orange",
+   "son": "déclencheur",
+   "statut": "VISION"
+  },
+  {
+   "id": "p02",
+   "sequence": "S1 la photo",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5022,
+   "format": "16:9",
+   "refs": [
+    "etienne",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) shoots from a phone up into the sky.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Golden hour, long shadows, warm sky with scattered clouds. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Wide low-angle shot: @etienne stands on the driveway in front of @maison holding up his phone; from the phone a single bright orange pulse of light (the photo travelling as data) shoots straight up into the sky like a tracer, the camera tilts up fast following it, the pulse pierces the clouds. No text, no logos.\n\noverall_soundscape:\nRising whoosh, deep sub-bass boom, wind.\n\nnon_diegetic_music:\nN/A",
+   "camera": "contre-plongée, panoramique vertical rapide",
+   "effets": "traceur orange",
+   "son": "fouet + boum",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p03",
+   "sequence": "S2 le signal",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5033,
+   "format": "16:9",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) reaches a satellite above Québec at dusk.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Above the clouds over Québec at dusk: the curve of the Earth, the St. Lawrence river glinting, city lights starting to glow. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] A sleek communications satellite with golden foil and dark-blue solar panels hangs in orbit; a single bright orange pulse of light (the photo travelling as data) streaks up from the clouds and strikes its dish; the satellite glints and fires the pulse back down towards the earth in a bright arc. Slow orbit camera. No text, no logos.\n\noverall_soundscape:\nDeep space hum, electric zap, resonant chime.\n\nnon_diegetic_music:\nN/A",
+   "camera": "orbite lente",
+   "effets": "arc lumineux",
+   "son": "zap",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p04",
+   "sequence": "S2 le signal",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5044,
+   "format": "16:9",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) strikes a 5G tower and leaps onto the power lines.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. A tall telecommunications tower on a hill above a small Québec town at blue hour, red beacon lights, autumn forest. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] a single bright orange pulse of light (the photo travelling as data) descends from the sky and hits the tower's antennas, which flare with light; the pulse races down the steel lattice and leaps onto the power lines below. Dynamic crane-down camera. No text, no logos.\n\noverall_soundscape:\nElectric crackle, metallic hum, whoosh.\n\nnon_diegetic_music:\nN/A",
+   "camera": "grue descendante",
+   "effets": "arc électrique",
+   "son": "crépitement",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p05",
+   "sequence": "S2 le signal",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5055,
+   "format": "16:9",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) races along power lines across rural Québec.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. A straight country road in rural Québec at dusk, wooden utility poles and power lines stretching to the horizon, autumn fields. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Low fast tracking shot alongside the poles: a single bright orange pulse of light (the photo travelling as data) streaks along the wires at incredible speed leaving a glowing trail, each pole flashing as it passes, the camera racing with it, motion blur. No text, no logos.\n\noverall_soundscape:\nCrackling electricity, rhythmic whoosh-by of the poles, wind.\n\nnon_diegetic_music:\nN/A",
+   "camera": "travelling latéral très rapide",
+   "effets": "traînée lumineuse",
+   "son": "passages en rafale",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p06",
+   "sequence": "S2 le signal",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5066,
+   "format": "16:9",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) dives into a server inside a data centre.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. A modern data centre: a long corridor of black server racks with blinking blue status lights, cold air haze. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] a single bright orange pulse of light (the photo travelling as data) races down the corridor along the cable trays and dives into the front of one server; the camera pushes in fast after it, through the server's panel into its glowing circuit board, macro, the circuits turn into a landscape of light. No text, no logos.\n\noverall_soundscape:\nServer fans, rising electronic tone, whoosh into silence.\n\nnon_diegetic_music:\nN/A",
+   "camera": "poussée avant rapide, plongée macro",
+   "effets": "plongée dans le circuit",
+   "son": "montée",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p07",
+   "sequence": "S3 le siège social",
+   "recette": "h3-max",
+   "images": 243,
+   "graine": 5077,
+   "format": "16:9",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the camera emerges inside a colossal virtual headquarters made of light.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. Inside @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] The camera bursts out of a tunnel of light into @hq; a single bright orange pulse of light (the photo travelling as data) flies into the atrium like a comet; floor after floor the building lights up in a cascade, thousands of translucent ion-blue holographic workers look up and get to work; the camera flies forward and rises through the immense space. No text, no logos.\n\noverall_soundscape:\nHuge reverberant whoosh, choir-like synth swell, a cascade of soft chimes.\n\nnon_diegetic_music:\nN/A",
+   "camera": "envol avant et montée",
+   "effets": "cascade de lumière étage par étage",
+   "son": "grand souffle",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p08",
+   "sequence": "S3 M1 réception",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5088,
+   "format": "16:9",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic receptionist catches the photo and sends it upstairs.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. The reception floor of @hq, a curved luminous desk. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] A holographic receptionist made of ion-blue light catches a single bright orange pulse of light (the photo travelling as data), now a small glowing photograph, in her open hand; she glances at it, smiles, and flicks it upward; it flies up the atrium towards the upper floors. Medium shot, slight push-in. No text, no logos.\n\noverall_soundscape:\nSoft chime, airy whoosh upward.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan moyen, léger avancé",
+   "effets": "photo lumineuse lancée",
+   "son": "carillon",
+   "statut": "VISION"
+  },
+  {
+   "id": "p09",
+   "sequence": "S3 M3 estimation",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5099,
+   "format": "16:9",
+   "refs": [
+    "hq",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: holographic estimators measure a 3D hologram of the house wall.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. The estimation floor of @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Five holographic estimators made of ion-blue light stand around a floating life-size hologram of the front wall of @maison; the wall turns into a precise wireframe, measuring lines and points of light snap onto every panel, window and corner; one estimator opens his hands and the hologram expands. Slow circular dolly. No text, no logos.\n\noverall_soundscape:\nPrecise digital ticks, soft scanning hum.\n\nnon_diegetic_music:\nN/A",
+   "camera": "travelling circulaire",
+   "effets": "fil de fer, points de mesure",
+   "son": "tics de mesure",
+   "statut": "VISION"
+  },
+  {
+   "id": "p10",
+   "sequence": "S3 M3 estimation",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5110,
+   "format": "16:9",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a cloud of light particles explores thousands of cost scenarios.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. Deep black background with the bokeh of @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Close-up: thousands of tiny orange and blue particles of light fan out from a single point in the air like a probability cloud, swirl, then converge into one bright precise line; translucent holographic hands guide them. No text, no logos.\n\noverall_soundscape:\nShimmering granular sound converging into one clean tone.\n\nnon_diegetic_music:\nN/A",
+   "camera": "gros plan",
+   "effets": "nuage de probabilités",
+   "son": "granulaire",
+   "statut": "RÉEL"
+  },
+  {
+   "id": "p11",
+   "sequence": "S3 M3 soumission",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5121,
+   "format": "16:9",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic document assembles in mid-air and seals.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. The atrium of @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Sheets of light fold together in mid-air into a glowing document; lines of light fill it from top to bottom (abstract lines only, no writing); a ring of eleven small lights around it turns on one by one; then it seals with a bright orange flash. The camera slowly orbits the document. No text, no logos.\n\noverall_soundscape:\nPaper-like swishes of light, eleven ascending ticks, a bright seal impact.\n\nnon_diegetic_music:\nN/A",
+   "camera": "orbite lente",
+   "effets": "document qui s'assemble, 11 voyants",
+   "son": "11 tics + sceau",
+   "statut": "RÉEL"
+  },
+  {
+   "id": "p12",
+   "sequence": "S3 approbation",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5132,
+   "format": "16:9",
+   "refs": [
+    "luc"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the company owner approves the quote with his thumb.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Luc's office at golden hour, warm light through blinds, wooden desk. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Close-up: @luc looks at his black smartphone, a soft orange glow on his face; he presses his thumb on the screen and a ring of light pulses around his thumb; he gives a small satisfied nod. No text, no logos.\n\noverall_soundscape:\nQuiet office, a soft confirmation tone.\n\nnon_diegetic_music:\nN/A",
+   "camera": "gros plan",
+   "effets": "anneau lumineux",
+   "son": "tonalité",
+   "statut": "RÉEL"
+  },
+  {
+   "id": "p13",
+   "sequence": "S4 le retour",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5143,
+   "format": "16:9",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) rushes back from the server to the sky at hyperspeed.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Night and dusk landscapes of Québec blurred by speed. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Hyperspeed: a single bright orange pulse of light (the photo travelling as data) shoots out of the server racks, along the power lines and wooden poles, up a telecommunications tower and into the sky in a single continuous rush, extreme speed, streaks of light, strong motion blur. No text, no logos.\n\noverall_soundscape:\nMassive reverse whoosh, Doppler sweep.\n\nnon_diegetic_music:\nN/A",
+   "camera": "hypervitesse",
+   "effets": "stries",
+   "son": "fouet inversé",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p14",
+   "sequence": "S4 le retour",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5154,
+   "format": "16:9",
+   "refs": [
+    "etienne",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the orange pulse falls from the sky into the representative's phone.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. The driveway of @maison at golden hour. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] a single bright orange pulse of light (the photo travelling as data) falls from the sky like a shooting star into the phone in @etienne's hand; the phone lights up softly; he looks at it and smiles broadly. Medium shot, slight push-in. No text, no logos.\n\noverall_soundscape:\nFalling whoosh, soft impact, phone vibration.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan moyen",
+   "effets": "étoile filante",
+   "son": "chute + vibration",
+   "statut": "VISION"
+  },
+  {
+   "id": "p15",
+   "sequence": "S4 monsieur Morin",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5165,
+   "format": "16:9",
+   "refs": [
+    "etienne",
+    "morin",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": "e01",
+   "prompt": "summary:\nA single continuous cinematic shot: the representative tells the homeowner his quote is ready.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. In front of @maison, golden hour. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Medium two-shot: @etienne turns his phone towards @morin, who stands on his porch; Étienne speaks to him with a proud smile. No text, no logos.\n\ndialogue:\n@etienne speaks in Québécois French, matching <Audio 1> word for word. Monsieur Morin listens.\n\noverall_soundscape:\nStreet ambience, leaves.\n\nnon_diegetic_music:\nN/A",
+   "camera": "deux personnages, plan moyen",
+   "effets": "—",
+   "son": "voix",
+   "statut": "VISION"
+  },
+  {
+   "id": "p16",
+   "sequence": "S4 monsieur Morin",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5176,
+   "format": "16:9",
+   "refs": [
+    "morin",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": "m01",
+   "prompt": "summary:\nA single continuous cinematic shot: the delighted homeowner reacts.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. The porch of @maison, golden hour. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Close-up: @morin raises his eyebrows, delighted, says one word, then laughs warmly. No text, no logos.\n\ndialogue:\n@morin speaks in Québécois French, matching <Audio 1> word for word, then laughs.\n\noverall_soundscape:\nStreet ambience.\n\nnon_diegetic_music:\nN/A",
+   "camera": "gros plan",
+   "effets": "—",
+   "son": "voix + rire",
+   "statut": "illustratif"
+  },
+  {
+   "id": "p17",
+   "sequence": "S5 le chantier",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5187,
+   "format": "16:9",
+   "refs": [
+    "atelier",
+    "kevin"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the job file reaches an installer at the work shop at dawn.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Dawn in front of @atelier. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] a single bright orange pulse of light (the photo travelling as data) streaks down from the dawn sky into the phone of @kevin; a holographic job file made of light unfolds in the air in front of him: a small floating 3D model of the Morin house and stacks of siding boxes; he studies it, breath vapour in the cold. No text, no logos.\n\noverall_soundscape:\nCold morning birds, distant highway, soft digital chime.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan moyen",
+   "effets": "dossier holographique",
+   "son": "carillon",
+   "statut": "EN PRÉPARATION"
+  },
+  {
+   "id": "p18",
+   "sequence": "S5 M6 matériel",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5198,
+   "format": "16:9",
+   "refs": [
+    "atelier",
+    "kevin"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the installer loads siding boxes into the pickup truck.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Dawn at @atelier. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] @kevin and a colleague load boxes of vinyl siding into the bed of a white pickup truck, brisk and efficient, dawn light, breath vapour; the small holographic job file floats beside the truck. Handheld tracking camera. No text, no logos.\n\noverall_soundscape:\nBoxes thudding, truck tailgate, birds.\n\nnon_diegetic_music:\nN/A",
+   "camera": "caméra à l'épaule",
+   "effets": "—",
+   "son": "cartons",
+   "statut": "RÉEL"
+  },
+  {
+   "id": "p19",
+   "sequence": "S6 M5 finance",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5209,
+   "format": "16:9",
+   "refs": [
+    "luc",
+    "comptable"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the holographic accountant materializes in the owner's office.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Evening in Luc's office, large window on the city lights, warm desk lamp. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] A column of ion-blue light rises from the desk and @comptable materializes from swirling particles, standing beside the desk; @luc leans back in his chair, impressed. Slow push-in. No text, no logos.\n\noverall_soundscape:\nShimmering materialization, low hum.\n\nnon_diegetic_music:\nN/A",
+   "camera": "avancé lent",
+   "effets": "matérialisation",
+   "son": "scintillement",
+   "statut": "VISION"
+  },
+  {
+   "id": "p20",
+   "sequence": "S6 M5 finance",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5220,
+   "format": "16:9",
+   "refs": [
+    "luc"
+   ],
+   "premiere": null,
+   "parole": "l01",
+   "prompt": "summary:\nA single continuous cinematic shot: the owner asks about profits.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Evening in Luc's office, warm lamp, city lights. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Medium close-up: @luc leans back, relaxed and curious, and asks a question to the hologram off-screen right. No text, no logos.\n\ndialogue:\n@luc speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nOffice room tone.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan rapproché",
+   "effets": "—",
+   "son": "voix",
+   "statut": "illustratif"
+  },
+  {
+   "id": "p21",
+   "sequence": "S6 M5 finance",
+   "recette": "h3-max",
+   "images": 243,
+   "graine": 5231,
+   "format": "16:9",
+   "refs": [
+    "comptable"
+   ],
+   "premiere": null,
+   "parole": "c01",
+   "prompt": "summary:\nA single continuous cinematic shot: the holographic accountant presents the projected profits.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Evening office, dark background with warm bokeh. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Medium close-up: @comptable speaks to the camera with assurance and a slight smile, gesturing with one hand towards a rising holographic curve of light beside her; light flickers subtly across her face. No text, no logos.\n\ndialogue:\n@comptable speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nSoft hum of the hologram.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan rapproché",
+   "effets": "courbe holographique",
+   "son": "voix",
+   "statut": "VISION"
+  },
+  {
+   "id": "p22",
+   "sequence": "S6 M5 finance",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5242,
+   "format": "16:9",
+   "refs": [
+    "luc",
+    "comptable"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the office fills with a giant holographic profit projection.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Evening in Luc's office. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Wide shot: a giant holographic projection fills the room, a rising curve of light and floating bars hovering over the desk; @luc stands up and walks into the light, reflections on his face; @comptable stands beside him. Slow arc camera. No text, no logos.\n\noverall_soundscape:\nRising shimmer, soft whoosh.\n\nnon_diegetic_music:\nN/A",
+   "camera": "arc lent",
+   "effets": "projection géante",
+   "son": "scintillement",
+   "statut": "VISION"
+  },
+  {
+   "id": "p23",
+   "sequence": "S7 M4 cédule",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5253,
+   "format": "16:9",
+   "refs": [
+    "luc"
+   ],
+   "premiere": null,
+   "parole": "g01",
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic operations planner presents the schedule.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Evening in Luc's office, @luc in the background. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] A holographic operations planner — a woman in her late twenties with short curly hair and glasses, made of translucent ion-blue light with fine scan lines and a realistic face — appears on the other side of the desk and speaks, presenting with an open hand. No text, no logos.\n\ndialogue:\nThe holographic planner speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nSoft hum.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan moyen",
+   "effets": "avatar holographique",
+   "son": "voix",
+   "statut": "VISION"
+  },
+  {
+   "id": "p24",
+   "sequence": "S7 M4 cédule",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5264,
+   "format": "16:9",
+   "refs": [
+    "luc"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic three-week calendar covers the office floor.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Evening office seen from above. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] High top-down shot slowly descending: the floor of the office becomes a huge holographic calendar of light, three weeks of glowing blocks sliding into place, tiny holographic trucks and crews moving between the blocks; @luc stands in the middle looking down. No text, no logos.\n\noverall_soundscape:\nBlocks clicking into place, soft whooshes.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plongée zénithale descendante",
+   "effets": "calendrier holographique",
+   "son": "clics",
+   "statut": "EN PRÉPARATION"
+  },
+  {
+   "id": "p25",
+   "sequence": "S8 l'adjointe",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5275,
+   "format": "16:9",
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the representative gets a call while driving.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Noon, a highway along the St. Lawrence river on a sunny autumn day. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Inside a white pickup truck: @etienne drives; his phone in a dash mount lights up with an incoming-call glow (no text on the screen); he taps it with one finger and listens. Side angle from the passenger seat. No text, no logos.\n\noverall_soundscape:\nRoad noise, soft ringtone chime.\n\nnon_diegetic_music:\nN/A",
+   "camera": "côté passager",
+   "effets": "—",
+   "son": "sonnerie",
+   "statut": "illustratif"
+  },
+  {
+   "id": "p26",
+   "sequence": "S8 M1 réception",
+   "recette": "h3-max",
+   "images": 243,
+   "graine": 5286,
+   "format": "16:9",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": "a01",
+   "prompt": "summary:\nA single continuous cinematic shot: the holographic administrative assistant calls the representative.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. The reception floor of @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Medium close-up: a holographic administrative assistant — a woman in her early thirties with dark hair in a low bun and a wireless headset, made of translucent ion-blue light with a warm realistic face — speaks warmly and efficiently into her headset; holographic agenda blocks rearrange themselves beside her. No text, no logos.\n\ndialogue:\nThe holographic assistant speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nSoft office hum of light.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan rapproché",
+   "effets": "blocs d'agenda",
+   "son": "voix",
+   "statut": "VISION"
+  },
+  {
+   "id": "p27",
+   "sequence": "S8 l'adjointe",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5297,
+   "format": "16:9",
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": "e02",
+   "prompt": "summary:\nA single continuous cinematic shot: the representative answers with a smile while driving.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Inside the white pickup truck, noon sun. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Medium close-up: @etienne, driving, smiles and answers, relaxed. No text, no logos.\n\ndialogue:\n@etienne speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nRoad noise.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan rapproché",
+   "effets": "—",
+   "son": "voix",
+   "statut": "illustratif"
+  },
+  {
+   "id": "p28",
+   "sequence": "S9 pointage",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5308,
+   "format": "16:9",
+   "refs": [
+    "kevin",
+    "atelier"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the installer clocks in at dawn.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Dawn at the door of @atelier. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] @kevin walks to the shop door and holds his phone to a small glowing pad on the wall; a ring of orange light closes around it, he nods and walks in. Medium shot. No text, no logos.\n\noverall_soundscape:\nFootsteps on frost, a short confirmation beep, door.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan moyen",
+   "effets": "anneau orange",
+   "son": "bip",
+   "statut": "EN PRÉPARATION"
+  },
+  {
+   "id": "p29",
+   "sequence": "S9 le chantier",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5319,
+   "format": "16:9",
+   "refs": [
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: time-lapse of the crew renewing the siding of the house.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. @maison. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Time-lapse: the sun arcs over @maison while a crew installs new dark-grey vinyl siding; the old beige siding disappears panel by panel, clouds race, shadows sweep across the lawn; the finished house glows at sunset. No text, no logos.\n\noverall_soundscape:\nTime-lapse whoosh, faint hammering.\n\nnon_diegetic_music:\nN/A",
+   "camera": "accéléré, caméra fixe",
+   "effets": "accéléré",
+   "son": "souffle",
+   "statut": "illustratif"
+  },
+  {
+   "id": "p30",
+   "sequence": "S9 la paye",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5330,
+   "format": "16:9",
+   "refs": [
+    "luc",
+    "kevin",
+    "atelier"
+   ],
+   "premiere": null,
+   "parole": "l02",
+   "prompt": "summary:\nA single continuous cinematic shot: the owner hands the installer his paycheque.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Friday afternoon inside @atelier, warm light. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Medium two-shot: @luc hands @kevin a white paycheque envelope and shakes his hand with a warm smile, speaking a few words; Kevin grins. No text, no logos.\n\ndialogue:\n@luc speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nShop ambience.\n\nnon_diegetic_music:\nN/A",
+   "camera": "deux personnages",
+   "effets": "—",
+   "son": "voix",
+   "statut": "VISION"
+  },
+  {
+   "id": "p31",
+   "sequence": "S10 le réseau",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5341,
+   "format": "16:9",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a living network of light connects a whole region.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Night aerial view of a Québec suburb and countryside. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Rising aerial shot: thin glowing orange and ion-blue lines of light connect houses, a work shop, pickup trucks on the roads and telecommunication towers, all converging towards a data centre glowing on the horizon; the network pulses like a heartbeat. No text, no logos.\n\noverall_soundscape:\nWide airy swell, distant pulses.\n\nnon_diegetic_music:\nN/A",
+   "camera": "montée aérienne",
+   "effets": "réseau lumineux",
+   "son": "souffle",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p32",
+   "sequence": "S10 les dix départements",
+   "recette": "h3-max",
+   "images": 243,
+   "graine": 5352,
+   "format": "16:9",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the camera rises through all ten floors of the virtual headquarters.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. Inside @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] The camera rises vertically at speed through all ten floors of @hq: each floor a full department lit and busy with holographic workers — documents, graphs, calendars, small vehicles of light — up to the top, where a sphere of warm white light glows; the camera bursts into the light. No text, no logos.\n\noverall_soundscape:\nRising roar of light, layered chimes, final burst.\n\nnon_diegetic_music:\nN/A",
+   "camera": "montée verticale",
+   "effets": "dix étages",
+   "son": "montée + éclat",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p02v",
+   "sequence": "S1 la photo (9:16)",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5022,
+   "format": "9:16",
+   "refs": [
+    "etienne",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) shoots from a phone up into the sky.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. Golden hour, long shadows, warm sky with scattered clouds. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Wide low-angle shot: @etienne stands on the driveway in front of @maison holding up his phone; from the phone a single bright orange pulse of light (the photo travelling as data) shoots straight up into the sky like a tracer, the camera tilts up fast following it, the pulse pierces the clouds. No text, no logos.\n\noverall_soundscape:\nRising whoosh, deep sub-bass boom, wind.\n\nnon_diegetic_music:\nN/A",
+   "camera": "contre-plongée, panoramique vertical rapide",
+   "effets": "traceur orange",
+   "son": "fouet + boum",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p05v",
+   "sequence": "S2 le signal (9:16)",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5055,
+   "format": "9:16",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a single bright orange pulse of light (the photo travelling as data) races along power lines across rural Québec.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. A straight country road in rural Québec at dusk, wooden utility poles and power lines stretching to the horizon, autumn fields. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Low fast tracking shot alongside the poles: a single bright orange pulse of light (the photo travelling as data) streaks along the wires at incredible speed leaving a glowing trail, each pole flashing as it passes, the camera racing with it, motion blur. No text, no logos.\n\noverall_soundscape:\nCrackling electricity, rhythmic whoosh-by of the poles, wind.\n\nnon_diegetic_music:\nN/A",
+   "camera": "travelling latéral très rapide",
+   "effets": "traînée lumineuse",
+   "son": "passages en rafale",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p07v",
+   "sequence": "S3 le siège social (9:16)",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5077,
+   "format": "9:16",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the camera emerges inside a colossal virtual headquarters made of light.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. Inside @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] The camera bursts out of a tunnel of light into @hq; a single bright orange pulse of light (the photo travelling as data) flies into the atrium like a comet; floor after floor the building lights up in a cascade, thousands of translucent ion-blue holographic workers look up and get to work; the camera flies forward and rises through the immense space. No text, no logos.\n\noverall_soundscape:\nHuge reverberant whoosh, choir-like synth swell, a cascade of soft chimes.\n\nnon_diegetic_music:\nN/A",
+   "camera": "envol avant et montée",
+   "effets": "cascade de lumière étage par étage",
+   "son": "grand souffle",
+   "statut": "métaphore"
+  },
+  {
+   "id": "p11v",
+   "sequence": "S3 M3 soumission (9:16)",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5121,
+   "format": "9:16",
+   "refs": [
+    "hq"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic document assembles in mid-air and seals.\n\ndetailed_description:\nCinematic frame from a 2026 science-fiction feature film, large-format digital cinema camera, anamorphic lenses: deep blacks, ion-blue and warm-white light, volumetric haze, crisp detail, epic scale. Original architecture, no neon grid, no franchise look. The atrium of @hq. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Sheets of light fold together in mid-air into a glowing document; lines of light fill it from top to bottom (abstract lines only, no writing); a ring of eleven small lights around it turns on one by one; then it seals with a bright orange flash. The camera slowly orbits the document. No text, no logos.\n\noverall_soundscape:\nPaper-like swishes of light, eleven ascending ticks, a bright seal impact.\n\nnon_diegetic_music:\nN/A",
+   "camera": "orbite lente",
+   "effets": "document qui s'assemble, 11 voyants",
+   "son": "11 tics + sceau",
+   "statut": "RÉEL"
+  },
+  {
+   "id": "p14v",
+   "sequence": "S4 le retour (9:16)",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5154,
+   "format": "9:16",
+   "refs": [
+    "etienne",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "prompt": "summary:\nA single continuous cinematic shot: the orange pulse falls from the sky into the representative's phone.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. The driveway of @maison at golden hour. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] a single bright orange pulse of light (the photo travelling as data) falls from the sky like a shooting star into the phone in @etienne's hand; the phone lights up softly; he looks at it and smiles broadly. Medium shot, slight push-in. No text, no logos.\n\noverall_soundscape:\nFalling whoosh, soft impact, phone vibration.\n\nnon_diegetic_music:\nN/A",
+   "camera": "plan moyen",
+   "effets": "étoile filante",
+   "son": "chute + vibration",
+   "statut": "VISION"
+  },
+  {
+   "id": "p16v",
+   "sequence": "S4 monsieur Morin (9:16)",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 5176,
+   "format": "9:16",
+   "refs": [
+    "morin",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": "m01",
+   "prompt": "summary:\nA single continuous cinematic shot: the delighted homeowner reacts.\n\ndetailed_description:\nCinematic frame from a 2026 Québec television commercial, shot on a large-format digital cinema camera with anamorphic lenses: natural skin texture, real exposure, rich contrast, shallow depth of field, fine film grain. The porch of @maison, golden hour. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image.\n[Shot 1] Close-up: @morin raises his eyebrows, delighted, says one word, then laughs warmly. No text, no logos.\n\ndialogue:\n@morin speaks in Québécois French, matching <Audio 1> word for word, then laughs.\n\noverall_soundscape:\nStreet ambience.\n\nnon_diegetic_music:\nN/A",
+   "camera": "gros plan",
+   "effets": "—",
+   "son": "voix + rire",
+   "statut": "illustratif"
+  }
+ ],
+ "musique": {
+  "prompt": "Instrumental cinematic hybrid score for a high-energy Québec technology commercial, 136 seconds long, 124 BPM, D minor rising to F major, uplifting, driving, heroic, confident, modern, never sad, never melancholic. Big punchy drums, pulsing synth bass, bright arpeggios, string ostinatos, brass stabs, huge clean hits, wide stereo, loud polished master, no vocals, no choir words. Structure: 0-4 s tense ticking pulse and a low heartbeat; at 4 s one huge hit with a camera-flash-like snap; 4-18 s fast driving build, rising arpeggios and risers, energy climbing; at 18 s a massive drop, the biggest moment so far, epic and bright; 18-50 s full anthem energy with soaring synth lead and big drums; at 50 s a hit and a switch to a confident mid-tempo groove with tight drums, funky bass and light synths, leaving space for dialogue (no lead melody between 50 and 104 s); 104-108 s riser; 108-124 s the final and biggest chorus, heroic and triumphant; at 124 s one final huge hit then a 12-second warm resolved tail.",
+  "bpm_vise": 124,
+  "duree_s": 136,
+  "coups": [
+   {
+    "t_s": 3.9,
+    "evenement": "le signal quitte le téléphone"
+   },
+   {
+    "t_s": 17.9,
+    "evenement": "révélation du siège social"
+   },
+   {
+    "t_s": 50.3,
+    "evenement": "acte 2 : le chantier"
+   },
+   {
+    "t_s": 108.4,
+    "evenement": "le réseau"
+   },
+   {
+    "t_s": 123.4,
+    "evenement": "Les ressources d'une grande entreprise"
+   }
+  ]
+ },
+ "montage": {
+  "long": {
+   "version": 1,
+   "fps": 24,
+   "format": "16:9",
+   "genre": "pub",
+   "titre": "Le siège social",
+   "sources": {
+    "p01": {
+     "kind": "video"
+    },
+    "p02": {
+     "kind": "video"
+    },
+    "p03": {
+     "kind": "video"
+    },
+    "p04": {
+     "kind": "video"
+    },
+    "p05": {
+     "kind": "video"
+    },
+    "p06": {
+     "kind": "video"
+    },
+    "p07": {
+     "kind": "video"
+    },
+    "p08": {
+     "kind": "video"
+    },
+    "p09": {
+     "kind": "video"
+    },
+    "p10": {
+     "kind": "video"
+    },
+    "p11": {
+     "kind": "video"
+    },
+    "p12": {
+     "kind": "video"
+    },
+    "p13": {
+     "kind": "video"
+    },
+    "p14": {
+     "kind": "video"
+    },
+    "p15": {
+     "kind": "video"
+    },
+    "p16": {
+     "kind": "video"
+    },
+    "p17": {
+     "kind": "video"
+    },
+    "p18": {
+     "kind": "video"
+    },
+    "p19": {
+     "kind": "video"
+    },
+    "p20": {
+     "kind": "video"
+    },
+    "p21": {
+     "kind": "video"
+    },
+    "p22": {
+     "kind": "video"
+    },
+    "p23": {
+     "kind": "video"
+    },
+    "p24": {
+     "kind": "video"
+    },
+    "p25": {
+     "kind": "video"
+    },
+    "p26": {
+     "kind": "video"
+    },
+    "p27": {
+     "kind": "video"
+    },
+    "p28": {
+     "kind": "video"
+    },
+    "p29": {
+     "kind": "video"
+    },
+    "p30": {
+     "kind": "video"
+    },
+    "p31": {
+     "kind": "video"
+    },
+    "p32": {
+     "kind": "video"
+    },
+    "noir": {
+     "kind": "image"
+    },
+    "carton": {
+     "kind": "image"
+    },
+    "musique": {
+     "kind": "audio"
+    },
+    "n01": {
+     "kind": "audio"
+    },
+    "n02": {
+     "kind": "audio"
+    },
+    "n03": {
+     "kind": "audio"
+    },
+    "n04": {
+     "kind": "audio"
+    },
+    "n05": {
+     "kind": "audio"
+    },
+    "n06": {
+     "kind": "audio"
+    },
+    "n07": {
+     "kind": "audio"
+    },
+    "e01": {
+     "kind": "audio"
+    },
+    "m01": {
+     "kind": "audio"
+    },
+    "l01": {
+     "kind": "audio"
+    },
+    "c01": {
+     "kind": "audio"
+    },
+    "g01": {
+     "kind": "audio"
+    },
+    "a01": {
+     "kind": "audio"
+    },
+    "e02": {
+     "kind": "audio"
+    },
+    "l02": {
+     "kind": "audio"
+    }
+   },
+   "video": [
+    {
+     "id": "c01",
+     "src": "p01",
+     "entree_f": 14,
+     "duree_f": 93,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c02",
+     "src": "p02",
+     "entree_f": 7,
+     "duree_f": 70,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c03",
+     "src": "p03",
+     "entree_f": 12,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c04",
+     "src": "p04",
+     "entree_f": 10,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c05",
+     "src": "p05",
+     "entree_f": 12,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c06",
+     "src": "p06",
+     "entree_f": 5,
+     "duree_f": 93,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     },
+     "rampe": {
+      "de": 1.0,
+      "a": 1.6
+     }
+    },
+    {
+     "id": "c07",
+     "src": "p07",
+     "entree_f": 0,
+     "duree_f": 139,
+     "transition_in": {
+      "type": "dip",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "c08",
+     "src": "p08",
+     "entree_f": 14,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c09",
+     "src": "p09",
+     "entree_f": 12,
+     "duree_f": 70,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c10",
+     "src": "p10",
+     "entree_f": 12,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c11",
+     "src": "p11",
+     "entree_f": 7,
+     "duree_f": 116,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c12",
+     "src": "p12",
+     "entree_f": 19,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     },
+     "zoom": {
+      "de": 1.0,
+      "a": 1.08
+     }
+    },
+    {
+     "id": "c13",
+     "src": "p13",
+     "entree_f": 7,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     },
+     "rampe": {
+      "de": 1.0,
+      "a": 1.6
+     }
+    },
+    {
+     "id": "c14",
+     "src": "p14",
+     "entree_f": 14,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c15",
+     "src": "p15",
+     "entree_f": 0,
+     "duree_f": 93,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c16",
+     "src": "p16",
+     "entree_f": 0,
+     "duree_f": 70,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c17",
+     "src": "p17",
+     "entree_f": 10,
+     "duree_f": 93,
+     "transition_in": {
+      "type": "dip",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "c18",
+     "src": "p18",
+     "entree_f": 12,
+     "duree_f": 70,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c19",
+     "src": "p19",
+     "entree_f": 10,
+     "duree_f": 93,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c20",
+     "src": "p20",
+     "entree_f": 0,
+     "duree_f": 68,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     },
+     "zoom": {
+      "de": 1.0,
+      "a": 1.08
+     }
+    },
+    {
+     "id": "c21",
+     "src": "p21",
+     "entree_f": 0,
+     "duree_f": 240,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c22",
+     "src": "p22",
+     "entree_f": 10,
+     "duree_f": 93,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c23",
+     "src": "p23",
+     "entree_f": 0,
+     "duree_f": 92,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c24",
+     "src": "p24",
+     "entree_f": 5,
+     "duree_f": 128,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c25",
+     "src": "p25",
+     "entree_f": 14,
+     "duree_f": 70,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c26",
+     "src": "p26",
+     "entree_f": 0,
+     "duree_f": 231,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c27",
+     "src": "p27",
+     "entree_f": 0,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     },
+     "zoom": {
+      "de": 1.0,
+      "a": 1.08
+     }
+    },
+    {
+     "id": "c28",
+     "src": "p28",
+     "entree_f": 12,
+     "duree_f": 70,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c29",
+     "src": "p29",
+     "entree_f": 7,
+     "duree_f": 58,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c30",
+     "src": "p30",
+     "entree_f": 0,
+     "duree_f": 93,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c31",
+     "src": "p31",
+     "entree_f": 7,
+     "duree_f": 116,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c32",
+     "src": "p32",
+     "entree_f": 0,
+     "duree_f": 232,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c-noir",
+     "src": "noir",
+     "entree_f": 0,
+     "duree_f": 70
+    },
+    {
+     "id": "c-carton",
+     "src": "carton",
+     "entree_f": 0,
+     "duree_f": 232
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "musique",
+     "entree_f": 0,
+     "gain_db": -6,
+     "fondu_in_f": 0,
+     "fondu_out_f": 60
+    },
+    "voix": [
+     {
+      "src": "n01",
+      "debut_f": 11,
+      "duree_f": 22,
+      "gain_db": 0
+     },
+     {
+      "src": "n02",
+      "debut_f": 250,
+      "duree_f": 77,
+      "gain_db": 0
+     },
+     {
+      "src": "n03",
+      "debut_f": 445,
+      "duree_f": 80,
+      "gain_db": 0
+     },
+     {
+      "src": "n04",
+      "debut_f": 756,
+      "duree_f": 123,
+      "gain_db": 0
+     },
+     {
+      "src": "n05",
+      "debut_f": 2662,
+      "duree_f": 118,
+      "gain_db": 0
+     },
+     {
+      "src": "n06",
+      "debut_f": 3011,
+      "duree_f": 72,
+      "gain_db": 0
+     },
+     {
+      "src": "n07",
+      "debut_f": 3087,
+      "duree_f": 20,
+      "gain_db": 0
+     },
+     {
+      "src": "e01",
+      "debut_f": 1041,
+      "duree_f": 78,
+      "gain_db": 0
+     },
+     {
+      "src": "m01",
+      "debut_f": 1134,
+      "duree_f": 15,
+      "gain_db": 0
+     },
+     {
+      "src": "l01",
+      "debut_f": 1456,
+      "duree_f": 60,
+      "gain_db": 0
+     },
+     {
+      "src": "c01",
+      "debut_f": 1524,
+      "duree_f": 231,
+      "gain_db": 0
+     },
+     {
+      "src": "g01",
+      "debut_f": 1857,
+      "duree_f": 84,
+      "gain_db": 0
+     },
+     {
+      "src": "a01",
+      "debut_f": 2147,
+      "duree_f": 222,
+      "gain_db": 0
+     },
+     {
+      "src": "e02",
+      "debut_f": 2378,
+      "duree_f": 30,
+      "gain_db": 0
+     },
+     {
+      "src": "l02",
+      "debut_f": 2564,
+      "duree_f": 37,
+      "gain_db": 0
+     }
+    ],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 9
+    },
+    "cible_lufs": -14,
+    "crete_db": -1.5,
+    "fondu_coupe_ms": 30
+   },
+   "textes": []
+  },
+  "court": {
+   "version": 1,
+   "fps": 24,
+   "format": "16:9",
+   "genre": "social",
+   "titre": "Le siège social · 15 s",
+   "sources": {
+    "p01": {
+     "kind": "video"
+    },
+    "p02": {
+     "kind": "video"
+    },
+    "p03": {
+     "kind": "video"
+    },
+    "p05": {
+     "kind": "video"
+    },
+    "p06": {
+     "kind": "video"
+    },
+    "p07": {
+     "kind": "video"
+    },
+    "p09": {
+     "kind": "video"
+    },
+    "p11": {
+     "kind": "video"
+    },
+    "p13": {
+     "kind": "video"
+    },
+    "p14": {
+     "kind": "video"
+    },
+    "p16": {
+     "kind": "video"
+    },
+    "carton": {
+     "kind": "image"
+    },
+    "musique": {
+     "kind": "audio"
+    },
+    "n01": {
+     "kind": "audio"
+    },
+    "m01": {
+     "kind": "audio"
+    }
+   },
+   "video": [
+    {
+     "id": "k01",
+     "src": "p01",
+     "entree_f": 34,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k02",
+     "src": "p02",
+     "entree_f": 10,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k03",
+     "src": "p03",
+     "entree_f": 19,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k04",
+     "src": "p05",
+     "entree_f": 19,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k05",
+     "src": "p06",
+     "entree_f": 29,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k06",
+     "src": "p07",
+     "entree_f": 0,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k07",
+     "src": "p09",
+     "entree_f": 19,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k08",
+     "src": "p11",
+     "entree_f": 24,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k09",
+     "src": "p13",
+     "entree_f": 14,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k10",
+     "src": "p14",
+     "entree_f": 24,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k11",
+     "src": "p16",
+     "entree_f": 0,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k-carton",
+     "src": "carton",
+     "entree_f": 0,
+     "duree_f": 46
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "musique",
+     "entree_f": 48,
+     "gain_db": -6,
+     "fondu_in_f": 0,
+     "fondu_out_f": 29
+    },
+    "voix": [
+     {
+      "src": "n01",
+      "debut_f": 6,
+      "duree_f": 22,
+      "gain_db": 0
+     },
+     {
+      "src": "m01",
+      "debut_f": 278,
+      "duree_f": 15,
+      "gain_db": 0
+     }
+    ],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 9
+    },
+    "cible_lufs": -14,
+    "crete_db": -1.5,
+    "fondu_coupe_ms": 30
+   },
+   "textes": []
+  },
+  "vertical": {
+   "version": 1,
+   "fps": 24,
+   "format": "9:16",
+   "genre": "social",
+   "titre": "Le siège social · 15 s",
+   "sources": {
+    "p01": {
+     "kind": "video"
+    },
+    "p02v": {
+     "kind": "video"
+    },
+    "p03": {
+     "kind": "video"
+    },
+    "p05v": {
+     "kind": "video"
+    },
+    "p06": {
+     "kind": "video"
+    },
+    "p07v": {
+     "kind": "video"
+    },
+    "p09": {
+     "kind": "video"
+    },
+    "p11v": {
+     "kind": "video"
+    },
+    "p13": {
+     "kind": "video"
+    },
+    "p14v": {
+     "kind": "video"
+    },
+    "p16v": {
+     "kind": "video"
+    },
+    "carton": {
+     "kind": "image"
+    },
+    "musique": {
+     "kind": "audio"
+    },
+    "n01": {
+     "kind": "audio"
+    },
+    "m01": {
+     "kind": "audio"
+    }
+   },
+   "video": [
+    {
+     "id": "k01",
+     "src": "p01",
+     "entree_f": 34,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k02",
+     "src": "p02v",
+     "entree_f": 10,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k03",
+     "src": "p03",
+     "entree_f": 19,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k04",
+     "src": "p05v",
+     "entree_f": 19,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k05",
+     "src": "p06",
+     "entree_f": 29,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k06",
+     "src": "p07v",
+     "entree_f": 0,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k07",
+     "src": "p09",
+     "entree_f": 19,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k08",
+     "src": "p11v",
+     "entree_f": 24,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k09",
+     "src": "p13",
+     "entree_f": 14,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k10",
+     "src": "p14v",
+     "entree_f": 24,
+     "duree_f": 23,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k11",
+     "src": "p16v",
+     "entree_f": 0,
+     "duree_f": 35,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "k-carton",
+     "src": "carton",
+     "entree_f": 0,
+     "duree_f": 46
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "musique",
+     "entree_f": 48,
+     "gain_db": -6,
+     "fondu_in_f": 0,
+     "fondu_out_f": 29
+    },
+    "voix": [
+     {
+      "src": "n01",
+      "debut_f": 6,
+      "duree_f": 22,
+      "gain_db": 0
+     },
+     {
+      "src": "m01",
+      "debut_f": 278,
+      "duree_f": 15,
+      "gain_db": 0
+     }
+    ],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 9
+    },
+    "cible_lufs": -14,
+    "crete_db": -1.5,
+    "fondu_coupe_ms": 30
+   },
+   "textes": []
+  }
+ },
+ "annexe": {
+  "long": {
+   "incrustations": [
+    {
+     "type": "statut",
+     "texte": "Photo reçue.",
+     "debut_f": 100,
+     "duree_f": 53,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "flash",
+     "intensite": 0.8,
+     "debut_f": 92,
+     "duree_f": 4
+    },
+    {
+     "type": "trajet",
+     "points": [
+      [
+       0.5,
+       0.95
+      ],
+      [
+       0.55,
+       0.55
+      ],
+      [
+       0.62,
+       0.08
+      ]
+     ],
+     "couleur": "signal",
+     "debut_f": 98,
+     "duree_f": 48
+    },
+    {
+     "type": "statut",
+     "texte": "Signal : satellite · tour 5G · réseau électrique",
+     "debut_f": 170,
+     "duree_f": 167,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "flash",
+     "intensite": 1.0,
+     "debut_f": 424,
+     "duree_f": 4
+    },
+    {
+     "type": "titre",
+     "texte": "Dix départements.|*Une seule équipe.*",
+     "zone": "colonne",
+     "debut_f": 455,
+     "duree_f": 86
+    },
+    {
+     "type": "surtitre",
+     "texte": "M1 · RÉCEPTION",
+     "debut_f": 567,
+     "duree_f": 53,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "surtitre",
+     "texte": "M3 · ESTIMATION",
+     "debut_f": 625,
+     "duree_f": 239,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "etiquette",
+     "texte": "VISION · MESURE PAR PHOTO",
+     "debut_f": 630,
+     "duree_f": 58,
+     "position": "bas-droite"
+    },
+    {
+     "type": "statut",
+     "texte": "Façade : 62,8 m². Moulures : 46 m.",
+     "debut_f": 637,
+     "duree_f": 53,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "statut",
+     "texte": "Simulation des coûts…",
+     "debut_f": 698,
+     "duree_f": 48,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "document",
+     "titre": "SOUMISSION 2417",
+     "destinataire": "M. Morin · revêtement de vinyle",
+     "lignes": [
+      [
+       "Mur avant",
+       "38,2 m²"
+      ],
+      [
+       "Murs latéraux",
+       "24,6 m²"
+      ],
+      [
+       "Moulures et coins",
+       "46 m"
+      ],
+      [
+       "Main-d'œuvre",
+       "3 jours"
+      ]
+     ],
+     "total": "18 940 $",
+     "tampon": null,
+     "debut_f": 756,
+     "duree_f": 111,
+     "position": "droite"
+    },
+    {
+     "type": "statut",
+     "texte": "Revue en 11 critères : conforme.",
+     "debut_f": 809,
+     "duree_f": 58,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "surtitre",
+     "texte": "APPROBATION HUMAINE",
+     "debut_f": 869,
+     "duree_f": 55,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "statut",
+     "texte": "Approuvée par Luc. Envoi.",
+     "debut_f": 889,
+     "duree_f": 36,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "glitch",
+     "intensite": 0.5,
+     "debut_f": 925,
+     "duree_f": 5
+    },
+    {
+     "type": "document",
+     "titre": "SOUMISSION 2417",
+     "destinataire": "M. Morin · revêtement de vinyle",
+     "lignes": [
+      [
+       "Mur avant",
+       "38,2 m²"
+      ],
+      [
+       "Murs latéraux",
+       "24,6 m²"
+      ],
+      [
+       "Moulures et coins",
+       "46 m"
+      ],
+      [
+       "Main-d'œuvre",
+       "3 jours"
+      ]
+     ],
+     "total": "18 940 $",
+     "tampon": "PRÊTE",
+     "debut_f": 993,
+     "duree_f": 94,
+     "position": "droite",
+     "echelle": 0.85
+    },
+    {
+     "type": "flash",
+     "intensite": 0.7,
+     "debut_f": 1199,
+     "duree_f": 4
+    },
+    {
+     "type": "surtitre",
+     "texte": "M4 · TERRAIN",
+     "debut_f": 1202,
+     "duree_f": 86,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "statut",
+     "texte": "Dossier de chantier : Morin, lundi 7 h.",
+     "debut_f": 1214,
+     "duree_f": 72,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "surtitre",
+     "texte": "M6 · MATÉRIEL",
+     "debut_f": 1295,
+     "duree_f": 62,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "statut",
+     "texte": "Réservé : 14 boîtes de vinyle gris.",
+     "debut_f": 1303,
+     "duree_f": 58,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "surtitre",
+     "texte": "M5 · FINANCE",
+     "debut_f": 1365,
+     "duree_f": 86,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "etiquette",
+     "texte": "VISION · AVATAR",
+     "debut_f": 1375,
+     "duree_f": 72,
+     "position": "bas-droite"
+    },
+    {
+     "type": "courbe",
+     "points": [
+      100,
+      104,
+      103,
+      109,
+      112,
+      115,
+      121,
+      126,
+      131
+     ],
+     "pointille_depuis": 5,
+     "etiquette": "PROFITS ANTICIPÉS",
+     "valeur": "+7 %",
+     "debut_f": 1572,
+     "duree_f": 285,
+     "position": "droite",
+     "echelle": 0.9
+    },
+    {
+     "type": "compteur",
+     "de": 0,
+     "a": 7,
+     "suffixe": " %",
+     "etiquette": "PRODUCTIVITÉ",
+     "debut_f": 1766,
+     "duree_f": 91,
+     "position": "gauche"
+    },
+    {
+     "type": "surtitre",
+     "texte": "M4 · CÉDULE",
+     "debut_f": 1859,
+     "duree_f": 215,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "cedule",
+     "titre": "CÉDULE · 3 SEMAINES",
+     "semaines": 3,
+     "blocs": [
+      [
+       0,
+       0,
+       2,
+       0,
+       "Chantier Morin"
+      ],
+      [
+       0,
+       3,
+       4,
+       1,
+       "Gouttières Lavoie"
+      ],
+      [
+       1,
+       0,
+       1,
+       0,
+       "Soffite Gagnon"
+      ],
+      [
+       1,
+       2,
+       4,
+       2,
+       "Revêtement Roy"
+      ],
+      [
+       2,
+       0,
+       4,
+       0,
+       "Chantier Côté"
+      ],
+      [
+       2,
+       1,
+       3,
+       1,
+       "Fascia Bélanger"
+      ]
+     ],
+     "debut_f": 1954,
+     "duree_f": 123,
+     "position": "centre",
+     "echelle": 0.95
+    },
+    {
+     "type": "etiquette",
+     "texte": "EN PRÉPARATION",
+     "debut_f": 1961,
+     "duree_f": 60,
+     "position": "bas-droite"
+    },
+    {
+     "type": "appel",
+     "nom": "Adjointe",
+     "sous_titre": "Appel entrant",
+     "voix": "a01",
+     "debut_f": 2089,
+     "duree_f": 289,
+     "position": "haut-droite"
+    },
+    {
+     "type": "surtitre",
+     "texte": "M1 · RÉCEPTION",
+     "debut_f": 2149,
+     "duree_f": 72,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "etiquette",
+     "texte": "VISION · RÉCEPTIONNISTE VOCALE",
+     "debut_f": 2161,
+     "duree_f": 72,
+     "position": "bas-droite"
+    },
+    {
+     "type": "pointage",
+     "heure": "06:58",
+     "nom": "Kevin Tremblay",
+     "etat": "ARRIVÉE",
+     "debut_f": 2443,
+     "duree_f": 63,
+     "position": "droite",
+     "echelle": 0.8
+    },
+    {
+     "type": "etiquette",
+     "texte": "EN PRÉPARATION",
+     "debut_f": 2448,
+     "duree_f": 48,
+     "position": "bas-droite"
+    },
+    {
+     "type": "surtitre",
+     "texte": "M5 · PAYE",
+     "debut_f": 2566,
+     "duree_f": 72,
+     "position": "haut-gauche"
+    },
+    {
+     "type": "etiquette",
+     "texte": "VISION",
+     "debut_f": 2576,
+     "duree_f": 60,
+     "position": "bas-droite"
+    },
+    {
+     "type": "pile",
+     "lignes": [
+      "M1 Réception",
+      "M2 CRM",
+      "M3 Estimation",
+      "M4 Terrain",
+      "M5 Finance",
+      "M6 Matériel",
+      "M7 Marketing",
+      "M8 Analytique",
+      "M9 Stratégie",
+      "M10 Mémoire"
+     ],
+     "debut_f": 2787,
+     "duree_f": 206,
+     "zone": "colonne"
+    },
+    {
+     "type": "flash",
+     "intensite": 1.0,
+     "debut_f": 3003,
+     "duree_f": 4
+    },
+    {
+     "type": "impact",
+     "texte": "Les ressources d'une *grande entreprise.*",
+     "debut_f": 3007,
+     "duree_f": 65
+    },
+    {
+     "type": "carton",
+     "debut_f": 3075,
+     "duree_f": 232
+    }
+   ],
+   "sfx": [
+    {
+     "type": "clic",
+     "debut_f": 70,
+     "db": -4
+    },
+    {
+     "type": "fouet",
+     "debut_f": 89,
+     "db": -3
+    },
+    {
+     "type": "impact",
+     "debut_f": 93,
+     "db": -2
+    },
+    {
+     "type": "montee",
+     "debut_f": 337,
+     "duree_s": 3.71,
+     "db": -6
+    },
+    {
+     "type": "boom",
+     "debut_f": 426,
+     "db": -1
+    },
+    {
+     "type": "inverse",
+     "debut_f": 911,
+     "db": -6
+    },
+    {
+     "type": "impact",
+     "debut_f": 1200,
+     "db": -4
+    },
+    {
+     "type": "impact",
+     "debut_f": 3005,
+     "db": -1
+    },
+    {
+     "type": "chute",
+     "debut_f": 3075,
+     "db": -3
+    }
+   ],
+   "son_plans": [
+    {
+     "plan": "p01",
+     "db": -14
+    },
+    {
+     "plan": "p02",
+     "db": -14
+    },
+    {
+     "plan": "p03",
+     "db": -14
+    },
+    {
+     "plan": "p04",
+     "db": -14
+    },
+    {
+     "plan": "p05",
+     "db": -14
+    },
+    {
+     "plan": "p06",
+     "db": -14
+    },
+    {
+     "plan": "p07",
+     "db": -14
+    },
+    {
+     "plan": "p13",
+     "db": -14
+    },
+    {
+     "plan": "p18",
+     "db": -14
+    },
+    {
+     "plan": "p25",
+     "db": -14
+    },
+    {
+     "plan": "p29",
+     "db": -14
+    },
+    {
+     "plan": "p31",
+     "db": -14
+    },
+    {
+     "plan": "p32",
+     "db": -14
+    }
+   ],
+   "etalonnage": {
+    "contraste": 1.05,
+    "saturation": 1.04,
+    "grain": 1.0
+   },
+   "caler_sur_temps": false
+  },
+  "court": {
+   "incrustations": [
+    {
+     "type": "compteur",
+     "de": 0,
+     "a": 10,
+     "suffixe": " s",
+     "etiquette": "SOUMISSION",
+     "debut_f": 35,
+     "duree_f": 243,
+     "position": "haut-droite",
+     "echelle": 0.45
+    },
+    {
+     "type": "statut",
+     "texte": "Photo reçue.",
+     "debut_f": 37,
+     "duree_f": 34,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "flash",
+     "intensite": 1.0,
+     "debut_f": 138,
+     "duree_f": 4
+    },
+    {
+     "type": "document",
+     "titre": "SOUMISSION 2417",
+     "destinataire": "M. Morin · revêtement",
+     "lignes": [
+      [
+       "Mur avant",
+       "38,2 m²"
+      ],
+      [
+       "Murs latéraux",
+       "24,6 m²"
+      ],
+      [
+       "Moulures",
+       "46 m"
+      ]
+     ],
+     "total": "18 940 $",
+     "tampon": "PRÊTE",
+     "debut_f": 197,
+     "duree_f": 92,
+     "position": "droite",
+     "echelle": 0.8
+    },
+    {
+     "type": "etiquette",
+     "texte": "VISION",
+     "debut_f": 139,
+     "duree_f": 72,
+     "position": "bas-droite"
+    },
+    {
+     "type": "carton",
+     "debut_f": 313,
+     "duree_f": 46
+    }
+   ],
+   "sfx": [
+    {
+     "type": "clic",
+     "debut_f": 24,
+     "db": -4
+    },
+    {
+     "type": "fouet",
+     "debut_f": 32,
+     "db": -3
+    },
+    {
+     "type": "boom",
+     "debut_f": 139,
+     "db": -2
+    },
+    {
+     "type": "inverse",
+     "debut_f": 220,
+     "db": -6
+    },
+    {
+     "type": "impact",
+     "debut_f": 313,
+     "db": -2
+    }
+   ],
+   "son_plans": [
+    {
+     "plan": "p05",
+     "db": -14
+    },
+    {
+     "plan": "p07",
+     "db": -14
+    }
+   ],
+   "recadrage_v": {
+    "p01": 0.55,
+    "p03": 0.5,
+    "p06": 0.5,
+    "p09": 0.5,
+    "p13": 0.5
+   }
+  },
+  "vertical": {
+   "incrustations": [
+    {
+     "type": "compteur",
+     "de": 0,
+     "a": 10,
+     "suffixe": " s",
+     "etiquette": "SOUMISSION",
+     "debut_f": 35,
+     "duree_f": 243,
+     "position": "haut-droite",
+     "echelle": 0.45
+    },
+    {
+     "type": "statut",
+     "texte": "Photo reçue.",
+     "debut_f": 37,
+     "duree_f": 34,
+     "position": "bas-gauche"
+    },
+    {
+     "type": "flash",
+     "intensite": 1.0,
+     "debut_f": 138,
+     "duree_f": 4
+    },
+    {
+     "type": "document",
+     "titre": "SOUMISSION 2417",
+     "destinataire": "M. Morin · revêtement",
+     "lignes": [
+      [
+       "Mur avant",
+       "38,2 m²"
+      ],
+      [
+       "Murs latéraux",
+       "24,6 m²"
+      ],
+      [
+       "Moulures",
+       "46 m"
+      ]
+     ],
+     "total": "18 940 $",
+     "tampon": "PRÊTE",
+     "debut_f": 197,
+     "duree_f": 92,
+     "position": "droite",
+     "echelle": 0.8
+    },
+    {
+     "type": "etiquette",
+     "texte": "VISION",
+     "debut_f": 139,
+     "duree_f": 72,
+     "position": "bas-droite"
+    },
+    {
+     "type": "carton",
+     "debut_f": 313,
+     "duree_f": 46
+    }
+   ],
+   "sfx": [
+    {
+     "type": "clic",
+     "debut_f": 24,
+     "db": -4
+    },
+    {
+     "type": "fouet",
+     "debut_f": 32,
+     "db": -3
+    },
+    {
+     "type": "boom",
+     "debut_f": 139,
+     "db": -2
+    },
+    {
+     "type": "inverse",
+     "debut_f": 220,
+     "db": -6
+    },
+    {
+     "type": "impact",
+     "debut_f": 313,
+     "db": -2
+    }
+   ],
+   "son_plans": [
+    {
+     "plan": "p05",
+     "db": -14
+    },
+    {
+     "plan": "p07",
+     "db": -14
+    }
+   ],
+   "recadrage_v": {
+    "p01": 0.55,
+    "p03": 0.5,
+    "p06": 0.5,
+    "p09": 0.5,
+    "p13": 0.5
+   }
+  }
+ },
+ "_grille": {
+  "bpm": 124.0,
+  "phase": 0.0,
+  "decalage": 0.0,
+  "duree_long_s": 137.79
+ }
+}

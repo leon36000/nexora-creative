@@ -1,0 +1,414 @@
+{
+ "voix": {
+  "drama3-adamqc": {
+   "moteur": "drama3:adamqc",
+   "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
+   "genre": "homme",
+   "description": "Adam, voix québécoise d'âge moyen, « chaleureuse et amicale »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 8.2,
+    "energie": 7.2,
+    "naturel": 7.5,
+    "clarte": 8.8,
+    "adequation_role": 7.8
+   },
+   "emr_moyen": 0.042,
+   "cps_moyen": 19.5,
+   "relief_demitons": 5.18,
+   "direction": "Patron québécois décontracté et décidé, parle vite, naturel.",
+   "vitesse": 1.1,
+   "echantillons": {
+    "administrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/administrateur-drama3-adamqc-p1.wav",
+    "representant": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/representant-drama3-adamqc-p1.wav"
+   },
+   "commentaires": [
+    "Bonne dynamique générale et un accent globalement convaincant, mais le 'pis' lu comme 'puis' et une légère rigidité trahissent la synthèse vocale.",
+    "Bonne prise naturelle et efficace avec un accent québécois crédible qui correspond très bien au rôle d'administrateur.",
+    "Excellente prise avec un accent québécois très authentique et une énergie efficace, tout à fait prête pour la diffusion."
+   ]
+  },
+  "drama3-amelie": {
+   "moteur": "drama3:amelie",
+   "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
+   "genre": "femme",
+   "description": "Amélie, voix québécoise, « jeune, assurée, amicale »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 4.5,
+    "energie": 7.5,
+    "naturel": 3.0,
+    "clarte": 8.0,
+    "adequation_role": 5.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 16.4,
+   "relief_demitons": 4.55,
+   "direction": "Assurée, précise, enjouée, accent québécois.",
+   "vitesse": 1.05,
+   "echantillons": {
+    "comptable": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/comptable-drama3-amelie-p1.wav"
+   },
+   "commentaires": [
+    "L'énergie est là, mais le timbre synthétique et la faute de prononciation sur 'ratios' rendent la prise inutilisable en l'état.",
+    "Malgré un bon niveau d'énergie, l'accent est purement hexagonal et la prosodie sonne résolument synthétique, ce qui rend la prise inutilisable pour une publicité québécoise."
+   ]
+  },
+  "drama3-frederic": {
+   "moteur": "drama3:frederic",
+   "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
+   "genre": "homme",
+   "description": "Frédéric, voix québécoise d'âge moyen, « professionnelle et assurée » (bibliothèque ElevenLabs)",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 9.0,
+    "energie": 7.0,
+    "naturel": 8.0,
+    "clarte": 9.0,
+    "adequation_role": 8.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 16.5,
+   "relief_demitons": 5.65,
+   "direction": "Énergique, assuré, naturel, accent québécois, rythme vif, jamais lisse ni endormi.",
+   "vitesse": 1.1,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/narrateur-drama3-frederic-p1.wav"
+   },
+   "commentaires": [
+    "Très bonne prise avec un accent québécois authentique et une diction claire, même si l'intention pourrait être encore un peu plus percutante pour un ton dramatique.",
+    "Bonne prestation avec un accent québécois naturel et une articulation claire, bien que la liaison sur « se met-t-au » fasse un peu trop soutenue."
+   ]
+  },
+  "drama3-jeannemance": {
+   "moteur": "drama3:jeannemance",
+   "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
+   "genre": "femme",
+   "description": "Jeanne Mance, voix québécoise, « charmante, claire et jeune »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 6.7,
+    "energie": 6.7,
+    "naturel": 6.5,
+    "clarte": 8.7,
+    "adequation_role": 6.3
+   },
+   "emr_moyen": 0.039,
+   "cps_moyen": 19.1,
+   "relief_demitons": 3.99,
+   "direction": "Chaleureuse, professionnelle, efficace, accent québécois naturel.",
+   "vitesse": 1.05,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/adjointe-drama3-jeannemance-p1.wav",
+    "gestion": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/gestion-drama3-jeannemance-p1.wav",
+    "comptable": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/comptable-drama3-jeannemance-p1.wav"
+   },
+   "commentaires": [
+    "Très bonne prise avec un accent québécois naturel (l'affrication sur Thibault est juste) et une élision naturelle sur 'demandé', tout à fait crédible et diffusable pour le rôle d'adjointe.",
+    "Excellente prise, l'accent québécois est très naturel avec une bonne affrication et le ton professionnel correspond parfaitement au rôle d'adjointe.",
+    "Excellente prise avec un accent québécois très authentique et une énergie autoritaire parfaite pour un rôle de gestion."
+   ]
+  },
+  "drama3-marieline": {
+   "moteur": "drama3:marieline",
+   "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
+   "genre": "femme",
+   "description": "Marie Line, voix québécoise d'âge moyen, « énergique et claire »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 7.0,
+    "energie": 4.5,
+    "naturel": 5.0,
+    "clarte": 8.0,
+    "adequation_role": 6.0
+   },
+   "emr_moyen": 0.074,
+   "cps_moyen": 20.8,
+   "relief_demitons": 4.63,
+   "direction": "Chaleureuse, professionnelle, efficace, accent québécois naturel.",
+   "vitesse": 1.05,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/adjointe-drama3-marieline-p1.wav"
+   },
+   "commentaires": [
+    "L'accent québécois est présent (notamment sur « Thibault »), mais l'intonation reste trop lisse, mécanique et manque d'incarnation pour une diffusion télévisée convaincante.",
+    "L'accent québécois est présent (notamment sur « Thibault »), mais l'intonation reste trop robotique et manque de vie pour une publicité télévisée."
+   ]
+  },
+  "drama3-thomas": {
+   "moteur": "drama3:thomas",
+   "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
+   "genre": "homme",
+   "description": "Thomas, jeune voix « claire, chaleureuse, professionnelle » (accent peu québécois à l'oreille de machine)",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 2.8,
+    "energie": 7.5,
+    "naturel": 6.8,
+    "clarte": 8.8,
+    "adequation_role": 4.2
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 17.8,
+   "relief_demitons": 5.5,
+   "direction": "Énergique, assuré, naturel, accent québécois, rythme vif, jamais lisse ni endormi.",
+   "vitesse": 1.1,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/narrateur-drama3-thomas-p1.wav",
+    "representant": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/representant-drama3-thomas-p1.wav"
+   },
+   "commentaires": [
+    "Bonne énergie publicitaire et voix claire, mais l'accent français de France est totalement inadapté pour une diffusion ciblant le marché télévisuel québécois.",
+    "Bonne énergie et clarté, mais l'accent est clairement français de France, ce qui est inutilisable pour le marché québécois.",
+    "Excellente énergie et un accent québécois très authentique (avec le « t'suite » naturel), parfait pour une publicité dynamique."
+   ]
+  },
+  "eleven-adamqc": {
+   "moteur": "eleven:93nuHbke4dTER9x2pDwE",
+   "famille": "ElevenLabs v4 (OpenRouter)",
+   "genre": "homme",
+   "description": "Adam, voix québécoise d'âge moyen, « chaleureuse et amicale »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 6.5,
+    "energie": 5.8,
+    "naturel": 6.0,
+    "clarte": 6.8,
+    "adequation_role": 6.3
+   },
+   "emr_moyen": 0.028,
+   "cps_moyen": 18.9,
+   "relief_demitons": 5.41,
+   "direction": "[energetic, confident, natural Québécois]",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/narrateur-eleven-adamqc-p1.wav",
+    "administrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/administrateur-eleven-adamqc-p1.wav",
+    "representant": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/representant-eleven-adamqc-p1.wav"
+   },
+   "commentaires": [
+    "Bonne diction et accent adéquat, mais l'intonation reste légèrement synthétique et manque de punch publicitaire.",
+    "Bonne diction et accent adéquat, bien que l'énergie reste modérée pour une publicité.",
+    "Une bonne base québécoise mais des erreurs de prononciation et un timbre légèrement synthétique nuisent au naturel."
+   ]
+  },
+  "eleven-alexandre": {
+   "moteur": "eleven:IPgYtHTNLjC7Bq7IPHrm",
+   "famille": "ElevenLabs v4 (OpenRouter)",
+   "genre": "homme",
+   "description": "Alexandre Boutin, voix des films V5 (jugée « beaucoup trop smooth » par le fondateur)",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 4.5,
+    "energie": 7.0,
+    "naturel": 7.5,
+    "clarte": 8.5,
+    "adequation_role": 7.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 15.2,
+   "relief_demitons": 5.4,
+   "direction": "[energetic, confident, natural Québécois]",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/narrateur-eleven-alexandre-p1.wav"
+   },
+   "commentaires": [
+    "Une bonne livraison dynamique au standard radio-canadien, mais la liaison sur « se met au » sonne trop littéraire et française pour la télé d'ici.",
+    "Bonne énergie de narration publicitaire, mais l'accent sonne beaucoup trop français de France pour le marché québécois et il y a une faute de liaison grammaticale sur « met au »."
+   ]
+  },
+  "eleven-amelie": {
+   "moteur": "eleven:UJCi4DDncuo0VJDSIegj",
+   "famille": "ElevenLabs v4 (OpenRouter)",
+   "genre": "femme",
+   "description": "Amélie, voix québécoise, « jeune, assurée, amicale »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 8.5,
+    "energie": 5.5,
+    "naturel": 6.8,
+    "clarte": 8.5,
+    "adequation_role": 7.0
+   },
+   "emr_moyen": 0.058,
+   "cps_moyen": 21.1,
+   "relief_demitons": 3.54,
+   "direction": "[warm, professional, efficient]",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/adjointe-eleven-amelie-p1.wav",
+    "comptable": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/comptable-eleven-amelie-p1.wav"
+   },
+   "commentaires": [
+    "L'accent québécois est authentique et le ton professionnel correspond bien au rôle d'adjointe, mais la livraison gagnerait à être un peu plus dynamique pour la télévision.",
+    "L'accent québécois est très convaincant avec de bonnes élisions naturelles, mais la livraison manque un peu de dynamisme pour une publicité télévisée.",
+    "La voix sonne très synthétique et robotique dans ses intonations, et il y a une erreur d'accord à l'oral (« mise à jour » au lieu de « mis à jour »)."
+   ]
+  },
+  "eleven-frederic": {
+   "moteur": "eleven:oziFLKtaxVDHQAh7o45V",
+   "famille": "ElevenLabs v4 (OpenRouter)",
+   "genre": "homme",
+   "description": "Frédéric, voix québécoise d'âge moyen, « professionnelle et assurée » (bibliothèque ElevenLabs)",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 8.3,
+    "energie": 6.0,
+    "naturel": 7.7,
+    "clarte": 8.3,
+    "adequation_role": 7.7
+   },
+   "emr_moyen": 0.042,
+   "cps_moyen": 18.7,
+   "relief_demitons": 4.74,
+   "direction": "[energetic, confident, natural Québécois]",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/narrateur-eleven-frederic-p1.wav",
+    "comptable": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/comptable-eleven-frederic-p1.wav",
+    "administrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/administrateur-eleven-frederic-p1.wav"
+   },
+   "commentaires": [
+    "Bonne prestation avec un accent québécois authentique et une diction claire, tout à fait diffusable pour une publicité.",
+    "Très bonne prise avec un accent québécois authentique et une diction claire, tout à fait diffusable bien qu'un peu plus de punch aurait servi la finale.",
+    "Bonne voix québécoise posée qui convient au rôle de comptable, mais il faut corriger l'erreur de liaison sur « mis à jour » et donner un peu plus de relief pour la télé."
+   ]
+  },
+  "eleven-jeannemance": {
+   "moteur": "eleven:K7gx0ylJdff0yjM2uVQS",
+   "famille": "ElevenLabs v4 (OpenRouter)",
+   "genre": "femme",
+   "description": "Jeanne Mance, voix québécoise, « charmante, claire et jeune »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 9.0,
+    "energie": 7.2,
+    "naturel": 8.2,
+    "clarte": 9.0,
+    "adequation_role": 8.2
+   },
+   "emr_moyen": 0.056,
+   "cps_moyen": 21.5,
+   "relief_demitons": 3.65,
+   "direction": "[warm, professional, efficient]",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/adjointe-eleven-jeannemance-p1.wav",
+    "gestion": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/gestion-eleven-jeannemance-p1.wav"
+   },
+   "commentaires": [
+    "Très bonne prise, l'accent québécois est authentique et le ton professionnel correspond parfaitement au rôle d'adjointe.",
+    "Excellente prise très naturelle avec un bel accent québécois authentique, idéale pour le rôle d'adjointe et prête pour la diffusion.",
+    "Très bonne prise avec un accent québécois authentique et une attitude crédible pour un rôle de gestion, le souffle initial donne un aspect naturel bien que l'énergie pourrait être légèrement plus appuyée pour de la pub télé."
+   ]
+  },
+  "eleven-marieline": {
+   "moteur": "eleven:u5l0VNCfzO5oqrKTuA1e",
+   "famille": "ElevenLabs v4 (OpenRouter)",
+   "genre": "femme",
+   "description": "Marie Line, voix québécoise d'âge moyen, « énergique et claire »",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 8.0,
+    "energie": 5.5,
+    "naturel": 7.5,
+    "clarte": 9.0,
+    "adequation_role": 7.5
+   },
+   "emr_moyen": 0.074,
+   "cps_moyen": 22.3,
+   "relief_demitons": 4.36,
+   "direction": "[warm, professional, efficient]",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/adjointe-eleven-marieline-p1.wav"
+   },
+   "commentaires": [
+    "Bonne diction, mais le ton est un peu trop lisse et manque de naturel spontané pour une publicité québécoise.",
+    "L'accent québécois est authentique et le ton professionnel convient bien au rôle d'adjointe, bien que la livraison soit un peu lisse façon SVI plutôt que dynamique pour la télévision."
+   ]
+  },
+  "eleven-thomas": {
+   "moteur": "eleven:4FLkNETtL5THnClfpjpb",
+   "famille": "ElevenLabs v4 (OpenRouter)",
+   "genre": "homme",
+   "description": "Thomas, jeune voix « claire, chaleureuse, professionnelle » (accent peu québécois à l'oreille de machine)",
+   "local": false,
+   "notes": {
+    "accent_quebecois": 4.2,
+    "energie": 6.2,
+    "naturel": 6.2,
+    "clarte": 8.2,
+    "adequation_role": 4.7
+   },
+   "emr_moyen": 0.022,
+   "cps_moyen": 18.1,
+   "relief_demitons": 4.32,
+   "direction": "[energetic, confident, natural Québécois]",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/narrateur-eleven-thomas-p1.wav",
+    "gestion": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/gestion-eleven-thomas-p1.wav",
+    "representant": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/representant-eleven-thomas-p1.wav"
+   },
+   "commentaires": [
+    "Bonne dynamique, mais l'accent manque d'authenticité québécoise et l'intonation paraît légèrement synthétique.",
+    "La livraison est claire mais l'accent européen et la liaison forcée ne conviennent pas au marché québécois.",
+    "Bonne diction et ton professionnel, mais l'accent est purement européen, ce qui est totalement inutilisable pour un chef de chantier québécois."
+   ]
+  },
+  "qwen3tts-frederic": {
+   "moteur": "qwen3tts:frederic",
+   "famille": "Qwen3-TTS 1.7B, local GB10 (clonage, apache-2.0)",
+   "genre": "homme",
+   "description": "Frédéric, voix québécoise d'âge moyen, « professionnelle et assurée » (bibliothèque ElevenLabs)",
+   "local": true,
+   "notes": {
+    "accent_quebecois": 6.0,
+    "energie": 6.0,
+    "naturel": 5.0,
+    "clarte": 7.0,
+    "adequation_role": 6.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 16.3,
+   "relief_demitons": 5.49,
+   "direction": "",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/narrateur-qwen3tts-frederic-p1.wav"
+   },
+   "commentaires": [
+    "Prise claire avec un bon rythme, mais le timbre trahit une voix de synthèse et l'accent manque un peu de naturel.",
+    "L'accent et l'énergie sont acceptables, mais la prosodie trahit légèrement la synthèse vocale."
+   ]
+  },
+  "qwen3tts-jeannemance": {
+   "moteur": "qwen3tts:jeannemance",
+   "famille": "Qwen3-TTS 1.7B, local GB10 (clonage, apache-2.0)",
+   "genre": "femme",
+   "description": "Jeanne Mance, voix québécoise, « charmante, claire et jeune »",
+   "local": true,
+   "notes": {
+    "accent_quebecois": 7.0,
+    "energie": 5.5,
+    "naturel": 6.0,
+    "clarte": 7.0,
+    "adequation_role": 6.5
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 23.1,
+   "relief_demitons": 3.29,
+   "direction": "",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting/voix/adjointe-qwen3tts-jeannemance-p1.wav"
+   },
+   "commentaires": [
+    "Bonne diction québécoise et ton professionnel, mais l'intonation reste légèrement mécanique.",
+    "L'accent québécois et la clarté sont bons, mais le ton reste un peu lisse et synthétique."
+   ]
+  }
+ }
+}
