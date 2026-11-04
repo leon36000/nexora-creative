@@ -353,3 +353,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Mesh : synthèse hors Git sur Storage, bancs et limites conservés. Site/Creative répondent HTTP 200 depuis pc5, WorkStudio 307 ; 1 705 entrées dans l'inventaire pc1, couverture infographies non établie.
 - Director : 80 tests ciblés passent ; règle live-action globale à corriger pour respecter les autres styles demandés. Finish : 14 tests TypeScript passent, Python bloqué par FastAPI absent localement ; aucune modification de code ou production.
+
+- VM204 : files Comfy sur adresse LAN vides, services actifs ; le refus localhost était lié à l'adresse d'écoute. Inventaire pc1 : 101 lignes portent une raison de non-copie, aucune extension d'image dans les chemins ; audit des infographies à faire. Script ciblé CPU pc1 préparé et syntaxiquement valide, pas exécuté.

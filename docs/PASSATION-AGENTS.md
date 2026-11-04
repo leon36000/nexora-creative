@@ -419,3 +419,9 @@ V100 : plafond mesuré 240/300 W et utilisation 0 %.
 - Director : six fichiers de tests ciblés, **80/80 passent** ; aucun changement au worktree. Toutefois la règle non commitée impose live-action à toutes les demandes, même si le client veut un style d'animation : incompatibilité potentielle avec la polyvalence du produit, à corriger avant intégration ; tests verts ne prouvent ni ce cas ni qualité visuelle. Banc 12 briefs réels non exécuté.
 - Finish : 14/14 tests TypeScript ciblés passent ; test Python non exécuté car FastAPI absent des deux interpréteurs locaux essayés. Aucune mesure nouvelle NVENC, aucun service ni production modifié ; le rapport 30 reste à finir.
 - pc1 : sudo non interactif indisponible ; CPU au plafond complet au contrôle. Ne pas lancer en bloc le script regroupé pendant le 502 : il retenterait aussi OAuth et pc6, et n'arrête pas ses étapes sur erreur.
+
+### Suites du diagnostic — 06 h 32 Montréal
+
+- VM204 : les deux ComfyUI écoutent sur l'adresse LAN, pas sur 127.0.0.1 ; services actifs, files 8188 et 8189 chacune à 0 actif/0 attente. Le service audio est actif. Le premier essai localhost refusé ne signifiait pas une panne.
+- Inventaire pc1 : 1 705 entrées dont 1 553 MP4, 17 MOV, 11 WebM, 28 fichiers audio et 96 sans extension ; 101 lignes ont une raison de non-copie. Aucune extension d'image n'apparaît dans le champ de chemin de cet inventaire : archivage des infographies non établi, il faut rechercher et inventorier les images ailleurs sans les supprimer. Les entrées non copiées demandent rapprochement.
+- Script ciblé pour le fondateur `/home/pc6/Desktop/nexora-cpu-pc1-codex.sh` : préparé, `bash -n` réussi, non exécuté ; il installe l'unité existante avec `GPU_SKIP=1`, demande éventuellement sudo pc1 et affiche fréquences/GPU. À confirmer par une nouvelle mesure après exécution. Il ne lance ni OAuth ni changement CPU sur pc6.
