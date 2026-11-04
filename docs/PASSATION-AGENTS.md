@@ -790,3 +790,7 @@ Un objet, aucun rendu ou verdict visuel : résultat prometteur pour la taille, m
 Commit local **71499dd** : un plan vidéo sans source résolue et une voix sans identifiant valide sont refusés ; un rapport du validateur explicitement `ok:false` arrête le rendu ; les nouveaux journaux indiquent le mode brouillon et la résolution. Les quatre lacunes ont été reproduites avant correction ; **18 tests ciblés** relancés indépendamment passent. Limites : si le validateur est absent et retourne `None`, la validation n’est pas démontrée ; les exports échoués restent conservés sans faux succès ; ABA reste explicitement hors attestation.
 
 Un nouvel essai CPU étiqueté du vertical DeepSeek tourne avec un nom différent pour vérifier ces derniers changements sur un vrai montage ; résultat et archivage en attente. Tous les essais précédents sont conservés.
+
+### Détourage : contrôle de santé explicite
+
+Un test réseau local simulé a montré que `/capacites` annonçait le rapide disponible même si `/sante` répondait HTTP 200 avec `{}` ou `ok:false`. Le serveur de détourage documenté renvoie `ok:true` en santé. Commit local **2ba45b0** : disponibilité vraie seulement avec `ok:true`, tandis qu’un moteur déclaré mais refusant ou renvoyant une réponse incomplète reste identifié comme indisponible. Régression observée avant correction ; **25 tests ciblés** et typecheck passent. Cela ne remplace pas un vrai parcours connecté, ne rajoute pas la recette manquante et n’est pas déployé.
