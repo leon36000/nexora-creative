@@ -597,3 +597,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 ### Reprise Codex — archive planche Muse, 4 novembre 2026
 
 - La planche comparative Muse est conservée sous Storage `Nexora/travail/films-reprise-codex/muse-court-vertical-comparison-20261104T212005732041Z/` et copiée sur le disque Infrastructure de pc1 sous `NexoraStudioWork/ArchivesNexora/codex-opsys-muse-court-vertical-comparison-20261104T212005732041Z/`. SHA-256 `392accf6ea804e261c2b0943d62da363bd65bf0ce8496128a0f96ca00d8c70ae` revérifié à distance; inventaire pc1 vérifié, 3934 entrées. Les autres aperçus de recherche ont été décodés en mémoire, sans fichiers images supplémentaires. Une seule image médiane par plan ne juge pas l'animation entière.
+
+
+### Reprise Codex — candidat veille GPU, 4 novembre 2026
+
+- Copie et correctif candidats sous Storage `Nexora/travail/rnd-codex-20261104/sync-gpu-guard-isolated/`; original pc1 inchangé, SHA-256 `829b5820262288feae8d2fb2baf39418ca9d855338a21c9b433fa44e3146a449`. Six tests CPU repassés indépendamment pour l'échéance; aucun accès GPU ou service.
+- Revue bloquante : le candidat conservait l'appel original `POST /free` à ComfyUI, susceptible de décharger des modèles partagés. Il ne doit pas être exécuté ni intégré ainsi durant le diagnostic; suppression de cet effet en cours et test demandé. Une file vide ne constitue pas une réservation exclusive. L'échéance historique déjà expirée bloquerait toute future exécution jusqu'à sa mise à jour explicite.
