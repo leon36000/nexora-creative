@@ -6,6 +6,23 @@ Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'es
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
 
+## Mise à jour du 03/11 (nuit) : vague 2, le mode Marketing (kit de marque, imprimés en PDF fond perdu)
+
+Page **Marketing** dans l'application (`/marketing`) : on saisit sa marque une fois (nom, logo SVG/PNG avec contrôles, couleurs avec contraste AA, polices libres, ton, coordonnées), puis **une phrase → 3 propositions → on choisit → on retouche → PDF imprimeur / PDF fond perdu / PNG / SVG**. Le kit est aussi donné au Producteur (ton, couleurs, polices, coordonnées) pour que vidéos et textes restent dans la marque.
+
+| Brique | État | Preuve |
+|---|---|---|
+| Kit de marque (modèle zod, API `GET/PUT /api/nexora/marque`, téléversement du logo, couleurs dominantes SVG et PNG) | **fait, testé** | `server/nexora/marketing/kit.ts`, 26 tests |
+| `SpecConception` v1 (7 formats, faces, calques texte/image/forme/logo/QR, variables, champs vides qui disparaissent) | **fait, testé** | `spec.ts` ; fond perdu 0,125 po, zone de sécurité |
+| Rendu : Playwright → PDF avec **traits de coupe**, TrimBox/BleedBox, polices TrueType intégrées, PNG ≈ 300 dpi, mesure réelle du texte | **fait, prouvé** | 9 gabarits rendus en **285 à 390 ms** chacun (carte, dépliant, accroche-porte) |
+| Contrôle préliminaire (dpi, zone de sécurité, zone de la poignée, fond perdu, contraste AA, texte trop petit) | **fait, testé** | `controler()` ; 0 erreur sur les 9 échantillons |
+| 9 gabarits (3 cartes, 3 dépliants/affiches, 3 accroche-portes), pilotés par le kit | **faits**, vus à l'écran | `marketing/creative/echantillons-vague2/` |
+| Assistant (rôle `design`, Éco d'abord, escalade) : 3 propositions, filtre d'allégations, 4 pistes de logo SVG | **prouvé en réel** (DeepInfra, Éco) | propositions : 0,019 à 0,026 crédit mesuré (devis 1) ; logos : 0,057 crédit (devis 1) |
+| Devis en crédits avant dépense | **fait** | le rendu est gratuit (CPU du serveur) ; seuls les appels au modèle sont facturés |
+| CMJN par Ghostscript | **fait si `gs` est installé** | échantillon `cmjn/` ; pas de PDF/X certifié, profil par défaut |
+
+**Pas fait dans cette tranche** : fond généré par Qwen-Image depuis la page (utiliser l'outil Image puis importer), vectorisation vtracer des idées de logo, PDF/X-1a certifié et profil ICC choisi par l'imprimeur, imposition n-up, éditeur Fabric.js par glisser-déposer (le panneau expert édite texte, taille, police, interligne), déclinaisons sociales 1:1 / 4:5 / 9:16 (#21), affiche et brochure DL sans gabarit propre (l'affiche réutilise les gabarits dépliant). Détail : `docs/JOURNAL.md`.
+
 ## Mise à jour du 03/11 (soir tard) : feuille de route maître et vague 1 (bulle d'effet)
 
 Audit complet (35 variables, notes contre Higgsfield, Runway, Krea, CapCut, Premiere/DaVinci, Descript, Canva, Meshy : **nous 2,4/5**, Higgsfield ≈ 2,7, CapCut ≈ 3,3), plan en 7 vagues, spécifications de la bulle d'effet et du mode Marketing : `docs/FEUILLE-DE-ROUTE-MAITRE.md`. **57 issues** GitLab (#1 à #57) + suivi **#58**. Vague 1 commencée : **bulle « Effet IA ici… » v0** au clic droit du Mode Studio (26 recettes instantanées à 0 jeton, rôle LLM `effets`, un seul Ctrl+Z, Plus fort / Plus doux, Avant/Après) ; 19 tests verts, vérifiée dans le navigateur (`marketing/creative/captures-v3/vague1-*.jpg`). Limites : rendu visuel non vu (pas de WebGPU dans le navigateur intégré, #8), voie LLM prouvée une fois en réel sur la VM 202 (« ambiance de film d'horreur, froid et inquiétant » → 5 effets du catalogue, tous dans leurs bornes), banc de 30 phrases à faire (#1), jetons du Studio non facturés (#4).

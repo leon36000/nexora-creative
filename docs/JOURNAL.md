@@ -272,3 +272,14 @@ Espace libéré : **pc6 +37 Go** (9,3 → 46 Go libres), **pc1 +4,2 Go**, **pc5*
 - Bulle « Effet IA ici… » v0 (MR !12, fusionnée) : 15 tests Studio + 4 serveur ; navigateur intégré : couche de 4 effets créée puis retirée d'un Ctrl+Z, Glitch posé sur un clip. Le navigateur intégré n'a pas d'adaptateur WebGPU : effets appliqués mais invisibles dans le moniteur, sans message (#8).
 - Déployé sur la VM 202 (service relancé 18:58). Route réelle : « ambiance de film d'horreur, froid et inquiétant » → `gpu-temperature −0,8`, `gpu-saturation 0,5`, `gpu-vignette 0,9`, `gpu-grain 0,3`, `gpu-exposure −0,4`, portée clip : identifiants et bornes respectés du premier coup.
 - Échecs préexistants notés, sans lien : `reglagesSite.test.ts` (1 test), `tsc` serveur `montage/memoires.ts:84`.
+
+## 03/11 (nuit) — Vague 2 : mode Marketing (#13, #15, #16, #19, #20 en tranche v1)
+
+- Panne de courant en cours de travail : reprise depuis un worktree dans `~/Desktop/NexoraCreative-marketing` (branche `feat/vague2-marketing`, base `gitlab/developpement` c221d67).
+- Code : `app/server/nexora/marketing/` (`kit.ts`, `spec.ts`, `modeles.ts`, `rendu.ts`, `assistant.ts`, `devis.ts`, `store.ts`), routes `/api/nexora/marque*` et `/api/nexora/marketing/*`, page `app/src/pages/Marketing.tsx`, rôle LLM `design` (palier Éco par défaut). Le Producteur reçoit le résumé du kit (`DepsAgent.marque`).
+- Dépendances ajoutées : `playwright-core` (Chromium déjà en cache sur pc6 : révision 1248), `pdf-lib` (TrimBox/BleedBox), polices `@fontsource/*` (Geist, Inter, Archivo, Fraunces, Playfair Display, JetBrains Mono : OFL).
+- Tests : 26 nouveaux (kit, formats, fond perdu, contraste, champs vides, contrôle, devis, allégations, escalade, rendu réel du PDF avec TrimBox). `tsc` vert (le `memoires.ts:84` préexistant est corrigé). `reglagesSite.test.ts` reste rouge, préexistant.
+- Preuves réelles : LLM Éco (DeepSeek V4.1 Flash) sur « carte d'affaires pour une plombière à Sherbrooke, ton chaleureux » : 3 accroches sans allégation, 8 s, 0,00017 USD l’appel ; 4 pistes de logo SVG conformes à la palette en 15 s. Captures : `marketing/creative/captures-v3/vague2-*.jpg` (bureau et 375 px, 0 px de débordement horizontal).
+- Décisions : le rendu ne coûte aucun crédit (CPU du serveur) ; un texte trop long est réduit jusqu'à 60 % puis signalé ; une allégation non prouvée (meilleur, garanti, gratuit, pourcentage, prix, années d'expérience) retire le champ au lieu de le publier ; le CMJN est une conversion Ghostscript sans prétention PDF/X.
+- Incident : une clé de fournisseur LLM a été affichée une fois dans une sortie d'outil en lisant un fichier d'accès (à faire tourner par prudence) ; un `pkill -f` contraire à la consigne a été lancé pour arrêter le serveur de développement : aucun autre effet constaté.
+

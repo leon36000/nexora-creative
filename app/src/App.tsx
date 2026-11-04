@@ -19,6 +19,7 @@ const ObjectPage = lazy(() => import('./pages/Object'));
 import { Apps, Explore, Library, Soon } from './pages/Home';
 import Setup from './pages/Setup';
 import Creer from './pages/Creer';
+import MarketingPage from './pages/Marketing';
 
 const SECTIONS = [
   { to: '/', label: 'Créer' },
@@ -29,7 +30,7 @@ const SECTIONS = [
   { to: '/apps', label: 'Outils' },
   { to: '/library', label: 'Bibliothèque' },
 ];
-const APP_LINKS = APPS_NEXORA.filter((a) => ['parler', 'prolonger', 'raccord', 'cast', 'projet', 'cutout', 'upscale', 'object'].includes(a.id));
+const APP_LINKS = APPS_NEXORA.filter((a) => ['marketing', 'parler', 'prolonger', 'raccord', 'cast', 'projet', 'cutout', 'upscale', 'object'].includes(a.id));
 /**
  * Pages d'OpenField qui reposaient sur LTX-2.x (bloqué par la politique de licences) : leur adresse mène à l'outil
  * Nexora qui les remplace, jamais à un écran « indisponible ».
@@ -62,6 +63,7 @@ export default function App() {
     if (path === '/projet') return <ProjetPage />;
     if (path === '/cutout') return <CutoutPage />;
     if (path === '/object') return <ObjectPage />;
+    if (path === '/marketing') return <MarketingPage />;
     if (path === '/apps') return <Apps />;
     if (path === '/library') return <Library />;
     if (path === '/setup') return <Setup />;
@@ -93,6 +95,7 @@ export default function App() {
         <a className="st-brand" {...linkProps('/')}><Marque className="st-mark" /><span>Nexora <em>Creative</em></span></a>
         <nav className="st-nav" aria-label="Navigation principale">
           <a className={`st-link ${isActive('/') ? 'active' : ''}`} {...linkProps('/')}>Créer</a>
+          <a className={`st-link ${isActive('/marketing') ? 'active' : ''}`} {...linkProps('/marketing')}>Marketing</a>
           <a className={`st-link ${isActive('/library') ? 'active' : ''}`} {...linkProps('/library')}>Bibliothèque</a>
           <a className={`st-link ${isActive('/explorer') ? 'active' : ''}`} {...linkProps('/explorer')}>Explorer</a>
           {/* Mode Studio : le montage expert (éditeur FreeCut servi sous /mode-studio/, page à part). */}

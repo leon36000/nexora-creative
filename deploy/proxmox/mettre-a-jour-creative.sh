@@ -12,6 +12,8 @@ rsync -a --delete --exclude node_modules --exclude dist --exclude .env --exclude
 rsync -a --delete "$ICI/mode-studio/dist/" "$VM:/srv/creative/mode-studio/dist/"
 echo "== VM : dépendances, interface, redémarrage"
 ssh "$VM" 'cd /srv/creative/app && npm ci --no-audit --no-fund >/dev/null 2>&1 && npx vite build >/dev/null 2>&1 && sudo systemctl restart nexora-creative'
+echo "== VM : impression (Chromium, Ghostscript, poppler ; idempotent, voir IMPRESSION-VM.md)"
+ssh "$VM" 'cd /srv/creative/app && (ls ~/.cache/ms-playwright 2>/dev/null | grep -q chromium || { npx playwright-core install chromium >/dev/null 2>&1 && sudo npx playwright-core install-deps chromium >/dev/null 2>&1; }); (command -v gs >/dev/null && command -v pdftocairo >/dev/null) || sudo apt-get install -y ghostscript poppler-utils >/dev/null 2>&1; true'
 for i in $(seq 1 30); do
   if ssh "$VM" 'curl -sf -m 3 http://127.0.0.1:3161/api/nexora/etat' >/dev/null 2>&1; then echo "== en ligne"; ssh "$VM" 'curl -s http://127.0.0.1:3161/api/nexora/etat'; echo; exit 0; fi
   sleep 2

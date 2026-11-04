@@ -85,6 +85,9 @@ export const JETONS_TACHE: Record<string, { entree: number; sortie: number }> = 
   montage: { entree: 4200, sortie: 2300 },
   film: { entree: 6800, sortie: 4000 },
   producteur: { entree: 9000, sortie: 1800 },
+  marketing_propositions: { entree: 2400, sortie: 1700 },
+  marketing_logos: { entree: 1700, sortie: 3600 },
+  marketing_variantes: { entree: 1900, sortie: 900 },
 };
 
 export interface Devis { tache: string; palier: Palier; entree: number; sortie: number; usd: number; credits: number; creditsReserves: number; plafondUsd: number; source: 'historique' | 'tables' }

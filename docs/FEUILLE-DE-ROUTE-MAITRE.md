@@ -207,3 +207,8 @@ Fondée sur `recherche/17` §B1 et sur `marketing/nexora/imprimes/` (moteur HTML
 ## 8. Ce que la vague 1 a livré (03/11)
 
 Bulle « Effet IA ici… » v0 : clic droit clip et vide de piste, 26 recettes maison instantanées (0 jeton), rôle LLM `effets` et route `POST /api/studio/effet`, validateur et catalogue généré du registre, Plus fort / Plus doux, Avant/Après, un seul Ctrl+Z. Preuves : 15 tests Studio + 4 tests serveur verts, typecheck Studio vert ; vérifié dans le navigateur intégré (couche de 4 effets « Look film années 80 » créée sur la piste « Effets IA », retirée d'un Ctrl+Z ; « Glitch » posé sur le clip, visible dans le panneau Effets) — captures `marketing/creative/captures-v3/vague1-*.jpg`. **Limite constatée** : le navigateur intégré n'a pas d'adaptateur WebGPU, donc le rendu visuel des effets n'a pas été vu (#8) ; la voie LLM n'est testée qu'avec un faux modèle (#1).
+
+## 9. Ce que la vague 2 a livré (03/11 nuit, tranche v1)
+
+Kit de marque (#13), `SpecConception` v1 et 9 gabarits (#15), page Marketing (#16), contrôle préliminaire de base (#17, sans PDF/X), accroches filtrées (#19), pistes de logo en SVG (#20 sans vtracer). Restent : #14 (extraction depuis un site), #18 imposition, #21 déclinaisons sociales, #22 lots et A/B, #23 présentation. Voir `docs/ETAT.md`.
+

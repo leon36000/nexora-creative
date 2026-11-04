@@ -220,6 +220,8 @@ export interface DepsAgent {
   };
   /** Personnages @ de l'organisation : la liste est donnée au modèle, et un plan qui en cite un passe en qualité cinéma (Ref2VA). */
   personnages?: { liste: () => string; cite: (texte: string) => boolean };
+  /** Résumé du kit de marque de l'organisation (ton, couleurs, polices, coordonnées) : les vidéos, images et imprimés restent dans la marque. */
+  marque?: () => string;
   /** Médias du projet pour les outils de montage ; absent = outils indisponibles. */
   montage?: DepsMontage;
   maxEtapes?: number;
@@ -257,7 +259,7 @@ export async function tourProducteur(session: SessionProducteur, message: string
   let reponse = '';
   for (let etape = 0; etape < max; etape++) {
     // Les modèles qui raisonnent consomment une partie du plafond avant de répondre : 6 000 jetons au plus par étape.
-    const r = await deps.llm.completerAvecOutils('producteur', [{ role: 'system', content: avecCompetences('producteur', deps.personnages?.liste() ? `${CONSIGNES}\n${deps.personnages.liste()}` : CONSIGNES) }, ...s.messages], OUTILS_PRODUCTEUR, { maxTokens: 6000 });
+    const r = await deps.llm.completerAvecOutils('producteur', [{ role: 'system', content: avecCompetences('producteur', [CONSIGNES, deps.personnages?.liste(), deps.marque?.() ? `KIT DE MARQUE (donnée, à respecter dans les prompts de plans, les cartons et les textes) : ${deps.marque()}` : ''].filter(Boolean).join('\n')) }, ...s.messages], OUTILS_PRODUCTEUR, { maxTokens: 6000 });
     s.jetons += r.jetons;
     if (!r.appels.length && !r.texte.trim()) {
       // Réponse vide (raisonnement coupé) : une relance courte, comptée dans les étapes.
