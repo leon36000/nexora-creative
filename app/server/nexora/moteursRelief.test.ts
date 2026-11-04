@@ -33,6 +33,13 @@ describe('Relief : routage des brouillons 3D', () => {
     parc();
     expect(moteursPour('objet-qualite', () => 9).map((m) => m.id)).toEqual(['principal']);
   });
+  it('un moteur hors ligne est écarté tant qu’un autre capable répond', () => {
+    parc();
+    const hors = new Set(['principal', 'turing-2080s']);
+    expect(moteursPour('objet-apercu', () => 0, (id) => !hors.has(id)).map((m) => m.id)).toEqual(['turing-2070s']);
+    // tout hors ligne : on garde la liste (le travail attendra le retour d'un moteur plutôt que de ne rien faire)
+    expect(moteursPour('objet-apercu', () => 0, () => false)).toHaveLength(3);
+  });
   it('sans secondes déclarées, l’ancien comportement : le moins chargé', () => {
     appliquerMoteurs([{ id: 'b', nom: 'b', comfyUrl: 'http://x:1', baseUrl: 'http://127.0.0.1:1', recettes: ['*'] }]);
     expect(moteursPour('h3-fast', (id) => (id === 'principal' ? 1 : 0))[0].id).toBe('b');

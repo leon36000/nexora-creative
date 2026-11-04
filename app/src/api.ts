@@ -112,7 +112,7 @@ export interface Storyboard {
   plans: PlanFilm[];
   dureeTotale: number;
 }
-export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; objet3d?: { nom?: string; formats?: string[]; apercu: boolean; qualite: boolean; texte: boolean } | null }
+export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; objet3d?: { nom?: string; formats?: string[]; multivue?: boolean; vuesMax?: number; apercu: boolean; qualite: boolean; texte: boolean } | null }
 export interface ObjetTexteEtat {
   etat: 'image' | 'objet' | 'jugement' | 'fini' | 'echec'; essai: number; image: number; objet: number | null;
   notes: { take: number; note: number; defauts: string[]; raison: string }[]; erreur: string | null; qualite: 'draft' | 'quality'; intention: string;

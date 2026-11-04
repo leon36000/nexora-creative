@@ -140,8 +140,10 @@ const enCours = new Map<string, Set<string>>();
  * moteur. Sans `secondes` déclarées, c'est le moins chargé (à égalité, l'ordre du parc : le principal d'abord). Ainsi un
  * brouillon 3D reste sur la GB10 (38 s) tant que sa file ne dépasse pas deux tâches, puis déborde sur les Turing (126 s).
  */
-export function moteursPour(recette?: string, charge: (id: string) => number = (id) => enCours.get(id)?.size ?? 0): MoteurGpu[] {
-  const capables = moteurs.filter((m) => m.recettes.includes('*') || (recette !== undefined && m.recettes.includes(recette)));
+export function moteursPour(recette?: string, charge: (id: string) => number = (id) => enCours.get(id)?.size ?? 0, enLigne: (id: string) => boolean = (id) => enLigneConnu.get(id) !== false): MoteurGpu[] {
+  const declares = moteurs.filter((m) => m.recettes.includes('*') || (recette !== undefined && m.recettes.includes(recette)));
+  // Un moteur vu hors ligne (état relevé toutes les 20 s) ne reçoit rien tant qu'un autre capable répond : bascule.
+  const capables = declares.some((m) => enLigne(m.id)) ? declares.filter((m) => enLigne(m.id)) : declares;
   const fin = (m: MoteurGpu) => (charge(m.id) + 1) * ((recette !== undefined ? m.secondes?.[recette] : undefined) ?? 1);
   return capables.sort((a, b) => fin(a) - fin(b));
 }

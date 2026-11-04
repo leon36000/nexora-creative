@@ -165,7 +165,7 @@ export default function ObjectPage() {
 
         <div className="seg" role="group" aria-label="Point de départ">
           <button type="button" className={mode === 'image' ? 'on' : ''} onClick={() => setMode('image')}>Image → 3D</button>
-          <button type="button" className={mode === 'vues' ? 'on' : ''} onClick={() => setMode('vues')}>Plusieurs vues</button>
+          <button type="button" className={mode === 'vues' ? 'on' : ''} onClick={() => setMode('vues')}>Multi-vues</button>
           <button type="button" className={mode === 'texte' ? 'on' : ''} onClick={() => setMode('texte')}>Texte → 3D</button>
         </div>
 
@@ -187,7 +187,7 @@ export default function ObjectPage() {
                 <SourceSlot label="Vue de gauche" value={vueGauche} onChange={setVueGauche} accept={['image']} title="Gauche (facultatif)" sub="Le même objet, vu de son côté gauche." />
                 <SourceSlot label="Vue de dos" value={vueDos} onChange={setVueDos} accept={['image']} title="Dos (facultatif)" sub="Le même objet, vu de derrière." />
                 <SourceSlot label="Vue de droite" value={vueDroite} onChange={setVueDroite} accept={['image']} title="Droite (facultatif)" sub="Le même objet, vu de son côté droit." />
-                <div className="dim" style={{ fontSize: 12 }}>Pixal3D recoupe les vues pour deviner ce qu’une seule photo cache. Au moins une vue en plus de la face ; brouillon seulement, sur les GPU Turing.</div>
+                <div className="dim" style={{ fontSize: 12 }}>Pixal3D recoupe les vues pour deviner ce qu’une seule photo cache. Au moins une vue en plus de la face, trois vues au plus pour l’instant (mémoire des GPU Turing) ; brouillon seulement, environ 3 à 4 minutes.</div>
               </>
             )}
           </>

@@ -80,7 +80,7 @@ import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, mo
 import type { DepsAgent } from './nexora/agent.js';
 import { ajusterProposition, depassement, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
-import { recetteMultivue } from './nexora/objet3d.js';
+import { MESURES_OBJET_PC5, recetteMultivue } from './nexora/objet3d.js';
 import { PRODUIT_3D } from '../src/produit3d.js';
 import { analyser, cartesPbr, cibleTriangles, decimerGlb, EXTENSION_RELIEF, exporter, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief } from './nexora/relief.js';
 import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
@@ -1715,7 +1715,7 @@ app.get('/api/nexora/etat', async () => {
     cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
     image: modeleImage() ? (modeleImage() === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
     musique: eng.recettesEnLigne().has('music3') ? 'MiniMax-Music3' : null,
-    objet3d: eng.recettesEnLigne().has('objet-apercu') || eng.recettesEnLigne().has('*') ? { nom: PRODUIT_3D, formats: FORMATS_RELIEF, apercu: true, qualite: eng.recettesEnLigne().has('objet-qualite') || eng.recettesEnLigne().has('*'), texte: !!modeleImage() || eng.recettesEnLigne().has('*') } : null,
+    objet3d: eng.recettesEnLigne().has('objet-apercu') || eng.recettesEnLigne().has('*') ? { nom: PRODUIT_3D, formats: FORMATS_RELIEF, multivue: eng.moteursPour(recetteMultivue()).length > 0, vuesMax: Math.max(2, Math.min(4, Number(process.env.NEXORA_RELIEF_VUES_MAX) || 3)), apercu: true, qualite: eng.recettesEnLigne().has('objet-qualite') || eng.recettesEnLigne().has('*'), texte: !!modeleImage() || eng.recettesEnLigne().has('*') } : null,
   };
 });
 
@@ -1760,12 +1760,13 @@ app.post('/api/nexora/image', async (req, reply) => {
  */
 app.post('/api/nexora/objet/devis', async (req) => {
   const b = (req.body ?? {}) as any;
-  const q: QualiteObjet = b.qualite === 'quality' ? 'quality' : 'draft';
-  const secondes = b.source === 'texte' ? secondesTexteVers3D(q) : secondesObjet(q);
+  const q: QualiteObjet = b.qualite === 'quality' && b.source !== 'vues' ? 'quality' : 'draft';
+  const multi = b.source === 'vues';
+  const secondes = b.source === 'texte' ? secondesTexteVers3D(q) : multi ? MESURES_OBJET_PC5.multivue : secondesObjet(q);
   const t = tarifDepuisEnv();
   // Crédits sur la mesure de la GB10 (le client ne paie pas plus cher parce que le brouillon déborde sur un Turing) ; le temps
   // annoncé est celui du moteur que le routage choisirait maintenant.
-  const recette = recetteObjet(q);
+  const recette = multi ? recetteMultivue() : recetteObjet(q);
   const moteur = eng.moteursPour(recette)[0];
   const sec = b.source === 'texte' ? secondes : (moteur?.secondes?.[recette] ?? secondes);
   const enFile = eng.moteursPour(recette).length > 1;
@@ -1999,7 +2000,7 @@ app.post('/api/nexora/relief/:take/juger', async (req, reply) => {
   const tournette = `${p.glb}.turntable.mp4`;
   if (!existsSync(tournette)) return reply.code(404).send({ error: 'Pas de tournette à juger : refais le modèle.' });
   const s = JSON.parse(p.t.settings ?? '{}');
-  const description = String(s.objet3d?.intention ?? s.userPrompt ?? 'a 3D object reconstructed from one photo').slice(0, 600);
+  const description = String(s.objet3d?.intention ?? (typeof s.userPrompt === 'string' && s.userPrompt.startsWith('3D: ') ? s.userPrompt.slice(4) : 'a 3D object reconstructed from one photo')).slice(0, 600);
   let v: Awaited<ReturnType<typeof evaluerRelief>>;
   try { v = await evaluerRelief(p.id, description, tournette); } catch (e) { return reply.code(502).send({ error: `Le juge n’a pas pu répondre (${e instanceof Error ? e.message : 'erreur'}).` }); }
   if (!v) return reply.code(503).send({ error: 'Aucun modèle vision n’est branché : le juge est indisponible.' });
@@ -2925,7 +2926,11 @@ async function objectGraph(b: any, seed: number): Promise<Built> {
   const vues: { left?: string; back?: string; right?: string; fov?: number } | undefined = multi ? { fov: Number.isFinite(Number(multi.fov)) ? Number(multi.fov) : 20 } : undefined;
   if (multi && vues) {
     for (const cote of ['left', 'back', 'right'] as const) if (multi[cote]) vues[cote] = await preparer(multi[cote], false);
-    if (!vues.left && !vues.back && !vues.right) throw new Error('Multi-image needs at least a second view (left, back or right).');
+    const nb = 1 + (vues.left ? 1 : 0) + (vues.back ? 1 : 0) + (vues.right ? 1 : 0);
+    if (nb < 2) throw new Error('Multi-image needs at least a second view (left, back or right).');
+    // Mesuré le 04/11/2026 : 2 et 3 vues passent sur les GPU Turing (VM de 8 Go de RAM), 4 vues font tuer ComfyUI par le noyau (mémoire).
+    const max = Math.max(2, Math.min(4, Number(process.env.NEXORA_RELIEF_VUES_MAX) || 3));
+    if (nb > max) throw new Error(`${PRODUIT_3D} accepte ${max} vues au plus pour l’instant (mémoire des GPU Turing) : retire une vue.`);
   }
   const q = OBJECT_QUALITY[quality];
   return {

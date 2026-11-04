@@ -40,8 +40,8 @@ export const TRELLIS_SHAPE_VAE = 'trellis_2_shape_vae_bf16.safetensors';
 export const TRELLIS_TEXTURE_VAE = 'trellis_2_texture_vae_bf16.safetensors';
 export const TRELLIS_ENCODER = 'dino_v3_vit_l.safetensors';
 export const BG_REMOVAL_MODEL = 'birefnet.safetensors';
-/** Relief multi-images : Pixal3D (5,58 Go int8, nœud natif ComfyUI 0.43.2) et son encodeur DINOv3 + NAF (1,21 Go). Moteurs Turing de pc5. */
-export const PIXAL3D_MODEL = 'pixal3d_int8_convrot.safetensors';
+/** Relief multi-images : Pixal3D multi-vues (5,58 Go int8, nœud natif ComfyUI 0.43.2) et son encodeur DINOv3 + NAF (1,21 Go). Moteurs Turing de pc5. */
+export const PIXAL3D_MODEL = 'pixal3d_multiview_int8_convrot.safetensors';
 export const PIXAL3D_ENCODER = 'dino_v3_L_naf_fp32.safetensors';
 /** Ordre des vues acceptées par Pixal3DMultiViewConditioning. */
 export const VUES_RELIEF = ['front', 'left', 'back', 'right'] as const;

@@ -21,10 +21,13 @@ export const recetteMultivue = () => RECETTES_OBJET.multi;
 export const recetteObjet = (q: QualiteObjet) => RECETTES_OBJET[q === 'quality' ? 'quality' : 'draft'];
 
 /**
- * Secondes de calcul mesurées sur la GB10 (DGX Spark, ComfyUI 0.43.2, TRELLIS.2 int8, chaise en chêne, 03/11/2026,
- * sans tournette) : aperçu 38 s à chaud (46 s à froid), qualité 162 s ; image de référence Qwen-Image-2.1 : 24 s.
+ * Secondes de calcul : médianes mesurées sur six sujets (chaise, basket, robot, vase, figurine, pièce mécanique ; banc
+ * `recherche/21`, 03-04/11/2026, GB10 partagée avec d'autres tâches). GB10 : aperçu 46 s (34 à 119 s selon le sujet),
+ * qualité 189 s (143 à 572 s) ; image de référence Qwen-Image-2.1 : 24 s. Chaise seule, GB10 au repos : 38 s et 162 s.
  */
-export const MESURES_OBJET_GB10 = { draft: 38, quality: 162, reference: 24, tournetteJuge: 12 } as const;
+export const MESURES_OBJET_GB10 = { draft: 46, quality: 189, reference: 24, tournetteJuge: 12 } as const;
+/** Moteurs Turing de pc5 (VM nexora-gpu), médiane des six sujets, aperçu : RTX 2080 SUPER 190 s (la 2070 SUPER : estimation) ; plusieurs vues (Pixal3D, 2 à 3 vues) : 195 à 204 s mesurés. */
+export const MESURES_OBJET_PC5 = { draft2080s: 190, draft2070s: 220, multivue: 200 } as const;
 
 export function secondesObjet(q: QualiteObjet): number {
   return MESURES_OBJET_GB10[q === 'quality' ? 'quality' : 'draft'];
