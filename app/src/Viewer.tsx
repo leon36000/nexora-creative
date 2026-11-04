@@ -255,7 +255,7 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
             <a className="btn sm accent" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download GLB</a>
             <a className="btn sm" href={`${turntableUrl(take.id)}`} download={`take_${take.id}_turntable.mp4`}><Icon name="video" size={14} />Turntable</a>
             {take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/stage?prop=${take.id}`); }} title="Open Stage with this model placed in the set as a prop"><Icon name="camera" size={14} />Use in Stage</button>}
-            {s.sourceTake && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/object?take=${s.sourceTake}`); }}><Icon name="image" size={14} />Source still</button>}
+            {s.sourceTake && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`${ROUTE_3D}?take=${s.sourceTake}`); }}><Icon name="image" size={14} />Source still</button>}
             <button type="button" className="btn sm" onClick={act(() => recreate(take))}><Icon name="redo" size={14} />Recreate</button>
             <button type="button" className="btn sm danger" onClick={act(async () => { await remove(take); onClose(); })}><Icon name="trash" size={14} />Delete</button>
           </div>

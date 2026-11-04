@@ -1,5 +1,6 @@
 /**
- * Relief (ex-Object, `/object` reste un alias) : any still becomes a textured 3D model (TRELLIS.2 on the local
+ * Nexora Mesh (ex-Relief, ex-Object ; `/mesh` est l'adresse, `/relief` et `/object` restent des alias) : any still
+ * becomes a textured 3D model (TRELLIS.2 on the local
  * engine). The rail takes the still and the settings; the canvas shows the
  * selected model on a turntable you can grab, next to every other take.
  * Each result is an ordinary take whose file is a GLB, so the Library, the
@@ -86,7 +87,7 @@ export default function ObjectPage() {
   }
   const enCours = chaine !== null && chaine.etat !== 'fini' && chaine.etat !== 'echec' || (chaineId !== null && chaine === null);
 
-  // Deep link from the Viewer's Make 3D: /object?take=44 preloads that still.
+  // Deep link from the Viewer's Make 3D: /mesh?take=44 (and the /object, /relief aliases) preloads that still.
   useTakeParam(params.get('take'), (s) => { setSource(s); setParams({ take: null }); });
   usePageDrop('Drop a still to make it 3D', (files) => {
     void (async () => { const s = await loadFile(files[0], ['image']); if (s) setSource(s); })();

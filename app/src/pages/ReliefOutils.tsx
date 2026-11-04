@@ -1,5 +1,5 @@
 /**
- * Relief : les outils d'un modèle fini. Exports (GLB, OBJ, STL, 3MF, USDZ) avec nombre de faces réglable et contrôle du
+ * Nexora Mesh : les outils d'un modèle fini. Exports (GLB, OBJ, STL, 3MF, USDZ) avec nombre de faces réglable et contrôle du
  * maillage, cartes PBR, GIF de la tournette et note du juge (quatre côtés). Les exports sont calculés par le serveur :
  * ils ne coûtent aucun crédit GPU.
  */

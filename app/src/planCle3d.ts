@@ -1,5 +1,5 @@
 /**
- * « Animer avec H3 » depuis Relief (recherche/25 §5) : la vue 3D telle que la personne l'a tournée devient le plan clé
+ * « Animer avec H3 » depuis Nexora Mesh (ex-Relief, recherche/25 §5) : la vue 3D telle que la personne l'a tournée devient le plan clé
  * d'une vidéo H3 (I2VA). L'objet garde exactement sa forme et ses couleurs dans la première image ; H3 l'anime, ajoute
  * lumière, reflets et son. Le rendu WebGL du visualiseur (fond transparent) est posé sur un fond de studio, au format
  * 16:9 de FastH3, objet centré sur 70 % de la hauteur.
