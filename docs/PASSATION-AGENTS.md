@@ -596,3 +596,9 @@ Diagnostic documentaire d’un sous-agent, complété par vérification du texte
 ### OPSYS DeepSeek : v02
 
 `v02-r1.mp4` généré en 138,1 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1, SHA-256 vérifiés ; inventaire **3 775 entrées**. La planche montre le signal montant depuis le téléphone ; son et mouvement restent à juger. Après file vide et limite 475 W confirmées, `v03` a été lancé seul.
+
+### OPSYS DeepSeek : brouillon long produit
+
+Le brouillon `~/nexora-creative-data/work/opsys-ultime/deepseek/montage/deepseek-long-brouillon.mp4` a été rendu en 491,6 s CPU : 32 plans, EditPlan validé sans avertissement, aucune source manquante. `ffprobe` indique H.264 960×540, AAC, 140,458333 s ; décodage intégral sans erreur. L’export, 94 tranches MP4, le mix WAV et une planche, soit 97 médias, ont été copiés sur le SSD Infrastructure de pc1, vérifiés SHA-256 et inscrits dans l’inventaire (**3 872 entrées**), dossier du Bureau `codex-opsys-deepseek-long-brouillon-20261104`. Originaux, liste des tranches et fichiers de travail préservés.
+
+Contrôle de la planche uniquement : maisons, bureaux, signal et personnage numérique visibles ; plusieurs scènes sont sombres. La dernière case noire de la grille est un remplissage : 14 images pour 15 cases, pas une preuve de noir dans la vidéo. Ce brouillon ne valide ni mouvement, ni son, ni lisibilité, ni la note humaine ≥9/10. `v03` vertical reste en cours.

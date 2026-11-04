@@ -431,3 +431,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS Muse : le HANDOFF rapporte un choix des équipes de recadrer le 16:9, pas une décision du fondateur ; aucun montage vertical Muse défini n’a été trouvé. Les plans verticaux DeepSeek sont définis séparément.
 
 - OPSYS DeepSeek : v02 généré, décodé et archivé avec sa planche et ses empreintes ; v03 lancé seul après file vide.
+
+- OPSYS DeepSeek : brouillon long 140,46 s/32 plans produit, décodé sans erreur et validé techniquement ; export, 94 tranches, mix et planche archivés SHA sur pc1 (3 872 entrées). Images fixes seulement examinées ; son, mouvement et verdict humain restent à faire. v03 vertical en cours.
