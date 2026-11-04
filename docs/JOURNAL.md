@@ -586,3 +586,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Muse Spark 1.3 Contributor, via passerelle protégée isolée, a rédigé `Nexora/travail/rnd-codex-20261104/agents/muse-vertical-opsys/proposition-vertical.md` sur Storage : proposition 9:16 de 14,5 s avec les six rushes de son court. Exécution réussie, 5 requêtes et 0,00767 $ relevés. Le modèle n'a pas visionné les rushes : cadrages et recommandations sont hypothétiques, non des décisions du fondateur; aucune vidéo produite ni dossier produit modifié. Une planche réelle est en cours de préparation et d'archivage.
 - Synchronisation labiale : les rapports persistants pc1 indiquent quatre essais LatentSync/MuseTalk `not_run_no_gpu_window` et aucun processus d'inférence GPU correspondant. Une évaluation CPU SyncNet existe sur deux clips H3 et deux témoins TTS; ce n'est pas une comparaison d'efficacité des modèles de retouche. Revue détaillée en cours.
+
+
+### Reprise Codex — échéance lipsync et cadrage Muse, 4 novembre 2026
+
+- Veille lèvres pc1 : `gpu_guard.py` cherche l'échéance à la racine et seulement au démarrage; le fichier existant se trouve sous `logs/`. Pour l'essai documenté, sa valeur correspondait cependant au même plafond de 3 h : le défaut ne démontre pas un surcoût substantiel. Risque confirmé pour une échéance différente ou ajoutée après démarrage. Une adaptation et des tests isolés sont proposés; aucun GPU ni fichier pc1 modifié.
+- Planche Muse du court produite sur Storage (source unique par plan, image médiane, crop central 9:16) : à l'image p07-r1, un grand texte généré déformé apparaît dans une salle, ce qui ne correspond pas à la soumission décrite dans la proposition textuelle; visage p01 partiellement coupé. La planche n'établit pas le contenu du mouvement entier. Recherche de prises Muse alternatives en lecture seule et archivage pc1 de la planche en cours; aucun jugement humain ni vidéo nouvelle.
