@@ -170,6 +170,6 @@ Ordre : 2 (risque de perte), 1 (inconnu), 4, 5, 3.
 | Hôte `pve` | `intel_iommu=on iommu=pt`, `vfio*`, `nouveau`/`nvidia` en liste noire | copies d'origine : `/root/backup-gpu-pc5/` (retour arrière : `docs/gpu-pc5.md`) |
 | Mémoire hôte | engagée : 22 Go → **30 Go** sur 62 Go | une seule VM nouvelle, 8 Go non ballonnables |
 
-Transcription Studio (04/11) : Whisper large-v3-turbo (`deepdml/faster-whisper-large-v3-turbo-ct2`, déjà dans `/srv/nexora-gpu/hf`, aucun nouveau poids) servi par `nexora-services` ; ajouts : `transcrire_endpoint.py` (quelques Ko) et `transcrire.token` (44 octets, mode 600) dans `/srv/nexora-gpu` ; disque de la VM inchangé, ≈ 4 Go libres. VRAM : modèle déchargé après 120 s d'inactivité, jamais en même temps que ComfyUI sur le GPU 1.
+Transcription Studio (04/11) : Whisper large-v3-turbo (`deepdml/faster-whisper-large-v3-turbo-ct2`, déjà dans `/srv/nexora-gpu/hf`, aucun nouveau poids) servi par `nexora-services` ; ajouts : `transcrire_endpoint.py` (quelques Ko) et `transcrire.token` (44 octets, mode 600) dans `/srv/nexora-gpu` ; disque de la VM inchangé, ≈ 4 Go libres. VRAM : modèle déchargé après 120 s d'inactivité.
 
 Rétention : sorties ComfyUI dans `/srv/nexora-gpu/output/gpu{0,1}` à purger à la main (rien n'est sauvegardé) ; modèles non dupliqués inutilement (le lot A1 de 8,9 Go est copié une fois, seuls les 5 fichiers nécessaires). VM 9100 non touchée par ce travail, mais **arrêtée par le redémarrage de l'hôte** (pas de `onboot`) : à relancer ou supprimer par le fondateur.
