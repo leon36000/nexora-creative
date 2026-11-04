@@ -427,3 +427,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS : les six plans verticaux DeepSeek sont définis avec leurs références disponibles ; v01 lancé seul après contrôle file vide et puissance configurée. Résultat et archive en attente.
 
 - OPSYS DeepSeek : v01 généré, décodé, archivé avec planche et SHA vérifiés ; v02 lancé seul après file vide. Détection automatique : aucun passage noir ≥0,5 s au seuil 0,05 dans le court ; contrôle limité.
+
+- OPSYS Muse : le HANDOFF rapporte un choix des équipes de recadrer le 16:9, pas une décision du fondateur ; aucun montage vertical Muse défini n’a été trouvé. Les plans verticaux DeepSeek sont définis séparément.

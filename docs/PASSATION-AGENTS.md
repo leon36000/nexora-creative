@@ -588,3 +588,7 @@ Les six plans `v01` à `v06` sont bien définis dans le dossier DeepSeek en 9:16
 `v01-r1.mp4` généré en 139,2 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et SHA-256 vérifiés ; inventaire **3 773 entrées**. La planche montre un travailleur utilisant son téléphone près d’une maison ; son, mouvement et qualité finale ne sont pas jugés. Après file vide et limite 475 W confirmées, `v02` a été lancé seul.
 
 Sur le brouillon court, une détection automatique n’a trouvé aucun passage noir continu d’au moins 0,5 s avec seuil de pixels 0,05 ; cela ne vérifie ni narration ni qualité visuelle.
+
+### OPSYS Muse : origine du vertical absent
+
+Diagnostic documentaire d’un sous-agent, complété par vérification du texte source : le HANDOFF rapporte une décision commune des quatre équipes de recadrer le 16:9 pour le vertical à cause de la file GPU ; le dossier Muse évoque ce recadrage si la file ne permet pas de 9:16 natif. Ce sont des indications d’équipe, **pas une décision attribuable au fondateur**. Le dossier actuel ne contient aucun montage vertical Muse défini, et les prises retrouvées sont horizontales. Le recadrage reste à concevoir et vérifier ; ne pas le déclarer livré. DeepSeek possède séparément six spécifications 9:16 propres.
