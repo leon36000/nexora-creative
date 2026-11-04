@@ -29,3 +29,4 @@ marketing/nexora/**/node_modules/
 marketing/nexora/video/essais/
 marketing/nexora/partage/img/
 marketing/nexora/partage/video/
+__pycache__/
