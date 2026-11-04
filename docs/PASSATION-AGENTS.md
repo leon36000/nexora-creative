@@ -572,3 +572,9 @@ Contrôle après le retour API : le pod PostgreSQL est maintenant prêt, utilise
 `p32-r1.mp4` est présent, H.264 1344×768 et AAC, 5,166688 s ; décodage complet sans erreur. La durée de calcul et le code de sortie du processus ne sont plus disponibles : ne pas les inventer. La vidéo et sa planche sont archivées sur pc1 avec vérification SHA-256 ; inventaire à **3 771 entrées**. Son et mouvement ne sont pas évalués.
 
 Les 32 plans du montage long DeepSeek, ses voix référencées et sa musique sont présents ; validation EditPlan `ok: true`, 140,46 s, aucune source vidéo manquante, sortie libre. Un brouillon long a été lancé en CPU, deux cœurs et un seul job ; son résultat et son archivage restent à vérifier. Tous les essais et tranches sont à conserver. Ce n’est pas une finale ni un verdict humain.
+
+### OPSYS : contrôle des quatre dossiers
+
+Contrôle des fichiers référencés dans les plans : DeepSeek, Gemini, Muse et Opus disposent chacun des sources vidéo, voix référencées et musique pour leurs versions longues et courtes. Pour le vertical, Gemini et Opus ont leurs sources référencées ; DeepSeek manque toujours `v01` à `v06`. Le champ `montage.vertical` de Muse est `null` et la construction de contexte lève `AttributeError` ; aucun vertical Muse utilisable n’est démontré. La présence de fichiers ne prouve ni leur qualité ni une validation des quatre films.
+
+Contrôle GitLab renouvelé : pipeline 2847 toujours en attente ; Garage toujours non prêt, 36 redémarrages. OAuth personnel GitLab-PC4 encore déconnecté. Aucune modification de production.
