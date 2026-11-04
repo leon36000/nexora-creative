@@ -819,3 +819,9 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 ### Reprise Codex — volume Mesh ambigu, 4 novembre 2026
 
 - Commit local `25b2824`, branche `fix/mesh-aretes-codex` : pour plusieurs composantes fermées, volume `null` et avertissement au lieu d'un chiffre pouvant être faux; le cas simple reste inchangé. 13 tests ciblés repassés indépendamment, typecheck réussi par l'agent; pas de déploiement. Distinguer les solides séparés des cavités demandera une classification géométrique. L'étanchéité actuelle ne démontre ni orientation cohérente ni absence d'auto-intersections; vérification complémentaire en cours. Réconciliation avec GitLab nécessaire avant MR.
+
+### Reprise Codex — contrôles indépendants, 4 novembre 2026
+
+- Montage `94da540` : revue indépendante du contrat TypeScript et du pont Python sans incompatibilité réelle trouvée; les 21 tests ciblés ont été relancés. Une réponse fabriquée `ok:true` de durée 0 ou supérieure à 180 s passerait le garde Python, mais le validateur officiel ne produit pas ces cas réussis.
+- Mesh : un tétraèdre fermé translaté, avec une face inversée, reste déclaré étanche alors que son volume calculé peut valoir 5/6 ou 13/6 au lieu de 1/6. Garde supplémentaire en cours, sans prétendre détecter les auto-intersections.
+- GitLab pc4, lecture seule : pod `garage-0` non prêt, `CrashLoopBackOff`, 59 redémarrages observés. Pas de diagnostic de perte de données, pas de redémarrage ni de push.
