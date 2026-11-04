@@ -1,0 +1,1555 @@
+{
+ "equipe": "muse",
+ "titre": "L'USINE INVISIBLE",
+ "personnages": [
+  {
+   "id": "etienne",
+   "nom": "Étienne",
+   "role": "représentant",
+   "fiche": "Character reference sheet, plain light-grey studio background: on the left Etienne, a Quebec man in his early thirties, short brown hair, light stubble, athletic build, wearing a navy work jacket over a grey hoodie and work boots, holding a smartphone; on the right a large close-up of his face with a friendly grin. Photorealistic, neutral lighting. Plain clothing with no logo, no text, no letters anywhere.",
+   "voix": "drama3-adamqc"
+  },
+  {
+   "id": "marie",
+   "nom": "Marie",
+   "role": "adjointe",
+   "fiche": "Character reference sheet, plain light-grey studio background: on the left Marie, a Quebec woman in her late twenties, long dark-brown hair tied back, bright eyes, wearing a teal blouse with a call-center headset; on the right a large close-up of her smiling face. Photorealistic, neutral lighting. Plain clothing with no logo, no text, no letters anywhere.",
+   "voix": "eleven-jeannemance"
+  },
+  {
+   "id": "morin",
+   "nom": "Morin",
+   "role": "employé de chantier",
+   "fiche": "Character reference sheet, plain light-grey studio background: on the left Morin, a Quebec man in his forties, shaved head, short beard, solid build, wearing an orange high-visibility vest over a dark hoodie and work gloves; on the right a large close-up of his weathered smiling face. Photorealistic, neutral lighting. Plain clothing with no logo, no text, no letters anywhere.",
+   "voix": "eleven-adamqc"
+  },
+  {
+   "id": "patron",
+   "nom": "Le patron",
+   "role": "administrateur",
+   "fiche": "Character reference sheet, plain light-grey studio background: on the left the owner, a Quebec man in his fifties, short grey beard, glasses, calm confident eyes, wearing a navy quilted vest over a plaid shirt; on the right a large close-up of his face. Photorealistic, neutral lighting. Plain clothing with no logo, no text, no letters anywhere.",
+   "voix": "eleven-frederic"
+  },
+  {
+   "id": "vox",
+   "nom": "Vox",
+   "role": "avatar des départements",
+   "fiche": "Holographic avatar reference on a dark background: on the left a feminine face sculpted from fine ion-blue points of light, glowing wireframe bust, elegant and futuristic; on the right a close-up of her luminous eye with a single warm orange glint. No text, no logos.",
+   "voix": "eleven-amelie"
+  }
+ ],
+ "lieux": [
+  {
+   "id": "maison",
+   "fiche": "Location plate: a suburban Quebec house with new warm-grey horizontal siding, white soffit and fascia, small front lawn, morning sun. Photorealistic, no text, no logos."
+  },
+  {
+   "id": "serveur",
+   "fiche": "Location plate: a dark vast server hall, rows of tall racks with ion-blue lights receding into haze, one warm orange lamp glowing far away. Cinematic, no text, no logos."
+  },
+  {
+   "id": "chantier",
+   "fiche": "Location plate: a renovation work site at golden hour, scaffold along a house wall, a pickup truck, tool crates. Photorealistic, no text, no logos."
+  }
+ ],
+ "cles": [
+  {
+   "id": "k01",
+   "format": "16:9",
+   "prompt": "Close-up of a smartphone held up before a Quebec house wall with fresh siding, morning light, shallow depth of field. Photorealistic, no text, no logos."
+  },
+  {
+   "id": "k02",
+   "format": "16:9",
+   "prompt": "A glowing blue signal beam rising from a rooftop phone into dramatic clouds, birds, sun flare. Cinematic, no text, no logos."
+  },
+  {
+   "id": "k03",
+   "format": "16:9",
+   "prompt": "Inside a dark server corridor, ion-blue rack lights, a luminous beam racing along the floor toward camera, haze. Cinematic, no text, no logos."
+  },
+  {
+   "id": "k04",
+   "format": "16:9",
+   "prompt": "A worker tapping a badge on a time-clock post at dawn on a work site, golden light, shallow depth of field. Photorealistic, no text, no logos."
+  }
+ ],
+ "voix": [
+  {
+   "id": "v01",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "vitesse": 1.1,
+   "prises": 2,
+   "direction": "Narrateur quebecois, energie brute, rythme vif, voix qui pousse, jamais lisse.",
+   "texte": "Une photo. Pis toute une usine se met au travail."
+  },
+  {
+   "id": "v02",
+   "role": "representant",
+   "voix": "drama3-adamqc",
+   "vitesse": 1.1,
+   "prises": 2,
+   "direction": "Jeune representant enthousiaste, parle vite, accent quebecois naturel.",
+   "texte": "Mur arrière, revêtement... c'est envoyé!"
+  },
+  {
+   "id": "v03",
+   "role": "avatar",
+   "voix": "eleven-amelie",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[warm, professional, efficient]",
+   "texte": "Photo reçue. Mesures en cours."
+  },
+  {
+   "id": "v04",
+   "role": "avatar",
+   "voix": "eleven-amelie",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[warm, professional, efficient]",
+   "texte": "Soumission prête : dix-huit mille neuf cent quarante dollars. J'attends ton approbation."
+  },
+  {
+   "id": "v05",
+   "role": "administrateur",
+   "voix": "eleven-frederic",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[energetic, confident, natural Quebecois]",
+   "texte": "Montre-moi les profits avec les nouveaux ratios."
+  },
+  {
+   "id": "v06",
+   "role": "avatar",
+   "voix": "eleven-amelie",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[warm, professional, efficient]",
+   "texte": "Profits anticipés, mis à jour : la productivité a monté de sept pour cent."
+  },
+  {
+   "id": "v07",
+   "role": "avatar",
+   "voix": "eleven-amelie",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[warm, professional, efficient]",
+   "texte": "Voici la cédule des trois prochaines semaines."
+  },
+  {
+   "id": "v08",
+   "role": "adjointe",
+   "voix": "eleven-jeannemance",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[warm, professional, efficient]",
+   "texte": "Vous avez rendez-vous avec monsieur Thibault à quatorze heures, pis j'ai déplacé votre seize heures comme vous me l'avez demandé."
+  },
+  {
+   "id": "v09",
+   "role": "employe",
+   "voix": "eleven-adamqc",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[energetic, confident, natural Quebecois]",
+   "texte": "Dossier reçu! On part sur le chantier."
+  },
+  {
+   "id": "v10",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "vitesse": 1.1,
+   "prises": 2,
+   "direction": "Narrateur quebecois, energie brute, rythme vif, voix qui pousse, jamais lisse.",
+   "texte": "Dix départements. Une seule équipe."
+  },
+  {
+   "id": "v11",
+   "role": "administrateur",
+   "voix": "eleven-frederic",
+   "vitesse": 1.0,
+   "prises": 2,
+   "direction": "[energetic, confident, natural Quebecois]",
+   "texte": "Approuvé. Envoyez ça."
+  },
+  {
+   "id": "v12",
+   "role": "narrateur",
+   "voix": "drama3-frederic",
+   "vitesse": 1.1,
+   "prises": 1,
+   "direction": "Narrateur quebecois, energie brute, isole, net.",
+   "texte": "OPSYS. L'usine invisible."
+  }
+ ],
+ "plans": [
+  {
+   "id": "p01",
+   "sequence": "S1 crochet",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 101,
+   "format": "16:9",
+   "refs": [
+    "etienne",
+    "maison"
+   ],
+   "premiere": "k01",
+   "parole": null,
+   "camera": "macro, focus rack du téléphone vers la maison",
+   "effets": "flash blanc à la photo",
+   "son": "déclic photo, souffle",
+   "statut": "VISION",
+   "prompt": "summary:\nA single continuous cinematic shot: a man photographs a house wall, flash freeze.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A young Quebec contractor @etienne in a navy work jacket holds up a smartphone before a suburban house @maison with fresh siding, morning sun flare, shallow depth of field.\n[Shot 1] Extreme close-up on the phone, @etienne taps, a white flash freezes the frame, the camera whips up to the sky. No text, no logos. No text, no logos.\n\noverall_soundscape:\nPhone camera click, bright flash pop, rising wind.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p02",
+   "sequence": "S1 signal",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 102,
+   "format": "16:9",
+   "refs": [
+    "maison"
+   ],
+   "premiere": null,
+   "parole": null,
+   "camera": "grue ascendante, grand large",
+   "effets": "faisceau lumineux, impulsion",
+   "son": "montée, souffle",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a beam of light rises from a rooftop into the sky.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A glowing ion-blue signal beam erupts from a suburban rooftop @maison and climbs into dramatic clouds, birds scattering, sun flare.\n[Shot 1] The camera cranes up fast, following the beam as a pulse of light shoots upward. No text, no logos. No text, no logos.\n\noverall_soundscape:\nDeep rising whoosh, crackling energy beam, wind rush.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p03",
+   "sequence": "S1 tour",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 103,
+   "format": "16:9",
+   "refs": [],
+   "premiere": "k02",
+   "parole": null,
+   "camera": "filé latéral rapide, travelling",
+   "effets": "faisceau longeant câbles et pylônes",
+   "son": "bourdonnement électrique, fouet",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a light beam races along power lines.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A luminous blue signal races along sagging power lines between wooden poles over Quebec fields at dusk, sparks and haze.\n[Shot 1] Fast lateral tracking shot chasing the pulse of light from pole to pole. No text, no logos. No text, no logos.\n\noverall_soundscape:\nElectric hum, rushing wind, crackling sparks.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p04",
+   "sequence": "S1 serveur",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 104,
+   "format": "16:9",
+   "refs": [
+    "serveur"
+   ],
+   "premiere": "k03",
+   "parole": null,
+   "camera": "travelling avant rapide dans l'allée",
+   "effets": "racks qui s'allument en cascade",
+   "son": "vrombissement, impacts",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a beam dives into a giant server hall.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A vast dark server hall @serveur, rows of racks igniting in ion-blue cascades as a beam of light dives down the corridor.\n[Shot 1] The camera rushes forward down the aisle as lights wake in waves toward camera. No text, no logos. No text, no logos.\n\noverall_soundscape:\nDeep server rumble, cascading power-up chimes, heavy impacts.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p05",
+   "sequence": "S2 usine",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 105,
+   "format": "16:9",
+   "refs": [
+    "serveur"
+   ],
+   "premiere": null,
+   "parole": null,
+   "camera": "plan large, lente montée",
+   "effets": "dix îlots lumineux + portraits holographiques",
+   "son": "pulsation, chœur de machines",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a server hall becomes a luminous factory.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. Inside the dark server hall @serveur, ten glowing work islands light up in a row, translucent holographic worker portraits rising above each, dust and haze in ion-blue light.\n[Shot 1] Slow rising wide shot revealing all ten islands igniting one after another. No text, no logos. No text, no logos.\n\noverall_soundscape:\nIndustrial pulse, machine hums, airy metallic echoes.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p06",
+   "sequence": "S2 mesure",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 106,
+   "format": "16:9",
+   "refs": [
+    "serveur"
+   ],
+   "premiere": null,
+   "parole": "v03",
+   "camera": "orbite lente autour de l'hologramme",
+   "effets": "maison holographique qui se mesure, filet laser",
+   "son": "bips laser, voix",
+   "statut": "VISION",
+   "prompt": "summary:\nA single continuous cinematic shot: a hologram measures a house, an avatar speaks.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A feminine hologram made of ion-blue light points gestures over the server floor @serveur as a wireframe house assembles and laser grids sweep its walls.\n[Shot 1] Slow orbit around the hologram while the wireframe house builds itself. No text, no logos. No text, no logos.\n\ndialogue:\nThe hologram @vox speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nLaser scanning zaps, holographic shimmer, room tone.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p07",
+   "sequence": "S2 estimation",
+   "recette": "h3-max",
+   "images": 158,
+   "graine": 107,
+   "format": "16:9",
+   "refs": [
+    "serveur"
+   ],
+   "premiere": null,
+   "parole": "v04",
+   "camera": "travelling circulaire, resserrement",
+   "effets": "document holographique qui s'assemble",
+   "son": "assemblage, voix",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic quote assembles line by line.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. Above the server floor @serveur, a large holographic quote card assembles line by line in glowing blue glass, totals counting, a stamp slamming at the end.\n[Shot 1] Circular tracking shot tightening on the glowing card as each glowing line locks in. No text, no logos. No text, no logos.\n\ndialogue:\nThe hologram @vox speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nGlass chimes per line, deep stamp thud, shimmer.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p08",
+   "sequence": "S3 approbation",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 108,
+   "format": "16:9",
+   "refs": [
+    "patron"
+   ],
+   "premiere": null,
+   "parole": "v11",
+   "camera": "gros plan, lent push-in",
+   "effets": "reflet bleu sur le visage",
+   "son": "voix, pièce feutrée",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a business owner approves with one word.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A Quebec business owner in his fifties @patron sits at a wooden desk in a warm renovation office at dusk, practical lamps, large window, ion-blue glow on his face.\n[Shot 1] Medium close-up, slow push-in as he looks into the lens and decides. No text, no logos. No text, no logos.\n\ndialogue:\n@patron speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nQuiet room tone, soft chair creak.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p09",
+   "sequence": "S3 morin",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 109,
+   "format": "16:9",
+   "refs": [
+    "morin",
+    "chantier"
+   ],
+   "premiere": null,
+   "parole": "v09",
+   "camera": "steadicam, entrée dans le chantier",
+   "effets": "carte holographique reçue sur le téléphone",
+   "son": "chantier, voix",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a worker receives the job file on site.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A sturdy Quebec worker @morin in a high-visibility vest stands on a renovation work site @chantier at golden hour, scaffold and pickup truck, glancing at his glowing phone.\n[Shot 1] Steadicam walks in with him as he looks up, energised, toward the house. No text, no logos. No text, no logos.\n\ndialogue:\n@morin speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nWork-site ambience, tools clanking, distant radio.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p10",
+   "sequence": "S4 pointage",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 110,
+   "format": "16:9",
+   "refs": [
+    "morin"
+   ],
+   "premiere": "k04",
+   "parole": null,
+   "camera": "gros plan main-badge, tilt vers le visage",
+   "effets": "heure frappée en incrustation",
+   "son": "bip, chantier aube",
+   "statut": "EN PRÉPARATION",
+   "prompt": "summary:\nA single continuous cinematic shot: a worker clocks in at dawn.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. At dawn on a Quebec work site, a worker @morin in a high-visibility vest taps a badge reader on a post, breath fogging, golden light flaring.\n[Shot 1] Close-up on the tap, slight tilt up to his satisfied face. No text, no logos. No text, no logos.\n\noverall_soundscape:\nBadge beep, cold morning wind, distant truck.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p11",
+   "sequence": "S4 adjointe",
+   "recette": "h3-max",
+   "images": 243,
+   "graine": 111,
+   "format": "16:9",
+   "refs": [
+    "marie"
+   ],
+   "premiere": null,
+   "parole": "v08",
+   "camera": "plan moyen, léger travelling",
+   "effets": "casque lumineux, onde vocale",
+   "son": "bureau, voix",
+   "statut": "VISION",
+   "prompt": "summary:\nA single continuous cinematic shot: a smiling assistant calls a client.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A young Quebec woman @marie with a call-center headset smiles in a bright modern office, soft daylight, blurred plants behind.\n[Shot 1] Medium shot with a gentle lateral drift as she speaks warmly into her headset. No text, no logos. No text, no logos.\n\ndialogue:\n@marie speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nBright office tone, soft keyboard clicks.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p12",
+   "sequence": "S4 projection",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 112,
+   "format": "16:9",
+   "refs": [
+    "patron"
+   ],
+   "premiere": null,
+   "parole": "v05",
+   "camera": "contre-plongée légère, push-in",
+   "effets": "courbe holographique en incrustation",
+   "son": "voix, pièce feutrée",
+   "statut": "EN PRÉPARATION",
+   "prompt": "summary:\nA single continuous cinematic shot: an owner questions his numbers.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A Quebec business owner in his fifties @patron stands before a tall dark window at night, city lights behind, a faint blue glow rising in front of him.\n[Shot 1] Low-angle medium shot, slow push-in as he asks his question. No text, no logos. No text, no logos.\n\ndialogue:\n@patron speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nQuiet room tone, low synth pulse.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p13",
+   "sequence": "S4 profits",
+   "recette": "h3-max",
+   "images": 141,
+   "graine": 113,
+   "format": "16:9",
+   "refs": [
+    "serveur"
+   ],
+   "premiere": null,
+   "parole": "v06",
+   "camera": "grue descendante sur la courbe",
+   "effets": "courbe holographique ascendante",
+   "son": "montée, voix",
+   "statut": "EN PRÉPARATION",
+   "prompt": "summary:\nA single continuous cinematic shot: a profit curve climbs above the servers.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. Above the dark server floor @serveur, a great arc of ion-blue light climbs like a profit curve, sparks and haze, one warm orange glint.\n[Shot 1] Crane shot descending along the rising arc of light. No text, no logos. No text, no logos.\n\ndialogue:\nThe hologram @vox speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nRising shimmer, deep confirming boom.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p14",
+   "sequence": "S4 cedule",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 114,
+   "format": "16:9",
+   "refs": [
+    "serveur"
+   ],
+   "premiere": null,
+   "parole": "v07",
+   "camera": "travelling latéral sur la grille",
+   "effets": "grille de cédule holographique",
+   "son": "clics rythmés, voix",
+   "statut": "EN PRÉPARATION",
+   "prompt": "summary:\nA single continuous cinematic shot: a schedule grid fills the air.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. In the dark server hall @serveur, a vast holographic schedule grid hangs in the air, glowing blocks filling week after week in ion blue and warm orange.\n[Shot 1] Lateral tracking shot gliding along the filling grid. No text, no logos. No text, no logos.\n\ndialogue:\nThe hologram @vox speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nRhythmic locking clicks, airy shimmer.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p15",
+   "sequence": "S5 retour",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 115,
+   "format": "16:9",
+   "refs": [],
+   "premiere": "fin:p04",
+   "parole": null,
+   "camera": "travelling arrière rapide",
+   "effets": "impulsion lumineuse qui repart",
+   "son": "montée inversée, fouet",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: light races back up the server aisle.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A pulse of ion-blue light races back up the dark server corridor, racks strobing past, haze tearing toward a distant bright exit.\n[Shot 1] Fast backward tracking shot fleeing with the pulse toward the light. No text, no logos. No text, no logos.\n\noverall_soundscape:\nReversed rising whoosh, electric crackle.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p16",
+   "sequence": "S5 livraison",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 116,
+   "format": "16:9",
+   "refs": [
+    "etienne",
+    "maison"
+   ],
+   "premiere": null,
+   "parole": "v02",
+   "camera": "plan moyen, lever de soleil",
+   "effets": "lueur qui touche le téléphone",
+   "son": "sonnerie douce, voix",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: a contractor gets the quote back.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. At sunrise before a suburban house @maison, the young contractor @etienne in a navy work jacket looks at his smartphone as a soft blue glow washes his smiling face.\n[Shot 1] Medium shot, gentle push-in as he reacts with joy. No text, no logos. No text, no logos.\n\ndialogue:\n@etienne speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nSoft notification chime, morning birds.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p17",
+   "sequence": "S6 quai",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 117,
+   "format": "16:9",
+   "refs": [
+    "patron"
+   ],
+   "premiere": null,
+   "parole": null,
+   "camera": "drone large, lent",
+   "effets": "reflet orange sur l'eau",
+   "son": "eau, vent, loin",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: an owner breathes on a quiet dock.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A Quebec man in his fifties @patron stands alone at the end of a wooden dock on a calm lake at dusk, warm orange sun on the water, deep peace.\n[Shot 1] Wide slow drone drift pulling back from the lone figure. No text, no logos. No text, no logos.\n\noverall_soundscape:\nLapping water, soft wind, distant loon.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p18",
+   "sequence": "S6 manifeste",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 118,
+   "format": "16:9",
+   "refs": [
+    "serveur"
+   ],
+   "premiere": null,
+   "parole": "v10",
+   "camera": "montée majestueuse, grand large",
+   "effets": "dix îlots en pleine gloire",
+   "son": "apothéose, voix",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: ten glowing departments in full glory.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. The vast server hall @serveur blazes with ten glowing work islands in a row, beams of light rising to the ceiling, majestic haze, one warm orange heart of light.\n[Shot 1] Majestic rising wide shot over the blazing hall. No text, no logos. No text, no logos.\n\ndialogue:\nThe narrator voice speaks in Quebecois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nEpic swelling pulse, deep choir-like boom.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p19",
+   "sequence": "S7 paye",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 119,
+   "format": "16:9",
+   "refs": [
+    "morin",
+    "chantier"
+   ],
+   "premiere": null,
+   "parole": null,
+   "camera": "travelling bas, contre-jour",
+   "effets": "enveloppe remise, poignée de main",
+   "son": "chantier joyeux",
+   "statut": "VISION",
+   "prompt": "summary:\nA single continuous cinematic shot: a worker gets his pay with a handshake.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. On a Quebec work site @chantier at golden hour, a foreman hands a pay envelope to the smiling worker @morin, firm handshake, dust glowing in backlight.\n[Shot 1] Low tracking shot gliding past the handshake into the sun flare. No text, no logos. No text, no logos.\n\noverall_soundscape:\nHappy work-site ambience, laughter, claps.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "id": "p20",
+   "sequence": "S7 carton",
+   "recette": "h3-max",
+   "images": 124,
+   "graine": 120,
+   "format": "16:9",
+   "refs": [
+    "marie",
+    "patron"
+   ],
+   "premiere": null,
+   "parole": null,
+   "camera": "fixe, lent zoom avant",
+   "effets": "visages qui se tournent vers la lumière",
+   "son": "queue musicale",
+   "statut": "RÉEL",
+   "prompt": "summary:\nA single continuous cinematic shot: two faces turn toward the light.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, real exposure, rich contrast, natural film colour, fine grain. A young Quebec woman @marie and a business owner in his fifties @patron stand side by side in soft darkness, turning together toward a rising warm light.\n[Shot 1] Locked-off shot with a slow push-in as they face the light. No text, no logos. No text, no logos.\n\noverall_soundscape:\nSoft musical tail, gentle room tone.\n\nnon_diegetic_music:\nN/A"
+  }
+ ],
+ "musique": {
+  "prompt": "High-energy modern corporate anthem, instrumental only, no vocals. Driving electronic drums at 124 BPM, pulsing synth bass, bright electric guitars, soaring strings and brass stabs. Structure in seconds: 0-8 rising intro with impacts, 8-30 verse groove, 30-55 build with risers, 55-75 epic chorus, 75-95 breakdown then bigger final chorus, 95-110 peak with hits on every cut, 110-120 outro tail. Positive, powerful, never sad, Quebec TV commercial energy. Clean mix, wide stereo, no voices, no sound effects.",
+  "bpm_vise": 124,
+  "duree_s": 150,
+  "coups": [
+   {
+    "t_s": 5.2,
+    "evenement": "le flash photo"
+   },
+   {
+    "t_s": 15.5,
+    "evenement": "le signal frappe le serveur"
+   },
+   {
+    "t_s": 31.0,
+    "evenement": "la soumission s'assemble"
+   },
+   {
+    "t_s": 75.0,
+    "evenement": "la courbe des profits monte"
+   },
+   {
+    "t_s": 94.0,
+    "evenement": "apotheose : dix departements"
+   }
+  ]
+ },
+ "montage": {
+  "long": {
+   "version": 1,
+   "fps": 24,
+   "format": "16:9",
+   "genre": "pub",
+   "titre": "L'usine invisible",
+   "sources": {
+    "p01": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p02": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p03": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p04": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p05": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p06": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p07": {
+     "kind": "video",
+     "duree_f": 158
+    },
+    "p08": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p09": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p10": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p11": {
+     "kind": "video",
+     "duree_f": 243
+    },
+    "p12": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p13": {
+     "kind": "video",
+     "duree_f": 141
+    },
+    "p14": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p15": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p16": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p17": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p18": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p19": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p20": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "v01": {
+     "kind": "audio",
+     "duree_f": 84
+    },
+    "v02": {
+     "kind": "audio",
+     "duree_f": 66
+    },
+    "v03": {
+     "kind": "audio",
+     "duree_f": 51
+    },
+    "v04": {
+     "kind": "audio",
+     "duree_f": 151
+    },
+    "v05": {
+     "kind": "audio",
+     "duree_f": 82
+    },
+    "v06": {
+     "kind": "audio",
+     "duree_f": 127
+    },
+    "v07": {
+     "kind": "audio",
+     "duree_f": 79
+    },
+    "v08": {
+     "kind": "audio",
+     "duree_f": 221
+    },
+    "v09": {
+     "kind": "audio",
+     "duree_f": 65
+    },
+    "v10": {
+     "kind": "audio",
+     "duree_f": 60
+    },
+    "v11": {
+     "kind": "audio",
+     "duree_f": 36
+    },
+    "v12": {
+     "kind": "audio",
+     "duree_f": 43
+    },
+    "musique": {
+     "kind": "audio",
+     "duree_f": 2873
+    }
+   },
+   "video": [
+    {
+     "id": "c01",
+     "src": "p01",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c02",
+     "src": "p02",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c03",
+     "src": "p03",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c04",
+     "src": "p04",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c05",
+     "src": "p05",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c06",
+     "src": "p06",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c07",
+     "src": "p07",
+     "entree_f": 0,
+     "duree_f": 158,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c08",
+     "src": "p08",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c09",
+     "src": "p09",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c10",
+     "src": "p10",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c11",
+     "src": "p11",
+     "entree_f": 0,
+     "duree_f": 226,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c12",
+     "src": "p12",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c13",
+     "src": "p13",
+     "entree_f": 0,
+     "duree_f": 141,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c14",
+     "src": "p14",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c15",
+     "src": "p15",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c16",
+     "src": "p16",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c17",
+     "src": "p17",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c18",
+     "src": "p18",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c19",
+     "src": "p19",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "c20",
+     "src": "p20",
+     "entree_f": 0,
+     "duree_f": 124,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "musique",
+     "entree_f": 0,
+     "duree_f": 2633,
+     "gain_db": -8,
+     "fondu_in_f": 24,
+     "fondu_out_f": 48
+    },
+    "voix": [
+     {
+      "src": "v01",
+      "debut_f": 10,
+      "entree_f": 0,
+      "duree_f": 84,
+      "gain_db": 0
+     },
+     {
+      "src": "v03",
+      "debut_f": 630,
+      "entree_f": 0,
+      "duree_f": 51,
+      "gain_db": 0
+     },
+     {
+      "src": "v04",
+      "debut_f": 750,
+      "entree_f": 0,
+      "duree_f": 151,
+      "gain_db": 0
+     },
+     {
+      "src": "v11",
+      "debut_f": 908,
+      "entree_f": 0,
+      "duree_f": 36,
+      "gain_db": 0
+     },
+     {
+      "src": "v09",
+      "debut_f": 1032,
+      "entree_f": 0,
+      "duree_f": 65,
+      "gain_db": 0
+     },
+     {
+      "src": "v08",
+      "debut_f": 1278,
+      "entree_f": 0,
+      "duree_f": 221,
+      "gain_db": 0
+     },
+     {
+      "src": "v05",
+      "debut_f": 1506,
+      "entree_f": 0,
+      "duree_f": 82,
+      "gain_db": 0
+     },
+     {
+      "src": "v06",
+      "debut_f": 1630,
+      "entree_f": 0,
+      "duree_f": 127,
+      "gain_db": 0
+     },
+     {
+      "src": "v07",
+      "debut_f": 1771,
+      "entree_f": 0,
+      "duree_f": 79,
+      "gain_db": 0
+     },
+     {
+      "src": "v02",
+      "debut_f": 2019,
+      "entree_f": 0,
+      "duree_f": 66,
+      "gain_db": 0
+     },
+     {
+      "src": "v10",
+      "debut_f": 2267,
+      "entree_f": 0,
+      "duree_f": 60,
+      "gain_db": 0
+     },
+     {
+      "src": "v12",
+      "debut_f": 2515,
+      "entree_f": 0,
+      "duree_f": 43,
+      "gain_db": 0
+     }
+    ],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 10
+    },
+    "cible_lufs": -14,
+    "crete_db": -1,
+    "fondu_coupe_ms": 30
+   },
+   "textes": [],
+   "generations": [],
+   "metadonnees": {
+    "modele": "muse",
+    "savoir": [
+     "opsys"
+    ]
+   }
+  },
+  "court": {
+   "version": 1,
+   "fps": 24,
+   "format": "16:9",
+   "genre": "pub",
+   "titre": "L'usine invisible (court)",
+   "sources": {
+    "p01": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p02": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p04": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p05": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p07": {
+     "kind": "video",
+     "duree_f": 158
+    },
+    "p16": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "v10": {
+     "kind": "audio",
+     "duree_f": 60
+    },
+    "musique": {
+     "kind": "audio",
+     "duree_f": 576
+    }
+   },
+   "video": [
+    {
+     "id": "s01",
+     "src": "p01",
+     "entree_f": 0,
+     "duree_f": 96,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "s02",
+     "src": "p02",
+     "entree_f": 0,
+     "duree_f": 48,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "s03",
+     "src": "p04",
+     "entree_f": 0,
+     "duree_f": 48,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "s04",
+     "src": "p05",
+     "entree_f": 0,
+     "duree_f": 36,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "s05",
+     "src": "p07",
+     "entree_f": 0,
+     "duree_f": 60,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "s06",
+     "src": "p16",
+     "entree_f": 0,
+     "duree_f": 48,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "musique",
+     "entree_f": 0,
+     "duree_f": 336,
+     "gain_db": -8,
+     "fondu_in_f": 12,
+     "fondu_out_f": 24
+    },
+    "voix": [
+     {
+      "src": "v10",
+      "debut_f": 252,
+      "entree_f": 0,
+      "duree_f": 60,
+      "gain_db": 0
+     }
+    ],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 10
+    },
+    "cible_lufs": -14,
+    "crete_db": -1,
+    "fondu_coupe_ms": 30
+   },
+   "textes": [],
+   "generations": []
+  },
+  "vertical": null
+ },
+ "annexe": {
+  "long": {
+   "incrustations": [
+    {
+     "type": "trajet",
+     "debut_f": 130,
+     "duree_f": 110,
+     "position": "centre",
+     "points": [
+      [
+       0.3,
+       0.7
+      ],
+      [
+       0.5,
+       0.3
+      ],
+      [
+       0.7,
+       0.2
+      ]
+     ],
+     "couleur": "ion"
+    },
+    {
+     "type": "flash",
+     "debut_f": 60,
+     "duree_f": 3,
+     "position": "centre",
+     "intensite": 0.8
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 620,
+     "duree_f": 100,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "statut",
+     "debut_f": 620,
+     "duree_f": 72,
+     "position": "bas",
+     "texte": "Photo reçue. Mesures en cours…"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 744,
+     "duree_f": 96,
+     "position": "haut-gauche",
+     "texte": "M3 · ESTIMATION"
+    },
+    {
+     "type": "compteur",
+     "debut_f": 760,
+     "duree_f": 120,
+     "position": "droite",
+     "de": 0,
+     "a": 18940,
+     "decimales": 0,
+     "prefixe": "",
+     "suffixe": " $",
+     "etiquette": "Soumission"
+    },
+    {
+     "type": "document",
+     "debut_f": 760,
+     "duree_f": 130,
+     "position": "droite",
+     "titre": "Soumission",
+     "destinataire": "Monsieur Morin",
+     "lignes": [
+      [
+       "Revêtement",
+       "12 400 $"
+      ],
+      [
+       "Soffite-fascia",
+       "3 890 $"
+      ],
+      [
+       "Gouttières",
+       "2 650 $"
+      ]
+     ],
+     "total": "18 940 $",
+     "tampon": "APPROUVÉ"
+    },
+    {
+     "type": "impact",
+     "debut_f": 908,
+     "duree_f": 48,
+     "position": "centre",
+     "texte": "Approuvé."
+    },
+    {
+     "type": "pointage",
+     "debut_f": 1156,
+     "duree_f": 72,
+     "position": "gauche",
+     "heure": "07:02",
+     "nom": "Morin",
+     "etat": "ARRIVÉE"
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1150,
+     "duree_f": 110,
+     "position": "haut-droite",
+     "texte": "EN PRÉPARATION"
+    },
+    {
+     "type": "appel",
+     "debut_f": 1280,
+     "duree_f": 210,
+     "position": "gauche",
+     "nom": "Marie · Adjointe",
+     "sous_titre": "Appel client",
+     "voix": "v08"
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1280,
+     "duree_f": 210,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "courbe",
+     "debut_f": 1630,
+     "duree_f": 130,
+     "position": "droite",
+     "points": [
+      4,
+      5,
+      6,
+      7,
+      9,
+      12,
+      16,
+      21
+     ],
+     "etiquette": "Profits · 26 semaines",
+     "valeur": "+7 %",
+     "pointille_depuis": 5
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1630,
+     "duree_f": 130,
+     "position": "haut-droite",
+     "texte": "EN PRÉPARATION"
+    },
+    {
+     "type": "cedule",
+     "debut_f": 1771,
+     "duree_f": 110,
+     "position": "droite",
+     "titre": "Cédule · 3 semaines",
+     "semaines": 3,
+     "jours": [
+      "Lun",
+      "Mar",
+      "Mer",
+      "Jeu",
+      "Ven"
+     ],
+     "blocs": [
+      [
+       0,
+       0,
+       2,
+       0,
+       "Équipe A"
+      ],
+      [
+       1,
+       0,
+       4,
+       1,
+       "Équipe B"
+      ],
+      [
+       2,
+       0,
+       3,
+       0,
+       "Morin"
+      ]
+     ]
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1771,
+     "duree_f": 110,
+     "position": "haut-droite",
+     "texte": "EN PRÉPARATION"
+    },
+    {
+     "type": "titre",
+     "debut_f": 2267,
+     "duree_f": 96,
+     "position": "centre",
+     "texte": "Dix départements. *Une* équipe.",
+     "zone": "centre"
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 2385,
+     "duree_f": 110,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "carton",
+     "debut_f": 2513,
+     "duree_f": 120,
+     "position": "centre"
+    }
+   ],
+   "sfx": [
+    {
+     "type": "fouet",
+     "debut_f": 124,
+     "db": -8
+    },
+    {
+     "type": "impact",
+     "debut_f": 372,
+     "db": -6
+    },
+    {
+     "type": "montee",
+     "debut_f": 620,
+     "db": -10
+    },
+    {
+     "type": "frappe",
+     "debut_f": 890,
+     "db": -8
+    },
+    {
+     "type": "clic",
+     "debut_f": 1771,
+     "db": -10
+    },
+    {
+     "type": "montee",
+     "debut_f": 2261,
+     "db": -8
+    },
+    {
+     "type": "boom",
+     "debut_f": 2513,
+     "db": -6
+    }
+   ],
+   "son_plans": [
+    {
+     "plan": "p09",
+     "db": -10
+    },
+    {
+     "plan": "p10",
+     "db": -12
+    }
+   ],
+   "etalonnage": {
+    "contraste": 1.05,
+    "saturation": 1.05,
+    "chaleur": 0.05,
+    "grain": 1.0
+   }
+  },
+  "court": {
+   "incrustations": [
+    {
+     "type": "trajet",
+     "debut_f": 100,
+     "duree_f": 60,
+     "position": "centre",
+     "points": [
+      [
+       0.3,
+       0.7
+      ],
+      [
+       0.5,
+       0.3
+      ],
+      [
+       0.7,
+       0.2
+      ]
+     ],
+     "couleur": "ion"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 228,
+     "duree_f": 60,
+     "position": "haut-gauche",
+     "texte": "M3 · ESTIMATION"
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 228,
+     "duree_f": 60,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "document",
+     "debut_f": 228,
+     "duree_f": 60,
+     "position": "droite",
+     "titre": "Soumission",
+     "destinataire": "Monsieur Morin",
+     "lignes": [
+      [
+       "Revêtement",
+       "12 400 $"
+      ],
+      [
+       "Main-d'œuvre",
+       "6 540 $"
+      ]
+     ],
+     "total": "18 940 $",
+     "tampon": null
+    },
+    {
+     "type": "carton",
+     "debut_f": 288,
+     "duree_f": 48,
+     "position": "centre"
+    }
+   ],
+   "sfx": [
+    {
+     "type": "fouet",
+     "debut_f": 96,
+     "db": -8
+    },
+    {
+     "type": "impact",
+     "debut_f": 156,
+     "db": -6
+    },
+    {
+     "type": "boom",
+     "debut_f": 288,
+     "db": -6
+    }
+   ],
+   "son_plans": [],
+   "etalonnage": {
+    "contraste": 1.05,
+    "saturation": 1.05,
+    "chaleur": 0.05,
+    "grain": 1.0
+   }
+  }
+ }
+}

@@ -1,0 +1,2839 @@
+{
+ "equipe": "deepseek",
+ "titre": "Le Onzième Étage",
+ "logline": "Une PME québécoise envoie une photo de toit ; le signal traverse le ciel, réveille une tour virtuelle de dix départements qui travaille toute la journée pour elle, et laisse à son patron le seul étage qui compte : le sien.",
+ "personnages": [
+  {
+   "id": "etienne",
+   "nom": "Étienne",
+   "role": "représentant (mesure, soumission)",
+   "voix": "drama3-adamqc",
+   "fiche": "Character reference sheet on a plain neutral grey studio background, 1792x1024, two views side by side: full body standing on the left, tight head-and-shoulders portrait on the right. A Québécois exterior-renovation sales representative, man of 34, short dark brown hair, three-day stubble, sharp friendly eyes, athletic build. He wears a plain charcoal work jacket over a plain heather-grey t-shirt, dark work trousers, worn leather work boots, a plain navy baseball cap with no logo and no lettering, a measuring tape clipped to his belt. Natural skin texture, soft even studio light, plain clothing with no logo, no text, no letters anywhere."
+  },
+  {
+   "id": "morin",
+   "nom": "Monsieur Morin",
+   "role": "propriétaire de la PME (administrateur)",
+   "voix": "drama3-frederic",
+   "fiche": "Character reference sheet on a plain neutral grey studio background, 1792x1024, two views side by side: full body on the left, tight head-and-shoulders portrait on the right. A Québécois small-business owner, man of 54, short greying hair, close grey beard, reading glasses pushed up on his forehead, broad shoulders, weathered hands. He wears a plain navy knit sweater over a plain checked shirt, dark trousers, no tie, no watch. Warm, stubborn, kind face, deep smile lines. Natural skin texture, soft even studio light, plain clothing with no logo, no text, no letters."
+  },
+  {
+   "id": "adjointe",
+   "nom": "L'adjointe",
+   "role": "adjointe administrative virtuelle (M1 Réception)",
+   "voix": "eleven-jeannemance",
+   "fiche": "Character reference sheet on a plain neutral grey studio background, 1792x1024, two views side by side: full body seated on the left, tight head-and-shoulders portrait on the right. A woman of 30, dark hair tied back in a low bun, clear intelligent eyes, light makeup, small headset with a thin boom microphone. She wears a plain light-grey blazer over a plain white shirt, no jewellery. She is rendered as a figure made of fine blue-white points of light, translucent, edges glowing, with a warm orange rim light on one side, while her face stays clearly readable and human. No text, no letters, no logo anywhere."
+  },
+  {
+   "id": "avatar",
+   "nom": "L'avatar des départements",
+   "role": "avatar holographique (comptabilité, gestion)",
+   "voix": "drama3-jeannemance",
+   "fiche": "Character reference sheet on a plain neutral grey studio background, 1792x1024, two views side by side: bust on the left, tight head-and-shoulders portrait on the right. A humanoid bust built from thousands of fine blue-white points of light, no clothing details, smooth shoulders fading into darkness, a calm androgynous face with clearly readable eyes and mouth, a deep orange glow inside one eye, faint horizontal scan lines crossing the skin of light. No text, no letters, no logo anywhere."
+  }
+ ],
+ "lieux": [
+  {
+   "id": "toit",
+   "fiche": "Location reference sheet, plain neutral grey background, 1792x1024, two views: wide exterior on the left, detail on the right. The roof of a suburban Québec bungalow at first light: worn asphalt shingles in the foreground, a strip of new dark grey soffit-fascia and a section of freshly installed pale grey siding on the right, an aluminium ladder hooked on the eave, morning mist, wet shingles, no people, no text, no logo."
+  },
+  {
+   "id": "tour",
+   "fiche": "Location reference sheet, plain neutral grey background, 1792x1024, two views: full tower on the left, close detail of one floor on the right. A colossal virtual office tower standing above a layer of clouds at dawn: ten distinct floors of dark glass and ion-blue light, each floor a wide open office seen in cross-section with rows of desks and silhouetted workers, thin vertical fins between floors, one warm orange light burning at the very top, no text, no logo."
+  },
+  {
+   "id": "bureau",
+   "fiche": "Location reference sheet, plain neutral grey background, 1792x1024, two views: wide room on the left, detail of the desk on the right. The office of a small Québec renovation company at dusk: a worn wooden desk, rolled paper plans, a coffee mug, a window onto a quiet suburban street, warm practical lamps, a plain pegboard wall with hand tools, a filing cabinet, no text, no logo, no computer screen readable."
+  },
+  {
+   "id": "serveur",
+   "fiche": "Location reference sheet, plain neutral grey background, 1792x1024, two views: wide room on the left, detail of the rack on the right. A small client server room in a clean basement: one dark steel rack with neat bundles of cable, small blue status lights, a concrete floor, a single warm work lamp, cold blue ambient light, no text, no logo, no readable screen anywhere."
+  }
+ ],
+ "cles": [
+  {
+   "id": "k01",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. Low angle on the roof of a suburban Québec bungalow at first light, wet asphalt shingles in the foreground, a strip of freshly installed pale grey siding on the right, morning mist. A man in a plain charcoal work jacket and a plain navy cap stands at the edge of the roof, back to camera, raising a plain dark phone toward the siding. Overcast dawn sky, cold blue light with one warm orange glow on the horizon. Photographic, anamorphic, fine grain, no text, no logo, no readable screen."
+  },
+  {
+   "id": "k02",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A dawn sky above a layer of low cloud, seen from high altitude. A lattice communications tower stands on the left, a white satellite dish on the right; a thin thread of ion-blue light crosses between them and continues toward the horizon. Cold blue and pale pink sky, anamorphic flare, fine grain, no text, no logo."
+  },
+  {
+   "id": "k03",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A corridor of wooden hydro poles and sagging cables along a country road at dawn, frost on the grass, a pulse of ion-blue light running along the cables toward a small industrial building in the distance. Low camera at cable height, cold blue light, warm orange in a window, fine grain, no text, no logo, no readable sign."
+  },
+  {
+   "id": "k04",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A plain white cargo van pulling out of a suburban driveway at dawn, seen from the side at low angle, headlights on, wet asphalt, a light trail of ion-blue drawn in the air ahead of it. Cold blue dawn, fine grain, no text, no logo, no readable plate."
+  },
+  {
+   "id": "k05",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A finished house exterior at golden hour: new pale grey siding, dark soffit and fascia, clean eaves, a ladder leaning against the wall, long warm shadows on the lawn. A camera rig made of thin light orbits the roof, small petals of light floating away from it. Warm gold and deep shadow, anamorphic, fine grain, no text, no logo."
+  },
+  {
+   "id": "k07",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A wall of fine blue-white light fills the frame, slightly curved, one brighter rectangle beginning to thicken on its surface. Cold blue, warm orange at the edges, fine grain, no text, no logo, no readable letters."
+  },
+  {
+   "id": "k08",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. An empty dawn sky, deep blue at the top fading to pale amber at the horizon, one thin band of cloud, nothing else. Clean, quiet, anamorphic, fine grain, no text, no logo."
+  },
+  {
+   "id": "k09",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A wide virtual office floor in cross-section: dark desks in rows, tall glass onto a cloud sea, silhouetted workers standing, one empty desk in the foreground lit by a cold shaft of light. Ion-blue accents, fine grain, no text, no logo, no readable screen."
+  },
+  {
+   "id": "k10",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A small industrial building at dawn seen from the road, overhead hydro cables entering its wall, one lit window, frost on the gravel, a thin blue line of light running down the wall toward a steel door. Cold blue, fine grain, no text, no logo, no readable sign."
+  },
+  {
+   "id": "k11",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A wide virtual office floor seen in cross-section from the outside through tall glass: rows of dark desks, silhouetted workers standing between them, a cloud sea beyond, ion-blue light from the ceiling. Fine grain, no text, no logo, no readable screen."
+  },
+  {
+   "id": "k06",
+   "format": "16:9",
+   "prompt": "First frame of a film shot. A construction site trailer at 7 a.m. in winter, breath of cold air, a worker in a plain dark parka walking toward a gate of thin light that flares as he passes. Snow on the ground, blue hour, one warm orange lamp above the door, fine grain, no text, no logo, no readable sign."
+  }
+ ],
+ "voix": [
+  {
+   "id": "l01",
+   "role": "Étienne, sur le toit",
+   "voix": "drama3-adamqc",
+   "vitesse": 1.12,
+   "prises": 2,
+   "texte": "Photo prise. Toit de monsieur Thibault, le 3.",
+   "direction": "Représentant pressé mais de bonne humeur : ton de gars qui travaille, un peu essoufflé par le froid, articulation nette, énergie qui monte sur « photo prise ». Pas de ton de speaker."
+  },
+  {
+   "id": "l02",
+   "role": "L'adjointe (M1 Réception)",
+   "voix": "eleven-jeannemance",
+   "vitesse": 1.08,
+   "prises": 3,
+   "texte": "Bonjour Étienne. Monsieur Thibault à 14 h. J'ai déplacé votre 16 h.",
+   "direction": "[warm, professional, efficient] Sourire audible, débit vif et sûr, petite pointe de fierté sur « j'ai déplacé ». Une vraie adjointe qui connaît son dossier, pas une voix de répondeur."
+  },
+  {
+   "id": "l03",
+   "role": "Avatar comptable (M5 Finance)",
+   "voix": "drama3-jeannemance",
+   "vitesse": 1.05,
+   "prises": 2,
+   "texte": "Voici les profits anticipés, mis à jour avec les nouveaux ratios. Productivité : plus sept pour cent.",
+   "direction": "Autoritaire, précise, sans emphase commerciale : elle énonce un fait vérifié et s'arrête net. Appuyer « plus sept pour cent » comme une conclusion, pas comme une promesse."
+  },
+  {
+   "id": "l04",
+   "role": "Avatar gestion (M4 Terrain)",
+   "voix": "drama3-jeannemance",
+   "vitesse": 1.1,
+   "prises": 2,
+   "texte": "Voici la cédule des trois prochaines semaines.",
+   "direction": "Sèche, efficace, un peu bousculée : elle a déjà tourné la page avant la fin de la phrase."
+  },
+  {
+   "id": "l05",
+   "role": "Monsieur Morin",
+   "voix": "drama3-frederic",
+   "vitesse": 1.12,
+   "prises": 2,
+   "texte": "Le deuxième camion, on peut-tu ?",
+   "direction": "Patron québécois qui pense tout haut, un peu bourru, regard direct dans la caméra. Monter sur « peut-tu », ton de défi amical, jamais suppliant."
+  },
+  {
+   "id": "l06",
+   "role": "Avatar finance",
+   "voix": "drama3-jeannemance",
+   "vitesse": 1.1,
+   "prises": 2,
+   "texte": "Oui. En mars. Le dossier est prêt pour ton comptable.",
+   "direction": "Réponse coupée, trois blocs nets. Aucune flatterie. Le « oui » tombe comme un couperet."
+  },
+  {
+   "id": "l07",
+   "role": "Monsieur Morin",
+   "voix": "drama3-frederic",
+   "vitesse": 1.15,
+   "prises": 3,
+   "texte": "Approuvé.",
+   "direction": "Un seul mot, lourd, satisfait, presque à voix basse. La décision d'un homme qui signe. Ne pas étirer : la coupe tombe sur le « é »."
+  },
+  {
+   "id": "l08",
+   "role": "L'adjointe, finale",
+   "voix": "eleven-jeannemance",
+   "vitesse": 1.05,
+   "prises": 2,
+   "texte": "OPSYS. Dix départements. Le onzième, c'est vous.",
+   "direction": "[confident, warm, punchy] Trois blocs, un temps entre chacun. Le nom tombe net, sans emphase publicitaire. Le dernier mot se pose, presque complice."
+  },
+  {
+   "id": "l09",
+   "role": "Étienne, sur le chantier",
+   "voix": "drama3-adamqc",
+   "vitesse": 1.1,
+   "prises": 2,
+   "texte": "La soumission est prête pour ton approbation. Beau toit, hein ?",
+   "direction": "Soulagement réel, ton de gars qui rentre chez lui : plus bas, plus lent, sourire dans la voix."
+  },
+  {
+   "id": "l10",
+   "role": "Avatar paye (M5)",
+   "voix": "drama3-jeannemance",
+   "vitesse": 1.12,
+   "prises": 2,
+   "texte": "Pointage reçu. Le chèque de paye est prêt.",
+   "direction": "Même autorité sèche, deux blocs. Le deuxième bloc plus bas, comme une confirmation administrative."
+  }
+ ],
+ "plans": [
+  {
+   "id": "p01",
+   "sequence": "S1",
+   "recette": "h3-max",
+   "images": 141,
+   "refs": [
+    "etienne",
+    "toit"
+   ],
+   "premiere": "k01",
+   "statut": "RÉEL",
+   "camera": "grues lente de la rue vers le toit, montée de 3 m",
+   "effets": "brume au sol, flare anamorphique sur le soleil levant",
+   "son": "vent léger, gouttière qui craque, oiseaux lointains",
+   "prompt": "summary:\nA single continuous cinematic shot that begins from the key frame: a man on a roof at dawn raises a phone toward new siding.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The shot begins from the first frame. @etienne, a Québécois renovation representative in a plain charcoal work jacket and a plain navy cap, stands on the wet shingled roof of @toit, beside a strip of freshly installed pale grey siding. He plants his boots, turns his shoulders toward the siding, and lifts a plain dark phone to eye level. Morning mist drifts across the roof and the low sun flares behind him. The camera cranes slowly upward from the street below and settles behind him. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nLight wind over shingles, a distant dog, the creak of an aluminium ladder, the soft click of a phone being lifted.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 139
+  },
+  {
+   "id": "p02",
+   "sequence": "S1",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": "l01",
+   "statut": "RÉEL",
+   "camera": "gros plan poitrine, léger travelling avant",
+   "effets": "souffle visible, flare froid",
+   "son": "vent, respiration",
+   "prompt": "summary:\nA single continuous cinematic shot: a Québécois representative on a roof speaks to camera, lips perfectly synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Medium close-up on @etienne on the roof, his plain navy cap low over his eyes, breath visible in the cold air, wet shingles blurred behind him. He looks just past the lens, says his line with the flat efficiency of a man who has done this a thousand times, then his eyes drop to the phone in his hand. The camera pushes in slowly. Plain clothing with no logo, no text, no letters anywhere.\n\ndialogue:\n@etienne speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nWind, his breath, the faint electrical hum of the phone.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 93
+  },
+  {
+   "id": "p03",
+   "sequence": "S1",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "etienne",
+    "toit"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "plan taille, axe latéral",
+   "effets": "éclair de flash, onde de choc lumineuse",
+   "son": "déclic de l'obturateur, souffle",
+   "prompt": "summary:\nA single continuous cinematic shot: a phone camera fires, and a ring of light expands across the wet siding.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] @etienne holds the phone steady at arm's length toward the new siding of @toit; a hard white shutter flash fires and a thin ring of ion-blue light bursts outward from the lens, races across the wet shingles of @toit and dies at the eave. His jacket sleeve lifts in the wind. The camera slides sideways, keeping him centred. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nA sharp camera shutter, a low electric thump, wind.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 58
+  },
+  {
+   "id": "p04",
+   "sequence": "S1",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "etienne",
+    "toit"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "contre-plongée, la caméra monte avec l'objet",
+   "effets": "la photo se détache de l'écran en volume, particules",
+   "son": "bourdonnement qui monte, crépitement",
+   "prompt": "summary:\nA single continuous cinematic shot: a photograph lifts out of a phone screen and becomes a solid plate of light in the air.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] @etienne lowers the phone; a small rectangle of pale light rises out of it, turns in the air above his open palm, thickens into a floating plate showing the siding of @toit in relief, then shoots upward past his shoulder into the dawn sky. Loose particles of light trail behind it. The camera tilts up and follows it. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nA rising electrical hum, fine crackle of particles, wind falling away.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 81
+  },
+  {
+   "id": "p05",
+   "sequence": "S2",
+   "recette": "h3-fast",
+   "images": 124,
+   "refs": [],
+   "premiere": "k02",
+   "statut": "RÉEL",
+   "camera": "travelling latéral rapide, très haute altitude",
+   "effets": "fil de lumière, nuages qui défilent, flare",
+   "son": "vent d'altitude, bourdonnement de signal",
+   "prompt": "summary:\nA single continuous cinematic shot that begins from the key frame: a thread of light crosses a dawn sky between a tower and a dish.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The shot begins from the first frame. High above a layer of low cloud, a thin thread of ion-blue light snaps taut between the lattice tower on the left and the white dish on the right, then runs on toward the horizon, pulsing once as it goes. Cloud shadows slide underneath. The camera tracks fast and level, chasing the thread. No text, no logos.\n\noverall_soundscape:\nHigh-altitude wind, a clean electrical tone, the deep silence above clouds.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 93
+  },
+  {
+   "id": "p06",
+   "sequence": "S2",
+   "recette": "h3-fast",
+   "images": 124,
+   "refs": [],
+   "premiere": "k03",
+   "statut": "RÉEL",
+   "camera": "rasante à hauteur de câble, avant",
+   "effets": "impulsion bleue courant sur les câbles, givre",
+   "son": "vent dans les fils, claquement de câble",
+   "prompt": "summary:\nA single continuous cinematic shot that begins from the key frame: a pulse of light races along hydro cables over a frozen country road.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The shot begins from the first frame. At cable height, a pulse of ion-blue light runs along the sagging cables from pole to pole, throwing a brief cold flash on the frost and the grass below, and disappears toward a small industrial building at the end of the road. The camera flies forward just under the wires, the poles whipping past. No text, no logos.\n\noverall_soundscape:\nWind humming in the wires, a cable clacking, the pulse buzzing past the lens.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 81
+  },
+  {
+   "id": "p07",
+   "sequence": "S2",
+   "recette": "h3-max",
+   "images": 141,
+   "refs": [
+    "serveur"
+   ],
+   "premiere": "k10",
+   "statut": "RÉEL",
+   "camera": "plan large, puis poussée vers la porte du local",
+   "effets": "le signal entre dans le bâtiment, halo bleu",
+   "son": "moteur de camionnette, gravier, bourdonnement",
+   "prompt": "summary:\nA single continuous cinematic shot: a pulse of light leaves the cables and dives into a small server room.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] A pulse of ion-blue light drops from the overhead cables, threads down the wall of a small industrial building and slips under the door of @serveur. The camera follows it down the wall, then pushes through the doorway into the cold blue room: one dark steel rack, neat cables, small blue status lights, a single warm work lamp. No text, no logos, no readable screen anywhere.\n\noverall_soundscape:\nThe pulse buzzing down the wall, a door seal hissing, then a low steady hum of fans.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 128
+  },
+  {
+   "id": "p08",
+   "sequence": "S3",
+   "recette": "h3-max",
+   "images": 209,
+   "refs": [
+    "serveur",
+    "tour"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "contre-plongée verticale dans le rack",
+   "effets": "la tour se déplie hors du rack, échelle impossible, poussière lumineuse",
+   "son": "souffle grave, craquement métallique, chœur bas",
+   "prompt": "summary:\nA single continuous cinematic shot: a colossal office tower unfolds out of a single server rack.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Inside @serveur, the blue status lights of the rack brighten in sequence from bottom to top, and out of the rack's dark glass a vast structure pushes forward and upward: @tour, ten floors of dark glass and ion-blue light, each floor an open office in cross-section, desks and silhouetted workers visible, thin vertical fins between floors, one warm orange light burning at the very top. The room around it stays real and small, dust turning in the lamp. The camera tilts up hard, dwarfed. No text, no logos, no readable screen.\n\noverall_soundscape:\nA deep rising rumble, metal ticking as it cools, a low choral tone underneath.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 209
+  },
+  {
+   "id": "p09",
+   "sequence": "S3",
+   "recette": "h3-max",
+   "images": 141,
+   "refs": [
+    "tour"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "travelling vertical ascendant le long de la façade",
+   "effets": "chaque étage s'allume au passage, reflets",
+   "son": "relais qui claquent, électricité",
+   "prompt": "summary:\nA single continuous cinematic shot: a camera climbs the facade of a ten-floor virtual tower as the floors light up.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The camera rises fast along the facade of @tour. As it passes each floor, the floor lights up from the inside: rows of desks, silhouetted workers leaning over plans, a hand raising, a screen glow, all seen through the glass and never readable. The vertical fins throw long blue reflections. At the top floor the warm orange light pulses once. No text, no logos, no readable screen anywhere.\n\noverall_soundscape:\nElectrical relays snapping one after another, a rising hum, glass ticking in the wind.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 128
+  },
+  {
+   "id": "p10",
+   "sequence": "S3",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "tour"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "plan large fixe, la tour occupe tout le cadre",
+   "effets": "le toit s'ouvre, la lumière orange monte",
+   "son": "grondement, souffle",
+   "prompt": "summary:\nA single continuous cinematic shot: the roof of the tower opens and a column of warm light rises out of it.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Seen from a distance, @tour fills the frame above a sea of cloud. The top floor's warm orange light swells, the roof panels iris open, and a slow column of amber light rises straight up into the dawn sky, carrying fine dust and a few sheets of paper that turn and climb. The camera holds steady, small against the scale. No text, no logos, no readable screen.\n\noverall_soundscape:\nA deep ground-shaking swell, paper fluttering, a long breath of air.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 105
+  },
+  {
+   "id": "p11",
+   "sequence": "S4",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "tour"
+   ],
+   "premiere": "k09",
+   "statut": "RÉEL",
+   "camera": "plan taille dans un étage, caméra portée",
+   "effets": "dossiers qui s'assemblent en l'air, lumière de fenêtre",
+   "son": "clavier, papier, rumeur de bureau",
+   "prompt": "summary:\nA single continuous cinematic shot: inside a virtual office floor, documents assemble themselves in mid-air above a desk.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Inside one floor of @tour: a wide open office of dark desks and glass, silhouetted workers moving between them. Above one empty desk, sheets of light lift and lock together into a neat stack, edges glowing ion-blue, then a second stack forms beside it. A worker in silhouette walks through the frame and the sheets part around him without breaking. The camera tracks sideways at chest height. No text, no logos, no readable screen, no readable writing on the sheets.\n\noverall_soundscape:\nOffice murmur, keys, paper sliding, a soft electrical shimmer.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 116
+  },
+  {
+   "id": "p12",
+   "sequence": "S4",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "morin",
+    "bureau"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "plan moyen, lente poussée avant",
+   "effets": "poussière dans la lumière, reflet orange",
+   "son": "horloge, pluie fine sur la fenêtre",
+   "prompt": "summary:\nA single continuous cinematic shot: a business owner in his office looks up as light gathers on the wall behind him.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] @morin sits at the worn wooden desk of @bureau, glasses pushed up on his forehead, a pencil in his hand over a rolled plan. Behind him, on the plain wall, a rectangle of blue-white light gathers and sharpens. He turns his head toward it, not startled, just tired and curious. The camera pushes in slowly past his shoulder. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nA wall clock, fine rain on the window, the pencil tapping once.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 116
+  },
+  {
+   "id": "p13",
+   "sequence": "S4",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "adjointe",
+    "morin"
+   ],
+   "premiere": null,
+   "parole": "l02",
+   "statut": "VISION",
+   "camera": "plan poitrine sur Morin, l'adjointe en amorce lumineuse à droite",
+   "effets": "l'adjointe se matérialise par balayage, onde vocale",
+   "son": "bureau, pluie",
+   "prompt": "summary:\nA single continuous cinematic shot: a business owner listens as a figure of light speaks to him, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Medium close-up on @morin at his desk, turned three-quarters toward the right of frame. At the right edge, @adjointe stands as a translucent figure of fine blue-white points of light, a plain light-grey blazer and a thin headset readable, her face clearly human, an orange rim light along one cheek. She speaks; he listens, eyebrows lifting, then a short nod. The camera holds a slow push-in on his face. Plain clothing with no logo, no text, no letters anywhere.\n\ndialogue:\n@adjointe speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nRoom tone, rain on glass, a chair creaking.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 105
+  },
+  {
+   "id": "p14",
+   "sequence": "S4",
+   "recette": "h3-fast",
+   "images": 124,
+   "refs": [],
+   "premiere": "k04",
+   "statut": "RÉEL",
+   "camera": "plan large, caméra fixe au sol",
+   "effets": "traînée de lumière sur l'asphalte mouillé",
+   "son": "moteur, gravier",
+   "prompt": "summary:\nA single continuous cinematic shot that begins from the key frame: a plain white cargo van pulls out of a driveway at dawn.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The shot begins from the first frame. A plain white cargo van rolls out of a suburban driveway onto a wet street, headlights on, a thin trail of ion-blue light drawn in the air ahead of it like a wire pulled tight. Water sprays from the tires. The camera holds low at the curb and lets the van cross the frame. No text, no logos, no readable plate.\n\noverall_soundscape:\nA cold engine, gravel, water under the tires.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 70
+  },
+  {
+   "id": "p15",
+   "sequence": "S5",
+   "recette": "h3-max",
+   "images": 158,
+   "refs": [
+    "tour",
+    "avatar"
+   ],
+   "premiere": null,
+   "parole": "l03",
+   "statut": "EN PRÉPARATION",
+   "camera": "plan poitrine, l'avatar au centre, la ville virtuelle derrière",
+   "effets": "l'avatar s'assemble à partir de points, courbe de lumière derrière",
+   "son": "bourdonnement doux, battement",
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic bust of light forms in a virtual office and speaks, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] In the open space of one floor of @tour, with the city of glass behind, thousands of fine blue-white points stream together and lock into @avatar, a humanoid bust of light with a calm readable face and a deep orange glow in one eye. Behind it, a wide dark window shows the cloud sea. It speaks to camera, unhurried, one small tilt of the head; a curve of pale light traces itself in the air beside it, rising to the right. The camera pushes in slowly. No text, no logos, no readable numbers anywhere.\n\ndialogue:\n@avatar speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nA soft electrical shimmer, a slow pulse, glass ticking.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 151
+  },
+  {
+   "id": "p16",
+   "sequence": "S5",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "avatar",
+    "tour"
+   ],
+   "premiere": null,
+   "statut": "EN PRÉPARATION",
+   "camera": "plan large, la caméra recule",
+   "effets": "grille de cédule qui se dessine en volume",
+   "son": "clics réguliers, souffle",
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic bust of light speaks and a wide grid of light draws itself in the air, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] @avatar turns slightly and lifts one hand; in the air in front of it a wide grid of thin blue lines draws itself row by row, then blocks of pale light drop into the cells one after another, each settling with a small pulse. It speaks to camera, then drops its hand. The grid turns slowly in space, throwing faint light on the glass floor of @tour. The camera pulls back to take in the whole grid. No text, no logos, no readable letters or numbers anywhere.\n\ndialogue:\n@avatar speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nEven mechanical clicks, a soft airy swell, a low hum.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 93,
+   "parole": "l04"
+  },
+  {
+   "id": "p17",
+   "sequence": "S6",
+   "recette": "h3-fast",
+   "images": 124,
+   "refs": [],
+   "premiere": "k06",
+   "statut": "EN PRÉPARATION",
+   "camera": "plan large, caméra fixe, léger vent latéral",
+   "effets": "porte de lumière qui s'ouvre, neige soulevée",
+   "son": "vent d'hiver, pas dans la neige",
+   "prompt": "summary:\nA single continuous cinematic shot that begins from the key frame: a worker walks through a gate of light at a winter job site.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The shot begins from the first frame. At a construction site trailer in blue winter dawn, a worker in a plain dark parka walks toward a tall rectangle of thin blue light standing open in the air; as he passes through it, the light flares, snow lifts off the ground in a ring, and the rectangle closes behind him. The camera holds steady at ground level. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nWind, snow crunching, a short electrical flare.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 81
+  },
+  {
+   "id": "p18",
+   "sequence": "S6",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "avatar"
+   ],
+   "premiere": null,
+   "statut": "VISION",
+   "camera": "plan poitrine serré, l'avatar de trois quarts",
+   "effets": "heure de pointage en lumière, particules",
+   "son": "bip, bourdonnement",
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic bust of light speaks to camera inside a virtual office, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Close on @avatar, three-quarters, the orange glow in one eye flaring slightly as it speaks. Behind it, a wall of blue light scrolls slowly upward and a blank luminous slip of paper slides out of it and hangs in the air. It lifts its chin at the end of the line and holds the look. The camera pushes in a few centimetres. No text, no logos, no readable numbers anywhere.\n\ndialogue:\n@avatar speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nA single clean beep, a low hum, glass ticking.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 93,
+   "parole": "l10"
+  },
+  {
+   "id": "p19",
+   "sequence": "S6",
+   "recette": "h3-fast",
+   "images": 124,
+   "refs": [],
+   "premiere": "k07",
+   "statut": "VISION",
+   "camera": "plan serré sur un mur de lumière, caméra fixe",
+   "effets": "un rectangle de papier lumineux se détache du mur",
+   "son": "papier, souffle",
+   "prompt": "summary:\nA single continuous cinematic shot: a sheet of luminous paper peels off a wall of blue light and floats forward.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] A wall of fine blue light, slightly curved, fills the frame. One rectangle of it thickens, peels away from the surface with a soft tearing sound, and floats toward the lens, edges glowing warm orange, surface blank and bright. The camera holds and lets it fill the frame, then it passes the lens. No text, no logos, no readable letters or numbers anywhere.\n\noverall_soundscape:\nPaper tearing softly, a warm hum, air moving.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 58
+  },
+  {
+   "id": "p20",
+   "sequence": "S6",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "morin",
+    "bureau"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "plan large du bureau, la caméra recule vers la fenêtre",
+   "effets": "la pile de documents lumineux se pose sur le bureau",
+   "son": "horloge, papier",
+   "prompt": "summary:\nA single continuous cinematic shot: a stack of luminous documents settles onto a wooden desk in front of a business owner.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] @morin looks up as a stack of glowing sheets floats down through the air of @bureau and settles onto his desk with a soft weight, edges pulsing once. He reaches out, hesitates, then puts two fingers on the top sheet. The lamp flickers warm. The camera pulls back slowly toward the window. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nThe clock, paper settling, a lamp buzzing.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 93
+  },
+  {
+   "id": "p21",
+   "sequence": "S7",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "morin",
+    "bureau"
+   ],
+   "premiere": null,
+   "parole": "l05",
+   "statut": "RÉEL",
+   "camera": "gros plan, axe direct, très légère plongée",
+   "effets": "aucun : visage, peau, lumière",
+   "son": "silence de bureau, pluie",
+   "prompt": "summary:\nA single continuous cinematic shot: a business owner speaks straight to camera, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Tight on the face of @morin at the desk of @bureau, glasses still up on his forehead, the warm lamp on one cheek and cold window light on the other. He looks straight into the lens and asks his question, jaw set, a small shrug at the end. Behind him the office is dark and quiet. The camera holds, breathing slightly. Plain clothing with no logo, no text, no letters anywhere.\n\ndialogue:\n@morin speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nRoom tone, a chair creak, rain.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 70
+  },
+  {
+   "id": "p22",
+   "sequence": "S7",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "avatar",
+    "tour"
+   ],
+   "premiere": null,
+   "parole": "l06",
+   "statut": "VISION",
+   "camera": "plan poitrine, contre-champ, la ville derrière",
+   "effets": "le buste se reforme, éclats de lumière",
+   "son": "bourdonnement, battement grave",
+   "prompt": "summary:\nA single continuous cinematic shot: a holographic bust of light answers to camera, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] @avatar reforms in the dark of a floor of @tour, points of light rushing inward and locking into the face, the orange glow in one eye steady. It speaks to camera in three short blocks, no gesture, no smile. Behind it the cloud sea turns slowly from blue to amber. The camera is locked off, a slow drift only. No text, no logos, no readable numbers anywhere.\n\ndialogue:\n@avatar speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nA low hum, a single deep pulse on each block of speech.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 93
+  },
+  {
+   "id": "p23",
+   "sequence": "S7",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "morin",
+    "bureau"
+   ],
+   "premiere": null,
+   "parole": "l07",
+   "statut": "RÉEL",
+   "camera": "gros plan main + visage, caméra fixe",
+   "effets": "un tampon de lumière orange se pose sur la feuille",
+   "son": "papier, tampon",
+   "prompt": "summary:\nA single continuous cinematic shot: a business owner presses two fingers on a glowing document and a seal of light appears.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] In @bureau, @morin looks at the glowing stack, says one word under his breath, then brings his weathered hand down flat on the top sheet; under his fingers a ring of warm orange light spreads across the paper and settles into a solid disc, then fades to a thin outline. He exhales and sits back. The camera holds tight on his hand and the lower half of his face. Plain clothing with no logo, no text, no letters anywhere.\n\ndialogue:\n@morin speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nPaper under a hand, a soft thump, a long exhale.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 46
+  },
+  {
+   "id": "p24",
+   "sequence": "S8",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "tour"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "travelling latéral le long de la façade, puis arrêt",
+   "effets": "les dix étages s'éteignent un à un vers le haut",
+   "son": "relais, électricité qui s'éteint",
+   "prompt": "summary:\nA single continuous cinematic shot: the floors of a colossal tower go dark one after another, bottom to top.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Along the facade of @tour, the office floors switch off one by one from the bottom up, each going from ion-blue to deep black with a small relay snap, leaving only the top floor's warm orange light. The camera tracks sideways and then stops, the dark tower filling the frame against a pale dawn. No text, no logos, no readable screen.\n\noverall_soundscape:\nRelays snapping in sequence, a hum powering down, wind.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 116
+  },
+  {
+   "id": "p25",
+   "sequence": "S8",
+   "recette": "h3-max",
+   "images": 141,
+   "refs": [
+    "morin",
+    "bureau"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "plan large depuis l'extérieur, à travers la fenêtre",
+   "effets": "la lumière orange de la tour se reflète dans la vitre",
+   "son": "rue calme, pluie fine",
+   "prompt": "summary:\nA single continuous cinematic shot: seen through an office window, a business owner stands up and turns off his lamp.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] From the street, through the wet window of @bureau, @morin stands, stretches his back, and clicks off the desk lamp; the office falls into blue dusk. In the glass, the reflection of a distant tower with one warm orange light at the top lines up exactly over his shoulder. He picks up his coat. The camera holds, rain running down the pane. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nQuiet street, fine rain on glass, a lamp switch.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 128
+  },
+  {
+   "id": "p26",
+   "sequence": "S8",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "etienne",
+    "toit"
+   ],
+   "premiere": "k05",
+   "statut": "RÉEL",
+   "camera": "orbite lente autour de la maison",
+   "effets": "rig de lumière, pétales de lumière, golden hour",
+   "son": "vent doux, oiseaux",
+   "prompt": "summary:\nA single continuous cinematic shot that begins from the key frame: a rig of light orbits a finished house at golden hour.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The shot begins from the first frame. Around the finished exterior of @toit, a house with new pale grey siding and dark soffit-fascia, a thin rig of blue-white light circles the roof once, and @etienne stands small at the foot of the ladder, shedding small petals of light that drift down and dissolve before they touch the lawn. The camera orbits with it, low, the long shadows sliding. No text, no logos, no readable sign.\n\noverall_soundscape:\nSoft wind, birds, a low warm hum.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 116
+  },
+  {
+   "id": "p27",
+   "sequence": "S9",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": "l09",
+   "statut": "RÉEL",
+   "camera": "plan poitrine, l'homme assis sur le hayon",
+   "effets": "halo doux, poussière dans la lumière",
+   "son": "camionnette qui refroidit, oiseaux",
+   "prompt": "summary:\nA single continuous cinematic shot: a representative sitting on a van tailgate speaks to camera, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] @etienne sits on the tailgate of a plain white van at golden hour, cap pushed back, phone in one hand, the finished house soft behind him. He speaks to camera with a tired smile, then looks down at the phone and taps once. The camera holds a slow push-in. Plain clothing with no logo, no text, no letters anywhere.\n\ndialogue:\n@etienne speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nA cooling engine ticking, birds, a light breeze.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 105
+  },
+  {
+   "id": "p29",
+   "sequence": "S9",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "gros plan sur le téléphone puis sur le visage",
+   "effets": "la lumière remonte l'écran, halo",
+   "son": "camionnette, oiseaux",
+   "prompt": "summary:\nA single continuous cinematic shot: a phone lights up in a man's hand and he smiles at it.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Close on @etienne's hand holding a plain dark phone at golden hour; the screen, kept blank and out of focus, blooms with warm light that spills onto his fingers and up his jaw. He reads, exhales through his nose, and a real smile arrives. He tilts the phone slightly toward the finished house behind him. The camera holds tight, then racks focus to his eyes. Plain clothing with no logo, no text, no letters anywhere, no readable screen.\n\noverall_soundscape:\nA cooling engine, birds, a soft notification chime, a breath.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 81
+  },
+  {
+   "id": "p30",
+   "sequence": "S9",
+   "recette": "h3-max",
+   "images": 243,
+   "refs": [
+    "tour",
+    "bureau"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "la caméra perce le plafond du dixième et découvre l'étage au-dessus",
+   "effets": "le toit s'ouvre, un vrai bureau apparaît posé sur la tour",
+   "son": "souffle, craquement, puis silence chaud",
+   "prompt": "summary:\nA single continuous cinematic shot: the camera rises through the roof of a virtual tower and finds a small real office sitting on top of it.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The camera climbs the inside of @tour past the tenth floor, breaks through the roof into open sky, and keeps rising until a small, warm, ordinary office appears, sitting alone on the flat roof: @bureau, seen from outside through its window, wooden desk, rolled plans, a coffee mug, a child's drawing pinned to the wall, one warm lamp. The vast dark tower stretches below it. The camera arcs around the little room, the cloud sea turning gold. No text, no logos, no readable screen, no readable writing on the drawing.\n\noverall_soundscape:\nA rush of air, then the small sounds of a real room: a clock, a chair, a lamp.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 232
+  },
+  {
+   "id": "p31",
+   "sequence": "S9",
+   "recette": "h3-max",
+   "images": 209,
+   "refs": [
+    "tour",
+    "bureau"
+   ],
+   "premiere": null,
+   "statut": "RÉEL",
+   "camera": "très grand large, recul vertical continu",
+   "effets": "la tour entière, dix étages bleus, un étage orange, la ville réelle en bas",
+   "son": "nappe grave, vent",
+   "prompt": "summary:\nA single continuous cinematic shot: a colossal tower of ten blue floors with one small warm office on top, seen from very far away.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] The camera pulls back and up, revealing @tour in full: ten floors of dark glass and ion-blue light stacked above a layer of cloud, and on the very top, small and bright and stubborn, the warm orange window of @bureau. Below the clouds, faint and real, the grid of a small Québec suburb at dusk. The camera keeps retreating until the tower is one bright vertical line in the sky. No text, no logos, no readable sign.\n\noverall_soundscape:\nA wide low chord of air, wind at altitude, one distant car.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 209
+  },
+  {
+   "id": "p28",
+   "sequence": "S9",
+   "recette": "h3-max",
+   "images": 124,
+   "refs": [
+    "adjointe",
+    "morin"
+   ],
+   "premiere": null,
+   "parole": "l08",
+   "statut": "VISION",
+   "camera": "plan poitrine de l'adjointe, Morin flou en amorce",
+   "effets": "l'adjointe se reforme, la pièce s'assombrit autour d'elle",
+   "son": "bourdonnement doux",
+   "prompt": "summary:\nA single continuous cinematic shot: a figure of light speaks to camera in a dark office, lips synchronised with <Audio 1>.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] In the dark of @bureau, @adjointe stands as a translucent figure of blue-white points of light, her plain light-grey blazer and thin headset readable, orange rim light on one cheek; @morin is a soft blurred shape in the left foreground, his shoulder in frame. She speaks to camera in three blocks, calm, and on the last word she looks directly into the lens. The camera pushes in slowly. Plain clothing with no logo, no text, no letters anywhere.\n\ndialogue:\n@adjointe speaks in Québécois French, matching <Audio 1> word for word.\n\noverall_soundscape:\nA soft electrical shimmer, a low warm tone, silence behind.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 93
+  },
+  {
+   "id": "p32",
+   "sequence": "S9",
+   "recette": "h3-fast",
+   "images": 124,
+   "refs": [],
+   "premiere": "k08",
+   "statut": "RÉEL",
+   "camera": "plan fixe, léger flottement",
+   "effets": "ciel d'aube pur, une seule ligne de lumière",
+   "son": "vent très doux, silence",
+   "prompt": "summary:\nA single continuous cinematic shot: an empty dawn sky with one thin vertical line of light fading upward.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] A clean dawn sky, deep blue at the top fading to pale amber at the horizon, a thin band of cloud. One fine vertical line of ion-blue light stands in the middle of the frame, fades slowly to a warm orange at its tip, then dissolves upward into the sky. Nothing else moves. No text, no logos.\n\noverall_soundscape:\nVery soft wind, a long fading tone, silence.\n\nnon_diegetic_music:\nN/A",
+   "duree_f": 105
+  },
+  {
+   "id": "v01",
+   "prompt": "summary:\nA single vertical cinematic shot: a man on a roof at dawn raises a phone toward new siding.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing, tall. @etienne, in a plain charcoal work jacket and plain navy cap, stands on the wet shingled roof of a suburban bungalow, the pale grey siding rising above him into a pale dawn sky, mist drifting between the shingles. He lifts a plain dark phone to eye level and holds. The camera cranes up slowly along his body and past his shoulder to the siding. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nWind, a distant dog, a ladder creaking.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v02",
+   "prompt": "summary:\nA single vertical cinematic shot: a ring of light bursts from a phone and races up a wall.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing. @etienne fires the shutter; a ring of ion-blue light explodes from the lens and climbs the siding in a bright vertical streak, over the eave and into the sky, where it narrows to a single thread. The camera tilts straight up with it, the roof falling away below. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nA camera shutter, an electric thump, wind rising.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v03",
+   "prompt": "summary:\nA single vertical cinematic shot: a pulse of light runs up a corridor of hydro poles.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing. At cable height on a frozen country road, a pulse of ion-blue light climbs from pole to pole toward a small industrial building, throwing a cold flash on the frost. The camera rises with the pulse, the cables converging to a point at the top of frame. No text, no logos.\n\noverall_soundscape:\nWind in the wires, a cable clacking, the pulse buzzing past.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v04",
+   "prompt": "summary:\nA single vertical cinematic shot: a colossal tower unfolds upward out of a server rack.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing. Inside @serveur, the status lights of one dark rack brighten bottom to top, and @tour unfolds upward out of the glass: ten floors of dark glass and ion-blue light stacked into the top of frame, each floor an open office in cross-section, one warm orange light at the very top. Dust turns in the work lamp beside the rack. The camera tilts up hard. No text, no logos, no readable screen.\n\noverall_soundscape:\nA deep rising rumble, metal ticking, a low choral tone.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "serveur",
+    "tour"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v05",
+   "prompt": "summary:\nA single vertical cinematic shot: the camera climbs the facade of a virtual tower as floors light up.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing, straight up the facade. As the camera rises, each floor of @tour lights from inside: desks, silhouetted workers, a hand raised, glass glow never readable. The vertical fins throw long blue lines up the frame. At the top the warm orange light pulses once. No text, no logos, no readable screen.\n\noverall_soundscape:\nRelays snapping one after another, a rising hum.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v06",
+   "prompt": "summary:\nA single vertical cinematic shot: a finished house at golden hour with a rig of light orbiting the roof.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing, @toit filling the lower two thirds, sky above. Around the finished exterior, new pale grey siding and dark soffit-fascia, a thin rig of blue-white light circles the roof once, and @etienne stands small at the foot of the ladder and sheds small petals of light that dissolve before touching the lawn. The camera orbits low, long shadows sliding. No text, no logos, no readable sign.\n\noverall_soundscape:\nSoft wind, birds, a low warm hum.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "toit"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  }
+ ],
+ "musique": {
+  "bpm_vise": 124,
+  "duree_s": 150,
+  "prompt": "Instrumental only, no vocals, no voice, no choir words. Driving cinematic electronic score for a technology commercial, 124 BPM, key of D minor with a bright lift to F major in the last third. Structure in seconds: 0-15 a low pulsing sub bass and a tight closed hi-hat, one note of hope on a felt piano; 15-38 add a syncopated analogue bassline and hand claps, energy climbing, no melody yet; 38-62 the main four-note motif enters on a warm analogue synth, wide stereo, with a rising filtered arpeggio underneath; 62-80 a short breath, drums drop out for two bars, one sustained string pad; 80-112 full drop: big live-sounding drums, the motif doubled by pizzicato strings, sidechain pump, a tambourine on the backbeat, energy maximum, triumphant but clean and modern, never aggressive; 112-134 the drums pull back to a half-time groove, the motif played on celesta and piano, warm and human; 134-150 a final build and one last full chord, then a clean stop with a short warm tail. Production: punchy modern mix, wide but not washy, analogue warmth, no riser clichés longer than one bar, no dark or sad colours, no lo-fi, no distortion, no vocals. Uplifting, confident, propulsive, cinematic.",
+  "coups": [
+   {
+    "t_s": 0.0,
+    "evenement": "noir, la première pulsation : le point orange du logo de signal s'allume"
+   },
+   {
+    "t_s": 4.84,
+    "evenement": "la photo est prise (éclair de flash)"
+   },
+   {
+    "t_s": 9.68,
+    "evenement": "la photo se détache du téléphone et monte"
+   },
+   {
+    "t_s": 13.55,
+    "evenement": "le signal quitte le toit, coupe vers le ciel"
+   },
+   {
+    "t_s": 17.42,
+    "evenement": "le fil de lumière se tend entre la tour et l'antenne"
+   },
+   {
+    "t_s": 23.23,
+    "evenement": "la tour s'ouvre hors du rack : impact grave"
+   },
+   {
+    "t_s": 32.03,
+    "evenement": "premier étage allumé, travelling vertical"
+   },
+   {
+    "t_s": 39.68,
+    "evenement": "la tour entière, colonne de lumière orange"
+   },
+   {
+    "t_s": 48.39,
+    "evenement": "l'adjointe apparaît, la voix entre"
+   },
+   {
+    "t_s": 58.06,
+    "evenement": "la cédule se dessine, clics"
+   },
+   {
+    "t_s": 70.65,
+    "evenement": "l'avatar comptable apparaît, la voix entre"
+   },
+   {
+    "t_s": 78.87,
+    "evenement": "le pointage, bip"
+   },
+   {
+    "t_s": 88.55,
+    "evenement": "la question de Morin : cassure, batterie qui tombe"
+   },
+   {
+    "t_s": 96.77,
+    "evenement": "l'avatar répond, trois blocs"
+   },
+   {
+    "t_s": 105.48,
+    "evenement": "le tampon orange : impact"
+   },
+   {
+    "t_s": 113.23,
+    "evenement": "les étages s'éteignent un à un, relais"
+   },
+   {
+    "t_s": 123.39,
+    "evenement": "le bureau réel posé sur la tour : lever, plein"
+   },
+   {
+    "t_s": 133.55,
+    "evenement": "la tour entière vue de loin, apothéose"
+   },
+   {
+    "t_s": 140.32,
+    "evenement": "carton final, coup final"
+   }
+  ],
+  "prompts": [
+   {
+    "id": "m01",
+    "duree_s": 150,
+    "prompt": "Instrumental only, no vocals, no voice, no choir words. Driving cinematic electronic score for a technology commercial, 124 BPM, key of D minor with a bright lift to F major in the last third. Structure in seconds: 0-15 a low pulsing sub bass and a tight closed hi-hat, one note of hope on a felt piano; 15-38 add a syncopated analogue bassline and hand claps, energy climbing, no melody yet; 38-62 the main four-note motif enters on a warm analogue synth, wide stereo, with a rising filtered arpeggio underneath; 62-80 a short breath, drums drop out for two bars, one sustained string pad; 80-112 full drop: big live-sounding drums, the motif doubled by pizzicato strings, sidechain pump, a tambourine on the backbeat, energy maximum, triumphant but clean and modern, never aggressive; 112-134 the drums pull back to a half-time groove, the motif played on celesta and piano, warm and human; 134-150 a final build and one last full chord, then a clean stop with a short warm tail. Production: punchy modern mix, wide but not washy, analogue warmth, no riser clichés longer than one bar, no dark or sad colours, no lo-fi, no distortion, no vocals. Uplifting, confident, propulsive, cinematic."
+   },
+   {
+    "id": "m02",
+    "duree_s": 30,
+    "prompt": "Instrumental only, no vocals. Compact 13-second cut of the same 124 BPM electronic cue in D minor: two bars of pulsing sub bass and closed hi-hat, a rising filtered arpeggio, then a full drop at 5 s with big live drums, the four-note analogue motif and pizzicato strings, one last hit and a clean stop with a warm tail. Punchy, modern, uplifting, propulsive, no dark colours, no lo-fi."
+   },
+   {
+    "id": "m03",
+    "duree_s": 30,
+    "prompt": "Instrumental only, no vocals. Vertical social cut, 124 BPM, same palette: a single low pulse and hand claps for two bars, then a wide drop with drums, a bright analogue motif and a short string swell, ending on one clean hit. Confident, energetic, clean modern mix, no vocals."
+   }
+  ]
+ },
+ "montage": {
+  "long": {
+   "version": 1,
+   "fps": 24,
+   "format": "16:9",
+   "genre": "pub",
+   "titre": "OPSYS-AI · Le Onzième Étage",
+   "sources": {
+    "p01": {
+     "kind": "video",
+     "duree_f": 141
+    },
+    "p02": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p03": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p04": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p05": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p06": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p07": {
+     "kind": "video",
+     "duree_f": 141
+    },
+    "p08": {
+     "kind": "video",
+     "duree_f": 209
+    },
+    "p09": {
+     "kind": "video",
+     "duree_f": 141
+    },
+    "p10": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p11": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p12": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p13": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p14": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p15": {
+     "kind": "video",
+     "duree_f": 158
+    },
+    "p16": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p17": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p18": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p19": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p20": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p21": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p22": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p23": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p24": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p25": {
+     "kind": "video",
+     "duree_f": 141
+    },
+    "p26": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p27": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p29": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p30": {
+     "kind": "video",
+     "duree_f": 243
+    },
+    "p31": {
+     "kind": "video",
+     "duree_f": 209
+    },
+    "p28": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p32": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "l01": {
+     "kind": "audio",
+     "duree_f": 58
+    },
+    "l02": {
+     "kind": "audio",
+     "duree_f": 78
+    },
+    "l03": {
+     "kind": "audio",
+     "duree_f": 129
+    },
+    "l04": {
+     "kind": "audio",
+     "duree_f": 61
+    },
+    "l10": {
+     "kind": "audio",
+     "duree_f": 56
+    },
+    "l05": {
+     "kind": "audio",
+     "duree_f": 50
+    },
+    "l06": {
+     "kind": "audio",
+     "duree_f": 69
+    },
+    "l07": {
+     "kind": "audio",
+     "duree_f": 20
+    },
+    "l09": {
+     "kind": "audio",
+     "duree_f": 79
+    },
+    "l08": {
+     "kind": "audio",
+     "duree_f": 59
+    },
+    "m01": {
+     "kind": "audio",
+     "duree_f": 3371
+    }
+   },
+   "video": [
+    {
+     "id": "p01",
+     "src": "p01",
+     "entree_f": 0,
+     "duree_f": 139,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p02",
+     "src": "p02",
+     "entree_f": 0,
+     "duree_f": 93,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "p03",
+     "src": "p03",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p04",
+     "src": "p04",
+     "entree_f": 0,
+     "duree_f": 81,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p05",
+     "src": "p05",
+     "entree_f": 0,
+     "duree_f": 93,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "glisse",
+      "duree_f": 6
+     }
+    },
+    {
+     "id": "p06",
+     "src": "p06",
+     "entree_f": 0,
+     "duree_f": 81,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p07",
+     "src": "p07",
+     "entree_f": 0,
+     "duree_f": 128,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p08",
+     "src": "p08",
+     "entree_f": 0,
+     "duree_f": 209,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "dip",
+      "duree_f": 12
+     }
+    },
+    {
+     "id": "p09",
+     "src": "p09",
+     "entree_f": 0,
+     "duree_f": 128,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p10",
+     "src": "p10",
+     "entree_f": 0,
+     "duree_f": 105,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p11",
+     "src": "p11",
+     "entree_f": 0,
+     "duree_f": 116,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 6
+     }
+    },
+    {
+     "id": "p12",
+     "src": "p12",
+     "entree_f": 0,
+     "duree_f": 116,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p13",
+     "src": "p13",
+     "entree_f": 0,
+     "duree_f": 105,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 6
+     }
+    },
+    {
+     "id": "p14",
+     "src": "p14",
+     "entree_f": 0,
+     "duree_f": 70,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p15",
+     "src": "p15",
+     "entree_f": 0,
+     "duree_f": 151,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 8
+     }
+    },
+    {
+     "id": "p16",
+     "src": "p16",
+     "entree_f": 0,
+     "duree_f": 93,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p17",
+     "src": "p17",
+     "entree_f": 0,
+     "duree_f": 81,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "glisse",
+      "duree_f": 6
+     }
+    },
+    {
+     "id": "p18",
+     "src": "p18",
+     "entree_f": 0,
+     "duree_f": 93,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "p19",
+     "src": "p19",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p20",
+     "src": "p20",
+     "entree_f": 0,
+     "duree_f": 93,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 6
+     }
+    },
+    {
+     "id": "p21",
+     "src": "p21",
+     "entree_f": 0,
+     "duree_f": 70,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "p22",
+     "src": "p22",
+     "entree_f": 0,
+     "duree_f": 93,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 6
+     }
+    },
+    {
+     "id": "p23",
+     "src": "p23",
+     "entree_f": 0,
+     "duree_f": 46,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p24",
+     "src": "p24",
+     "entree_f": 0,
+     "duree_f": 116,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "dip",
+      "duree_f": 10
+     }
+    },
+    {
+     "id": "p25",
+     "src": "p25",
+     "entree_f": 0,
+     "duree_f": 128,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p26",
+     "src": "p26",
+     "entree_f": 0,
+     "duree_f": 116,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 8
+     }
+    },
+    {
+     "id": "p27",
+     "src": "p27",
+     "entree_f": 0,
+     "duree_f": 105,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p29",
+     "src": "p29",
+     "entree_f": 0,
+     "duree_f": 81,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p30",
+     "src": "p30",
+     "entree_f": 0,
+     "duree_f": 232,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 10
+     }
+    },
+    {
+     "id": "p31",
+     "src": "p31",
+     "entree_f": 0,
+     "duree_f": 209,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 10
+     }
+    },
+    {
+     "id": "p28",
+     "src": "p28",
+     "entree_f": 0,
+     "duree_f": 93,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 8
+     }
+    },
+    {
+     "id": "p32",
+     "src": "p32",
+     "entree_f": 0,
+     "duree_f": 105,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "m01",
+     "entree_f": 0,
+     "duree_f": 3371,
+     "gain_db": -9,
+     "fondu_in_f": 12,
+     "fondu_out_f": 30
+    },
+    "voix": [
+     {
+      "src": "l01",
+      "debut_f": 143,
+      "entree_f": 0,
+      "duree_f": 58,
+      "gain_db": 0
+     },
+     {
+      "src": "l02",
+      "debut_f": 1321,
+      "entree_f": 0,
+      "duree_f": 78,
+      "gain_db": 0
+     },
+     {
+      "src": "l03",
+      "debut_f": 1488,
+      "entree_f": 0,
+      "duree_f": 129,
+      "gain_db": 0
+     },
+     {
+      "src": "l04",
+      "debut_f": 1639,
+      "entree_f": 0,
+      "duree_f": 61,
+      "gain_db": 0
+     },
+     {
+      "src": "l10",
+      "debut_f": 1803,
+      "entree_f": 0,
+      "duree_f": 56,
+      "gain_db": 0
+     },
+     {
+      "src": "l05",
+      "debut_f": 2037,
+      "entree_f": 0,
+      "duree_f": 50,
+      "gain_db": 0
+     },
+     {
+      "src": "l06",
+      "debut_f": 2101,
+      "entree_f": 0,
+      "duree_f": 69,
+      "gain_db": 0
+     },
+     {
+      "src": "l07",
+      "debut_f": 2194,
+      "entree_f": 0,
+      "duree_f": 20,
+      "gain_db": 0
+     },
+     {
+      "src": "l09",
+      "debut_f": 2582,
+      "entree_f": 0,
+      "duree_f": 79,
+      "gain_db": 0
+     },
+     {
+      "src": "l08",
+      "debut_f": 3181,
+      "entree_f": 0,
+      "duree_f": 59,
+      "gain_db": 0
+     }
+    ],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 11
+    },
+    "cible_lufs": -14,
+    "crete_db": -1.5,
+    "fondu_coupe_ms": 40
+   },
+   "textes": [],
+   "generations": []
+  },
+  "court": {
+   "version": 1,
+   "fps": 24,
+   "format": "16:9",
+   "genre": "pub",
+   "titre": "OPSYS-AI · Signal (13 s)",
+   "sources": {
+    "p01": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p03": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p05": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p07": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p08": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p10": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "p26": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "m02": {
+     "kind": "audio",
+     "duree_f": 324
+    }
+   },
+   "video": [
+    {
+     "id": "p01",
+     "src": "p01",
+     "entree_f": 0,
+     "duree_f": 70,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p03",
+     "src": "p03",
+     "entree_f": 0,
+     "duree_f": 35,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p05",
+     "src": "p05",
+     "entree_f": 0,
+     "duree_f": 46,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "glisse",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "p07",
+     "src": "p07",
+     "entree_f": 0,
+     "duree_f": 46,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "p08",
+     "src": "p08",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "dip",
+      "duree_f": 8
+     }
+    },
+    {
+     "id": "p10",
+     "src": "p10",
+     "entree_f": 0,
+     "duree_f": 35,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 6
+     }
+    },
+    {
+     "id": "p26",
+     "src": "p26",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 6
+     }
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "m02",
+     "entree_f": 0,
+     "duree_f": 324,
+     "gain_db": -7,
+     "fondu_in_f": 6,
+     "fondu_out_f": 18
+    },
+    "voix": [],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 9
+    },
+    "cible_lufs": -14,
+    "crete_db": -1.5,
+    "fondu_coupe_ms": 40
+   },
+   "textes": [],
+   "generations": []
+  },
+  "vertical": {
+   "version": 1,
+   "fps": 24,
+   "format": "9:16",
+   "genre": "social",
+   "titre": "OPSYS-AI · Signal (vertical)",
+   "sources": {
+    "v01": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "v02": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "v03": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "v04": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "v05": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "v06": {
+     "kind": "video",
+     "duree_f": 124
+    },
+    "m03": {
+     "kind": "audio",
+     "duree_f": 348
+    }
+   },
+   "video": [
+    {
+     "id": "v01",
+     "src": "v01",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "v02",
+     "src": "v02",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "v03",
+     "src": "v03",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "glisse",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "v04",
+     "src": "v04",
+     "entree_f": 0,
+     "duree_f": 70,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "dip",
+      "duree_f": 4
+     }
+    },
+    {
+     "id": "v05",
+     "src": "v05",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "cut",
+      "duree_f": 0
+     }
+    },
+    {
+     "id": "v06",
+     "src": "v06",
+     "entree_f": 0,
+     "duree_f": 58,
+     "vitesse": 1,
+     "transition_in": {
+      "type": "fondu",
+      "duree_f": 4
+     }
+    }
+   ],
+   "audio": {
+    "musique": {
+     "src": "m03",
+     "entree_f": 0,
+     "duree_f": 348,
+     "gain_db": -6,
+     "fondu_in_f": 4,
+     "fondu_out_f": 14
+    },
+    "voix": [],
+    "ducking": {
+     "actif": true,
+     "profondeur_db": 9
+    },
+    "cible_lufs": -14,
+    "crete_db": -1.5,
+    "fondu_coupe_ms": 40
+   },
+   "textes": [],
+   "generations": []
+  }
+ },
+ "annexe": {
+  "long": {
+   "incrustations": [
+    {
+     "type": "statut",
+     "debut_f": 6,
+     "duree_f": 90,
+     "position": "bas-gauche",
+     "texte": "Photo reçue. Mesures en cours…"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 10,
+     "duree_f": 78,
+     "position": "haut-gauche",
+     "texte": "M3 · ESTIMATION"
+    },
+    {
+     "type": "document",
+     "debut_f": 296,
+     "duree_f": 100,
+     "position": "droite",
+     "titre": "SOUMISSION",
+     "destinataire": "Monsieur Thibault · Toit, revêtement",
+     "lignes": [
+      [
+       "Revêtement",
+       "4 210 pi²"
+      ],
+      [
+       "Soffite-fascia",
+       "62 pi"
+      ],
+      [
+       "Main-d'œuvre",
+       "3 jours"
+      ],
+      [
+       "Préparation",
+       "incluse"
+      ],
+      [
+       "Total",
+       "18 940 $"
+      ]
+     ],
+     "total": "18 940 $",
+     "tampon": null
+    },
+    {
+     "type": "trajet",
+     "debut_f": 365,
+     "duree_f": 70,
+     "position": "centre",
+     "points": [
+      [
+       0.08,
+       0.62
+      ],
+      [
+       0.34,
+       0.31
+      ],
+      [
+       0.61,
+       0.44
+      ],
+      [
+       0.88,
+       0.22
+      ]
+     ],
+     "couleur": "ion"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 369,
+     "duree_f": 60,
+     "position": "haut-droite",
+     "texte": "SIGNAL · EN TRANSIT"
+    },
+    {
+     "type": "trajet",
+     "debut_f": 456,
+     "duree_f": 80,
+     "position": "centre",
+     "points": [
+      [
+       0.02,
+       0.55
+      ],
+      [
+       0.28,
+       0.5
+      ],
+      [
+       0.55,
+       0.58
+      ],
+      [
+       0.8,
+       0.47
+      ],
+      [
+       0.99,
+       0.52
+      ]
+     ],
+     "couleur": "signal"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 659,
+     "duree_f": 96,
+     "position": "haut-gauche",
+     "texte": "OPSYS-AI · DIX DÉPARTEMENTS"
+    },
+    {
+     "type": "pile",
+     "debut_f": 866,
+     "duree_f": 104,
+     "position": "gauche",
+     "lignes": [
+      "M1 Réception",
+      "M2 CRM",
+      "M3 Estimation",
+      "M4 Terrain",
+      "M5 Finance"
+     ]
+    },
+    {
+     "type": "pile",
+     "debut_f": 994,
+     "duree_f": 96,
+     "position": "droite",
+     "lignes": [
+      "M6 Matériel",
+      "M7 Marketing",
+      "M8 Analytique",
+      "M9 Stratégie",
+      "M10 Mémoire"
+     ]
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 1091,
+     "duree_f": 84,
+     "position": "haut-gauche",
+     "texte": "M3 · SOUMISSION REVUE"
+    },
+    {
+     "type": "statut",
+     "debut_f": 1211,
+     "duree_f": 110,
+     "position": "bas-gauche",
+     "texte": "11 critères vérifiés. Prête à approuver."
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1317,
+     "duree_f": 100,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "appel",
+     "debut_f": 1325,
+     "duree_f": 110,
+     "position": "bas-droite",
+     "nom": "L'adjointe · M1",
+     "sous_titre": "Appel interne",
+     "voix": "l02"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 1420,
+     "duree_f": 60,
+     "position": "haut-gauche",
+     "texte": "M4 · INTERVENTION"
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1484,
+     "duree_f": 110,
+     "position": "haut-droite",
+     "texte": "EN PRÉPARATION"
+    },
+    {
+     "type": "courbe",
+     "debut_f": 1492,
+     "duree_f": 126,
+     "position": "droite",
+     "points": [
+      62,
+      64,
+      63,
+      67,
+      70,
+      73,
+      76,
+      78,
+      81,
+      84
+     ],
+     "etiquette": "PROFITS ANTICIPÉS · 26 SEMAINES",
+     "valeur": "+7 %",
+     "pointille_depuis": 5
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 1635,
+     "duree_f": 88,
+     "position": "haut-gauche",
+     "texte": "M4 · CÉDULE · 3 SEMAINES"
+    },
+    {
+     "type": "cedule",
+     "debut_f": 1639,
+     "duree_f": 88,
+     "position": "droite",
+     "titre": "CÉDULE",
+     "semaines": 3,
+     "jours": [
+      "Lun",
+      "Mar",
+      "Mer",
+      "Jeu",
+      "Ven"
+     ],
+     "blocs": [
+      [
+       0,
+       0,
+       1,
+       0,
+       "Thibault · toit"
+      ],
+      [
+       0,
+       2,
+       3,
+       1,
+       "Gagnon · soffite"
+      ],
+      [
+       1,
+       0,
+       2,
+       0,
+       "Thibault · fin"
+      ],
+      [
+       1,
+       3,
+       4,
+       1,
+       "Leblanc · revêtement"
+      ],
+      [
+       2,
+       0,
+       1,
+       0,
+       "Morin · rénovation"
+      ],
+      [
+       2,
+       2,
+       4,
+       1,
+       "Gagnon · fascia"
+      ]
+     ]
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1720,
+     "duree_f": 90,
+     "position": "haut-droite",
+     "texte": "EN PRÉPARATION"
+    },
+    {
+     "type": "pointage",
+     "debut_f": 1803,
+     "duree_f": 92,
+     "position": "bas-gauche",
+     "heure": "07:02",
+     "nom": "Étienne",
+     "etat": "ARRIVÉE"
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1797,
+     "duree_f": 100,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "statut",
+     "debut_f": 1890,
+     "duree_f": 70,
+     "position": "bas",
+     "texte": "Chèque de paye · brouillon"
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 1890,
+     "duree_f": 70,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "impact",
+     "debut_f": 2097,
+     "duree_f": 58,
+     "position": "centre",
+     "texte": "Mars."
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 2188,
+     "duree_f": 70,
+     "position": "haut-gauche",
+     "texte": "M5 · APPROBATION"
+    },
+    {
+     "type": "statut",
+     "debut_f": 2216,
+     "duree_f": 60,
+     "position": "bas",
+     "texte": "Approuvé. Dossier prêt pour le comptable."
+    },
+    {
+     "type": "statut",
+     "debut_f": 2230,
+     "duree_f": 80,
+     "position": "bas",
+     "texte": "Journée terminée."
+    },
+    {
+     "type": "statut",
+     "debut_f": 2342,
+     "duree_f": 96,
+     "position": "bas-gauche",
+     "texte": "18 h 30. La shop est fermée."
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 2462,
+     "duree_f": 90,
+     "position": "haut-gauche",
+     "texte": "M7 · CONTENUS PROPOSÉS"
+    },
+    {
+     "type": "statut",
+     "debut_f": 2584,
+     "duree_f": 90,
+     "position": "bas",
+     "texte": "Brouillon prêt. Approbation requise."
+    },
+    {
+     "type": "titre",
+     "debut_f": 2766,
+     "duree_f": 100,
+     "position": "bas",
+     "zone": "bas",
+     "texte": "Dix étages travaillent. Le onzième, c'est *vous*"
+    },
+    {
+     "type": "titre",
+     "debut_f": 3002,
+     "duree_f": 80,
+     "position": "centre",
+     "zone": "centre",
+     "texte": "Une grande entreprise. À *votre* taille."
+    },
+    {
+     "type": "etiquette",
+     "debut_f": 3175,
+     "duree_f": 100,
+     "position": "haut-droite",
+     "texte": "VISION"
+    },
+    {
+     "type": "carton",
+     "debut_f": 3268,
+     "duree_f": 103,
+     "position": "centre"
+    }
+   ],
+   "sfx": [
+    {
+     "type": "souffle",
+     "debut_f": 0,
+     "db": -20,
+     "duree_s": 2.0
+    },
+    {
+     "type": "frappe",
+     "debut_f": 4,
+     "db": -12
+    },
+    {
+     "type": "clic",
+     "debut_f": 248,
+     "db": -6
+    },
+    {
+     "type": "montee",
+     "debut_f": 292,
+     "db": -10,
+     "duree_s": 1.4
+    },
+    {
+     "type": "fouet",
+     "debut_f": 361,
+     "db": -8
+    },
+    {
+     "type": "drone",
+     "debut_f": 363,
+     "db": -16,
+     "duree_s": 4.0
+    },
+    {
+     "type": "fouet",
+     "debut_f": 535,
+     "db": -8
+    },
+    {
+     "type": "impact",
+     "debut_f": 665,
+     "db": -4
+    },
+    {
+     "type": "boom",
+     "debut_f": 667,
+     "db": -8,
+     "duree_s": 1.5
+    },
+    {
+     "type": "montee",
+     "debut_f": 860,
+     "db": -12,
+     "duree_s": 3.0
+    },
+    {
+     "type": "impact",
+     "debut_f": 996,
+     "db": -6
+    },
+    {
+     "type": "fouet",
+     "debut_f": 1087,
+     "db": -9
+    },
+    {
+     "type": "souffle",
+     "debut_f": 1319,
+     "db": -14,
+     "duree_s": 1.2
+    },
+    {
+     "type": "fouet",
+     "debut_f": 1480,
+     "db": -8
+    },
+    {
+     "type": "impact",
+     "debut_f": 1635,
+     "db": -9
+    },
+    {
+     "type": "fouet",
+     "debut_f": 1718,
+     "db": -9
+    },
+    {
+     "type": "clic",
+     "debut_f": 1805,
+     "db": -10
+    },
+    {
+     "type": "fouet",
+     "debut_f": 1888,
+     "db": -8
+    },
+    {
+     "type": "frappe",
+     "debut_f": 2059,
+     "db": -9
+    },
+    {
+     "type": "chute",
+     "debut_f": 2095,
+     "db": -7,
+     "duree_s": 1.2
+    },
+    {
+     "type": "impact",
+     "debut_f": 2200,
+     "db": -3
+    },
+    {
+     "type": "clic",
+     "debut_f": 2222,
+     "db": -10
+    },
+    {
+     "type": "chute",
+     "debut_f": 2346,
+     "db": -12,
+     "duree_s": 1.0
+    },
+    {
+     "type": "souffle",
+     "debut_f": 2458,
+     "db": -12,
+     "duree_s": 1.6
+    },
+    {
+     "type": "clic",
+     "debut_f": 2695,
+     "db": -8
+    },
+    {
+     "type": "montee",
+     "debut_f": 2750,
+     "db": -9,
+     "duree_s": 3.4
+    },
+    {
+     "type": "impact",
+     "debut_f": 2990,
+     "db": -5
+    },
+    {
+     "type": "boom",
+     "debut_f": 2992,
+     "db": -9,
+     "duree_s": 2.0
+    },
+    {
+     "type": "impact",
+     "debut_f": 3268,
+     "db": -4
+    }
+   ],
+   "son_plans": [
+    {
+     "plan": "p01",
+     "db": -16
+    },
+    {
+     "plan": "p03",
+     "db": -12
+    },
+    {
+     "plan": "p05",
+     "db": -14
+    },
+    {
+     "plan": "p06",
+     "db": -13
+    },
+    {
+     "plan": "p07",
+     "db": -15
+    },
+    {
+     "plan": "p08",
+     "db": -9
+    },
+    {
+     "plan": "p11",
+     "db": -17
+    },
+    {
+     "plan": "p12",
+     "db": -15
+    },
+    {
+     "plan": "p14",
+     "db": -14
+    },
+    {
+     "plan": "p17",
+     "db": -13
+    },
+    {
+     "plan": "p20",
+     "db": -16
+    },
+    {
+     "plan": "p23",
+     "db": -13
+    },
+    {
+     "plan": "p24",
+     "db": -15
+    },
+    {
+     "plan": "p25",
+     "db": -17
+    },
+    {
+     "plan": "p26",
+     "db": -14
+    },
+    {
+     "plan": "p29",
+     "db": -15
+    },
+    {
+     "plan": "p30",
+     "db": -11
+    },
+    {
+     "plan": "p31",
+     "db": -13
+    }
+   ],
+   "etalonnage": {
+    "contraste": 1.08,
+    "saturation": 0.94,
+    "chaleur": 0.06,
+    "grain": 1.15
+   }
+  },
+  "court": {
+   "incrustations": [
+    {
+     "type": "surtitre",
+     "debut_f": 6,
+     "duree_f": 60,
+     "position": "haut-gauche",
+     "texte": "M3 · ESTIMATION"
+    },
+    {
+     "type": "statut",
+     "debut_f": 10,
+     "duree_f": 62,
+     "position": "bas-gauche",
+     "texte": "Photo reçue."
+    },
+    {
+     "type": "trajet",
+     "debut_f": 103,
+     "duree_f": 54,
+     "position": "centre",
+     "points": [
+      [
+       0.05,
+       0.6
+      ],
+      [
+       0.35,
+       0.3
+      ],
+      [
+       0.66,
+       0.45
+      ],
+      [
+       0.94,
+       0.2
+      ]
+     ],
+     "couleur": "ion"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 191,
+     "duree_f": 62,
+     "position": "haut-gauche",
+     "texte": "OPSYS-AI · DIX DÉPARTEMENTS"
+    },
+    {
+     "type": "titre",
+     "debut_f": 239,
+     "duree_f": 54,
+     "position": "bas",
+     "zone": "bas",
+     "texte": "Dix départements. Une *seule* équipe."
+    },
+    {
+     "type": "statut",
+     "debut_f": 270,
+     "duree_f": 40,
+     "position": "bas",
+     "texte": "Soumission prête. Approuver ?"
+    },
+    {
+     "type": "carton",
+     "debut_f": 312,
+     "duree_f": 12,
+     "position": "centre"
+    }
+   ],
+   "sfx": [
+    {
+     "type": "frappe",
+     "debut_f": 0,
+     "db": -12
+    },
+    {
+     "type": "clic",
+     "debut_f": 90,
+     "db": -6
+    },
+    {
+     "type": "montee",
+     "debut_f": 8,
+     "db": -10,
+     "duree_s": 1.0
+    },
+    {
+     "type": "fouet",
+     "debut_f": 101,
+     "db": -8
+    },
+    {
+     "type": "impact",
+     "debut_f": 199,
+     "db": -4
+    },
+    {
+     "type": "boom",
+     "debut_f": 201,
+     "db": -8,
+     "duree_s": 1.2
+    },
+    {
+     "type": "impact",
+     "debut_f": 241,
+     "db": -6
+    },
+    {
+     "type": "impact",
+     "debut_f": 268,
+     "db": -5
+    }
+   ],
+   "son_plans": [
+    {
+     "plan": "p01",
+     "db": -16
+    },
+    {
+     "plan": "p03",
+     "db": -12
+    },
+    {
+     "plan": "p05",
+     "db": -14
+    },
+    {
+     "plan": "p06",
+     "db": -13
+    },
+    {
+     "plan": "p07",
+     "db": -15
+    },
+    {
+     "plan": "p08",
+     "db": -9
+    },
+    {
+     "plan": "p26",
+     "db": -14
+    }
+   ],
+   "etalonnage": {
+    "contraste": 1.08,
+    "saturation": 0.94,
+    "chaleur": 0.06,
+    "grain": 1.15
+   }
+  },
+  "vertical": {
+   "incrustations": [
+    {
+     "type": "surtitre",
+     "debut_f": 4,
+     "duree_f": 50,
+     "position": "haut-gauche",
+     "texte": "M3 · ESTIMATION"
+    },
+    {
+     "type": "statut",
+     "debut_f": 8,
+     "duree_f": 48,
+     "position": "bas-gauche",
+     "texte": "Photo reçue."
+    },
+    {
+     "type": "trajet",
+     "debut_f": 114,
+     "duree_f": 50,
+     "position": "centre",
+     "points": [
+      [
+       0.5,
+       0.95
+      ],
+      [
+       0.42,
+       0.6
+      ],
+      [
+       0.56,
+       0.35
+      ],
+      [
+       0.5,
+       0.06
+      ]
+     ],
+     "couleur": "ion"
+    },
+    {
+     "type": "surtitre",
+     "debut_f": 172,
+     "duree_f": 50,
+     "position": "haut-gauche",
+     "texte": "OPSYS-AI · DIX DÉPARTEMENTS"
+    },
+    {
+     "type": "statut",
+     "debut_f": 294,
+     "duree_f": 44,
+     "position": "bas",
+     "texte": "Soumission prête. Approuver ?"
+    },
+    {
+     "type": "carton",
+     "debut_f": 340,
+     "duree_f": 8,
+     "position": "centre"
+    }
+   ],
+   "sfx": [
+    {
+     "type": "frappe",
+     "debut_f": 0,
+     "db": -12
+    },
+    {
+     "type": "clic",
+     "debut_f": 76,
+     "db": -6
+    },
+    {
+     "type": "fouet",
+     "debut_f": 112,
+     "db": -8
+    },
+    {
+     "type": "impact",
+     "debut_f": 176,
+     "db": -4
+    },
+    {
+     "type": "boom",
+     "debut_f": 178,
+     "db": -8,
+     "duree_s": 1.0
+    },
+    {
+     "type": "impact",
+     "debut_f": 292,
+     "db": -5
+    }
+   ],
+   "son_plans": [
+    {
+     "plan": "v01",
+     "db": -16
+    },
+    {
+     "plan": "v02",
+     "db": -12
+    },
+    {
+     "plan": "v03",
+     "db": -14
+    },
+    {
+     "plan": "v04",
+     "db": -9
+    },
+    {
+     "plan": "v05",
+     "db": -13
+    },
+    {
+     "plan": "v06",
+     "db": -14
+    }
+   ],
+   "etalonnage": {
+    "contraste": 1.08,
+    "saturation": 0.94,
+    "chaleur": 0.06,
+    "grain": 1.15
+   }
+  }
+ },
+ "vertical": [
+  {
+   "id": "v01",
+   "beats": 5,
+   "prompt": "summary:\nA single vertical cinematic shot: a man on a roof at dawn raises a phone toward new siding.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing, tall. @etienne, in a plain charcoal work jacket and plain navy cap, stands on the wet shingled roof of a suburban bungalow, the pale grey siding rising above him into a pale dawn sky, mist drifting between the shingles. He lifts a plain dark phone to eye level and holds. The camera cranes up slowly along his body and past his shoulder to the siding. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nWind, a distant dog, a ladder creaking.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v02",
+   "beats": 5,
+   "prompt": "summary:\nA single vertical cinematic shot: a ring of light bursts from a phone and races up a wall.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing. @etienne fires the shutter; a ring of ion-blue light explodes from the lens and climbs the siding in a bright vertical streak, over the eave and into the sky, where it narrows to a single thread. The camera tilts straight up with it, the roof falling away below. Plain clothing with no logo, no text, no letters anywhere.\n\noverall_soundscape:\nA camera shutter, an electric thump, wind rising.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "etienne"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v03",
+   "beats": 5,
+   "prompt": "summary:\nA single vertical cinematic shot: a pulse of light runs up a corridor of hydro poles.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing. At cable height on a frozen country road, a pulse of ion-blue light climbs from pole to pole toward a small industrial building, throwing a cold flash on the frost. The camera rises with the pulse, the cables converging to a point at the top of frame. No text, no logos.\n\noverall_soundscape:\nWind in the wires, a cable clacking, the pulse buzzing past.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v04",
+   "beats": 6,
+   "prompt": "summary:\nA single vertical cinematic shot: a colossal tower unfolds upward out of a server rack.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing. Inside @serveur, the status lights of one dark rack brighten bottom to top, and @tour unfolds upward out of the glass: ten floors of dark glass and ion-blue light stacked into the top of frame, each floor an open office in cross-section, one warm orange light at the very top. Dust turns in the work lamp beside the rack. The camera tilts up hard. No text, no logos, no readable screen.\n\noverall_soundscape:\nA deep rising rumble, metal ticking, a low choral tone.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "serveur",
+    "tour"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v05",
+   "beats": 5,
+   "prompt": "summary:\nA single vertical cinematic shot: the camera climbs the facade of a virtual tower as floors light up.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing, straight up the facade. As the camera rises, each floor of @tour lights from inside: desks, silhouetted workers, a hand raised, glass glow never readable. The vertical fins throw long blue lines up the frame. At the top the warm orange light pulses once. No text, no logos, no readable screen.\n\noverall_soundscape:\nRelays snapping one after another, a rising hum.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  },
+  {
+   "id": "v06",
+   "beats": 5,
+   "prompt": "summary:\nA single vertical cinematic shot: a finished house at golden hour with a rig of light orbiting the roof.\n\ndetailed_description:\nCinematic frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, real exposure, rich contrast, natural film colour, fine grain, shallow depth of field.\n[Shot 1] Vertical framing, @toit filling the lower two thirds, sky above. Around the finished exterior, new pale grey siding and dark soffit-fascia, a thin rig of blue-white light circles the roof once, and @etienne stands small at the foot of the ladder and sheds small petals of light that dissolve before touching the lawn. The camera orbits low, long shadows sliding. No text, no logos, no readable sign.\n\noverall_soundscape:\nSoft wind, birds, a low warm hum.\n\nnon_diegetic_music:\nN/A",
+   "sequence": "V",
+   "recette": "h3-max",
+   "images": 124,
+   "format": "9:16",
+   "refs": [
+    "toit"
+   ],
+   "premiere": null,
+   "parole": null,
+   "statut": "RÉEL",
+   "camera": "voir prompt",
+   "effets": "voir prompt",
+   "son": "voir prompt"
+  }
+ ]
+}
