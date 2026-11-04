@@ -752,3 +752,9 @@ Essai réel sur copie distincte du vertical DeepSeek : 14,5 s, six plans, rendu 
 ### Revue Mesh par sous-agent DeepSeek outillé
 
 Second essai isolé DeepSeek : **OK**, six requêtes, sept tours, 76 s, coût journalisé 0,00518 $ ; revue `Storage/Nexora/travail/rnd-codex-20261104/agents/deepseek-revue-glb/revue.md`. La clé réelle est restée dans le relais, pas dans le sous-agent. Il signale les limites du compteur GLB : modes strips/fans non comptés, nombre d’indices non multiple de trois tronqué, textures déclarées sans preuve de validité. Vérification indépendante du lot : **34 primitives mode 4, aucun compte non multiple de trois, aucune URI data à casse atypique** ; les mesures déclarées de ce lot restent valables dans les limites déjà indiquées. Aucun classement qualitatif.
+
+### Viewer : actions audio non fonctionnelles masquées localement
+
+Un audit a confirmé que `Speak` sur une image et `Add sound` sur une vidéo dirigeaient toutes deux vers `/speak`, redirigé vers un autre outil en perdant l’élément choisi. Sur le worktree distinct `Storage/Nexora/travail/fix-viewer-speak-codex-20261104`, branche `fix/viewer-speak-button-codex`, commits locaux **bef6071** et **6359dbc** : ces deux actions trompeuses sont masquées ; le code dormant est conservé. Transpilation et vérification TypeScript complète passent ; pas de test navigateur, push ou déploiement. Le Viewer distant diffère globalement de la base locale bien que les lignes concernées aient été retrouvées identiques : réconciliation avant MR.
+
+Autre défaut relevé : la redirection de `Extend`/transition perd l’identifiant du clip ; correctif local séparé en cours. D’autres actions renvoient à `/apps` et demandent un examen avant de les qualifier.
