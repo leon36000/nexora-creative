@@ -466,3 +466,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Passerelle : réponses effectives DeepSeek, Muse et Gemini élevé conservées sur Storage comme propositions à vérifier. Recherche Luna en cours sur Mesh, Sync et détourage/Wan. Après libération de marge et file vide, v05 OPSYS DeepSeek lancé seul ; résultat en attente.
 
 - R&D triple A : quatre notes sourcées sur Storage (Mesh, Sync, détourage/Wan, montage/évaluation). Existence de plusieurs articles vérifiée indépendamment ; critères et expériences restent des propositions, sans résultats ou intégration inventés.
+
+- OPSYS DeepSeek v05 généré, décodé et archivé avec planche ; v06 lancé seul après file vide. Racine pc6 ~17 Gio libres au relevé, à surveiller.
