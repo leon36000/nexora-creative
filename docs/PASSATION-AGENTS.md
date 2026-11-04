@@ -546,3 +546,7 @@ Inspection de la planche uniquement : représentant/maison, signal, serveurs et 
 ### Finish : protocole consolidé
 
 Commit local **9c223cb** sur `feat/sortie-video-nvenc` : rapport 30, JSON des six paires et protocole portable, avec empreintes, 288 images, divergence d'alignement PTS et limites de l'aperçu fixe. Contrôle indépendant : SHA du JSON commité identique à la mesure sur Storage ; syntaxe Python valide. Le script portable n'a pas été relancé et ne prouve pas, à lui seul, la reproductibilité. Codecs toujours désactivés ; aucun push ni déploiement.
+
+### OPSYS DeepSeek : p30
+
+`p30-r1.mp4` rendu en 400,9 s de moteur ; H.264 1344×768, AAC, 10,125 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et vérifiées SHA-256 ; inventaire **3 767 entrées**. La planche montre un immeuble puis un bureau ; lisibilité en mouvement, son et rendu final restent à juger. Après file vide et plafond 475 W confirmés, `p31` a été lancé seul ; résultat en attente.
