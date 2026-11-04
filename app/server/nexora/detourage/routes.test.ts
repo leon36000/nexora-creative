@@ -1,4 +1,4 @@
-import { mkdtempSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -17,6 +17,110 @@ describe('choix du moteur', () => {
     expect(moteurPour([m('c', ['*'], 'http://c')], 'pro')).toBeUndefined();
     expect(moteurPour([m('c', ['detourage-pro'], 'http://c')], 'pro')?.id).toBe('c');
     expect(moteurPour([m('a', ['*'])], 'rapide')).toBeUndefined();
+    expect(moteurPour([m('a', ['h3-max'], 'http://a')], 'rapide')).toBeUndefined();
+  });
+});
+
+describe('disponibilité du détourage pro', () => {
+  it('reste indisponible même si un moteur pro est déclaré, avant tout dépôt', async () => {
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-pro-')),
+      moteurs: () => [{ id: 'pro', nom: 'Pro', recettes: ['detourage-pro'], detourageUrl: 'http://127.0.0.1:1' }],
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const capacites = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(capacites.statusCode).toBe(200);
+      expect(capacites.json().pro.disponible).toBe(false);
+      const creation = await app.inject({ method: 'POST', url: '/api/nexora/detourage/travaux', payload: { palier: 'pro' } });
+      expect(creation.statusCode).toBe(503);
+      expect(creation.json().error).not.toMatch(/poids.*install/i);
+      const travaux = await app.inject({ method: 'GET', url: '/api/nexora/detourage/travaux' });
+      expect(travaux.json()).toEqual([]);
+    } finally {
+      arreter();
+      await app.close();
+    }
+  });
+
+  it('refuse un ancien travail pro même si la requête demande le palier rapide', async () => {
+    const dossierDonnees = mkdtempSync(join(tmpdir(), 'detourage-pro-ancien-'));
+    const id = 'a'.repeat(24);
+    const mixte = 'c'.repeat(24);
+    mkdirSync(join(dossierDonnees, 'detourage'), { recursive: true });
+    const repris = 'b'.repeat(24);
+    const ancien = {
+      id, organisation: 'local', utilisateur: 'local', nom: 'ancien', moteurId: 'pro',
+      creeLe: Date.now(), majLe: Date.now(), etat: 'depose', etape: 'dépôt', progression: 0,
+      message: '', fichiers: { 'source.mp4': 1 }, source: { duree: 1, fps: 24 },
+    };
+    writeFileSync(join(dossierDonnees, 'detourage', 'registre.json'), JSON.stringify([
+      ancien, { ...ancien, id: repris, etat: 'interrompu', params: { source: 'source.mp4' } },
+      { ...ancien, id: mixte, moteurId: 'mixte', etat: 'interrompu', params: { source: 'source.mp4', palier: 'pro' } },
+    ]));
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees,
+      moteurs: () => [
+        { id: 'pro', nom: 'Pro', recettes: ['detourage-pro'], detourageUrl: 'http://127.0.0.1:1' },
+        { id: 'mixte', nom: 'Mixte', recettes: ['*', 'detourage-pro'], detourageUrl: 'http://127.0.0.1:1' },
+      ],
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const lancement = await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${id}/lancer`,
+        payload: { palier: 'rapide', invites: [{ image: 0, points: [[0.5, 0.5, 1]] }] } });
+      expect(lancement.statusCode).toBe(503);
+      const travail = await app.inject({ method: 'GET', url: `/api/nexora/detourage/travaux/${id}` });
+      expect(travail.json().etat).toBe('depose');
+      const reprise = await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${repris}/reprendre` });
+      expect(reprise.statusCode).toBe(503);
+      const interrompu = await app.inject({ method: 'GET', url: `/api/nexora/detourage/travaux/${repris}` });
+      expect(interrompu.json().etat).toBe('interrompu');
+      const reprisePro = await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${mixte}/reprendre` });
+      expect(reprisePro.statusCode).toBe(503);
+    } finally {
+      arreter();
+      await app.close();
+    }
+  });
+});
+
+describe('santé du détourage rapide', () => {
+  it('distingue un moteur déclaré mais refusant la santé d’un moteur qui répond', async () => {
+    let statut = 401;
+    let corps: Record<string, unknown> = {};
+    const faux = createServer((_req, res) => {
+      res.statusCode = statut;
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify(corps));
+    });
+    await new Promise<void>((r) => faux.listen(0, '127.0.0.1', r));
+    const port = (faux.address() as AddressInfo).port;
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-sante-')),
+      moteurs: () => [{ id: 'rapide', nom: 'Rapide', recettes: ['detourage-rapide'], detourageUrl: `http://127.0.0.1:${port}` }],
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const refus = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(refus.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      statut = 200;
+      const incomplet = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(incomplet.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      corps = { ok: false };
+      const malade = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(malade.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      corps = { ok: true };
+      const ok = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(ok.json().rapide).toMatchObject({ disponible: true, moteur: { id: 'rapide' } });
+    } finally {
+      arreter();
+      await app.close();
+      await new Promise<void>((r) => faux.close(() => r()));
+    }
   });
 });
 
@@ -57,7 +161,7 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     const port = (faux.address() as AddressInfo).port;
     enregistrerDetourage(app, {
       dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-routes-')),
-      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['*'], detourageUrl: `http://127.0.0.1:${port}`, detourageJeton: JETON }],
+      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['*', 'detourage-pro'], detourageUrl: `http://127.0.0.1:${port}`, detourageJeton: JETON }],
       facturation: () => null, nexora: false,
     });
     await app.ready();

@@ -15,7 +15,7 @@ import { dirname, extname, join, resolve, sep } from 'path';
 import type { WebSocket } from 'ws';
 import * as comfy from './comfy.js';
 import * as eng from './engine.js';
-import { enregistrerDetourage } from './nexora/detourage/routes.js';
+import { enregistrerDetourage, moteurPour } from './nexora/detourage/routes.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
 import { besoinDe, intentionAvecCamera, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
@@ -1756,7 +1756,7 @@ app.get('/api/nexora/etat', async () => {
     cinema: moteurDuCompte('max') === 'h3-max', ...(moteur ? {} : { erreur: REFUS_TERRITOIRE }),
     image: modeleImage() ? (modeleImage() === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512') : null,
     musique: eng.recettesEnLigne().has('music3') ? 'MiniMax-Music3' : null,
-    detourage: eng.moteurs.some((m) => !!m.detourageUrl),
+    detourage: !!moteurPour(eng.moteurs, 'rapide'),
     objet3d: eng.recettesEnLigne().has('objet-apercu') || eng.recettesEnLigne().has('*') ? { nom: PRODUIT_3D, formats: FORMATS_RELIEF, multivue: eng.moteursPour(recetteMultivue()).length > 0, vuesMax: Math.max(2, Math.min(4, Number(process.env.NEXORA_RELIEF_VUES_MAX) || 3)), apercu: true, qualite: eng.recettesEnLigne().has('objet-qualite') || eng.recettesEnLigne().has('*'), texte: !!modeleImage() || eng.recettesEnLigne().has('*') } : null,
   };
 });
