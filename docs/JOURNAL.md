@@ -820,3 +820,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Six commits détourage réappliqués sur `developpement` `5ac932d` dans `wt-detourage-disponibilite-integre-codex-20261104` sur Storage. La branche distante code seul pointe `319ef68`, MR brouillon !46; le commit documentaire local `e1bb9c9` reste préservé mais non poussé pour éviter d'écraser les documents de passation concurrents. 19 tests ciblés repassés indépendamment sans fichiers d'environnement; typecheck complet signalé. Pas de déploiement.
 - Limite : `/capacites` vérifie `sante.ok`, mais le service observé renvoie ce statut inconditionnellement et charge les modèles à la demande. Il ne prouve donc ni poids disponibles ni inférence. `/travaux` et `/lancer` ne consultent pas cette santé en amont; tests réels et configuration du moteur rapide restent nécessaires.
+
+
+### Reprise Codex — qualité des autres pipelines, 4 novembre 2026
+
+- Lecture des métadonnées GitLab : les derniers pipelines observés Web #2694, WorkStudio #1497 et OPSYS #1716 sont `failed`; leurs jobs `pc4_gitleaks` sont en échec. Web et WorkStudio avaient un job `pc4_sonarqube` réussi dans ces pipelines historiques; Semgrep et Trivy y étaient aussi réussis. Cela ne prouve pas la cause de Gitleaks, ni qu'une fuite existe. Aucun journal ou rapport de détection n'a été ouvert afin de respecter l'interdiction de lire des secrets.
+- Une première interrogation API Web a expiré, puis une nouvelle lecture a réussi; aucune mutation ni relance de job. Ces échecs anciens ne doivent pas être confondus avec les pipelines verts des branches Creative.
