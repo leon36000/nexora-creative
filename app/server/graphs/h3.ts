@@ -180,7 +180,9 @@ function useShiftSrc(
 }
 
 export function buildH3Graph(p: H3Params): Record<string, unknown> {
-  const useRef = !!p.refImages?.length || !!p.refMode;
+  if (p.refImages?.length && (p.startImage || p.endImage)) throw new Error('H3: explicit references cannot be combined with first/last frame anchors');
+  // Une image d’ancrage est une contrainte temporelle, pas une référence d’apparence.
+  const useRef = !!p.refImages?.length || (!!p.refMode && !p.startImage && !p.endImage);
   const family = useRef ? 'ref2va' : 'fl2va';
   // Checkpoint override is honored only within the correct model family —
   // an fl2va file can't drive the ref graph and vice versa.
@@ -269,8 +271,7 @@ export function buildH3Graph(p: H3Params): Record<string, unknown> {
   if (useRef) {
     // Reference mode: each ref is its own dynamic dotted input slot
     // (ref_images.ref_image_N), per the official r2v template wiring.
-    // Nexora : une photo de départ sur un point de contrôle ref2va devient la première référence (première image du plan).
-    const refs = (p.refImages?.length ? p.refImages : p.startImage ? [p.startImage] : []).slice(0, 4);
+    const refs = (p.refImages ?? []).slice(0, 4);
     refs.forEach((name, i) => {
       g[`ref${i}`] = { class_type: 'LoadImage', inputs: { image: name } };
       genInputs[`ref_images.ref_image_${i}`] = [`ref${i}`, 0];

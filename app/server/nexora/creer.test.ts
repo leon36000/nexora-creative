@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { bundlesFor } from '../models.js';
 import { verdictLicence } from './licences.js';
 import { choisirMoteur, corpsRendu, corpsRenduH3, lireDemandeCreer } from './creer.js';
@@ -68,10 +68,24 @@ describe('partir d’une photo (image vers vidéo)', () => {
     expect(lireDemandeCreer({ intention: 'a', image: 'asset:x' }).image).toBeUndefined();
   });
 
+  it('conserve le checkpoint FL2VA et les étapes configurés pour une photo max', () => {
+    vi.stubEnv('NEXORA_H3_MAX_CHECKPOINT', 'minimax_h3_fl2va_pruned_fp8_scaled.safetensors');
+    vi.stubEnv('NEXORA_H3_MAX_ETAPES', '20');
+    try {
+      const d = lireDemandeCreer({ intention: 'ma voiture', image: jeton, qualite: 'max' });
+      const c = corpsRendu(d, 'P', 'h3-max');
+      expect(c).toMatchObject({ checkpoint: 'minimax_h3_fl2va_pruned_fp8_scaled.safetensors', steps: 20, videoModel: 'h3-max', width: 1344, height: 768, startImage: jeton });
+      expect(c).not.toHaveProperty('refMode');
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it('passe la photo en première image, sur les deux moteurs H3', () => {
     const d = lireDemandeCreer({ intention: 'ma voiture', image: jeton });
     expect(corpsRendu(d, 'P', 'h3-fast')).toMatchObject({ startImage: jeton });
-    expect(corpsRendu(d, 'P', 'h3-max')).toMatchObject({ startImage: jeton });
+    expect(corpsRendu(d, 'P', 'h3-max')).toMatchObject({ startImage: jeton, checkpoint: 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors', width: 1344, height: 768 });
+    expect(corpsRendu(d, 'P', 'h3-max')).not.toHaveProperty('refMode');
     expect(corpsRendu(lireDemandeCreer({ intention: 'b' }), 'P', 'h3-fast')).not.toHaveProperty('startImage');
   });
 });

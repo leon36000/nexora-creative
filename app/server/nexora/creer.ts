@@ -33,7 +33,7 @@ export const CHECKPOINT_H3_MAX = '10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_r
 /**
  * Recette « h3-max » : point de contrôle H3 et nombre d'étapes, réglables par la configuration (ronde de comparaison
  * du 02/11/2026 : marketing/creative/video-v3/JOURNAL-V3.md). Un point de contrôle ref2va passe par le nœud de
- * référence, même sans image ; une photo de départ y devient la première référence.
+ * référence, même sans image ; une photo de départ exige un checkpoint FL2VA pour garder son ancrage temporel.
  */
 export function reglagesH3Max(env: NodeJS.ProcessEnv = process.env) {
   const checkpoint = env.NEXORA_H3_MAX_CHECKPOINT?.trim() || CHECKPOINT_H3_MAX;
@@ -113,6 +113,9 @@ export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVide
   const base = corpsRenduH3(d, promptH3);
   if (moteur === 'h3-fast') return base;
   const m = reglagesH3Max();
+  // Une photo exige FL2VA : repli FastH3 plein format si le checkpoint cinéma est Ref2VA.
+  // Le nom de route h3-max reste le même ; un checkpoint FL2VA configuré est conservé avec ses étapes.
+  if (d.image && m.ref) return { ...base, ...TAILLES.max[d.format], videoModel: 'h3-max' as const };
   // Le moteur cinéma est toujours à pleine résolution.
   return { ...base, ...TAILLES.max[d.format], videoModel: 'h3-max' as const, checkpoint: m.checkpoint, steps: m.etapes, ...(m.ref ? { refMode: true } : {}) };
 }

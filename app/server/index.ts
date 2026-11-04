@@ -76,7 +76,7 @@ import { analyserMedia } from './nexora/montage/analyse.js';
 import { resoudrePersonnages } from './nexora/personnagesCast.js';
 import { compteurProjet, corpsBrouillonDe, corpsFinalDe, prisesDuPlan, type PrisesDuPlan } from './nexora/prises.js';
 import { aplatir, estimerProjet, intentionDuPlanProjet, ordreAssemblage, prochainLot, scenarioVersArbre, type ProjetLong, type PlanProjet } from './nexora/projet.js';
-import { convertirEnPromptRef, decoupeFiche, promptFiche } from './nexora/personnages.js';
+import { decoupeFiche, promptFiche, referencesAvecComposition } from './nexora/personnages.js';
 import { dureeTotaleS } from './nexora/montage/editplan.js';
 import { rendreEditPlan } from './nexora/montage/rendu.js';
 import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
@@ -1021,7 +1021,8 @@ app.post('/api/nexora/creer', async (req, reply) => {
   // Personnages @ : sur le moteur cinéma (Ref2VA), @nom joint les images du personnage ; ailleurs, seulement ses mots.
   const persos = moteur === 'h3-max' && !demande.image ? await resoudrePersonnages(demande.intention) : null;
   const entree = {
-    intention: intentionAvecCamera(persos?.sujets.length ? { ...demande, intention: persos.texteClair } : demande), mode: (demande.image ? 'i2va' : 't2va') as 'i2va' | 't2va', dureeS: dureeEffective(demande),
+    intention: intentionAvecCamera(persos?.sujets.length ? { ...demande, intention: persos.texteClair } : demande), mode: (demande.image ? 'i2va' : persos?.sujets.length ? 'ref2va' : 't2va') as 'i2va' | 'ref2va' | 't2va',
+    ...(persos?.sujets.length ? { references: { sujets: persos.sujets } } : {}), dureeS: dureeEffective(demande),
     moteur, format: demande.format, ...(demande.replique ? { dialogues: [{ texte: demande.replique, langue: 'French' }] } : {}),
   };
   // Le réalisateur (recherche/25) écrit le prompt ; ses jetons sont réservés, mesurés et réglés comme ceux de l'agent.
@@ -1043,7 +1044,7 @@ app.post('/api/nexora/creer', async (req, reply) => {
     }
   } else r = await reecrireH3(entree, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur, nexoraAutoMusique: (req.body as any)?.musique === true };
-  if (persos?.sujets.length) Object.assign(corps, { prompt: convertirEnPromptRef(r.prompt, persos.sujets), refImages: persos.jetons, personnages: persos.noms });
+  if (persos?.sujets.length) Object.assign(corps, { refImages: persos.jetons, personnages: persos.noms });
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
@@ -1562,10 +1563,11 @@ app.post('/api/nexora/film/:id/plan/:n/reference', async (req, reply) => {
     corps = { ...corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'rapide' }, r.prompt, 'h3-fast'), startImage: b.jeton, brouillon: true };
   } else {
     if (!moteurDuCompte('max')) return reply.code(422).send({ error: 'La composition par image demande le moteur cinéma, indisponible ici.' });
-    const r = await reecrireH3({ intention: persos?.sujets.length ? persos.texteClair : intentionDuPlan(sb, n), mode: 't2va', dureeS, ...dialogues }, llm);
+    // Une image par identité si nécessaire, pour conserver les sujets ET la composition dans quatre entrées.
+    const { sujets, jetons } = referencesAvecComposition(persos?.sujets ?? [], persos?.jetons ?? [], b.jeton);
+    const r = await reecrireH3({ intention: persos?.sujets.length ? persos.texteClair : intentionDuPlan(sb, n), mode: 'ref2va', references: { sujets, composition: 1 }, dureeS, ...dialogues }, llm);
     const base = corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'max' }, r.prompt, 'h3-max');
-    const jetons = [...(persos?.jetons ?? []), b.jeton].slice(0, 4);
-    corps = { ...base, refImages: jetons, prompt: convertirEnPromptRef(r.prompt, persos?.sujets ?? [], { composition: jetons.length - (persos?.jetons.length ?? 0) }), personnages: persos?.noms };
+    corps = { ...base, refImages: jetons, personnages: sujets.map((s) => s.nom) };
     corps = corpsBrouillonDe(corps, Math.floor(Math.random() * 1e9), corps);
   }
   Object.assign(corps, { app: 'nexora-prise', shotName: `${sb.titre.slice(0, 24)}_plan${n + 1}_ref`, userPrompt: plan.resume });
@@ -1674,12 +1676,12 @@ app.post('/api/nexora/projet/:id/lancer', async (req, reply) => {
       return t;
     });
     const persos = await Promise.all(textes.map((t) => (moteur === 'h3-max' ? resoudrePersonnages(t) : null)));
-    const ecrits = await Promise.all(lot.map((x, i) => reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : textes[i].replace(/@/g, ''), mode: 't2va', dureeS: (x.plan.duree === 10 ? 243 : 124) / 24, ...(x.plan.replique ? { dialogues: [{ texte: x.plan.replique, langue: 'French' }] } : {}) }, llm)));
+    const ecrits = await Promise.all(lot.map((x, i) => reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : textes[i].replace(/@/g, ''), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: (x.plan.duree === 10 ? 243 : 124) / 24, ...(x.plan.replique ? { dialogues: [{ texte: x.plan.replique, langue: 'French' }] } : {}) }, llm)));
     for (let i = 0; i < lot.length; i++) {
       const x = lot[i];
       const corps: any = {
         ...corpsRendu(demandeDe(x.plan), ecrits[i].prompt, moteur),
-        ...(persos[i]?.sujets.length ? { prompt: convertirEnPromptRef(ecrits[i].prompt, persos[i]!.sujets), refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
+        ...(persos[i]?.sujets.length ? { refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
         app: 'nexora-projet', userPrompt: x.plan.resume, projetLong: p.id, projetPlan: x.plan.id, promptSource: ecrits[i].source,
         shotName: `${p.titre.slice(0, 24)}_${x.plan.id}`,
       };

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { ClientLlm, MessageLlm } from './llm.js';
-import { reecrireH3Classique, remarquesParasites, texteEcranNonDemande } from './reecritureH3.js';
+import { promptDeRepli, reecrireH3Classique, remarquesParasites, texteEcranNonDemande } from './reecritureH3.js';
 
-const bon = `integrated_multimodal_description: [Shot 1] Live-action, cinematic, a wide shot of a red car. The camera performs an arc shot at slow speed around it.
+import { STYLE_LIVE_ACTION, NEGATIF_LIVE_ACTION, verifierRecetteLiveAction } from './liveAction.js';
+
+const bon = `integrated_multimodal_description: [Shot 1] ${STYLE_LIVE_ACTION}, a wide shot of a red car. The camera performs an arc shot at slow speed around it.
 
 overall_soundscape: Waves and wind.
 
@@ -49,6 +51,29 @@ describe('réécrivain H3', () => {
     const r2 = await reecrireH3Classique(entree, null);
     expect(r2.source).toBe('repli');
     expect(r2.erreurs).toEqual([]);
+  });
+
+  it('préserve une animation demandée en FR ou EN jusque dans le repli', () => {
+    const essais = [
+      { intention: 'une pub pour la cabane en dessin animé 2D', consigne: 'Visual style: 2D cel animation' },
+      { intention: 'a 3D animated product ad', consigne: 'Visual style: 3D animation' },
+    ];
+    for (const { intention, consigne } of essais) {
+      const prompt = promptDeRepli({ ...entree, intention, consignes: [consigne] });
+      expect(prompt).toContain(intention);
+      expect(prompt).toContain(consigne);
+      expect(prompt).not.toContain(STYLE_LIVE_ACTION);
+      expect(prompt).not.toContain(NEGATIF_LIVE_ACTION);
+      expect(verifierRecetteLiveAction(prompt, intention, undefined, [consigne])).toEqual([]);
+    }
+  });
+
+  it('garde une recette photo complète pour un repli de film promo photoréaliste', () => {
+    const intention = 'film promo photoréaliste de ma voiture rouge au bord de la mer';
+    const prompt = promptDeRepli({ ...entree, intention });
+    expect(prompt).toContain(STYLE_LIVE_ACTION);
+    expect(prompt).toContain(NEGATIF_LIVE_ACTION);
+    expect(verifierRecetteLiveAction(prompt, intention)).toEqual([]);
   });
 
   it('protège les répliques de l’utilisateur', async () => {

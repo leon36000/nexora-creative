@@ -3,20 +3,21 @@ import type { ClientLlm } from './llm.js';
 import { validerPromptH3 } from './promptH3.js';
 import { lireFiche, realiser, verifierFiche, versH3, versImage } from './realisateur.js';
 import { reecrireH3 } from './reecritureH3.js';
+import { MOTS_RENDU_INTERDITS, NEGATIF_LIVE_ACTION, STYLE_LIVE_ACTION, motsRenduInterdits } from './liveAction.js';
 
 const FICHE = {
   compris: 'Une pub de cabane à sucre en trois plans.',
   famille: 'pub',
   hypotheses: ['Printemps, plein jour'],
-  style: 'Live-action, cinematic, warm spring grade',
+  style: STYLE_LIVE_ACTION,
   personnages: [
     { id: 'P1', court: 'the grandmother in a red plaid shirt', apparence: 'woman in her late sixties, silver bun, red plaid flannel shirt', voix: 'warm, cheerful low female voice' },
     { id: 'P2', court: 'the little boy in a blue knit hat', apparence: 'six-year-old boy, rosy cheeks, blue knit hat' },
   ],
   plans: [
-    { debut: 0, cadrage: 'wide', texte: 'a low-angle wide shot on a 24mm lens frames [P1] pouring golden maple syrup over a trench of snow while [P2] watches, the camera pushes in with small amplitude.' },
-    { debut: 4, cadrage: 'close-up', texte: 'a tight close-up of the taffy, 85mm, as [P2] rolls it onto a wooden stick and laughs.' },
-    { debut: 8, cadrage: 'medium', texte: 'a medium shot on a 35mm lens as [P1] turns to camera. [R1] She smiles.' },
+    { debut: 0, cadrage: 'wide', texte: 'a low-angle wide shot on a 24mm Cooke S4 lens frames [P1] in the foreground pouring golden maple syrup over a trench of snow while [P2] watches, the camera pushes in with small amplitude under sunlight.' },
+    { debut: 4, cadrage: 'close-up', texte: 'a tight close-up on an 85mm Cooke S4 lens of the taffy as [P2] rolls it onto a wooden stick and laughs in daylight.' },
+    { debut: 8, cadrage: 'medium', texte: 'a medium shot on a 35mm Cooke S4 lens as [P1] turns to camera, sunlight on her flannel shirt. [R1] She smiles.' },
   ],
   locuteurs: { R1: 'P1' },
   ambiance: 'Birdsong, crackling fire, crunching snow.',
@@ -32,6 +33,91 @@ const faux = (reponses: string[]): ClientLlm & { appels: number } => {
 };
 
 describe('réalisateur', () => {
+  it.each(MOTS_RENDU_INTERDITS)('fait réparer le déclencheur de synthèse %s', (mot) => {
+    const f = lireFiche({ ...FICHE, style: `${STYLE_LIVE_ACTION}, ${mot}` });
+    expect(verifierFiche(f, ENTREE).join(' ')).toContain('forbidden visual word');
+  });
+
+  it.each(['un dragon noir y passe devant la tour pis y se pose', 'a black dragon flies past the tower then lands'])('comprend FR/EN et garde la sortie H3 anglaise : %s', async (intention) => {
+    const r = await realiser({ ...ENTREE, intention }, faux([JSON.stringify(FICHE)]));
+    expect(motsRenduInterdits(r.prompt)).toEqual([]);
+    expect(r.prompt).toContain('ARRI Alexa 35');
+    expect(r.prompt).toContain('Cooke S4 50mm');
+    expect(r.prompt).toContain(NEGATIF_LIVE_ACTION);
+    expect(r.prompt).not.toContain(intention);
+  });
+
+  it('répare un nom protégé et ne réintroduit pas les consignes brutes de l’interface', async () => {
+    const f = { ...FICHE, plans: [{ ...FICHE.plans[0], texte: 'a medium shot on a 50mm Cooke S4 lens of a Jedi lifting a lightsaber, then striking under practical rain-soaked street lamps.' }] };
+    const e = { ...ENTREE, intention: 'un Jedi comme Star Wars', consignes: ['epic cinematic Unreal 8K'], dialogues: [] };
+    const llm = faux([JSON.stringify(f), JSON.stringify({ ...f, plans: [{ ...f.plans[0], texte: 'a medium shot on a 50mm Cooke S4 lens of an original hooded knight lifting an energy blade, then striking under practical rain-soaked street lamps.' }] })]);
+    const r = await realiser(e, llm);
+    expect(llm.appels).toBe(2);
+    expect(r.prompt).not.toMatch(/Jedi|lightsaber|Star Wars|Unreal|8K|epic|cinematic/i);
+    expect(r.prompt).toContain('lifting an energy blade, then striking');
+  });
+
+  it('refuse une recette manquante même après la dernière réparation', async () => {
+    const f = { ...FICHE, style: 'Live-action, cinematic' };
+    await expect(realiser(ENTREE, faux([JSON.stringify(f)]), 1)).rejects.toThrow(/forbidden visual word/);
+  });
+
+  it('refuse le spectacle trop éloigné et sans repère d’échelle', () => {
+    const f = lireFiche({ ...FICHE, famille: 'vfx', plans: [{ debut: 0, texte: 'a distant dragon flies then lands far away.' }] });
+    const erreurs = verifierFiche(f, { ...ENTREE, dialogues: [] }).join(' ');
+    expect(erreurs).toContain('keep the hero large');
+    expect(erreurs).toContain('scale cue');
+  });
+
+  it('préserve une Terre réelle, le soleil dur et un dessin spatial original, refuse les navires militaires', () => {
+    const e = { ...ENTREE, intention: 'film promo photoréaliste : bataille spatiale en orbite de la Terre', dialogues: [] };
+    const base = { ...FICHE, famille: 'vfx', plans: [{ debut: 0, texte: 'a medium shot on a 50mm Cooke S4 lens of an original spacecraft in the foreground, crew windows give scale; it banks then passes real Earth with curved blue limb and clouds, under hard direct sunlight and deep black shadows, scratched metal catching the sun.' }] };
+    expect(verifierFiche(lireFiche(base), e)).toEqual([]);
+    const mauvaise = lireFiche({ ...base, plans: [{ debut: 0, texte: base.plans[0].texte.replace('original spacecraft', 'battleship').replace('hard direct sunlight', 'soft light') }] });
+    expect(verifierFiche(mauvaise, e).join(' ')).toMatch(/hard direct sunlight/);
+    expect(verifierFiche(mauvaise, e).join(' ')).toMatch(/military/);
+  });
+
+  it('respecte une animation demandée dans une pub et ne lui ajoute pas le négatif photo', async () => {
+    const animation = {
+      ...FICHE,
+      famille: 'pub',
+      style: '2D hand-drawn animation with textured watercolor backgrounds',
+      personnages: [],
+      plans: [{ debut: 0, cadrage: 'medium', texte: 'a medium animated view of a steaming bowl of poutine as a fork lifts the cheese curds, then the owner laughs; warm colors and a lively hand-drawn line keep the food readable.' }],
+      variantes: ['Nighttime stop-motion at the counter', 'A playful 3D animation', 'A paper-cutout short'],
+    };
+    const e = { ...ENTREE, intention: 'pub de poutine en dessin animé 2D', dialogues: [], dureeS: 124 / 24, consignes: ['Visual style: 2D cel animation'] };
+    let messages: any[] = [];
+    const llm: ClientLlm = { async completer(_role, m) { messages = m; return JSON.stringify(animation); } };
+    const r = await realiser(e, llm);
+    expect(verifierFiche(r.fiche, e)).toEqual([]);
+    expect(r.prompt).toContain('2D hand-drawn animation');
+    expect(r.prompt).not.toContain(NEGATIF_LIVE_ACTION);
+    expect(messages[0].content).toContain('preserve 2D/3D animation, anime, cartoons, illustration, stop-motion, claymation');
+  });
+
+  it.each(['t2va', 'i2va', 'fl2va', 'l2va', 'ref2va'] as const)('compile %s avec chronologie et dialogues intacts', (mode) => {
+    const references = mode === 'ref2va' ? { sujets: [], composition: 1 } : undefined;
+    const e = { ...ENTREE, mode, references };
+    const prompt = versH3(lireFiche(FICHE), e);
+    expect(validerPromptH3(prompt, { ...e, dialogues: ENTREE.dialogues.map((d) => d.texte) })).toEqual([]);
+    expect(prompt).toContain('At 00:04.000');
+    expect(prompt).toContain('<d>[French] Venez sucrer le bec en famille!</d>');
+    expect(motsRenduInterdits(prompt)).toEqual([]);
+    if (mode === 'ref2va') {
+      expect(prompt).toMatch(/^subject_definitions:/);
+      expect(prompt).toContain('<Picture 1>');
+      expect(prompt).toContain('detailed_description:');
+    }
+  });
+
+  it('garde le dialogue du client verbatim même quand il contient un qualificatif interdit au visuel', () => {
+    const e = { ...ENTREE, dialogues: [{ texte: 'That was epic!', langue: 'English' }] };
+    const p = versH3(lireFiche(FICHE), e);
+    expect(p).toContain('<d>[English] That was epic!</d>');
+    expect(motsRenduInterdits(p)).toEqual([]);
+  });
   it('compile une fiche en prompt H3 conforme au guide, réplique mot pour mot', () => {
     const f = lireFiche(FICHE);
     expect(verifierFiche(f, ENTREE)).toEqual([]);
@@ -77,7 +163,7 @@ describe('réalisateur', () => {
 
   it('donne aussi le dialecte image (plan clé Qwen) sans balise ni texte', () => {
     const t = versImage(lireFiche(FICHE), 1);
-    expect(t).toMatch(/^Live-action, cinematic, warm spring grade, a single still frame:/);
+    expect(t).toMatch(/^Live-action footage.*a single still frame:/);
     expect(t).not.toMatch(/\[P\d\]|\[R\d\]/);
     expect(t).toMatch(/No text, no logo/);
   });

@@ -47,10 +47,24 @@ describe('graphe H3 avec le point de contrôle cinéma 10Eros-Max × Singularity
     expect(g.sampler.inputs.sampler_name).toBe('euler');
   });
 
-  it('prend la photo de départ comme première référence', () => {
-    const g = buildH3Graph({ ...base, checkpoint: nom, refMode: true, startImage: 'depart.png' }) as Record<string, Node>;
-    expect(g.ref0.inputs.image).toBe('depart.png');
-    expect(g.gen.inputs['ref_images.ref_image_0']).toEqual(['ref0', 0]);
+  it('garde les premières et dernières images dans la famille FL2VA, même si refMode est demandé', () => {
+    for (const images of [{ startImage: 'depart.png' }, { endImage: 'fin.png' }, { startImage: 'depart.png', endImage: 'fin.png' }]) {
+      const g = buildH3Graph({ ...base, checkpoint: nom, refMode: true, ...images }) as Record<string, Node>;
+      expect(g.gen.class_type).toBe('MiniMaxH3ImageToVideo');
+      expect(g.u.inputs.unet_name).toBe('minimax_h3_fl2va_pruned_fp8_scaled.safetensors');
+      expect(g.gen.inputs.first_frame).toEqual(images.startImage ? ['ss', 0] : undefined);
+      expect(g.gen.inputs.last_frame).toEqual(images.endImage ? ['se', 0] : undefined);
+    }
+  });
+
+  it('branche les références dans le même ordre que les Picture du prompt', () => {
+    const g = buildH3Graph({ ...base, checkpoint: nom, refImages: ['corps.png', 'visage.png', 'composition.png'] }) as Record<string, Node>;
+    expect(g.gen.class_type).toBe('MiniMaxH3ReferenceToVideo');
+    expect(g.ref0.inputs.image).toBe('corps.png');
+    expect(g.ref1.inputs.image).toBe('visage.png');
+    expect(g.ref2.inputs.image).toBe('composition.png');
+    expect(g.gen.inputs['ref_images.ref_image_2']).toEqual(['ref2', 0]);
+    expect(() => buildH3Graph({ ...base, refImages: ['visage.png'], endImage: 'fin.png' })).toThrow(/cannot be combined/);
   });
 
   it('n’est pas appliqué hors de sa famille (graphe fl2va)', () => {
