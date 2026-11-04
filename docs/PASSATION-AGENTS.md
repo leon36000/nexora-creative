@@ -706,3 +706,7 @@ Trois nouvelles notes d’agents Luna sur Storage : `voix-doublage.md` (mesures 
 Comparaison indépendante du plan actuel à `ffprobe` : Gemini long 112,000 s contre 105,583 s rendu ; Muse long 90,458 s contre 109,708 s ; Muse court 14,500 s contre 14,000 s. Des révisions différentes peuvent expliquer les écarts : la provenance exacte reste à établir avant tout remplacement ou verdict. DeepSeek long, court et vertical correspondent chacun à leur durée prévue ; Opus long/court aussi. Aucune note créative attribuée.
 
 Une revue de code supplémentaire par DeepSeek n’a pas abouti (délai réseau dépassé) ; une réponse DeepSeek antérieure a bien été reçue. Un essai de sous-agent Muse avec outils isolés est en cours, en passant par un relais privé qui garde la clé de passerelle hors du sous-agent ; résultat non encore établi.
+
+### OPSYS : indice de provenance des montages existants
+
+Lecture ciblée des champs non secrets du journal persistant de montage : le long Gemini a été enregistré à **20 plans / 105,58 s**, le long Muse à **20 plans / 109,71 s**, durées concordant aux fichiers à l’arrondi ; les plans actuels en comptent **24 et 19**. Le court Muse est inscrit à **6 plans / 14,0 s**, contre **6 plans / 14,5 s** dans le plan actuel. Ceci appuie un changement de plan ou de version de calcul depuis l’export, sans identifier la révision exacte : aucun hash historique n’est attesté par ces champs. Tous les brouillons restent préservés ; ne pas les écraser ni juger la fidélité au plan actuel comme une erreur certaine.

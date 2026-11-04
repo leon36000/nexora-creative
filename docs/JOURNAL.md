@@ -477,3 +477,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Nouvelles recherches voix FR-CA/EN-CA, qualité films et sauvegarde GitLab ; Garage en panne, backup et restauration complète non prouvés. Les durées des plans courants divergent des brouillons Gemini long, Muse long et Muse court ; provenance à vérifier.
 - Une revue DeepSeek supplémentaire a expiré ; essai isolé d’un agent Muse outillé en cours, clé de passerelle non exposée à l’agent.
+
+- OPSYS : journal de montage corrèle les exports Gemini et Muse longs à 20 plans chacun, contre 24 et 19 dans les plans actuels ; court Muse 14,0 s contre 14,5 s. Changement de plan ou calcul probable, révision exacte non prouvée, exports préservés.
