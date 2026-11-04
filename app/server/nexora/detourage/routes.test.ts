@@ -17,6 +17,7 @@ describe('choix du moteur', () => {
     expect(moteurPour([m('c', ['*'], 'http://c')], 'pro')).toBeUndefined();
     expect(moteurPour([m('c', ['detourage-pro'], 'http://c')], 'pro')?.id).toBe('c');
     expect(moteurPour([m('a', ['*'])], 'rapide')).toBeUndefined();
+    expect(moteurPour([m('a', ['h3-max'], 'http://a')], 'rapide')).toBeUndefined();
   });
 });
 
