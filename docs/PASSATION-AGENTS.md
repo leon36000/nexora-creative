@@ -964,3 +964,8 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 ### Reprise Codex — limite de l'adaptateur H3 Muse, 4 novembre 2026
 
 - Lecture de code : la chaîne H3 ne consomme pas directement `comfy_filename_prefix`; un adaptateur pourrait fixer `SaveVideo.inputs.filename_prefix` dans le graphe et téléverser les octets vérifiés avec `overwrite=false`. Toutefois, le serveur d'upload vérifie l'existence puis ouvre en écriture sans réservation atomique, et `SaveVideo` choisit son compteur avant écriture non exclusive : l'absence d'écrasement distant n'est pas garantie en cas de collision ou course. UUID et SHA côté client réduisent/mesurent certains risques mais ne prouvent pas la réception ni l'unicité serveur. Prototype préservé sur Storage, non testé et non exécuté; aucune API/GPU. La génération réelle attend un mécanisme sûr ou des garanties démontrées.
+
+### Reprise Codex — traçage du modèle H3, 4 novembre 2026
+
+- Pipeline #2855 de la MR Director !42 réussi, mais la revue produit reste bloquante : avec qualité max, photo et checkpoint max Ref2VA par défaut, le code construit un graphe FastH3 FL2VA tout en exposant `h3-max` et en utilisant un profil de devis mesuré pour un autre modèle. Ce constat statique ne prouve ni coût réel ni surfacturation. Changer simplement `videoModel` peut modifier le routage de machine; une preuve CPU puis une correction qui explicite/refuse le repli sont à préparer sans inventer de mesure. Configuration effective en service et inventaire des poids non vérifiés.
+- Pour la reprise Muse, un préfixe UUID rend la collision accidentelle très improbable sans la rendre atomiquement impossible; un adaptateur sur Storage est préparé et testé uniquement en simulation, sans appel réel.
