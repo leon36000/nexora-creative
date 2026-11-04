@@ -693,3 +693,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Pipeline GitLab #2852 sur `developpement` à `5ac932d` : succès vérifié API, y compris gitleaks, semgrep, trivy et tâche pc4_ci_fallback. Cela ne vérifie pas l'intégrité des anciens objets Garage ni la sauvegarde complète.
 - Revue indépendante Director après correction : les problèmes de langue des répliques, d'erreurs image et de réponses périmées sont traités; une différence mineure de message API historique pour les montages reste à corriger. Tests simulés, sans preuve navigateur ni garantie de langue de sortie LLM. Commit et intégration à venir.
+
+
+### Reprise Codex — MR de passation et Director, 4 novembre 2026
+
+- La branche de reprise a été poussée sur GitLab après succès du pipeline d'intégration. MR brouillon !41 vers `developpement`; pipeline #2853 sur `40f40a3` réussi (gitleaks, semgrep, trivy, fallback). Aucun déploiement. Les nouvelles notes de ce commit déclenchent leur propre pipeline après synchronisation.
+- Director : seconde revue Terra, les trois problèmes majeurs identifiés sont traités; l'ancien message API sans langue pour les montages a été restauré. Typecheck et 72 tests ciblés réussis avec configuration interdisant les fichiers d'environnement, cache/log sur Storage. Revue et commit locaux en cours; pas de test navigateur/HTTP complet ni traduction de Creative entier.
