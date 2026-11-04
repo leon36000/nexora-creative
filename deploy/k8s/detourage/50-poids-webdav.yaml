@@ -1,0 +1,38 @@
+# Poids du détourage servis en lecture seule à la VM V100 de pc3 (qemu, réseau « user »), qui les monte par
+# `rclone mount` au lieu de les copier sur son disque. Écoute 127.0.0.1:8095 sur pc3 seulement : la VM y arrive par
+# 10.0.2.2 (passerelle slirp = boucle locale de pc3) ; rien n'est exposé au LAN ni à Tailscale. Authentification :
+# Secret `poids-webdav` (clé `mdp`, sans saut de ligne final, créé hors git). --copy-links : le cache Hugging Face
+# est fait de liens symboliques (snapshots -> blobs). Provisoire, comme le placement de la VM elle-même.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poids-webdav
+  namespace: nexora
+  labels: {app: poids-webdav}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: poids-webdav}}
+  template:
+    metadata:
+      labels: {app: poids-webdav}
+    spec:
+      nodeSelector: {kubernetes.io/hostname: pc3}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      securityContext: {runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true}
+      containers:
+        - name: webdav
+          image: docker.io/rclone/rclone:1.71.2@sha256:3103526c506266a9ecdf064efe99bf3677d92ef6407af124d8c56b4f49cbaa51
+          args: [serve, webdav, /modeles, --addr, "127.0.0.1:8095", --read-only, --copy-links, --user, nexora, --config, /dev/null, --log-level, NOTICE]
+          env:
+            - name: RCLONE_PASS
+              valueFrom: {secretKeyRef: {name: poids-webdav, key: mdp}}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 512Mi}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts:
+            - {name: modeles, mountPath: /modeles, readOnly: true}
+      volumes:
+        - name: modeles
+          hostPath: {path: /home/pc3/nexora-detourage/modeles, type: Directory}
