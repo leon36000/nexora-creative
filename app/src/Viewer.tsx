@@ -218,10 +218,9 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
     !image && done && { label: 'Restyle', icon: 'palette', title: 'Same motion, a new look', run: () => { onClose(); navigate(`/mirror?mode=restyle&take=${take.id}`); } },
     done && s.app !== 'cutout' && { label: 'Remove background', icon: 'cutout', run: act(async () => { onClose(); await removeBackground(take); }) },
     { label: 'Add effect', icon: 'sparkle', run: act(() => addEffect(take)) },
-    !image && { label: 'Add sound', icon: 'audio', run: () => { onClose(); navigate(`/speak?mode=sound&take=${take.id}`); } },
     !image && done && s.app !== 'hdr' && { label: 'Finish in HDR', icon: 'sparkle', title: 'ACEScg EXR sequence and an HLG master, from LTX-2.5 SDR to HDR', run: act(() => finishHdr(take)) },
     !image && done && { label: 'Improve the seam', icon: 'loop', title: 'Measure the loop point and try to lower it: trim, regenerate the wrap, or a new seed. Each try is a new take; the original is kept', run: act(() => fixSeam(take)) },
-  ].filter((m): m is MoreItem => !!m);
+  ].filter((m): m is Exclude<typeof m, false> => !!m);
 
   return (
     <div className="viewer-back" onClick={onClose}>
