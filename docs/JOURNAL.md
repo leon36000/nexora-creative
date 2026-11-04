@@ -533,3 +533,8 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Commit local `94da540` sur `feat/opsys-ultime` : export final refusé si le validateur est indisponible; brouillon possible avec `validation:null`; rapports mal formés ou `ok:false` refusés. 21 tests ciblés repassés indépendamment. Le vrai validateur a accepté DeepSeek vertical (14,5 s) et Muse long (90,458 s, deux avertissements); il refuse Gemini long : `c23` demande à `p19` les images 36–132 alors que la source déclare 124 images. Diagnostic de la source et des autres versions en cours; aucun montage relancé ni plan modifié. Revue indépendante du contrat en cours.
 - Bilan espace : l'inventaire a identifié de volumineux travaux OPSYS et des qualifications dont l'usage et les dépendances restent à établir; conservés en place.
+
+
+### Reprise Codex — volume Mesh ambigu, 4 novembre 2026
+
+- Commit local `25b2824`, branche `fix/mesh-aretes-codex` : pour plusieurs composantes fermées, volume `null` et avertissement au lieu d'un chiffre pouvant être faux; le cas simple reste inchangé. 13 tests ciblés repassés indépendamment, typecheck réussi par l'agent; pas de déploiement. Distinguer les solides séparés des cavités demandera une classification géométrique. L'étanchéité actuelle ne démontre ni orientation cohérente ni absence d'auto-intersections; vérification complémentaire en cours. Réconciliation avec GitLab nécessaire avant MR.
