@@ -1,5 +1,5 @@
 /**
- * Object: any still becomes a textured 3D model (TRELLIS.2 on the local
+ * Relief (ex-Object, `/object` reste un alias) : any still becomes a textured 3D model (TRELLIS.2 on the local
  * engine). The rail takes the still and the settings; the canvas shows the
  * selected model on a turntable you can grab, next to every other take.
  * Each result is an ordinary take whose file is a GLB, so the Library, the
@@ -15,6 +15,8 @@ import { Icon, MediaCard, Spill, Stepper, Switch, fmtSeconds, presetClip, useEst
 import Viewer, { recreate, remove } from '../Viewer';
 import { usePageDrop } from '../drop';
 import type { ModelLook } from '../ModelView';
+import { PRODUIT_3D } from '../produit3d.js';
+import ReliefOutils from './ReliefOutils';
 
 const ModelView = lazy(() => import('../ModelView'));
 
@@ -38,14 +40,18 @@ export default function ObjectPage() {
   const [look, setLook] = useState<ModelLook>('lit');
   const [viewing, setViewing] = useState<number | null>(null);
   // Texte → 3D : une image de référence propre, puis le modèle, puis le contrôle du juge sur quatre côtés.
-  const [mode, setMode] = useState<'image' | 'texte'>('image');
+  const [mode, setMode] = useState<'image' | 'vues' | 'texte'>('image');
+  // Plusieurs vues du même objet (Pixal3D) : la vue de face est la source principale ci-dessous.
+  const [vueGauche, setVueGauche] = useState<Source | null>(null);
+  const [vueDos, setVueDos] = useState<Source | null>(null);
+  const [vueDroite, setVueDroite] = useState<Source | null>(null);
   const [intention, setIntention] = useState('');
   const [chaine, setChaine] = useState<ObjetTexteEtat | null>(null);
   const [devisT, setDevisT] = useState<{ secondesEstimees: number; credits: number | null } | null>(null);
   const [chaineId, setChaineId] = useState<number | null>(null);
   useEffect(() => {
     let mort = false;
-    api.objetDevis({ qualite: quality, source: mode }).then((d) => { if (!mort) setDevisT(d); }).catch(() => {});
+    api.objetDevis({ qualite: mode === 'vues' ? 'draft' : quality, source: mode }).then((d) => { if (!mort) setDevisT(d); }).catch(() => {});
     return () => { mort = true; };
   }, [quality, mode]);
   useEffect(() => {
@@ -120,9 +126,30 @@ export default function ObjectPage() {
         userPrompt: source.prompt ? `3D: ${source.prompt}` : `3D from ${source.name}`,
       });
       setSelected(r.takeIds[0]);
-      toast(`Building ${r.takeIds.length} model${r.takeIds.length > 1 ? 's' : ''}`);
+      toast(`${PRODUIT_3D} : ${r.takeIds.length} modèle${r.takeIds.length > 1 ? 's' : ''} en construction`);
     } catch (e) {
       toast(e instanceof Error ? e.message : 'failed', true);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /** Plusieurs vues du même objet : Pixal3D, brouillon, une prise (sur les GPU Turing qui portent ce modèle). */
+  async function goVues() {
+    if (!source) return;
+    setBusy('Mise en file...');
+    try {
+      const versSpec = (s: Source | null) => (s ? (s.takeId ? { sourceTake: s.takeId } : { image: s.token }) : undefined);
+      const r = await api.generate({
+        kind: 'object', app: 'object', quality: 'draft', count: 1, removeBackground: cutout,
+        ...(source.takeId ? { sourceTake: source.takeId } : { image: source.token }),
+        vues: { left: versSpec(vueGauche), back: versSpec(vueDos), right: versSpec(vueDroite) },
+        shotName: `${PRODUIT_3D.toLowerCase()}_vues_${(source.name || 'vue').slice(0, 24)}`, userPrompt: `3D à partir de plusieurs vues de ${source.name || 'l’objet'}`,
+      });
+      setSelected(r.takeIds[0]);
+      toast(`${PRODUIT_3D} : modèle en construction à partir de plusieurs vues`);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'échec', true);
     } finally {
       setBusy(null);
     }
@@ -133,11 +160,12 @@ export default function ObjectPage() {
     <div className="rail-layout" style={{ gridTemplateColumns: '372px 1fr' }}>
       <aside className="rail">
         <Spill src={presetClip('turntable')} video />
-        <div className="display" style={{ fontSize: 26 }}>Object</div>
-        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>One still becomes a textured 3D model you can turn, download as GLB and drop into a scene. TRELLIS.2, on your GPU.</div>
+        <div className="display" style={{ fontSize: 26 }}>{PRODUIT_3D}</div>
+        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Une image, plusieurs vues ou une phrase deviennent un modèle 3D texturé : à tourner, à exporter (GLB, OBJ, STL, 3MF, USDZ) et à poser dans une scène. Sur nos GPU.</div>
 
         <div className="seg" role="group" aria-label="Point de départ">
           <button type="button" className={mode === 'image' ? 'on' : ''} onClick={() => setMode('image')}>Image → 3D</button>
+          <button type="button" className={mode === 'vues' ? 'on' : ''} onClick={() => setMode('vues')}>Plusieurs vues</button>
           <button type="button" className={mode === 'texte' ? 'on' : ''} onClick={() => setMode('texte')}>Texte → 3D</button>
         </div>
 
@@ -151,17 +179,27 @@ export default function ObjectPage() {
             <div className="dim" style={{ fontSize: 12 }}>Nexora dessine d’abord une photo de produit propre de l’objet seul, puis la reconstruit en 3D, puis vérifie quatre côtés. Une seule relance si le contrôle est sévère.</div>
           </div>
         ) : (
-          <SourceSlot label="Still" value={source} onChange={setSource} accept={['image']}
-            title="Add a still of the thing" sub="One subject, whole in frame, on a plain background works best." />
+          <>
+            <SourceSlot label={mode === 'vues' ? 'Vue de face' : 'Still'} value={source} onChange={setSource} accept={['image']}
+              title={mode === 'vues' ? 'Ajoute la vue de face' : 'Add a still of the thing'} sub="One subject, whole in frame, on a plain background works best." />
+            {mode === 'vues' && (
+              <>
+                <SourceSlot label="Vue de gauche" value={vueGauche} onChange={setVueGauche} accept={['image']} title="Gauche (facultatif)" sub="Le même objet, vu de son côté gauche." />
+                <SourceSlot label="Vue de dos" value={vueDos} onChange={setVueDos} accept={['image']} title="Dos (facultatif)" sub="Le même objet, vu de derrière." />
+                <SourceSlot label="Vue de droite" value={vueDroite} onChange={setVueDroite} accept={['image']} title="Droite (facultatif)" sub="Le même objet, vu de son côté droit." />
+                <div className="dim" style={{ fontSize: 12 }}>Pixal3D recoupe les vues pour deviner ce qu’une seule photo cache. Au moins une vue en plus de la face ; brouillon seulement, sur les GPU Turing.</div>
+              </>
+            )}
+          </>
         )}
 
-        <div className="rail-section">
+        {mode !== 'vues' && <div className="rail-section">
           <div className="label">Detail</div>
           <div className="seg">
             {OBJECT_DETAIL.map((x) => <button key={x.id} type="button" className={quality === x.id ? 'on' : ''} onClick={() => setQuality(x.id)}>{x.label}</button>)}
           </div>
           <div className="dim" style={{ fontSize: 12 }}>{q.note}</div>
-        </div>
+        </div>}
 
         {mode === 'image' && source && (
           <div className="rail-section">
@@ -196,7 +234,7 @@ export default function ObjectPage() {
           </div>
         </div>}
 
-        {mode === 'image' && <div className="chip-row" style={{ alignItems: 'center' }}>
+        {mode !== 'texte' && <div className="chip-row" style={{ alignItems: 'center' }}>
           <Stepper value={count} min={1} max={4} onChange={setCount} fmt={(v) => `${v}/4`} />
           <span className="dim" style={{ fontSize: 12 }}>Each take uses a new seed.</span>
         </div>}
@@ -210,8 +248,8 @@ export default function ObjectPage() {
             </button>
           </>
         ) : (
-          <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source} onClick={() => void go()}>
-            <span>{busy ?? (count > 1 ? `Make 3D · ${count}` : 'Make 3D')}</span>
+          <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source || (mode === 'vues' && !vueGauche && !vueDos && !vueDroite)} onClick={() => void (mode === 'vues' ? goVues() : go())}>
+            <span>{busy ?? (count > 1 ? `${PRODUIT_3D} · ${count}` : mode === 'vues' ? `${PRODUIT_3D} depuis ${1 + [vueGauche, vueDos, vueDroite].filter(Boolean).length} vues` : PRODUIT_3D)}</span>
             <span className="cost">{devisT?.credits != null ? `${devisT.credits * count} crédits · ` : ''}{est ? fmtSeconds(est * count) : devisT ? `≈ ${fmtSeconds(devisT.secondesEstimees * count)}` : 'TRELLIS.2'}</span>
           </button>
         )}
@@ -227,7 +265,7 @@ export default function ObjectPage() {
           {takes.length === 0 ? (
             <div className="hero-empty">
               <div className="object-hero"><video src={presetClip('turntable')} muted loop autoPlay playsInline /></div>
-              <div className="display" style={{ fontSize: 'clamp(34px,4.6vw,60px)' }}>A still <span className="hl">in the round</span></div>
+              <div className="display" style={{ fontSize: 'clamp(34px,4.6vw,60px)' }}>{PRODUIT_3D} : <span className="hl">en volume</span></div>
               <div className="steps3">
                 <div><span className="label">01</span><b>Add a still</b><span className="dim">Or press Make 3D on any image in the Library.</span></div>
                 <div><span className="label">02</span><b>Pick the detail</b><span className="dim">Draft to check the shape, High for the keeper.</span></div>
@@ -259,6 +297,7 @@ export default function ObjectPage() {
 function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void; onOpen: () => void }) {
   const s = settingsOf(take);
   return (
+    <>
     <div className="object-focus">
       <Suspense fallback={<div className="model-view"><img className="model-poster" src={posterUrl(take.id)} alt="" /></div>}>
         <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} />
@@ -279,6 +318,8 @@ function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLo
         <button type="button" className="btn sm" onClick={onOpen}><Icon name="sparkle" size={14} />Open</button>
       </div>
     </div>
+    <ReliefOutils take={take} />
+    </>
   );
 }
 

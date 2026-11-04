@@ -889,9 +889,9 @@ server.registerTool('upscale', {
 // ---------- image to 3D ----------
 
 server.registerTool('make_3d', {
-  title: 'Make 3D',
+  title: 'Make 3D (Relief)',
   description: [
-    'Object app (TRELLIS.2, local): one still becomes a textured 3D model, saved as a GLB take (PBR base color, metallic, roughness; high also bakes a normal map and AO).',
+    'Relief app (3D, TRELLIS.2, local; the former Object app, /object stays as an alias): one still becomes a textured 3D model, saved as a GLB take (PBR base color, metallic, roughness; high also bakes a normal map and AO).',
     'BiRefNet cuts the subject out first unless remove_background is false (then the PNG\'s own transparency is used). Works best on one subject, whole in frame, on a plain background.',
     OBJECT_DETAIL.map((d) => `quality ${d.id === 'quality' ? 'high' : d.id}: ${d.note}`).join(' '),
     'The take\'s output_path is the .glb; get_take also returns glb_url (served as model/gltf-binary), a turntable mp4 and the isolated subject. The preview image is the first turntable frame.',

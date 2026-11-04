@@ -36,6 +36,7 @@ describe('lecture des réglages du site', () => {
 
 describe('application des réglages', () => {
   it('applique le modèle LLM par rôle (avant l’environnement) et les moteurs, le moteur principal restant en tête', () => {
+    moteurs[0].recettes = ['qwen21', 'qwen', 'flux2', 'music3']; // comme le poste de développement : le principal ne porte pas H3
     const r = appliquerReglagesSite(config());
     expect(r).toEqual({ moteurs: 2, ignores: [] });
     expect(modelePour('moderation', { NEXORA_LLM_MODELE: 'poste' } as NodeJS.ProcessEnv)).toBe('nexora-local-8b');

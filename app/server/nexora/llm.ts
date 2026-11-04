@@ -13,13 +13,14 @@
  *  boost       : « Booster ma phrase »                        musique     : description de la bande originale
  *  moderation  : garde-fou avant rendu (licence H3, V.5)      publication : titres et textes pour les réseaux
  *  idees       : « Inspire-moi »                              juge        : juge visuel (deux candidats, modèle vision)
+ *  juge3d      : juge visuel de Relief (le mode 3D) : note quatre côtés d'un modèle ; modèle vision aussi
  *  producteur  : agent Producteur (boucle d'outils bornée, server/nexora/agent.ts)
  *  monteur     : planification de montage (EditPlan v1, server/nexora/montage/)
  *  design      : mode Marketing, rôle « design » : gabarit, accroches, idées de logo (server/nexora/marketing/)
  * `prompt`, `intention` et `assistant` restent acceptés (anciens appels).
  */
-export type RoleLlm = 'tournage' | 'montage' | 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur' | 'effets' | 'design';
-export const ROLES_LLM: readonly RoleLlm[] = ['tournage', 'montage', 'redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur', 'design'];
+export type RoleLlm = 'tournage' | 'montage' | 'intention' | 'realisation' | 'prompt' | 'juge' | 'assistant' | 'redaction' | 'boost' | 'musique' | 'moderation' | 'publication' | 'idees' | 'producteur' | 'monteur' | 'effets' | 'design' | 'juge3d';
+export const ROLES_LLM: readonly RoleLlm[] = ['tournage', 'montage', 'redaction', 'realisation', 'boost', 'musique', 'moderation', 'publication', 'idees', 'juge', 'producteur', 'monteur', 'design', 'juge3d'];
 
 /** Réglages venus de l'administration du site (modèle par défaut et par rôle) ; ils passent avant l'environnement du poste. */
 let reglages: { defaut?: string; roles: Partial<Record<RoleLlm, string>> } = { roles: {} };
@@ -53,6 +54,8 @@ export interface ClientLlm {
   /** Renvoie le texte de la réponse ; `json` demande un objet JSON. */
   completer(role: RoleLlm, messages: MessageLlm[], options?: { json?: boolean; temperature?: number; maxTokens?: number }): Promise<string>;
   /** Un tour d'appel de fonctions (« tools ») : texte éventuel et appels d'outils demandés par le modèle. */
+  /** Comme `completer`, avec le modèle réellement appelé et les jetons consommés (facturation du juge de Relief). */
+  completerMesure?(role: RoleLlm, messages: MessageLlm[], options?: { json?: boolean; temperature?: number; maxTokens?: number }): Promise<{ texte: string; modele: string; entree: number; sortie: number }>;
   completerAvecOutils?(role: RoleLlm, messages: MessageLlm[], outils: DefinitionOutil[], options?: { temperature?: number; maxTokens?: number }): Promise<ReponseOutils>;
 }
 
@@ -73,7 +76,7 @@ export class ErreurLlm extends Error {}
  * Modèle par défaut d'un rôle qui exige une capacité que le modèle général n'a pas. Le juge regarde des images : le modèle
  * par défaut (textuel) ne convient pas, `qwen/qwen3.8-27b` (vision) a été éprouvé sur de vraies prises.
  */
-export const MODELES_PAR_DEFAUT_ROLE: Partial<Record<RoleLlm, string>> = { juge: 'qwen/qwen3.8-27b' };
+export const MODELES_PAR_DEFAUT_ROLE: Partial<Record<RoleLlm, string>> = { juge: 'qwen/qwen3.8-27b', juge3d: 'qwen/qwen3.8-27b' };
 
 export function modelePour(role: RoleLlm, env: NodeJS.ProcessEnv = process.env): string | null {
   // Ordre : réglage du site pour ce rôle, variable d'environnement du rôle, modèle par défaut du rôle, réglage du site
@@ -101,19 +104,21 @@ export function clientLlmDepuisEnv(env: NodeJS.ProcessEnv = process.env, f: type
       usage?: { prompt_tokens?: number; completion_tokens?: number };
     };
   };
+  const textuel = async (role: RoleLlm, messages: MessageLlm[], options: { json?: boolean; temperature?: number; maxTokens?: number }) => {
+    const corps = await appeler(role, {
+      messages: versApi(messages),
+      temperature: options.temperature ?? 0.4,
+      // Sans plafond, la passerelle réserve le maximum du modèle sur les crédits à chaque appel.
+      max_tokens: options.maxTokens ?? 8000,
+      ...(options.json ? { response_format: { type: 'json_object' } } : {}),
+    });
+    const texte = corps.choices?.[0]?.message?.content;
+    if (typeof texte !== 'string' || !texte.trim()) throw new ErreurLlm('réponse LLM vide');
+    return { texte, entree: corps.usage?.prompt_tokens ?? 0, sortie: corps.usage?.completion_tokens ?? 0 };
+  };
   return {
-    async completer(role, messages, options = {}) {
-      const corps = await appeler(role, {
-        messages: versApi(messages),
-        temperature: options.temperature ?? 0.4,
-        // Sans plafond, la passerelle réserve le maximum du modèle sur les crédits à chaque appel.
-        max_tokens: options.maxTokens ?? 8000,
-        ...(options.json ? { response_format: { type: 'json_object' } } : {}),
-      });
-      const texte = corps.choices?.[0]?.message?.content;
-      if (typeof texte !== 'string' || !texte.trim()) throw new ErreurLlm('réponse LLM vide');
-      return texte;
-    },
+    async completer(role, messages, options = {}) { return (await textuel(role, messages, options)).texte; },
+    async completerMesure(role, messages, options = {}) { return { ...(await textuel(role, messages, options)), modele: modelePour(role, env) ?? '' }; },
     async completerAvecOutils(role, messages, outils, options = {}) {
       const corps = await appeler(role, {
         messages: versApi(messages),

@@ -527,7 +527,7 @@ const { VIDEO_MODELS, IMAGE_MODELS, IMAGE_RES, compilePrompt, presetById, sizeFo
   }
   assert.throws(() => objectBody({ source: { token: 'x', kind: 'video', name: 'v', w: 1, h: 1, seconds: 3 }, quality: 'draft', cutout: true, count: 1 }), /needs a still/);
   const viewer = readFileSync(join(ROOT, 'src/Viewer.tsx'), 'utf8');
-  assert.ok(viewer.includes('navigate(`/object?take=${take.id}`)'), 'Viewer.tsx Make 3D no longer opens /object?take=<id>');
+  assert.ok(viewer.includes('navigate(`${ROUTE_3D}?take=${take.id}`)'), 'Viewer.tsx Make 3D no longer opens <route 3D>?take=<id>');
   assert.ok(src.includes("useTakeParam(params.get('take'),"), 'Object.tsx no longer reads ?take=');
   passed++;
   console.log('ok  viewer Make 3D deep-links /object?take=<id>, which the page reads');

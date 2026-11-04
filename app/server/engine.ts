@@ -30,7 +30,22 @@ export const engine = new EventEmitter();
  * comfy-api-proxy. Une recette (« h3-fast », « h3-max »…) ne part que vers un moteur qui la déclare ; parmi eux, le
  * moins chargé. Le lien tâche → moteur est gardé sur disque pour retrouver les tâches après un redémarrage.
  */
-export interface MoteurGpu { id: string; nom: string; comfyUrl: string; baseUrl: string; recettes: string[]; /** Clé d'un moteur cloud (jamais journalisée). */ cle?: string }
+export interface MoteurGpu { id: string; nom: string; comfyUrl: string; baseUrl: string; recettes: string[];
+  /** Secondes mesurées d'une tâche par recette (ex. { "objet-apercu": 126 }) : le choix du moteur minimise l'heure de fin estimée. */
+  secondes?: Record<string, number>;
+  /** Clé d'un moteur cloud (jamais journalisée). */ cle?: string }
+
+/** Secondes par recette : un objet JSON (texte ou déjà lu) de nombres positifs ; le reste est ignoré. */
+export function lireSecondes(brut: unknown): Record<string, number> | undefined {
+  try {
+    const o = typeof brut === 'string' ? (brut.trim() ? JSON.parse(brut) : null) : brut;
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return undefined;
+    const r = Object.fromEntries(Object.entries(o as Record<string, unknown>).filter(([, v]) => Number.isFinite(Number(v)) && Number(v) > 0).map(([k, v]) => [k, Number(v)]));
+    return Object.keys(r).length ? r : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 function lireMoteurs(): MoteurGpu[] {
   const principal: MoteurGpu = {
@@ -39,6 +54,7 @@ function lireMoteurs(): MoteurGpu[] {
     comfyUrl: config.comfyUrl,
     baseUrl: config.comfyBaseUrl,
     recettes: (process.env.NEXORA_MOTEUR_RECETTES || '*').split(',').map((r) => r.trim()).filter(Boolean),
+    secondes: lireSecondes(process.env.NEXORA_MOTEUR_SECONDES),
   };
   let autres: MoteurGpu[] = [];
   try {
@@ -49,6 +65,7 @@ function lireMoteurs(): MoteurGpu[] {
         .map((m) => ({
           id: m.id, nom: String(m.nom ?? m.id), comfyUrl: m.comfyUrl.replace(/\/+$/, ''), baseUrl: m.baseUrl.replace(/\/+$/, ''),
           recettes: Array.isArray(m.recettes) ? m.recettes.map(String) : ['*'],
+          ...(lireSecondes(m.secondes) ? { secondes: lireSecondes(m.secondes) } : {}),
         }));
     }
   } catch (e) {
@@ -118,10 +135,15 @@ export const moteurDuJob = (jobId: string) => moteurParId(jobMoteur.get(jobId));
 /** Tâches en cours par moteur, pour répartir la charge. */
 const enCours = new Map<string, Set<string>>();
 
-/** Moteurs capables d'une recette, le moins chargé d'abord. */
-export function moteursPour(recette?: string): MoteurGpu[] {
+/**
+ * Moteurs capables d'une recette, le plus rapide à finir d'abord : (tâches en cours + 1) × secondes de la recette sur ce
+ * moteur. Sans `secondes` déclarées, c'est le moins chargé (à égalité, l'ordre du parc : le principal d'abord). Ainsi un
+ * brouillon 3D reste sur la GB10 (38 s) tant que sa file ne dépasse pas deux tâches, puis déborde sur les Turing (126 s).
+ */
+export function moteursPour(recette?: string, charge: (id: string) => number = (id) => enCours.get(id)?.size ?? 0): MoteurGpu[] {
   const capables = moteurs.filter((m) => m.recettes.includes('*') || (recette !== undefined && m.recettes.includes(recette)));
-  return capables.sort((a, b) => (enCours.get(a.id)?.size ?? 0) - (enCours.get(b.id)?.size ?? 0));
+  const fin = (m: MoteurGpu) => (charge(m.id) + 1) * ((recette !== undefined ? m.secondes?.[recette] : undefined) ?? 1);
+  return capables.sort((a, b) => fin(a) - fin(b));
 }
 
 const jobs = new Map<string, Job>();

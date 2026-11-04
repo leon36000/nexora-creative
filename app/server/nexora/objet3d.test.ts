@@ -9,7 +9,7 @@ describe('recettes 3D', () => {
   it('une recette par détail, routée comme les autres recettes du parc', () => {
     expect(recetteObjet('draft')).toBe('objet-apercu');
     expect(recetteObjet('quality')).toBe('objet-qualite');
-    expect(Object.values(RECETTES_OBJET)).toEqual(['objet-apercu', 'objet-qualite']);
+    expect(Object.values(RECETTES_OBJET)).toEqual(['objet-apercu', 'objet-qualite', 'objet-multivue']);
   });
   it('temps GPU mesuré sur la GB10 : l’aperçu est bien plus court que la qualité', () => {
     expect(secondesObjet('draft')).toBeLessThan(60);
@@ -96,5 +96,16 @@ describe('texte → 3D : prochaine étape', () => {
   it('un objet qui échoue : échec avec le motif', () => {
     const s = { ...base, phase: 'objet' as const, tentatives: [11] };
     expect(prochaineEtapeTexte3D(s, { image: 'done', objet: 'failed' }).action).toBe('echec');
+  });
+});
+
+describe('Relief : vues et GIF', () => {
+  it('quatre vues régulièrement espacées d’une tournette de n images', async () => {
+    const { indicesQuatreVues, argsGif } = await import('./objet3d.js');
+    expect(indicesQuatreVues(32)).toEqual([0, 8, 16, 24]);
+    expect(indicesQuatreVues(8)).toEqual([0, 2, 4, 6]);
+    expect(indicesQuatreVues(2)).toHaveLength(4);
+    expect(argsGif('a.mp4', 'b.gif').slice(-1)[0]).toBe('b.gif');
+    expect(argsGif('a.mp4', 'b.gif').join(' ')).toContain('palettegen');
   });
 });
