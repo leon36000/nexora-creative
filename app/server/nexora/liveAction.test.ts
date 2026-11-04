@@ -15,10 +15,12 @@ describe('choix du médium du réalisateur', () => {
     ['a stop-motion claymation ad', true],
     ['un film d’animation', true],
     ['an anime short', true],
+    ['une pub en style anime', true],
     ['an illustration of a spaceship', true],
     ['a stylized video-game style promo', true],
     ['une pub avec un style de jeu vidéo', true],
     ['animer une photo de cette femme', false],
+    ['anime cette photo pour une pub', false],
     ['animation d’un vrai acteur dans la rue', false],
     ['animate this photo of a real actor', false],
     ['animation of a real actor walking', false],
@@ -41,5 +43,10 @@ describe('choix du médium du réalisateur', () => {
   it('prend en compte un style explicitement choisi dans les consignes de l’interface', () => {
     expect(requiertPhotographie('pub', 'coffee shop ad', ['Visual style: 2D cel animation'])).toBe(false);
     expect(requiertPhotographie('pub', 'coffee shop ad', ['Camera movement: slow tracking shot'])).toBe(true);
+  });
+
+  it('ne confond pas le verbe français « anime » avec un style visuel', () => {
+    expect(requiertPhotographie('pub', 'anime cette photo pour une pub')).toBe(true);
+    expect(requiertPhotographie('pub', 'une pub en style anime')).toBe(false);
   });
 });
