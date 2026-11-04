@@ -1,0 +1,83 @@
+{
+ "reprises": [
+  {
+   "plan": "p04",
+   "graine": 1041
+  },
+  {
+   "plan": "p05",
+   "graine": 1051
+  },
+  {
+   "plan": "p06",
+   "graine": 1061
+  },
+  {
+   "plan": "p07",
+   "graine": 1071
+  },
+  {
+   "plan": "p13",
+   "graine": 1131
+  },
+  {
+   "plan": "p14",
+   "graine": 1141
+  }
+ ],
+ "voix": {
+  "v01": 1,
+  "v02": 2,
+  "v03": 1,
+  "v04": 1,
+  "v05": 2,
+  "v06": 1,
+  "v07": 2,
+  "v08": 2,
+  "v09": 2,
+  "v10": 1,
+  "v11": 2,
+  "v12": 1
+ },
+ "voix_reprises": [
+  {
+   "id": "v01",
+   "texte": "Une photo. Pis toute une usine se met au travail.",
+   "voix": "drama3-adamqc",
+   "direction": "Narrateur pub Quebec, grave et punche, attaques franches, rythme vite, jamais lisse ni endormi.",
+   "vitesse": 1.15
+  },
+  {
+   "id": "v03",
+   "texte": "Photo reçue. Mesures en cours.",
+   "voix": "eleven-jeannemance",
+   "direction": "[energetic, punchy, natural Quebecois]",
+   "vitesse": 1.05
+  },
+  {
+   "id": "v04",
+   "texte": "Soumission prête : dix-huit mille neuf cent quarante dollars. J'attends ton approbation.",
+   "voix": "eleven-jeannemance",
+   "direction": "[energetic, punchy, natural Quebecois]",
+   "vitesse": 1.0
+  },
+  {
+   "id": "v06",
+   "texte": "Profits anticipés, calcul mis à jour : la productivité a monté de sept pour cent.",
+   "voix": "eleven-jeannemance",
+   "direction": "[energetic, punchy, natural Quebecois]",
+   "vitesse": 1.0
+  },
+  {
+   "id": "v07",
+   "texte": "Voici la cédule des trois prochaines semaines.",
+   "voix": "eleven-jeannemance",
+   "direction": "[energetic, punchy, natural Quebecois]",
+   "vitesse": 1.05
+  }
+ ],
+ "musique": {
+  "choix": "juge"
+ },
+ "notes": "Serveur/3D les plus jeu video repris en prises reelles (p04,p05,p06,p07,p13,p14=8u). Voix: adjointe garde prise2 excellente; avatar unifie en jeannemance; narrateur repasse en adamqc punche. Montage: drop p17/p19, rafale signal, queues muettes coupees, vrais trous."
+}
