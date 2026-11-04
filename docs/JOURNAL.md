@@ -409,3 +409,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Finish : rapport et protocole de comparaison à débit égal commités `9c223cb` ; JSON identique par SHA à celui du banc. Codecs restent fermés ; script portable non relancé.
 
 - OPSYS DeepSeek : p30 rendu, décodé et archivé avec planche ; p31 lancé seul après contrôle de file et puissance.
+
+
+## 04/11/2026 — Retour partiel de GitLab
+
+- API et PostgreSQL répondent ; Garage reste en échec. Le compte service voit les projets demandés en listant sans filtre membre ; OAuth personnel GitLab-PC4 déconnecté.
+- Une autre session a synchronisé la branche film jusqu'à `3634d83` et la passation jusqu'à `5141f84`, commit vide déjà ancêtre local ; MR !37 ouverte, !27 brouillon. Pipeline 2841 échoué, 2847 en attente ; aucun push/fusion supplémentaire de cette session.
