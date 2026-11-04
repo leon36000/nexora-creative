@@ -12,8 +12,11 @@ Le rendu se fait par tranches d'images en parallèle ; les tranches et le mix re
 `montage/tranches-<équipe>-<version>-<mode>-<horodatage>/` avec l'export du film.
 """
 import argparse
+import hashlib
 import json
 import math
+import os
+import stat
 import subprocess
 import sys
 import time
@@ -147,6 +150,102 @@ def verifier_sortie_libre(sortie):
     return sortie
 
 
+class ErreurProvenance(RuntimeError):
+    """La provenance d'un montage ne peut pas être attestée sans ambiguïté."""
+
+
+def empreinte_editplan(plan):
+    """SHA-256 déterministe de l'objet EditPlan effectivement donné au rendu."""
+    try:
+        contenu = json.dumps(plan, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    except (TypeError, ValueError):
+        raise ErreurProvenance("L'EditPlan ne peut pas être sérialisé canoniquement pour sa provenance.") from None
+    return hashlib.sha256(contenu).hexdigest()
+
+
+def empreinte_fichier(fichier):
+    """Hash d'un fichier en flux; refuse un fichier manquant, illisible ou modifié pendant sa lecture."""
+    h = hashlib.sha256()
+    try:
+        with Path(fichier).open("rb") as fh:
+            avant = os.fstat(fh.fileno())
+            if not stat.S_ISREG(avant.st_mode):
+                raise ErreurProvenance("La provenance SHA-256 exige un fichier ordinaire.")
+            while bloc := fh.read(1024 * 1024):
+                h.update(bloc)
+            apres = os.fstat(fh.fileno())
+    except ErreurProvenance:
+        raise
+    except OSError:
+        raise ErreurProvenance("Lecture impossible d'un fichier nécessaire à la provenance SHA-256.") from None
+    signature = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
+    if signature(avant) != signature(apres):
+        raise ErreurProvenance("Un fichier a changé pendant le calcul de sa provenance SHA-256.")
+    return h.hexdigest()
+
+
+def empreintes_sources_utilisees(ctx):
+    """Hash seulement les sources vidéo, voix et musique réellement référencées par cet EditPlan.
+
+    Les références répétées au même chemin canonique ne sont lues qu'une fois. Les sources audio
+    planifiées mais absentes sont déclarées comme absentes plutôt que de recevoir une empreinte fictive.
+    """
+    references = {"video": {}, "voix": {}, "musique": {}}
+    absentes = {"video": set(), "voix": set(), "musique": set()}
+    for plan in ctx.plan.get("video", []):
+        sid = plan.get("src")
+        if not sid or sid in ("noir", "carton"):
+            continue
+        chemin = ctx.vid.get(sid)
+        if chemin is not None:
+            references["video"][sid] = chemin
+    audio = ctx.plan.get("audio", {})
+    for voix in audio.get("voix", []):
+        sid = voix.get("src")
+        if not sid:
+            continue
+        chemin = ctx.voix.get(sid)
+        if chemin is None:
+            absentes["voix"].add(sid)
+        else:
+            references["voix"][sid] = chemin
+    musique = audio.get("musique")
+    if musique:
+        sid = musique.get("src") or "musique"
+        if ctx.musique is None:
+            absentes["musique"].add(sid)
+        else:
+            references["musique"][sid] = ctx.musique
+
+    cache = {}
+    sources_sha256 = {role: {} for role in references}
+    for role, refs in references.items():
+        for sid, chemin in sorted(refs.items()):
+            try:
+                canonique = Path(chemin).resolve(strict=True)
+            except OSError:
+                raise ErreurProvenance(f"Chemin de source introuvable pour {role}/{sid}.") from None
+            if canonique not in cache:
+                cache[canonique] = empreinte_fichier(canonique)
+            sources_sha256[role][sid] = cache[canonique]
+
+    return {
+        "sources_sha256": sources_sha256,
+        "sources_absentes": {role: sorted(ids) for role, ids in absentes.items()},
+    }
+
+
+def instantane_contexte_rendu(ctx):
+    """Entrées déjà résolues, transmises aux workers sans relecture des dossiers/choix."""
+    return {"plan": ctx.plan, "annexe": ctx.annexe, "vid": ctx.vid, "voix": ctx.voix, "musique": ctx.musique}
+
+
+def initialiser_contexte_rendu(equipe, version, brouillon, instantane):
+    """Chaque processus de rendu utilise la même révision et les mêmes fichiers résolus."""
+    _CTX.clear()
+    contexte((equipe, version, brouillon), instantane=instantane)
+
+
 def creer_dossier_tranches(out_dir, equipe, version, brouillon):
     """Réserve un dossier propre et étiqueté pour garder les vidéos intermédiaires."""
     horodatage = time.strftime("%Y%m%d-%H%M%S", time.localtime())
@@ -227,25 +326,35 @@ def image_plan(c, k, fichier, W, H, cx_v):
 
 
 class Contexte:
-    def __init__(self, equipe, version, brouillon):
-        self.D, self.plan, self.annexe = charger(equipe, version)
+    def __init__(self, equipe, version, brouillon, instantane=None):
+        if instantane is None:
+            self.D, self.plan, self.annexe = charger(equipe, version)
+        else:
+            self.D = {}
+            self.plan = instantane["plan"]
+            self.annexe = instantane["annexe"]
         self.equipe, self.version = equipe, version
         vert = self.plan.get("format") == "9:16"
         self.W, self.H = (1080, 1920) if vert else (1920, 1080)
         if brouillon:
             self.W, self.H = self.W // 2, self.H // 2
         self.vert = vert
-        self.vid, self.voix, self.musique = resoudre(equipe, self.plan, version)
+        if instantane is None:
+            self.vid, self.voix, self.musique = resoudre(equipe, self.plan, version)
+        else:
+            self.vid = instantane["vid"]
+            self.voix = instantane["voix"]
+            self.musique = instantane["musique"]
         self.debuts, self.total = ligne_de_temps(self.plan["video"])
 
 
 _CTX = {}
 
 
-def contexte(args):
+def contexte(args, instantane=None):
     cle = tuple(args)
     if cle not in _CTX:
-        ctx = Contexte(*args)
+        ctx = Contexte(*args, instantane=instantane)
         reg = dict(REGLAGES)
         e = ctx.annexe.get("etalonnage") or {}
         reg["contraste"] *= float(e.get("contraste", 1.0))
@@ -476,12 +585,16 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     nom_sortie = f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
     chemin_defaut = T.TRAVAIL / equipe / "montage" / nom_sortie
     sortie = verifier_sortie_libre(sortie if sortie is not None else chemin_defaut)
+    editplan_sha256 = empreinte_editplan(ctx.plan)
+    sources_initiales = empreintes_sources_utilisees(ctx)
+    instantane = instantane_contexte_rendu(ctx)
     rapport = valider_ts(ctx.plan)
     out_dir = T.dossier_travail(equipe, "montage")
     tranches = creer_dossier_tranches(out_dir, equipe, version, brouillon)
     pas = 36
     taches = [(equipe, version, brouillon, a, min(ctx.total, a + pas), tranches / f"t{a:06d}.mp4") for a in range(0, ctx.total, pas)]
-    with ProcessPoolExecutor(jobs) as ex:
+    with ProcessPoolExecutor(jobs, initializer=initialiser_contexte_rendu,
+                             initargs=(equipe, version, brouillon, instantane)) as ex:
         list(ex.map(rendre_tranche, taches))
     (tranches / "liste.txt").write_text("".join(f"file '{x[-1]}'\n" for x in taches))
     wav = tranches / "mix.wav"
@@ -489,8 +602,19 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     subprocess.run([FF, "-v", "error", "-n", "-f", "concat", "-safe", "0", "-i", str(tranches / "liste.txt"), "-i", str(wav), "-map", "0:v", "-map", "1:a",
                     "-c:v", "libx264", "-preset", "fast" if brouillon else "slow", "-crf", "23" if brouillon else "16", "-pix_fmt", "yuv420p",
                     "-c:a", "aac", "-b:a", "256k", "-movflags", "+faststart", "-shortest", str(sortie)], check=True)
+    sources_finales = empreintes_sources_utilisees(ctx)
+    if sources_finales != sources_initiales:
+        raise ErreurProvenance("Une source du montage a changé pendant le rendu; les empreintes ne sont pas attestées.")
+    provenance = {
+        "algorithme": "SHA-256",
+        "editplan_sha256": editplan_sha256,
+        "sources_sha256": sources_initiales["sources_sha256"],
+        "sources_absentes": sources_initiales["sources_absentes"],
+        "export_sha256": empreinte_fichier(sortie),
+    }
     res = {"film": str(sortie), "equipe": equipe, "version": version, "duree_s": round(ctx.total / FPS, 2), "plans": len(ctx.plan["video"]),
-           "tranches": str(tranches), "manquants": manquants, "validation": rapport, "secondes": round(time.time() - t0, 1)}
+           "tranches": str(tranches), "manquants": manquants, "validation": rapport, "secondes": round(time.time() - t0, 1),
+           "provenance": provenance}
     print(json.dumps(res, ensure_ascii=False))
     with (T.TRAVAIL / "journal-montage.jsonl").open("a") as fh:
         fh.write(json.dumps(res, ensure_ascii=False) + "\n")
@@ -507,6 +631,6 @@ if __name__ == "__main__":
     o = a.parse_args()
     try:
         construire(o.equipe, o.version, o.brouillon, o.sortie, o.jobs)
-    except (PlansVideoManquants, FileExistsError) as e:
+    except (PlansVideoManquants, FileExistsError, ErreurProvenance) as e:
         print(f"ERREUR : {e}", file=sys.stderr)
         raise SystemExit(2)

@@ -1,4 +1,6 @@
 """Contrôles sans rendu des gardes et correspondances de montage."""
+import hashlib
+import json
 import sys
 import tempfile
 import unittest
@@ -129,9 +131,13 @@ class ExportPreservationTests(unittest.TestCase):
             self.assertEqual(b"existing export", output.read_bytes())
 
     def test_render_keeps_labeled_tranches_and_disables_ffmpeg_overwrite(self):
+        pools = []
+
         class FakePool:
-            def __init__(self, _jobs):
-                pass
+            def __init__(self, _jobs, initializer=None, initargs=()):
+                self.initializer = initializer
+                self.initargs = initargs
+                pools.append(self)
 
             def __enter__(self):
                 return self
@@ -154,7 +160,8 @@ class ExportPreservationTests(unittest.TestCase):
             source = root / "p01-r1.mp4"
             source.write_bytes(b"source")
             output = out_dir / "deepseek-long-brouillon.mp4"
-            ctx = SimpleNamespace(vid={"p01": source}, plan={"video": [{}]}, total=36)
+            ctx = SimpleNamespace(vid={"p01": source}, voix={}, musique=None,
+                                  plan={"video": [{"src": "p01"}], "audio": {}}, annexe={}, total=36)
             commandes = []
 
             def mixer_factice(_ctx, fichier):
@@ -185,6 +192,131 @@ class ExportPreservationTests(unittest.TestCase):
             self.assertIn("-n", commandes[0][0])
             self.assertNotIn("-y", commandes[0][0])
             self.assertTrue(commandes[0][1])
+
+            provenance = result["provenance"]
+            self.assertEqual(monter.empreinte_editplan(ctx.plan), provenance["editplan_sha256"])
+            self.assertEqual(hashlib.sha256(b"source").hexdigest(), provenance["sources_sha256"]["video"]["p01"])
+            self.assertEqual(hashlib.sha256(b"export").hexdigest(), provenance["export_sha256"])
+            journal = json.loads((work / "journal-montage.jsonl").read_text().splitlines()[-1])
+            self.assertEqual(provenance, journal["provenance"])
+            self.assertIs(pools[0].initializer, monter.initialiser_contexte_rendu)
+            self.assertEqual(monter.empreinte_editplan(ctx.plan), monter.empreinte_editplan(pools[0].initargs[-1]["plan"]))
+            self.assertEqual({"p01": source}, pools[0].initargs[-1]["vid"])
+
+    def test_source_change_during_render_blocks_success_record_and_keeps_export(self):
+        class FakePool:
+            def __init__(self, _jobs, initializer=None, initargs=()):
+                self.initializer = initializer
+                self.initargs = initargs
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_exc):
+                return False
+
+            def map(self, _func, tasks):
+                tasks = list(tasks)
+                for task in tasks:
+                    Path(task[-1]).write_bytes(b"tranche")
+                return [None] * len(tasks)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            work = root / "work"
+            work.mkdir()
+            out_dir = root / "montage"
+            out_dir.mkdir()
+            source = root / "p01-r1.mp4"
+            source.write_bytes(b"source")
+            output = out_dir / "film.mp4"
+            ctx = SimpleNamespace(vid={"p01": source}, voix={}, musique=None,
+                                  plan={"video": [{"src": "p01"}], "audio": {}}, annexe={}, total=36)
+
+            def mixer_factice(_ctx, fichier):
+                Path(fichier).write_bytes(b"mix")
+                source.write_bytes(b"changed during render")
+
+            def ffmpeg_factice(commande, check):
+                Path(commande[-1]).write_bytes(b"export")
+                return SimpleNamespace(returncode=0)
+
+            with (
+                patch.object(monter, "Contexte", return_value=ctx),
+                patch.object(monter, "valider_ts", return_value=None),
+                patch.object(monter, "ProcessPoolExecutor", FakePool),
+                patch.object(monter, "mixer", side_effect=mixer_factice),
+                patch.object(monter.subprocess, "run", side_effect=ffmpeg_factice),
+                patch.object(monter.T, "TRAVAIL", work),
+                patch.object(monter.T, "dossier_travail", return_value=out_dir),
+            ):
+                with self.assertRaisesRegex(monter.ErreurProvenance, "a changé pendant le rendu"):
+                    monter.construire("deepseek", "long", brouillon=True, sortie=output, jobs=1)
+
+            self.assertTrue(output.is_file())
+            self.assertFalse((work / "journal-montage.jsonl").exists())
+
+    def test_worker_initializer_uses_the_frozen_context_snapshot(self):
+        snapshot = {"plan": {"version": 1}, "annexe": {}, "vid": {}, "voix": {}, "musique": None}
+        with patch.object(monter, "contexte") as build_context:
+            monter.initialiser_contexte_rendu("gemini", "long", True, snapshot)
+
+        build_context.assert_called_once_with(("gemini", "long", True), instantane=snapshot)
+
+
+class ProvenanceTests(unittest.TestCase):
+    def test_editplan_hash_is_stable_and_changes_with_plan_content(self):
+        first = {"version": 1, "fps": 24, "video": [{"src": "p01", "duree_f": 24}]}
+        reordered = {"video": [{"duree_f": 24, "src": "p01"}], "fps": 24, "version": 1}
+        changed = {"version": 1, "fps": 24, "video": [{"src": "p01", "duree_f": 25}]}
+
+        digest = monter.empreinte_editplan(first)
+        self.assertEqual(digest, monter.empreinte_editplan(reordered))
+        self.assertNotEqual(digest, monter.empreinte_editplan(changed))
+
+    def test_sources_hash_only_references_used_and_deduplicates_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            video = root / "shared.mp4"
+            voice = root / "voice.wav"
+            music = root / "music.wav"
+            unused = root / "unused.mp4"
+            for path, data in ((video, b"video"), (voice, b"voice"), (music, b"music"), (unused, b"unused")):
+                path.write_bytes(data)
+            ctx = SimpleNamespace(
+                plan={
+                    "video": [{"src": "p01"}, {"src": "p02"}, {"src": "p01"}],
+                    "audio": {"voix": [{"src": "v01"}, {"src": "v01"}], "musique": {"src": "m01"}},
+                },
+                vid={"p01": video, "p02": video, "inutilise": unused},
+                voix={"v01": voice},
+                musique=music,
+            )
+            original = monter.empreinte_fichier
+            with patch.object(monter, "empreinte_fichier", wraps=original) as empreinte:
+                resultat = monter.empreintes_sources_utilisees(ctx)
+
+            self.assertEqual(3, empreinte.call_count)
+            self.assertEqual({"p01", "p02"}, set(resultat["sources_sha256"]["video"]))
+            self.assertEqual(resultat["sources_sha256"]["video"]["p01"], resultat["sources_sha256"]["video"]["p02"])
+            self.assertEqual(hashlib.sha256(b"voice").hexdigest(), resultat["sources_sha256"]["voix"]["v01"])
+            self.assertEqual(hashlib.sha256(b"music").hexdigest(), resultat["sources_sha256"]["musique"]["m01"])
+            self.assertEqual([], resultat["sources_absentes"]["voix"])
+
+    def test_source_hash_changes_with_file_contents_and_read_failure_is_not_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source.wav"
+            source.write_bytes(b"first")
+            first = monter.empreinte_fichier(source)
+            source.write_bytes(b"second")
+            self.assertNotEqual(first, monter.empreinte_fichier(source))
+
+            ctx = SimpleNamespace(
+                plan={"video": [], "audio": {"voix": [{"src": "v01"}]}},
+                vid={}, voix={"v01": source / "missing.wav"}, musique=None,
+            )
+            with self.assertRaises(monter.ErreurProvenance):
+                monter.empreintes_sources_utilisees(ctx)
 
 
 if __name__ == "__main__":
