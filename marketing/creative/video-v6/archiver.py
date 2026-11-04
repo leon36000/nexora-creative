@@ -17,7 +17,8 @@ INV = "Bureau/Nexora-Livrables/TOUS-LES-FILMS/INVENTAIRE.csv"
 FFPROBE = str(Path.home() / "nexora-creative-data/engine/ffmpeg/ffmpeg-7.0.2-arm64-static/ffprobe")
 # (motif, sous-dossier, quoi, rôle, modèle)
 GROUPES = [
-    ("montage/*.mp4", "films", "Film V6 « Trois mots. » (Creative)", "master", "montage monter_v6.py"),
+    ("cache-montage/films/*.mp4", "films", "Film V6 « Trois mots. » (Creative) : master 1080p, voix H3 (fr) / ElevenLabs Liam + répliques H3 (en) ; « sans-narration » = répliques, sons et musique", "master", "montage monter_v6.py, plans MiniMax H3 h3-max, musique Lyria 3 Pro"),
+    ("musique/music3-*.flac", "musique", "Bande originale candidate V6 (essai Music3)", "travail", "MiniMax-Music3 (GB10)"),
     ("rushes/*.mp4", "rushes-plans-H3", "Rush du film V6 (parcours réel Creative : boost → image clé → Qualité cinéma)", "rush", "MiniMax H3 h3-max (10Eros-Max × Singularity)"),
     ("rushes/dialogues/*.mp4", "rushes-dialogues-H3", "Plan à réplique du film V6 (voix native H3)", "rush", "MiniMax H3 h3-max"),
     ("voix/h3/*.mp4", "voix-essais-H3", "Essai de voix native H3 (distribution des voix V6)", "travail", "MiniMax H3 h3-max"),

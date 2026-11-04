@@ -59,3 +59,14 @@ Le kit de marque Marketing « Studio Braise » est fictif (poste de développeme
 `monter_v6.py` + `effets_v6.py` + `sfx_v6.py` (moteur de montage écrit par Codex, relu), `archiver.py` (copie sur pc1 et
 INVENTAIRE.csv), `lancer-studio.sh` (studio de la branche avec le LLM de production, clé jamais affichée).
 Données : `~/nexora-creative-data/promo/v6-creative/` (captures, rushes, voix, musique, montage, journaux, tournage.jsonl).
+
+## Livraison (04/11/2026)
+- Films (1080p, H.264, −14 LUFS, crête −1,6 dBTP, 53,8 s) : `~/nexora-creative-data/promo/montage/Nexora-Creative-promo-V6-{16x9,9x16}-{fr,en}.mp4`
+  et `…-V6-sans-narration-…` ; copies sur pc1 : `~/Bureau/Nexora-Livrables/TOUS-LES-FILMS/creative-v6/films/` (+ rushes, voix, musique,
+  essais, détourage ; INVENTAIRE.csv). Sources lourdes sur le disque externe `/media/pc6/Storage/Nexora/rendus/creative-v6/`.
+- Voix : FR = voix native H3 (6 groupes, référence audio) ; EN = ElevenLabs v4 « Liam » énergique (la narration H3 anglaise a été
+  arrêtée après le 1er groupe, la file de la 5090 étant à 20 min par rendu) ; répliques dans l'image en H3 natif dans les deux langues.
+  Refaire avec une autre voix : `V6_VOIX_FR=… V6_VOIX_EN=… python3 montage_v6.py > montage-v6.json` puis `monter_v6.py`.
+- Musique : Lyria 3 Pro n° 3 (124,8 BPM mesurés ; drop, cassure à 30 s, reprise finale). Music3 essayé (graines 61, 62) : moins
+  dynamique (−13 à −20 dB contre −6 à −10), pas de vrai drop ni de silence avant la reprise : gardé comme échantillon.
+- Rendu : `V6_CACHE=… python3 -B monter_v6.py montage-v6.json --format 16x9|9x16 --langue fr|en --master web --sortie …` (≈ 2 min CPU).
