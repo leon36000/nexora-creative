@@ -526,3 +526,7 @@ Validation réelle des sources du dossier DeepSeek, sans rendu : le **court** a 
 ### Finish : aperçu visuel limité
 
 Codex a comparé des recadrages 640×360 de la source et des quatre variantes p7/x264, sur une image par clip : bureau et espace à 5 s, action à 2,5 s. Pas de différence flagrante à l'échelle de l'aperçu, mais une image fixe ne démontre pas une qualité équivalente en mouvement ni un verdict humain. L'essai initial action à 5 s tombait sur une image noire et est conservé aussi. Les quatre planches PNG ont été archivées sur pc1 et vérifiées ; inventaire **3 751 entrées**. Codecs toujours désactivés en attente des autres validations.
+
+### OPSYS DeepSeek : p29
+
+`p29-r1.mp4` rendu en 138,3 s de moteur ; H.264 1344×768, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et vérifiées SHA-256 ; inventaire **3 753 entrées**. La planche montre le représentant devant une maison avec téléphone ; son et mouvement restent à juger. Après file vide et plafond 475 W confirmés, `p30` (plan plus long) a été lancé seul ; résultat en attente.
