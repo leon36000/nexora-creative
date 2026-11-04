@@ -1,0 +1,101 @@
+{
+ "images": 224,
+ "png_alpha": {
+  "dtype": "uint16",
+  "valeurs_distinctes": 11508,
+  "min": 0,
+  "max": 65535,
+  "vraiment_16_bits": true
+ },
+ "png_rgba": {
+  "dtype": "uint16",
+  "canaux": 4
+ },
+ "exr": {
+  "pixels": "float16",
+  "compression": "Compression.ZIP_COMPRESSION",
+  "canaux": [
+   "RGBA"
+  ],
+  "nexora_alpha": "premultiplied",
+  "R_inferieur_ou_egal_A": true,
+  "ecart_max_alpha_png_vs_exr": 0.00025,
+  "ecart_moyen_couleur_premultipliee": 1e-05
+ },
+ "detourage-prores4444.mov": {
+  "codec_name": "prores",
+  "pix_fmt": "yuva444p12le",
+  "tags": {
+   "handler_name": "VideoHandler",
+   "vendor_id": "FFMP",
+   "encoder": "Lavc61.3.100 prores_ks"
+  },
+  "alpha": true
+ },
+ "detourage-alpha.webm": {
+  "codec_name": "vp9",
+  "pix_fmt": "yuv420p",
+  "tags": {
+   "alpha_mode": "1",
+   "ENCODER": "Lavc61.3.100 libvpx-vp9",
+   "DURATION": "00:00:08.960000000"
+  },
+  "alpha": true
+ },
+ "raccords": {
+  "images_de_raccord": [
+   52,
+   53,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   60,
+   61,
+   62,
+   63,
+   104,
+   105,
+   106,
+   107,
+   108,
+   109,
+   110,
+   111,
+   112,
+   113,
+   114,
+   115,
+   156,
+   157,
+   158,
+   159,
+   160,
+   161,
+   162,
+   163,
+   164,
+   165,
+   166,
+   167,
+   208,
+   209,
+   210,
+   211,
+   212,
+   213,
+   214,
+   215,
+   216,
+   217,
+   218,
+   219
+  ],
+  "ecart_moyen_aux_raccords": 0.00578,
+  "ecart_moyen_ailleurs": 0.00366,
+  "ecart_max_aux_raccords": 0.0102,
+  "ecart_max_ailleurs": 0.01043
+ }
+}

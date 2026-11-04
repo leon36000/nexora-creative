@@ -6,6 +6,27 @@ Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'es
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
 
+## Mise à jour du 04/11 : détourage vidéo pro, palier rapide livré, palier pro bloqué (recherche/22)
+
+Page **Détourage pro** (`/detourage`, tuile dans Outils) : importer une vidéo, cliquer le sujet (clics positifs et négatifs sur plusieurs images, masque en direct en **0,15 s**), choisir fond et exports, lancer un travail asynchrone, voir le damier, le matte, le nouveau fond, télécharger. Branche `feat/detourage-video`.
+
+| Brique | État | Preuve |
+|---|---|---|
+| Serveur de détourage GPU (`outils/detourage/`) : SAM 2.1 (clic, suivi, score d'objet), ViTMatte (bords), stabilisation par flux optique, avant-plan estimé | **fait, mesuré** sur la GB10 | 0,67 s par image à 720p, VRAM pic 2,6 Go, RAM pic 4,1 Go (224 images) |
+| Sorties : **alpha PNG 16 bits**, RGBA PNG 16 bits, **EXR** demi ZIP prémultiplié linéaire, ProRes 4444, WebM alpha, matte, composite sur couleur / flou / image / vidéo | **faites, relues par des lecteurs indépendants** (OpenEXR officielle, OpenCV, ffprobe) | 11 508 valeurs d'alpha distinctes, R ≤ A, `alpha_mode=1` ; `captures-v3/detourage-verification-sorties.json` |
+| Vidéos longues : segments de 96 images, recouvrement 12, rampes qui somment à 1, graine = masque du segment voisin | **fait, mesuré** | raccords : écart temporel 0,0058 contre 0,0037 ailleurs, maximum identique |
+| Occlusion (score d'objet), **coupures de plan** (le suivi ne les traverse jamais, plan sans clic signalé), reprise (clés de contenu), annulation | **faits, éprouvés** | annulation à 38 s puis reprise : suivi 37,8 s au lieu de 61,7 s (2 segments sur 5 déjà faits, réutilisés) ; planches `captures-v3/detourage-5-…` |
+| Tâches serveur : file par organisation, progression, annulation, reprise, nettoyage (TTL 48 h, suppression), devis en crédits, isolation | **faits, testés** | 21 tests TypeScript dont routes avec moteur simulé ; 22 tests Python |
+| Moteur déclaré dans la configuration des moteurs GPU (`NEXORA_DETOURAGE_URL` ou `detourageUrl`, recettes `detourage-rapide` / `detourage-pro`) | **fait** | `server/engine.ts` |
+| Palier **pro** (LTX-2.5 22B + IC-LoRA Alpha-Gen) | **bloqué** : LTX-2.5, le LoRA et SAM 3 sont derrière un formulaire d'accès (401) ; rien accepté, aucun poids téléchargé | plan de comparaison INT8 / GGUF prêt, non exécuté (recherche/22 §6) |
+| Pc3 (RTX 5080) | **non touché** : pas d'accès SSH depuis pc6 | accès à fournir : `outils/detourage/README.md` |
+| Moteur sur la RTX 5090 (pc1) et les GPU de pc5 | **non fait** (pas de pip ni de ffmpeg sur pc1 ; hors budget) | même code, mêmes étapes d'installation |
+| Intégration dans la timeline de Mode Studio | **non faite** : on exporte ProRes 4444 / WebM alpha à importer à la main | lien « Ouvrir Mode Studio » |
+
+**Qualité honnête : 7/10 sur la fourrure et les bords nets** (lapin de *Big Buck Bunny*, CC-BY : oreilles, pelage sur fond clair, gros plan flou), **non évaluée sur cheveux filmés, verre, fumée, personnes qui se croisent** : aucune vidéo réelle avec vérité terrain. Scintillement des bords réduit de 26 à 35 % par la stabilisation.
+
+**Licence du dépôt de référence** : PolyForm Noncommercial jusqu'au 27/10/2026, puis GPL-3.0-or-later (licence commerciale à part pour du code fermé) ; aucun de ses fichiers n'a été copié, embarqué ou exécuté.
+
 ## Mise à jour du 03/11 (nuit) : vague 2, le mode Marketing (kit de marque, imprimés en PDF fond perdu)
 
 Page **Marketing** dans l'application (`/marketing`) : on saisit sa marque une fois (nom, logo SVG/PNG avec contrôles, couleurs avec contraste AA, polices libres, ton, coordonnées), puis **une phrase → 3 propositions → on choisit → on retouche → PDF imprimeur / PDF fond perdu / PNG / SVG**. Le kit est aussi donné au Producteur (ton, couleurs, polices, coordonnées) pour que vidéos et textes restent dans la marque.
