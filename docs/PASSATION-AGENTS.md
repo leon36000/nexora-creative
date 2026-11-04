@@ -578,3 +578,7 @@ Les 32 plans du montage long DeepSeek, ses voix référencées et sa musique son
 Contrôle des fichiers référencés dans les plans : DeepSeek, Gemini, Muse et Opus disposent chacun des sources vidéo, voix référencées et musique pour leurs versions longues et courtes. Pour le vertical, Gemini et Opus ont leurs sources référencées ; DeepSeek manque toujours `v01` à `v06`. Le champ `montage.vertical` de Muse est `null` et la construction de contexte lève `AttributeError` ; aucun vertical Muse utilisable n’est démontré. La présence de fichiers ne prouve ni leur qualité ni une validation des quatre films.
 
 Contrôle GitLab renouvelé : pipeline 2847 toujours en attente ; Garage toujours non prêt, 36 redémarrages. OAuth personnel GitLab-PC4 encore déconnecté. Aucune modification de production.
+
+### OPSYS DeepSeek : reprise verticale
+
+Les six plans `v01` à `v06` sont bien définis dans le dossier DeepSeek en 9:16, avec références, voix éventuelles et premières images requises présentes au contrôle. Ils sont distincts des plans horizontaux. Après contrôle de file GPU vide et limite configurée 475 W (25,24 W au repos), `v01` a été lancé seul ; résultat, décodage et archive restent à vérifier. Le brouillon long CPU reste en cours.

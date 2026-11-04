@@ -423,3 +423,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS DeepSeek : p32 décodé, archivé avec sa planche et vérifié SHA ; temps de calcul et code de sortie indisponibles. Sources du long et EditPlan vérifiés, brouillon long lancé sur deux cœurs ; résultat en attente.
 
 - OPSYS : sources longues et courtes référencées présentes pour les quatre équipes ; vertical DeepSeek manque six plans, vertical Muse `null` (contexte en erreur). Présence ne prouve pas qualité. GitLab : pipeline 2847 toujours en attente, Garage non prêt (36 redémarrages), OAuth personnel encore déconnecté.
+
+- OPSYS : les six plans verticaux DeepSeek sont définis avec leurs références disponibles ; v01 lancé seul après contrôle file vide et puissance configurée. Résultat et archive en attente.
