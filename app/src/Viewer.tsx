@@ -215,9 +215,7 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
   // Secondary transforms. On a video take they sit under "More..." so the grid stays short.
   const done = take.status === 'done';
   const more: MoreItem[] = [
-    !image && done && { label: 'Restyle', icon: 'palette', title: 'Same motion, a new look', run: () => { onClose(); navigate(`/mirror?mode=restyle&take=${take.id}`); } },
     done && s.app !== 'cutout' && { label: 'Remove background', icon: 'cutout', run: act(async () => { onClose(); await removeBackground(take); }) },
-    { label: 'Add effect', icon: 'sparkle', run: act(() => addEffect(take)) },
     !image && done && s.app !== 'hdr' && { label: 'Finish in HDR', icon: 'sparkle', title: 'ACEScg EXR sequence and an HLG master, from LTX-2.5 SDR to HDR', run: act(() => finishHdr(take)) },
     !image && done && { label: 'Improve the seam', icon: 'loop', title: 'Measure the loop point and try to lower it: trim, regenerate the wrap, or a new seed. Each try is a new take; the original is kept', run: act(() => fixSeam(take)) },
   ].filter((m): m is Exclude<typeof m, false> => !!m);
@@ -253,16 +251,13 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
           <div className="viewer-actions">
             <a className="btn sm accent" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download GLB</a>
             <a className="btn sm" href={`${turntableUrl(take.id)}`} download={`take_${take.id}_turntable.mp4`}><Icon name="video" size={14} />Turntable</a>
-            {take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/stage?prop=${take.id}`); }} title="Open Stage with this model placed in the set as a prop"><Icon name="camera" size={14} />Use in Stage</button>}
             {s.sourceTake && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/object?take=${s.sourceTake}`); }}><Icon name="image" size={14} />Source still</button>}
             <button type="button" className="btn sm" onClick={act(() => recreate(take))}><Icon name="redo" size={14} />Recreate</button>
             <button type="button" className="btn sm danger" onClick={act(async () => { await remove(take); onClose(); })}><Icon name="trash" size={14} />Delete</button>
           </div>
         ) : (
         <div className="viewer-actions">
-          {s.app === 'stage' && s.scene && <button type="button" className="btn sm accent" onClick={() => { onClose(); navigate(`/stage?take=${take.id}`); }} title="Load this take's set, camera and look back into Stage"><Icon name="camera" size={14} />Open in Stage</button>}
           {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`${ROUTE_3D}?take=${take.id}`); }} title="A textured 3D model of the subject, from this still"><Icon name="cube" size={14} />Make 3D</button>}
-          {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/stage?look=${take.id}`); }} title="Open Stage with this still as the look frame, cropped to the shot if it needs to be"><Icon name="camera" size={14} />Use as Stage look frame</button>}
           {image && <button type="button" className={`btn sm ${s.app === 'stage' ? '' : 'accent'}`} onClick={act(() => animate(take))}><Icon name="video" size={14} />Animate</button>}
           {image && <button type="button" className="btn sm" onClick={act(() => animate(take, true))}><Icon name="loop" size={14} />Make a loop</button>}
           {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/edit?take=${take.id}`); }} title="Edit, new angle, relight, expand and more"><Icon name="wand" size={14} />Edit...</button>}
