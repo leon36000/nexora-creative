@@ -960,3 +960,7 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 ### Reprise Codex — revue complète des commits Director, 4 novembre 2026
 
 - Revue statique Terra de `35e680a` à `adc14a8` : quatre risques P2 à reproduire et corriger avant sortie de la MR !42. Certaines demandes `an anime scene/battle` peuvent déclencher la recette photo; le repli peut retirer des mots demandés entre guillemets; un checkpoint FastH3 avec photo est rapporté/estimé sous `h3-max`; le garde spatial peut exiger un vaisseau pour un astronaute seul sur la Lune. Le repli après échec LLM ne garantit pas les contrôles sémantiques live-action/spatiaux. Pas de mesure GPU/LLM, fréquence ou coût réel déduits. Tests et corrections isolés en cours; aucune fusion ni déploiement.
+
+### Reprise Codex — limite de l'adaptateur H3 Muse, 4 novembre 2026
+
+- Lecture de code : la chaîne H3 ne consomme pas directement `comfy_filename_prefix`; un adaptateur pourrait fixer `SaveVideo.inputs.filename_prefix` dans le graphe et téléverser les octets vérifiés avec `overwrite=false`. Toutefois, le serveur d'upload vérifie l'existence puis ouvre en écriture sans réservation atomique, et `SaveVideo` choisit son compteur avant écriture non exclusive : l'absence d'écrasement distant n'est pas garantie en cas de collision ou course. UUID et SHA côté client réduisent/mesurent certains risques mais ne prouvent pas la réception ni l'unicité serveur. Prototype préservé sur Storage, non testé et non exécuté; aucune API/GPU. La génération réelle attend un mécanisme sûr ou des garanties démontrées.
