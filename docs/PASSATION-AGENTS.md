@@ -915,3 +915,9 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 
 - La revue indépendante du lanceur p07 a identifié des risques avant tout usage : un même identifiant peut créer le même préfixe distant depuis deux racines; la prise en compte de ce préfixe par H3 n'est pas démontrée; les références et voix peuvent changer après calcul de leur empreinte; le WAV n'est pas prouvé conforme au texte de révision; certaines interruptions ou pannes peuvent laisser statut et fichier partiels. La création exclusive protège uniquement le répertoire et la sortie locaux sous le contrat du callback. Aucune génération/API n'a été lancée.
 - Terra prépare des garde-fous locaux dans une copie distincte sur Storage, tests et temporaires sur Storage; sans promettre le comportement d'un service non testé ni la correspondance du WAV. Espace racine toujours critique; pas de tests lourds.
+
+### Reprise Codex — reprise Muse protégée, 4 novembre 2026
+
+- Copie revue du lanceur `Nexora/travail/films-reprise-codex/muse-p07-r2-lanceur-revue-20261104/` sur Storage : préfixe UUID dans la spec, graine de révision explicite, copies locales des références et voix contrôlées, journalisation améliorée. 12 tests simulés repassés indépendamment avec `TMPDIR` sur Storage. Aucun GPU, secret ou réseau utilisé.
+- Limites : `chmod 0400` n'assure pas l'immuabilité contre le même utilisateur; l'adaptateur H3 n'existe pas encore et ne démontre ni respect du préfixe ni octets transmis. WAV non validé contre le texte, panne/plein disque/arrêt brutal non couverts. Ceci reste expérimental, sans rendu ni intégration.
+- Director : l'agent a inspecté le graphe des six tests et le code de configuration Vite. Une configuration autonome `envFile:false`, `envDir:false`, environnement épuré et stockage des logs/cache sur Storage est préparée; aucune relance avant sa mise en place. L'incident de chargement possible précédent demeure documenté.
