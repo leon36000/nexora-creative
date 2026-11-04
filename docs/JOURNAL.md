@@ -350,3 +350,6 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Revue documentaire commitée localement `80f2dde` avec trailer Codex ; aucun push. Sauvegarde GitLab complète et restauration non démontrées.
 
 - V7 : dossier DeepSeek existant importé avec textes et script, validation OK avec deux avertissements sur les mentions ; commit local `3634d83`, aucun rendu ni push. V100 mesurée à 240/300 W.
+
+- Mesh : synthèse hors Git sur Storage, bancs et limites conservés. Site/Creative répondent HTTP 200 depuis pc5, WorkStudio 307 ; 1 705 entrées dans l'inventaire pc1, couverture infographies non établie.
+- Director : 80 tests ciblés passent ; règle live-action globale à corriger pour respecter les autres styles demandés. Finish : 14 tests TypeScript passent, Python bloqué par FastAPI absent localement ; aucune modification de code ou production.

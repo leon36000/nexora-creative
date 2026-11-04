@@ -411,3 +411,11 @@ Dernier complément consulté : L21049, autre assistant à11:17:23UTC ; notifica
 Le dossier V7 DeepSeek préexistant (« La doublure » : 23 images clés, 23 plans, 3 voix, 3 musiques) a été copié depuis les données persistantes, avec `DOSSIER.md`, `dossier.json`, `fabrique.py` et `textes.json`, dans le worktree film ; les originaux sont conservés. Validation `python3 -B .../chaine/v7.py valider deepseek` : OK, deux avertissements de mentions trop longues en FR et EN. Commit local **3634d83** sur `feat/film-v6-creative` ; aucun push à cause du 502, pas de rendu ni d'acceptation humaine. La file GPU et la puissance doivent être contrôlées avant toute reprise de génération.
 
 V100 : plafond mesuré 240/300 W et utilisation 0 %.
+
+### Contrôles complémentaires — 06 h 31 Montréal
+
+- Site VM201 HTTP 200, Creative VM202 port 3162 HTTP 200, WorkStudio VM203 HTTP 307 depuis pc5 ; pas de parcours connecté ni test visuel. Sur pc1, `INVENTAIRE.csv` contient 1 705 entrées hors en-tête, et 105 MP4 sous `opsys-ultime` ; couverture des infographies et vérification des sommes restent à faire. Stockage GitLab `/srv/gitlab-data` : 1,8 T disponibles affichés ; cela ne prouve pas une sauvegarde complète. PostgreSQL totalisait 5 redémarrages et Garage 22 au deuxième relevé.
+- Mesh : synthèse des recherches et bancs existants, 10 cas d'usage et prochaines preuves dans `/media/pc6/Storage/Nexora/travail/relief-29/SYNTHESE-REPRISE-CODEX.md` (hors Git, aucun nouveau banc). Le renommage et rapport final restent à intégrer et vérifier.
+- Director : six fichiers de tests ciblés, **80/80 passent** ; aucun changement au worktree. Toutefois la règle non commitée impose live-action à toutes les demandes, même si le client veut un style d'animation : incompatibilité potentielle avec la polyvalence du produit, à corriger avant intégration ; tests verts ne prouvent ni ce cas ni qualité visuelle. Banc 12 briefs réels non exécuté.
+- Finish : 14/14 tests TypeScript ciblés passent ; test Python non exécuté car FastAPI absent des deux interpréteurs locaux essayés. Aucune mesure nouvelle NVENC, aucun service ni production modifié ; le rapport 30 reste à finir.
+- pc1 : sudo non interactif indisponible ; CPU au plafond complet au contrôle. Ne pas lancer en bloc le script regroupé pendant le 502 : il retenterait aussi OAuth et pc6, et n'arrête pas ses étapes sur erreur.
