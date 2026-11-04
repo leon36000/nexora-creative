@@ -28,18 +28,39 @@ def main():
     groupes = defaultdict(list)
     for p in banc["prises"]:
         groupes[p["moteur_court"]].append(p)
+    b2 = TRAVAIL / "casting" / "banc2.json"
+    if b2.exists():  # manche 2 (04/11) : moteurs OpenRouter génériques « or:<modèle>|voice=…|ref=… »
+        for p in json.loads(b2.read_text())["prises"]:
+            groupes[p["moteur_court"]].append(p)
     pal, lignes = {}, []
     for mc, ps in sorted(groupes.items()):
         fam, _, v = mc.partition(":")
         genre, descr = DESCR.get(v, ("?", v))
+        if fam == "or":
+            champs = dict(c.partition("=")[::2] for c in v.split("|")[1:])
+            modele = v.split("|")[0]
+            court = {"mistralai/voxtral-mini-tts-3-0": "voxtral3", "mistralai/voxtral-mini-tts-2603": "voxtral2603", "fish-audio/s2.1-pro": "fish21",
+                     "minimax/speech-2.8-hd": "minimax28", "microsoft/mai-voice-2.1": "mai21"}.get(modele, modele.split("/")[-1])
+            nomv = champs.get("voice") or champs.get("ref") or "defaut"
+            ident = f"{court}-{nomv.replace('Neural', '').replace('voice_', 'v').lower()}"
+            fem = any(x in nomv.lower() for x in ("sylvie", "denise", "female", "marie", "jeanne", "amelie", "v592", "v3137", "v589", "v3141", "voice_"))
+            genre = "femme" if fem and "frederic" not in nomv and "JeanNeural" not in nomv else "homme"
+            descr = {"voxtral3": "Mistral Voxtral TTS 3, voix préréglée française", "voxtral2603": "Mistral Voxtral Mini TTS (2603), voix préréglée",
+                     "fish21": f"Fish S2.1 Pro, clonage de {nomv}", "minimax28": f"MiniMax Speech 2.8 HD, voix {nomv}",
+                     "mai21": f"MAI-Voice-2.1 (Microsoft), voix {nomv}" + (" — canadienne-française" if "fr-CA" in nomv else "")}.get(court, mc)
+            MOTEUR.setdefault("or", "OpenRouter (manche 2)")
+            fam_aff = {"voxtral3": "Mistral Voxtral 3", "voxtral2603": "Mistral Voxtral 2603", "fish21": "Fish S2.1 Pro", "minimax28": "MiniMax Speech 2.8 HD",
+                       "mai21": "MAI-Voice-2.1"}.get(court, court)
         notes = defaultdict(list)
         for p in ps:
             for k, x in ((p.get("oreille") or {}).get("moyennes") or {}).items():
                 notes[k].append(x)
         moy = {k: round(sum(x) / len(x), 1) for k, x in notes.items()}
-        ident = f"{fam}-{v}"
+        if fam != "or":
+            ident = f"{fam}-{v}"
+            fam_aff = MOTEUR[fam]
         moteur = f"eleven:{VOIX_ID[v]}" if fam == "eleven" else mc
-        pal[ident] = {"moteur": moteur, "famille": MOTEUR[fam], "genre": genre, "description": descr,
+        pal[ident] = {"moteur": moteur, "famille": fam_aff, "genre": genre, "description": descr, "manche": 2 if fam == "or" else 1,
                       "local": fam == "qwen3tts", "notes": moy,
                       "emr_moyen": round(sum(p.get("emr", 0) for p in ps) / len(ps), 3),
                       "cps_moyen": round(sum(p.get("cps", 0) for p in ps) / len(ps), 1),
@@ -50,7 +71,11 @@ def main():
         lignes.append(ident)
     (RACINE / "casting").mkdir(exist_ok=True)
     (RACINE / "casting" / "palette.json").write_text(json.dumps({"voix": pal}, ensure_ascii=False, indent=1))
-    t = ["# Palette commune de voix (banc du 03/11/2026, une seule ronde, mêmes répliques pour tous)", "",
+    t = ["# Palette commune de voix (manche 1 du 03/11 et manche 2 du 04/11, mêmes répliques pour tous)", "",
+         "Manche 2 (consigne du fondateur du 04/11) : Mistral Voxtral TTS 3 et 2603 (voix préréglées françaises : OpenRouter refuse le clonage",
+         "pour ces modèles), MiniMax Speech 2.8 HD, MAI-Voice-2.1 (voix canadiennes-françaises fr-CA Sylvie, Antoine, Thierry, Jean) et Fish S2.1 Pro",
+         "(clonage). Aucune ne dépasse les meilleures de la manche 1 à l'oreille de machine ; les voix fr-CA de MAI sont québécoises mais plates.",
+         "Attention : les deux manches ont été jugées à quelques heures d'écart ; l'écart de 1 point entre manches n'est pas significatif.", "",
          "Chaque équipe choisit par rôle une **voix de la palette** (colonne `id`), écrit le texte, la direction de jeu et la vitesse.",
          "Notes sur 10 de l'**oreille de machine** (Gemini 4 Argon, audio, deux passes, sévère : 8 = diffusable à la télé au Québec) ;",
          "ce n'est pas une écoute humaine. EMR = erreur de mots Whisper ; c/s = caractères par seconde (débit) ; relief = écart-type de",

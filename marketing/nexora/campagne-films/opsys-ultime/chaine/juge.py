@@ -90,6 +90,7 @@ def reel(eq, plans=None):
         for nom, r in ex.map(un, fichiers):
             res[nom] = r
             print(nom, r["moyennes"], flush=True)
+            sortie.write_text(json.dumps(res, ensure_ascii=False, indent=1))
     sortie.write_text(json.dumps(res, ensure_ascii=False, indent=1))
     return res
 

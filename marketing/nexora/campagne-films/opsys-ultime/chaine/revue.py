@@ -135,10 +135,22 @@ def main():
          f"Temps GPU (5090) : {gpu / 60:.1f} min.", "",
          "## Plans tournés (planches : " + ", ".join(n.name for n in noms) + ")", "",
          "Trois images par plan (12 %, 50 %, 88 % de la durée). Défauts relevés à l'œil par le producteur :", "",
-         "| prise | durée | GPU | ce qu'on voit (producteur) | défauts relevés |", "|---|---|---|---|---|"]
+         "Colonne « réel » : juge de machine « réel contre synthèse » (Gemini 4 Argon, 3 images, deux passes) : 10 = indiscernable d'une "
+         "vraie prise de vues, 0 = image de synthèse évidente ; « jeu » = look jeu vidéo (10 = très). Description : celle du producteur si "
+         "elle existe, sinon celle du juge (marquée « juge : »).", "",
+         "| prise | durée | GPU | réel | jeu | ce qu'on voit | défauts relevés |", "|---|---|---|---|---|---|---|"]
+    jr = {}
+    jrf = T.TRAVAIL / eq / "juge-reel.json"
+    if jrf.exists():
+        jr = json.loads(jrf.read_text())
     for nom, r in sorted(journal.items()):
-        t.append(f"| {nom} | {(r.get('images') or 0) / 24:.1f} s | {r.get('secondesMoteur') or '–'} s | {descr.get(nom, '')} | "
-                 f"{defauts.get(nom, r.get('erreur', '') or 'aucun relevé')} |")
+        j = jr.get(nom, {})
+        mo = j.get("moyennes", {})
+        p0 = next((p for p in j.get("passes", []) if "resume" in p), {})
+        d_ = descr.get(nom) or (("juge : " + p0.get("resume", "")) if p0 else "")
+        dj = ", ".join(p0.get("defauts", [])[:4]) if p0 else ""
+        t.append(f"| {nom} | {(r.get('images') or 0) / 24:.1f} s | {r.get('secondesMoteur') or '–'} s | {mo.get('reel', '–')} | {mo.get('look_jeu_video', '–')} | "
+                 f"{d_} | {defauts.get(nom, '') or dj or (r.get('erreur', '') or 'aucun relevé')} |")
     t += ["", "## Voix", "", "Oreille de machine (Gemini 4 Argon, sur 10 : accent québécois, énergie, naturel, clarté) ; EMR = erreur de mots Whisper.", "",
           "| réplique | prise | durée | c/s | relief | EMR | oreille | transcription | avis |", "|---|---|---|---|---|---|---|---|---|"]
     for j in sorted((T.TRAVAIL / eq / "voix").glob("*.json")):
@@ -161,6 +173,15 @@ def main():
                 r = json.loads(l)
                 if r.get("equipe") == eq:
                     t.append(f"- {Path(r['film']).name} : {r['duree_s']} s, {r['plans']} plans montés, plans manquants : {r.get('manquants') or 'aucun'}")
+        for jf in sorted((T.TRAVAIL / eq / "montage").glob("*.juge.json")):
+            if "essai-musique" in jf.name:
+                continue
+            jj = json.loads(jf.read_text())
+            t += ["", f"### Juge audio-vidéo sur `{jf.name[:-10]}` (Gemini 4 Argon, film mixé, deux passes)", "",
+                  "Notes : " + ", ".join(f"{k} {v}" for k, v in jj.get("moyennes", {}).items())]
+            for p in jj.get("passes", [])[:1]:
+                t += ["Forces : " + " ; ".join(p.get("forces", [])), "Faiblesses : " + " ; ".join(p.get("faiblesses", [])),
+                      "Moments plats : " + " ; ".join(p.get("moments_plats", []))]
         rp = T.TRAVAIL / eq / "montage" / "rapport.md"
         if rp.exists():
             t += ["", rp.read_text()]

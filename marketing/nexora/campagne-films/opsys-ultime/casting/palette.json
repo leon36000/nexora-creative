@@ -5,6 +5,7 @@
    "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
    "genre": "homme",
    "description": "Adam, voix québécoise d'âge moyen, « chaleureuse et amicale »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 8.2,
@@ -33,6 +34,7 @@
    "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
    "genre": "femme",
    "description": "Amélie, voix québécoise, « jeune, assurée, amicale »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 4.5,
@@ -59,6 +61,7 @@
    "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
    "genre": "homme",
    "description": "Frédéric, voix québécoise d'âge moyen, « professionnelle et assurée » (bibliothèque ElevenLabs)",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 9.0,
@@ -85,6 +88,7 @@
    "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
    "genre": "femme",
    "description": "Jeanne Mance, voix québécoise, « charmante, claire et jeune »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 6.7,
@@ -114,6 +118,7 @@
    "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
    "genre": "femme",
    "description": "Marie Line, voix québécoise d'âge moyen, « énergique et claire »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 7.0,
@@ -140,6 +145,7 @@
    "famille": "Fish Audio Drama 3 (clonage de la voix ElevenLabs, OpenRouter ; même modèle en local GB10/5090)",
    "genre": "homme",
    "description": "Thomas, jeune voix « claire, chaleureuse, professionnelle » (accent peu québécois à l'oreille de machine)",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 2.8,
@@ -168,6 +174,7 @@
    "famille": "ElevenLabs v4 (OpenRouter)",
    "genre": "homme",
    "description": "Adam, voix québécoise d'âge moyen, « chaleureuse et amicale »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 6.5,
@@ -197,6 +204,7 @@
    "famille": "ElevenLabs v4 (OpenRouter)",
    "genre": "homme",
    "description": "Alexandre Boutin, voix des films V5 (jugée « beaucoup trop smooth » par le fondateur)",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 4.5,
@@ -223,6 +231,7 @@
    "famille": "ElevenLabs v4 (OpenRouter)",
    "genre": "femme",
    "description": "Amélie, voix québécoise, « jeune, assurée, amicale »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 8.5,
@@ -251,6 +260,7 @@
    "famille": "ElevenLabs v4 (OpenRouter)",
    "genre": "homme",
    "description": "Frédéric, voix québécoise d'âge moyen, « professionnelle et assurée » (bibliothèque ElevenLabs)",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 8.3,
@@ -280,6 +290,7 @@
    "famille": "ElevenLabs v4 (OpenRouter)",
    "genre": "femme",
    "description": "Jeanne Mance, voix québécoise, « charmante, claire et jeune »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 9.0,
@@ -308,6 +319,7 @@
    "famille": "ElevenLabs v4 (OpenRouter)",
    "genre": "femme",
    "description": "Marie Line, voix québécoise d'âge moyen, « énergique et claire »",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 8.0,
@@ -334,6 +346,7 @@
    "famille": "ElevenLabs v4 (OpenRouter)",
    "genre": "homme",
    "description": "Thomas, jeune voix « claire, chaleureuse, professionnelle » (accent peu québécois à l'oreille de machine)",
+   "manche": 1,
    "local": false,
    "notes": {
     "accent_quebecois": 4.2,
@@ -358,11 +371,448 @@
     "Bonne diction et ton professionnel, mais l'accent est purement européen, ce qui est totalement inutilisable pour un chef de chantier québécois."
    ]
   },
+  "fish21-amelie": {
+   "moteur": "or:fish-audio/s2.1-pro|ref=amelie|instr",
+   "famille": "Fish S2.1 Pro",
+   "genre": "femme",
+   "description": "Fish S2.1 Pro, clonage de amelie",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 4.5,
+    "energie": 5.5,
+    "naturel": 6.0,
+    "clarte": 6.5,
+    "adequation_role": 5.5
+   },
+   "emr_moyen": 0.043,
+   "cps_moyen": 17.4,
+   "relief_demitons": 3.89,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "comptable": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/comptable-fish-audio_s2.1-pro_ref-amelie_instr-p1.wav"
+   },
+   "commentaires": [
+    "Bonne énergie et diction claire, mais l'accent est français standard plutôt que québécois et il y a une erreur d'accord à la lecture.",
+    "Bonne intonation générale avec une touche québécoise crédible, mais des erreurs de liaison et de grammaire nuisent au professionnalisme attendu pour ce rôle."
+   ]
+  },
+  "fish21-frederic": {
+   "moteur": "or:fish-audio/s2.1-pro|ref=frederic|instr",
+   "famille": "Fish S2.1 Pro",
+   "genre": "homme",
+   "description": "Fish S2.1 Pro, clonage de frederic",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 6.5,
+    "energie": 6.0,
+    "naturel": 5.5,
+    "clarte": 7.0,
+    "adequation_role": 6.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 17.7,
+   "relief_demitons": 4.26,
+   "direction": "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, accent québécois naturel.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/narrateur-fish-audio_s2.1-pro_ref-frederic_instr-p1.wav"
+   },
+   "commentaires": [
+    "L'accent québécois est reconnaissable avec un bon dynamisme, mais le timbre présente des artefacts métalliques qui trahissent une voix synthétique.",
+    "L'accent québécois est bien présent et le texte est respecté, bien que la livraison manque légèrement de punch publicitaire."
+   ]
+  },
+  "fish21-jeannemance": {
+   "moteur": "or:fish-audio/s2.1-pro|ref=jeannemance|instr",
+   "famille": "Fish S2.1 Pro",
+   "genre": "femme",
+   "description": "Fish S2.1 Pro, clonage de jeannemance",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 7.0,
+    "energie": 6.0,
+    "naturel": 6.5,
+    "clarte": 7.0,
+    "adequation_role": 6.5
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 22.3,
+   "relief_demitons": 3.24,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-fish-audio_s2.1-pro_ref-jeannemance_instr-p1.wav"
+   },
+   "commentaires": [
+    "Bonne prestation avec un accent québécois crédible et une diction claire pour le rôle.",
+    "L'accent québécois est crédible et la diction est claire, bien que le ton reste légèrement synthétique et manque un peu de dynamisme."
+   ]
+  },
+  "fish21-marieline": {
+   "moteur": "or:fish-audio/s2.1-pro|ref=marieline|instr",
+   "famille": "Fish S2.1 Pro",
+   "genre": "femme",
+   "description": "Fish S2.1 Pro, clonage de marieline",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 4.5,
+    "energie": 5.0,
+    "naturel": 6.0,
+    "clarte": 7.0,
+    "adequation_role": 5.5
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 20.5,
+   "relief_demitons": 3.54,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-fish-audio_s2.1-pro_ref-marieline_instr-p1.wav"
+   },
+   "commentaires": [
+    "Bonne diction générale et accent crédible, bien que le ton manque un peu de dynamisme.",
+    "L'articulation est nette et le ton professionnel convient au rôle, mais l'accent sonne beaucoup trop français standard pour une diffusion télévisée québécoise."
+   ]
+  },
+  "mai21-fr-ca-antoine": {
+   "moteur": "or:microsoft/mai-voice-2.1|voice=fr-CA-AntoineNeural",
+   "famille": "MAI-Voice-2.1",
+   "genre": "homme",
+   "description": "MAI-Voice-2.1 (Microsoft), voix fr-CA-AntoineNeural — canadienne-française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 6.0,
+    "energie": 4.5,
+    "naturel": 4.5,
+    "clarte": 7.0,
+    "adequation_role": 5.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 12.8,
+   "relief_demitons": 5.81,
+   "direction": "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, accent québécois naturel.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/narrateur-microsoft_mai-voice-2.1_voice-fr-CA-AntoineNeural-p1.wav"
+   },
+   "commentaires": [
+    "L'articulation est claire mais le ton synthétique et le manque de dynamisme limitent l'impact publicitaire.",
+    "L'articulation est très claire avec un accent québécois standard, mais le ton demeure trop synthétique et manque d'énergie pour une publicité télévisée."
+   ]
+  },
+  "mai21-fr-ca-jean": {
+   "moteur": "or:microsoft/mai-voice-2.1|voice=fr-CA-JeanNeural",
+   "famille": "MAI-Voice-2.1",
+   "genre": "homme",
+   "description": "MAI-Voice-2.1 (Microsoft), voix fr-CA-JeanNeural — canadienne-française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 6.5,
+    "energie": 4.8,
+    "naturel": 4.8,
+    "clarte": 7.0,
+    "adequation_role": 5.5
+   },
+   "emr_moyen": 0.042,
+   "cps_moyen": 12.2,
+   "relief_demitons": 5.15,
+   "direction": "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, accent québécois naturel.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/narrateur-microsoft_mai-voice-2.1_voice-fr-CA-JeanNeural-p1.wav",
+    "administrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/administrateur-microsoft_mai-voice-2.1_voice-fr-CA-JeanNeural-p1.wav"
+   },
+   "commentaires": [
+    "L'accent et l'articulation sont adéquats, mais l'intonation reste légèrement synthétique et manque d'énergie publicitaire.",
+    "L'accent et l'articulation sont justes, mais l'intonation manque de naturel et de dynamisme pour une publicité télévisée.",
+    "L'accent est globalement adéquat mais la prosodie demeure trop robotique et manque de dynamisme pour la télévision."
+   ]
+  },
+  "mai21-fr-ca-sylvie": {
+   "moteur": "or:microsoft/mai-voice-2.1|voice=fr-CA-SylvieNeural",
+   "famille": "MAI-Voice-2.1",
+   "genre": "femme",
+   "description": "MAI-Voice-2.1 (Microsoft), voix fr-CA-SylvieNeural — canadienne-française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 6.0,
+    "energie": 4.0,
+    "naturel": 4.8,
+    "clarte": 7.0,
+    "adequation_role": 5.8
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 19.8,
+   "relief_demitons": 2.83,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-microsoft_mai-voice-2.1_voice-fr-CA-SylvieNeural-p1.wav",
+    "comptable": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/comptable-microsoft_mai-voice-2.1_voice-fr-CA-SylvieNeural-p1.wav"
+   },
+   "commentaires": [
+    "L'articulation est claire et l'accent est adéquat, mais l'intonation demeure trop lisse et robotique pour une publicité télévisée.",
+    "L'accent québécois est présent et la diction est claire, mais l'intonation demeure monotone et synthétique.",
+    "La voix possède une couleur québécoise adéquate et une bonne clarté, mais le ton demeure trop synthétique et monotone pour une diffusion télévisée."
+   ]
+  },
+  "mai21-fr-ca-thierry": {
+   "moteur": "or:microsoft/mai-voice-2.1|voice=fr-CA-ThierryNeural",
+   "famille": "MAI-Voice-2.1",
+   "genre": "homme",
+   "description": "MAI-Voice-2.1 (Microsoft), voix fr-CA-ThierryNeural — canadienne-française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 6.0,
+    "energie": 4.0,
+    "naturel": 4.0,
+    "clarte": 7.0,
+    "adequation_role": 5.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 12.7,
+   "relief_demitons": 6.08,
+   "direction": "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, accent québécois naturel.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/narrateur-microsoft_mai-voice-2.1_voice-fr-CA-ThierryNeural-p1.wav"
+   },
+   "commentaires": [
+    "Intonation trop synthétique et manque de dynamisme pour une publicité.",
+    "L'accent canadien est perceptible mais la livraison manque de dynamisme et trahit une origine synthétique."
+   ]
+  },
+  "mai21-fr-fr-denise": {
+   "moteur": "or:microsoft/mai-voice-2.1|voice=fr-FR-DeniseNeural",
+   "famille": "MAI-Voice-2.1",
+   "genre": "femme",
+   "description": "MAI-Voice-2.1 (Microsoft), voix fr-FR-DeniseNeural",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 3.0,
+    "energie": 4.5,
+    "naturel": 5.0,
+    "clarte": 7.0,
+    "adequation_role": 4.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 21.9,
+   "relief_demitons": 2.0,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-microsoft_mai-voice-2.1_voice-fr-FR-DeniseNeural-p1.wav"
+   },
+   "commentaires": [
+    "L'articulation est nette, mais l'accent français standard et le ton légèrement synthétique ne conviennent pas au marché québécois.",
+    "Voix synthétique à l'accent français standard, trop lisse et inadaptée au marché québécois."
+   ]
+  },
+  "minimax28-french_femaleanchor": {
+   "moteur": "or:minimax/speech-2.8-hd|voice=French_FemaleAnchor",
+   "famille": "MiniMax Speech 2.8 HD",
+   "genre": "femme",
+   "description": "MiniMax Speech 2.8 HD, voix French_FemaleAnchor",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 3.0,
+    "energie": 4.5,
+    "naturel": 5.5,
+    "clarte": 7.0,
+    "adequation_role": 5.5
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 22.9,
+   "relief_demitons": 2.37,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-minimax_speech-2.8-hd_voice-French_FemaleAnchor-p1.wav"
+   },
+   "commentaires": [
+    "Bonne diction professionnelle, mais l'accent de France ne convient pas au marché québécois.",
+    "L'accent est clairement européen et le ton manque de dynamisme pour une publicité québécoise, bien que la diction soit claire."
+   ]
+  },
+  "minimax28-french_malenarrator": {
+   "moteur": "or:minimax/speech-2.8-hd|voice=French_MaleNarrator",
+   "famille": "MiniMax Speech 2.8 HD",
+   "genre": "homme",
+   "description": "MiniMax Speech 2.8 HD, voix French_MaleNarrator",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 2.5,
+    "energie": 5.0,
+    "naturel": 6.0,
+    "clarte": 7.0,
+    "adequation_role": 4.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 14.3,
+   "relief_demitons": 4.26,
+   "direction": "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, accent québécois naturel.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "narrateur": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/narrateur-minimax_speech-2.8-hd_voice-French_MaleNarrator-p1.wav"
+   },
+   "commentaires": [
+    "Bonne diction mais l'accent français standard ne convient pas au marché québécois.",
+    "L'accent est clairement européen et non québécois, avec un ton trop neutre pour le marché local."
+   ]
+  },
+  "voxtral2603-fr_marie_happy": {
+   "moteur": "or:mistralai/voxtral-mini-tts-2603|voice=fr_marie_happy",
+   "famille": "Mistral Voxtral 2603",
+   "genre": "femme",
+   "description": "Mistral Voxtral Mini TTS (2603), voix préréglée",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 2.0,
+    "energie": 5.5,
+    "naturel": 6.0,
+    "clarte": 7.0,
+    "adequation_role": 6.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 21.9,
+   "relief_demitons": 2.4,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-mistralai_voxtral-mini-tts-2603_voice-fr_marie_happy-p1.wav"
+   },
+   "commentaires": [
+    "La voix est claire et dynamique, mais l'accent français de France est inadapté au marché québécois et la fin est tronquée.",
+    "L'accent français de France et la livraison trop lisse ne conviennent pas pour une publicité québécoise."
+   ]
+  },
+  "voxtral3-v3137": {
+   "moteur": "or:mistralai/voxtral-mini-tts-3-0|voice=voice_3137",
+   "famille": "Mistral Voxtral 3",
+   "genre": "femme",
+   "description": "Mistral Voxtral TTS 3, voix préréglée française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 3.0,
+    "energie": 5.0,
+    "naturel": 6.0,
+    "clarte": 7.0,
+    "adequation_role": 4.5
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 25.6,
+   "relief_demitons": 2.82,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-mistralai_voxtral-mini-tts-3-0_voice-voice_3137-p1.wav"
+   },
+   "commentaires": [
+    "L'interprétation est claire et professionnelle mais l'accent est purement européen et non québécois.",
+    "Bonne diction et ton professionnel, mais l'accent européen ne convient pas pour une publicité québécoise."
+   ]
+  },
+  "voxtral3-v3141": {
+   "moteur": "or:mistralai/voxtral-mini-tts-3-0|voice=voice_3141",
+   "famille": "Mistral Voxtral 3",
+   "genre": "femme",
+   "description": "Mistral Voxtral TTS 3, voix préréglée française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 3.0,
+    "energie": 4.5,
+    "naturel": 5.5,
+    "clarte": 5.5,
+    "adequation_role": 4.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 26.8,
+   "relief_demitons": 1.81,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-mistralai_voxtral-mini-tts-3-0_voice-voice_3141-p1.wav"
+   },
+   "commentaires": [
+    "La voix présente un accent français standard inadapté au marché québécois et l'enregistrement est tronqué avant la fin de la phrase.",
+    "Bonne clarté et ton professionnel, mais l'accent européen ne convient pas pour le marché québécois."
+   ]
+  },
+  "voxtral3-v589": {
+   "moteur": "or:mistralai/voxtral-mini-tts-3-0|voice=voice_589",
+   "famille": "Mistral Voxtral 3",
+   "genre": "femme",
+   "description": "Mistral Voxtral TTS 3, voix préréglée française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 2.5,
+    "energie": 4.5,
+    "naturel": 6.0,
+    "clarte": 7.0,
+    "adequation_role": 5.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 27.3,
+   "relief_demitons": 2.4,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-mistralai_voxtral-mini-tts-3-0_voice-voice_589-p1.wav"
+   },
+   "commentaires": [
+    "L'interprétation convient à un rôle d'adjointe, mais l'accent est clairement européen et manque de dynamisme pour une publicité québécoise.",
+    "Bonne clarté et débit fluide, mais l'accent européen ne convient pas pour une publicité québécoise."
+   ]
+  },
+  "voxtral3-v592": {
+   "moteur": "or:mistralai/voxtral-mini-tts-3-0|voice=voice_592",
+   "famille": "Mistral Voxtral 3",
+   "genre": "femme",
+   "description": "Mistral Voxtral TTS 3, voix préréglée française",
+   "manche": 2,
+   "local": false,
+   "notes": {
+    "accent_quebecois": 3.0,
+    "energie": 5.0,
+    "naturel": 6.0,
+    "clarte": 7.0,
+    "adequation_role": 5.0
+   },
+   "emr_moyen": 0.0,
+   "cps_moyen": 25.7,
+   "relief_demitons": 2.81,
+   "direction": "Adjointe québécoise chaleureuse, professionnelle et efficace, accent québécois naturel, rythme vif.",
+   "vitesse": 1.0,
+   "echantillons": {
+    "adjointe": "/home/pc6/nexora-creative-data/work/opsys-ultime/casting2/voix/adjointe-mistralai_voxtral-mini-tts-3-0_voice-voice_592-p1.wav"
+   },
+   "commentaires": [
+    "Bonne diction mais l'accent est clairement français de France et la phrase est tronquée à la fin.",
+    "L'interprétation est claire et naturelle, mais l'accent européen ne convient pas du tout à une publicité québécoise."
+   ]
+  },
   "qwen3tts-frederic": {
    "moteur": "qwen3tts:frederic",
    "famille": "Qwen3-TTS 1.7B, local GB10 (clonage, apache-2.0)",
    "genre": "homme",
    "description": "Frédéric, voix québécoise d'âge moyen, « professionnelle et assurée » (bibliothèque ElevenLabs)",
+   "manche": 1,
    "local": true,
    "notes": {
     "accent_quebecois": 6.0,
@@ -389,6 +839,7 @@
    "famille": "Qwen3-TTS 1.7B, local GB10 (clonage, apache-2.0)",
    "genre": "femme",
    "description": "Jeanne Mance, voix québécoise, « charmante, claire et jeune »",
+   "manche": 1,
    "local": true,
    "notes": {
     "accent_quebecois": 7.0,

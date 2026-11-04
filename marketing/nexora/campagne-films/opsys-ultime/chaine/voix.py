@@ -35,7 +35,12 @@ QWEN_PY = str(Path.home() / "nexora-creative-data/work/voix2-modeles/qwen3tts/ve
 REFS = TRAVAIL / "casting/refs"  # prises de référence (wav + .txt) pour le clonage
 
 
+FLEX = {"order": ["google-ai-studio/flex"], "allow_fallbacks": False}  # consigne du 04/11 : Gemini 4 Argon par Flex seulement
+
+
 def post(url, corps, timeout=300):
+    if "gemini-4-argon" in str(corps.get("model", "")):
+        corps = {**corps, "provider": FLEX}
     d = json.dumps(corps).encode()
     err = None
     for i in range(4):
@@ -66,7 +71,10 @@ def generer(moteur, texte, direction="", vitesse=1.0):
     """Renvoie (octets mp3 ou wav, extension, coût estimé USD)."""
     famille, _, arg = moteur.partition(":")
     if famille == "eleven":
-        t = (direction.strip() + " " + texte).strip() if direction else texte
+        # ElevenLabs n'interprète que les balises entre crochets : une consigne en prose serait LUE à voix haute (vu le 04/11)
+        import re
+        tags = " ".join(re.findall(r"\[[^\]]*\]", direction or ""))
+        t = (tags + " " + texte).strip() if tags else texte
         return post("https://openrouter.ai/api/v1/audio/speech", {"model": "elevenlabs/eleven-v4", "input": t, "voice": arg,
                                                                  "response_format": "mp3"}), "mp3", round(len(t) * 0.08 / 1000, 5)
     if famille == "drama3":
