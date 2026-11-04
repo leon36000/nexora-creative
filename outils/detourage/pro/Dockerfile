@@ -10,8 +10,9 @@ ARG TORCHVISION_VERSION=0.29.1
 ARG COMFYUI_REF=2c75dc1b379a59e0880619d029607af5169a62ef
 ARG LTXVIDEO_REF=220e1d45aa0469f518e982102fca4dca92a61862
 
+# gcc : Triton compile ses lanceurs à la volée (noyaux de comfy-kitchen)
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg git ca-certificates \
+ && apt-get install -y --no-install-recommends ffmpeg git ca-certificates gcc libc6-dev \
  && rm -rf /var/lib/apt/lists/*
 # torchaudio : plus publié pour torch 2.14 ; non requis par le graphe vidéo vers alpha (sans piste audio)
 RUN pip install --no-cache-dir "torch==${TORCH_VERSION}" "torchvision==${TORCHVISION_VERSION}" --index-url "${TORCH_INDEX}"
