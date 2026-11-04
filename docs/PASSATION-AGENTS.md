@@ -514,3 +514,7 @@ Après contrôle des références, de la voix et de la file vide, **p27** a ét�
 ### OPSYS : contrôle du montage après p26
 
 Validation réelle des sources du dossier DeepSeek, sans rendu : le **court** a ses plans, voix référencées et musique ; le long manque `p27–p32` pendant que `p27` tourne ; le vertical manque toujours `v01–v06`. Le garde-fou refuse bien les absents. Toutefois `monter.py` supprime actuellement le répertoire de tranches MP4 après assemblage et utilise une sortie écrasable. **Ne pas lancer le montage tant que ces comportements ne sont pas corrigés** : l'agent films prépare un correctif pour conserver les segments et éviter l'écrasement.
+
+### OPSYS DeepSeek : p27
+
+`p27-r1.mp4` rendu en 139,8 s de moteur, sans erreur rapportée ; fichier présent, H.264 1344×768, AAC, 5,166688 s. Vidéo et planche de cinq images archivées sur pc1 et vérifiées SHA-256 ; inventaire à **3 745 entrées**. La planche montre un homme près d'une camionnette ; voix, lèvres, mouvement et qualité finale restent à écouter et regarder. Les sources sont gardées. Après vérification de la file vide et du plafond à 475 W, `p28` a été lancé seul ; son résultat reste en attente.

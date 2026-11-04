@@ -393,3 +393,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS DeepSeek : p26 rendu (158,8 s moteur, 5,17 s H.264/AAC), vidéo et planche archivées et SHA vérifiés sur pc1. Une image sombre visible ; mouvement et son non évalués. p27 lancé seul après contrôle des prérequis et de la file vide.
 
 - OPSYS DeepSeek : le court a ses sources et le garde-fou identifie les plans manquants du long/vertical. Montage non lancé : son nettoyage actuel efface des tranches MP4 ; correctif de conservation et protection contre l'écrasement en cours.
+
+- OPSYS DeepSeek : p27 rendu (139,8 s moteur, 5,17 s H.264/AAC), vidéo et planche archivées et vérifiées ; son et lèvres non évalués. p28 lancé seul après contrôle de la file vide.
