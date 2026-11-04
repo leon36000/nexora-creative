@@ -582,3 +582,9 @@ Contrôle GitLab renouvelé : pipeline 2847 toujours en attente ; Garage toujour
 ### OPSYS DeepSeek : reprise verticale
 
 Les six plans `v01` à `v06` sont bien définis dans le dossier DeepSeek en 9:16, avec références, voix éventuelles et premières images requises présentes au contrôle. Ils sont distincts des plans horizontaux. Après contrôle de file GPU vide et limite configurée 475 W (25,24 W au repos), `v01` a été lancé seul ; résultat, décodage et archive restent à vérifier. Le brouillon long CPU reste en cours.
+
+### OPSYS DeepSeek : v01
+
+`v01-r1.mp4` généré en 139,2 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et SHA-256 vérifiés ; inventaire **3 773 entrées**. La planche montre un travailleur utilisant son téléphone près d’une maison ; son, mouvement et qualité finale ne sont pas jugés. Après file vide et limite 475 W confirmées, `v02` a été lancé seul.
+
+Sur le brouillon court, une détection automatique n’a trouvé aucun passage noir continu d’au moins 0,5 s avec seuil de pixels 0,05 ; cela ne vérifie ni narration ni qualité visuelle.
