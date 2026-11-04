@@ -500,3 +500,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Sous-agent DeepSeek outillé isolé : seconde tentative terminée avec revue ; limites du compteur GLB examinées, 34 primitives du lot en mode 4 et comptes tous multiples de trois. Aucun score de qualité déduit.
 
 - Viewer : `bef6071`/`6359dbc` masquent localement Speak/Add sound qui perdaient l’élément et redirigeaient vers un autre outil ; code dormant préservé, typecheck OK, pas de test navigateur ni déploiement. Correction de la perte du clip pour Extend en cours.
+
+- Agent Muse outillé isolé : seconde tâche terminée, propositions de tests relues et corrigées ; aucune preuve GPU ou décision fondateur attribuée.

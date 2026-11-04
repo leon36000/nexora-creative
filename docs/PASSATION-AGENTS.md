@@ -758,3 +758,7 @@ Second essai isolé DeepSeek : **OK**, six requêtes, sept tours, 76 s, coût jo
 Un audit a confirmé que `Speak` sur une image et `Add sound` sur une vidéo dirigeaient toutes deux vers `/speak`, redirigé vers un autre outil en perdant l’élément choisi. Sur le worktree distinct `Storage/Nexora/travail/fix-viewer-speak-codex-20261104`, branche `fix/viewer-speak-button-codex`, commits locaux **bef6071** et **6359dbc** : ces deux actions trompeuses sont masquées ; le code dormant est conservé. Transpilation et vérification TypeScript complète passent ; pas de test navigateur, push ou déploiement. Le Viewer distant diffère globalement de la base locale bien que les lignes concernées aient été retrouvées identiques : réconciliation avant MR.
 
 Autre défaut relevé : la redirection de `Extend`/transition perd l’identifiant du clip ; correctif local séparé en cours. D’autres actions renvoient à `/apps` et demandent un examen avant de les qualifier.
+
+### Sous-agent Muse outillé : seconde tentative terminée
+
+Une seconde tâche isolée Muse a produit `agents/muse-controle-detourage/controle.md` sur Storage : cinq propositions de vérification, 5 requêtes, 6 tours, 45 s, 0,00124 $ journalisé ; aucune clé réelle accessible à l’agent. Relecture du coordinateur : priorité pratique au raccordement rapide avant le pro non intégré ; contrôle des recettes au runtime plutôt que dans le seul dépôt ; ne pas promettre une absence absolue de scintillement. Ces corrections sont ajoutées à la note ; aucun test GPU n’a été effectué par cet agent.
