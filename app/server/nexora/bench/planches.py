@@ -21,7 +21,7 @@ def duree(ffprobe, f):
 
 
 def images(ffmpeg, f, n=6, larg=320):
-    d = duree(ffmpeg.replace("ffmpeg", "ffprobe"), f)
+    d = duree(os.path.join(os.path.dirname(ffmpeg), os.path.basename(ffmpeg).replace("ffmpeg", "ffprobe")), f)
     out = []
     with tempfile.TemporaryDirectory() as t:
         for k in range(n):

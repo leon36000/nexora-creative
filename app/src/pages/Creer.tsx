@@ -83,6 +83,7 @@ export default function Creer() {
   const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number | null } | null>(null);
   const toutes = useStore((s) => s.takes);
   const lances = useRef(new Set<number>());
+  const jetonsRecus = useRef(new Set<string>());
 
   const visibles = useStore((s) => s.takes.filter((t) => inFeed(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null && t.kind !== 'audio'));
   const montrees = useMemo(() => visibles.filter((t) => {
@@ -116,6 +117,20 @@ export default function Creer() {
   }, [toutes]);
 
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
+  // « Animer avec H3 » depuis Relief : /?mode=video&jeton=asset:…&intention=… pose la vue 3D comme plan clé.
+  useEffect(() => {
+    const jeton = params.get('jeton');
+    if (!jeton || !/^asset:[0-9a-f-]{36}$/i.test(jeton) || jetonsRecus.current.has(jeton)) return;
+    jetonsRecus.current.add(jeton);
+    let apercu = '';
+    try { apercu = sessionStorage.getItem('nexora-plan-cle-apercu') ?? ''; sessionStorage.removeItem('nexora-plan-cle-apercu'); } catch { /* sans aperçu */ }
+    const texte = params.get('intention');
+    setParams({ jeton: null, intention: null });
+    setCle({ jeton, apercu });
+    setDepart('cle');
+    if (texte) setIntention(texte.slice(0, 4000));
+    toast('Vue 3D posée comme plan clé : ajuste la description puis lance « Animer avec H3 ».');
+  }, [params.get('jeton')]);
   // « Animer » depuis la Bibliothèque : /?mode=video&cle=<image> pose l'image comme plan clé.
   useEffect(() => {
     const id = Number(params.get('cle'));
