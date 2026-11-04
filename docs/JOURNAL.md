@@ -468,3 +468,6 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - R&D triple A : quatre notes sourcées sur Storage (Mesh, Sync, détourage/Wan, montage/évaluation). Existence de plusieurs articles vérifiée indépendamment ; critères et expériences restent des propositions, sans résultats ou intégration inventés.
 
 - OPSYS DeepSeek v05 généré, décodé et archivé avec planche ; v06 lancé seul après file vide. Racine pc6 ~17 Gio libres au relevé, à surveiller.
+
+- Détourage : correctif local `5d27dc6` évite d’annoncer pro disponible quand le lancement est bloqué ; test échouait avant, 23 tests et typecheck passent après. Aucun push/déploiement ; base distante à réconcilier.
+- OPSYS DeepSeek : v06 généré, décodé et archivé avec sa planche ; les six plans verticaux sont présents. EditPlan validé, brouillon vertical CPU lancé ; résultat en attente.

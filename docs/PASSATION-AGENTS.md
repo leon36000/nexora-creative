@@ -680,3 +680,11 @@ Pistes : comparer Sync sur les mêmes clips FR-CA/EN-CA avec jugement humain ; r
 ### OPSYS DeepSeek : v05
 
 `v05-r1.mp4` généré en 118,1 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage intégral sans erreur. Vidéo et planche archivées sur pc1, empreintes SHA-256 vérifiées ; inventaire **3 888 entrées**. La planche montre une façade de bureaux ; son et mouvement restent à juger. Après file GPU vide et limite 475 W confirmées, `v06` a été lancé seul ; résultat et archive restent à vérifier. La racine pc6 affiche ~17 Gio libres au nouveau relevé, moins que les ~19 Gio affichés juste après les déplacements : surveiller, cause de la baisse non établie.
+
+### Détourage : disponibilité exacte, correctif local
+
+Défaut reproduit par test : si un moteur pro est déclaré, `/capacites` annonçait `disponible: true` alors que le lancement pro refusait toujours, et les erreurs attribuaient sans preuve l’indisponibilité aux poids. Correctif sur worktree séparé Storage, branche `fix/detourage-disponibilite-codex`, commit local **5d27dc6** : capacité pro déclarée indisponible, création pro refusée avant dépôt et message honnête ; palier rapide inchangé. Les quatre fichiers de base comparés à GitLab `developpement` avaient les mêmes identifiants de contenu au relevé, mais le worktree part d’une référence d’intégration locale antérieure : à réconcilier avec la branche distante avant MR. Test de régression vu échouer avant correctif ; **23 tests ciblés** et `npm run typecheck` passent après. Aucun push, pipeline, déploiement ou test utilisateur réel ; GitLab reste en erreur partielle.
+
+### OPSYS DeepSeek : v06 et vertical en montage
+
+`v06-r1.mp4` généré en 129,4 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1, SHA-256 vérifiés ; inventaire **3 890 entrées**. Les six plans verticaux sont présents. EditPlan vertical validé, 14,5 s, six plans, aucune source ou voix manquante, musique présente et sortie libre ; brouillon CPU sur deux cœurs lancé, résultat et archive en attente. Le film final et son verdict humain restent à faire.
