@@ -45,7 +45,7 @@ export interface RapportMaillage {
   etanche: boolean;
   /** Boîte englobante (largeur, hauteur, profondeur) dans l'unité du modèle. */
   taille: [number, number, number];
-  /** Volume (unité³) si le maillage est étanche, sinon null. */
+  /** Volume (unité³) si une composante fermée a un volume calculable ; null si ouvert ou ambigu. */
   volume: number | null;
   avertissements: string[];
 }
@@ -158,12 +158,13 @@ export function analyser(m: Maillage): RapportMaillage {
   if (ouvertes > 0) avertissements.push(`${ouvertes} arêtes ouvertes : le modèle n’est pas étanche (impression 3D : à réparer).`);
   if (nonVariete > 0) avertissements.push(`${nonVariete} arêtes partagées par plus de deux faces (non-variété).`);
   if (degeneres > 0) avertissements.push(`${degeneres} triangles dégénérés.`);
+  if (etanche && racines.size > 1) avertissements.push('Volume non calculé : plusieurs composantes fermées peuvent représenter des solides distincts ou des cavités imbriquées.');
   if (racines.size > 1) avertissements.push(`${racines.size} morceaux séparés (fragments flottants possibles).`);
   return {
     sommets: m.positions.length / 3, triangles: nTri, degeneres, aretesOuvertes: ouvertes, aretesNonVariete: nonVariete,
     composantes: racines.size, etanche,
     taille: nTri ? [max[0] - min[0], max[1] - min[1], max[2] - min[2]] : [0, 0, 0],
-    volume: etanche ? Math.abs(volume6) / 6 : null, avertissements,
+    volume: etanche && racines.size === 1 ? Math.abs(volume6) / 6 : null, avertissements,
   };
 }
 

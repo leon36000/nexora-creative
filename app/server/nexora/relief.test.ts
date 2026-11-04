@@ -72,6 +72,21 @@ describe('Relief : contrôle du maillage', () => {
     expect(r.volume).toBeCloseTo(1 / 6, 6);
     expect(r.composantes).toBe(1);
   });
+  it('ne donne pas un volume physique ambigu pour plusieurs coquilles fermées', () => {
+    const tetra = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]];
+    const faces = [0, 2, 1, 0, 1, 3, 0, 3, 2, 1, 2, 3];
+    const positions = Float32Array.from([...tetra.flat(), ...tetra.map(([x, y, z]) => [x + 3, y, z]).flat()]);
+    const indices = [...faces];
+    for (let i = 0; i < faces.length; i += 3) {
+      const [a, b, c] = faces.slice(i, i + 3);
+      indices.push(4 + a, 4 + c, 4 + b); // second tetrahedron orienté à l'inverse
+    }
+    const r = analyser({ positions, uvs: null, indices: Uint32Array.from(indices), couleur: null });
+    expect(r.etanche).toBe(true);
+    expect(r.composantes).toBe(2);
+    expect(r.volume).toBeNull();
+    expect(r.avertissements).toContain('Volume non calculé : plusieurs composantes fermées peuvent représenter des solides distincts ou des cavités imbriquées.');
+  });
 });
 
 describe('Relief : décimation', () => {
