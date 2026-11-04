@@ -669,3 +669,16 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - **Mesuré depuis la VM 202** (parole française de 70 s synthétisée par Kokoro, texte connu) : GPU 2,65 s en passant par le client Creative (26 fois le temps réel, envoi compris), CPU `transcrire.py` 29,4 s ; ressemblance au texte lu identique, 0,993 (221 mots sur 222). Clip de 149 s (voix du banc) : 3,9 s sur le GPU. Repli : port faux, le client rend `null` après 10,5 s (délai de connexion, paquets perdus) et le serveur passe sur le CPU ; avec le service coupé et l'hôte joignable, le refus est immédiat.
 - **Reste** : essai visuel dans l'interface par le fondateur ; la réponse porte `moteur: 'gpu'` ou `'cpu'`.
 
+
+
+### Reprise Codex — espace pc6 et revue Director, 4 novembre 2026
+
+- Cache navigateurs `~/.cache/ms-playwright` : aucun processus ne l'ouvrait au contrôle; copie vers Storage `Nexora/travail/relocalisation-pc6-20261104/cache-playwright`, contrôle complet rsync, 1 168 fichiers vérifiés par SHA-256 et liens comparés, inventaire à côté de la copie. Ancien chemin maintenu par lien; `chrome --version` fonctionne depuis ce chemin. Copies sources retirées après vérification. La racine affiche environ 8,2 Gio libres et reste très pleine; Storage environ 615 Gio libres.
+- Director : six suites, 70 tests relancés avec config Vite autonome `envFile:false`/`envDir:false`, environnement épuré, logs/cache sur Storage et graphe des imports vérifié; résultat vert. La première exécution qui pouvait charger un fichier d'environnement reste documentée. Revue indépendante Terra : risques de langue de dialogue faussement liée à la langue d'interface, d'erreurs françaises sur le plan clé, et de réponses générées dans une langue périmée après changement. Corrections en cours, aucun commit, push ou déploiement. L'ensemble de Creative n'est pas livré bilingue.
+
+
+### Reprise Codex — récupération de la passation et GitLab, 4 novembre 2026
+
+- Pendant cette reprise, l'ancien worktree `NexoraCreative-doc-passation` et sa branche locale ont disparu; le commit `7a50b77` restait dans les objets Git et le maître du Bureau était intact. Une autre mise à jour a fusionné la passation dans `developpement` et ajouté une section GitLab. Le nouveau worktree de documentation est `Nexora/travail/wt-passation-reprise-codex-20261104` sur Storage, branche `docs/passation-reprise-codex-20261104` basée sur `5ac932d`; l'entrée de journal de `7a50b77` a été rétablie sans enlever la mise à jour externe. Copie préalable du maître sur Storage `Nexora/travail/sauvegardes-passation/`. Aucune cause de la disparition n'est attribuée sans preuve.
+- Contrôle lecture seule actuel : `garage-0` prêt, zéro redémarrage sur le pod actuel. La section ajoutée par l'autre travail rapporte une récupération partielle des métadonnées Garage et des objets potentiellement manquants; ces pertes ne sont pas vérifiées indépendamment. La sauvegarde intégrale GitLab et une restauration éprouvée restent indispensables avant migration/formatage. Aucune réparation de production n'a été effectuée par cette reprise.
+- Espace : la revue Terra n'a trouvé aucun autre candidat multi-Gio prouvé inutilisé et sans risque; l'environnement ComfyUI actif est exclu, le venv Ming possède de nombreux hardlinks, et les résultats de banc Mesh doivent être préservés.
