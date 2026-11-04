@@ -566,3 +566,9 @@ Contrôle après le retour API : le pod PostgreSQL est maintenant prêt, utilise
 ### OPSYS DeepSeek : p31
 
 `p31-r1.mp4` rendu en 313,1 s de moteur ; H.264 1344×768, AAC, 8,708333 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et vérifiées SHA-256 ; inventaire **3 769 entrées**. La planche montre une tour ; sa dernière case noire est un remplissage de la grille (4 images disponibles pour 5 cases), pas une preuve d'image noire dans le film. Son et mouvement restent à juger. Pendant le calcul, une lecture instantanée a affiché 487,83 W malgré une consigne nvidia-smi de 475 W ; aucune modification de réglage n'a été faite. Après file vide et limite configurée 475 W confirmées, `p32` a été lancé seul ; résultat en attente.
+
+### OPSYS DeepSeek : p32 et brouillon long
+
+`p32-r1.mp4` est présent, H.264 1344×768 et AAC, 5,166688 s ; décodage complet sans erreur. La durée de calcul et le code de sortie du processus ne sont plus disponibles : ne pas les inventer. La vidéo et sa planche sont archivées sur pc1 avec vérification SHA-256 ; inventaire à **3 771 entrées**. Son et mouvement ne sont pas évalués.
+
+Les 32 plans du montage long DeepSeek, ses voix référencées et sa musique sont présents ; validation EditPlan `ok: true`, 140,46 s, aucune source vidéo manquante, sortie libre. Un brouillon long a été lancé en CPU, deux cœurs et un seul job ; son résultat et son archivage restent à vérifier. Tous les essais et tranches sont à conserver. Ce n’est pas une finale ni un verdict humain.

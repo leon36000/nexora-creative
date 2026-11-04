@@ -419,3 +419,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - PostgreSQL : la nouvelle révision souhaitée est maintenant active et prête avec sonde 240 ; aucune recréation effectuée par cette session. Garage reste en échec.
 
 - OPSYS DeepSeek : p31 rendu, décodé et archivé avec planche ; case noire finale de la planche = remplissage de grille. Une mesure instantanée de 487,83 W a dépassé la consigne 475 W ; p32 lancé seul après file vide.
+
+- OPSYS DeepSeek : p32 décodé, archivé avec sa planche et vérifié SHA ; temps de calcul et code de sortie indisponibles. Sources du long et EditPlan vérifiés, brouillon long lancé sur deux cœurs ; résultat en attente.
