@@ -446,3 +446,9 @@ Le test local était bloqué faute de FastAPI, mais l'environnement existant `/s
 ### Accès aux modèles économiques
 
 La passerelle locale répond sur son point de santé, mais `/v1/models` répond 401 sans authentification. Le lanceur `outils/sous-agents/sous-agent.sh` appelle `sa_master_key` et peut lancer `gateway.sh`, lequel lit les clés fournisseurs. Ces scripts n'ont pas été exécutés par Codex parce que le fondateur a interdit **toute lecture de secret** ; aucun appel DeepSeek/Muse/Gemini n'est encore prouvé dans cette reprise. Chercher une interface déjà authentifiée qui n'expose ni ne lit de clé dans le processus de travail ; à défaut, signaler le blocage plutôt que prétendre avoir délégué. Trois sous-agents GPT-6 Luna max sont réellement lancés.
+
+### Conservation médias — deuxième vague
+
+Racines supplémentaires : `Nexora Creative/marketing`, `NexoraSite/web/public`, `~/nexora-creative-data/promo` ; fichiers médias réguliers, sans suivre les liens symboliques. Sur 1 806 contenus uniques, 412 déjà archivés ont été revérifiés par SHA-256 ; **1 394 nouveaux** ont été copiés et vérifiés : 389 MP4, 9 MOV, 156 JPG, 607 PNG, 70 SVG, 163 PDF. Chaque fichier a une ligne avec sources dans `INVENTAIRE.csv` ; total vérifié **3 720 entrées**, toutes à 15 colonnes.
+
+Pour ménager la racine pc1, cette vague est physiquement dans `/run/media/pc1/Infrastructure/NexoraStudioWork/ArchivesNexora/codex-reprise-vague2-20261104/` et accessible depuis `~/Bureau/Nexora-Livrables/TOUS-LES-FILMS/codex-reprise-vague2-20261104` par lien symbolique ; `MANIFESTE.json` et les inventaires sous `/media/pc6/Storage/Nexora/travail/inventaires/` donnent les sources et empreintes. Après copie : Infrastructure 244 Gio libres, racine pc1 33 Gio libres. Aucune source supprimée. Toute la production historique et les autres machines restent à rechercher : ne pas qualifier l'archive d'exhaustive.

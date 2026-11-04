@@ -367,3 +367,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Déléguer activement à DeepSeek V4.1 Flash 1017 et Muse Spark 1.3 Contributor max, Gemini 4 Argon Flex moyen/élevé, et trois GPT-6 Luna max ; le responsable vérifie les résultats. Aucun secret lu.
 
 - Passerelle économique : santé HTTP 200, catalogue sans authentification HTTP 401 ; le lanceur lit une clé maître, donc pas utilisé sous la consigne « aucun secret lu ». Trois agents Luna max lancés.
+
+- Conservation, deuxième vague : 412 contenus déjà vérifiés, 1 394 supplémentaires copiés sur le SSD Infrastructure de pc1 et accessibles depuis le Bureau ; empreintes SHA-256 vérifiées, inventaire à 3 720 lignes et 15 colonnes. Racine pc1 33 Gio libres, Infrastructure 244 Gio libres. Sources conservées ; parc complet non encore audité.
