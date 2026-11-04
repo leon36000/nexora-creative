@@ -1,0 +1,995 @@
+{
+ "equipe": "deepseek",
+ "titre": "LA DOUBLURE",
+ "cles": [
+  {
+   "id": "k01",
+   "format": "16:9",
+   "graine": 1101,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an old Cooke 400mm telephoto lens from 300 metres away, compressed perspective, heat shimmer; dusk on a rainy Scottish hillside, a huge dragon with scarred, mud-caked leathery hide clings to the top of a real ruined stone keep and breathes a jet of real fire onto the wet battlements, the flames light the drizzle and the wet stone, thick black smoke drifts across heavy overcast cloud, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles stands small in the long grass in the foreground with her back to us for scale, wet grass whipping in the wind; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k02",
+   "format": "16:9",
+   "graine": 1102,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld Arri Alexa 35 with an 85mm lens, rain drops on the glass; night on the same moor, close on the face of a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles, she looks just past the lens, firelight from a burning building flickers across her wet skin and the rain running down her cheek, she does not blink, out-of-focus firefighters in yellow coats far behind her; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k03",
+   "format": "16:9",
+   "graine": 1103,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld camera running beside her with a 32mm lens; a peat bog at dusk, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles sprints through shin-deep mud away from a real fuel explosion behind her, a wall of orange flame and black smoke rolls over the heather, clods of peat and water thrown up by her boots, a burning truck tilted on the slope, her mouth open, breath visible; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k04",
+   "format": "16:9",
+   "graine": 1104,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a Panavision anamorphic 40mm lens on a low tripod, 60 metres back; a deserted asphalt road across a high desert at last light, a dark saloon car torn open by a real explosion, doors and glass thrown across the tarmac, burning fuel running in the gutter, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles walks toward the camera through the smoke with her coat flapping, heat shimmer bending the horizon, a road sign bent by the blast; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k05",
+   "format": "16:9",
+   "graine": 1105,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld Arri Alexa Mini with a 25mm lens, water on the front element; night, heavy rain on a real industrial rooftop, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles slams back-first into a galvanised vent housing, steam bursts from a broken pipe, sodium lamps from the street below light the wet metal and the puddles, sparks from a severed cable skitter past her boot, the city out of focus far below; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k06",
+   "format": "16:9",
+   "graine": 1106,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a gyro-stabilised camera mounted on a helicopter skid, 24mm lens, rotor vibration; open sea at grey dawn, a rescue helicopter three metres above the swell, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles hangs from the skid by both hands, her legs swinging over the water, spray torn up by the rotor wash soaking the frame, a coast guard in a harness leaning out of the door to reach her, the horizon tilted; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k07",
+   "format": "16:9",
+   "graine": 1107,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld camera on a castle rampart with a 24mm Panavision lens, dirt and rain on the lens; night, the belly and wings of an enormous dragon pass a few metres overhead above a real castle rampart in the rain, its wet hide lit from below by burning torches and fires, sparks and embers fly, a torn banner whips in the wind, two soldiers duck against the parapet in the foreground; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k08",
+   "format": "16:9",
+   "graine": 1108,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a helmet camera strapped to a skydiver, 20mm lens, the frame shaking; freefall inside a grey cloud bank, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles falls face down at terminal velocity, her coat and hair ripped flat by the wind, water droplets streaming off her sleeve, the dark shape of a helicopter small and far above her, cloud tearing past the lens; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k09",
+   "format": "16:9",
+   "graine": 1109,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an Arri Alexa 65 with a 50mm lens, shot like aerial footage from a chase helicopter, high-altitude haze; above a real cloud layer at sunset, an enormous dragon grips the scarred steel hull of a grey military airship the size of a ship and breathes fire onto the plating, rivets, rust streaks, buckled panels, real sunlight and haze, a crewman in the airship's open hatch firing a flare for scale; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k10",
+   "format": "16:9",
+   "graine": 1110,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a 600mm telephoto lens from a second aircraft, heavy atmospheric haze; the same airship burning and breaking apart as it falls through a layer of cloud at sunset, a long trail of black smoke, a tiny figure under a parachute a hundred metres below the wreck, torn metal turning slowly, the sun low and hard behind the cloud; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k11",
+   "format": "16:9",
+   "graine": 1111,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld camera held low to the wet grass, 35mm lens; a rain-soaked field at night, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles lands hard on one knee in the mud, the helicopter searchlight sweeping across the grass behind her, her wet coat heavy with water, breath steaming, rain hammering the lens; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k12",
+   "format": "16:9",
+   "graine": 1112,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld 85mm lens at close range, slight drift; night, close on the face of a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles, soaked, mud streaked across her cheek, lit from above by a helicopter searchlight, rain falling through the beam, a tired smile starting, the dark moor out of focus behind her; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k13",
+   "format": "16:9",
+   "graine": 1113,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a 600mm telephoto lens on a tripod, slow pan; the same rainy moor at night, a huge dragon circles far above in the low cloud, wings beating slowly, lit only by a helicopter searchlight beam crossing under it, rain visible in the beam, a stone wall and a dead tree in the foreground for scale; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k14",
+   "format": "16:9",
+   "graine": 1114,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld camera at ground level with a 50mm lens, very close; dusk on black volcanic rock, a small red cat with singed whiskers sits and spits a thin jet of real orange flame into the wind, the flame gutters sideways, wet ash and cinders on the rock, the sea far below out of focus; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k15",
+   "format": "16:9",
+   "graine": 1115,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld camera at shoulder height, 32mm lens, following her; a rainy Scottish moor at night, a real film crew at work: a camera operator tracks backwards on a dolly, a boom operator holds a microphone above a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles who is wrapped in a silver blanket and soaked to the skin, a generator cable in the mud, and far behind them in the rain a huge dragon waits without moving; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k16",
+   "format": "16:9",
+   "graine": 1116,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a macro lens at very shallow depth of field; extreme close-up of a dragon's eye, the slit pupil narrowing, firelight moving across the wet iris, a rain drop running down the scales beside it, dust and a small scar on the hide; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k19",
+   "format": "16:9",
+   "graine": 1119,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a motion-control camera with a 35mm lens, the warships built as large physical miniatures with weathered paint, panel lines and scorch marks, lit by one hard key light the way 1980s model photography was lit; low Earth orbit seen from a real spacecraft window, two battered grey warships pass close, hard unfiltered sunlight from one side and pitch-black shadows, a real cloud-covered Earth below, a small explosion throwing debris and white vented gas, the only light is hard white sunlight; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k20",
+   "format": "16:9",
+   "graine": 1120,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a helicopter-mounted 300mm lens, heat shimmer; the dragon crosses in front of the low sun above a real cloud layer, wings spread wide, its body black against the sun, the cloud below turned orange, the sun flaring at the edge of the frame, rotor blur at the frame edge; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k21",
+   "format": "16:9",
+   "graine": 1121,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a long Cooke 400mm telephoto lens on a tripod 400 metres away, compressed perspective, rain haze; dusk on a rainy Scottish moor, a real ruined stone keep burning on the hill, the fire lighting the rain, the black silhouette of a huge dragon rising above the flames, a stone wall and a dead tree in the foreground for scale, a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles stands small in the long grass with her back to the camera; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k17",
+   "format": "9:16",
+   "graine": 1117,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a helmet camera in freefall, 24mm lens, vertical framing, the frame shaking; freefall inside a grey cloud bank, seen from above: a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles falls away from the camera face down, arms out, her coat and hair ripped flat by the wind, the cloud tearing past, a dark helicopter small far above her; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k18",
+   "format": "9:16",
+   "graine": 1118,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld camera on a castle rampart, 24mm lens, vertical framing, rain on the lens; night, the head and neck of an enormous dragon pass a few metres overhead above a real castle rampart in the rain, its wet hide lit from below by burning torches, sparks and embers flying, a soldier ducking against the parapet at the bottom of the frame; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k22",
+   "format": "9:16",
+   "graine": 1122,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld 85mm lens at close range, vertical framing, slight drift; night, close on the face of a stunt performer in her thirties, dark hair plastered flat by rain, a small scar above her left eyebrow, soaked dark canvas coat, mud on her knuckles, soaked, mud streaked across her cheek, lit from above by a helicopter searchlight, rain falling through the beam, a tired smile starting, the dark moor out of focus behind her; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  },
+  {
+   "id": "k23",
+   "format": "9:16",
+   "graine": 1123,
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a 600mm telephoto lens on a tripod, vertical framing, 400 metres away, heavy rain haze; dusk on a rainy Scottish moor, a real ruined stone keep burning on the hill, the fire lighting the rain, the black silhouette of a huge dragon rising above the flames, a stone wall and a dead tree in the foreground for scale; rain on the lens, visible film grain, halation around the flames, slight motion blur."
+  }
+ ],
+ "plans": [
+  {
+   "id": "p01",
+   "cle": "k01",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2101,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, long telephoto camera on a tripod 300 metres away, slight pan, compressed perspective, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon arches its neck and breathes a long jet of fire onto the battlements; burning debris falls, smoke rolls sideways in the wind, the woman in the long grass does not move. The camera pans a few degrees to follow the flames. No text, no logos.\n\noverall_soundscape: Roaring fire, crackling burning timber, heavy rain, a deep animal growl far away, wind in the grass.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p02",
+   "cle": "k02",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2102,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera operator at close range, the frame breathing, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She stands in the rain and looks just past the lens without blinking; firelight moves across her wet face, rain runs down her cheek, a strand of wet hair lifts in the wind. Behind her, out of focus, firefighters walk past. No text, no logos.\n\noverall_soundscape: Rain on a coat, distant fire, a man shouting orders, the low crackle of a burning building.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p03",
+   "cle": "k03",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2103,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera operator running beside her, strong shake, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She sprints through shin-deep mud away from the explosion; a wall of flame and black smoke rolls over the heather behind her, clods of peat and water thrown up by her boots, she stumbles once and keeps running. The camera runs with her. No text, no logos.\n\noverall_soundscape: A fuel explosion, boots sucking in mud, hard breathing, wind, burning heather crackling.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p04",
+   "cle": "k04",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2104,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, camera on a low tripod 60 metres back, slow push in on a long lens, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She walks toward the camera through the smoke of the wrecked car, coat flapping, heat shimmer bending the horizon; burning fuel runs in the gutter and a bent road sign creaks in the wind. She does not look at the car. No text, no logos.\n\noverall_soundscape: Burning fuel, ticking hot metal, wind across the desert, glass cracking as it cools.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p05",
+   "cle": "k05",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2105,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera operator at close range, hard shake on impact, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She slams back-first into the vent housing and the metal buckles; steam bursts from a broken pipe and hides her for a moment, sparks from a severed cable skitter across the wet roof past her boot. She pushes herself up. No text, no logos.\n\noverall_soundscape: Metal buckling, a burst of steam, an electrical crackle, rain on metal, city traffic far below.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p06",
+   "cle": "k06",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2106,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, camera mounted on the helicopter skid, rotor vibration, wide lens, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She hangs from the skid by both hands above the swell; the coast guard leans out and grabs her wrist, her legs swing, spray from the rotor wash soaks the frame. The coast guard shouts one short line up at her. No text, no logos.\n\noverall_soundscape: Rotor thump, wind, heavy sea, the helicopter radio crackling; the coast guard shouts <d>[French] Attrape ma main.</d> over the noise.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p07",
+   "cle": "k07",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2107,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera on the rampart, operator ducks as the creature passes, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon sweeps low over the rampart from right to left; the downdraft whips rain and embers into the lens, the camera ducks, a torn banner snaps, the two soldiers press against the parapet. Fires burn along the wall. No text, no logos.\n\noverall_soundscape: Deafening wingbeats, gusting wind, rain, crackling fires, men shouting.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p08",
+   "cle": "k08",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2108,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, helmet camera in freefall, the frame shaking hard, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She falls face down through the cloud, arms out, coat and hair ripped flat by the wind; the cloud tears past the lens and breaks into open grey air, the helicopter small and far above her. She turns her head to the camera. No text, no logos.\n\noverall_soundscape: Wind roaring past a helmet, fabric snapping, her breathing inside the helmet.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p09",
+   "cle": "k09",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2109,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, aerial camera from a chase helicopter, slight vibration, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon grips the airship hull and breathes fire onto the plating; rivets pop, a panel buckles and falls away into the clouds, smoke streams backwards. A crewman in the open hatch fires a flare. No text, no logos.\n\noverall_soundscape: Wind, the dragon's roar, tearing metal, a deep engine drone, fire.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p10",
+   "cle": "k10",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2110,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, long telephoto camera from a second aircraft, heavy haze, slow drift, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The airship breaks apart as it falls through the cloud, a long trail of black smoke behind it; torn metal turns slowly, a tiny figure under a parachute swings a hundred metres below the wreck. The sun sits low and hard behind the cloud. No text, no logos.\n\noverall_soundscape: A long low rumble, wind at altitude, metal groaning, then near silence.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p11",
+   "cle": "k11",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2111,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera held low in the wet grass, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She lands hard on one knee in the mud and stays there, breathing; the searchlight sweeps across the grass behind her and passes over her back, rain hammering. She wipes mud from her mouth with the back of her hand. No text, no logos.\n\noverall_soundscape: A helicopter passing overhead, rain in grass, her breath, boots squelching.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p12",
+   "cle": "k12",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2112,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera at close range, slight drift, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. Close on her face in the searchlight beam; rain falls through the light, mud streaked on her cheek, and a tired smile starts and holds. She looks straight into the lens and says one word, almost to herself. No text, no logos.\n\noverall_soundscape: Rain, her breathing, the helicopter fading, a distant generator; she says <d>[French] Encore.</d>\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p13",
+   "cle": "k13",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2113,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, long telephoto camera on a tripod, slow pan following the shape, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon circles far above in the low cloud, wings beating slowly; the searchlight beam crosses under it and catches the rain. A stone wall and a dead tree hold the foreground. No text, no logos.\n\noverall_soundscape: Wind over open moor, a faint deep call from above, rain.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p14",
+   "cle": "k14",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2114,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera at ground level, very close, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The small red cat sits on the volcanic rock and spits a thin jet of flame into the wind; the flame gutters sideways, cinders lift off the wet ash, the cat sneezes and looks straight at the lens. No text, no logos.\n\noverall_soundscape: Wind, a small dry whoosh of flame, a cat's short sneeze, the sea far below.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p15",
+   "cle": "k15",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2115,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera at shoulder height following her through the crew, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The camera operator tracks backwards on the dolly, the boom operator holds the microphone over her; she is wrapped in a silver blanket, soaked, and the crew works around her in the rain. Far behind them the dragon waits without moving. No text, no logos.\n\noverall_soundscape: Rain on nylon, the dolly wheels, distant crew voices, a generator humming.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p16",
+   "cle": "k16",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2116,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, macro lens, very shallow depth of field, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon's slit pupil narrows as firelight moves across the wet iris; a raindrop runs down the scales beside the eye and falls out of frame. No text, no logos.\n\noverall_soundscape: A low breath, rain on hide, a deep rumble felt more than heard.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p19",
+   "cle": "k19",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2119,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, motion-control camera gliding forward between the hulls, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The camera glides between the two battered hulls as a small explosion throws metal debris and white vented gas across the frame; hard sunlight flickers across the plating and the Earth turns slowly below. No text, no logos.\n\noverall_soundscape: Muffled metallic groans through a hull, a dull distant impact, the hiss of venting gas, near silence.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p20",
+   "cle": "k20",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2120,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, helicopter-mounted long lens, heat shimmer, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon crosses in front of the low sun above the cloud layer, wings spread wide; the sun flares at the edge of the frame and the cloud below turns orange. Rotor blur at the frame edge. No text, no logos.\n\noverall_soundscape: Rotor thump, wind, one long roar that ends in silence.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p21",
+   "cle": "k21",
+   "format": "16:9",
+   "images": 124,
+   "graine": 2121,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, long telephoto camera on a tripod 400 metres away, locked off, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She stands small in the long grass with her back to the camera and watches the keep burn; the dragon's black shape rises above the flames and the fire lights the rain. Nothing moves except the smoke and the grass. No text, no logos.\n\noverall_soundscape: Fire at a distance, rain, wind in the grass, no music.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p22",
+   "cle": "k17",
+   "format": "9:16",
+   "images": 124,
+   "graine": 2122,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, helmet camera in freefall, vertical framing, the frame shaking, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. She falls away from the camera face down, arms out, coat and hair ripped flat; the cloud tears past and breaks, the helicopter small far above. No text, no logos.\n\noverall_soundscape: Wind roaring past a helmet, fabric snapping, her breathing.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p23",
+   "cle": "k18",
+   "format": "9:16",
+   "images": 124,
+   "graine": 2123,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera on the rampart, vertical framing, operator ducks, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The head and neck of the dragon pass a few metres overhead; embers and rain whip down, the soldier at the bottom of the frame ducks. No text, no logos.\n\noverall_soundscape: Deafening wingbeats, gusting wind, rain, crackling fires.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p24",
+   "cle": "k22",
+   "format": "9:16",
+   "images": 124,
+   "graine": 2124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera at close range, vertical framing, slight drift, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. Close on her face in the searchlight beam; rain falls through the light, mud on her cheek, a tired smile starts and holds. No text, no logos.\n\noverall_soundscape: Rain, her breathing, the helicopter fading.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "id": "p25",
+   "cle": "k23",
+   "format": "9:16",
+   "images": 124,
+   "graine": 2125,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, long telephoto camera on a tripod, vertical framing, locked off, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The keep burns on the hill, the dragon's black shape rises above the flames, the rain is lit by the fire. No text, no logos.\n\noverall_soundscape: Fire at a distance, rain, wind in the grass.\n\nnon_diegetic_music: N/A"
+  }
+ ],
+ "voix": [
+  {
+   "id": "v01",
+   "moteur": "h3-natif",
+   "texte": "<d>[French] Attrape ma main.</d>",
+   "direction": "Le coast guard, 35 ans, dans le plan p06 : il se penche hors de l'hélicoptère, tend le bras, et crie une seule fois par-dessus le rotor et le vent. Voix serrée par l'effort, pas de surjeu, la phrase est soufflée plus que projetée."
+  },
+  {
+   "id": "v02",
+   "moteur": "h3-natif",
+   "texte": "<d>[French] Encore.</d>",
+   "direction": "Elle, 30 ans, dans le plan p12 : à bout de souffle, le visage dans le faisceau, un sourire fatigué. Un seul mot, presque pour elle-même, pas un cri. C'est une promesse, pas une fanfaronnade."
+  },
+  {
+   "id": "v03",
+   "moteur": "gemini38-puck",
+   "texte": "Coupez. On la refait.",
+   "direction": "Le réalisateur, 45 ans, dans le plan p15 : voix calme et satisfaite, à peine audible sous la pluie, comme on constate un fait. Pas de théâtre, pas d'emphase. Quatre mots, un temps d'arrêt entre les deux phrases."
+  }
+ ],
+ "temps_forts": [
+  {
+   "t": 0.0,
+   "evenement": "premier plan fort : le dragon crache le feu sur le donjon, elle en echelle humaine"
+  },
+  {
+   "t": 0.5,
+   "evenement": "drone grave, grosse caisse, motif D-F-E-A au violoncelle"
+  },
+  {
+   "t": 4.0,
+   "evenement": "coupe sur le visage, la pluie, le feu qui bouge sur la peau"
+  },
+  {
+   "t": 6.0,
+   "evenement": "percussions dures, rafale de six plans d'une seconde"
+  },
+  {
+   "t": 9.0,
+   "evenement": "arret : elle pend dans le vide, le rotor seul, premiere replique"
+  },
+  {
+   "t": 10.0,
+   "evenement": "le dragon passe au-dessus du rempart, taiko seul"
+  },
+  {
+   "t": 12.0,
+   "evenement": "PIC : dragon contre airship, cuivres, taiko, synthe grave"
+  },
+  {
+   "t": 15.5,
+   "evenement": "chute brutale : orbite, une note tenue"
+  },
+  {
+   "t": 17.5,
+   "evenement": "SILENCE TOTAL 0,5 s avant l'impact"
+  },
+  {
+   "t": 18.0,
+   "evenement": "impact : atterrissage dans la boue, grosse caisse et cuivres bas"
+  },
+  {
+   "t": 21.5,
+   "evenement": "resolution chaude : violoncelle, cordes douces, « Encore. »"
+  },
+  {
+   "t": 23.5,
+   "evenement": "mysterieux : bois bas, cordes muettes, le dragon dans les nuages"
+  },
+  {
+   "t": 25.5,
+   "evenement": "large : le dragon devant le soleil, trompette lointaine"
+  },
+  {
+   "t": 27.5,
+   "evenement": "chute comique : pizzicato, basson, le chat"
+  },
+  {
+   "t": 28.5,
+   "evenement": "revelation : le plateau, « Coupez. On la refait. »"
+  },
+  {
+   "t": 32.0,
+   "evenement": "macro de l'oeil, un battement"
+  },
+  {
+   "t": 33.5,
+   "evenement": "derniere image : elle regarde bruler, titre TOUT EST VRAI."
+  },
+  {
+   "t": 37.0,
+   "evenement": "carton, silence puis le motif au violoncelle seul"
+  },
+  {
+   "t": 39.5,
+   "evenement": "bonus : saisie reelle « dragn chato feu »"
+  },
+  {
+   "t": 41.0,
+   "evenement": "boost : les mots eclatent"
+  },
+  {
+   "t": 42.5,
+   "evenement": "le chat crache une derniere flamme, …OU PRESQUE."
+  }
+ ],
+ "musiques": [
+  {
+   "id": "m1",
+   "moteur": "lyria-pro",
+   "prompt": "Lyria 3 Pro, instrumental, 44 s, tempo 120 BPM, hybrid orchestral and electronic score written to picture, with a memorable four-note motif (D, F, E, A) for solo cello and low strings. 0:00-0:00.5 near silence, rain texture only, no music. 0:00.5-0:04 low string drone, one deep drum on the downbeat at 0:00.5, the motif on solo cello, restrained. 0:04-0:06 the motif repeats a step higher, muted strings, tension. 0:06-0:09 percussion enters hard on the beat, taiko and metal hits, fast repeated string figures, rising. 0:09-0:10 abrupt stop, one sustained low note only, almost nothing. 0:10-0:11 taiko pattern alone, like wingbeats. 0:11-0:12 snare roll and rising strings, building. 0:12-0:15.5 peak: full brass, taiko, distorted low synth, the motif played twice, maximum energy, then cut dead at 0:15.5. 0:15.5-0:16.5 one sustained low note, space. 0:16.5-0:17.5 low strings rising again, then cut. 0:17.5-0:18 total silence. 0:18-0:21.5 impact: big low brass hit on the downbeat, then warm resolution, cello motif, soft strings, no percussion. 0:21.5-0:23.5 warm and quiet, cello motif, soft strings. 0:23.5-0:25.5 mysterious, low woodwind and muted strings, slow. 0:25.5-0:27.5 wide, sustained strings, distant solo trumpet, motif fragment. 0:27.5-0:28.5 comic drop: pizzicato strings and a single bassoon, playful. 0:28.5-0:32 quiet and sparse, ticking pulse under the set, low strings, no drums. 0:32-0:33.5 one low note, breath. 0:33.5-0:37 the motif played full one last time, brass and strings, then cut. 0:37-0:39.5 near silence, one sustained note. 0:39.5-0:42.5 playful pizzicato and a small brass sting on the cat, then a short pause. 0:42.5-0:44 the four-note motif on solo cello alone, ending on the third, unresolved. Mix: wide stereo, dry close percussion, no reverb wash, no vocals."
+  },
+  {
+   "id": "m2",
+   "moteur": "lyria-pro",
+   "prompt": "Lyria 3 Pro, instrumental, 44 s, 120 BPM, tense electronic score for a chase, written to picture. Signature: a two-note pulse, a low synth note then a struck metal hit, present from 0:00.5 to 0:15.5. 0:00-0:00.5 silence. 0:00.5-0:04 one low pulsing synth note every beat, no melody, pressure building, a single deep hit at 0:00.5. 0:04-0:06 pulse continues, filtered, muted. 0:06-0:09 the pulse doubles, distorted bass, metallic percussion on the beat. 0:09-0:10 stop, one low note. 0:10-0:12 pulse alone, sparse. 0:12-0:15.5 maximum: distorted bass, hard kick on every beat, brass cluster, chaotic but on tempo, cut dead at 0:15.5. 0:15.5-0:17.5 sparse, one synth note, wide reverb. 0:17.5-0:18 silence. 0:18-0:21.5 impact, then pulse slows to half time, warm pad, release. 0:21.5-0:23.5 warm pad, one synth note. 0:23.5-0:25.5 sparse, wide reverb. 0:25.5-0:27.5 half-time pulse, low strings. 0:27.5-0:28.5 playful detuned synth and pizzicato. 0:28.5-0:32 soft ticking under the set, then a small sting. 0:32-0:37 near silence, one sustained note. 0:37-0:39.5 silence. 0:39.5-0:42.5 small playful pulse, then a sting. 0:42.5-0:44 final two-note pulse alone, one hit, long tail. No vocals, no drums after 0:42.5."
+  },
+  {
+   "id": "m3",
+   "moteur": "music3",
+   "prompt": "MiniMax Music3, instrumental, 44 s, 120 BPM, orchestral percussion and low brass only, no melody instruments, built as a rhythmic bed: taiko and floor toms in a steady pattern from 0:00, accents every four beats, rising cymbal swells at 0:06, 0:12, 0:15.5 and 0:33.5, hard stops at 0:09, 0:12 and 0:17.5 lasting half a second, a sparse ticking pattern 0:28.5-0:32, and a final single low drum at 0:42.5. Dry, close, punchy, no reverb, no synth pads."
+  }
+ ],
+ "montage": {
+  "marque": "marque-v7.json",
+  "bpm": 120,
+  "phase": 0,
+  "musique": {
+   "fichier": "musique:m1",
+   "entree": 0,
+   "gain_db": -8,
+   "trous": [
+    [
+     17.5,
+     18.0
+    ]
+   ],
+   "ducking_db": 6
+  },
+  "dossiers_voix": {
+   "fr": "voix/fr",
+   "en": "voix/en"
+  },
+  "voix": [
+   {
+    "id": "v03",
+    "t": 29.5,
+    "db": -2
+   }
+  ],
+  "sfx": [
+   {
+    "t": 0.0,
+    "type": "boom",
+    "db": -10,
+    "duree": 0.8
+   },
+   {
+    "t": 6.0,
+    "type": "impact",
+    "db": -6,
+    "duree": 0.6
+   },
+   {
+    "t": 12.0,
+    "type": "sub",
+    "db": -8,
+    "duree": 1.2
+   },
+   {
+    "t": 18.0,
+    "type": "impact",
+    "db": -3,
+    "duree": 0.8
+   }
+  ],
+  "segments": [
+   {
+    "type": "plan",
+    "debut": 0.0,
+    "duree": 4.0,
+    "fichier": "plan:p01",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.42,
+      1.0
+     ],
+     [
+      4.0,
+      0.5,
+      0.45,
+      1.06
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -5
+   },
+   {
+    "type": "plan",
+    "debut": 4.0,
+    "duree": 2.0,
+    "fichier": "plan:p02",
+    "entree": 0.2,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.46,
+      1.05
+     ],
+     [
+      2.0,
+      0.5,
+      0.48,
+      1.1
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -8
+   },
+   {
+    "type": "plan",
+    "debut": 6.0,
+    "duree": 1.0,
+    "fichier": "plan:p03",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.52,
+      0.5,
+      1.0
+     ],
+     [
+      1.0,
+      0.5,
+      0.48,
+      1.04
+     ]
+    ],
+    "secousses": [
+     [
+      0.0,
+      16,
+      0.35
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -4
+   },
+   {
+    "type": "plan",
+    "debut": 7.0,
+    "duree": 1.0,
+    "fichier": "plan:p04",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1.0
+     ],
+     [
+      1.0,
+      0.5,
+      0.48,
+      1.05
+     ]
+    ],
+    "etalonnage": "neutre",
+    "son_db": -7
+   },
+   {
+    "type": "plan",
+    "debut": 8.0,
+    "duree": 1.0,
+    "fichier": "plan:p05",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.48,
+      1.02
+     ]
+    ],
+    "secousses": [
+     [
+      0.0,
+      22,
+      0.25
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -5
+   },
+   {
+    "type": "plan",
+    "debut": 9.0,
+    "duree": 1.0,
+    "fichier": "plan:p06",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.45,
+      1.0
+     ]
+    ],
+    "etalonnage": "aube",
+    "son_db": -4
+   },
+   {
+    "type": "plan",
+    "debut": 10.0,
+    "duree": 1.0,
+    "fichier": "plan:p07",
+    "fichier_vertical": "plan_v:p23",
+    "entree": 0.0,
+    "secousses": [
+     [
+      0.1,
+      12,
+      0.4
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -3
+   },
+   {
+    "type": "plan",
+    "debut": 11.0,
+    "duree": 1.0,
+    "fichier": "plan:p08",
+    "fichier_vertical": "plan_v:p22",
+    "entree": 0.0,
+    "etalonnage": "orage",
+    "son_db": -6
+   },
+   {
+    "type": "plan",
+    "debut": 12.0,
+    "duree": 3.5,
+    "fichier": "plan:p09",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.45,
+      1.0
+     ],
+     [
+      3.5,
+      0.52,
+      0.42,
+      1.08
+     ]
+    ],
+    "secousses": [
+     [
+      1.2,
+      10,
+      0.5
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -3
+   },
+   {
+    "type": "plan",
+    "debut": 15.5,
+    "duree": 1.0,
+    "fichier": "plan:p19",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1.0
+     ],
+     [
+      1.0,
+      0.5,
+      0.5,
+      1.04
+     ]
+    ],
+    "secousses": [
+     [
+      0.2,
+      6,
+      0.3
+     ]
+    ],
+    "etalonnage": "espace",
+    "son_db": -10
+   },
+   {
+    "type": "plan",
+    "debut": 16.5,
+    "duree": 1.0,
+    "fichier": "plan:p10",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.48,
+      1.0
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -8
+   },
+   {
+    "type": "noir",
+    "debut": 17.5,
+    "duree": 0.5
+   },
+   {
+    "type": "plan",
+    "debut": 18.0,
+    "duree": 3.5,
+    "fichier": "plan:p11",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1.0
+     ],
+     [
+      3.5,
+      0.5,
+      0.48,
+      1.06
+     ]
+    ],
+    "secousses": [
+     [
+      0.0,
+      24,
+      0.3
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -3
+   },
+   {
+    "type": "plan",
+    "debut": 21.5,
+    "duree": 2.0,
+    "fichier": "plan:p12",
+    "fichier_vertical": "plan_v:p24",
+    "entree": 0.2,
+    "etalonnage": "nuit_feu",
+    "son_db": -6
+   },
+   {
+    "type": "plan",
+    "debut": 23.5,
+    "duree": 2.0,
+    "fichier": "plan:p13",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.4,
+      1.0
+     ],
+     [
+      2.0,
+      0.52,
+      0.38,
+      1.05
+     ]
+    ],
+    "etalonnage": "orage",
+    "son_db": -8
+   },
+   {
+    "type": "plan",
+    "debut": 25.5,
+    "duree": 2.0,
+    "fichier": "plan:p20",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.4,
+      1.0
+     ],
+     [
+      2.0,
+      0.5,
+      0.38,
+      1.04
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -5
+   },
+   {
+    "type": "plan",
+    "debut": 27.5,
+    "duree": 1.0,
+    "fichier": "plan:p14",
+    "entree": 0.3,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1.08
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -7
+   },
+   {
+    "type": "plan",
+    "debut": 28.5,
+    "duree": 3.5,
+    "fichier": "plan:p15",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1.0
+     ],
+     [
+      3.5,
+      0.48,
+      0.48,
+      1.04
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -8
+   },
+   {
+    "type": "plan",
+    "debut": 32.0,
+    "duree": 1.5,
+    "fichier": "plan:p16",
+    "entree": 0.0,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1.05
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -9
+   },
+   {
+    "type": "plan",
+    "debut": 33.5,
+    "duree": 3.5,
+    "fichier": "plan:p21",
+    "fichier_vertical": "plan_v:p25",
+    "entree": 0.0,
+    "etalonnage": "nuit_feu",
+    "son_db": -6,
+    "textes": [
+     {
+      "t": 0.5,
+      "duree": 2.6,
+      "texte_id": "tout_vrai",
+      "style": "claque",
+      "position": "centre"
+     }
+    ]
+   },
+   {
+    "type": "carton",
+    "debut": 37.0,
+    "duree": 2.5
+   },
+   {
+    "type": "saisie",
+    "debut": 39.5,
+    "duree": 1.5,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s10",
+    "etapes": [
+     "vide",
+     "saisie",
+     "saisie-fin",
+     "survol"
+    ],
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     296,
+     532,
+     474
+    ],
+    "clavier_db": -18
+   },
+   {
+    "type": "boost",
+    "debut": 41.0,
+    "duree": 1.5,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s10",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     490,
+     532,
+     765
+    ],
+    "termes_cles": [
+     "chat",
+     "flammes",
+     "volcanique"
+    ]
+   },
+   {
+    "type": "plan",
+    "debut": 42.5,
+    "duree": 1.5,
+    "fichier": "plan:p14",
+    "entree": 2.5,
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1.1
+     ]
+    ],
+    "etalonnage": "nuit_feu",
+    "son_db": -6,
+    "textes": [
+     {
+      "t": 0.5,
+      "duree": 0.8,
+      "texte_id": "presque",
+      "style": "claque",
+      "position": "bas"
+     }
+    ]
+   }
+  ]
+ }
+}
