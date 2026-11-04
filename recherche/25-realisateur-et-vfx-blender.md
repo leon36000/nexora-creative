@@ -59,8 +59,86 @@ Pour écarter la **préférence de Gemini pour un texte écrit par Gemini** : r�
 
 ## 4. Banc vidéo : le meilleur prompt donne-t-il la meilleure vidéo ?
 
-(voir §4 rempli après les rendus)
+La littérature (Prompt-A-Video, recherche/24 §3) prévient qu'un prompt « plus beau » peut tuer le mouvement : la décision se prend sur la vidéo. **10 paires** (5 effets spéciaux dont sabres, explosion, dragon, bataille spatiale ; une pub ; deux produits ; un film avec réplique ; un réseau social ; un cours), h3-fast sur la RTX 5090, même graine (777), même format et durée que la demande ; A = prompt de la production actuelle (GLM-5.3), B = réalisateur v2 Expert. Rendus : 47 s de moteur en moyenne (≈ 13 min d'attente dans la file partagée avec deux autres agents).
+
+Juge visuel à l'aveugle (Argon élevé, six images de chaque vidéo, rangées X/Y tirées au hasard puis inversées, 20 jugements, 0,21 $ ; `juge-videos-paires.jsonl`) :
+
+| Critère | A actuel | B réalisateur |
+|---|---|---|
+| fidélité | 6,00 | 6,55 |
+| image | 4,90 | 5,75 |
+| **mouvement** | 4,70 | **5,90** |
+| impact | 4,70 | 5,95 |
+| **global** | **4,75** | **5,90** |
+
+**B gagne 17 jugements sur 20** ; dans 7 paires il gagne dans les deux ordres (sabres, explosion, dragon, poutine, parfum, chat en skate, volcan), 3 paires sont partagées (bataille spatiale, montre, retrouvailles). Le mouvement monte (+1,2) au lieu de baisser : la règle « une action par plan, un mouvement de caméra » tient.
+
+Ce que je vois moi-même sur les planches (`marketing/creative/captures-v3/llm-booste-paire-*.jpg`) : le dragon demandé **noir** est rouge chez A, noir chez B ; la poutine de B donne faim (sauce, fromage qui file, client qui mange) quand A montre surtout la préparation ; les retrouvailles se valent (les deux disent la réplique, vérifiée par transcription faster-whisper : « T'as pas changé, mon vieux »). Défauts restants chez B : des lames d'énergie qui se confondent dans le duel, des visages en gros plan parfois cireux (FastH3 832×480), des plans de 3 s encore chargés.
+
+**Note honnête de la vidéo** : 5,9/10 avec le réalisateur contre 4,75 avant, au juge sévère, sur FastH3 en 832×480. C'est un gain net, pas encore du triple A : la résolution et le moteur rapide plafonnent l'image ; le moteur cinéma (h3-max) et une seconde prise jugée sont les leviers suivants.
+
+**Le son n'a été écouté par aucun humain** ; seule la réplique a été vérifiée par transcription.
+
+## 4 bis. Coût par demande (ce que paie le client)
+
+| | Avant (GLM-5.3) | Après (réalisateur Expert) |
+|---|---|---|
+| USD fournisseur | 0,0103 | **0,0055** |
+| Crédits facturés (×1,10 × 1,4025 × 100, arrondi, minimum 1) | 2 | **1** |
+| Délai médian de l'écriture | 17,5 s | **14,3 s** |
+| Note du prompt (Sol / Argon) | 5,9 / 5,4 | **7,1 / 8,0** |
+| Note de la vidéo (Argon, images) | 4,75 | **5,90** |
+
+Rapport qualité/prix : le palier Éco (0,0004 $) n'apporte que +0,3 à +0,5 au texte, non significatif, et coûterait le même crédit au client ; Expert est le bon défaut. Si un jour le prix du crédit descend sous le centième, Équilibré (Muse Spark, 10,8 s, 0,0003 $, 32/32 valides) est le repli naturel.
 
 ## 5. Effets en images de synthèse : Relief + Blender
 
-(voir §5 rempli après les rendus)
+### 5.1 Machine
+
+**Blender n'a pas de version Linux ARM64 officielle** (5.2.3 LTS : `linux-x64` seulement ; `bpy` sur PyPI : pas de roue `linux_aarch64` ; Ubuntu arm64 propose 4.0.2, ancien et sans CUDA) et le disque de pc6 est à 99 %. Choix : **pc1**, Blender 5.2.3 LTS officiel (somme SHA-256 vérifiée, 1,2 Go) dans `/run/media/pc1/Infrastructure/NexoraStudioWork/blender/`, rendu EEVEE sans interface sur la 5090 (≈ 0,4 à 0,8 s par image en 832×480, 32 à 48 échantillons ; ≈ 0,35 s par image de passe de données ; VRAM négligeable à côté de H3).
+
+### 5.2 Le prototype
+
+`app/server/nexora/vfx/scene_blender.py` (bpy, `blender -b -P … -- spec.json`) : importe un GLB de Relief, le normalise (centre, taille), anime l'objet et une caméra (images clés, cible suivie, secousse, flou de mouvement), éclaire (soleil + contre-jour + ambiance réglés sur la plaque) et rend **couleur RGBA, profondeur 16 bits, normales (espace caméra), masque** par substitution de matériau (aucune dépendance au compositeur, dont l'API change entre versions ; courbes lues dans les « channelbags » de Blender 5). Planche des passes : `marketing/creative/captures-v3/vfx-blender-04-passes.jpg`.
+
+Actifs : deux modèles Relief faits pour l'essai (image Qwen-Image-2.1 puis TRELLIS.2 qualité sur la GB10, 174 s et ≈ 170 s) : un chasseur spatial et une chaussure de course blanche. Plaque d'espace : Qwen-Image-2.1.
+
+### 5.3 Trois façons de faire le même plan, même budget (h3-fast, 5 s, 832×480, graine 4242)
+
+- **A, H3 seul** : prompt du réalisateur (T2VA), l'objet décrit en mots.
+- **B, plan clé 3D** : Blender pose le modèle Relief sur la plaque, une image ; H3 l'anime en I2VA.
+- **C, calque 3D** : Blender rend les 121 images de l'objet ; elles sont posées sur une plaque vidéo H3 (I2VA de la plaque vide, son gardé) ; pour la chaussure, rendu Blender seul (tournette).
+
+Planches : `vfx-blender-01-vaisseau-approche.jpg`, `-02-vaisseau-passage.jpg`, `-03-soulier.jpg`. Juge visuel à l'aveugle (Argon élevé, deux ordres, `juge-vfx.jsonl`, 0,13 $) et mon propre visionnage :
+
+| Plan | A H3 seul | B plan clé 3D | C calque 3D | Ce que je vois |
+|---|---|---|---|---|
+| Vaisseau qui fonce vers la caméra | **6,5** | 4,5 | (raté) | A est spectaculaire (nébuleuse, reflets, passage au-dessus) ; B ajoute un reflet d'objectif puis le vaisseau devient une coque géante qui ne ressemble plus au modèle ; C est raté : la plaque « vide » contient elle-même des vaisseaux inventés par H3 (le son décrit un passage, H3 le montre) |
+| Vaisseau qui passe en profil | 5 | **6** | 3,5 | B garde la forme exacte du modèle et H3 ajoute les tuyères bleues et le mouvement ; A est beau mais c'est un autre vaisseau que celui du plan 1 ; C a l'air incrusté (image de synthèse sans lumière ni flou de la plaque) |
+| Chaussure qui tourne (produit) | 5,5 | 4,5 | **6** contre B ; 5,5 contre A | A est la plus « pub » mais **invente le produit** (grand panneau orange et un logo triangulaire de marque) ; B garde exactement la chaussure mais ne la fait presque pas tourner ; C la fait tourner exactement, en image de synthèse un peu plastique (texture de TRELLIS bosselée au talon) |
+
+### 5.4 Décision
+
+**Le gain est réel mais étroit, et Blender n'est pas indispensable pour l'obtenir.**
+
+- Ce que la chaîne 3D apporte vraiment : **la fidélité d'un objet précis** (le produit du client, le même vaisseau d'un plan à l'autre) et une trajectoire exacte. H3 seul garde mieux le spectacle et la lumière, mais change l'objet (et ajoute des logos).
+- Ce qu'elle n'apporte pas : du spectacle triple A. Le calque 3D posé sur une plaque générée perd (3,5/10) : lumière, grain et flou ne raccordent pas, et la plaque n'est pas contrôlable.
+- Le gain vient du **plan clé** (B), qui n'a besoin que d'une image de l'objet sous le bon angle : le visualiseur 3D de Relief la donne déjà. **Intégré** : bouton « Animer avec H3 » dans Relief (la vue telle que la personne l'a tournée, posée sur un fond de studio, devient le plan clé I2VA du mode Vidéo), sans service Blender à exploiter.
+- Le rendu exact d'une tournette (C3) reste utile pour les produits ; il demande un travailleur Blender (pc1) qui n'est **pas déployé** : à faire quand un client produit le demande, avec une meilleure texture (retexture prévue dans Relief).
+- **Ce qui rendrait Blender décisif** : un modèle vidéo guidé par profondeur, pose ou trajectoire. H3 n'en a pas ; recherche/24 §4 désigne Wan2.2-Fun-Control / VACE-Fun (Apache-2.0) et Wan-Move. Les passes de profondeur, normales et masque du prototype sont exactement ce qu'ils consomment ; c'est à ce moment-là que la chaîne vaudra la peine d'être un outil de l'agent. Décision de moteur (Wan retiré le 31/10 par le fondateur) à reprendre avec lui.
+
+## 6. Ce qui reste
+
+- **Boucle de retour sur la vidéo** (RAPO++, recherche/24 §3) : juger la prise (planche + juge visuel, déjà en place pour les films « 2 prises par plan ») et réécrire le plan raté. Non fait pour le mode Vidéo simple.
+- Réalisateur au service du **Producteur** et du **storyboard Film** (`planifierFilm`) : aujourd'hui il écrit chaque plan déjà découpé ; la découpe du film elle-même reste l'ancien rôle `realisation`.
+- **Dialectes** : H3 T2VA/I2VA et image Qwen sont compilés par le code ; FL2VA, L2VA et Ref2VA (personnages @) passent encore par la conversion existante (`convertirEnPromptRef`). LTX n'a pas de dialecte : il est retiré de l'interface (licence), il n'y a rien à compiler.
+- Banc plus large sur la vidéo (10 paires ici ; le son à écouter par un humain ; h3-max non mesuré).
+- Les deux juges sont des LLM ; aucun humain n'a départagé.
+- Blender : travailleur sur pc1 non déployé ; à reprendre avec un modèle vidéo guidé par profondeur (décision de moteur au fondateur). Pika H3 Flex (TA1) non mesuré : la file de la 5090 était saturée.
+
+## 7. Observations pour la vague « interface triple A et Mode Studio »
+
+- Le panneau « Ce que l'IA a compris » est la bonne place pour un **storyboard visuel** : la fiche a déjà les plans (cadrage, début) ; une vignette Qwen par plan (`versImage`) coûterait ≈ 20 s de GB10 par plan et donnerait l'aperçu avant tout rendu vidéo.
+- Les **variantes** devraient lancer un brouillon chacune (FastH3, 30 s de moteur) côte à côte plutôt que réécrire la description : c'est le « 4 prises » de Higgsfield, à un coût que nos GPU permettent.
+- La file partagée de la 5090 (13 min d'attente moyenne pour 47 s de calcul pendant ce banc) se verra dans l'interface : il faut afficher la position dans la file et l'heure prévue, et réserver une part de la file aux clients.
+- Mode Studio (FreeCut) : la fiche du réalisateur se traduit directement en pistes (un plan = un clip avec sa durée, sa réplique, sa musique) ; l'importer comme timeline éditable donnerait le pont « Créer → Studio » que filmcraft fait par contrats (recherche/24 §9).
