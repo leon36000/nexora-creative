@@ -494,3 +494,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Détourage : commit local `74959b0` aligne l’état général sur la sélection rapide ; 24 tests et typecheck passent. Il ne prouve pas la santé ni ne raccorde le moteur ; index distant divergent, réconciliation nécessaire.
 
 - Agent DeepSeek outillé et isolé : premier essai a atteint la limite de tours sans livrer sa revue ; second essai borné lancé.
+
+- OPSYS : commits locaux `7585b81`/`9f8f13f` ajoutent une traçabilité partielle des plans, annexes, sources et export ; 14 tests relancés. Essai réel vertical séparé : plan, annexe, 7 sources et export vérifiés indépendamment ; vidéo et dix segments archivés sur pc1. Pas de verdict humain ni push.

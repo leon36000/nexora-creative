@@ -742,3 +742,9 @@ Commit local **74959b0** sur le même worktree : le booléen `detourage` de `/ap
 ### Agent DeepSeek outillé isolé : premier essai incomplet
 
 Le même relais privé a permis une exécution DeepSeek outillée : six requêtes, six appels Bash, puis limite de tours atteinte (`FAIL:error_max_turns`, 0,00472 $ journalisé), sans fichier de revue final. Traces et éventuels essais synthétiques conservés ; ne pas déclarer la revue achevée. Un second essai borné est lancé avec consigne de conclure plus directement ; pas de clé réelle visible dans l’agent et aucun accès aux autres projets.
+
+### OPSYS : empreintes de provenance testées sur un vrai montage
+
+Sur `feat/opsys-ultime`, commits locaux **7585b81** et **9f8f13f** : les futurs montages enregistrent SHA-256 du plan, de son annexe, des sources vidéo/voix/musique résolues et de l’export ; les sources manquantes sont indiquées et une modification constatée après rendu empêche l’attestation. Les workers reçoivent le même instantané de plan et de sources. La couverture est **partielle** : polices, logo/marque, code, dépendances, environnement et modification transitoire suivie de restauration restent hors attestation. Les 14 tests ciblés ont été relancés indépendamment avec succès.
+
+Essai réel sur copie distincte du vertical DeepSeek : 14,5 s, six plans, rendu CPU 52,6 s, H.264 540×960/AAC, décodage complet sans erreur. Plan, annexe, sept sources et empreinte export ont été vérifiés indépendamment ; une entrée de journal correspondante. Export, dix tranches, mix et planche archivés sur pc1 et SHA vérifiés, inventaire **3 916 entrées** ; détails de provenance copiés et vérifiés sur Storage et pc1. C’est un essai technique préservé, pas un nouveau verdict humain ni une preuve de couverture complète. Aucun push ni pipeline.
