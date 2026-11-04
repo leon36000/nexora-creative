@@ -68,12 +68,27 @@ describe('réécrivain H3', () => {
     }
   });
 
+  it.each(['an anime scene for a coffee ad', 'an anime battle in a coffee ad'])('garde le style anime explicite dans le repli : %s', (intention) => {
+    const prompt = promptDeRepli({ ...entree, intention });
+    expect(prompt).toContain(intention);
+    expect(prompt).not.toContain(STYLE_LIVE_ACTION);
+    expect(prompt).not.toContain(NEGATIF_LIVE_ACTION);
+  });
+
   it('garde une recette photo complète pour un repli de film promo photoréaliste', () => {
     const intention = 'film promo photoréaliste de ma voiture rouge au bord de la mer';
     const prompt = promptDeRepli({ ...entree, intention });
     expect(prompt).toContain(STYLE_LIVE_ACTION);
     expect(prompt).toContain(NEGATIF_LIVE_ACTION);
     expect(verifierRecetteLiveAction(prompt, intention)).toEqual([]);
+  });
+
+  it.each(['"cinematic  Ferrari"', '«cinematic  Ferrari»', '“cinematic  Ferrari”'])('préserve intégralement le texte cité et nettoie le style photo hors citation : %s', (citation) => {
+    const intention = `A coffee ad displays ${citation}, with cinematic golden lighting and a Ferrari nearby.`;
+    const prompt = promptDeRepli({ ...entree, intention });
+    expect(prompt).toContain(citation);
+    expect(prompt).toContain('unbranded sports car');
+    expect(prompt.replace(citation, '')).not.toMatch(/\bcinematic\b/i);
   });
 
   it('protège les répliques de l’utilisateur', async () => {

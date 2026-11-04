@@ -118,6 +118,17 @@ describe('réalisateur', () => {
     expect(messages[0].content).toContain('preserve 2D/3D animation, anime, cartoons, illustration, stop-motion, claymation');
   });
 
+  it.each(['an anime scene for a coffee ad', 'an anime battle in a coffee ad'])('does not apply the photo recipe to an anime medium: %s', async (intention) => {
+    const animation = {
+      ...FICHE,
+      style: '2D hand-drawn anime with inked outlines and painted backgrounds',
+    };
+    const r = await realiser({ ...ENTREE, intention, dialogues: [] }, faux([JSON.stringify(animation)]));
+    expect(r.prompt).toContain('hand-drawn anime');
+    expect(r.prompt).not.toContain(STYLE_LIVE_ACTION);
+    expect(r.prompt).not.toContain(NEGATIF_LIVE_ACTION);
+  });
+
   it.each(['t2va', 'i2va', 'fl2va', 'l2va', 'ref2va'] as const)('compile %s avec chronologie et dialogues intacts', (mode) => {
     const references = mode === 'ref2va' ? { sujets: [], composition: 1 } : undefined;
     const e = { ...ENTREE, mode, references };

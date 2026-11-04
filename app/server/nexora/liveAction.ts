@@ -7,6 +7,12 @@ export const MOTS_RENDU_INTERDITS = [
 
 const echapper = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[- ]/g, '[-\\s]+');
 const interdit = new RegExp(`\\b(?:${MOTS_RENDU_INTERDITS.map(echapper).join('|')})\\b`, 'gi');
+// Citations typographiques simples sur une ligne; les citations imbriquées ou multiligne ne sont pas analysées.
+const CITATION = /("[^"\n]*"|«[^»\n]*»|“[^”\n]*”)/g;
+
+function remplacerHorsCitations(t: string, transformer: (partie: string) => string): string {
+  return t.split(CITATION).map((partie, i) => i % 2 ? partie : transformer(partie)).join('');
+}
 
 /** Même intention que le négatif du rapport, sans répéter les déclencheurs au sein du conditionnement positif.
  * H3 utilise BasicGuider (CFG 1), sans entrée négative : cette exclusion reste une phrase de prose du guide. */
@@ -14,7 +20,7 @@ export const NEGATIF_LIVE_ACTION = 'Avoid synthetic imagery, game-like aesthetic
 export const STYLE_LIVE_ACTION = 'Live-action footage photographed on an ARRI Alexa 35 sensor with a Cooke S4 50mm lens, natural exposure, fine film grain, slight halation and lens imperfections';
 export const STYLE_NEUTRE = 'A clear, consistent visual style suited to the request';
 
-const STYLE_ANIME = /\b(?:2d(?:[- ]animated?)?|3d\s+(?:animated?|animation|cg|cgi|render|character|model|scene|film|video)|animated?\s+(?:film|movie|video|short|series|scene|character)|cartoon(?:ish)?|an anime\s+(?:film|movie|short|video|series|style|look|character|aesthetic)|anime[- ](?:style|look|film|movie|short|video|series|character|aesthetic)|manga|claymation|stop[- ]motion|motion design|cgi|computer[- ]generated|illustration|illustrated|hand[- ]drawn|drawn animation|dessin(?:s)? animé|dessin d['’]animation|film d['’]animation|vidéo d['’]animation|animation\s+(?:2d|3d|cgi)|(?:style|look|esthétique)\s+(?:cartoon|anime|manga|illustration|claymation)|video[- ]game (?:style|look)|game[- ]like style|game[- ]art(?: style)?|(?:style|look) (?:de )?jeu vidéo|graphismes? de jeu vidéo|jeu vidéo(?:que)?)(?=$|[^\p{L}\p{N}_])/iu;
+const STYLE_ANIME = /\b(?:2d(?:[- ]animated?)?|3d\s+(?:animated?|animation|cg|cgi|render|character|model|scene|film|video)|animated?\s+(?:film|movie|video|short|series|scene|character)|cartoon(?:ish)?|an anime\s+(?:film|movie|short|video|series|scene|battle|fight|style|look|character|aesthetic)|anime[- ](?:style|look|film|movie|short|video|series|scene|battle|fight|character|aesthetic)|anime\s+de\s+(?:combat|bataille|guerre)|manga|claymation|stop[- ]motion|motion design|cgi|computer[- ]generated|illustration|illustrated|hand[- ]drawn|drawn animation|dessin(?:s)? animé|dessin d['’]animation|film d['’]animation|vidéo d['’]animation|animation\s+(?:2d|3d|cgi)|(?:style|look|esthétique)\s+(?:cartoon|anime|manga|illustration|claymation)|video[- ]game (?:style|look)|game[- ]like style|game[- ]art(?: style)?|(?:style|look) (?:de )?jeu vidéo|graphismes? de jeu vidéo|jeu vidéo(?:que)?)(?=$|[^\p{L}\p{N}_])/iu;
 const STYLE_PHOTO = /\b(?:live[- ]action|photoreal(?:istic|isme)?|photoréalistes?|photoréalisme|photographic(?:ally)?|photographique|prises? de vues? réelles?|filmée? en réel|shot on film|real footage)(?![\p{L}\p{N}_])/iu;
 const NEGATION_STYLE = /(?:\b(?:not|no|never|without|non|pas|sans|aucun|aucune|ne)\b|\bdon['’]t\b)(?:[\s\p{L}'’:-]{0,28})$/iu;
 const NEGATION_PHOTO = /\b(?:not|no|without|non|pas|sans)\s+(?:a\s+|the\s+|de\s+|du\s+|d['’])?(?:live[- ]action|photoreal(?:istic|isme)?|photoréaliste|photoréalisme|photographic|photographique|prises? de vues? réelles?)\b/i;
@@ -25,8 +31,9 @@ const PROMO = /\b(?:pub|ad|ads|advert|advertisement|advertising|commercial|promo
  * d'« animation d'un vrai acteur » ne sont pas des choix de dessin animé; un mot nié ne compte pas non plus.
  */
 export function styleNonPhotographiqueDemande(texte: string): boolean {
-  for (const m of texte.matchAll(new RegExp(STYLE_ANIME.source, STYLE_ANIME.flags + 'g'))) {
-    const avant = texte.slice(Math.max(0, m.index! - 30), m.index!);
+  const brief = horsParoles(texte);
+  for (const m of brief.matchAll(new RegExp(STYLE_ANIME.source, STYLE_ANIME.flags + 'g'))) {
+    const avant = brief.slice(Math.max(0, m.index! - 30), m.index!);
     if (!NEGATION_STYLE.test(avant)) return true;
   }
   return false;
@@ -38,7 +45,7 @@ export function requiertPhotographie(
   intention: string,
   consignes: readonly string[] = [],
 ): boolean {
-  const brief = [intention, ...consignes].join('\n');
+  const brief = horsParoles([intention, ...consignes].join('\n'));
   if (styleNonPhotographiqueDemande(brief) || NEGATION_PHOTO.test(brief)) return false;
   if (STYLE_PHOTO.test(brief)) return true;
   return famille === 'pub' || famille === 'produit' || PROMO.test(brief);
@@ -62,7 +69,7 @@ export const REGLES_LIVE_ACTION = [
 
 /** Répliques et texte visible explicitement demandé ne sont pas des instructions de style. */
 export function horsParoles(t: string): string {
-  return t.replace(/<d>[\s\S]*?<\/d>/g, '').replace(/"[^"\n]*"/g, '');
+  return t.replace(/<d>[\s\S]*?<\/d>/g, '').replace(CITATION, '');
 }
 
 export function motsRenduInterdits(t: string): string[] {
@@ -82,13 +89,33 @@ export function nettoyerRepli(t: string, photographique = true): string {
     [/\b(ferrari)\b/gi, 'unbranded sports car'],
     [/\b(marvel|avengers|disney|pixar|pok[eé]mon|harry potter|batman|superman|spider-?man|iron ?man|transformers?|godzilla|lego)\b/gi, 'original fictional character'],
   ];
-  const styleNettoye = photographique ? t.replace(interdit, '') : t;
-  return equivalents.reduce((s, [re, vers]) => s.replace(re, vers), styleNettoye)
-    .replace(/\s+/g, ' ').trim();
+  return remplacerHorsCitations(t, (partie) => {
+    const styleNettoye = photographique ? partie.replace(interdit, '') : partie;
+    return equivalents.reduce((s, [re, vers]) => s.replace(re, vers), styleNettoye)
+      .replace(/\s+/g, ' ');
+  }).trim();
 }
 
 export function estSpatial(intention: string): boolean {
-  return /\b(space(?:ship|craft| station)?|orbit\w*|astronaut\w*|vaisseau\w*|spatial\w*|espace|cosmos|lune|moon)\b/i.test(intention);
+  const brief = horsParoles(intention);
+  return /\b(space(?:ship|craft| station)?|orbit\w*|astronaut\w*|vaisseau\w*|spatial\w*|espace|cosmos|lune|moon)\b/i.test(brief);
+}
+
+const VAISSEAU_SPATIAL = /\b(?:space[\s-]?(?:ships?|crafts?|vessels?|fighters?|frigates?|cruisers?|vehicles?)|starships?|vaisseaux?|navettes? spatiales?)\b/i;
+const NEGATION_VAISSEAU = /\b(?:without|no|not(?!\s+(?:only|just)\b)|never|avoid|exclude|excluding|do not|don['’]t|sans|pas|aucun(?:e)?|ni|éviter|eviter|évite|evite|exclure|exclu)\b(?:[\s\p{L}'’:-]{0,40})$/iu;
+const NEGATION_VAISSEAU_SUIVANTE = /^\s*(?:(?:is|are|was|were)\s+)?(?:not\s+(?:needed|required|requested|wanted|present|included|there|shown|visible|desired)|absent|omitted|n['’]est\s+pas\s+(?:nécessaire|voulu|demandé|présent|inclus)|pas\s+(?:nécessaire|voulu|demandé|présent|inclus))\b/iu;
+
+/** Traite les mentions positives de vaisseau hors citations et hors négations directes courantes. */
+function mentionPositive(texte: string, vocabulaire: RegExp): boolean {
+  const brief = horsParoles(texte);
+  const occurrences = new RegExp(vocabulaire.source, `${vocabulaire.flags}g`);
+  return [...brief.matchAll(occurrences)].some((m) => {
+    const debut = m.index ?? 0;
+    const fin = debut + m[0].length;
+    const avant = brief.slice(Math.max(0, debut - 50), debut);
+    const apres = brief.slice(fin, fin + 50);
+    return !NEGATION_VAISSEAU.test(avant) && !NEGATION_VAISSEAU_SUIVANTE.test(apres);
+  });
 }
 
 /** Vérification du texte compilé, partagée avec le banc sans GPU. */
@@ -123,8 +150,14 @@ export function verifierVaisseauxOriginaux(t: string, intention: string): string
   if (!estSpatial(intention)) return [];
   const p = horsParoles(t);
   const erreurs: string[] = [];
-  if (!/\b(original|purpose-built|unique|invented)\b/i.test(p)) erreurs.push('space: use original purpose-built spacecraft designs');
-  if (/\b(battleships?|aircraft carriers?|naval ships?|F[- ]?(?:16|18|22|35)|B[- ]?2|warships?)\b/i.test(p)) {
+  const vaisseauDemande = mentionPositive(intention, VAISSEAU_SPATIAL);
+  const vaisseauDansPrompt = mentionPositive(p, VAISSEAU_SPATIAL);
+  const enginMilitaire = /\b(battleships?|aircraft carriers?|naval ships?|F[- ]?(?:16|18|22|35)|B[- ]?2|warships?)\b/i;
+  const enginMilitaireDansPrompt = mentionPositive(p, enginMilitaire);
+  if (!vaisseauDemande && !vaisseauDansPrompt && !enginMilitaireDansPrompt) return [];
+  if (vaisseauDemande && !vaisseauDansPrompt) erreurs.push('space: preserve the requested spacecraft and use an original purpose-built design');
+  else if (vaisseauDansPrompt && !/\b(original|purpose-built|unique|invented)\b/i.test(p)) erreurs.push('space: use original purpose-built spacecraft designs');
+  if (enginMilitaireDansPrompt) {
     erreurs.push('space: replace real military aircraft and naval vessels with original spacecraft');
   }
   return erreurs;
