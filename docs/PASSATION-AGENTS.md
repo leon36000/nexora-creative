@@ -766,3 +766,7 @@ Une seconde tâche isolée Muse a produit `agents/muse-controle-detourage/contro
 ### Gemini Flex élevé : revue outillée de la provenance
 
 Après les tâches outillées DeepSeek et Muse, un agent `gemini-eleve` est lancé dans le même dispositif isolé, pour relire une copie du montage et ses empreintes de provenance. Dossier et traces sur Storage ; clé de passerelle conservée uniquement dans le relais, pas dans l’agent ; aucune clé fournisseur lue. Résultat en attente, à vérifier indépendamment.
+
+### OPSYS : concordance avec les premiers dossiers Git
+
+Un agent Luna a comparé les dossiers Git, calcul relancé indépendamment : pour Gemini long, `9303394` contient **20 plans / 105,583 s**, contre **24 / 112 s** à `d728c65` ; pour Muse long, `9303394` contient **20 / 109,708 s**, contre **19 / 90,458 s** à `2b3e075` ; le court Muse est **6 / 14 s** puis **6 / 14,5 s**. Les premiers chiffres correspondent aux anciennes entrées de montage et aux fichiers. C’est une forte concordance avec les dossiers initiaux parmi les versions examinées, pas une preuve cryptographique de la révision exacte : aucun hash historique du plan n’a été trouvé. Pas de rendu ni remplacement.
