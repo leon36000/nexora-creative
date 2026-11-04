@@ -628,3 +628,9 @@ Le fondateur confirme que la reprise couvre bien Mesh, la synchronisation labial
 ### Nexora Sync : rapport persistant retrouvé
 
 Le rapport `pc1:/run/media/pc1/Infrastructure/NexoraStudioWork/lipsync/RAPPORT-LIPSYNC.md` et ses entrées/sorties existent. Il rapporte des mesures CPU SyncNet sur H3 natif ancré : LSE-C 5,83 et 5,06, LSE-D 8,48 et 9,15 pour deux personnages distincts. Les témoins de voix remplacée ont été mesurés sur d’autres personnages et dialogues ; ils ne démontrent pas une comparaison équitable de modèles. MuseTalk 1.5 et LatentSync 1.6 sont préparés, mais **aucun redoublage GPU comparatif n’a été réalisé** lors de cette veille ; ne pas inventer vitesse, VRAM ou gagnant. Les deux environnements déclarent sm_120 ; l’inférence complète 5090 reste à vérifier. À reprendre avec les mêmes clips et voix, en protégeant la file partagée, dès que la marge disque est sûre.
+
+### Quatre équipes OPSYS : copie sur le disque Bureau de pc1
+
+Dix brouillons et essais existants ont été copiés depuis Storage sur le disque contenant le Bureau de pc1 : longs et courts des quatre équipes, ainsi que deux essais musicaux Opus. Dossier physique `~/Bureau/Nexora-Livrables/TOUS-LES-FILMS/codex-opsys-quatre-equipes-brouillons-bureau-20261104/`, 202 Mio, confirmé sur `/dev/nvme2n1p2` et non lien symbolique ; chaque fichier vérifié SHA-256, inventaire global **3 886 entrées**. Les originaux et autres archives sont conservés.
+
+État confirmé par relevé documentaire d’un sous-agent : Gemini/Muse/Opus ont leurs brouillons long et court 16:9 ; aucun export vertical retrouvé dans les trois dossiers de montage consultés. Les dossiers Gemini et Opus définissent des montages verticaux à partir de sources résolubles, dont des replis de recadrage explicitement codés pour Opus ; Muse ne définit pas encore le sien. Présence des fichiers et propositions d’équipe ne constituent ni validation qualité ni décision du fondateur.

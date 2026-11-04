@@ -445,3 +445,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Le fondateur confirme l’approfondissement de toutes les technologies Creative, y compris Mesh, lipsync, LTX 2.5, détourage et Wan 2.2 pc4 ; le mandat ne se limite pas aux films. Statuts et preuves à vérifier avant toute déclaration de livraison.
 
 - Sync : rapport persistant retrouvé sur Infrastructure pc1 ; H3 natif mesuré, MuseTalk et LatentSync préparés mais aucune génération comparative GPU prouvée. Comparaison à reprendre sur clips/voix identiques sans perturber la file partagée.
+
+- À la demande du fondateur, dix brouillons/essais des quatre équipes OPSYS copiés physiquement sur le disque Bureau pc1 (202 Mio), SHA vérifiés et inventoriés ; originaux préservés. Aucun vertical exporté trouvé pour Gemini/Muse/Opus, malgré des plans définis pour Gemini/Opus.
