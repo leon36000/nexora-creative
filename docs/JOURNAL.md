@@ -403,3 +403,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS DeepSeek : p29 rendu, décodé et archivé avec planche ; p30 lancé seul après contrôle de file et puissance.
 
 - OPSYS : commit `65acfe4` conserve les tranches et refuse l'écrasement, 7 tests relancés. Le court DeepSeek (EditPlan validé, 13,5 s) est lancé en brouillon CPU sur deux cœurs ; résultat et archivage en attente.
+
+- OPSYS DeepSeek : premier brouillon court 13,5 s/7 plans produit, décodé, sans source absente. Film, neuf tranches, mix et planche archivés SHA sur pc1 ; revue du son/mouvement et verdict humain non faits.

@@ -536,3 +536,9 @@ Codex a comparé des recadrages 640×360 de la source et des quatre variantes p7
 Commit local **65acfe4** sur `feat/opsys-ultime` : conservation des tranches MP4 et du mix dans un dossier unique étiqueté ; refus d'écraser l'export existant, y compris symlink, et `ffmpeg -n`. Sept tests ciblés passent, relancés indépendamment ; `equipes/essai` non suivi préservé. Aucun push.
 
 Après validation réelle de l'EditPlan court DeepSeek (`ok: true`, 13,5 s), présence des plans, voix et musique, et contrôle qu'aucun export du même nom n'existe, le brouillon court a été lancé en CPU (`--jobs 1`, affinité deux cœurs, priorité basse), en parallèle du seul plan GPU p30. Il est **en cours** : ne pas déclarer le film complet, ni supprimer les tranches ; à la fin, vérifier et archiver chaque MP4 ainsi que le film et leurs planches sur pc1.
+
+### OPSYS DeepSeek : brouillon court produit
+
+Le brouillon `~/nexora-creative-data/work/opsys-ultime/deepseek/montage/deepseek-court-brouillon.mp4` a été rendu en 50,4 s CPU après validation de l'EditPlan (13,5 s, 7 plans, aucune source manquante). `ffprobe` confirme H.264 960×540, AAC, 13,5 s ; décodage intégral sans erreur. Neuf tranches MP4, le mix WAV, l'export et une planche ont été copiés sur le SSD Infrastructure de pc1, vérifiés SHA-256 et inscrits dans l'inventaire (**3 765 entrées**), via le dossier du Bureau `codex-opsys-deepseek-court-brouillon-20261104`. Tous les originaux et tranches restent sur Storage.
+
+Inspection de la planche uniquement : représentant/maison, signal, serveurs et carton sont présents ; plusieurs images sont sombres. Le rythme, la voix, le son, le mouvement et la qualité globale ne sont pas encore évalués. C'est un **brouillon interne**, pas une finale ni une note fondateur. `p30` du long est toujours en cours à cet instant.
