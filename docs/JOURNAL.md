@@ -443,3 +443,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Le fondateur demande d’utiliser Storage pc6 et les espaces Bureau et Infrastructure pc1. Vérifiés : ~645 Gio libres sur Storage, ~244 Gio sur Infrastructure, ~33 Gio sur le système de fichiers contenant le Bureau pc1. Gros volumes sur les espaces disposant de marge ; copies vérifiées et inventoriées.
 
 - Le fondateur confirme l’approfondissement de toutes les technologies Creative, y compris Mesh, lipsync, LTX 2.5, détourage et Wan 2.2 pc4 ; le mandat ne se limite pas aux films. Statuts et preuves à vérifier avant toute déclaration de livraison.
+
+- Sync : rapport persistant retrouvé sur Infrastructure pc1 ; H3 natif mesuré, MuseTalk et LatentSync préparés mais aucune génération comparative GPU prouvée. Comparaison à reprendre sur clips/voix identiques sans perturber la file partagée.
