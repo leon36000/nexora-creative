@@ -1,0 +1,346 @@
+{
+ "id": "opsys",
+ "titre": "OPSYS-AI · Votre entreprise, au complet (film de vision)",
+ "produit": "OPSYS-AI",
+ "idee": "Pendant que vous êtes sur le toit, dix départements préparent tout ; rien ne part sans votre décision.",
+ "duree": 54.6,
+ "etiquette": "Vision · en développement",
+ "plaques": {
+  "toit": {
+   "recette": "max",
+   "secondes": 5,
+   "image": "Sunrise on a snowy suburban roof in Quebec: a roofing and gutter contractor in his forties, insulated work jacket, gloves and toque, kneels on the roof edge fitting a white aluminum gutter; his breath is visible; his phone in the chest pocket lights up and vibrates; he pauses and looks down at it. Bright golden sunrise key light, clean pale blue sky, crisp snow, lifted shadows, natural skin texture, 35mm.",
+   "mouvement": "Slow push-in; he stops working, glances at the glowing phone in his pocket, then keeps his hands on the gutter, looking out at the street.",
+   "son": "Cold morning wind, a phone vibrating in a jacket, distant traffic, a metal gutter clink."
+  },
+  "marteau": {
+   "existant": "opsys-opus/plaques/p03-rapide-0.mp4",
+   "cle": "opsys-opus/plaques/p03-cle-0.png",
+   "image": "Gloved hands hammering a nail into roof shingles in the cold morning light.",
+   "mouvement": "Slow push-in on the gloved hands at work.",
+   "son": "Hammer taps, wind."
+  },
+  "soir": {
+   "existant": "opsys-opus/plaques/p13-rapide-0.mp4",
+   "cle": "opsys-opus/plaques/p13-cle-0.png",
+   "image": "Evening at home: a father sits on the floor by a window playing with his young child in warm lamplight.",
+   "mouvement": "Still camera, gentle drift.",
+   "son": "Soft home ambience, a child's laugh."
+  },
+  "matin": {
+   "existant": "opsys-opus/plaques/p16-rapide-0.mp4",
+   "cle": "opsys-opus/plaques/p16-cle-0.png",
+   "image": "Sunrise: the contractor stands on a rooftop looking over a small Quebec town, golden light.",
+   "mouvement": "Slow push-in toward the silhouette.",
+   "son": "Morning wind, distant church bell."
+  }
+ },
+ "plans": [
+  {
+   "id": "p01",
+   "t": 0.0,
+   "d": 3.8,
+   "type": "plaque",
+   "src": "toit",
+   "debut": 0.4,
+   "zoom": [
+    1.0,
+    1.06
+   ],
+   "entree": "noir"
+  },
+  {
+   "id": "p02",
+   "t": 3.8,
+   "d": 2.4,
+   "type": "plaque",
+   "src": "marteau",
+   "debut": 0.5,
+   "zoom": [
+    1.02,
+    1.07
+   ]
+  },
+  {
+   "id": "p03",
+   "t": 6.2,
+   "d": 6.8,
+   "type": "tableau",
+   "allume": [
+    [
+     "M1",
+     "Appel manqué saisi"
+    ]
+   ]
+  },
+  {
+   "id": "p04",
+   "t": 13.0,
+   "d": 4.0,
+   "type": "ui",
+   "image": "console/reception-card.png",
+   "clair": true,
+   "aspect": 4.39,
+   "de": [
+    0.5,
+    0.5,
+    1.0
+   ],
+   "a": [
+    0.36,
+    0.5,
+    0.72
+   ],
+   "aspect_v": 1.6,
+   "de_v": [
+    0.3,
+    0.5,
+    0.6
+   ],
+   "a_v": [
+    0.3,
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "p05",
+   "t": 17.0,
+   "d": 8.0,
+   "type": "tableau",
+   "deja": [
+    "M1"
+   ],
+   "allume": [
+    [
+     "M3",
+     "Soumission brouillon"
+    ],
+    [
+     "M4",
+     "Intervention créée"
+    ],
+    [
+     "M6",
+     "Besoins matériel"
+    ],
+    [
+     "M5",
+     "Facture brouillon"
+    ]
+   ]
+  },
+  {
+   "id": "p06",
+   "t": 25.0,
+   "d": 5.0,
+   "type": "ui",
+   "image": "console/soumission-m3-focus.png",
+   "clair": true,
+   "aspect": 2.87,
+   "de": [
+    0.5,
+    0.5,
+    1.0
+   ],
+   "a": [
+    0.36,
+    0.32,
+    0.72
+   ],
+   "aspect_v": 1.1,
+   "de_v": [
+    0.3,
+    0.4,
+    0.55
+   ],
+   "a_v": [
+    0.26,
+    0.3,
+    0.45
+   ]
+  },
+  {
+   "id": "p07",
+   "t": 30.0,
+   "d": 5.4,
+   "type": "plaque",
+   "src": "soir",
+   "debut": 0.3,
+   "zoom": [
+    1.0,
+    1.04
+   ]
+  },
+  {
+   "id": "p08",
+   "t": 35.4,
+   "d": 5.2,
+   "type": "tableau",
+   "deja": [
+    "M1",
+    "M3",
+    "M4",
+    "M6",
+    "M5"
+   ],
+   "allume": [
+    [
+     "M7",
+     "Contenus proposés"
+    ],
+    [
+     "M8",
+     "Vue exécutive"
+    ],
+    [
+     "M9",
+     "Briefing du matin"
+    ],
+    [
+     "M10",
+     "Mémoire de l'affaire"
+    ],
+    [
+     "M2",
+     "Prochaine action"
+    ]
+   ]
+  },
+  {
+   "id": "p09",
+   "t": 40.6,
+   "d": 3.6,
+   "type": "plaque",
+   "src": "matin",
+   "debut": 0.3,
+   "zoom": [
+    1.0,
+    1.05
+   ]
+  },
+  {
+   "id": "p10",
+   "t": 44.2,
+   "d": 5.2,
+   "type": "ligne",
+   "texte": "Votre entreprise.|*Au complet.*"
+  },
+  {
+   "id": "p11",
+   "t": 49.4,
+   "d": 5.2,
+   "type": "carton",
+   "sous": "Dix départements. Une seule entreprise : la vôtre."
+  }
+ ],
+ "textes": [
+  {
+   "t": 13.3,
+   "d": 2.4,
+   "texte": "Console réelle · données fictives",
+   "style": "sur"
+  }
+ ],
+ "narration": [
+  {
+   "id": "n1",
+   "t": 0.9,
+   "texte": "Quand vous êtes sur le toit… qui répond?"
+  },
+  {
+   "id": "n2",
+   "t": 6.6,
+   "texte": "OPSYS-AI. Dix départements, chacun avec ses agents.",
+   "dit": "Opsis A I. Dix départements, chacun avec ses agents."
+  },
+  {
+   "id": "n3",
+   "t": 17.3,
+   "texte": "L'appel devient un dossier. Le dossier, une soumission. La job finie, une facture."
+  },
+  {
+   "id": "n4",
+   "t": 25.4,
+   "texte": "Tout est préparé. C'est vous qui décidez."
+  },
+  {
+   "id": "n5",
+   "t": 35.8,
+   "texte": "Et le matin, votre briefing est prêt."
+  }
+ ],
+ "sfx": [
+  {
+   "t": 0.3,
+   "type": "souffle",
+   "db": -24
+  },
+  {
+   "t": 1.4,
+   "type": "vibre",
+   "db": -18
+  },
+  {
+   "t": 6.2,
+   "type": "impact",
+   "db": -12
+  },
+  {
+   "t": 25.0,
+   "type": "clic",
+   "db": -16
+  },
+  {
+   "t": 44.2,
+   "type": "impact",
+   "db": -13
+  }
+ ],
+ "musique": {
+  "gain_db": -2,
+  "prompt": "A 60-second cinematic instrumental for a premium, Apple-style vision film about a Quebec roofing contractor whose company runs ten AI departments. Grounded, warm, hopeful and precise. 0-6 s: near silence, cold air, one low piano note. 6-30 s: a steady soft pulse at 84 BPM (felt piano ostinato, low strings, a subtle heartbeat kick) that builds step by step, each step a little brighter. 30-35 s: the music breathes out, intimate and tender (evening at home). 35-44 s: a confident, luminous rise with full strings and warm percussion. 44-55 s: one sustained resolved chord and a clean ending by 56 s. No vocals, no choir, no bombast, no risers.",
+  "courbe": [
+   [
+    0,
+    0.05
+   ],
+   [
+    6,
+    0.35
+   ],
+   [
+    17,
+    0.5
+   ],
+   [
+    29,
+    0.65
+   ],
+   [
+    31,
+    0.3
+   ],
+   [
+    35,
+    0.4
+   ],
+   [
+    38,
+    0.85
+   ],
+   [
+    44,
+    0.7
+   ],
+   [
+    50,
+    0.3
+   ],
+   [
+    54,
+    0.1
+   ]
+  ]
+ }
+}

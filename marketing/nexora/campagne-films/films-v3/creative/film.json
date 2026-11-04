@@ -1,0 +1,389 @@
+{
+ "id": "creative",
+ "titre": "Nexora Creative · Une phrase",
+ "produit": "Creative",
+ "idee": "Vous écrivez une phrase ; le studio en fait un vrai film (plan, prix d'abord, prises jugées, montage).",
+ "duree": 56.4,
+ "etiquette": null,
+ "plaques": {
+  "atelier": {
+   "recette": "max",
+   "secondes": 5,
+   "image": "Early autumn sunrise inside a small independent bicycle repair workshop in Old Quebec City: exposed red brick walls, tall arched window, pegboard of hand tools, warm pendant lamps, a vintage steel road bicycle on a repair stand. A woman mechanic in her late thirties, canvas work apron, sleeves rolled up, stands at the wooden workbench holding a small wrench and pauses, looking out the window at the cobblestone street, thoughtful. Bright airy morning light, soft key light on her face, lifted shadows, natural warm colors, 35mm lens, shallow depth of field.",
+   "mouvement": "Slow, steady dolly-in toward the woman; she pauses, lowers the wrench and turns her head toward the window; dust motes drift in the sunbeam. Calm, still, confident camera.",
+   "son": "Quiet workshop room tone, a bicycle wheel ticking softly as it spins down, distant street ambience."
+  },
+  "mains": {
+   "recette": "rapide",
+   "secondes": 5,
+   "image": "Close-up from the side of the same woman mechanic's slender hands, faint grease on her fingertips, typing on an open plain unbranded matte grey laptop with a blank lid, no logo set on a worn wooden workbench beside bicycle tools and a brass bell; the laptop screen faces away from camera and is not visible. Bright warm morning sunlight from a tall window, shallow depth of field, natural skin texture.",
+   "mouvement": "Very slow push-in on the hands as they type with quick, decided strokes, then stop.",
+   "son": "Soft keyboard typing, quiet workshop room tone."
+  },
+  "client": {
+   "recette": "rapide",
+   "secondes": 5,
+   "image": "Inside the same bright brick bicycle workshop in Old Quebec City, the blond woman mechanic in her late thirties, hair in a low bun, beige shirt and canvas apron, turns her open plain unbranded laptop (blank lid, no logo) toward an older male customer in a tweed jacket holding a bicycle helmet; both look at the screen (screen faces away from camera, not visible) and smile softly. Warm bright morning light through the arched window, lifted shadows, 35mm, shallow depth of field.",
+   "mouvement": "Gentle slow lateral move; the customer leans in and smiles; the woman nods, quietly proud.",
+   "son": "Workshop room tone, a soft laugh."
+  }
+ },
+ "plans": [
+  {
+   "id": "p01",
+   "t": 0.0,
+   "d": 3.4,
+   "type": "plaque",
+   "src": "atelier",
+   "debut": 0.4,
+   "zoom": [
+    1.0,
+    1.06
+   ],
+   "entree": "noir"
+  },
+  {
+   "id": "p02",
+   "t": 3.4,
+   "d": 2.6,
+   "type": "plaque",
+   "src": "mains",
+   "debut": 0.6,
+   "zoom": [
+    1.02,
+    1.07
+   ]
+  },
+  {
+   "id": "p03",
+   "t": 6.0,
+   "d": 6.4,
+   "type": "flux",
+   "seq": "frappe",
+   "t0": 1793746900.55,
+   "vitesse": 1.18,
+   "aspect": 1.78,
+   "de": [
+    0.3,
+    0.66,
+    0.4
+   ],
+   "a": [
+    0.25,
+    0.79,
+    0.25
+   ],
+   "aspect_v": 0.75,
+   "de_v": [
+    0.247,
+    0.66,
+    0.25
+   ],
+   "a_v": [
+    0.247,
+    0.75,
+    0.2
+   ]
+  },
+  {
+   "id": "p04",
+   "t": 12.4,
+   "d": 5.6,
+   "type": "ui",
+   "image": "cap/c02-plan.png",
+   "aspect": 1.6,
+   "de": [
+    0.626,
+    0.593,
+    0.5
+   ],
+   "a": [
+    0.627,
+    0.47,
+    0.49
+   ],
+   "aspect_v": 0.8,
+   "de_v": [
+    0.48,
+    0.45,
+    0.19
+   ],
+   "a_v": [
+    0.485,
+    0.47,
+    0.17
+   ]
+  },
+  {
+   "id": "p05",
+   "t": 18.0,
+   "d": 3.2,
+   "type": "ui",
+   "image": "cap/c03-devis.png",
+   "aspect": 2.4,
+   "de": [
+    0.63,
+    0.8,
+    0.48
+   ],
+   "a": [
+    0.6,
+    0.83,
+    0.44
+   ],
+   "aspect_v": 1.0,
+   "de_v": [
+    0.52,
+    0.8,
+    0.28
+   ],
+   "a_v": [
+    0.5,
+    0.82,
+    0.24
+   ]
+  },
+  {
+   "id": "p06",
+   "t": 21.2,
+   "d": 5.0,
+   "type": "suite",
+   "images": [
+    "cap/suivi-001.png",
+    "cap/suivi-003.png",
+    "cap/suivi-005.png",
+    "cap/suivi-007.png",
+    "cap/suivi-008.png",
+    "cap/suivi-009.png",
+    "cap/c05-pret.png"
+   ],
+   "aspect": 2.0,
+   "de": [
+    0.71,
+    0.42,
+    0.34
+   ],
+   "a": [
+    0.715,
+    0.42,
+    0.32
+   ],
+   "aspect_v": 0.9,
+   "de_v": [
+    0.675,
+    0.42,
+    0.25
+   ],
+   "a_v": [
+    0.675,
+    0.42,
+    0.24
+   ]
+  },
+  {
+   "id": "p07",
+   "t": 26.2,
+   "d": 13.8,
+   "type": "video",
+   "fichier": "sortie/aube-a-velo.mp4",
+   "segments": [
+    [
+     3.4,
+     6.2
+    ],
+    [
+     7.0,
+     12.0
+    ],
+    [
+     13.6,
+     17.6
+    ]
+   ],
+   "zoom": [
+    1.0,
+    1.03
+   ],
+   "centre_v": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "p09",
+   "t": 40.0,
+   "d": 1.5,
+   "type": "imprime",
+   "image": "imprimes/carte-recto.png",
+   "rot": -2.0
+  },
+  {
+   "id": "p10",
+   "t": 41.5,
+   "d": 1.5,
+   "type": "imprime",
+   "image": "imprimes/affiche-creative.png",
+   "rot": 1.5
+  },
+  {
+   "id": "p11",
+   "t": 43.0,
+   "d": 1.6,
+   "type": "imprime",
+   "image": "imprimes/accroche-porte.png",
+   "rot": -1.0
+  },
+  {
+   "id": "p12",
+   "t": 44.6,
+   "d": 4.0,
+   "type": "plaque",
+   "src": "client",
+   "debut": 0.5,
+   "zoom": [
+    1.0,
+    1.05
+   ]
+  },
+  {
+   "id": "p13",
+   "t": 48.6,
+   "d": 3.6,
+   "type": "ligne",
+   "texte": "Écrivez-le.|*On le filme.*"
+  },
+  {
+   "id": "p14",
+   "t": 52.2,
+   "d": 4.2,
+   "type": "carton",
+   "sous": "Une phrase suffit."
+  }
+ ],
+ "textes": [
+  {
+   "t": 6.3,
+   "d": 2.2,
+   "texte": "Captures réelles du studio",
+   "style": "sur"
+  },
+  {
+   "t": 26.5,
+   "d": 2.6,
+   "texte": "Le film qu'il a tourné",
+   "style": "sur"
+  },
+  {
+   "t": 40.2,
+   "d": 2.4,
+   "texte": "Imprimés conçus avec nos outils",
+   "style": "sur"
+  }
+ ],
+ "narration": [
+  {
+   "id": "n1",
+   "t": 0.9,
+   "texte": "Vous avez une idée."
+  },
+  {
+   "id": "n2",
+   "t": 3.7,
+   "texte": "Pas d'équipe de tournage."
+  },
+  {
+   "id": "n3",
+   "t": 7.0,
+   "texte": "Écrivez-la."
+  },
+  {
+   "id": "n4",
+   "t": 12.8,
+   "texte": "Le studio fait le plan… et vous montre le prix d'abord."
+  },
+  {
+   "id": "n5",
+   "t": 21.5,
+   "texte": "Il tourne deux prises, garde la meilleure, et monte sur la musique."
+  },
+  {
+   "id": "n6",
+   "t": 40.1,
+   "texte": "Le film. L'affiche. La carte."
+  }
+ ],
+ "sfx": [
+  {
+   "t": 0.3,
+   "type": "souffle",
+   "db": -24
+  },
+  {
+   "t": 12.35,
+   "type": "clic",
+   "db": -14
+  },
+  {
+   "t": 19.9,
+   "type": "clic",
+   "db": -14
+  },
+  {
+   "t": 26.2,
+   "type": "impact",
+   "db": -10
+  },
+  {
+   "t": 48.6,
+   "type": "impact",
+   "db": -13
+  },
+  {
+   "t": 52.2,
+   "type": "clic",
+   "db": -20
+  }
+ ],
+ "musique": {
+  "gain_db": -2,
+  "prompt": "A 60-second instrumental for a premium, Apple-style product film about a small bicycle workshop owner who makes her own ad. Warm, human, optimistic, minimal and precise. 0-6 s: almost silent, one soft felt-piano note and air. 6-26 s: a gentle steady pulse at 96 BPM starts (muted plucked nylon guitar, soft kick, light shaker), patient and curious. Exactly at 26 s: a confident lift (fuller warm drums, round bass, hand claps, bright guitar) that carries a joyful reveal for 10 seconds. 40-48 s: rhythmic and light. 48-56 s: everything drops to one sustained warm chord that resolves; clean ending by 58 s. No vocals, no risers, no cliches.",
+  "courbe": [
+   [
+    0,
+    0.05
+   ],
+   [
+    6,
+    0.3
+   ],
+   [
+    25,
+    0.45
+   ],
+   [
+    26.5,
+    0.95
+   ],
+   [
+    36,
+    0.85
+   ],
+   [
+    40,
+    0.7
+   ],
+   [
+    48,
+    0.5
+   ],
+   [
+    52,
+    0.35
+   ],
+   [
+    56,
+    0.1
+   ]
+  ]
+ }
+}
