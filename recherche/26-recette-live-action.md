@@ -37,7 +37,19 @@ la 5090 partagée). Sources : `marketing/creative/video-v7/recette/` (prompts, j
 | duel aux lames sous la pluie | 0 / 2 | 3,0 → 7,0 |
 Moyenne 2,9 → 7,0 ; 5 duels sur 6 gagnés dans les deux ordres. Le juge note sévèrement en absolu (images clés V7 : 3 à 7) et
 relève des défauts précis (échelle de miniature, anatomie, intégration à la vitre) : il sert de filtre automatique (seuil 6,5,
-une relance avec une autre graine, on garde la meilleure). Plans vidéo du banc : à compléter (`recette/specs-recette.json`).
+une relance avec une autre graine, on garde la meilleure).
+
+**Plans vidéo (h3-max depuis ces images clés, contre les plans V6 ; juge sur 3 images du plan, deux ordres)** :
+| plan | victoires V6 / recette | réalisme V6 → recette |
+|---|---|---|
+| dragon sur le château | 0 / 2 | 3,0 → 7,0 |
+| dragon qui survole | 0 / 2 | 3,0 → 7,5 |
+| bataille spatiale | 1 / 1 (incohérent) | 5,5 → 4,0 |
+| dragon contre croiseur | 0 / 2 | 4,0 → 6,0 |
+| flotte de dragons | 0 / 2 | 2,5 → 7,5 |
+| duel sous la pluie | 0 / 2 | 3,5 → 7,0 |
+5 sur 6 gagnés dans les deux ordres, moyenne 3,6 → 6,5. Échec : l'espace en « maquette » (des cuirassés réels en orbite) ;
+pour l'espace, garder la photographie réelle (soleil dur, Terre réelle) mais des vaisseaux d'un dessin original, pas des navires.
 
 ## 4. Pour `realisateur.ts`
 Ajouter au réécrivain d'image et au réécrivain H3 : le préambule de §2.1 et §2.7, le choix d'un objectif et d'un opérateur selon

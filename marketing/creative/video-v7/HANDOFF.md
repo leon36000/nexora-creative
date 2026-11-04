@@ -18,7 +18,7 @@
 - DeepSeek : deux sessions d'agent coupées à 45 min (trop lent en effort max) ; écriture directe sur DeepInfra en cours
   (`ecriture_directe.py`, journal `…/ecriture/deepseek/ecriture.log`). Une fois `…/ecriture/deepseek/equipes/deepseek/dossier.json`
   écrit : le copier dans `equipes/deepseek/`, `python3 -B chaine/v7.py valider deepseek`, corriger le technique, lancer sa production.
-- Banc vidéo de la recette (6 plans h3-max, `recette/specs-recette.json`) : 3 sur 6 rendus au moment de l'arrêt.
+- Banc vidéo de la recette : fait (5/6 gagnés, réalisme 3,6 → 6,5 ; recherche 26 §3).
 
 ## Reste
 1. Quand les plans d'une équipe sont faits : `monter <e> --brouillon`, `juger-musique <e>`, `planche <e>` ; ronde de révision

@@ -39,7 +39,7 @@ def cle():
 def image_de(media, largeur=1024):
     p = Path(media)
     if p.suffix.lower() in (".mp4", ".mov", ".webm"):
-        dur = float(subprocess.run([FF.replace("ffmpeg", "ffprobe"), "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(p)],
+        dur = float(subprocess.run([str(Path(FF).with_name("ffprobe")), "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(p)],
                                    capture_output=True, text=True).stdout or 5)
         ims = []
         for t in (0.15 * dur, 0.5 * dur, 0.85 * dur):
