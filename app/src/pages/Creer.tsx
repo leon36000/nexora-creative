@@ -17,6 +17,7 @@ import Producteur from '../studio/Producteur';
 import { CAMERAS } from '../studio/apps';
 import { setParams, useRoute } from '../router';
 import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
+import { cleDevisCreation, ControleDevis } from '../devisCreation';
 import { creationVideoCopy, erreurVisibleCreationVideo, nomCameraCreation } from '../creationVideoCopy';
 import type { LangueClient } from '../../shared/creationLanguage';
 
@@ -72,11 +73,11 @@ export default function Creer() {
   const [dureeFilm, setDureeFilm] = useState<number>(30);
   const [son, setSon] = useState(true);
   const [musique, setMusique] = useState(false);
-  const [qualite, setQualite] = useState<'rapide' | 'max'>('rapide');
+  const [qualite, setQualiteState] = useState<'rapide' | 'max'>('rapide');
   const [nombreImages, setNombreImages] = useState(2);
   const [depart, setDepart] = useState<Depart>(() => (params.get('depart') === 'photo' ? 'photo' : 'texte'));
   const [camera, setCamera] = useState<string | null>(null);
-  const [cle, setCle] = useState<{ jeton: string; apercu: string } | null>(null);
+  const [cle, setCleState] = useState<{ jeton: string; apercu: string } | null>(null);
   const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo'>(null);
   const [boost, setBoost] = useState<string | null>(null);
   const [compris, setCompris] = useState<(Comprehension & { credits?: number; prompt: string }) | null>(null);
@@ -91,13 +92,18 @@ export default function Creer() {
   const [pub, setPub] = useState<number | null>(null);
   const [idees, setIdees] = useState<Partial<Record<Exclude<Mode, 'producteur'>, string[]>>>({});
   const [inspire, setInspire] = useState(false);
-  const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number | null } | null>(null);
+  const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number | null; erreur?: string; code?: string; cle: string } | null>(null);
   const toutes = useStore((s) => s.takes);
   const lances = useRef(new Set<number>());
   const jetonsRecus = useRef(new Set<string>());
   const versionLangueRef = useRef(0);
   const requeteIdeesRef = useRef(0);
   const requeteBoostRef = useRef(0);
+
+  const controleDevis = useRef(new ControleDevis());
+  function invaliderDevis() { controleDevis.current.invalider(); setDevis(null); }
+  function setQualite(value: 'rapide' | 'max') { if (value !== qualite) invaliderDevis(); setQualiteState(value); }
+  function setCle(value: { jeton: string; apercu: string } | null) { if (value?.jeton !== cle?.jeton) invaliderDevis(); setCleState(value); }
 
   const visibles = useStore((s) => s.takes.filter((t) => inFeed(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null && t.kind !== 'audio'));
   const montrees = useMemo(() => visibles.filter((t) => {
@@ -156,15 +162,18 @@ export default function Creer() {
   }, [params.get('cle')]);
   const film = mode === 'film';
   const dureeClip = duree;
+  const cleDevis = cleDevisCreation(mode, format, dureeClip, son, qualite, cle?.jeton, langueClient);
+  const devisCourant = devis?.cle === cleDevis ? devis : null;
   useEffect(() => {
     if (mode !== 'video') { setDevis(null); return; }
     let actif = true;
-    void api.nexoraDevis({ format, duree: dureeClip, son, qualite, image: cle?.jeton }).then((d) => actif && setDevis(d)).catch(() => actif && setDevis(null));
+    const version = controleDevis.current.jeton();
+    void api.nexoraDevis({ format, duree: dureeClip, son, qualite, image: cle?.jeton, langueClient }).then((d) => actif && controleDevis.current.accepte(version) && setDevis({ ...d, cle: cleDevis })).catch(() => actif && controleDevis.current.accepte(version) && setDevis(null));
     return () => { actif = false; };
-  }, [mode, format, dureeClip, son, qualite, cle]);
+  }, [mode, format, dureeClip, son, qualite, cle, langueClient, cleDevis]);
 
   const occupe = envoi !== null;
-  const prete = intention.trim().length > 0 && !occupe;
+  const prete = intention.trim().length > 0 && !occupe && !(mode === 'video' && devisCourant?.code === 'H3_MAX_ANCHOR_UNAVAILABLE');
   const nomImage = etat?.image ?? 'Qwen-Image';
 
   function choisirLangueClient(langue: LangueClient) {
@@ -556,10 +565,11 @@ export default function Creer() {
 
           <div className="st-cta">
             <button type="button" className="st-go" disabled={!prete} onClick={lancer}>{libelle}</button>
-            {mode === 'video' && devis && devis.secondesEstimees != null && !cleRequise && (
+            {mode === 'video' && devisCourant?.code === 'H3_MAX_ANCHOR_UNAVAILABLE' && <p className="st-credit" role="alert">{devisCourant.erreur}</p>}
+            {mode === 'video' && devisCourant && devisCourant.secondesEstimees != null && !cleRequise && (
               <div className="st-devis">
-                <span>{texteVideo.estimate} <b>{fmtTemps(devis.secondesEstimees, langueActive)}</b></span>
-                <span>{qualite === 'max' && etat?.cinema ? texteVideo.fullH3 : texteVideo.fastH3} · RTX 5090{devis.credits !== null ? ` · ${texteVideo.creditUnit(devis.credits)}` : ''}</span>
+                <span>{texteVideo.estimate} <b>{fmtTemps(devisCourant.secondesEstimees, langueActive)}</b></span>
+                <span>{qualite === 'max' && etat?.cinema ? texteVideo.fullH3 : texteVideo.fastH3} · RTX 5090{devisCourant.credits !== null ? ` · ${texteVideo.creditUnit(devisCourant.credits)}` : ''}</span>
               </div>
             )}
             {mode === 'image' && <div className="st-devis"><span>{nomImage} · DGX Spark GB10</span><span>≈ {qualite === 'max' ? '50 s' : '25 s'} par image</span></div>}

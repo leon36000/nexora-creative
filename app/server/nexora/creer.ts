@@ -5,6 +5,7 @@
  * H3 complet du moteur cinéma (RTX 5090), à pleine résolution et pleines étapes.
  */
 import { type Besoin, planifierMoteurs } from './registre.js';
+import { checkpointMaxFL2VAExplicite } from '../graphs/h3.js';
 import { lireLangueClient, type LangueClient } from '../../shared/creationLanguage.js';
 import type { EntreeReecriture } from './reecritureH3.js';
 
@@ -146,6 +147,18 @@ export function choisirMoteur(
 /** Besoin d'une demande « Créer », pour le registre de capacités. */
 export function besoinDe(d: DemandeCreer): Besoin {
   return { tache: d.image ? 'i2v' : 't2v', dureeS: imagesPour(d.duree) / 24, son: d.son };
+}
+
+/** Reject a max route whose configured reference model would silently become FastH3 with a first frame. */
+export function ancrageMaxIndisponible(moteur: MoteurVideo, ancre: boolean, env: NodeJS.ProcessEnv = process.env): boolean {
+  const reglage = reglagesH3Max(env);
+  return moteur === 'h3-max' && ancre && (reglage.ref || !checkpointMaxFL2VAExplicite(reglage.checkpoint));
+}
+
+export function messageAncrageMax(langue: LangueClient | undefined): string {
+  return langue === 'en'
+    ? 'Maximum quality is unavailable with an anchored image on this engine. Try Fast quality if available, or remove the image.'
+    : 'La qualité maximale est indisponible avec une image ancrée sur ce moteur. Essaie la qualité Rapide si disponible ou retire l’image.';
 }
 
 /** Corps de rendu pour le moteur choisi. */

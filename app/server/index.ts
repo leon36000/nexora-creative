@@ -17,8 +17,9 @@ import * as comfy from './comfy.js';
 import * as eng from './engine.js';
 import { enregistrerDetourage } from './nexora/detourage/routes.js';
 import { config, ROOT } from './config.js';
+import { avecGardeNouveauRendu } from './nexora/gardeNouveauRendu.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
-import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, entreeRealisateurCreation, lireDemandeCreer, messageErreurParcoursCreer, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
+import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, entreeRealisateurCreation, lireDemandeCreer, messageErreurParcoursCreer, ancrageMaxIndisponible, messageAncrageMax, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
 import { consignesAmeliorationCreation, erreurAmeliorationCreation, erreurImageCreation, ideesRepliCreation, lireLangueClient, messageErreurRendu } from './nexora/creationLanguage.js';
 import type { LangueClient } from '../shared/creationLanguage.js';
 import { buildMusic3Graph } from './graphs/music3.js';
@@ -1001,7 +1002,17 @@ async function recordWorkflow(takeId: number, jobId: string, graph: Record<strin
   }
 }
 
-app.post('/api/generate', async (req, reply) => generate(req.body as any, reply));
+app.post('/api/generate', async (req, reply) => {
+  return avecGardeNouveauRendu(req.body,
+    () => generate(req.body as any, reply),
+    (raison) => reply.code(422).send({
+      error: raison === 'INVALID_KIND'
+        ? (lireLangueClient((req.body as any)?.langueClient) === 'en' ? 'Unknown render type.' : 'Type de rendu inconnu.')
+        : messageAncrageMax(lireLangueClient((req.body as any)?.langueClient)),
+      code: raison,
+    }),
+  );
+});
 
 /**
  * Nexora Creative, parcours simple : une intention en français → prompt H3 écrit par le LLM cloud (réécrivain validé
@@ -1020,6 +1031,7 @@ app.post('/api/nexora/creer', async (req, reply) => {
       : `Aucun moteur ne peut faire cette vidéo pour ton compte : ${plan.exclus.map((e) => e.raison).join(' ; ')}.`;
     return reply.code(422).send({ error });
   }
+  if (ancrageMaxIndisponible(moteur, !!demande.image)) return reply.code(422).send({ error: messageAncrageMax(demande.langueClient), code: 'H3_MAX_ANCHOR_UNAVAILABLE' });
   const verdict = await moderer(`${demande.intention} ${demande.replique ?? ''}`, llmCourant(), (m) => app.log.warn(m), demande.langueClient);
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
@@ -1136,6 +1148,7 @@ app.post('/api/nexora/devis', async (req) => {
   const demande = lireDemandeCreer({ intention: 'devis', format: b.format, duree: b.duree, son: b.son, qualite: b.qualite, image: b.image });
   const moteur = moteurDuCompte(demande.qualite, besoinDe(demande));
   if (!moteur) return { credits: null, secondesEstimees: null, moteur: null, erreur: REFUS_TERRITOIRE };
+  if (ancrageMaxIndisponible(moteur, !!demande.image)) return { credits: null, secondesEstimees: null, moteur, erreur: messageAncrageMax(lireLangueClient(b.langueClient)), code: 'H3_MAX_ANCHOR_UNAVAILABLE' };
   const corps = corpsRendu(demande, '', moteur);
   return { credits: configAuth ? devisCredits(corps, tarifDepuisEnv()) : null, secondesEstimees: secondesGpuEstimees(corps), moteur };
 });

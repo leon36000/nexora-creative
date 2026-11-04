@@ -164,6 +164,13 @@ export const H3_DISTILLED_CHECKPOINTS: Record<string, { family: 'fl2va' | 'ref2v
   '10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors': { family: 'ref2va', steps: 8, shiftVideo: 12, shiftAudio: 3, sampler: 'euler' },
 };
 
+/** Allow only FL2VA checkpoints explicitly registered by the graph, excluding FastH3. */
+export function checkpointMaxFL2VAExplicite(checkpoint: unknown): boolean {
+  if (typeof checkpoint !== 'string' || !checkpoint || checkpoint === 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors') return false;
+  const known = H3_DISTILLED_CHECKPOINTS[checkpoint];
+  return checkpoint === H3_MODELS.fl2va || (known?.family === 'fl2va');
+}
+
 /** Frame counts must sit on the model's 17k+5 grid (5, 22, ..., 124, ..., 362). */
 export function snapH3Length(frames: number): number {
   const k = Math.round((frames - 5) / 17);
