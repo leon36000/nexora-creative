@@ -973,3 +973,8 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 ### Reprise Codex — preuve CPU du modèle H3, 4 novembre 2026
 
 - Test CPU isolé `Nexora/travail/director-fasth3-preuve-cpu-20261104/preuve.test.ts` : demande max/photo 124 images 1344×768 construit un `UNETLoader` FastH3 FL2VA, tandis que le corps indique `h3-max` et le devis utilise 129 s du profil max. Tarif de 0,5 crédit/s utilisé uniquement comme exemple injecté, sans rapport établi avec la configuration réelle. Test des fonctions pures, pas de route HTTP, GPU, service ou coût réel. Correction isolée en préparation pour empêcher l'annonce trompeuse sans changer silencieusement la machine.
+
+### Reprise Codex — réservations des films H3, 4 novembre 2026
+
+- Le prototype de garde H3 est isolé dans `Nexora/travail/director-h3-ancrage-garde-codex-20261104` sur Storage, non commité/non déployé; 25 tests simulés et typechecks signalés. Revue Terra : une suite préexistante peut avoir une réservation dans le storyboard sans prise créée; la réconciliation existante ne parcourt que les réservations rattachées aux prises. Refuser cette suite pourrait donc laisser une réservation en suspens. Aucun mécanisme idempotent de libération n'est prouvé; aucun solde réel touché. Ce prototype ne doit pas être intégré tel quel. Une protection partielle avant réservation des nouvelles demandes est étudiée séparément, sans prétendre couvrir les films existants.
+- Director : quatre nouveaux tests ont reproduit les erreurs anime/citation/vaisseau; correctifs locaux en vérification. Aucun rendu ni déploiement.
