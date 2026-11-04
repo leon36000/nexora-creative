@@ -151,16 +151,26 @@ def verifier_sortie_libre(sortie):
 
 
 class ErreurProvenance(RuntimeError):
-    """La provenance d'un montage ne peut pas être attestée sans ambiguïté."""
+    """Les empreintes ciblées ne peuvent pas être calculées sans ambiguïté."""
+
+
+def empreinte_json_canonique(objet, nom):
+    """SHA-256 déterministe d'un objet JSON avec clés triées et représentation compacte."""
+    try:
+        contenu = json.dumps(objet, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    except (TypeError, ValueError):
+        raise ErreurProvenance(f"{nom} ne peut pas être sérialisé canoniquement pour sa provenance.") from None
+    return hashlib.sha256(contenu).hexdigest()
 
 
 def empreinte_editplan(plan):
     """SHA-256 déterministe de l'objet EditPlan effectivement donné au rendu."""
-    try:
-        contenu = json.dumps(plan, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
-    except (TypeError, ValueError):
-        raise ErreurProvenance("L'EditPlan ne peut pas être sérialisé canoniquement pour sa provenance.") from None
-    return hashlib.sha256(contenu).hexdigest()
+    return empreinte_json_canonique(plan, "L'EditPlan")
+
+
+def empreinte_annexe(annexe):
+    """SHA-256 déterministe de l'annexe effectivement donnée au rendu."""
+    return empreinte_json_canonique(annexe, "L'annexe")
 
 
 def empreinte_fichier(fichier):
@@ -586,6 +596,7 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     chemin_defaut = T.TRAVAIL / equipe / "montage" / nom_sortie
     sortie = verifier_sortie_libre(sortie if sortie is not None else chemin_defaut)
     editplan_sha256 = empreinte_editplan(ctx.plan)
+    annexe_sha256 = empreinte_annexe(ctx.annexe)
     sources_initiales = empreintes_sources_utilisees(ctx)
     instantane = instantane_contexte_rendu(ctx)
     rapport = valider_ts(ctx.plan)
@@ -604,13 +615,25 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
                     "-c:a", "aac", "-b:a", "256k", "-movflags", "+faststart", "-shortest", str(sortie)], check=True)
     sources_finales = empreintes_sources_utilisees(ctx)
     if sources_finales != sources_initiales:
-        raise ErreurProvenance("Une source du montage a changé pendant le rendu; les empreintes ne sont pas attestées.")
+        raise ErreurProvenance("Une source du montage a changé pendant le rendu; les empreintes ciblées ne sont pas produites.")
+    if empreinte_annexe(ctx.annexe) != annexe_sha256:
+        raise ErreurProvenance("L'annexe du montage a changé pendant le rendu; les empreintes ciblées ne sont pas produites.")
     provenance = {
         "algorithme": "SHA-256",
+        "couverture": "partielle",
         "editplan_sha256": editplan_sha256,
+        "annexe_sha256": annexe_sha256,
         "sources_sha256": sources_initiales["sources_sha256"],
         "sources_absentes": sources_initiales["sources_absentes"],
+        "note_sources_absentes": "Liste limitée aux voix et musique planifiées sans fichier résolu; elle ne certifie pas l'exhaustivité des dépendances.",
         "export_sha256": empreinte_fichier(sortie),
+        "non_couverts": [
+            "polices utilisées au rendu",
+            "logo et fichier marque-opsys.json",
+            "code de montage, versions des outils et dépendances",
+            "autres configurations et réglages de l'environnement",
+            "modification transitoire d'une source suivie d'une restauration avant la seconde empreinte",
+        ],
     }
     res = {"film": str(sortie), "equipe": equipe, "version": version, "duree_s": round(ctx.total / FPS, 2), "plans": len(ctx.plan["video"]),
            "tranches": str(tranches), "manquants": manquants, "validation": rapport, "secondes": round(time.time() - t0, 1),

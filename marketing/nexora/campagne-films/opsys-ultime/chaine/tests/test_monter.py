@@ -161,7 +161,9 @@ class ExportPreservationTests(unittest.TestCase):
             source.write_bytes(b"source")
             output = out_dir / "deepseek-long-brouillon.mp4"
             ctx = SimpleNamespace(vid={"p01": source}, voix={}, musique=None,
-                                  plan={"video": [{"src": "p01"}], "audio": {}}, annexe={}, total=36)
+                                  plan={"video": [{"src": "p01"}], "audio": {}},
+                                  annexe={"etalonnage": {"contraste": 1.03}, "incrustations": [{"type": "titre", "texte": "DÉMO"}]},
+                                  total=36)
             commandes = []
 
             def mixer_factice(_ctx, fichier):
@@ -195,8 +197,13 @@ class ExportPreservationTests(unittest.TestCase):
 
             provenance = result["provenance"]
             self.assertEqual(monter.empreinte_editplan(ctx.plan), provenance["editplan_sha256"])
+            self.assertEqual(monter.empreinte_annexe(ctx.annexe), provenance["annexe_sha256"])
             self.assertEqual(hashlib.sha256(b"source").hexdigest(), provenance["sources_sha256"]["video"]["p01"])
             self.assertEqual(hashlib.sha256(b"export").hexdigest(), provenance["export_sha256"])
+            self.assertEqual("partielle", provenance["couverture"])
+            for limite in ("polices", "logo", "code de montage", "configurations"):
+                self.assertTrue(any(limite in item for item in provenance["non_couverts"]))
+            self.assertIn("ne certifie pas l'exhaustivité", provenance["note_sources_absentes"])
             journal = json.loads((work / "journal-montage.jsonl").read_text().splitlines()[-1])
             self.assertEqual(provenance, journal["provenance"])
             self.assertIs(pools[0].initializer, monter.initialiser_contexte_rendu)
@@ -274,6 +281,15 @@ class ProvenanceTests(unittest.TestCase):
         self.assertEqual(digest, monter.empreinte_editplan(reordered))
         self.assertNotEqual(digest, monter.empreinte_editplan(changed))
 
+    def test_annexe_hash_is_stable_and_sensitive_to_render_settings(self):
+        first = {"etalonnage": {"contraste": 1.03}, "recadrage_v": {"p01": 0.4}}
+        reordered = {"recadrage_v": {"p01": 0.4}, "etalonnage": {"contraste": 1.03}}
+        changed = {"etalonnage": {"contraste": 1.04}, "recadrage_v": {"p01": 0.4}}
+
+        digest = monter.empreinte_annexe(first)
+        self.assertEqual(digest, monter.empreinte_annexe(reordered))
+        self.assertNotEqual(digest, monter.empreinte_annexe(changed))
+
     def test_sources_hash_only_references_used_and_deduplicates_paths(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -317,6 +333,17 @@ class ProvenanceTests(unittest.TestCase):
             )
             with self.assertRaises(monter.ErreurProvenance):
                 monter.empreintes_sources_utilisees(ctx)
+
+    def test_missing_voice_and_music_are_reported_as_scoped_absences(self):
+        ctx = SimpleNamespace(
+            plan={"video": [], "audio": {"voix": [{"src": "v01"}], "musique": {"src": "m01"}}},
+            vid={}, voix={}, musique=None,
+        )
+
+        resultat = monter.empreintes_sources_utilisees(ctx)
+
+        self.assertEqual({"video": [], "voix": ["v01"], "musique": ["m01"]}, resultat["sources_absentes"])
+        self.assertEqual({"video": {}, "voix": {}, "musique": {}}, resultat["sources_sha256"])
 
 
 if __name__ == "__main__":
