@@ -469,3 +469,7 @@ Sur le worktree Director basé sur `da27fa4`, exécution Vitest sous environneme
 ### Complément de mesure AMD
 
 Les deux limites lisibles sur pc4 sont **240/300 W par défaut** et **152/190 W par défaut**, soit 80 % chacune (le 330 W cité plus haut était le maximum autorisé de la première carte, pas son réglage d'usine par défaut). Les deux cartes lues étaient à 0 % d'activité au relevé ; une troisième carte restait occupée/illisible, plafond et activité non établis. Ne pas déduire de cette lecture que toutes les cartes AMD sont limitées.
+
+### Banc Finish retrouvé et médias conservés
+
+Sur VM204, `/srv/nexora-gpu/essais-sortie/` contient trois sources MKV, 12 encodages MP4 et `resultats-gpu.json`, ainsi que les scripts de banc. Les 15 vidéos (340 Mio) n'étaient pas dans l'inventaire vérifié : copie sur pc1 SSD Infrastructure, accessible par `~/Bureau/Nexora-Livrables/TOUS-LES-FILMS/codex-banc-finish-vm204-20261104/`, chacune vérifiée SHA-256 et inscrite. `INVENTAIRE.csv` contient désormais **3 735 entrées** ; sources VM204 conservées. Les mesures et leur comparabilité sont en cours de revue par l'agent Finish : aucune conclusion de qualité ni activation NVENC déduite de la présence de fichiers.

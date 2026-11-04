@@ -377,3 +377,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Quatre suites ciblées auth/crédits/Studio/transcription GPU : 30 tests passent avec services fictifs ; débit réel et parcours utilisateur restent à prouver.
 
 - Précision AMD pc4 : limites lisibles 240/300 W et 152/190 W par défaut ; troisième carte illisible. Le 330 W observé plus tôt est une limite maximale autorisée, non le défaut.
+
+- Banc Finish retrouvé sur VM204 : 15 vidéos d'essai copiées sur le SSD Infrastructure de pc1, vérifiées SHA-256 et ajoutées à l'inventaire (3 735 entrées). Mesures en cours d'examen ; pas encore de verdict qualité.
