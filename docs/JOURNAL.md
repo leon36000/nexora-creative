@@ -506,3 +506,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Un agent Gemini Flex élevé outillé est lancé en environnement isolé pour relire la provenance OPSYS ; résultat en attente.
 
 - OPSYS : les durées et nombres de plans des anciens rendus Gemini/Muse concordent avec les dossiers initiaux Git `9303394`, pas avec leurs révisions ultérieures ; calcul relancé indépendamment. Correspondance forte mais non attestée par hash historique.
+
+- Agent Gemini Flex élevé outillé isolé : revue achevée ; sources vidéo omises et validation négative à reproduire/corriger. Les suggestions restent à vérifier ; tous les essais doivent rester conservés.
