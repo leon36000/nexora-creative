@@ -518,3 +518,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Détourage : `2ba45b0` exige une réponse de santé `ok:true` plutôt que n’importe quel JSON HTTP 200 ; 25 tests et typecheck passent. Raccordement et essai réel toujours absents.
 
 - OPSYS : après `71499dd`, nouvel essai réel vertical décodé, mode/résolution et SHA vérifiés ; film, dix tranches, mix, planche et provenance conservés sur pc1. Pas de verdict humain.
+
+- Mesh `bfafe59` : collision d’arêtes à très grands indices reproduite puis corrigée, 12 tests et typecheck OK ; revue mathématique indépendante et mêmes métriques sur la chaise Pixal. Autres limites de volume/instancing/matériaux documentées ; aucun déploiement.

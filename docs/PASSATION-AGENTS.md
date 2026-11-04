@@ -798,3 +798,9 @@ Un test réseau local simulé a montré que `/capacites` annonçait le rapide di
 ### OPSYS : garde-fous vérifiés sur un vrai montage
 
 Après `71499dd`, nouvel essai distinct du vertical DeepSeek : 14,5 s, six plans, validation `ok:true`, 52,3 s CPU ; décodage intégral sans erreur. Le journal indique correctement `brouillon:true`, 540×960, empreintes et couverture partielle ; SHA de l’export vérifié indépendamment. Film, dix tranches, mix et planche copiés sur pc1 et SHA vérifiés ; détails de provenance aussi copiés, inventaire **3 932 entrées**. Cet essai a la même empreinte export que l’essai précédent, sans conclure à un déterminisme général. Aucun verdict humain attribué.
+
+### Mesh : collision d’arêtes corrigée localement
+
+La clé numérique historique `a × 2^32 + b` pouvait confondre des arêtes distinctes au-delà d’environ **2,1 millions de sommets soudés**, ce qui peut fausser les arêtes ouvertes/non-variété, l’étanchéité et le volume. Collision reproduite et confirmée par un agent indépendant ; elle ne touche pas la chaise Pixal à 94 612 sommets. Commit local **bfafe59** sur `fix/mesh-aretes-codex` : clé exacte calculée selon le nombre de sommets, repli BigInt au-delà du seuil sûr. Test initial en échec puis **12 tests** et typecheck réussis ; revue mathématique indépendante et comparaison sur la chaise réelle : mêmes métriques, trois temps comparables, sans preuve de gain de vitesse. La branche et les fichiers distants diffèrent globalement : réconcilier avant MR ; aucun push/déploiement.
+
+Autres limites identifiées, non corrigées : fusion des positions arrondies à 1e-5, volume signé ambigu pour plusieurs coquilles, instancing GLB et exports multi-matériaux non pleinement pris en compte. Leur portée et leurs cas d’utilisation demandent des tests spécifiques ; ne pas généraliser l’essai Pixal à tous les modèles.
