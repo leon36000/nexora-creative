@@ -498,3 +498,9 @@ Commit **e29ca2a** sur `feat/sortie-video-nvenc` : client/point d'encodage born�
 ### Director : tranches locales commitées
 
 Commits **35e680a** puis **adc14a8** sur `feat/realisateur-live-action` : recette photo conditionnelle aux promotions/produits ou aux demandes photo, respect des styles visuels explicitement demandés, modes H3 et langues pris en compte. La revue Codex a trouvé un faux positif pour « anime cette photo » ; il est corrigé par le deuxième commit. Agent : suite complète 452 tests et typecheck verts sur le premier commit ; après correction, 60 tests ciblés verts, relancés indépendamment par Codex. Worktree propre, aucun push ni déploiement. Le banc LLM des 12 briefs et les mesures de rendu ne sont pas exécutés ; la recherche 26 reste sur la branche film, absente ici. Les tests ne sont pas une preuve de qualité vidéo acceptée.
+
+### Reprise OPSYS DeepSeek
+
+Commit local **4b4ae82** sur `feat/opsys-ultime` : le montage refuse explicitement les plans vidéo absents au lieu de les remplacer silencieusement par de l'encre. Cinq tests ciblés passent, relancés indépendamment ; l'exception verticale `p02v → p02` est préservée, aucune correspondance `v01–v06` inventée. Le commit initial de l'agent `169d4d4` a été corrigé localement avant tout push pour inclure le trailer demandé ; `equipes/essai` non suivi reste intact.
+
+Après contrôle des prérequis et de la file vide, un seul rendu a été lancé : OPSYS DeepSeek `p26` sur 5090, `--max-file 1`, avec environnement vide et sans appel LLM. Au relevé : 1 tâche active, aucune attente, GPU 100 %, 474,88 W pour plafond 475 W. **En cours : résultat et archivage non encore attestés**. Les autres plans restent à reprendre un par un après vérification. Aucun service redémarré.

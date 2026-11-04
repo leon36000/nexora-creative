@@ -387,3 +387,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Finish : tranche locale `e29ca2a`, codecs désactivés, 14 tests TS relancés indépendamment ; l'agent rapporte aussi 12 tests Python simulés et typecheck verts. Aucun déploiement/push. Les documents non commités du worktree Finish restent préservés et ne remplacent pas ce maître.
 
 - Director : commits locaux `35e680a` et `adc14a8`, respect du médium demandé et correction du faux positif « anime cette photo » ; 452 tests et typecheck rapportés sur la première tranche, 60 ciblés relancés après correctif. Pas de banc LLM, rendu, push ou déploiement.
+
+- OPSYS : garde-fou plans absents commité `4b4ae82`, 5 tests relancés ; premier rendu DeepSeek p26 lancé seul après file et plafond contrôlés. Il est en cours, résultat/archivage non prouvés à cet instant.
