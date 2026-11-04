@@ -687,3 +687,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 ### Reprise Codex — pipelines GitLab, 4 novembre 2026
 
 - Lecture seule API `root/nexora-creative` : pipelines #2848/#2849 de passation et #2850 d'intégration réussis, #2851 réussi pour le correctif MCP; #2852 sur `developpement` SHA `5ac932d` encore en cours au relevé. Les anciens #2846/#2847 ont échoué. Ne pas inférer l'état du pipeline en cours ni l'intégrité des objets Garage à partir des autres succès. Aucun push depuis cette nouvelle branche de reprise à ce stade.
+
+
+### Reprise Codex — pipeline et revue Director, 4 novembre 2026
+
+- Pipeline GitLab #2852 sur `developpement` à `5ac932d` : succès vérifié API, y compris gitleaks, semgrep, trivy et tâche pc4_ci_fallback. Cela ne vérifie pas l'intégrité des anciens objets Garage ni la sauvegarde complète.
+- Revue indépendante Director après correction : les problèmes de langue des répliques, d'erreurs image et de réponses périmées sont traités; une différence mineure de message API historique pour les montages reste à corriger. Tests simulés, sans preuve navigateur ni garantie de langue de sortie LLM. Commit et intégration à venir.
