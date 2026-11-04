@@ -46,6 +46,7 @@ describe('disponibilité du détourage pro', () => {
   it('refuse un ancien travail pro même si la requête demande le palier rapide', async () => {
     const dossierDonnees = mkdtempSync(join(tmpdir(), 'detourage-pro-ancien-'));
     const id = 'a'.repeat(24);
+    const mixte = 'c'.repeat(24);
     mkdirSync(join(dossierDonnees, 'detourage'), { recursive: true });
     const repris = 'b'.repeat(24);
     const ancien = {
@@ -55,11 +56,15 @@ describe('disponibilité du détourage pro', () => {
     };
     writeFileSync(join(dossierDonnees, 'detourage', 'registre.json'), JSON.stringify([
       ancien, { ...ancien, id: repris, etat: 'interrompu', params: { source: 'source.mp4' } },
+      { ...ancien, id: mixte, moteurId: 'mixte', etat: 'interrompu', params: { source: 'source.mp4', palier: 'pro' } },
     ]));
     const app = Fastify();
     const { arreter } = enregistrerDetourage(app, {
       dossierDonnees,
-      moteurs: () => [{ id: 'pro', nom: 'Pro', recettes: ['detourage-pro'], detourageUrl: 'http://127.0.0.1:1' }],
+      moteurs: () => [
+        { id: 'pro', nom: 'Pro', recettes: ['detourage-pro'], detourageUrl: 'http://127.0.0.1:1' },
+        { id: 'mixte', nom: 'Mixte', recettes: ['*', 'detourage-pro'], detourageUrl: 'http://127.0.0.1:1' },
+      ],
       facturation: () => null, nexora: false,
     });
     try {
@@ -72,6 +77,8 @@ describe('disponibilité du détourage pro', () => {
       expect(reprise.statusCode).toBe(503);
       const interrompu = await app.inject({ method: 'GET', url: `/api/nexora/detourage/travaux/${repris}` });
       expect(interrompu.json().etat).toBe('interrompu');
+      const reprisePro = await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${mixte}/reprendre` });
+      expect(reprisePro.statusCode).toBe(503);
     } finally {
       arreter();
       await app.close();

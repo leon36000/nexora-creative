@@ -191,7 +191,9 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   app.post(`${P}/travaux/:id/reprendre`, async (req, reply) => garde(reply, async () => {
     const id = idDe(req, reply); if (!id) return;
     const { org } = qui();
-    verifierMoteurRapide(detourage.obtenir(org, id));
+    const travail = detourage.obtenir(org, id);
+    if (travail.params?.palier === 'pro') throw new ErreurDetourage('Le détourage pro n’est pas encore disponible.', 503);
+    verifierMoteurRapide(travail);
     return vue(await detourage.reprendre(org, id));
   }));
   app.delete(`${P}/travaux/:id`, async (req, reply) => garde(reply, async () => {
