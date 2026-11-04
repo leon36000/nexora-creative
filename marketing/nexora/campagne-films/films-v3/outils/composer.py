@@ -140,7 +140,7 @@ class Plaque:
         self.vitesse = min(1.0, max(0.5, (dsrc - debut - 0.05) / max(d, 0.1)))
         n = int(d * IPS) + 3
         self.p = subprocess.Popen([C.FF, "-v", "error", "-ss", f"{debut:.3f}", "-i", str(f), "-vf",
-                                   f"setpts=PTS/{self.vitesse:.4f},fps={IPS}", "-frames:v", str(n), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+                                   (f"setpts=PTS/{self.vitesse:.4f},framerate={IPS}" if self.vitesse < 0.98 else f"fps={IPS}"), "-frames:v", str(n), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
                                   stdout=subprocess.PIPE)
         self.derniere = None
         self.g = None
@@ -416,9 +416,12 @@ class Rendu:
                     r = 0.011 * self.W * (1 - k / 16)
                     X = sx(t)
                     dc.ellipse([X - r, yy - r, X + r, yy + r], fill=tuple(int(c * (1 - k / 14)) for c in SIG))
-        halo = cal.filter(ImageFilter.GaussianBlur(9))
-        out = np.clip(np.asarray(base, np.int16) + np.asarray(halo, np.int16) + (np.asarray(cal, np.int16) * 0.6).astype(np.int16), 0, 255)
-        return Image.fromarray(out.astype(np.uint8))
+        # peinture (pas d'addition) : la lumière reste orange même sur l'interface blanche
+        a = np.asarray(cal.convert("L"), np.float32) / 255
+        h = np.asarray(cal.convert("L").filter(ImageFilter.GaussianBlur(10)), np.float32) / 255
+        al = np.clip(np.maximum(a, h * 1.4), 0, 1)[..., None]
+        out = np.asarray(base, np.float32) * (1 - al) + np.array(SIG, np.float32) * al
+        return Image.fromarray(out.clip(0, 255).astype(np.uint8))
 
     def envoye(self, u, d):
         """Recomposition dessinée (étiquetée) de la fin de l'exécution réelle : accord humain → envoi vers la boîte de test."""
@@ -549,8 +552,8 @@ class Rendu:
                     if x["t"] <= t < x["t"] + x["d"]:
                         spec = {"d": x["d"], "style": x["style"], "zone": x.get("zone", "haut" if x["style"] == "sur" else "centre")}
                         if x["style"] == "sur":
-                            spec["y"] = 0.075 if not self.v else None
-                            spec["y_v"] = 0.12
+                            spec["y"] = (0.115 if film.get("etiquette") else 0.075) if not self.v else None
+                            spec["y_v"] = 0.12 if not film.get("etiquette") else 0.105
                         if x["style"] == "impact":
                             vo = 0.62 * eio((t - x["t"]) / 0.3) * (1 - eio((t - x["t"] - x["d"] + 0.3) / 0.3))
                             im = Image.blend(im, Image.new("RGB", im.size, ENCRE), vo)

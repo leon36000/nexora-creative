@@ -32,27 +32,15 @@
   {
    "id": "p01",
    "t": 0.0,
-   "d": 3.8,
+   "d": 6.4,
    "type": "plaque",
    "src": "aube",
    "debut": 0.4,
    "zoom": [
     1.0,
-    1.06
+    1.08
    ],
    "entree": "noir"
-  },
-  {
-   "id": "p02",
-   "t": 3.8,
-   "d": 2.6,
-   "type": "plaque",
-   "src": "ecran",
-   "debut": 0.8,
-   "zoom": [
-    1.02,
-    1.06
-   ]
   },
   {
    "id": "p03",
