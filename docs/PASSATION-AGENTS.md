@@ -1013,3 +1013,8 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 
 - Bundle Git Creative, manifeste et inventaire de refs copiés sur Infrastructure pc1 dans `NexoraStudioWork/sauvegarde-gitlab-creative-partielle-20261104-a6dktGCD/`; trois SHA-256 relus et vérifiés à distance. Le dépôt public cité dans le manifeste n'a pas été copié à pc1; les copies Storage et restaurations Git labo demeurent. Ce n'est pas une sauvegarde complète de GitLab ni une restauration d'instance.
 - Revue indépendante H3 : un `kind` inconnu peut atteindre H3 malgré la garde limitée aux types vidéo, et les plans de film `suite` contournent toujours la protection via `queueTakes`. Correction du premier cas sur copie isolée en cours; le traitement financier des suites déjà réservées reste non résolu, sans modification de solde.
+
+### Reprise Codex — revue de la garde H3 étendue, 4 novembre 2026
+
+- Garde locale H3 : création/devis et nouvelles requêtes `/api/generate` refusent les combinaisons max/ancre avec checkpoint incompatible ou inconnu avant réservation; variantes contrôlées, genres non H3 connus conservés. 34 tests ciblés repassés indépendamment, 55 signalés par l'agent avec typechecks. Revue Films : pas de divergence actuelle du classement des genres mais liste dupliquée avec le répartiteur, risque de dérive future; test de cohérence examiné. Les suites de films et leurs réservations préexistantes restent hors couverture. Aucun déploiement ni modification de solde.
+- Le SHA courant `d988a9d` de la MR Director !42 a 114 tests ciblés indépendants; l'essai navigateur isolé a échoué avec Firefox avant ouverture d'une page, une tentative Chromium isolée est examinée. Aucune réussite navigateur affirmée.
