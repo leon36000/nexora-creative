@@ -29,7 +29,7 @@ async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
   return new NodeIO().writeBinary(doc);
 }
 
-describe('Relief : contrôle du maillage', () => {
+describe('Nexora Mesh : contrôle du maillage', () => {
   it('une sphère UV : un seul morceau, 2 de haut, triangles écrasés des pôles comptés', async () => {
     const m = await lireGlb(await glbSphere());
     const r = analyser(m);
@@ -53,7 +53,7 @@ describe('Relief : contrôle du maillage', () => {
   });
 });
 
-describe('Relief : décimation', () => {
+describe('Nexora Mesh : décimation', () => {
   it('cibleTriangles borne et ignore ce qui ne réduit pas', () => {
     expect(cibleTriangles(undefined, 1000)).toBeNull();
     expect(cibleTriangles(10, 100000)).toBe(500);
@@ -70,7 +70,7 @@ describe('Relief : décimation', () => {
   });
 });
 
-describe('Relief : exports', () => {
+describe('Nexora Mesh : exports', () => {
   it('STL binaire : taille = 84 + 50 par triangle, plus grande dimension à 100 mm', async () => {
     const m = await lireGlb(await glbSphere(8));
     const stl = versStl(m);

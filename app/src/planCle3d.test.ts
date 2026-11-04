@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { boiteOpaque } from './planCle3d';
 
-describe('plan clé depuis Relief', () => {
+describe('plan clé depuis Nexora Mesh', () => {
   it('trouve la boîte de l’objet dans une image à fond transparent', () => {
     const w = 10, h = 6, d = new Uint8ClampedArray(w * h * 4);
     for (const [x, y] of [[3, 1], [7, 4], [5, 2]]) d[(y * w + x) * 4 + 3] = 255;

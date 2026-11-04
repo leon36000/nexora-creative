@@ -1,5 +1,5 @@
 /**
- * Fait juger des planches de vues (JPEG, quatre côtés d'un modèle 3D) par le juge de Relief, pour le banc comparatif.
+ * Fait juger des planches de vues (JPEG, quatre côtés d'un modèle 3D) par le juge de Nexora Mesh (ex-Relief), pour le banc comparatif.
  *
  *   NEXORA_LLM_BASE_URL=… NEXORA_LLM_CLE=… [NEXORA_LLM_MODELE_JUGE3D=…] tsx scripts/relief-juge.ts <sujets.txt> <sortie.jsonl> <planche.jpg>…
  *

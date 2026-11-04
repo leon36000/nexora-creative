@@ -57,7 +57,7 @@ describe('API de crédits du site Nexora', () => {
   });
 });
 
-describe('Relief : devis des options', () => {
+describe('Nexora Mesh : devis des options', () => {
   it('plusieurs vues = temps mesuré sur les GPU Turing ; qualité > aperçu', async () => {
     const { secondesGpuEstimees } = await import('./credits.js');
     expect(secondesGpuEstimees({ kind: 'object', quality: 'draft', vues: { back: {} } })).toBe(200);

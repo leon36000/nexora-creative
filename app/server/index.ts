@@ -1919,7 +1919,7 @@ app.get('/api/nexora/objet/:take', async (req, reply) => {
   };
 });
 
-// ---------- Relief : rapport, exports, cartes PBR, GIF de la tournette, juge ----------
+// ---------- Nexora Mesh (ex-Relief) : rapport, exports, cartes PBR, GIF de la tournette, juge ----------
 
 type PriseRelief = { id: number; glb: string; t: NonNullable<ReturnType<typeof takes.get>> };
 function priseRelief(req: FastifyRequest, reply: FastifyReply): PriseRelief | null {
@@ -2009,7 +2009,7 @@ app.get('/api/nexora/relief/:take/gif', async (req, reply) => {
 });
 
 /**
- * Juge de Relief : quatre côtés de la tournette, une note de 0 à 10, les jetons mesurés un à un et facturés comme les autres
+ * Juge de Nexora Mesh (ex-Relief) : quatre côtés de la tournette, une note de 0 à 10, les jetons mesurés un à un et facturés comme les autres
  * appels LLM (réservation au plafond du devis, règlement du réel, ligne au grand livre). Sans LLM : null, rien n'est dû.
  */
 async function evaluerRelief(takeId: number, description: string, tournette: string): Promise<(VerdictVues & { credits: number }) | null> {
@@ -2929,7 +2929,7 @@ async function upscaleGraph(b: any, seed: number): Promise<Built> {
   };
 }
 
-// ---------- Relief (image to 3D; ex-Object) ----------
+// ---------- Nexora Mesh (image to 3D; ex-Relief, ex-Object) ----------
 
 const ASSET_TOKEN_RE = /^asset:[0-9a-f-]{36}$/i;
 

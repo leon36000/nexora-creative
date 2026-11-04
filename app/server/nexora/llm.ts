@@ -13,7 +13,7 @@
  *  boost       : « Booster ma phrase »                        musique     : description de la bande originale
  *  moderation  : garde-fou avant rendu (licence H3, V.5)      publication : titres et textes pour les réseaux
  *  idees       : « Inspire-moi »                              juge        : juge visuel (deux candidats, modèle vision)
- *  juge3d      : juge visuel de Relief (le mode 3D) : note quatre côtés d'un modèle ; modèle vision aussi
+ *  juge3d      : juge visuel de Nexora Mesh (le mode 3D, ex-Relief) : note quatre côtés d'un modèle ; modèle vision aussi
  *  producteur  : agent Producteur (boucle d'outils bornée, server/nexora/agent.ts)
  *  monteur     : planification de montage (EditPlan v1, server/nexora/montage/)
  *  design      : mode Marketing, rôle « design » : gabarit, accroches, idées de logo (server/nexora/marketing/)
@@ -54,7 +54,7 @@ export interface ClientLlm {
   /** Renvoie le texte de la réponse ; `json` demande un objet JSON. */
   completer(role: RoleLlm, messages: MessageLlm[], options?: { json?: boolean; temperature?: number; maxTokens?: number }): Promise<string>;
   /** Un tour d'appel de fonctions (« tools ») : texte éventuel et appels d'outils demandés par le modèle. */
-  /** Comme `completer`, avec le modèle réellement appelé et les jetons consommés (facturation du juge de Relief). */
+  /** Comme `completer`, avec le modèle réellement appelé et les jetons consommés (facturation du juge de Nexora Mesh). */
   completerMesure?(role: RoleLlm, messages: MessageLlm[], options?: { json?: boolean; temperature?: number; maxTokens?: number }): Promise<{ texte: string; modele: string; entree: number; sortie: number }>;
   completerAvecOutils?(role: RoleLlm, messages: MessageLlm[], outils: DefinitionOutil[], options?: { temperature?: number; maxTokens?: number }): Promise<ReponseOutils>;
 }
