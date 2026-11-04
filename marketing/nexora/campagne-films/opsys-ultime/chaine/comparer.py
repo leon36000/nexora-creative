@@ -12,7 +12,7 @@ from pathlib import Path
 import tourner as T
 
 USAGE = Path.home() / ".local/share/nexora-sous-agents/usage.jsonl"
-ALIAS = {"deepseek": "eco-deepseek", "muse": "eco-muse", "gemini": "eco-gemini"}
+ALIAS = {"deepseek": ("eco-deepseek",), "muse": ("eco-muse",), "gemini": ("eco-gemini", "eco-gemini-eleve")}
 
 
 def sonie(f):
@@ -32,7 +32,7 @@ def jetons(eq):
         except ValueError:
             continue
         run = r.get("run") or ""
-        if r.get("alias") == ALIAS[eq] and run.startswith("ou-"):
+        if r.get("alias") in ALIAS[eq] and run.startswith("ou-"):
             tot["req"] += 1
             tot["in"] += r.get("in") or 0
             tot["out"] += r.get("out") or 0
