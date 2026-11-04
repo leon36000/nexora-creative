@@ -638,3 +638,7 @@ Dix brouillons et essais existants ont été copiés depuis Storage sur le disqu
 ### pc6 : diagnostic de l’occupation, sans nettoyage
 
 Relevé de métadonnées d’un sous-agent : caches locaux environ 25 Gio, dont uv 7,1, Hugging Face 6,5 et ingestion pc5 5,4 ; journaux système environ 4 Gio et cache APT environ 1,1 Gio. Plusieurs gros fichiers de caches ont des dates du 3 novembre : ils expliquent une partie de l’occupation, **pas nécessairement la baisse observée pendant cette reprise**. La cause de cette baisse n’est pas démontrée. Aucun contenu de secret lu, aucune suppression, migration ou modification de production. Rechercher une libération de marge sûre et vérifiée sans retirer les médias ni perturber les services.
+
+### Détourage et LTX 2.5 : preuves historiques précisées
+
+Le journal Creative rapporte un banc pc3 du rapide SAM 3.1 + ViTMatte : 224 images en 120 s (0,54 s/image) en pod, sur clips définis ; il ne prouve pas le parcours utilisateur complet après la panne. LTX 2.5 Alpha-Gen a été préparé et essayé sur RTX 5080 pc3 : 25 images en 18–20 s après chargement, 97 images en 88,3 s, VRAM 15,3–16,1 Gio et RAM système pic 29,2 Gio sur 30. Sur scènes synthétiques guidées, meilleur résultat rapporté pour le verre mais moins bon pour fourrure/fumée que le rapide. Ces mesures historiques ne suffisent ni à valider des vrais plans ni à déclarer le mode pro raccordé à Creative. Le pod pro était à zéro réplica dans le document ; état courant et intégration restent à vérifier en lecture seule.

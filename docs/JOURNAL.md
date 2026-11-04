@@ -449,3 +449,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - À la demande du fondateur, dix brouillons/essais des quatre équipes OPSYS copiés physiquement sur le disque Bureau pc1 (202 Mio), SHA vérifiés et inventoriés ; originaux préservés. Aucun vertical exporté trouvé pour Gemini/Muse/Opus, malgré des plans définis pour Gemini/Opus.
 
 - pc6 : caches (~25 Gio), journaux (~4 Gio) et cache APT (~1,1 Gio) contribuent à l’occupation. Les dates observées ne prouvent pas la cause de la baisse pendant cette reprise. Aucun nettoyage ni déplacement effectué.
+
+- Détourage/LTX : preuves historiques retrouvées pc3 ; rapide 224 images/120 s, LTX Alpha-Gen essayé sur 5080 avec VRAM quasi pleine et comparatif synthétique contrasté. Parcours réel et intégration pro restent à prouver.
