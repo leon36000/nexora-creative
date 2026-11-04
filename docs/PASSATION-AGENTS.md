@@ -436,3 +436,9 @@ V100 : plafond mesuré 240/300 W et utilisation 0 %.
 ### Finish — test Python isolé
 
 Le test local était bloqué faute de FastAPI, mais l'environnement existant `/srv/nexora-gpu/venv-audio` de la VM204 dispose des dépendances. Les deux fichiers de test/code ont été copiés dans un dossier temporaire `nexora-encoder-test-codex.*` sur cette VM ; exécution avec environnement vide et données/jeton fictifs : **9 tests Python sur 9 passent**. Aucun service, secret réel, GPU ou configuration de production utilisé/modifié. Combiné aux **14 tests TypeScript sur 14**, cela ne démontre ni la qualité NVENC sur de vrais clips, ni un déploiement, ni la validation de l'export complet. Le dossier temporaire étiqueté reste à inventorier/nettoyer selon les règles applicables.
+
+
+## 18. Décision du fondateur — 04/11/2026, reprise Codex
+
+- **CPU pc1 : le fondateur choisit de ne pas appliquer de limite.** Cela remplace toutes les indications précédentes proposant de la lui demander ; ne pas lancer le script groupé historique `nexora-actions-pc6.sh` (qui installerait cette limite). Le script ciblé `nexora-cpu-pc1-codex.sh` a été neutralisé sans exécution et n'effectue aucune modification. Le plafond GPU 5090 mesuré à 475 W reste distinct.
+- Le fondateur demande d'utiliser activement et à volonté **DeepSeek V4.1 Flash 1017**, **Muse Spark 1.3 Contributor** et **Gemini 4 Argon Flex, effort moyen à élevé** ; les deux premiers au maximum comme convenu. Il demande aussi **trois sous-agents GPT-6 Luna effort max**. Codex coordonne et vérifie leurs résultats ; aucune clé ni fichier de secret ne doit être lu ou affiché. Trois agents Luna ont été lancés sur Director, Finish et films ; leur résultat doit être contrôlé avant intégration.

@@ -359,3 +359,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Conservation : corrigé cinq lignes CSV décalées, original sauvegardé. Sur le périmètre Creative/OPSYS recensé, 104 contenus déjà vérifiés et 621 copiés sur pc1, chaque SHA-256 contrôlé et ajouté à l'inventaire (2 326 entrées) ; deux dossiers d'essai ne contiennent qu'un manifeste et sont conservés. Couverture totale du parc non démontrée.
 
 - Finish : 9 tests Python passent isolément sur VM204 avec environnement existant et données fictives ; aucun service ni GPU modifié. Avec 14 tests TS, cela ne prouve pas encore la qualité NVENC ni le déploiement.
+
+
+## 04/11/2026 — Décision du fondateur : CPU pc1 et délégation
+
+- Le fondateur choisit de ne pas appliquer de limite CPU sur pc1. Le script ciblé préparé a été neutralisé sans avoir été exécuté ; ne pas lancer le script groupé historique.
+- Déléguer activement à DeepSeek V4.1 Flash 1017 et Muse Spark 1.3 Contributor max, Gemini 4 Argon Flex moyen/élevé, et trois GPT-6 Luna max ; le responsable vérifie les résultats. Aucun secret lu.
