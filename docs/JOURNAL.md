@@ -302,3 +302,10 @@ Espace libéré : **pc6 +37 Go** (9,3 → 46 Go libres), **pc1 +4,2 Go**, **pc5*
 - **Mesures GB10** : 0,67 s par image à 720p (224 images, 151 s), VRAM pic 2,6 Go, RAM pic 4,1 Go ; raccords sans saut ; scintillement −26 à −35 %. Relecture indépendante des fichiers : PNG vraiment 16 bits, EXR demi ZIP prémultiplié, ProRes `yuva444p12le`, WebM `alpha_mode=1`.
 - **Non fait** : palier pro et comparaison INT8 / GGUF (poids protégés), pc3 (accès SSH), moteur sur 5090 / pc5, sélection par texte (SAM 3), Mode Studio en direct. **Prochain** : le fondateur accepte les formulaires s'il le décide et fournit un jeton de lecture ; clé SSH de pc3 ; tunnel `detourage` vers la VM 202 (unité + `permitopen`) pour activer la page en production.
 
+
+## 03/11/2026 (nuit) — recherche « triple A » : grammaire des promos, état de l'art, backlog
+- **Promos** : 102 vidéos analysées (2 courts du fondateur, 69 promos de 20 concurrents, 12 démos virales d'effets, 9 films d'entreprise, 10 promos de plus) ; mesures ffmpeg + Gemini 4 Argon sur la vidéo entière ; vidéos supprimées après analyse ; 4,9 USD. Livré : `recherche/23-grammaire-promos-ia.md` (16 règles, recettes Creative et OPSYS-AI, contrôle avant livraison), MR !19 puis !20.
+- **État de l'art** : `recherche/24-etat-de-lart-creative-2026-11.md` + annexes (trois rapports Codex avec recherche web, remue-méninges Gemini et Sol). Contrôle : 79/79 titres arXiv identiques, 83/85 dépôts existants, six affirmations recoupées à la main.
+- **Trouvé** : Pika H3 Flex (29/10) publie des adaptateurs LoRA ComfyUI pour nos bases H3 FL2VA et Ref2VA, non protégés, sous licence H3 ; 6 étapes, 15 s ; à mesurer en premier (TA1). H3 est 3e de l'arène Artificial Analysis, premier modèle ouvert.
+- **Plan** : `docs/backlog/creative-triple-a.md` (25 chantiers TA1-TA25, réponses sur Blender, FilmCraft, coût et prix, interface).
+- **Non fait** : aucune mesure GPU (les GPU tournent les films) ; aucune écoute humaine.
