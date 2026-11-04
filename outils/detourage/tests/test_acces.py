@@ -24,9 +24,12 @@ class TestAcces(unittest.TestCase):
         return {'NEXORA_DETOURAGE_JETON_FICHIER': self.f, 'NEXORA_DETOURAGE_AUTORISES': '192.168.1.122,127.0.0.1', **kw}
 
     def test_jeton_mode_600_exige(self):
-        os.chmod(self.f, 0o640)
-        with self.assertRaises(ConfigAcces):
-            lire_jeton(self.f)
+        for mode in (0o644, 0o604, 0o660, 0o666):
+            os.chmod(self.f, mode)
+            with self.assertRaises(ConfigAcces, msg=oct(mode)):
+                lire_jeton(self.f)
+        os.chmod(self.f, 0o640)  # groupe du processus (Secret monté avec fsGroup) : admis
+        self.assertEqual(lire_jeton(self.f), JETON)
         os.chmod(self.f, 0o600)
         self.assertEqual(lire_jeton(self.f), JETON)
 

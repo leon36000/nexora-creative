@@ -24,6 +24,8 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
   let faux: Server;
   const recu: string[] = [];
   const octetsRecus: number[] = [];
+  const sansJeton: string[] = [];
+  const JETON = 'jeton-de-test-0123456789abcdefghijklmnop';
   const app = Fastify();
   // comme monterAuthentification : la requête s'exécute dans le contexte du compte
   app.addHook('onRequest', (req, _r, done) => avecCompte({ organisationId: String(req.headers['x-org']), utilisateurId: 'u', territoire: 'CA' }, done));
@@ -34,6 +36,10 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
   beforeAll(async () => {
     faux = createServer((req, res) => {
       recu.push(`${req.method} ${req.url}`);
+      if (req.headers.authorization !== `Bearer ${JETON}`) { // comme serveur.py : 401 sans le jeton partagé
+        sansJeton.push(`${req.method} ${req.url}`);
+        res.statusCode = 401; res.end('{"erreur":"jeton manquant ou invalide"}'); return;
+      }
       const morceaux: Buffer[] = [];
       req.on('data', (d) => morceaux.push(d));
       req.on('end', () => {
@@ -50,7 +56,7 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     const port = (faux.address() as AddressInfo).port;
     enregistrerDetourage(app, {
       dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-routes-')),
-      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['*'], detourageUrl: `http://127.0.0.1:${port}` }],
+      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['*'], detourageUrl: `http://127.0.0.1:${port}`, detourageJeton: JETON }],
       facturation: () => null, nexora: false,
     });
     await app.ready();
@@ -82,6 +88,8 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     expect(video.body).toBe('VIDEO');
     const evade = await inj(A, { method: 'GET', url: `/api/nexora/detourage/travaux/${t.id}/sorties/..%2F..%2Fetc%2Fpasswd` });
     expect(evade.statusCode).toBe(404);
+    expect(sansJeton).toEqual([]); // chaque requête vers la machine GPU porte le jeton
+    expect(JSON.stringify(etat.json())).not.toContain(JETON); // et il n'est jamais renvoyé au navigateur
   });
 
   it('une autre organisation ne voit rien et ne peut rien faire', async () => {

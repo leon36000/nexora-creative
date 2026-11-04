@@ -65,7 +65,8 @@ def sonder(chemin: str) -> dict:
 
 DEFAUTS = {
     'largeur_max': 1920, 'debut_s': 0.0, 'duree_s': None, 'invites': [], 'segment': {'taille': 96, 'recouvrement': 12},
-    'sam': 'large', 'matting': 'vitmatte-small', 'bande': 0.015, 'lissage': 1.0, 'etapes': ['suivi', 'matting', 'sorties'],
+    'sam': 'large', 'matting': 'vitmatte-base', 'bande': 0.05,  # mesuré sur vérité terrain (recherche/22 §9)
+    'lissage': 1.0, 'etapes': ['suivi', 'matting', 'sorties'],
     'sorties': {'png16': True, 'rgba16': True, 'exr': True, 'prores': True, 'webm': True, 'matte': True, 'apercu': True},
     'composite': None, 'conserver_travail': True, 'mesure_scintillement': True,
 }

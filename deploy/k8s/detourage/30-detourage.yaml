@@ -1,0 +1,82 @@
+# Serveur de détourage vidéo de Nexora Creative (palier rapide : SAM 2.1 + ViTMatte) sur la RTX 5080 de pc3.
+# Portable : seuls l'image, le nodeSelector, l'adresse LAN (hostIP) et les chemins hostPath sont propres à pc3.
+# Prérequis hors git : Secret `detourage-jeton` (clé `jeton`, ≥ 32 caractères) et `registre-tirage` (voir README).
+# Accès : VM 202 (192.168.1.122) seulement, sur 192.168.1.126:8231 (hostPort lié à l'adresse LAN, ni Tailscale ni
+# boucle locale), jeton exigé à chaque requête, liste d'adresses dans le serveur ET NetworkPolicy.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detourage
+  namespace: nexora
+  labels: {app: detourage, nexora.ai/produit: creative}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}           # un seul GPU : l'ancien pod libère la carte avant que le nouveau démarre
+  selector: {matchLabels: {app: detourage}}
+  template:
+    metadata:
+      labels: {app: detourage}
+    spec:
+      nodeSelector: {kubernetes.io/hostname: pc3}
+      imagePullSecrets: [{name: registre-tirage}]
+      securityContext: {runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, fsGroup: 1000}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: detourage
+          image: 127.0.0.1:5000/nexora/detourage:__TAG__
+          env:
+            - {name: NEXORA_DETOURAGE_HOTE, value: "0.0.0.0"}          # dans l'espace réseau du pod seulement
+            - {name: NEXORA_DETOURAGE_AUTORISES, value: "192.168.1.122"}
+            - {name: NEXORA_DETOURAGE_JETON_FICHIER, value: /secrets/jeton}
+            - {name: NEXORA_DETOURAGE_SOCKET, value: /tmp/detourage.sock}  # administration : kubectl exec
+            - {name: HOME, value: /tmp}
+          ports:
+            - {name: http, containerPort: 8231, hostPort: 8231, hostIP: 192.168.1.126, protocol: TCP}
+          resources:
+            requests: {cpu: "2", memory: 4Gi, nvidia.com/gpu: 1}
+            limits: {memory: 10Gi, nvidia.com/gpu: 1}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          readinessProbe:   # /sante exige le jeton : la sonde vérifie seulement que le port répond
+            tcpSocket: {port: 8231}
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: {port: 8231}
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          volumeMounts:
+            - {name: modeles, mountPath: /modeles, readOnly: true}
+            - {name: travaux, mountPath: /travaux}
+            - {name: jeton, mountPath: /secrets, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: modeles     # poids hors de l'image ; contenu décrit par modeles.json (source, révision, sha256)
+          hostPath: {path: /home/pc3/nexora-detourage/modeles, type: Directory}
+        - name: travaux     # ≈ 0,08 Go par seconde de vidéo à 720p ; nettoyé par Creative (TTL 48 h)
+          hostPath: {path: /home/pc3/nexora-detourage/k8s/travaux, type: DirectoryOrCreate}
+        - name: jeton
+          secret: {secretName: detourage-jeton, defaultMode: 0400, items: [{key: jeton, path: jeton}]}
+        - name: tmp
+          emptyDir: {sizeLimit: 2Gi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: detourage
+  namespace: nexora
+  labels: {app: detourage}
+spec:
+  type: ClusterIP           # pour les appelants du groupe ; la VM 202 passe par le hostPort LAN
+  selector: {app: detourage}
+  ports: [{name: http, port: 8231, targetPort: 8231}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: detourage-entree
+  namespace: nexora
+spec:
+  podSelector: {matchLabels: {app: detourage}}
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{ipBlock: {cidr: 192.168.1.122/32}}]
+      ports: [{port: 8231, protocol: TCP}]

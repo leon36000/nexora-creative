@@ -30,10 +30,16 @@ def est_local(hote: str) -> bool:
 
 
 def lire_jeton(chemin: str) -> str:
-    """Lit le jeton ; refuse un fichier lisible par le groupe ou les autres, ou un jeton trop court."""
+    """Lit le jeton ; refuse un fichier accessible aux autres, modifiable par le groupe, ou un jeton trop court.
+
+    La lecture par le groupe n'est admise que si ce groupe est celui du processus : c'est le cas d'un Secret Kubernetes
+    monté avec fsGroup (le kubelet ajoute g+r), où seul notre conteneur appartient à ce groupe.
+    """
     st = os.stat(chemin)
-    if st.st_mode & (stat.S_IRWXG | stat.S_IRWXO):
-        raise ConfigAcces(f'le fichier du jeton doit être en mode 600 (actuel {stat.S_IMODE(st.st_mode):o})')
+    mode = stat.S_IMODE(st.st_mode)
+    groupe_a_nous = st.st_gid == os.getgid() or st.st_gid in os.getgroups()
+    if mode & stat.S_IRWXO or mode & (stat.S_IWGRP | stat.S_IXGRP) or (mode & stat.S_IRGRP and not groupe_a_nous):
+        raise ConfigAcces(f'le fichier du jeton doit être en mode 600 (actuel {mode:o})')
     with open(chemin, encoding='utf-8') as fh:
         jeton = fh.read().strip()
     if len(jeton) < LONGUEUR_MIN:

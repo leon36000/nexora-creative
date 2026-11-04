@@ -1,7 +1,7 @@
 """
 Banc du serveur de détourage : mêmes clips, mêmes clics, même chemin HTTP que le banc GB10 du 03/11 (recherche/22 §5).
 
-  python -I banc.py <url | unix:/chemin/prise> <dossier_clips> <sortie.json> [--matting vitmatte-small] [--seul nom]
+  python -I banc.py <url | unix:/chemin/prise> <dossier_clips> <sortie.json> [--matting vitmatte-small] [--params json] [--seul nom]
 
 Le jeton est lu dans le fichier NEXORA_DETOURAGE_JETON_FICHIER (jamais affiché). Chaque clip est déposé, lancé en
 1280 px de large, suivi jusqu'à la fin ; on garde les mesures du serveur (temps par étape, VRAM et RAM pic,
@@ -91,6 +91,7 @@ def main():
     base, clips, sortie = sys.argv[1].rstrip('/'), sys.argv[2], sys.argv[3]
     opts = sys.argv[4:]
     matting = opts[opts.index('--matting') + 1] if '--matting' in opts else None
+    plus = json.loads(opts[opts.index('--params') + 1]) if '--params' in opts else {}  # ex. '{"bande": 0.05}'
     seul = opts[opts.index('--seul') + 1] if '--seul' in opts else None
     resultats = {}
     for nom, fichier, invites, extra in CLIPS:
@@ -104,6 +105,7 @@ def main():
         params = {'invites': invites, 'largeur_max': 1280, **extra}
         if matting:
             params['matting'] = matting
+        params.update(plus)
         smi = VramSmi()
         smi.start()
         t0 = time.time()

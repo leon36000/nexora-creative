@@ -11,7 +11,7 @@ import { Detourage, ErreurDetourage } from './gestion.js';
 import { compteCourant } from '../compte.js';
 import { tarifDepuisEnv, type Facturation } from '../credits.js';
 
-export interface MoteurDetourageDeclare { id: string; nom: string; detourageUrl?: string; recettes: string[] }
+export interface MoteurDetourageDeclare { id: string; nom: string; detourageUrl?: string; detourageJeton?: string; recettes: string[] }
 
 export interface DepsDetourage {
   dossierDonnees: string;
@@ -36,8 +36,9 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   const clientDe = (id: string): ClientDetourage | null => {
     const m = deps.moteurs().find((x) => x.id === id && x.detourageUrl);
     if (!m?.detourageUrl) return null;
-    let c = clients.get(`${id}@${m.detourageUrl}`);
-    if (!c) { c = clientDetourage(m.detourageUrl); clients.set(`${id}@${m.detourageUrl}`, c); }
+    const cle = `${id}@${m.detourageUrl}#${m.detourageJeton ?? ""}`; // en mémoire seulement
+    let c = clients.get(cle);
+    if (!c) { c = clientDetourage(m.detourageUrl, fetch, m.detourageJeton); clients.set(cle, c); }
     return c;
   };
   const detourage = new Detourage({

@@ -33,8 +33,14 @@ async function verifier(r: Response): Promise<Response> {
   throw new Error(`détourage : ${m}`);
 }
 
-export function clientDetourage(base: string, f: typeof fetch = fetch): ClientDetourage {
+/**
+ * `jeton` : secret partagé avec le serveur de la machine GPU (NEXORA_DETOURAGE_JETON), envoyé en « Authorization: Bearer »
+ * à chaque requête ; jamais journalisé (les erreurs ne reprennent que le code HTTP et le message du serveur).
+ */
+export function clientDetourage(base: string, f0: typeof fetch = fetch, jeton?: string): ClientDetourage {
   const u = (c: string) => `${base.replace(/\/+$/, '')}${c}`;
+  const auth: Record<string, string> = jeton ? { authorization: `Bearer ${jeton}` } : {};
+  const f = ((url: string, init: RequestInit = {}) => f0(url, { ...init, headers: { ...(init.headers as Record<string, string> | undefined), ...auth } })) as typeof fetch;
   const json = (corps: unknown) => ({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(corps) });
   return {
     async sante() { return (await verifier(await f(u('/sante'), { signal: AbortSignal.timeout(8_000) }))).json() as Promise<Record<string, unknown>>; },
