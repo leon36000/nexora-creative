@@ -750,3 +750,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Director : préservation des citations et distinction entre vaisseau non demandé et vaisseau demandé mais omis corrigées localement. 110 tests ciblés relancés indépendamment, configuration Vite sans fichiers d'environnement; typecheck signalé réussi. Revue Terra finale en cours, pas encore commit/push de ces corrections.
 - Garde H3 partielle : revue indépendante confirme le refus avant réservation dans `/api/nexora/creer` et le devis; le chemin `/api/generate` reste contournable et certains checkpoints non reconnus peuvent être substitués. Films/suites existants et réservations ne sont pas réglés. Ne pas présenter cette variante comme correction complète; examen de la portée du chemin API en cours.
 - Pipeline #2858 de la MR passation réussi sur `28e8146`.
+
+
+### Reprise Codex — couverture API H3 et négations Director, 4 novembre 2026
+
+- Revue de la garde H3 limitée : le wrapper externe `/api/generate` constitue une autre entrée avant réservation; il peut être protégé sans modifier les suites de films existantes, mais une nouvelle commande Viewer de recréation serait refusée si elle demande le cas incohérent (prise d'origine préservée). Checkpoints non reconnus et ancien devis affiché brièvement après changement d'options sont aussi à traiter. Extension sur worktree isolé en préparation; aucune facturation ou production touchée.
+- Director : détection locale ajustée pour ignorer citations simples et négations directes « sans/without » avant de demander un vaisseau. 110 tests ciblés et typecheck signalés; revue indépendante en cours. Analyse lexicale : négations complexes et citations imbriquées/multilignes restent des limites, sans garantie générale.
