@@ -731,3 +731,10 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Le prototype de garde H3 est isolé dans `Nexora/travail/director-h3-ancrage-garde-codex-20261104` sur Storage, non commité/non déployé; 25 tests simulés et typechecks signalés. Revue Terra : une suite préexistante peut avoir une réservation dans le storyboard sans prise créée; la réconciliation existante ne parcourt que les réservations rattachées aux prises. Refuser cette suite pourrait donc laisser une réservation en suspens. Aucun mécanisme idempotent de libération n'est prouvé; aucun solde réel touché. Ce prototype ne doit pas être intégré tel quel. Une protection partielle avant réservation des nouvelles demandes est étudiée séparément, sans prétendre couvrir les films existants.
 - Director : quatre nouveaux tests ont reproduit les erreurs anime/citation/vaisseau; correctifs locaux en vérification. Aucun rendu ni déploiement.
+
+
+### Reprise Codex — protection H3 partielle et adaptateur Muse, 4 novembre 2026
+
+- Variante H3 distincte `Nexora/travail/director-h3-ancrage-creer-limite-codex-20261104` : garde limitée aux nouvelles créations et devis, avant réservation, message FR/EN; 24 tests simulés et typechecks signalés. Elle ne modifie ni films/suites ni réservations existantes et ne couvre pas toutes les entrées : protection partielle seulement, non commitée/non déployée, revue indépendante en cours. Le prototype plus large demeure bloqué par le risque de réservations de films en attente.
+- Adaptateur Muse isolé : 22 tests simulés repassés indépendamment avec temporaires sur Storage; UUID explicite, octets client contrôlés et absence de retry automatique après POST ambigu. Aucun appel réel ou GPU. L'API distante ne réserve pas atomiquement les noms; la réception des octets et l'absence d'écrasement serveur ne sont pas attestées.
+- Director : les trois défauts anime, texte cité et astronaute sans vaisseau ont été reproduits puis corrigés localement; 78 tests ciblés signalés, suite élargie en cours.
