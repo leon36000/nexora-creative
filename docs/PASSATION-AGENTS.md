@@ -730,3 +730,7 @@ Deux commits locaux complémentaires à `5d27dc6` : **826b604** contrôle que le
 ### Détourage : promesse visuelle corrigée localement
 
 Le relevé indépendant a retrouvé une phrase d’interface promettant « sans scintillement », alors que les mesures historiques montrent une réduction et non l’absence d’artefacts. Commit local **c3dbee0** sur le worktree de détourage : formulation factuelle « avec stabilisation des contours ». Correction de texte vérifiée par `git diff --check`, pas de test d’interface ni de déploiement. L’interface de détourage reste majoritairement française : la couverture FR/EN demeure un chantier distinct, non livrée.
+
+### Détourage réel : recettes actuellement annoncées
+
+GET en lecture seule `/api/nexora/moteurs-gpu` depuis pc5 : les quatre moteurs Creative déclarent des recettes d’image, musique, 3D ou H3, mais **aucun ne déclare `detourage-rapide` ni `*`**. Combiné au code déployé vérifié par hash et aux deux réponses d’état, cela explique le refus de sélection du moteur rapide malgré une URL de détourage déclarée. Le moteur SAM pc3 répond HTTP 401 sans jeton depuis VM202 : réseau présent, authentification et traitement réels non testés. Aucune configuration réelle, valeur de secret ou mot de passe n’a été lu ; aucun service modifié ou redémarré. Étudier une correction vérifiée sur branche ou de configuration après le diagnostic, sans supposer que l’URL suffit à prouver le bon modèle.

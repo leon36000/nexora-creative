@@ -488,3 +488,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Détourage : `826b604` protège lancement/reprise des anciens travaux liés à un moteur seulement pro ; `575e5cd` bloque aussi la reprise de paramètres pro explicites sur moteur mixte. 24 tests ciblés et typecheck passent ; anciennes données sans palier restent ambiguës. Pas de déploiement.
 
 - Détourage : `c3dbee0` retire localement la garantie non prouvée « sans scintillement » ; pas de déploiement. Interface FR/EN encore à compléter.
+
+- Détourage réel : aucun des quatre moteurs ne déclare la recette rapide ou `*`, alors qu’une URL détourage existe ; le filtre de sélection explique l’état indisponible. Pc3 répond 401 sans jeton, pas de preuve authentifiée ni modification production.
