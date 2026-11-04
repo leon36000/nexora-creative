@@ -439,3 +439,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - pc6 : racine 100 %, ~5,1 Gio disponibles, cause de baisse non établie ; données de montage sur Storage, inodes 28 %. Aucun nettoyage. v04 déjà en cours à vérifier/archiver puis suspendre les nouveaux rendus tant que la marge est insuffisante.
 
 - OPSYS DeepSeek : v04 généré, décodé et archivé avec planche ; v05–v06 restent à générer après rétablissement de la marge disque racine. Aucun nouveau rendu lancé.
+
+- Le fondateur demande d’utiliser Storage pc6 et les espaces Bureau et Infrastructure pc1. Vérifiés : ~645 Gio libres sur Storage, ~244 Gio sur Infrastructure, ~33 Gio sur le système de fichiers contenant le Bureau pc1. Gros volumes sur les espaces disposant de marge ; copies vérifiées et inventoriées.

@@ -616,3 +616,7 @@ Sur le brouillon long, un contrôle automatique n’a trouvé aucun passage noir
 ### OPSYS DeepSeek : v04, pause de génération
 
 `v04-r1.mp4` généré en 141,0 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1, SHA-256 vérifiés ; inventaire **3 876 entrées**. La planche montre un serveur puis une façade de bureaux ; son et mouvement restent à juger. Les plans verticaux `v05` et `v06` restent à générer lorsque la marge disque racine pc6 sera rétablie ; aucun autre rendu lancé.
+
+### Consigne du fondateur : répartition du stockage
+
+Le fondateur demande d’utiliser le SSD externe **Storage de pc6** ainsi que les espaces **Bureau et Infrastructure de pc1**. Relevé de montage : Storage pc6 `/media/pc6/Storage`, ~645 Gio libres ; Infrastructure pc1 `/run/media/pc1/Infrastructure`, ~244 Gio libres ; le dossier `/home/pc1/Bureau` est sur le système de fichiers racine de pc1, ~33 Gio libres. Les dossiers d’archives visibles au Bureau peuvent pointer par lien symbolique vers Infrastructure : ne pas confondre leur emplacement visible avec le disque physique. Privilégier Storage et Infrastructure pour les gros volumes, conserver un inventaire et vérifier les copies. Ne pas déplacer ni supprimer des données existantes sans preuve de conservation.
