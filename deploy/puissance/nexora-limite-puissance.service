@@ -1,0 +1,11 @@
+[Unit]
+Description=Nexora : limite de puissance (GPU -20 %, CPU -13 %)
+After=multi-user.target nvidia-persistenced.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/nexora-limite-puissance.sh
+
+[Install]
+WantedBy=multi-user.target
