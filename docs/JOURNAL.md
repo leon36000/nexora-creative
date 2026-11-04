@@ -481,3 +481,6 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS : journal de montage corrèle les exports Gemini et Muse longs à 20 plans chacun, contre 24 et 19 dans les plans actuels ; court Muse 14,0 s contre 14,5 s. Changement de plan ou calcul probable, révision exacte non prouvée, exports préservés.
 
 - Essai de sous-agent Muse outillé, isolé et sans accès à la clé : 3 requêtes et appels d’outils, mais délai 240 s atteint avant production de la revue. Résultat incomplet, traces conservées.
+
+- Détourage réel : Creative répond 200 mais annonce rapide indisponible et aucun moteur rapide déclaré, tandis que l’état général dit détourage configuré. Pc3 répond 401 sans jeton depuis VM202 : joignable, santé authentifiée non prouvée. Sources déployées comparées par hash ; aucune modification de production.
+- Relecture de `5d27dc6` : ancien travail sur moteur seulement pro contournait le refus ; régression reproduite et correctif complémentaire local en vérification.
