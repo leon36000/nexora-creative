@@ -340,3 +340,13 @@ Maître du Bureau revu : 101 messages réels uniques (77 récents), 13 résumés
 Addendum de fin de session intégré : huit nouveaux messages, dernier événement 11:13:26Z ; diagnostic GitLab/Garage rapporté par l’autre session, commit 203c633 préservé. API Anthropic mise de côté par le fondateur, passage complet à Codex.
 
 Commit final de la revue bloqué : git add refuse index.lock (.git en lecture seule). Aucun fichier indexé, dernier HEAD 203c633 de l’autre session. Script pour le terminal du fondateur : ~/Desktop/nexora-commiter-passation.sh ; trailer GPT-6.1 Sol, aucun push.
+
+
+## 04/11/2026 — Reprise Codex : diagnostic initial en lecture seule
+
+- Réseau SSH rétabli ; GitLab répond 502. PostgreSQL non prêt, Garage en boucle, webservice/sidekiq en initialisation. Aucun service modifié. Les projets et pipelines restent invérifiables.
+- Files ComfyUI 37188 et 37288 vides au relevé ; plafonds GPU et CPU observés, détails dans `docs/PASSATION-AGENTS.md` §17. pc1 CPU à 100 % et troisième carte AMD pc4 illisible ; ne pas lancer de production GPU massive.
+- Worktrees Director et Finish préservés, sans reset. HANDOFF des deux films relus, aucune reprise automatique.
+- Revue documentaire commitée localement `80f2dde` avec trailer Codex ; aucun push. Sauvegarde GitLab complète et restauration non démontrées.
+
+- V7 : dossier DeepSeek existant importé avec textes et script, validation OK avec deux avertissements sur les mentions ; commit local `3634d83`, aucun rendu ni push. V100 mesurée à 240/300 W.
