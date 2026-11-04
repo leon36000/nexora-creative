@@ -1338,7 +1338,7 @@
         {
           "id": "c23",
           "src": "p19",
-          "entree_f": 36,
+          "entree_f": 28,
           "duree_f": 96,
           "vitesse": 1,
           "transition_in": {
