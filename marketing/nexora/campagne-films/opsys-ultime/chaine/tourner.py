@@ -123,6 +123,7 @@ def voix(equipe, ids=None):
     import voix as V
     D = dossier(equipe)
     pal = json.loads((RACINE / "casting" / "palette.json").read_text())["voix"]
+    taches = []
     for l in D.get("voix", []):
         if ids and l["id"] not in ids:
             continue
@@ -137,11 +138,9 @@ def voix(equipe, ids=None):
             direc = l.get("direction") or p.get("direction", "")
             if p["moteur"].startswith("qwen3tts"):
                 direc = ""
-            try:
-                m = V.ligne(equipe, l["id"], p["moteur"], l["texte"], direc, vit, k)
-                print(l["id"], k, m["utile_s"], "s emr", m["emr"], (m.get("oreille") or {}).get("moyennes"), flush=True)
-            except Exception as e:
-                print("ECHEC voix", l["id"], k, str(e)[:300], flush=True)
+            taches.append((equipe, l["id"], p["moteur"], l["texte"], direc, vit, k))
+    for m in V.lot(taches):
+        print(m["id"], m["prise"], m["utile_s"], "s emr", m["emr"], (m.get("oreille") or {}).get("moyennes"), flush=True)
 
 
 def prise_voix(equipe, lid):
@@ -176,6 +175,8 @@ def musique(equipe, n=None):
         if (TRAVAIL / equipe / "musique" / f"lyria-{i}.json").exists():
             continue
         pr = prompts[min(i, len(prompts)) - 1]
+        if isinstance(pr, dict):  # forme {id, duree_s, prompt} (équipe deepseek) : acceptée telle quelle
+            pr = pr.get("prompt", "")
         g = MU.composer(equipe, i, pr, m.get("modele", "google/lyria-3-pro-preview"))
         print("musique", i, g["bpm"], g["duree_s"], g["sauts_energie_s"][:6], flush=True)
 
@@ -266,6 +267,42 @@ def etat(equipe):
     return u
 
 
+def appliquer_revision(equipe):
+    """REVISION.json d'une équipe : nouvelles prises de voix (voix_reprises), choix des prises de voix et de la musique.
+    Les reprises de plans passent par file.py reprises."""
+    import voix as V
+    f = RACINE / "equipes" / equipe / "REVISION.json"
+    if not f.exists():
+        return
+    R = json.loads(f.read_text())
+    pal = json.loads((RACINE / "casting" / "palette.json").read_text())["voix"]
+    D = dossier(equipe)
+    c = choix(equipe)
+    taches = []
+    for r in R.get("voix_reprises", []):
+        base = next((l for l in D.get("voix", []) if l["id"] == r["id"]), {})
+        l = {**base, **{k: v for k, v in r.items() if v is not None}}
+        p = pal.get(l.get("voix"))
+        if not p or not l.get("texte"):
+            print("reprise de voix ignorée (voix ou texte manquant) :", r, flush=True)
+            continue
+        n = len(list((TRAVAIL / equipe / "voix").glob(f"{l['id']}-p*.json"))) + 1
+        if n > 3:
+            print("reprise de voix refusée (3 prises au plus) :", l["id"], flush=True)
+            continue
+        taches.append((equipe, l["id"], p["moteur"], l["texte"], "" if p["moteur"].startswith("qwen3tts") else (l.get("direction") or ""),
+                       float(l.get("vitesse", 1.0)), n))
+        c["voix"][l["id"]] = n
+    for m in V.lot(taches):
+        print("reprise voix", m["id"], m["prise"], m["emr"], (m.get("oreille") or {}).get("moyennes"), flush=True)
+    for k, v in (R.get("voix") or {}).items():
+        if k not in {t[1] for t in taches}:
+            c["voix"][k] = int(v)
+    if R.get("musique"):
+        c["musique"] = R["musique"] if isinstance(R["musique"], dict) else int(R["musique"])
+    ecrire_choix(equipe, c)
+
+
 if __name__ == "__main__":
     eq, cmd, *reste = sys.argv[1:]
     if cmd == "fiches":
@@ -286,5 +323,7 @@ if __name__ == "__main__":
                 print(p["id"], s["recette"], s["images"], "images", len(s["refs"]), "réf.", "audio" if s["audio"] else "")
             except Exception as e:
                 print(p["id"], "ERREUR", e)
+    elif cmd == "revision":
+        appliquer_revision(eq)
     elif cmd == "etat":
         print(json.dumps(etat(eq)))

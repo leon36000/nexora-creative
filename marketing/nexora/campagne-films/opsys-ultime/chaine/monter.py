@@ -104,6 +104,14 @@ def resoudre(equipe, plan, version):
             voix[v["src"]] = None
     c = T.choix(equipe)
     n = c.get("musique") or 1
+    if isinstance(n, dict):  # choix par version : {"long": 1, "court": 3}
+        n = n.get(version) or n.get("long") or 1
+    # une source musique nommée comme une entrée de musique.prompts ({id, prompt}) désigne cette génération-là
+    D = T.dossier(equipe)
+    src = (plan.get("audio", {}).get("musique") or {}).get("src")
+    for i, pr in enumerate(D.get("musique", {}).get("prompts") or [], 1):
+        if isinstance(pr, dict) and pr.get("id") == src:
+            n = i
     m = T.TRAVAIL / equipe / "musique" / f"lyria-{n}.wav"
     return vid, voix, (str(m) if m.exists() else None)
 
@@ -414,7 +422,7 @@ def mixer(ctx, sortie_wav):
     j = json.loads(e[e.rfind("{"): e.rfind("}") + 1])
     subprocess.run([FF, "-v", "error", "-y", "-i", str(brut), "-af",
                     f"loudnorm=I={cible}:TP={tp}:LRA=11:measured_I={j['input_i']}:measured_TP={j['input_tp']}:measured_LRA={j['input_lra']}:"
-                    f"measured_thresh={j['input_thresh']}:offset={j['target_offset']}:linear=true,alimiter=limit=0.80:level=false",
+                    f"measured_thresh={j['input_thresh']}:offset={j['target_offset']}:linear=true,alimiter=limit=0.72:level=false:asc=1",
                     "-ar", str(SR), str(sortie_wav)], check=True)
     brut.unlink()
 

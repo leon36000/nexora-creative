@@ -68,6 +68,29 @@ def travailler(tache, max_file):
     if pm.startswith("fin:"):
         while T.plan_retenu(eq, pm[4:]) is None:
             time.sleep(15)
+    # prérequis : fiches des références, image clé, prise de voix ancrée (attente, jamais d'échec silencieux)
+    t_att = time.time()
+    while True:
+        manque = []
+        for r in (p.get("refs") or []) if p.get("recette", "h3-max") == "h3-max" else []:
+            try:
+                T.images_ref(eq, r)
+            except FileNotFoundError:
+                manque.append(f"fiche {r}")
+        if pm and not pm.startswith("fin:") and not (T.TRAVAIL / eq / "cles" / f"{pm}.png").exists():
+            manque.append(f"clé {pm}")
+        if p.get("parole"):
+            try:
+                T.prise_voix(eq, p["parole"])
+            except FileNotFoundError:
+                manque.append(f"voix {p['parole']}")
+        if not manque:
+            break
+        if time.time() - t_att > 4 * 3600:
+            res = {"equipe": eq, "nom": f"{p['id']}-r{prise}", "erreur": "prérequis absents : " + ", ".join(manque)}
+            print(json.dumps(res, ensure_ascii=False), flush=True)
+            return res
+        time.sleep(30)
     try:
         s = T.spec_plan(eq, D, p, prise)
     except Exception as e:

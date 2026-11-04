@@ -134,7 +134,7 @@ def graphe_image(s):
     }
 
 
-def nos_travaux_en_attente(comfy):
+def nos_travaux_en_attente(comfy, prefixe="opsys-ultime/"):
     try:
         q = json.loads(http(f"{comfy}/queue"))
     except Exception:
@@ -142,7 +142,7 @@ def nos_travaux_en_attente(comfy):
     n = 0
     for it in q.get("queue_pending", []) + q.get("queue_running", []):
         try:
-            if "opsys-ultime/" in json.dumps(it[2].get("save", {}).get("inputs", {})):
+            if prefixe in json.dumps(it[2].get("save", {}).get("inputs", {})):
                 n += 1
         except Exception:
             pass
@@ -152,7 +152,8 @@ def nos_travaux_en_attente(comfy):
 def soumettre(s, max_file=6):
     video = s.get("type", "h3") == "h3"
     comfy = s.get("comfy", H3_COMFY if video else IMG_COMFY)
-    while nos_travaux_en_attente(comfy) >= max_file:
+    prefixe = f"opsys-ultime/{s.get('equipe', 'commun')}/" if os.environ.get("OPSYS_FILE_PAR_EQUIPE") else "opsys-ultime/"
+    while nos_travaux_en_attente(comfy, prefixe) >= max_file:
         time.sleep(10)
     g = graphe_h3(s, comfy) if video else graphe_image(s)
     pid = json.loads(http(f"{comfy}/prompt", json.dumps({"prompt": g, "client_id": "opsys-ultime"}).encode(),

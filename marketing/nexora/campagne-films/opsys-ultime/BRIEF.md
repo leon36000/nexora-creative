@@ -113,8 +113,9 @@ Le fondateur a cité deux courts. Notes du producteur (visionnés en basse défi
   lui** (hologrammes, documents qui s'assemblent, voix) ; (3) chaque fonction = un nom court + une preuve visuelle de 2 à 4 s ;
   (4) des messages d'état de l'IA comme fil narratif (« Photo reçue. Mesures en cours… ») ; (5) la musique pilote les coupes ;
   (6) une apothéose, puis le carton.
-- La note de recherche `recherche/23-grammaire-promos-ia.md` (autre agent) sera ajoutée ici dès sa parution ; à défaut, ces
-  notes font foi.
+- La note de recherche `recherche/23-grammaire-promos-ia.md` (autre agent, 102 promos analysées) a paru le 03/11 à 23 h 30,
+  après l'écriture des quatre dossiers : elle est remise aux quatre équipes **à la ronde de révision** (copie dans
+  `reference/23-grammaire-promos-ia.md`). À lire : §1 (16 règles), §6 (recette du film d'entreprise OPSYS-AI), §7 (contrôles).
 
 ## 4. Les outils, et leurs limites MESURÉES
 

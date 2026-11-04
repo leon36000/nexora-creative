@@ -71,6 +71,38 @@ def planches(eq, sortie, journal):
     return noms
 
 
+def planche_montage(eq, sortie):
+    """Une image toutes les 2 s du premier montage long, avec le temps : pour réviser sans regarder la vidéo."""
+    f = T.TRAVAIL / eq / "montage" / f"{eq}-long.mp4"
+    if not f.exists():
+        f = T.TRAVAIL / eq / "montage" / f"{eq}-long-brouillon.mp4"
+    if not f.exists():
+        return []
+    d = T.duree(f)
+    font = ImageFont.truetype(str(POLICE), 20)
+    ims = []
+    t = 1.0
+    while t < d:
+        raw = subprocess.run([T.FF, "-v", "error", "-ss", f"{t:.2f}", "-i", str(f), "-frames:v", "1", "-vf", "scale=384:-2",
+                              "-f", "image2pipe", "-vcodec", "png", "-"], capture_output=True).stdout
+        from io import BytesIO
+        im = Image.open(BytesIO(raw)).convert("RGB")
+        ImageDraw.Draw(im).text((8, 6), f"{t:5.1f} s", font=font, fill=(255, 90, 31))
+        ims.append(im)
+        t += 2.0
+    noms = []
+    for k in range(0, len(ims), 30):
+        lot = ims[k:k + 30]
+        w, h = lot[0].size
+        P = Image.new("RGB", (w * 5 + 16, h * ((len(lot) + 4) // 5) + 4 * ((len(lot) + 4) // 5)), (8, 8, 10))
+        for i, im in enumerate(lot):
+            P.paste(im, ((i % 5) * (w + 4), (i // 5) * (h + 4)))
+        n = sortie / f"planche-montage-{k // 30 + 1}.jpg"
+        P.save(n, quality=82)
+        noms.append(n)
+    return noms
+
+
 def main():
     a = argparse.ArgumentParser()
     a.add_argument("equipe")
@@ -90,6 +122,11 @@ def main():
     if df.exists():
         defauts = json.loads(df.read_text())
     noms = planches(eq, sortie, journal)
+    noms_m = planche_montage(eq, sortie)
+    descr = {}
+    dfd = T.TRAVAIL / eq / "descriptions.json"
+    if dfd.exists():
+        descr = json.loads(dfd.read_text())
     D = T.dossier(eq)
     u = T.etat(eq)
     gpu = sum((r.get("secondesMoteur") or 0) for r in journal.values())
@@ -98,9 +135,10 @@ def main():
          f"Temps GPU (5090) : {gpu / 60:.1f} min.", "",
          "## Plans tournés (planches : " + ", ".join(n.name for n in noms) + ")", "",
          "Trois images par plan (12 %, 50 %, 88 % de la durée). Défauts relevés à l'œil par le producteur :", "",
-         "| prise | durée | GPU | défauts relevés |", "|---|---|---|---|"]
+         "| prise | durée | GPU | ce qu'on voit (producteur) | défauts relevés |", "|---|---|---|---|---|"]
     for nom, r in sorted(journal.items()):
-        t.append(f"| {nom} | {r.get('images', 0) / 24:.1f} s | {r.get('secondesMoteur') or '–'} s | {defauts.get(nom, r.get('erreur', '') or 'aucun relevé')} |")
+        t.append(f"| {nom} | {(r.get('images') or 0) / 24:.1f} s | {r.get('secondesMoteur') or '–'} s | {descr.get(nom, '')} | "
+                 f"{defauts.get(nom, r.get('erreur', '') or 'aucun relevé')} |")
     t += ["", "## Voix", "", "Oreille de machine (Gemini 4 Argon, sur 10 : accent québécois, énergie, naturel, clarté) ; EMR = erreur de mots Whisper.", "",
           "| réplique | prise | durée | c/s | relief | EMR | oreille | transcription | avis |", "|---|---|---|---|---|---|---|---|---|"]
     for j in sorted((T.TRAVAIL / eq / "voix").glob("*.json")):
@@ -115,6 +153,17 @@ def main():
         g = json.loads(j.read_text())
         t.append(f"- `{j.stem}` : {g['duree_s']} s, **{g['bpm']} BPM mesurés** (temps {g['temps_s']} s, phase {g['phase_s']} s), "
                  f"sauts d'énergie à {', '.join(str(x) for x in g['sauts_energie_s'][:8])} s")
+    if noms_m:
+        t += ["", "## Premier montage (planches : " + ", ".join(n.name for n in noms_m) + ", une image toutes les 2 s)", ""]
+        jm = T.TRAVAIL / "journal-montage.jsonl"
+        if jm.exists():
+            for l in jm.read_text().splitlines():
+                r = json.loads(l)
+                if r.get("equipe") == eq:
+                    t.append(f"- {Path(r['film']).name} : {r['duree_s']} s, {r['plans']} plans montés, plans manquants : {r.get('manquants') or 'aucun'}")
+        rp = T.TRAVAIL / eq / "montage" / "rapport.md"
+        if rp.exists():
+            t += ["", rp.read_text()]
     m = T.TRAVAIL / eq / "montage"
     t += ["", "## Premier montage", ""] + [f"- `{f.name}`" for f in sorted(m.glob("*.mp4"))] if m.exists() else []
     t += ["", "## Ce que tu peux décider (une seule ronde)", "",

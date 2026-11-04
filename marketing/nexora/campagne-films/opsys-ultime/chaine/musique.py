@@ -16,7 +16,32 @@ import numpy as np
 ICI = Path(__file__).resolve().parent
 sys.path.insert(0, str(ICI.parents[1] / "films-v3/outils"))
 import commun as C  # noqa: E402
-from musique import lyria  # noqa: E402  (films-v3/outils/musique.py : appel en flux, renvoie (octets, coût))
+
+
+def lyria(prompt, modele="google/lyria-3-pro-preview"):
+    """Appel en flux d'OpenRouter (repris de films-v3/outils/musique.py) ; renvoie (octets mp3, coût USD)."""
+    import base64
+    import urllib.request
+    corps = {"model": modele, "messages": [{"role": "user", "content": prompt}], "modalities": ["text", "audio"], "stream": True}
+    r = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=json.dumps(corps).encode(),
+                               headers={"Authorization": "Bearer " + C.cle("openrouter"), "Content-Type": "application/json"})
+    morceaux, cout = [], None
+    with urllib.request.urlopen(r, timeout=900) as resp:
+        for ligne in resp:
+            ligne = ligne.decode().strip()
+            if not ligne.startswith("data:") or ligne[5:].strip() == "[DONE]":
+                continue
+            try:
+                j = json.loads(ligne[5:])
+            except ValueError:
+                continue
+            if j.get("usage"):
+                cout = j["usage"].get("cost")
+            for c in j.get("choices", []):
+                a = c.get("delta", {}).get("audio")
+                if a and a.get("data"):
+                    morceaux.append(a["data"])
+    return base64.b64decode("".join(morceaux)), cout
 
 TRAVAIL = Path.home() / "nexora-creative-data/work/opsys-ultime"
 FF = str(Path.home() / "nexora-creative-data/engine/ffmpeg/ffmpeg-7.0.2-arm64-static/ffmpeg")

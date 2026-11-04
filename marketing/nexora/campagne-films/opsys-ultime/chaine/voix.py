@@ -193,11 +193,45 @@ def juger(f, texte, role, passes=2, modele="google/gemini-4-argon"):
     return {"moyennes": moy, "passes": notes}
 
 
-def ligne(equipe, ident, moteur, texte, direction="", vitesse=1.0, prise=1, juge=True):
+def lot(taches, paralleles=6):
+    """Plusieurs prises d'un coup : génération en parallèle, une seule passe Whisper, oreille en parallèle.
+    tache = (equipe, ident, moteur, texte, direction, vitesse, prise)."""
+    import concurrent.futures as cf
+
+    def gen(t):
+        try:
+            return ligne(*t, juge=False, avec_whisper=False)
+        except Exception as e:
+            print("ECHEC voix", t[1], t[6], str(e)[:300], flush=True)
+            return None
+    with cf.ThreadPoolExecutor(paralleles) as ex:
+        ms = [m for m in ex.map(gen, taches) if m]
+    if not ms:
+        return []
+    tr = transcrire([m["fichier"] for m in ms])
+    for m in ms:
+        x = tr.get(m["fichier"], {"texte": "", "mots": []})
+        m["transcription"], m["mots"], m["emr"] = x["texte"], x["mots"], emr(m["texte"], x["texte"])
+
+    def ore(m):
+        m["oreille"] = juger(m["brut"], m["texte"], m["id"])
+        return m
+    with cf.ThreadPoolExecutor(paralleles) as ex:
+        ms = list(ex.map(ore, ms))
+    for m in ms:
+        Path(m["fichier"]).with_suffix(".json").write_text(json.dumps(m, ensure_ascii=False, indent=1))
+    return ms
+
+
+def ligne(equipe, ident, moteur, texte, direction="", vitesse=1.0, prise=1, juge=True, avec_whisper=True):
     d = TRAVAIL / equipe / "voix"
     d.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    octets, ext, cout = generer(moteur, texte, direction, vitesse)
+    for essai in range(3):  # réponse vide ou tronquée du fournisseur : on recommence
+        octets, ext, cout = generer(moteur, texte, direction, vitesse)
+        if len(octets) > 2000:
+            break
+        time.sleep(3)
     brut = d / f"{ident}-p{prise}-brut.{ext}"
     brut.write_bytes(octets)
     # version de montage : 48 kHz mono, silences de tête/queue coupés, −16 LUFS
@@ -209,6 +243,8 @@ def ligne(equipe, ident, moteur, texte, direction="", vitesse=1.0, prise=1, juge
     m = mesurer(wav, texte)
     m.update({"equipe": equipe, "id": ident, "prise": prise, "moteur": moteur, "texte": texte, "direction": direction, "vitesse": vitesse,
               "fichier": str(wav), "brut": str(brut), "cout_usd": cout, "secondes": round(time.time() - t0, 1)})
+    if not avec_whisper:
+        return m
     tr = transcrire([wav])[str(wav)]
     m["transcription"] = tr["texte"]
     m["mots"] = tr["mots"]
