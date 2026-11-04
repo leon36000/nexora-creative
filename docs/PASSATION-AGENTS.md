@@ -956,3 +956,7 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 ### Reprise Codex — MR Director, 4 novembre 2026
 
 - Commit `6bb8793` de Director bilingue poussé sur `feat/director-creation-fr-en-codex`; MR brouillon !42 vers `developpement`, pipeline #2855 en attente au relevé. La MR comprend aussi les deux commits Director antérieurs `35e680a` et `adc14a8` : revue de l'ensemble nécessaire. La fusion simulée avec `developpement` `5ac932d` ne présente pas de conflit. 72 tests ciblés relancés indépendamment avec `envFile:false`/`envDir:false`; typecheck validé par l'agent. Aucun déploiement. Un essai navigateur/HTTP isolé avec services simulés est en préparation; Publication, Viewer et Creative entier restent hors portée du bilinguisme.
+
+### Reprise Codex — revue complète des commits Director, 4 novembre 2026
+
+- Revue statique Terra de `35e680a` à `adc14a8` : quatre risques P2 à reproduire et corriger avant sortie de la MR !42. Certaines demandes `an anime scene/battle` peuvent déclencher la recette photo; le repli peut retirer des mots demandés entre guillemets; un checkpoint FastH3 avec photo est rapporté/estimé sous `h3-max`; le garde spatial peut exiger un vaisseau pour un astronaute seul sur la Lune. Le repli après échec LLM ne garantit pas les contrôles sémantiques live-action/spatiaux. Pas de mesure GPU/LLM, fréquence ou coût réel déduits. Tests et corrections isolés en cours; aucune fusion ni déploiement.
