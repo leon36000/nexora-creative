@@ -1,0 +1,74 @@
+[
+ {
+  "type": "h3",
+  "nom": "voix-h3-fr-a",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, a medium close-up frames a charismatic male movie-trailer announcer in his thirties with a gritty, powerful, punchy voice (S1) standing in a dark professional recording booth in front of a large studio microphone, warm key light, black acoustic foam behind him. He leans into the microphone, grinning, with sharp energetic gestures, and speaks fast with hard attacks, a short dry beat before each punchline, in a Québécois French accent, never soft, never calm. The announcer (S1) says: <d>[French] Trois mots. Même mal écrits. L'IA écrit le reste. Une bataille dans l'espace ? Réglé. T'écris trois mots. On fait le film.</d> The camera pushes in with small amplitude at slow speed.\n\noverall_soundscape: A dry, close-miked studio voice with no room echo and no background noise.\n\nnon_diegetic_music: N/A",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "largeur": 960,
+  "hauteur": 544,
+  "images": 220,
+  "graine": 9101,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/voix/h3"
+ },
+ {
+  "type": "h3",
+  "nom": "voix-h3-fr-b",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, a medium close-up frames a playful, high-energy male hype host in his late twenties with a bright, raspy, grinning voice (S1) standing in a dark professional recording booth in front of a large studio microphone, warm key light, black acoustic foam behind him. He leans into the microphone, grinning, with sharp energetic gestures, and speaks fast with hard attacks, a short dry beat before each punchline, in a Québécois French accent, never soft, never calm. The announcer (S1) says: <d>[French] Trois mots. Même mal écrits. L'IA écrit le reste. Une bataille dans l'espace ? Réglé. T'écris trois mots. On fait le film.</d> The camera pushes in with small amplitude at slow speed.\n\noverall_soundscape: A dry, close-miked studio voice with no room echo and no background noise.\n\nnon_diegetic_music: N/A",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "largeur": 960,
+  "hauteur": 544,
+  "images": 220,
+  "graine": 9102,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/voix/h3"
+ },
+ {
+  "type": "h3",
+  "nom": "voix-h3-en-a",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, a medium close-up frames a charismatic male movie-trailer announcer in his thirties with a gritty, powerful, punchy voice (S1) standing in a dark professional recording booth in front of a large studio microphone, warm key light, black acoustic foam behind him. He leans into the microphone, grinning, with sharp energetic gestures, and speaks fast with hard attacks, a short dry beat before each punchline, in a North American English, never soft, never calm. The announcer (S1) says: <d>[English] Three words. Typos and all. The AI writes the rest. A space battle? Done. You type three words. We make the movie.</d> The camera pushes in with small amplitude at slow speed.\n\noverall_soundscape: A dry, close-miked studio voice with no room echo and no background noise.\n\nnon_diegetic_music: N/A",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "largeur": 960,
+  "hauteur": 544,
+  "images": 220,
+  "graine": 9101,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/voix/h3"
+ },
+ {
+  "type": "h3",
+  "nom": "voix-h3-en-b",
+  "prompt": "integrated_multimodal_description: [Shot 1] Live-action, cinematic, a medium close-up frames a playful, high-energy male hype host in his late twenties with a bright, raspy, grinning voice (S1) standing in a dark professional recording booth in front of a large studio microphone, warm key light, black acoustic foam behind him. He leans into the microphone, grinning, with sharp energetic gestures, and speaks fast with hard attacks, a short dry beat before each punchline, in a North American English, never soft, never calm. The announcer (S1) says: <d>[English] Three words. Typos and all. The AI writes the rest. A space battle? Done. You type three words. We make the movie.</d> The camera pushes in with small amplitude at slow speed.\n\noverall_soundscape: A dry, close-miked studio voice with no room echo and no background noise.\n\nnon_diegetic_music: N/A",
+  "checkpoint": "10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors",
+  "etapes": 8,
+  "decalage": [
+   12,
+   3
+  ],
+  "echantillonneur": "euler",
+  "ref": true,
+  "largeur": 960,
+  "hauteur": 544,
+  "images": 220,
+  "graine": 9102,
+  "sortie": "~/nexora-creative-data/promo/v6-creative/voix/h3"
+ }
+]

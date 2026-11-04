@@ -1,0 +1,199 @@
+{
+  "marque": "marque-v6.json",
+  "bpm": 124.8,
+  "phase": 0,
+  "musique": {
+    "fichier": "~/nexora-creative-data/promo/v6-creative/musique/lyria-3.wav",
+    "entree": 8.008691370883742,
+    "gain_db": -7
+  },
+  "voix": [],
+  "sfx": [
+    {
+      "t": 6.25,
+      "type": "whoosh",
+      "db": -14,
+      "duree": 0.2
+    }
+  ],
+  "segments": [
+    {
+      "type": "saisie",
+      "debut": 0.0,
+      "duree": 1.9230769230769231,
+      "dossier": "~/nexora-creative-data/promo/v6-creative/captures/boost/s01",
+      "etapes": [
+        "vide",
+        "saisie",
+        "saisie-fin",
+        "survol"
+      ],
+      "viewport": [
+        1600,
+        900
+      ],
+      "zone": [
+        100,
+        296,
+        532,
+        474
+      ],
+      "clavier_db": -18
+    },
+    {
+      "type": "boost",
+      "debut": 1.9230769230769231,
+      "duree": 0.9615384615384616,
+      "dossier": "~/nexora-creative-data/promo/v6-creative/captures/boost/s01",
+      "viewport": [
+        1600,
+        900
+      ],
+      "zone": [
+        100,
+        490,
+        532,
+        765
+      ],
+      "termes_cles": [
+        "dragon",
+        "château",
+        "feu",
+        "flammes",
+        "rugissement"
+      ]
+    },
+    {
+      "type": "titre",
+      "debut": 2.8846153846153846,
+      "duree": 0.4807692307692308,
+      "texte_id": "tourne",
+      "style": "claque"
+    },
+    {
+      "type": "plan",
+      "debut": 3.3653846153846154,
+      "duree": 2.8846153846153846,
+      "fichier": "~/nexora-creative-data/promo/v6-creative/rushes/765.mp4",
+      "entree": 0.7,
+      "vitesse": [
+        [
+          0,
+          1.4
+        ],
+        [
+          0.65,
+          1.4
+        ],
+        [
+          0.9,
+          0.25
+        ],
+        [
+          1.65,
+          0.25
+        ],
+        [
+          2.1,
+          1.3
+        ],
+        [
+          2.8846153846153846,
+          1.3
+        ]
+      ],
+      "cadrage": [
+        [
+          0,
+          0.54,
+          0.48,
+          1
+        ],
+        [
+          2.8846153846153846,
+          0.53,
+          0.48,
+          1.08
+        ]
+      ],
+      "cadrage_v": [
+        [
+          0,
+          0.52,
+          0.47,
+          1
+        ],
+        [
+          1.5,
+          0.59,
+          0.43,
+          1.05
+        ],
+        [
+          2.8846153846153846,
+          0.53,
+          0.49,
+          1
+        ]
+      ],
+      "secousses": [
+        [
+          0.8,
+          22,
+          0.4
+        ]
+      ],
+      "flash": [
+        [
+          0.8,
+          "os",
+          0.12
+        ]
+      ],
+      "etalonnage": "nuit_feu",
+      "son_db": -6
+    },
+    {
+      "type": "chapitre",
+      "debut": 6.25,
+      "duree": 1.9230769230769231,
+      "texte_id": "chapitre_boost",
+      "media": {
+        "fichier": "~/nexora-creative-data/promo/v6-creative/captures/boost/s01/0032-boost.jpg",
+        "viewport": [
+          1600,
+          900
+        ],
+        "zone": [
+          100,
+          490,
+          532,
+          765
+        ]
+      }
+    },
+    {
+      "type": "avant_apres",
+      "debut": 8.173076923076923,
+      "duree": 1.9230769230769231,
+      "couches": [
+        {
+          "fichier": "~/nexora-creative-data/promo/v6-creative/rushes/765.mp4",
+          "entree": 1.0,
+          "saturation": 0.0,
+          "texte_id": "brut"
+        },
+        {
+          "fichier": "~/nexora-creative-data/promo/v6-creative/rushes/765.mp4",
+          "entree": 1.0,
+          "texte_id": "final"
+        }
+      ]
+    },
+    {
+      "type": "carton",
+      "debut": 10.096153846153847,
+      "duree": 1.9230769230769231
+    }
+  ]
+}
