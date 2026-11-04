@@ -738,3 +738,7 @@ GET en lecture seule `/api/nexora/moteurs-gpu` depuis pc5 : les quatre moteurs C
 ### Détourage : état général aligné localement
 
 Commit local **74959b0** sur le même worktree : le booléen `detourage` de `/api/nexora/etat` utilise désormais le même sélecteur de recette rapide que `/capacites` au lieu de signaler toute URL comme disponible. Ceci décrit une **configuration sélectionnable**, pas une vérification de santé : `/capacites` reste nécessaire pour cette dernière. Le test couvre une URL déclarée avec recette sans détourage ; **24 tests ciblés** et typecheck passent. Cette correction ne raccorde pas le moteur manquant. Le `index.ts` distant a un identifiant de contenu différent de notre base locale ; réconciliation attentive indispensable avant MR. Aucun push ni production modifiée.
+
+### Agent DeepSeek outillé isolé : premier essai incomplet
+
+Le même relais privé a permis une exécution DeepSeek outillée : six requêtes, six appels Bash, puis limite de tours atteinte (`FAIL:error_max_turns`, 0,00472 $ journalisé), sans fichier de revue final. Traces et éventuels essais synthétiques conservés ; ne pas déclarer la revue achevée. Un second essai borné est lancé avec consigne de conclure plus directement ; pas de clé réelle visible dans l’agent et aucun accès aux autres projets.
