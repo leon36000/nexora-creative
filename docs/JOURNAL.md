@@ -415,3 +415,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - API et PostgreSQL répondent ; Garage reste en échec. Le compte service voit les projets demandés en listant sans filtre membre ; OAuth personnel GitLab-PC4 déconnecté.
 - Une autre session a synchronisé la branche film jusqu'à `3634d83` et la passation jusqu'à `5141f84`, commit vide déjà ancêtre local ; MR !37 ouverte, !27 brouillon. Pipeline 2841 échoué, 2847 en attente ; aucun push/fusion supplémentaire de cette session.
+
+- PostgreSQL : la nouvelle révision souhaitée est maintenant active et prête avec sonde 240 ; aucune recréation effectuée par cette session. Garage reste en échec.
