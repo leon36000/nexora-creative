@@ -790,3 +790,8 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Pipelines #2861 Director `d988a9d`, #2865 garde H3 `7a94779` et #2864 passation `f726766` : succès vérifiés via API. Les MR !42/!43 restent brouillons; succès CI ne prouve ni la couverture des films/suites ni le comportement réel des modèles.
 - Essai navigateur Director isolé : Firefox a expiré avant page, puis Chromium a échoué avant ouverture (`Socket path too long`); la config Vite isolée ne résolvait pas `react-refresh`. Aucun DOM ou résultat navigateur vérifié. Les serveurs simulés locaux ont été arrêtés; un processus Firefox issu de l'essai a résisté à l'arrêt par permission et n'a pas été forcé. Une tentative corrigée avec chemin court vers Storage et résolution explicite est en cours; aucun service production ni GPU.
+
+
+### Reprise Codex — réconciliation avec GitLab, 4 novembre 2026
+
+- Simulation `git merge-tree` contre `developpement` `5ac932d` : le worktree détourage n'a pas de conflit textuel, Mesh a un conflit dans `relief.test.ts`, Viewer un conflit dans `Viewer.tsx`. Aucun fichier n'a été modifié par ces simulations. Réconciliations Mesh et détourage dans de nouveaux worktrees Storage en cours; les anciens worktrees sont préservés. Une absence de conflit ne prouve pas le comportement ni la compatibilité.
