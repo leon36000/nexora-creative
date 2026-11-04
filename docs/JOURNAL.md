@@ -389,3 +389,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Director : commits locaux `35e680a` et `adc14a8`, respect du médium demandé et correction du faux positif « anime cette photo » ; 452 tests et typecheck rapportés sur la première tranche, 60 ciblés relancés après correctif. Pas de banc LLM, rendu, push ou déploiement.
 
 - OPSYS : garde-fou plans absents commité `4b4ae82`, 5 tests relancés ; premier rendu DeepSeek p26 lancé seul après file et plafond contrôlés. Il est en cours, résultat/archivage non prouvés à cet instant.
+
+- OPSYS DeepSeek : p26 rendu (158,8 s moteur, 5,17 s H.264/AAC), vidéo et planche archivées et SHA vérifiés sur pc1. Une image sombre visible ; mouvement et son non évalués. p27 lancé seul après contrôle des prérequis et de la file vide.

@@ -504,3 +504,9 @@ Commits **35e680a** puis **adc14a8** sur `feat/realisateur-live-action` : recett
 Commit local **4b4ae82** sur `feat/opsys-ultime` : le montage refuse explicitement les plans vidéo absents au lieu de les remplacer silencieusement par de l'encre. Cinq tests ciblés passent, relancés indépendamment ; l'exception verticale `p02v → p02` est préservée, aucune correspondance `v01–v06` inventée. Le commit initial de l'agent `169d4d4` a été corrigé localement avant tout push pour inclure le trailer demandé ; `equipes/essai` non suivi reste intact.
 
 Après contrôle des prérequis et de la file vide, un seul rendu a été lancé : OPSYS DeepSeek `p26` sur 5090, `--max-file 1`, avec environnement vide et sans appel LLM. Au relevé : 1 tâche active, aucune attente, GPU 100 %, 474,88 W pour plafond 475 W. **En cours : résultat et archivage non encore attestés**. Les autres plans restent à reprendre un par un après vérification. Aucun service redémarré.
+
+### OPSYS DeepSeek : premier plan repris
+
+`p26-r1.mp4` rendu en 158,8 s de moteur, sans erreur rapportée ; fichier effectivement présent, H.264 1344×768, AAC, 5,166688 s. Vidéo et planche de cinq images ont été copiées sur le SSD Infrastructure de pc1, contrôlées par SHA-256 et ajoutées à l'inventaire (**3 743 entrées**). La planche montre bien une maison et un anneau lumineux demandés ; l'image est sombre, l'évaluation du mouvement et du son reste à faire, aucune note humaine ni acceptation. Originaux conservés.
+
+Après contrôle des références, de la voix et de la file vide, **p27** a été lancé seul (`--max-file 1`) ; il est en cours, sans résultat encore attesté. Poursuivre un plan à la fois, vérifier puis archiver chaque sortie et tout essai, sans utiliser les scripts automatiques qui poussent ou appellent des fournisseurs.
