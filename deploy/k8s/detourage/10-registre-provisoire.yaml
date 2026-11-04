@@ -1,0 +1,45 @@
+# Registre d'images PROVISOIRE sur pc3, en attendant le registre commun de l'agent d'infrastructure.
+# Pourquoi : pas de root sur pc3 (pas d'import `ctr`, pas de registries.yaml) ; containerd tire en HTTP depuis
+# 127.0.0.1 sans configuration. Écoute 127.0.0.1:5000 seulement (réseau de l'hôte), authentification htpasswd
+# (Secret `registre-htpasswd`, créé hors git), stockage hostPath ~/nexora-detourage/k8s/registre (propriétaire pc3).
+# À retirer dès que les images sont poussées au registre commun : `kubectl -n nexora delete -f ce-fichier`.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registre-provisoire
+  namespace: nexora
+  labels: {app: registre-provisoire, nexora.ai/statut: provisoire}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: registre-provisoire}}
+  template:
+    metadata:
+      labels: {app: registre-provisoire}
+    spec:
+      nodeSelector: {kubernetes.io/hostname: pc3}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      securityContext: {runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, fsGroup: 1000}
+      containers:
+        - name: registre
+          image: docker.io/library/registry:3.0.0
+          env:
+            - {name: REGISTRY_HTTP_ADDR, value: "127.0.0.1:5000"}
+            - {name: REGISTRY_AUTH, value: htpasswd}
+            - {name: REGISTRY_AUTH_HTPASSWD_REALM, value: nexora}
+            - {name: REGISTRY_AUTH_HTPASSWD_PATH, value: /auth/htpasswd}
+            - {name: REGISTRY_STORAGE_DELETE_ENABLED, value: "true"}
+            - {name: OTEL_TRACES_EXPORTER, value: none}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 512Mi}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts:
+            - {name: donnees, mountPath: /var/lib/registry}
+            - {name: auth, mountPath: /auth, readOnly: true}
+      volumes:
+        - name: donnees
+          hostPath: {path: /home/pc3/nexora-detourage/k8s/registre, type: Directory}
+        - name: auth
+          secret: {secretName: registre-htpasswd, items: [{key: htpasswd, path: htpasswd}]}

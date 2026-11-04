@@ -1,11 +1,11 @@
 """
 Scènes Blender à vérité terrain exacte pour noter le détourage (alpha connu au pixel près, rendu Cycles, fond transparent).
 
-  blender -b -P scene_blender.py -- <fourrure|verre|fumee> <dossier_sortie> [images=49] [echantillons=96] [derniere_image_rendue]
+  blender -b -P scene_blender.py -- <fourrure|verre|fumee|net> <dossier_sortie> [images=49] [echantillons=96] [derniere_image_rendue]
 
 Écrit <dossier>/rgba_%04d.png (RGBA 16 bits, alpha droit). Le fond réel est ajouté ensuite par composer.py :
 la vérité est alors l'alpha du rendu, sans aucune estimation. Catégories que nos clips Big Buck Bunny ne couvrent pas :
-cheveux fins (fourrure longue, mèches folles), verre (transmission, film_transparent_glass), fumée (volume).
+cheveux fins (fourrure longue, mèches folles), verre (transmission, film_transparent_glass), fumée (volume) ; et un contrôle à bords francs (net).
 """
 import math
 import os
@@ -109,13 +109,13 @@ if CAT == 'fourrure':
     ps = ob.modifiers.new('poils', 'PARTICLE_SYSTEM').particle_system
     s = ps.settings
     s.type = 'HAIR'
-    s.count = 6000
-    s.hair_length = 0.55
+    s.count = 4000
+    s.hair_length = 0.85
     s.material = 2
     s.child_type = 'INTERPOLATED'
     s.rendered_child_count = 12
     s.child_length = 1.0
-    s.roughness_1, s.roughness_2, s.roughness_endpoint = 0.06, 0.25, 0.08  # mèches folles
+    s.roughness_1, s.roughness_2, s.roughness_endpoint = 0.08, 0.35, 0.22  # mèches folles
     s.kink = 'CURL'
     s.kink_amplitude, s.kink_frequency = 0.02, 3.0
     s.root_radius, s.tip_radius, s.radius_scale = 1.0, 0.0, 0.008
@@ -177,6 +177,19 @@ elif CAT == 'fumee':
         bruit.inputs['W'].default_value = w
         bruit.inputs['W'].keyframe_insert('default_value', frame=f)
     trajectoire(ob, (-1.8, 0, -0.2), (1.6, 0, 0.3), tours=0.1)
+elif CAT == 'net':  # contrôle : bords francs et opaques (une bande large ne doit pas les dégrader)
+    bpy.ops.mesh.primitive_monkey_add(size=1.6)
+    ob = bpy.context.object
+    ob.modifiers.new('lisse', 'SUBSURF').levels = 2
+    bpy.ops.object.shade_smooth()
+    m, n, _ = materiau('net')
+    n['Principled BSDF'].inputs['Base Color'].default_value = (0.15, 0.35, 0.8, 1)
+    ob.data.materials.append(m)
+    bpy.ops.mesh.primitive_cube_add(size=0.5, location=(1.2, 0, 0.6))
+    cube = bpy.context.object
+    cube.data.materials.append(m)
+    cube.parent = ob
+    trajectoire(ob, (-2.2, 0, -0.1), (2.0, 0.3, 0.2), tours=0.4)
 else:
     raise SystemExit(f'catégorie inconnue : {CAT}')
 

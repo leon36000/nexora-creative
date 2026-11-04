@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nexora
+  labels:
+    nexora.ai/proprietaire: nexora-creative
