@@ -417,3 +417,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Une autre session a synchronisé la branche film jusqu'à `3634d83` et la passation jusqu'à `5141f84`, commit vide déjà ancêtre local ; MR !37 ouverte, !27 brouillon. Pipeline 2841 échoué, 2847 en attente ; aucun push/fusion supplémentaire de cette session.
 
 - PostgreSQL : la nouvelle révision souhaitée est maintenant active et prête avec sonde 240 ; aucune recréation effectuée par cette session. Garage reste en échec.
+
+- OPSYS DeepSeek : p31 rendu, décodé et archivé avec planche ; case noire finale de la planche = remplissage de grille. Une mesure instantanée de 487,83 W a dépassé la consigne 475 W ; p32 lancé seul après file vide.

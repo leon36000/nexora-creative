@@ -562,3 +562,7 @@ Commit local **9c223cb** sur `feat/sortie-video-nvenc` : rapport 30, JSON des si
 ### PostgreSQL : nouvelle révision appliquée
 
 Contrôle après le retour API : le pod PostgreSQL est maintenant prêt, utilise bien la révision désirée `gitlab-postgresql-5cd6988b69` et la sonde à **240**. L'ancien relevé à 30 concernait le pod précédent ; aucune recréation n'a été effectuée par cette session. Garage reste en échec, donc la reprise complète de GitLab et les sauvegardes ne sont pas établies.
+
+### OPSYS DeepSeek : p31
+
+`p31-r1.mp4` rendu en 313,1 s de moteur ; H.264 1344×768, AAC, 8,708333 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et vérifiées SHA-256 ; inventaire **3 769 entrées**. La planche montre une tour ; sa dernière case noire est un remplissage de la grille (4 images disponibles pour 5 cases), pas une preuve d'image noire dans le film. Son et mouvement restent à juger. Pendant le calcul, une lecture instantanée a affiché 487,83 W malgré une consigne nvidia-smi de 475 W ; aucune modification de réglage n'a été faite. Après file vide et limite configurée 475 W confirmées, `p32` a été lancé seul ; résultat en attente.
