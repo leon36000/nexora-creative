@@ -508,3 +508,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS : les durées et nombres de plans des anciens rendus Gemini/Muse concordent avec les dossiers initiaux Git `9303394`, pas avec leurs révisions ultérieures ; calcul relancé indépendamment. Correspondance forte mais non attestée par hash historique.
 
 - Agent Gemini Flex élevé outillé isolé : revue achevée ; sources vidéo omises et validation négative à reproduire/corriger. Les suggestions restent à vérifier ; tous les essais doivent rester conservés.
+
+- Viewer : `0200277` conserve l’identifiant du clip en redirigeant Prolonger/raccord ; 4 tests ciblés et typecheck relancés, pas de test navigateur ou déploiement.

@@ -774,3 +774,7 @@ Un agent Luna a comparé les dossiers Git, calcul relancé indépendamment : pou
 ### Gemini Flex élevé outillé : revue de provenance
 
 La revue isolée `agents/gemini-revue-provenance/revue.md` sur Storage est terminée : 6 requêtes, 6 tours, 92 s, 0,05258 $ journalisé. La clé réelle est restée dans le relais. Gemini signale notamment qu’une source vidéo absente de `plan.sources` pourrait échapper au garde-fou et être rendue en encre, et qu’un rapport de validation `ok:false` semble ne pas arrêter le montage. Ces points sont soumis à reproduction et correction par un agent Luna ; aucune proposition n’est automatiquement acceptée. La suggestion de supprimer ou remplacer un export échoué ne doit pas contrevenir à la conservation de tous les essais ni à la protection contre l’écrasement.
+
+### Viewer : clip conservé lors de la redirection Prolonger
+
+Commit local **0200277** dans le worktree Viewer : les liens `/extend` conservent `take` en allant vers `/prolonger`, y compris `mode=transition` traduit en `mode=raccord`; sans identifiant les destinations restent celles d’origine. Quatre tests ciblés et le typecheck complet ont été relancés indépendamment avec succès. Pas de test navigateur ni déploiement ; réconcilier la branche avec le `developpement` serveur plus récent avant MR.
