@@ -952,3 +952,7 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 
 - La branche de reprise a été poussée sur GitLab après succès du pipeline d'intégration. MR brouillon !41 vers `developpement`; pipeline #2853 sur `40f40a3` réussi (gitleaks, semgrep, trivy, fallback). Aucun déploiement. Les nouvelles notes de ce commit déclenchent leur propre pipeline après synchronisation.
 - Director : seconde revue Terra, les trois problèmes majeurs identifiés sont traités; l'ancien message API sans langue pour les montages a été restauré. Typecheck et 72 tests ciblés réussis avec configuration interdisant les fichiers d'environnement, cache/log sur Storage. Revue et commit locaux en cours; pas de test navigateur/HTTP complet ni traduction de Creative entier.
+
+### Reprise Codex — MR Director, 4 novembre 2026
+
+- Commit `6bb8793` de Director bilingue poussé sur `feat/director-creation-fr-en-codex`; MR brouillon !42 vers `developpement`, pipeline #2855 en attente au relevé. La MR comprend aussi les deux commits Director antérieurs `35e680a` et `adc14a8` : revue de l'ensemble nécessaire. La fusion simulée avec `developpement` `5ac932d` ne présente pas de conflit. 72 tests ciblés relancés indépendamment avec `envFile:false`/`envDir:false`; typecheck validé par l'agent. Aucun déploiement. Un essai navigateur/HTTP isolé avec services simulés est en préparation; Publication, Viewer et Creative entier restent hors portée du bilinguisme.
