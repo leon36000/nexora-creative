@@ -371,3 +371,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Conservation, deuxième vague : 412 contenus déjà vérifiés, 1 394 supplémentaires copiés sur le SSD Infrastructure de pc1 et accessibles depuis le Bureau ; empreintes SHA-256 vérifiées, inventaire à 3 720 lignes et 15 colonnes. Racine pc1 33 Gio libres, Infrastructure 244 Gio libres. Sources conservées ; parc complet non encore audité.
 
 - État Creative : H3, Qwen, Music3, détourage configuré et 3D annoncés par `/api/nexora/etat`, sans essai utilisateur de bout en bout. GitLab encore 502 ; les 2 015 nouveaux médias ont chacun une entrée correspondante et un fichier présent sur pc1.
+
+- GitLab : le StatefulSet demande bien une sonde PostgreSQL à 240, mais le pod utilise l'ancienne révision à 30 ; service encore 502, Garage en boucle. Aucune intervention en production et cause complète non établie.

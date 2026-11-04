@@ -457,3 +457,7 @@ Pour ménager la racine pc1, cette vague est physiquement dans `/run/media/pc1/I
 
 - `/api/nexora/etat` sur la VM202 répond et déclare H3, Qwen-Image 2.1, Music3, un moteur de détourage configuré et le mode 3D. Cette réponse décrit la configuration détectée ; elle ne prouve pas un détourage ou une transcription de bout en bout après la panne.
 - Nouvelle lecture GitLab : HTTP 502 ; PostgreSQL 7 redémarrages, non prêt, Garage 24 redémarrages, non prêt. Aucune réparation ni suppression de volume. Les copies des deux vagues de médias ont été rapprochées de leurs manifestes et de l'inventaire pc1 : 621/621 et 1 394/1 394 présentes et inscrites.
+
+### GitLab : sonde PostgreSQL non propagée
+
+À 06 h 45 Montréal, diagnostic en lecture seule : le StatefulSet `gitlab-postgresql` est bien configuré avec `startupProbe.failureThreshold=240`, période 10 s, génération 4 observée. **Mais le pod effectif utilise encore 30 × 10 s**, ancienne révision `gitlab-postgresql-bbc96b578`, alors que la révision désirée est `gitlab-postgresql-5cd6988b69` (stratégie RollingUpdate). Le réglage à 240 existe donc mais n'est pas appliqué au pod observé. PostgreSQL non prêt, 8 redémarrages ; événements Unhealthy/Killing ; Garage `CrashLoopBackOff`, 25 redémarrages ; GitLab encore 502. pc4 disposait d'environ 40 Gio de mémoire disponible et de swap libre à ce relevé. La cause complète, la corruption Garage et l'intégrité de la base ne sont pas établies par ces seuls éléments. Aucun pod, volume ou service modifié ; sauvegarde complète/restauration toujours manquantes.
