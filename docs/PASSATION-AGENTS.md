@@ -999,3 +999,7 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 
 - Revue de la garde H3 limitée : le wrapper externe `/api/generate` constitue une autre entrée avant réservation; il peut être protégé sans modifier les suites de films existantes, mais une nouvelle commande Viewer de recréation serait refusée si elle demande le cas incohérent (prise d'origine préservée). Checkpoints non reconnus et ancien devis affiché brièvement après changement d'options sont aussi à traiter. Extension sur worktree isolé en préparation; aucune facturation ou production touchée.
 - Director : détection locale ajustée pour ignorer citations simples et négations directes « sans/without » avant de demander un vaisseau. 110 tests ciblés et typecheck signalés; revue indépendante en cours. Analyse lexicale : négations complexes et citations imbriquées/multilignes restent des limites, sans garantie générale.
+
+### Reprise Codex — correctifs Director dans la MR, 4 novembre 2026
+
+- Commit `d988a9d` poussé sur la MR brouillon !42 : distinctions anime/photo FR/EN, citations simples, négations directes de vaisseau et scène spatiale citée. Revue indépendante des cas corrigés; 114 tests ciblés relancés sans chargement `.env`, typecheck signalé réussi. Les citations imbriquées/multilignes et négations complexes restent des limites lexicales. Pipeline du nouveau SHA en cours au relevé. La MR comprend aussi les deux commits Director historiques; essais navigateur/HTTP, routage H3 et revue complète restent nécessaires avant intégration.
