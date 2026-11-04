@@ -624,3 +624,8 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Muse a proposé deux alternatives dans `Nexora/travail/rnd-codex-20261104/agents/muse-alternatives-court/alternatives.md` (7 requêtes, 0,00706 $). Relecture indépendante `RELECTURE-CODEX.md` : le secours p05 proposé (entrée 88, durée 60) dépasse ses 124 images effectives et déclarées; la graine responsable du texte de p07-r1 n'est pas établie; un export vertical de sources horizontales n'est pas natif. Ces propositions restent non validées et ne constituent pas des décisions.
 - Gemini élevé a rédigé un protocole lipsync sous `agents/gemini-protocole-lipsync/protocole.md` (5 requêtes, 0,05425 $); il s'agit de propositions méthodologiques, pas de résultats mesurés.
 - Deux tentatives de revue DeepSeek montage ont atteint leur limite de tours (`error_max_turns`, 12 puis 8 requêtes; 0,05008 $ puis 0,02059 $). Pas de rapport final `revue.md`; essais de code conservés sur Storage, aucun succès affirmé.
+
+
+### Reprise Codex — candidat veille corrigé, 4 novembre 2026
+
+- Copie `sync-gpu-guard-isolated/` : suppression du POST `/free` et de `killpg`; un budget d'échéance est partagé entre tentatives et revérifié avant création de l'enfant. Seul l'enfant direct du processus peut être interrompu; ses descendants éventuels ne sont pas tués et peuvent rester actifs. 11 tests CPU repassés indépendamment avec callbacks/faux processus, aucun effet sur GPU/Comfy ni fichier pc1. La file vide ne réserve rien, l'échéance pc1 existante est expirée et le candidat n'est ni déployé ni prêt à exécution avant revue complémentaire Terra.
