@@ -332,6 +332,335 @@ Espace libéré : **pc6 +37 Go** (9,3 → 46 Go libres), **pc1 +4,2 Go**, **pc5*
 - **Disque** : `~/nexora-detourage/` sur pc3 regroupe tout (poids rapide 0,49 Go, pro 40,4 Go dont SAM 3.1 1,75 Go, registre 8,4 Go, travaux, venvs, outils/blender 1,2 Go, ffmpeg, bancs) ; `~/nexora-creative-data/models/detourage/` sur pc6 passe de 1,6 à 0,49 Go.
 - **Reste** : vérification visuelle dans l'interface par le fondateur (l'URL Tailscale n'est pas joignable depuis pc6 et l'agent n'a pas de compte de production) ; branchement du pro dans Creative (décision du fondateur) ; adresse pour la V100 ; R9700 (pc4) à évaluer ; `loginctl enable-linger pc3` si on revient au natif.
 
+## 04/11/2026 — revue de passation Claude → Codex, lecture seule
+
+Maître du Bureau revu : 101 messages réels uniques (77 récents), 13 résumés et 12 mémoires, inventaire de 18 worktrees et résultats persistants. Ajout du registre daté a–h, des preuves et écarts, de la chronologie et des priorités, de sept annexes REVUE et du prompt Codex de 49 lignes. Corrections : Director/Finish non commités, V7/OPSYS sans finales, Mesh hors Git et rapport 29 absent, Wan déjà mesuré, V100 cu126, facturation réelle partielle, infographies à conserver, chemin historique de Nexora Code absent. Production et secrets intacts ; aucun rendu, redémarrage ou suppression. SSH/socket et proxy Git 127.0.0.1:1055 bloqués : pas de contrôle actuel de la production et pas de push. Détails dans `docs/passation/REVUE-RAPPORT.md` et `REVUE-ETAT-DISQUE.md` ; le 502 précédent reste historique.
+
+
+Addendum de fin de session intégré : huit nouveaux messages, dernier événement 11:13:26Z ; diagnostic GitLab/Garage rapporté par l’autre session, commit 203c633 préservé. API Anthropic mise de côté par le fondateur, passage complet à Codex.
+
+Commit final de la revue bloqué : git add refuse index.lock (.git en lecture seule). Aucun fichier indexé, dernier HEAD 203c633 de l’autre session. Script pour le terminal du fondateur : ~/Desktop/nexora-commiter-passation.sh ; trailer GPT-6.1 Sol, aucun push.
+
+
+## 04/11/2026 — Reprise Codex : diagnostic initial en lecture seule
+
+- Réseau SSH rétabli ; GitLab répond 502. PostgreSQL non prêt, Garage en boucle, webservice/sidekiq en initialisation. Aucun service modifié. Les projets et pipelines restent invérifiables.
+- Files ComfyUI 37188 et 37288 vides au relevé ; plafonds GPU et CPU observés, détails dans `docs/PASSATION-AGENTS.md` §17. pc1 CPU à 100 % et troisième carte AMD pc4 illisible ; ne pas lancer de production GPU massive.
+- Worktrees Director et Finish préservés, sans reset. HANDOFF des deux films relus, aucune reprise automatique.
+- Revue documentaire commitée localement `80f2dde` avec trailer Codex ; aucun push. Sauvegarde GitLab complète et restauration non démontrées.
+
+- V7 : dossier DeepSeek existant importé avec textes et script, validation OK avec deux avertissements sur les mentions ; commit local `3634d83`, aucun rendu ni push. V100 mesurée à 240/300 W.
+
+- Mesh : synthèse hors Git sur Storage, bancs et limites conservés. Site/Creative répondent HTTP 200 depuis pc5, WorkStudio 307 ; 1 705 entrées dans l'inventaire pc1, couverture infographies non établie.
+- Director : 80 tests ciblés passent ; règle live-action globale à corriger pour respecter les autres styles demandés. Finish : 14 tests TypeScript passent, Python bloqué par FastAPI absent localement ; aucune modification de code ou production.
+
+- VM204 : files Comfy sur adresse LAN vides, services actifs ; le refus localhost était lié à l'adresse d'écoute. Inventaire pc1 : 101 lignes portent une raison de non-copie, aucune extension d'image dans les chemins ; audit des infographies à faire. Script ciblé CPU pc1 préparé et syntaxiquement valide, pas exécuté.
+
+- Conservation : corrigé cinq lignes CSV décalées, original sauvegardé. Sur le périmètre Creative/OPSYS recensé, 104 contenus déjà vérifiés et 621 copiés sur pc1, chaque SHA-256 contrôlé et ajouté à l'inventaire (2 326 entrées) ; deux dossiers d'essai ne contiennent qu'un manifeste et sont conservés. Couverture totale du parc non démontrée.
+
+- Finish : 9 tests Python passent isolément sur VM204 avec environnement existant et données fictives ; aucun service ni GPU modifié. Avec 14 tests TS, cela ne prouve pas encore la qualité NVENC ni le déploiement.
+
+
+## 04/11/2026 — Décision du fondateur : CPU pc1 et délégation
+
+- Le fondateur choisit de ne pas appliquer de limite CPU sur pc1. Le script ciblé préparé a été neutralisé sans avoir été exécuté ; ne pas lancer le script groupé historique.
+- Déléguer activement à DeepSeek V4.1 Flash 1017 et Muse Spark 1.3 Contributor max, Gemini 4 Argon Flex moyen/élevé, et trois GPT-6 Luna max ; le responsable vérifie les résultats. Aucun secret lu.
+
+- Passerelle économique : santé HTTP 200, catalogue sans authentification HTTP 401 ; le lanceur lit une clé maître, donc pas utilisé sous la consigne « aucun secret lu ». Trois agents Luna max lancés.
+
+- Conservation, deuxième vague : 412 contenus déjà vérifiés, 1 394 supplémentaires copiés sur le SSD Infrastructure de pc1 et accessibles depuis le Bureau ; empreintes SHA-256 vérifiées, inventaire à 3 720 lignes et 15 colonnes. Racine pc1 33 Gio libres, Infrastructure 244 Gio libres. Sources conservées ; parc complet non encore audité.
+
+- État Creative : H3, Qwen, Music3, détourage configuré et 3D annoncés par `/api/nexora/etat`, sans essai utilisateur de bout en bout. GitLab encore 502 ; les 2 015 nouveaux médias ont chacun une entrée correspondante et un fichier présent sur pc1.
+
+- GitLab : le StatefulSet demande bien une sonde PostgreSQL à 240, mais le pod utilise l'ancienne révision à 30 ; service encore 502, Garage en boucle. Aucune intervention en production et cause complète non établie.
+
+- Quatre suites ciblées auth/crédits/Studio/transcription GPU : 30 tests passent avec services fictifs ; débit réel et parcours utilisateur restent à prouver.
+
+- Précision AMD pc4 : limites lisibles 240/300 W et 152/190 W par défaut ; troisième carte illisible. Le 330 W observé plus tôt est une limite maximale autorisée, non le défaut.
+
+- Banc Finish retrouvé sur VM204 : 15 vidéos d'essai copiées sur le SSD Infrastructure de pc1, vérifiées SHA-256 et ajoutées à l'inventaire (3 735 entrées). Mesures en cours d'examen ; pas encore de verdict qualité.
+
+- OPSYS DeepSeek : sept plans du long absents ; le montage peut masquer ces absences par des fonds sombres. Correction ciblée en cours ; aucun export incomplet lancé. Finish : banc NVENC retrouvé mais absence de x264 à débit égal et divergence des scripts ; activation non justifiée.
+
+- Finish : six comparaisons x264/NVENC à débit mesuré égal (±0,41 %) sur trois clips, CPU pc6 deux threads. SSIM indexé légèrement favorable à x264 ; ancien écart SSIM reproduit avec alignement PTS. Résultats et six vidéos conservés, inventaire pc1 3 741 entrées ; avis visuel/activation restent ouverts.
+
+- Finish : tranche locale `e29ca2a`, codecs désactivés, 14 tests TS relancés indépendamment ; l'agent rapporte aussi 12 tests Python simulés et typecheck verts. Aucun déploiement/push. Les documents non commités du worktree Finish restent préservés et ne remplacent pas ce maître.
+
+- Director : commits locaux `35e680a` et `adc14a8`, respect du médium demandé et correction du faux positif « anime cette photo » ; 452 tests et typecheck rapportés sur la première tranche, 60 ciblés relancés après correctif. Pas de banc LLM, rendu, push ou déploiement.
+
+- OPSYS : garde-fou plans absents commité `4b4ae82`, 5 tests relancés ; premier rendu DeepSeek p26 lancé seul après file et plafond contrôlés. Il est en cours, résultat/archivage non prouvés à cet instant.
+
+- OPSYS DeepSeek : p26 rendu (158,8 s moteur, 5,17 s H.264/AAC), vidéo et planche archivées et SHA vérifiés sur pc1. Une image sombre visible ; mouvement et son non évalués. p27 lancé seul après contrôle des prérequis et de la file vide.
+
+- OPSYS DeepSeek : le court a ses sources et le garde-fou identifie les plans manquants du long/vertical. Montage non lancé : son nettoyage actuel efface des tranches MP4 ; correctif de conservation et protection contre l'écrasement en cours.
+
+- OPSYS DeepSeek : p27 rendu (139,8 s moteur, 5,17 s H.264/AAC), vidéo et planche archivées et vérifiées ; son et lèvres non évalués. p28 lancé seul après contrôle de la file vide.
+
+- OPSYS DeepSeek : p28 rendu, décodé et archivé avec planche ; p26 et p27 décodés sans erreur. p29 lancé seul après contrôle de file et puissance.
+
+- Finish : inspection de trois recadrages fixes comparatifs, sans différence flagrante à l'échelle vue ; insuffisant pour valider le mouvement ou activer les codecs. Quatre planches, y compris l'essai noir, archivées et vérifiées sur pc1.
+
+- OPSYS DeepSeek : p29 rendu, décodé et archivé avec planche ; p30 lancé seul après contrôle de file et puissance.
+
+- OPSYS : commit `65acfe4` conserve les tranches et refuse l'écrasement, 7 tests relancés. Le court DeepSeek (EditPlan validé, 13,5 s) est lancé en brouillon CPU sur deux cœurs ; résultat et archivage en attente.
+
+- OPSYS DeepSeek : premier brouillon court 13,5 s/7 plans produit, décodé, sans source absente. Film, neuf tranches, mix et planche archivés SHA sur pc1 ; revue du son/mouvement et verdict humain non faits.
+
+- Finish : rapport et protocole de comparaison à débit égal commités `9c223cb` ; JSON identique par SHA à celui du banc. Codecs restent fermés ; script portable non relancé.
+
+- OPSYS DeepSeek : p30 rendu, décodé et archivé avec planche ; p31 lancé seul après contrôle de file et puissance.
+
+
+## 04/11/2026 — Retour partiel de GitLab
+
+- API et PostgreSQL répondent ; Garage reste en échec. Le compte service voit les projets demandés en listant sans filtre membre ; OAuth personnel GitLab-PC4 déconnecté.
+- Une autre session a synchronisé la branche film jusqu'à `3634d83` et la passation jusqu'à `5141f84`, commit vide déjà ancêtre local ; MR !37 ouverte, !27 brouillon. Pipeline 2841 échoué, 2847 en attente ; aucun push/fusion supplémentaire de cette session.
+
+- PostgreSQL : la nouvelle révision souhaitée est maintenant active et prête avec sonde 240 ; aucune recréation effectuée par cette session. Garage reste en échec.
+
+- OPSYS DeepSeek : p31 rendu, décodé et archivé avec planche ; case noire finale de la planche = remplissage de grille. Une mesure instantanée de 487,83 W a dépassé la consigne 475 W ; p32 lancé seul après file vide.
+
+- OPSYS DeepSeek : p32 décodé, archivé avec sa planche et vérifié SHA ; temps de calcul et code de sortie indisponibles. Sources du long et EditPlan vérifiés, brouillon long lancé sur deux cœurs ; résultat en attente.
+
+- OPSYS : sources longues et courtes référencées présentes pour les quatre équipes ; vertical DeepSeek manque six plans, vertical Muse `null` (contexte en erreur). Présence ne prouve pas qualité. GitLab : pipeline 2847 toujours en attente, Garage non prêt (36 redémarrages), OAuth personnel encore déconnecté.
+
+- OPSYS : les six plans verticaux DeepSeek sont définis avec leurs références disponibles ; v01 lancé seul après contrôle file vide et puissance configurée. Résultat et archive en attente.
+
+- OPSYS DeepSeek : v01 généré, décodé, archivé avec planche et SHA vérifiés ; v02 lancé seul après file vide. Détection automatique : aucun passage noir ≥0,5 s au seuil 0,05 dans le court ; contrôle limité.
+
+- OPSYS Muse : le HANDOFF rapporte un choix des équipes de recadrer le 16:9, pas une décision du fondateur ; aucun montage vertical Muse défini n’a été trouvé. Les plans verticaux DeepSeek sont définis séparément.
+
+- OPSYS DeepSeek : v02 généré, décodé et archivé avec sa planche et ses empreintes ; v03 lancé seul après file vide.
+
+- OPSYS DeepSeek : brouillon long 140,46 s/32 plans produit, décodé sans erreur et validé techniquement ; export, 94 tranches, mix et planche archivés SHA sur pc1 (3 872 entrées). Images fixes seulement examinées ; son, mouvement et verdict humain restent à faire. v03 vertical en cours.
+
+- OPSYS DeepSeek : v03 généré, décodé et archivé avec planche ; v04 lancé seul. Contrôle automatique du long : aucun noir ≥0,5 s au seuil 0,05 ; volume moyen −15,7 dB, pic −1,5 dB, sans verdict sur son ou image.
+
+- pc6 : racine 100 %, ~5,1 Gio disponibles, cause de baisse non établie ; données de montage sur Storage, inodes 28 %. Aucun nettoyage. v04 déjà en cours à vérifier/archiver puis suspendre les nouveaux rendus tant que la marge est insuffisante.
+
+- OPSYS DeepSeek : v04 généré, décodé et archivé avec planche ; v05–v06 restent à générer après rétablissement de la marge disque racine. Aucun nouveau rendu lancé.
+
+- Le fondateur demande d’utiliser Storage pc6 et les espaces Bureau et Infrastructure pc1. Vérifiés : ~645 Gio libres sur Storage, ~244 Gio sur Infrastructure, ~33 Gio sur le système de fichiers contenant le Bureau pc1. Gros volumes sur les espaces disposant de marge ; copies vérifiées et inventoriées.
+
+- Le fondateur confirme l’approfondissement de toutes les technologies Creative, y compris Mesh, lipsync, LTX 2.5, détourage et Wan 2.2 pc4 ; le mandat ne se limite pas aux films. Statuts et preuves à vérifier avant toute déclaration de livraison.
+
+- Sync : rapport persistant retrouvé sur Infrastructure pc1 ; H3 natif mesuré, MuseTalk et LatentSync préparés mais aucune génération comparative GPU prouvée. Comparaison à reprendre sur clips/voix identiques sans perturber la file partagée.
+
+- À la demande du fondateur, dix brouillons/essais des quatre équipes OPSYS copiés physiquement sur le disque Bureau pc1 (202 Mio), SHA vérifiés et inventoriés ; originaux préservés. Aucun vertical exporté trouvé pour Gemini/Muse/Opus, malgré des plans définis pour Gemini/Opus.
+
+- pc6 : caches (~25 Gio), journaux (~4 Gio) et cache APT (~1,1 Gio) contribuent à l’occupation. Les dates observées ne prouvent pas la cause de la baisse pendant cette reprise. Aucun nettoyage ni déplacement effectué.
+
+- Détourage/LTX : preuves historiques retrouvées pc3 ; rapide 224 images/120 s, LTX Alpha-Gen essayé sur 5080 avec VRAM quasi pleine et comparatif synthétique contrasté. Parcours réel et intégration pro restent à prouver.
+
+## 04/11/2026 — Objectif de R&D triple A activé
+
+- Le fondateur demande recherches approfondies sur sources primaires et projets open source, intégration et amélioration de toutes les technologies ; trois agents Luna max mobilisés en parallèle.
+- Son « OK » autorise uniquement la lecture technique interne de la clé de passerelle, sans exposition, pour utiliser DeepSeek, Muse et Gemini ; aucune autre clé ou fichier .env réel ne doit être lu ou affiché.
+
+- Passerelle : clé de passerelle lue uniquement en interne avec accord ; quatre alias visibles. Réponse Gemini élevé reçue, possiblement tronquée et non validée ; sa suggestion de stopper des workers partagés est rejetée. Premiers appels DeepSeek/Muse sans texte, nouvelle tentative en cours.
+
+- Sur demande du fondateur, environnement expérimental sgl-gb10 et son cache déplacés vers Storage avec liens conservant les chemins ; copies vérifiées par checksums, Python/Torch testés. Près de 9,86 Gio récupérés : racine ~15 Gio libres, 99 %. Aucune production arrêtée ni média effacé.
+
+- pc6 : 128 médias des anciens montages ont chacun une copie pc1 relue et SHA vérifiée ; dossier intégral déplacé sur Storage, chemin préservé et double vérification sans écart. Racine 98 %, ~18,2 Gio libres, gain total ~13,2 Gio depuis le début de la libération.
+
+- Passerelle : réponses effectives DeepSeek, Muse et Gemini élevé conservées sur Storage comme propositions à vérifier. Recherche Luna en cours sur Mesh, Sync et détourage/Wan. Après libération de marge et file vide, v05 OPSYS DeepSeek lancé seul ; résultat en attente.
+
+- R&D triple A : quatre notes sourcées sur Storage (Mesh, Sync, détourage/Wan, montage/évaluation). Existence de plusieurs articles vérifiée indépendamment ; critères et expériences restent des propositions, sans résultats ou intégration inventés.
+
+- OPSYS DeepSeek v05 généré, décodé et archivé avec planche ; v06 lancé seul après file vide. Racine pc6 ~17 Gio libres au relevé, à surveiller.
+
+- Détourage : correctif local `5d27dc6` évite d’annoncer pro disponible quand le lancement est bloqué ; test échouait avant, 23 tests et typecheck passent après. Aucun push/déploiement ; base distante à réconcilier.
+- OPSYS DeepSeek : v06 généré, décodé et archivé avec sa planche ; les six plans verticaux sont présents. EditPlan validé, brouillon vertical CPU lancé ; résultat en attente.
+
+- OPSYS DeepSeek : brouillon vertical 14,5 s produit, décodé et archivé avec dix tranches, mix et planche ; jugement audiovisuel humain non fait.
+- Mesh : 34 GLB ont passé un contrôle structurel limité ; 10 déclarent des textures. Aucune conclusion sur rendu visuel, topologie complète ou classement entre modèles.
+
+- Nouvelles recherches voix FR-CA/EN-CA, qualité films et sauvegarde GitLab ; Garage en panne, backup et restauration complète non prouvés. Les durées des plans courants divergent des brouillons Gemini long, Muse long et Muse court ; provenance à vérifier.
+- Une revue DeepSeek supplémentaire a expiré ; essai isolé d’un agent Muse outillé en cours, clé de passerelle non exposée à l’agent.
+
+- OPSYS : journal de montage corrèle les exports Gemini et Muse longs à 20 plans chacun, contre 24 et 19 dans les plans actuels ; court Muse 14,0 s contre 14,5 s. Changement de plan ou calcul probable, révision exacte non prouvée, exports préservés.
+
+- Essai de sous-agent Muse outillé, isolé et sans accès à la clé : 3 requêtes et appels d’outils, mais délai 240 s atteint avant production de la revue. Résultat incomplet, traces conservées.
+
+- Détourage réel : Creative répond 200 mais annonce rapide indisponible et aucun moteur rapide déclaré, tandis que l’état général dit détourage configuré. Pc3 répond 401 sans jeton depuis VM202 : joignable, santé authentifiée non prouvée. Sources déployées comparées par hash ; aucune modification de production.
+- Relecture de `5d27dc6` : ancien travail sur moteur seulement pro contournait le refus ; régression reproduite et correctif complémentaire local en vérification.
+
+- Détourage : `826b604` protège lancement/reprise des anciens travaux liés à un moteur seulement pro ; `575e5cd` bloque aussi la reprise de paramètres pro explicites sur moteur mixte. 24 tests ciblés et typecheck passent ; anciennes données sans palier restent ambiguës. Pas de déploiement.
+
+- Détourage : `c3dbee0` retire localement la garantie non prouvée « sans scintillement » ; pas de déploiement. Interface FR/EN encore à compléter.
+
+- Détourage réel : aucun des quatre moteurs ne déclare la recette rapide ou `*`, alors qu’une URL détourage existe ; le filtre de sélection explique l’état indisponible. Pc3 répond 401 sans jeton, pas de preuve authentifiée ni modification production.
+
+- Détourage : commit local `74959b0` aligne l’état général sur la sélection rapide ; 24 tests et typecheck passent. Il ne prouve pas la santé ni ne raccorde le moteur ; index distant divergent, réconciliation nécessaire.
+
+- Agent DeepSeek outillé et isolé : premier essai a atteint la limite de tours sans livrer sa revue ; second essai borné lancé.
+
+- OPSYS : commits locaux `7585b81`/`9f8f13f` ajoutent une traçabilité partielle des plans, annexes, sources et export ; 14 tests relancés. Essai réel vertical séparé : plan, annexe, 7 sources et export vérifiés indépendamment ; vidéo et dix segments archivés sur pc1. Pas de verdict humain ni push.
+
+- Sous-agent DeepSeek outillé isolé : seconde tentative terminée avec revue ; limites du compteur GLB examinées, 34 primitives du lot en mode 4 et comptes tous multiples de trois. Aucun score de qualité déduit.
+
+- Viewer : `bef6071`/`6359dbc` masquent localement Speak/Add sound qui perdaient l’élément et redirigeaient vers un autre outil ; code dormant préservé, typecheck OK, pas de test navigateur ni déploiement. Correction de la perte du clip pour Extend en cours.
+
+- Agent Muse outillé isolé : seconde tâche terminée, propositions de tests relues et corrigées ; aucune preuve GPU ou décision fondateur attribuée.
+
+- Un agent Gemini Flex élevé outillé est lancé en environnement isolé pour relire la provenance OPSYS ; résultat en attente.
+
+- OPSYS : les durées et nombres de plans des anciens rendus Gemini/Muse concordent avec les dossiers initiaux Git `9303394`, pas avec leurs révisions ultérieures ; calcul relancé indépendamment. Correspondance forte mais non attestée par hash historique.
+
+- Agent Gemini Flex élevé outillé isolé : revue achevée ; sources vidéo omises et validation négative à reproduire/corriger. Les suggestions restent à vérifier ; tous les essais doivent rester conservés.
+
+- Viewer : `0200277` conserve l’identifiant du clip en redirigeant Prolonger/raccord ; 4 tests ciblés et typecheck relancés, pas de test navigateur ou déploiement.
+
+- Mesh : décimation CPU d’une chaise Pixal, 149 898 → 49 996 triangles et 8,18 → 4,94 Mo ; deux cartes PBR identiques par SHA. Non-variété 96 → 111 ; pas de verdict visuel ou activation par défaut. Essai et mesures archivés sur pc1.
+
+- OPSYS `71499dd` : sources vidéo oubliées, voix sans identifiant et plan explicitement invalide refusés ; brouillon et résolution journalisés. 18 tests relancés ; essai réel CPU séparé en cours, validateur absent reste une limite.
+
+- Détourage : `2ba45b0` exige une réponse de santé `ok:true` plutôt que n’importe quel JSON HTTP 200 ; 25 tests et typecheck passent. Raccordement et essai réel toujours absents.
+
+- OPSYS : après `71499dd`, nouvel essai réel vertical décodé, mode/résolution et SHA vérifiés ; film, dix tranches, mix, planche et provenance conservés sur pc1. Pas de verdict humain.
+
+- Mesh `bfafe59` : collision d’arêtes à très grands indices reproduite puis corrigée, 12 tests et typecheck OK ; revue mathématique indépendante et mêmes métriques sur la chaise Pixal. Autres limites de volume/instancing/matériaux documentées ; aucun déploiement.
+
+
+### Reprise Codex — Viewer et volume Mesh, 4 novembre 2026
+
+- Viewer : commit local `368ae95` dans `fix/viewer-speak-button-codex` : masquage de cinq actions Restyle, Add effect et Stage dont les routes redirigent vers Apps et perdent la prise. Les pages et fonctions restent présentes. Typecheck et contrôle du diff réussis; pas de test navigateur ni déploiement. Les extraits retirés correspondent à GitLab, mais le ref local est en retard : réconciliation indispensable avant MR. Les autres actions n’ont pas été auditées exhaustivement.
+- Mesh : reproduction en mémoire de deux tétraèdres fermés séparés : orientations identiques, volume 1/3; seconde orientation inversée, volume 0 malgré deux composantes étanches. Une cavité orientée inversement demande au contraire une soustraction : sommer les volumes absolus serait incorrect. Correctif prudent en cours, aucun résultat de volume matériel à promettre avant validation.
+- Stockage vérifié : racine pc6 16 Gio libres (99 %), Storage 623 Gio libres. Les déplacements déjà documentés ont préservé les chemins et les fichiers; aucune nouvelle suppression.
+
+
+### Reprise Codex — validation des films, 4 novembre 2026
+
+- Commit local `94da540` sur `feat/opsys-ultime` : export final refusé si le validateur est indisponible; brouillon possible avec `validation:null`; rapports mal formés ou `ok:false` refusés. 21 tests ciblés repassés indépendamment. Le vrai validateur a accepté DeepSeek vertical (14,5 s) et Muse long (90,458 s, deux avertissements); il refuse Gemini long : `c23` demande à `p19` les images 36–132 alors que la source déclare 124 images. Diagnostic de la source et des autres versions en cours; aucun montage relancé ni plan modifié. Revue indépendante du contrat en cours.
+- Bilan espace : l'inventaire a identifié de volumineux travaux OPSYS et des qualifications dont l'usage et les dépendances restent à établir; conservés en place.
+
+
+### Reprise Codex — volume Mesh ambigu, 4 novembre 2026
+
+- Commit local `25b2824`, branche `fix/mesh-aretes-codex` : pour plusieurs composantes fermées, volume `null` et avertissement au lieu d'un chiffre pouvant être faux; le cas simple reste inchangé. 13 tests ciblés repassés indépendamment, typecheck réussi par l'agent; pas de déploiement. Distinguer les solides séparés des cavités demandera une classification géométrique. L'étanchéité actuelle ne démontre ni orientation cohérente ni absence d'auto-intersections; vérification complémentaire en cours. Réconciliation avec GitLab nécessaire avant MR.
+
+
+### Reprise Codex — contrôles indépendants, 4 novembre 2026
+
+- Montage `94da540` : revue indépendante du contrat TypeScript et du pont Python sans incompatibilité réelle trouvée; les 21 tests ciblés ont été relancés. Une réponse fabriquée `ok:true` de durée 0 ou supérieure à 180 s passerait le garde Python, mais le validateur officiel ne produit pas ces cas réussis.
+- Mesh : un tétraèdre fermé translaté, avec une face inversée, reste déclaré étanche alors que son volume calculé peut valoir 5/6 ou 13/6 au lieu de 1/6. Garde supplémentaire en cours, sans prétendre détecter les auto-intersections.
+- GitLab pc4, lecture seule : pod `garage-0` non prêt, `CrashLoopBackOff`, 59 redémarrages observés. Pas de diagnostic de perte de données, pas de redémarrage ni de push.
+
+
+### Reprise Codex — orientation Mesh et plan Gemini, 4 novembre 2026
+
+- Commit local `a35a2d7` : détection d'orientation incohérente par arête, volume `null` et avertissement; l'étanchéité reste un constat topologique. Les 14 tests ciblés ont été repassés indépendamment; typecheck réussi par l'agent. Cela ne détecte pas les auto-intersections; une formulation UI plus prudente est en cours. Revue indépendante et réconciliation GitLab nécessaires.
+- Films : le fichier retenu Gemini p19 contient effectivement 124 images à 24 i/s. Son plan c23 demande 96 images depuis l'image 36, jusqu'à la borne exclusive 132 : dépassement de 8 images confirmé. Les 11 plans existants des quatre équipes ont été vérifiés avec le vrai validateur; seul Gemini long échoue. Les options préservent l'ancien plan et les exports; aucune modification encore faite.
+
+
+### Reprise Codex — plan Gemini corrigé et affichage Mesh, 4 novembre 2026
+
+- Films : commit local `9e90859` : Gemini long `c23.entree_f` 36→28, sans changement de durée ni vitesse. Les 11 EditPlans présents passent désormais le vrai validateur; Muse vertical est absent, Muse long et court gardent respectivement 2 et 12 avertissements. Seule la durée média réelle de Gemini p19 a été vérifiée contre le fichier; ailleurs, le validateur utilise les durées déclarées. Ancien EditPlan Gemini long conservé sous Storage `Nexora/travail/films-reprise-codex/archives/gemini-long/gemini-long-before-c23-entry-fix-20261104T144226662401Z.json`, SHA-256 `7206988f86bd560a0a179674be6cb4bc2944bdebcfec11e66e952f67fc860dc3`, revérifié. 21 tests ciblés réussis. Aucune vidéo ou export antérieur modifié; nouvelle amorce à juger humainement, aucun rendu lancé.
+- Mesh : commit local `4ba718b` : l’interface indique « Arêtes fermées » sans promettre l'aptitude à imprimer. Revue indépendante : avertissements affichés, aucun consommateur numérique de `volume` trouvé; typecheck réussi. Ces contrôles ne détectent pas les auto-intersections. Pas de push ni déploiement; réconciliation GitLab requise.
+
+
+### Reprise Codex — mesure du garde Mesh, 4 novembre 2026
+
+- Sur la chaise Pixal de 149 898 triangles, trois analyses CPU à deux cœurs après ajout du contrôle d'orientation ont pris 0,222 / 0,192 / 0,154 s; 549 arêtes ouvertes, 96 non-variété et 11 composantes, identiques aux contrôles précédents. Comparaison indicative sur un seul objet, sans preuve de performance générale. Résultat conservé dans `Nexora/travail/rnd-codex-20261104/mesh-essai-decimation/controle-orientation-a35a2d7.json` sur Storage.
+- Le reste de l'environnement Ming de voix comprend des fichiers à plusieurs liens physiques, et un nom potentiellement sensible détecté dans son environnement; il n'a pas été déplacé ni lu. Aucun gain d'espace n'est présumé.
+
+
+### Reprise Codex — contrôle visuel Gemini p19, 4 novembre 2026
+
+- Une planche CPU des images 24, 28, 32, 36 et 123 de la source Gemini p19 a été créée sur Storage `Nexora/travail/films-reprise-codex/controle-gemini-c23-20261104/`. Elle montre une structure futuriste aux premières images et un bureau avec serveur à la 123e; les images intermédiaires et l'intention narrative restent à vérifier. Aucune conclusion de qualité ni note humaine. Planche archivée physiquement sur Infrastructure pc1, copie vérifiée par SHA-256, inventaire pc1 porté à 3933 entrées. Première tentative de commande sans chemin absolu FFmpeg : binaire introuvable, aucun fichier produit; seconde réussie.
+
+
+### Reprise Codex — revues Mesh et intention Gemini, 4 novembre 2026
+
+- Gemini p19 : le dossier de l'équipe décrit explicitement le passage continu de la Citadelle vers le bureau; les deux extrémités de la planche correspondent donc à l'intention écrite. Les images fixes ne prouvent pas la fluidité ni la qualité du montage; jugement humain requis.
+- Revue indépendante Mesh `4ba718b` : incidents à une, deux et trois faces contrôlés, tétraèdre à positions négatives vérifié, 14 tests réussis; aucune régression constatée. Limites : la cohérence d'orientation n'exclut ni auto-intersection ni recouvrement; le soudage arrondi peut fusionner des sommets proches. Les clés ont été testées jusqu’à 2^32, mais l'analyseur utilise aussi un `Int32Array` : son fonctionnement n'est pas démontré à partir de 2^31 sommets. Aucun push ni déploiement.
+
+
+### Reprise Codex — état réel Director/Finish et vertical Muse, 4 novembre 2026
+
+- Les worktrees originaux sont `NexoraCreative-live-director` (`feat/realisateur-live-action`, `adc14a8`, code propre) et `NexoraCreative-sortie-video` (`feat/sortie-video-nvenc`, `9c223cb`). Les anciens changements de code non commités de la passation sont maintenant dans les commits locaux documentés. Finish conserve des modifications non commitées de `docs/JOURNAL.md` et `docs/PASSATION-AGENTS.md`, ainsi que `recherche/30-annexes/recalculer_ssim.py` et `work/` non suivis : intégralement préservés. État GitLab distant et intégration non démontrés par le ref local.
+- Vertical Muse OPSYS : `montage.vertical` absent dans les deux révisions historiques examinées. Le court courant emploie six rushes propres Muse p01,p02,p04,p05,p07,p16; sélection actuelle p04/p05 r2 et p07 r1. Les reprises r2 p07/p13/p14 prévues ne sont pas présentes. Les 23 rushes examinés sont horizontaux; la passation prévoit le recadrage 9:16. Une proposition de Muse et une planche de cadrage archivée sont en préparation; aucun vertical rendu ni qualité attribuée.
+
+
+### Reprise Codex — proposition Muse et limites lipsync, 4 novembre 2026
+
+- Muse Spark 1.3 Contributor, via passerelle protégée isolée, a rédigé `Nexora/travail/rnd-codex-20261104/agents/muse-vertical-opsys/proposition-vertical.md` sur Storage : proposition 9:16 de 14,5 s avec les six rushes de son court. Exécution réussie, 5 requêtes et 0,00767 $ relevés. Le modèle n'a pas visionné les rushes : cadrages et recommandations sont hypothétiques, non des décisions du fondateur; aucune vidéo produite ni dossier produit modifié. Une planche réelle est en cours de préparation et d'archivage.
+- Synchronisation labiale : les rapports persistants pc1 indiquent quatre essais LatentSync/MuseTalk `not_run_no_gpu_window` et aucun processus d'inférence GPU correspondant. Une évaluation CPU SyncNet existe sur deux clips H3 et deux témoins TTS; ce n'est pas une comparaison d'efficacité des modèles de retouche. Revue détaillée en cours.
+
+
+### Reprise Codex — échéance lipsync et cadrage Muse, 4 novembre 2026
+
+- Veille lèvres pc1 : `gpu_guard.py` cherche l'échéance à la racine et seulement au démarrage; le fichier existant se trouve sous `logs/`. Pour l'essai documenté, sa valeur correspondait cependant au même plafond de 3 h : le défaut ne démontre pas un surcoût substantiel. Risque confirmé pour une échéance différente ou ajoutée après démarrage. Une adaptation et des tests isolés sont proposés; aucun GPU ni fichier pc1 modifié.
+- Planche Muse du court produite sur Storage (source unique par plan, image médiane, crop central 9:16) : à l'image p07-r1, un grand texte généré déformé apparaît dans une salle, ce qui ne correspond pas à la soumission décrite dans la proposition textuelle; visage p01 partiellement coupé. La planche n'établit pas le contenu du mouvement entier. Recherche de prises Muse alternatives en lecture seule et archivage pc1 de la planche en cours; aucun jugement humain ni vidéo nouvelle.
+
+
+### Reprise Codex — archive planche Muse, 4 novembre 2026
+
+- La planche comparative Muse est conservée sous Storage `Nexora/travail/films-reprise-codex/muse-court-vertical-comparison-20261104T212005732041Z/` et copiée sur le disque Infrastructure de pc1 sous `NexoraStudioWork/ArchivesNexora/codex-opsys-muse-court-vertical-comparison-20261104T212005732041Z/`. SHA-256 `392accf6ea804e261c2b0943d62da363bd65bf0ce8496128a0f96ca00d8c70ae` revérifié à distance; inventaire pc1 vérifié, 3934 entrées. Les autres aperçus de recherche ont été décodés en mémoire, sans fichiers images supplémentaires. Une seule image médiane par plan ne juge pas l'animation entière.
+
+
+### Reprise Codex — candidat veille GPU, 4 novembre 2026
+
+- Copie et correctif candidats sous Storage `Nexora/travail/rnd-codex-20261104/sync-gpu-guard-isolated/`; original pc1 inchangé, SHA-256 `829b5820262288feae8d2fb2baf39418ca9d855338a21c9b433fa44e3146a449`. Six tests CPU repassés indépendamment pour l'échéance; aucun accès GPU ou service.
+- Revue bloquante : le candidat conservait l'appel original `POST /free` à ComfyUI, susceptible de décharger des modèles partagés. Il ne doit pas être exécuté ni intégré ainsi durant le diagnostic; suppression de cet effet en cours et test demandé. Une file vide ne constitue pas une réservation exclusive. L'échéance historique déjà expirée bloquerait toute future exécution jusqu'à sa mise à jour explicite.
+
+
+### Reprise Codex — revue Terra de la veille GPU, 4 novembre 2026
+
+- La copie isolée lipsync a retiré `POST /free`; sept tests CPU passent, mais ils ne prouvent pas l'absence générale de tout effet. Aucun script GPU exécuté ni original pc1 modifié.
+- Revue indépendante par GPT-6.1 Terra élevé : `killpg` hérité pouvait signaler un groupe de processus entier, contraire à la règle « seulement ses propres PID »; délai susceptible d'expirer pendant des appels lents avant `Popen`, et échéance mémorisée perdue entre tentatives. Ces points bloquent toute utilisation/intégration du candidat. Correctif et tests isolés demandés; une file GPU vide ne réserve pas le GPU.
+- Le fondateur demande désormais deux sous-agents GPT-6 Luna max et un GPT-6.1 Terra élevé pour l'orchestration, en plus des modèles DeepSeek/Muse et Gemini disponibles. Il demande l'envoi Gmail à lui-même lorsque des vidéos sont terminées; aucun film final n'a encore le verdict humain requis, donc aucun envoi n'a été fait.
+
+
+### Reprise Codex — reprise Muse p07, 4 novembre 2026
+
+- `REVISION.json` Muse prévoit p07-r2, absent localement et non trouvé dans l'inventaire pc1 examiné. Le prompt courant décrit une soumission imprimée sur table, avec feuilles vierges, et demande l'absence de texte/logos; l'information chiffrée dépendrait de l'incrustation. `@vox` n'a que la référence serveur attachée; fidélité visuelle non démontrée. H3-max, 1344×768, 158 images, voix v04-p3 disponible; 2 unités estimées par le barème local. La graine de révision 1071 deviendrait 1168 via le calcul pour prise 2 : divergence à résoudre avant soumission.
+- La commande `file.py reprises --equipes muse` parcourrait six reprises car `--seulement` n'est pas appliqué à cette branche; `apres_revision.sh` déclencherait aussi d'autres étapes et push. L'ancien fichier de fabrication porte un prompt différent. Aucun de ces scripts n'a été lancé. L'écriture existante `write_bytes` risque d'écraser en cas de course. Un lanceur d'essai unique, sortie exclusive et provenance, est préparé sur Storage avec tests simulés, sans GPU/API. Toute exécution réelle dépend aussi de l'authentification autorisée et du service; aucun secret ne doit être lu.
+- Au sondage, la file Comfy interrogée avait 0 tâche active/en attente et la GB10 locale 0 % : instantané, non réservation. Pas de déduction sur les autres GPU/files.
+
+
+### Reprise Codex — travaux parallèles et relecture Muse, 4 novembre 2026
+
+- Muse a proposé deux alternatives dans `Nexora/travail/rnd-codex-20261104/agents/muse-alternatives-court/alternatives.md` (7 requêtes, 0,00706 $). Relecture indépendante `RELECTURE-CODEX.md` : le secours p05 proposé (entrée 88, durée 60) dépasse ses 124 images effectives et déclarées; la graine responsable du texte de p07-r1 n'est pas établie; un export vertical de sources horizontales n'est pas natif. Ces propositions restent non validées et ne constituent pas des décisions.
+- Gemini élevé a rédigé un protocole lipsync sous `agents/gemini-protocole-lipsync/protocole.md` (5 requêtes, 0,05425 $); il s'agit de propositions méthodologiques, pas de résultats mesurés.
+- Deux tentatives de revue DeepSeek montage ont atteint leur limite de tours (`error_max_turns`, 12 puis 8 requêtes; 0,05008 $ puis 0,02059 $). Pas de rapport final `revue.md`; essais de code conservés sur Storage, aucun succès affirmé.
+
+
+### Reprise Codex — candidat veille corrigé, 4 novembre 2026
+
+- Copie `sync-gpu-guard-isolated/` : suppression du POST `/free` et de `killpg`; un budget d'échéance est partagé entre tentatives et revérifié avant création de l'enfant. Seul l'enfant direct du processus peut être interrompu; ses descendants éventuels ne sont pas tués et peuvent rester actifs. 11 tests CPU repassés indépendamment avec callbacks/faux processus, aucun effet sur GPU/Comfy ni fichier pc1. La file vide ne réserve rien, l'échéance pc1 existante est expirée et le candidat n'est ni déployé ni prêt à exécution avant revue complémentaire Terra.
+
+
+### Reprise Codex — deuxième revue Terra, 4 novembre 2026
+
+- Le candidat de veille GPU passe 11 tests simulés mais ne peut pas être intégré en l'état : un descendant GPU pourrait survivre à l'enfant direct et une autre tentative redémarrer; `nvidia-smi` n'avait pas de délai maximal et un journal d'essai pouvait être tronqué. L'échéance représente une limite de lancement, pas d'exécution, et la file vide n'est pas une réservation. Terra prépare une version conservatrice sur Storage : pas de relance automatique après interruption non résolue, délais bornés, journaux exclusifs; aucun PID tiers, GPU, service ou fichier pc1 touché.
+
+
+### Reprise Codex — urgence espace et incident de test, 4 novembre 2026
+
+- La racine est descendue à 542 Mio libres, cause non établie. Les nouveaux tests ont été suspendus. Deux modèles GGUF de cache `~/.cache/pc5-mass-ingestion/model/` (5 763 064 352 octets, datés du 26/10, aucun fichier ouvert au contrôle) ont été copiés vers Storage `Nexora/travail/relocalisation-pc6-20261104/pc5-mass-ingestion-model/`, comparaison rsync et SHA-256 fichier par fichier réussies; l'ancien chemin est un lien vers la copie et l'inventaire SHA est sur Storage. Les copies sources ont été retirées seulement après vérification. La racine affiche environ 6 Gio libres; elle reste à 100 % arrondi. Aucun secret ni vidéo concerné.
+- Incident de test Director : la configuration Vite initiale du sous-agent n'excluait pas explicitement les fichiers d'environnement. Un `.env` a pu être chargé automatiquement, sans affichage de contenu; cela n'est pas conforme à la consigne d'absence de lecture. Tests suspendus, configuration à corriger avec `envFile:false` et vérification du comportement avant reprise. Les 70 tests et typecheck rapportés ne démontrent pas le respect de cette contrainte. Modifications Director préservées, non commitées dans `director-creation-fr-en-codex-20261104` sur Storage.
+
+
+### Reprise Codex — correctif expérimental et espace disque, 4 novembre 2026
+
+- Terra a préparé dans `sync-gpu-guard-isolated/` une seule tentative, arrêt après interruption, journal exclusif, `nvidia-smi` borné à 5 s; 16 tests simulés réussis par lui puis indépendamment. La fin de l'enfant ne prouve toujours pas celle de ses descendants, aucune réservation GPU n'est assurée, et la copie reste expérimentale, non intégrée. Un premier test de régression avait bouclé en créant de nombreux fichiers factices dans son répertoire temporaire; le propre PID de test a été interrompu, puis les tests bornés ont réussi. Aucune preuve de fichiers résiduels de ce test.
+- Muse p07 : lanceur isolé `Nexora/travail/films-reprise-codex/muse-p07-r2-lanceur-isole-20261104/`, six tests CPU par l'agent; pas d'adaptateur réseau, aucun rendu, aucune API. Il impose un choix explicite de graine 1071 ou 1168 et une sortie exclusive. Revue Terra indépendante en cours; la prévisualisation ne démontre pas une génération.
+- Investigation espace : une autre zone de travail Codex créée aujourd'hui occupe environ 11 Gio et peut être active; elle est laissée intacte. Ce constat ne prouve pas à lui seul la cause complète de la baisse de l'espace libre. Les tests Director sont suspendus jusqu'à pouvoir empêcher la lecture des fichiers d'environnement.
+
+
+### Reprise Codex — revue Terra du lanceur Muse, 4 novembre 2026
+
+- La revue indépendante du lanceur p07 a identifié des risques avant tout usage : un même identifiant peut créer le même préfixe distant depuis deux racines; la prise en compte de ce préfixe par H3 n'est pas démontrée; les références et voix peuvent changer après calcul de leur empreinte; le WAV n'est pas prouvé conforme au texte de révision; certaines interruptions ou pannes peuvent laisser statut et fichier partiels. La création exclusive protège uniquement le répertoire et la sortie locaux sous le contrat du callback. Aucune génération/API n'a été lancée.
+- Terra prépare des garde-fous locaux dans une copie distincte sur Storage, tests et temporaires sur Storage; sans promettre le comportement d'un service non testé ni la correspondance du WAV. Espace racine toujours critique; pas de tests lourds.
+
+
+### Reprise Codex — reprise Muse protégée, 4 novembre 2026
+
+- Copie revue du lanceur `Nexora/travail/films-reprise-codex/muse-p07-r2-lanceur-revue-20261104/` sur Storage : préfixe UUID dans la spec, graine de révision explicite, copies locales des références et voix contrôlées, journalisation améliorée. 12 tests simulés repassés indépendamment avec `TMPDIR` sur Storage. Aucun GPU, secret ou réseau utilisé.
+- Limites : `chmod 0400` n'assure pas l'immuabilité contre le même utilisateur; l'adaptateur H3 n'existe pas encore et ne démontre ni respect du préfixe ni octets transmis. WAV non validé contre le texte, panne/plein disque/arrêt brutal non couverts. Ceci reste expérimental, sans rendu ni intégration.
+- Director : l'agent a inspecté le graphe des six tests et le code de configuration Vite. Une configuration autonome `envFile:false`, `envDir:false`, environnement épuré et stockage des logs/cache sur Storage est préparée; aucune relance avant sa mise en place. L'incident de chargement possible précédent demeure documenté.
+
 ## 04/11/2026 — transcription du Mode Studio sur le GPU de pc5 (MR !33)
 
 - **Déployé** : `POST /transcrire` dans `nexora-services` (VM 204, :8190, LAN seulement) : Whisper large-v3-turbo fp16, mots horodatés, même format que `transcrire.py`. Seul `nexora-services` a été redémarré (file `charge` vide avant), ComfyUI :8188 et :8189 intact. Sauvegarde de l'ancien `service.py` : `/srv/nexora-gpu/service.py.bak-avant-transcrire`.
