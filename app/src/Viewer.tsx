@@ -267,7 +267,6 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
           {image && <button type="button" className={`btn sm ${s.app === 'stage' ? '' : 'accent'}`} onClick={act(() => animate(take))}><Icon name="video" size={14} />Animate</button>}
           {image && <button type="button" className="btn sm" onClick={act(() => animate(take, true))}><Icon name="loop" size={14} />Make a loop</button>}
           {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/edit?take=${take.id}`); }} title="Edit, new angle, relight, expand and more"><Icon name="wand" size={14} />Edit...</button>}
-          {image && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/speak?take=${take.id}`); }}><Icon name="person" size={14} />Speak</button>}
           {take.kind !== 'upres' && s.app !== 'upscale' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/upscale?take=${take.id}`); }}><Icon name="up" size={14} />Upscale</button>}
           {!image && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/extend?take=${take.id}`); }}><Icon name="plus" size={14} />Extend</button>}
           <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/extend?mode=transition&take=${take.id}`); }}><Icon name="loop" size={14} />Transition to...</button>
