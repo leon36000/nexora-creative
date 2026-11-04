@@ -447,3 +447,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Sync : rapport persistant retrouvé sur Infrastructure pc1 ; H3 natif mesuré, MuseTalk et LatentSync préparés mais aucune génération comparative GPU prouvée. Comparaison à reprendre sur clips/voix identiques sans perturber la file partagée.
 
 - À la demande du fondateur, dix brouillons/essais des quatre équipes OPSYS copiés physiquement sur le disque Bureau pc1 (202 Mio), SHA vérifiés et inventoriés ; originaux préservés. Aucun vertical exporté trouvé pour Gemini/Muse/Opus, malgré des plans définis pour Gemini/Opus.
+
+- pc6 : caches (~25 Gio), journaux (~4 Gio) et cache APT (~1,1 Gio) contribuent à l’occupation. Les dates observées ne prouvent pas la cause de la baisse pendant cette reprise. Aucun nettoyage ni déplacement effectué.
