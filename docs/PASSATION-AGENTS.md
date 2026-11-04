@@ -608,3 +608,7 @@ Contrôle de la planche uniquement : maisons, bureaux, signal et personnage num�
 `v03-r1.mp4` généré en 118,4 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1, SHA-256 vérifiés ; inventaire **3 874 entrées**. La planche montre le signal longeant une route enneigée ; son et mouvement restent à juger. Après file vide et limite 475 W confirmées, `v04` a été lancé seul.
 
 Sur le brouillon long, un contrôle automatique n’a trouvé aucun passage noir continu ≥0,5 s au seuil de pixels 0,05 ; volume moyen mesuré −15,7 dB et pic −1,5 dB. Ces mesures ne démontrent ni intelligibilité, ni mixage satisfaisant, ni qualité cinématographique.
+
+### pc6 : espace racine critique
+
+`df` affiche maintenant la racine à **100 %**, environ **5,1 Gio disponibles** ; deux mesures espacées sont presque stables, mais la cause de la baisse depuis le précédent relevé n’est pas établie. Inodes à 28 %. Le montage OPSYS utilise le répertoire réel sur Storage (environ 120 Mio) et les planches aussi ; aucune attribution de la baisse ne peut être faite à partir de ces chiffres. Aucune suppression ou nettoyage automatique : caches, journaux et données sont conservés. Terminer la vérification et l’archivage de v04 déjà lancé, puis suspendre les nouveaux rendus jusqu’à disposer d’une marge fiable sur la racine.

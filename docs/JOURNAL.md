@@ -435,3 +435,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS DeepSeek : brouillon long 140,46 s/32 plans produit, décodé sans erreur et validé techniquement ; export, 94 tranches, mix et planche archivés SHA sur pc1 (3 872 entrées). Images fixes seulement examinées ; son, mouvement et verdict humain restent à faire. v03 vertical en cours.
 
 - OPSYS DeepSeek : v03 généré, décodé et archivé avec planche ; v04 lancé seul. Contrôle automatique du long : aucun noir ≥0,5 s au seuil 0,05 ; volume moyen −15,7 dB, pic −1,5 dB, sans verdict sur son ou image.
+
+- pc6 : racine 100 %, ~5,1 Gio disponibles, cause de baisse non établie ; données de montage sur Storage, inodes 28 %. Aucun nettoyage. v04 déjà en cours à vérifier/archiver puis suspendre les nouveaux rendus tant que la marge est insuffisante.
