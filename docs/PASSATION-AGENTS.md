@@ -518,3 +518,7 @@ Validation réelle des sources du dossier DeepSeek, sans rendu : le **court** a 
 ### OPSYS DeepSeek : p27
 
 `p27-r1.mp4` rendu en 139,8 s de moteur, sans erreur rapportée ; fichier présent, H.264 1344×768, AAC, 5,166688 s. Vidéo et planche de cinq images archivées sur pc1 et vérifiées SHA-256 ; inventaire à **3 745 entrées**. La planche montre un homme près d'une camionnette ; voix, lèvres, mouvement et qualité finale restent à écouter et regarder. Les sources sont gardées. Après vérification de la file vide et du plafond à 475 W, `p28` a été lancé seul ; son résultat reste en attente.
+
+### OPSYS DeepSeek : p28
+
+`p28-r1.mp4` rendu en 162,5 s de moteur ; H.264 1344×768, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et vérifiées SHA-256 ; inventaire à **3 747 entrées**. La planche montre l'adjointe dans un bureau ; qualité du jeu, synchro labiale et voix non jugées sur les images fixes. p26 et p27 ont aussi été décodés entièrement sans erreur. Après file vide et plafond 475 W confirmés, `p29` a été lancé seul ; résultat en attente.
