@@ -211,7 +211,7 @@ export default function Detourage() {
     <div className="rail-layout" style={{ gridTemplateColumns: '380px 1fr' }}>
       <aside className="rail">
         <div className="display" style={{ fontSize: 26 }}>Détourage pro</div>
-        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Isole une personne, un animal ou un objet dans une vidéo : cheveux, fourrure, bords nets, sans scintillement. Sortie alpha 16 bits et EXR.</div>
+        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Isole une personne, un animal ou un objet dans une vidéo, avec stabilisation des contours. Sortie alpha 16 bits et EXR.</div>
 
         {cap && !cap.rapide.disponible && <div className="rail-section" style={{ color: 'var(--bad)', fontSize: 12.5 }}>Aucun moteur de détourage en ligne. Lance le serveur de détourage sur la machine GPU (outils/detourage).</div>}
 
