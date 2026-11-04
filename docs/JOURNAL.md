@@ -365,3 +365,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Le fondateur choisit de ne pas appliquer de limite CPU sur pc1. Le script ciblé préparé a été neutralisé sans avoir été exécuté ; ne pas lancer le script groupé historique.
 - Déléguer activement à DeepSeek V4.1 Flash 1017 et Muse Spark 1.3 Contributor max, Gemini 4 Argon Flex moyen/élevé, et trois GPT-6 Luna max ; le responsable vérifie les résultats. Aucun secret lu.
+
+- Passerelle économique : santé HTTP 200, catalogue sans authentification HTTP 401 ; le lanceur lit une clé maître, donc pas utilisé sous la consigne « aucun secret lu ». Trois agents Luna max lancés.
