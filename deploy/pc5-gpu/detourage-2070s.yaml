@@ -1,0 +1,62 @@
+# Détourage rapide (SAM 3.1 + ViTMatte base) sur la RTX 2070 SUPER de pc5 (VM 204), pour la future plateforme (k3s).
+# Dérivé de deploy/k8s/detourage/30-detourage.yaml (pc3). Mesuré en processus nu le 04/11/2026 (recherche/28) : 0,91 s par image à 1280 px,
+# VRAM 2,1 à 2,8 Go, RAM 3,9 Go. NON appliqué : la VM 204 n'est pas un nœud k3s aujourd'hui.
+# Image : le Dockerfile existant, avec  --build-arg TORCH_INDEX=https://download.pytorch.org/whl/cu128 --build-arg TORCH_VERSION=2.11.0 --build-arg TORCHVISION_VERSION=0.26.0
+# (torch 2.11 cu128 est ce qui tourne sur la VM : sm_75 inclus ; le pilote 595 de la VM accepte aussi cu130 si on veut l'image commune de pc3).
+# Prérequis hors git : Secret `detourage-jeton` (clé `jeton`) ; Secret `registre-tirage`.
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: detourage-2070s, namespace: nexora, labels: {app: detourage-2070s, nexora.ai/produit: creative}}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: detourage-2070s}}
+  template:
+    metadata: {labels: {app: detourage-2070s}}
+    spec:
+      nodeSelector: {kubernetes.io/hostname: nexora-gpu, nexora.ai/gpu: rtx2070s}   # étiquette à poser sur le nœud ; la 2070 SUPER est en PCIe x16 (12 Go/s)
+      imagePullSecrets: [{name: registre-tirage}]
+      securityContext: {runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, fsGroup: 1000}
+      containers:
+        - name: detourage
+          image: __REGISTRE__/nexora/detourage:__TAG__-cu128
+          env:
+            - {name: NEXORA_DETOURAGE_HOTE, value: "0.0.0.0"}
+            - {name: NEXORA_DETOURAGE_AUTORISES, value: "192.168.1.122"}
+            - {name: NEXORA_DETOURAGE_JETON_FICHIER, value: /secrets/jeton}
+            - {name: NEXORA_DETOURAGE_SOCKET, value: /tmp/detourage.sock}
+            - {name: HOME, value: /tmp}
+          ports: [{name: http, containerPort: 8231, hostPort: 8231, hostIP: 192.168.1.124, protocol: TCP}]
+          # Mémoire : 3,9 Go de RAM au pic mesuré sur une VM qui n'en a que 7,7 : monter la VM à 12 Go avant de laisser ce pod cohabiter avec ComfyUI x2.
+          resources:
+            requests: {cpu: "2", memory: 4Gi, nvidia.com/gpu: 1}
+            limits: {memory: 5Gi, nvidia.com/gpu: 1}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          readinessProbe: {tcpSocket: {port: 8231}, periodSeconds: 10}
+          livenessProbe: {tcpSocket: {port: 8231}, initialDelaySeconds: 60, periodSeconds: 30}
+          volumeMounts:
+            - {name: modeles, mountPath: /modeles, readOnly: true}
+            - {name: travaux, mountPath: /travaux}
+            - {name: jeton, mountPath: /secrets, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - {name: modeles, hostPath: {path: /srv/nexora-gpu/detourage/modeles, type: Directory}}   # 2,2 Go : SAM 3.1 (1,75) + ViTMatte base (0,39)
+        - {name: travaux, hostPath: {path: /srv/nexora-gpu/detourage/travaux, type: DirectoryOrCreate}}   # 0,08 Go par seconde de vidéo ; exige 3 Go libres (disque de la VM à 95 %)
+        - {name: jeton, secret: {secretName: detourage-jeton, defaultMode: 0400, items: [{key: jeton, path: jeton}]}}
+        - {name: tmp, emptyDir: {sizeLimit: 2Gi}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: detourage-2070s, namespace: nexora, labels: {app: detourage-2070s}}
+spec:
+  type: ClusterIP
+  selector: {app: detourage-2070s}
+  ports: [{name: http, port: 8231, targetPort: 8231}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: detourage-2070s-entree, namespace: nexora}
+spec:
+  podSelector: {matchLabels: {app: detourage-2070s}}
+  policyTypes: [Ingress]
+  ingress: [{from: [{ipBlock: {cidr: 192.168.1.122/32}}], ports: [{port: 8231, protocol: TCP}]}]
