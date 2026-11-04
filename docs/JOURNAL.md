@@ -629,3 +629,8 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 ### Reprise Codex — candidat veille corrigé, 4 novembre 2026
 
 - Copie `sync-gpu-guard-isolated/` : suppression du POST `/free` et de `killpg`; un budget d'échéance est partagé entre tentatives et revérifié avant création de l'enfant. Seul l'enfant direct du processus peut être interrompu; ses descendants éventuels ne sont pas tués et peuvent rester actifs. 11 tests CPU repassés indépendamment avec callbacks/faux processus, aucun effet sur GPU/Comfy ni fichier pc1. La file vide ne réserve rien, l'échéance pc1 existante est expirée et le candidat n'est ni déployé ni prêt à exécution avant revue complémentaire Terra.
+
+
+### Reprise Codex — deuxième revue Terra, 4 novembre 2026
+
+- Le candidat de veille GPU passe 11 tests simulés mais ne peut pas être intégré en l'état : un descendant GPU pourrait survivre à l'enfant direct et une autre tentative redémarrer; `nvidia-smi` n'avait pas de délai maximal et un journal d'essai pouvait être tronqué. L'échéance représente une limite de lancement, pas d'exécution, et la file vide n'est pas une réservation. Terra prépare une version conservatrice sur Storage : pas de relance automatique après interruption non résolue, délais bornés, journaux exclusifs; aucun PID tiers, GPU, service ou fichier pc1 touché.
