@@ -767,3 +767,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Nouveau jeu sur Storage `Nexora/sauvegardes/gitlab/20261104T2247Z-partiel-cTcehyBf/` : miroir et bundle Creative, miroir du dépôt public pc4-ci-securite, restaurations Git isolées. Creative : 18 branches comparées aux SHA de l'API, bundle SHA-256 `687850a3414b1a55390f400c3da885e5b6767660c68c6eb59468c74b85688ad9`, vérification bundle et `git fsck` réussies sur miroir et restauration. Dépôt public restauré et fsck réussi. Pas de modification de production ni de secret affiché.
 - Cette sauvegarde est partielle : dix autres projets non vides et quatre vides, PostgreSQL, issues/MR, droits, objets Garage/LFS/artefacts, registres et configuration ne sont pas couverts. Les sondes HTTPS privées sans identifiants ont échoué; aucun accès d'autre projet n'a été réparé. Un clone Git restauré n'est pas une restauration GitLab. Copie pc1 du bundle Creative en cours. Sauvegarde complète et restauration d'instance restent à faire avant migration/formatage.
+
+
+### Reprise Codex — copie pc1 et contournement H3, 4 novembre 2026
+
+- Bundle Git Creative, manifeste et inventaire de refs copiés sur Infrastructure pc1 dans `NexoraStudioWork/sauvegarde-gitlab-creative-partielle-20261104-a6dktGCD/`; trois SHA-256 relus et vérifiés à distance. Le dépôt public cité dans le manifeste n'a pas été copié à pc1; les copies Storage et restaurations Git labo demeurent. Ce n'est pas une sauvegarde complète de GitLab ni une restauration d'instance.
+- Revue indépendante H3 : un `kind` inconnu peut atteindre H3 malgré la garde limitée aux types vidéo, et les plans de film `suite` contournent toujours la protection via `queueTakes`. Correction du premier cas sur copie isolée en cours; le traitement financier des suites déjà réservées reste non résolu, sans modification de solde.
