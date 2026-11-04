@@ -112,6 +112,9 @@ def resoudre(equipe, plan, version):
     for i, pr in enumerate(D.get("musique", {}).get("prompts") or [], 1):
         if isinstance(pr, dict) and pr.get("id") == src:
             n = i
+    if isinstance(n, str):  # piste conformée au montage (partition.py) ou candidat nommé
+        m = T.TRAVAIL / equipe / "musique" / n
+        return vid, voix, (str(m) if m.exists() else None)
     m = T.TRAVAIL / equipe / "musique" / f"lyria-{n}.wav"
     return vid, voix, (str(m) if m.exists() else None)
 
@@ -378,7 +381,7 @@ def mixer(ctx, sortie_wav):
     # musique avec ducking
     m = A.get("musique")
     if m and ctx.musique:
-        e = m.get("entree_f", 0) / FPS
+        e = 0.0 if "conforme-" in Path(ctx.musique).name else m.get("entree_f", 0) / FPS  # une piste conformée part de 0
         d = (m.get("duree_f") or (ctx.total - 0)) / FPS
         mu = lire_audio(ctx.musique, e, d)
         n = len(mu)

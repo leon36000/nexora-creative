@@ -76,6 +76,20 @@ def generer(moteur, texte, direction="", vitesse=1.0):
         if vitesse and abs(vitesse - 1) > 1e-3:
             corps["speed"] = vitesse
         return post("https://openrouter.ai/api/v1/audio/speech", corps), "mp3", round(len(texte) * 2 / 1e6, 6)
+    if famille == "or":  # moteur OpenRouter générique : or:<modèle>|voice=<voix>|ref=<prise de référence>|instr
+        champs = arg.split("|")
+        corps = {"model": champs[0], "input": texte, "response_format": "mp3"}
+        for c in champs[1:]:
+            k, _, v = c.partition("=")
+            if k == "voice":
+                corps["voice"] = v
+            elif k == "ref":
+                corps.update(ref_clone(v))
+            elif k == "instr" and direction:
+                corps["instructions"] = direction
+        if vitesse and abs(vitesse - 1) > 1e-3:
+            corps["speed"] = vitesse
+        return post("https://openrouter.ai/api/v1/audio/speech", corps), "mp3", round(len(texte) * 20 / 1e6, 6)
     if famille == "qwen3tts":
         out = TRAVAIL / "tmp" / f"qwen-{abs(hash((texte, arg)))}.wav"
         out.parent.mkdir(parents=True, exist_ok=True)

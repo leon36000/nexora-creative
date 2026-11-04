@@ -226,7 +226,7 @@ montage (images mélangées).
 | Version courte 9:16 native (768×1344) | 6 unités, rendues seulement si la file GPU le permet pour les **quatre** équipes (sinon recadrage du 16:9) |
 | Reprises après la ronde de révision | 8 unités |
 | Voix | ≤ 30 répliques, ≤ 3 prises chacune, toute la palette |
-| Musique | 3 générations Lyria 3 Pro (ou Clip) ; l'équipe choisit |
+| Musique | 3 générations Lyria 3 Pro (ou Clip) à l'écriture ; **à la révision (consigne du 04/11)** : 3 à 4 candidates sur au moins 2 moteurs (Lyria 3 Pro, MiniMax-Music3, ACE-Step), conformées au montage et jugées sur le film mixé |
 | Montage | 1 EditPlan long + 1 court (+ 1 vertical), une révision |
 | Écriture (jetons) | une session d'écriture et une session de révision, mêmes plafonds de tours et de dépense pour les trois sous-agents ; coût réel relevé par `outils/sous-agents/cout.sh` |
 

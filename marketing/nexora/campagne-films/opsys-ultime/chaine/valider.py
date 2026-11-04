@@ -123,10 +123,25 @@ def main(f, palette=None):
     # musique
     mu = D.get("musique", {})
     prompts = mu.get("prompts") or ([mu["prompt"]] if mu.get("prompt") else [])
-    if not prompts:
+    cands = mu.get("candidats") or []
+    if not prompts and not cands:
         err("musique", "prompt Lyria absent")
-    if len(prompts) > 3:
+    if len(prompts) > 3 and not cands:
         err("musique", "3 générations au plus")
+    if cands:  # musique écrite pour le montage (consigne du 04/11) : 3 à 4 candidates par film, au moins 2 moteurs
+        lc = [c for c in cands if c.get("version", "long") == "long"]
+        if not 3 <= len(lc) <= 4:
+            err("musique.candidats", f"{len(lc)} candidates pour le film long : 3 à 4")
+        if len({c.get("moteur") for c in lc}) < 2:
+            err("musique.candidats", "au moins 2 moteurs différents (lyria, music3, acestep)")
+        for c in cands:
+            if c.get("moteur") not in ("lyria", "music3", "acestep"):
+                err(f"musique.candidats {c.get('id')}", "moteur lyria, music3 ou acestep")
+            if not c.get("id") or not c.get("prompt"):
+                err("musique.candidats", "chaque candidate a un id et un prompt")
+        k = (mu.get("carte") or {}).get("long") or {}
+        if not k.get("impacts"):
+            err("musique.carte.long", "carte des temps forts absente (impacts en secondes)")
     # montage
     for ver, (dmin, dmax) in (("long", (90, 180)), ("court", (10, 15)), ("vertical", (10, 15))):
         P = (D.get("montage") or {}).get(ver)
