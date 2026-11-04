@@ -479,3 +479,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Une revue DeepSeek supplémentaire a expiré ; essai isolé d’un agent Muse outillé en cours, clé de passerelle non exposée à l’agent.
 
 - OPSYS : journal de montage corrèle les exports Gemini et Muse longs à 20 plans chacun, contre 24 et 19 dans les plans actuels ; court Muse 14,0 s contre 14,5 s. Changement de plan ou calcul probable, révision exacte non prouvée, exports préservés.
+
+- Essai de sous-agent Muse outillé, isolé et sans accès à la clé : 3 requêtes et appels d’outils, mais délai 240 s atteint avant production de la revue. Résultat incomplet, traces conservées.

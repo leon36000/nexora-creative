@@ -710,3 +710,7 @@ Une revue de code supplémentaire par DeepSeek n’a pas abouti (délai réseau 
 ### OPSYS : indice de provenance des montages existants
 
 Lecture ciblée des champs non secrets du journal persistant de montage : le long Gemini a été enregistré à **20 plans / 105,58 s**, le long Muse à **20 plans / 109,71 s**, durées concordant aux fichiers à l’arrondi ; les plans actuels en comptent **24 et 19**. Le court Muse est inscrit à **6 plans / 14,0 s**, contre **6 plans / 14,5 s** dans le plan actuel. Ceci appuie un changement de plan ou de version de calcul depuis l’export, sans identifier la révision exacte : aucun hash historique n’est attesté par ces champs. Tous les brouillons restent préservés ; ne pas les écraser ni juger la fidélité au plan actuel comme une erreur certaine.
+
+### Agent Muse outillé isolé : essai incomplet
+
+Un lanceur dérivé de celui du dépôt a été essayé avec un relais Unix privé : seule la passerelle/relais lit la clé autorisée en mémoire ; l’agent ne reçoit qu’une valeur factice et travaille dans un dossier isolé sur Storage, sans réseau direct ni accès au domicile. La passerelle existante n’a pas été redémarrée et aucune clé fournisseur n’a été lue. Muse a effectué 3 requêtes et utilisé ses outils Bash/Read, mais l’exécution a atteint son délai de 240 s (`FAIL:timeout`, coût journalisé 0,00170 $) sans produire la revue demandée. Ne pas prétendre que la revue est terminée. Le dossier d’exécution est conservé pour diagnostic ; les réponses textuelles précédentes de Muse restent distinctes de cet essai outillé.
