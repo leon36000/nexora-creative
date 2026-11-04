@@ -357,3 +357,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - VM204 : files Comfy sur adresse LAN vides, services actifs ; le refus localhost était lié à l'adresse d'écoute. Inventaire pc1 : 101 lignes portent une raison de non-copie, aucune extension d'image dans les chemins ; audit des infographies à faire. Script ciblé CPU pc1 préparé et syntaxiquement valide, pas exécuté.
 
 - Conservation : corrigé cinq lignes CSV décalées, original sauvegardé. Sur le périmètre Creative/OPSYS recensé, 104 contenus déjà vérifiés et 621 copiés sur pc1, chaque SHA-256 contrôlé et ajouté à l'inventaire (2 326 entrées) ; deux dossiers d'essai ne contiennent qu'un manifeste et sont conservés. Couverture totale du parc non démontrée.
+
+- Finish : 9 tests Python passent isolément sur VM204 avec environnement existant et données fictives ; aucun service ni GPU modifié. Avec 14 tests TS, cela ne prouve pas encore la qualité NVENC ni le déploiement.
