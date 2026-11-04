@@ -83,28 +83,101 @@ class PlansVideoManquantsTests(unittest.TestCase):
             self.assertFalse(sortie.exists())
 
     def test_explicit_ts_validation_failure_stops_before_allocating_or_rendering(self):
+        for brouillon in (False, True):
+            with self.subTest(brouillon=brouillon), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                source = root / "p01.mp4"
+                source.write_bytes(b"video")
+                output = root / "custom-name.mp4"
+                ctx = SimpleNamespace(
+                    vid={"p01": source}, voix={}, musique=None,
+                    plan={"video": [{"src": "p01"}], "audio": {}}, annexe={}, total=24,
+                    W=960, H=540,
+                )
+                with (
+                    patch.object(monter, "Contexte", return_value=ctx),
+                    patch.object(monter, "valider_ts", return_value={"ok": False, "erreurs": [{"regle": "test", "message": "invalid"}]}),
+                    patch.object(monter, "ProcessPoolExecutor") as pool,
+                    patch.object(monter.T, "dossier_travail") as dossier_travail,
+                    patch.object(monter, "creer_dossier_tranches") as creer_tranches,
+                ):
+                    with self.assertRaises(monter.EditPlanInvalide):
+                        monter.construire("gemini", "long", brouillon=brouillon, sortie=output, jobs=1)
+
+                pool.assert_not_called()
+                dossier_travail.assert_not_called()
+                creer_tranches.assert_not_called()
+                self.assertFalse(output.exists())
+
+    def test_final_without_validator_refuses_before_creating_tranches(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             source = root / "p01.mp4"
             source.write_bytes(b"video")
-            output = root / "custom-name.mp4"
+            out_dir = root / "montage"
+            out_dir.mkdir()
+            output = root / "final.mp4"
             ctx = SimpleNamespace(
                 vid={"p01": source}, voix={}, musique=None,
                 plan={"video": [{"src": "p01"}], "audio": {}}, annexe={}, total=24,
-                W=960, H=540,
+                W=1920, H=1080,
             )
             with (
                 patch.object(monter, "Contexte", return_value=ctx),
-                patch.object(monter, "valider_ts", return_value={"ok": False, "erreurs": [{"regle": "test", "message": "invalid"}]}),
+                patch.object(monter, "valider_ts", return_value=None),
+                patch.object(monter.T, "dossier_travail", return_value=out_dir),
+                patch.object(monter, "creer_dossier_tranches", side_effect=AssertionError("tranches créées sans validation")) as creer_tranches,
                 patch.object(monter, "ProcessPoolExecutor") as pool,
-                patch.object(monter.T, "dossier_travail") as dossier_travail,
             ):
                 with self.assertRaises(monter.EditPlanInvalide):
-                    monter.construire("gemini", "long", sortie=output, jobs=1)
+                    monter.construire("gemini", "long", brouillon=False, sortie=output, jobs=1)
 
+            creer_tranches.assert_not_called()
             pool.assert_not_called()
-            dossier_travail.assert_not_called()
             self.assertFalse(output.exists())
+
+    def test_malformed_validator_response_is_refused_for_final_and_draft(self):
+        malformed_reports = (
+            {},
+            {"ok": "true", "erreurs": [], "avertissements": [], "duree_s": 1.0},
+            {"ok": True},
+            {"ok": True, "erreurs": [], "avertissements": [], "duree_s": "1.0"},
+            {"ok": True, "erreurs": [], "avertissements": [], "duree_s": True},
+            {"ok": True, "erreurs": [], "avertissements": [], "duree_s": float("nan")},
+            {"ok": True, "erreurs": ["incohérent"], "avertissements": [], "duree_s": 1.0},
+            "{\"ok\":true}",
+        )
+        for brouillon in (False, True):
+            for report in malformed_reports:
+                with self.subTest(brouillon=brouillon, report=report), tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    source = root / "p01.mp4"
+                    source.write_bytes(b"video")
+                    out_dir = root / "montage"
+                    out_dir.mkdir()
+                    ctx = SimpleNamespace(
+                        vid={"p01": source}, voix={}, musique=None,
+                        plan={"video": [{"src": "p01"}], "audio": {}}, annexe={}, total=24,
+                        W=960 if brouillon else 1920, H=540 if brouillon else 1080,
+                    )
+                    with (
+                        patch.object(monter, "Contexte", return_value=ctx),
+                        patch.object(monter, "valider_ts", return_value=report),
+                        patch.object(monter.T, "dossier_travail", return_value=out_dir),
+                        patch.object(monter, "creer_dossier_tranches", side_effect=AssertionError("tranches créées avec un rapport invalide")) as creer_tranches,
+                        patch.object(monter, "ProcessPoolExecutor") as pool,
+                    ):
+                        with self.assertRaises(monter.EditPlanInvalide):
+                            monter.construire("gemini", "long", brouillon=brouillon, sortie=root / "custom.mp4", jobs=1)
+
+                    creer_tranches.assert_not_called()
+                    pool.assert_not_called()
+
+    def test_well_formed_success_report_is_accepted(self):
+        rapport = {"ok": True, "erreurs": [], "avertissements": [], "duree_s": 1.0}
+
+        self.assertIs(rapport, monter.verifier_rapport_validation(rapport, brouillon=False))
+        self.assertIsNone(monter.verifier_rapport_validation(None, brouillon=True))
 
 
 
@@ -259,8 +332,10 @@ class ExportPreservationTests(unittest.TestCase):
             self.assertEqual({"p01": source}, pools[0].initargs[-1]["vid"])
             self.assertTrue(result["film"].endswith("custom-output.mp4"))
             self.assertTrue(result["brouillon"])
+            self.assertIsNone(result["validation"])
             self.assertEqual({"largeur": 960, "hauteur": 540}, result["resolution"])
             self.assertTrue(journal["brouillon"])
+            self.assertIsNone(journal["validation"])
             self.assertEqual({"largeur": 960, "hauteur": 540}, journal["resolution"])
 
     def test_source_change_during_render_blocks_success_record_and_keeps_export(self):

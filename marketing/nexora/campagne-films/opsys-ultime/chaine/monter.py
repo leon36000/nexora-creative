@@ -127,7 +127,31 @@ class PlansVideoManquants(ValueError):
 
 
 class EditPlanInvalide(ValueError):
-    """Le validateur TypeScript a explicitement refusé l'EditPlan."""
+    """L'EditPlan n'a pas obtenu un rapport de validation utilisable."""
+
+
+def verifier_rapport_validation(rapport, brouillon):
+    """N'autorise un rapport absent que pour un brouillon et valide le contrat TS."""
+    if rapport is None:
+        if brouillon:
+            return None
+        raise EditPlanInvalide("Validateur validerEditPlan indisponible; export final refusé.")
+    if not isinstance(rapport, dict) or rapport.get("ok") is not True:
+        if isinstance(rapport, dict) and rapport.get("ok") is False:
+            raise EditPlanInvalide("EditPlan refusé par validerEditPlan (ok=false).")
+        raise EditPlanInvalide("Rapport validerEditPlan mal formé ou sans ok:true.")
+    duree = rapport.get("duree_s")
+    if (
+        not isinstance(rapport.get("erreurs"), list)
+        or rapport["erreurs"]
+        or not isinstance(rapport.get("avertissements"), list)
+        or isinstance(duree, bool)
+        or not isinstance(duree, (int, float))
+        or (isinstance(duree, float) and not math.isfinite(duree))
+        or duree < 0
+    ):
+        raise EditPlanInvalide("Rapport validerEditPlan mal formé ou incohérent.")
+    return rapport
 
 
 def verifier_sources_video(equipe, version, sources, video=None):
@@ -610,9 +634,7 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     nom_sortie = f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
     chemin_defaut = T.TRAVAIL / equipe / "montage" / nom_sortie
     sortie = verifier_sortie_libre(sortie if sortie is not None else chemin_defaut)
-    rapport = valider_ts(ctx.plan)
-    if isinstance(rapport, dict) and rapport.get("ok") is False:
-        raise EditPlanInvalide("EditPlan refusé par validerEditPlan (ok=false).")
+    rapport = verifier_rapport_validation(valider_ts(ctx.plan), brouillon)
     editplan_sha256 = empreinte_editplan(ctx.plan)
     annexe_sha256 = empreinte_annexe(ctx.annexe)
     sources_initiales = empreintes_sources_utilisees(ctx)
