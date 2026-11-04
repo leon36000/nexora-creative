@@ -90,11 +90,9 @@ def resoudre(equipe, plan, version):
     for sid, s in plan["sources"].items():
         if s.get("kind") != "video":
             continue
-        f = None
-        if vert and sid.endswith("v"):
-            f = T.plan_retenu(equipe, sid)  # plan tourné nativement en 9:16 (identifiant « p02v »)
-        if f is None:
-            f = T.plan_retenu(equipe, sid)
+        f = T.plan_retenu(equipe, sid)
+        if f is None and vert and sid.endswith("v"):  # 9:16 natif non tourné : le plan 16:9 du même nom, recadré
+            f = T.plan_retenu(equipe, sid[:-1])
         vid[sid] = str(f) if f else None
     voix = {}
     for v in plan.get("audio", {}).get("voix", []):
@@ -300,7 +298,7 @@ def rendre_tranche(args):
             i = actifs[-1]
             c = video[i]
             k = g - ctx.debuts[i]
-            cxv = rec_v.get(c["src"]) if ctx.vert and not c["src"].endswith("v") else None
+            cxv = (rec_v.get(c["src"]) if c["src"] in rec_v else rec_v.get(c["src"][:-1])) if ctx.vert else None
             im = image_plan(c, k, ctx.vid.get(c["src"]), W, H, cxv)
             tr = c.get("transition_in") or {}
             if len(actifs) > 1 and tr.get("type", "cut") != "cut" and k < tr.get("duree_f", 0):

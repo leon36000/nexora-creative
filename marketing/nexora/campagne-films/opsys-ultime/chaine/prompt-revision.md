@@ -24,6 +24,11 @@ chaîne commune. Voici ta **seule ronde de révision**. Tu décides toi-même ; 
    les effets (lumière du signal, hologrammes) intégrés comme de vrais VFX de film dans une vraie prise. `reference/26-recette-live-action.md`
    (si présent) donne la recette complète.
 
+4. **9:16 natif annulé** (décision du producteur, la même pour les quatre équipes) : la file de la RTX 5090 est saturée ; les 6 unités
+   9:16 ne sont pas tournées. La version verticale (si tu la gardes) se monte avec tes plans 16:9 recadrés : remplace dans
+   `montage.vertical` les plans 9:16 par des plans 16:9 tournés, et donne pour chacun le centre horizontal du recadrage dans
+   `annexe.vertical.recadrage_v` (`{"p05": 0.42}` : 0 = bord gauche, 0,5 = centre, 1 = bord droit).
+
 ## Ce que tu as reçu (dans le dossier courant)
 - `equipes/{EQUIPE}/dossier.json` et `DOSSIER.md` : ton dossier (corrections techniques du producteur dans `CORRECTIONS.md`, s'il y en a).
 - `revue/REVUE.md` : tes rendus (durée réelle, temps GPU), **la description écrite de chaque plan par le producteur** et ses défauts,

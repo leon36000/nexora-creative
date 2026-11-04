@@ -51,6 +51,24 @@ def reprises(eq):
     return out
 
 
+def trouver_dans_comfy(s):
+    """Identifiant ComfyUI d'un travail déjà soumis pour ce plan (file d'attente, en cours, ou historique récent), sinon None."""
+    pref = f"opsys-ultime/{s['equipe']}/{s['nom']}"
+    try:
+        q = json.loads(h3.http(f"{h3.H3_COMFY}/queue"))
+        for it in q.get("queue_running", []) + q.get("queue_pending", []):
+            if json.dumps(it[2].get("save", {}).get("inputs", {})).find(f'"{pref}"') >= 0:
+                return it[1]
+        hist = json.loads(h3.http(f"{h3.H3_COMFY}/history?max_items=200", timeout=120))
+        for pid, h in hist.items():
+            if json.dumps(h.get("prompt", [None, None, {}])[2].get("save", {}).get("inputs", {})).find(f'"{pref}"') >= 0 \
+                    and h.get("status", {}).get("completed"):
+                return pid
+    except Exception:
+        return None
+    return None
+
+
 def entrelacer(listes):
     out = []
     while any(listes):
@@ -97,7 +115,12 @@ def travailler(tache, max_file):
         res = {"equipe": eq, "nom": f"{p['id']}-r{prise}", "erreur": f"spec : {e}"}
         print(json.dumps(res, ensure_ascii=False), flush=True)
         return res
-    with VERROU:  # une soumission à la fois, dans l'ordre entrelacé
+    # reprise après redémarrage : ce plan est peut-être déjà dans la file ComfyUI ou déjà rendu (historique)
+    deja = trouver_dans_comfy(s)
+    if deja:
+        comfy, pid, t0 = h3.H3_COMFY, deja, time.time()
+    else:
+      with VERROU:  # une soumission à la fois, dans l'ordre entrelacé
         comfy, pid, t0 = h3.soumettre(s, max_file)
     try:
         res = h3.attendre(s, comfy, pid, t0)
