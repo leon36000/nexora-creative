@@ -502,3 +502,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Viewer : `bef6071`/`6359dbc` masquent localement Speak/Add sound qui perdaient l’élément et redirigeaient vers un autre outil ; code dormant préservé, typecheck OK, pas de test navigateur ni déploiement. Correction de la perte du clip pour Extend en cours.
 
 - Agent Muse outillé isolé : seconde tâche terminée, propositions de tests relues et corrigées ; aucune preuve GPU ou décision fondateur attribuée.
+
+- Un agent Gemini Flex élevé outillé est lancé en environnement isolé pour relire la provenance OPSYS ; résultat en attente.

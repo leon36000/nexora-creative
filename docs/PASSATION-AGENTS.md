@@ -762,3 +762,7 @@ Autre défaut relevé : la redirection de `Extend`/transition perd l’identifia
 ### Sous-agent Muse outillé : seconde tentative terminée
 
 Une seconde tâche isolée Muse a produit `agents/muse-controle-detourage/controle.md` sur Storage : cinq propositions de vérification, 5 requêtes, 6 tours, 45 s, 0,00124 $ journalisé ; aucune clé réelle accessible à l’agent. Relecture du coordinateur : priorité pratique au raccordement rapide avant le pro non intégré ; contrôle des recettes au runtime plutôt que dans le seul dépôt ; ne pas promettre une absence absolue de scintillement. Ces corrections sont ajoutées à la note ; aucun test GPU n’a été effectué par cet agent.
+
+### Gemini Flex élevé : revue outillée de la provenance
+
+Après les tâches outillées DeepSeek et Muse, un agent `gemini-eleve` est lancé dans le même dispositif isolé, pour relire une copie du montage et ses empreintes de provenance. Dossier et traces sur Storage ; clé de passerelle conservée uniquement dans le relais, pas dans l’agent ; aucune clé fournisseur lue. Résultat en attente, à vérifier indépendamment.
