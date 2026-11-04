@@ -471,3 +471,6 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Détourage : correctif local `5d27dc6` évite d’annoncer pro disponible quand le lancement est bloqué ; test échouait avant, 23 tests et typecheck passent après. Aucun push/déploiement ; base distante à réconcilier.
 - OPSYS DeepSeek : v06 généré, décodé et archivé avec sa planche ; les six plans verticaux sont présents. EditPlan validé, brouillon vertical CPU lancé ; résultat en attente.
+
+- OPSYS DeepSeek : brouillon vertical 14,5 s produit, décodé et archivé avec dix tranches, mix et planche ; jugement audiovisuel humain non fait.
+- Mesh : 34 GLB ont passé un contrôle structurel limité ; 10 déclarent des textures. Aucune conclusion sur rendu visuel, topologie complète ou classement entre modèles.

@@ -688,3 +688,13 @@ Défaut reproduit par test : si un moteur pro est déclaré, `/capacites` annon�
 ### OPSYS DeepSeek : v06 et vertical en montage
 
 `v06-r1.mp4` généré en 129,4 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1, SHA-256 vérifiés ; inventaire **3 890 entrées**. Les six plans verticaux sont présents. EditPlan vertical validé, 14,5 s, six plans, aucune source ou voix manquante, musique présente et sortie libre ; brouillon CPU sur deux cœurs lancé, résultat et archive en attente. Le film final et son verdict humain restent à faire.
+
+### OPSYS DeepSeek : brouillon vertical produit
+
+Le brouillon `~/nexora-creative-data/work/opsys-ultime/deepseek/montage/deepseek-vertical-brouillon.mp4` a été rendu en 52,7 s CPU : six plans, EditPlan validé, aucune source manquante. `ffprobe` indique H.264 540×960, AAC, 14,5 s ; décodage intégral sans erreur. Export, dix tranches MP4, mix WAV et planche : 13 médias copiés sur pc1, vérifiés SHA-256, inventaire **3 903 entrées**. Les originaux sont conservés.
+
+La planche montre le travailleur, le signal, le serveur et le retour à la maison ; une image est très sombre. La dernière case noire est un remplissage de grille, pas une preuve de noir dans la vidéo. Son, mouvement, lisibilité mobile et verdict humain ≥9/10 restent à examiner ; ce n’est pas une finale.
+
+### Mesh : contrôle structurel complémentaire
+
+Un analyseur Python standard a vérifié entêtes GLB 2, longueurs de blocs, JSON et indices d’accesseurs pour **34 fichiers** existants : 20 Step1X AMD, 3 Pixal AMD BF16, 7 TRELLIS GB10 et 4 Hunyuan forme, tous analysables selon ce contrôle limité. Textures déclarées : respectivement **0/20, 3/3, 7/7 et 0/4** ; aucune image externe déclarée dans ce lot. Résultats détaillés `Storage/Nexora/travail/rnd-codex-20261104/mesh-inventaire-structure-glb-20261104.json`. Pas de rendu, de contrôle de topologie complet ni de classement qualité ; jeux et matériels diffèrent.
