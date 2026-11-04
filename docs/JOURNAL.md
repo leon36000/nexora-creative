@@ -795,3 +795,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 ### Reprise Codex — réconciliation avec GitLab, 4 novembre 2026
 
 - Simulation `git merge-tree` contre `developpement` `5ac932d` : le worktree détourage n'a pas de conflit textuel, Mesh a un conflit dans `relief.test.ts`, Viewer un conflit dans `Viewer.tsx`. Aucun fichier n'a été modifié par ces simulations. Réconciliations Mesh et détourage dans de nouveaux worktrees Storage en cours; les anciens worktrees sont préservés. Une absence de conflit ne prouve pas le comportement ni la compatibilité.
+
+
+### Reprise Codex — navigateur simulé et MR Mesh, 4 novembre 2026
+
+- Director `d988a9d` : essai Chromium isolé réussi après correction du socket et de la résolution React. DOM FR/EN, transmission de langue, résumés simulés et réponses idées/boost périmées contrôlés; une ancienne erreur de création après bascule s'affiche en message générique de la nouvelle langue. Réseau hors loopback bloqué, serveurs simulés arrêtés, aucun GPU/production ou capture. Ceci ne prouve pas le backend ou le moteur réel. Rapport sur Storage dans le worktree Director `work/director-fr-en-validation/playwright-ui-check-retry.log`.
+- Mesh : fusion locale `203ca56` de `5ac932d` et `4ba718b` dans `Nexora/travail/wt-mesh-aretes-reconcilie-codex-20261104` sur Storage; conflit de tests résolu en conservant les deux versions et les noms Nexora Mesh. 16 tests ciblés relancés indépendamment sans `.env`, typecheck complet signalé; MR brouillon !44 vers `developpement`, pipeline en cours. Pas de déploiement ni validation d'un corpus général.
