@@ -1,4 +1,4 @@
-# 23 — La grammaire des promos IA spectaculaires (v1, 03/11/2026)
+# 23 — La grammaire des promos IA spectaculaires (v1.1, 03/11/2026)
 
 **Pour qui** : les agents qui tournent en ce moment les films promotionnels de Creative et d'OPSYS-AI. **À lire d'abord** : §1 (les 16 règles), §5 (film « capacités infinies »), §6 (film d'entreprise OPSYS-AI), §7 (contrôle avant livraison). Le reste justifie.
 
@@ -6,10 +6,10 @@
 
 ## 0. Méthode, corpus, limites
 
-- **Corpus v1 : 71 vidéos analysées une à une** (les 2 courts demandés par le fondateur + 69 promos officielles ou démos de Higgsfield, OpenArt, Kling, Runway, Luma, Pika, MiniMax/Hailuo, Google Flow/Veo/Gemini Omni, OpenAI Sora, Seedance/Dreamina, LTX, Krea, Freepik/Magnific, Leonardo, Hedra, Vidu, Moonvalley, Meshy, Tripo, Autodesk Flow Studio, et une démo virale d'effets) ; **lot 2 en cours** (34 vidéos : démos virales d'effets, films d'ouverture de NVIDIA, Salesforce, LG, OpenAI, Google DeepMind) : il sera intégré en v1.1 (tableau de l'annexe A et §2). Liste complète avec liens, dates de mise en ligne et vues : annexe A.
+- **Corpus v1.1 : 102 vidéos analysées une à une, 101 exploitables** : lot 1 = les 2 courts demandés par le fondateur + 69 promos officielles ou démos de Higgsfield, OpenArt, Kling, Runway, Luma, Pika, MiniMax/Hailuo, Google Flow/Veo/Gemini Omni, OpenAI Sora, Seedance/Dreamina, LTX, Krea, Freepik/Magnific, Leonardo, Hedra, Vidu, Moonvalley, Meshy, Tripo, Autodesk Flow Studio ; lot 2 = 31 vidéos : 12 démos virales d'effets et faux films IA (dont 3 vidéos d'ErikDoesVFX à 1,4 à 8,8 M de vues, duels au sabre, dragon, transformation de super-héroïne), 9 films d'entreprise (ouvertures de keynote NVIDIA GTC 2024, GTC 2026, GTC Berlin 2026, CES 2026 ; Salesforce Agentforce ; LG U+ Enterprise ; deux films OpenAI) et 10 promos de plus (Runway, Luma, LTX, Seedance, OpenArt, Tripo, Higgsfield). 4 vidéos n'ont pas pu être téléchargées (privées ou 403). Listes avec liens, dates de mise en ligne et vues : annexes A et B.
 - **Chaîne** : yt-dlp en ≤ 480p ; les vidéos de plus de 150 s sont coupées à 150 s (on analyse l'ouverture) ; mesures **par le code** (ffmpeg : coupes de plan par détection de scène au seuil 0,15 avec fusion des détections à moins de 0,3 s, durée, sonie intégrée EBU R128 et plage de sonie) ; analyse de **la vidéo entière avec son** par Gemini 4 Argon (OpenRouter, effort moyen ; effort élevé pour les deux courts du fondateur) sur une grille fixe (accroche 0-2 s, structure, escalade, capacités et preuves, textes à l'écran, voix, musique, design sonore, caméra, fin, faiblesses, règles). Deux planches d'images ont été regardées par moi pour contrôler Gemini sur les courts du fondateur : les descriptions concordent (jungle, timeline After Effects, « OMNI REFERENCE », vignettes Start/Middle/End).
 - **Fiabilité** : durée, nombre de coupes, secondes par plan et LUFS sont **mesurés** ; tempo (BPM), énergie (1-10) et la note « spectaculaire » sont des **estimations de Gemini** (la note est généreuse : médiane 8/10 ; elle sert à classer, pas à juger). Le compteur de coupes rate une partie des transitions animées (motion design) : Gemini donne sa propre estimation à côté (annexe A, colonne Plans).
-- **Droits** : toutes les vidéos ont été supprimées après analyse ; ne restent que les notes (JSON hors dépôt, dans le scratchpad de la session). Coût d'analyse du lot 1 : ≈ 3,3 USD (OpenRouter, journalisé par appel).
+- **Droits** : toutes les vidéos ont été supprimées après analyse ; ne restent que les notes (JSON hors dépôt, dans le scratchpad de la session). Coût d'analyse des deux lots : ≈ 4,9 USD (OpenRouter, journalisé par appel).
 
 ## 1. Les 16 règles (applicables tout de suite)
 
@@ -32,19 +32,19 @@
 | R15 | **Fin courte et sèche** : coupe nette sur le pic, carton logo + appel de 1,5 à 3,5 s ; mieux : **une scène bonus** (gag, fausse fin, nouveau brief) après le carton. | carton ≤ 3,5 s ; pas de fondu long | Kling (carton de 2 s), Runway (1,7 s), 9Pbg (nouveau brief → sables mouvants), Pikaswaps et Sora 2 (scène après le carton) |
 | R16 | **Format natif par écran** : jamais un 16:9 posé au milieu d'un 9:16 sur fond flou (Gemini le relève comme faiblesse sur les deux courts du fondateur : textes illisibles au téléphone). | 9:16 tourné ou recadré par plan, textes dans la zone sûre | 9Pbg et 5fuQ (défaut relevé par l'analyse) |
 
-## 2. Ce que disent les chiffres (lot 1, n = 70 analyses exploitables)
+## 2. Ce que disent les chiffres (lots 1 et 2, n = 101 analyses exploitables)
 
-| Mesure | Médiane du corpus | Médiane des notes ≥ 8 (n = 57) | Médiane des notes ≤ 6 (n = 6) | Source |
+| Mesure | Médiane du corpus | Médiane des notes ≥ 8 (n = 81) | Médiane des notes ≤ 6 (n = 9) | Source |
 |---|---|---|---|---|
-| Durée | 67 s | 69 s | 84 s | code |
-| Secondes par plan | 2,34 s | **2,04 s** | 2,77 s | code |
-| Tempo | 116 BPM | 118 BPM | 112 BPM | Gemini |
+| Durée analysée | 70 s | 70 s | 86 s | code |
+| Secondes par plan | 2,34 s | **2,09 s** | 2,94 s | code |
+| Tempo | 118 BPM | 121 BPM | 115 BPM | Gemini |
 | Énergie musicale | 8/10 | 8/10 | **5/10** | Gemini |
-| Sonie intégrée | −15,1 LUFS (de −23,6 à −4,7) | — | — | code |
+| Sonie intégrée | −15,1 LUFS (de −24,8 à −4,7) ; plage de sonie médiane 4,9 LU | — | — | code |
 
 Lecture : la différence entre une promo « qui claque » et une démo plate tient d'abord à **l'énergie de la musique** (8 contre 5) et au **rythme des plans** (2 s contre 2,8 s), pas à la durée. La sonie n'est **pas** un levier : les promos vont de −24 à −5 LUFS, et les plateformes normalisent à la lecture. Garder −14 LUFS et une crête vraie à −1 dBTP, mais **compresser la musique** pour la densité (voir §4.7).
 
-Voix (présence principale) : personnages 25, aucune 18, présentateur 12, voix off seule 10, mélanges 5.
+Voix (présence principale, n = 101) : personnages 33, aucune 25, voix off seule 21, présentateur 16, mélanges 6. **Mais les films d'entreprise font exception** : 6 des 9 reposent sur une voix off (NVIDIA, Salesforce, LG), toujours posée et grave, **sur un montage frénétique** : le contraste voix lente / image rapide est leur signature (§6).
 
 ## 3. Les deux courts demandés par le fondateur
 
@@ -107,6 +107,16 @@ Toutes les vidéos notées 9 ont un design sonore dense : whooshes sur chaque mo
 ### 4.9 Fin
 Carton de 1,5 à 3,5 s, coupe sèche, une ligne d'appel (« Essayez Creative »), puis **scène bonus** de 2 à 5 s (gag, réplique d'un personnage, nouveau brief). Les fondus longs et les cartons de 6 s (MiniMax « Butterfly ») sont l'exception.
 
+### 4.10 Effets spéciaux et action : ce qu'apprennent les démos virales (lot 2)
+Les démos d'effets les plus vues (ErikDoesVFX : [Did AI Just Change Movies Forever?](https://youtu.be/BRESQ8NX-us) 8,8 M de vues, [Did AI Just Kill VFX?](https://youtu.be/eIq1uw8q3dE) 1,8 M, [Is AI The New VFX?](https://youtu.be/jfGVMfle07g) 1,4 M) et les faux films (duels au sabre, dragon en vue subjective, transformation de super-héroïne) donnent six règles propres aux VFX :
+1. **Réel d'abord, effet ensuite, dans le même mouvement** : un plan-séquence réel (présentateur qui marche, travelling arrière) dans lequel les créatures se construisent en direct. Le spectateur croit l'effet parce que la caméra ne coupe pas.
+2. **La transformation en un seul plan de 4 à 5 s**, déclenchée sur le drop (armure qui grimpe sur la joue et le bras d'une motarde lancée à pleine vitesse, flash synchronisé au drop à 3,4 s) : prouve « pas de triche au montage ». À l'inverse, **le combat se découpe en plans de 0,3 à 0,5 s** avec un impact sonore à chaque coupe : cela cache les limites physiques du modèle (le duel Jaina contre Desann : 296 coupes en 142 s).
+3. **Lumière diégétique forte** (sabres, néons, feu, éclairs) : elle unifie des plans générés séparément et masque les écarts de rendu.
+4. **Le son fait croire à l'image** : respirations, bourdonnement des lames, impacts précis ; un design sonore familier rend crédible un plan imparfait.
+5. **Rupture de ton aux deux tiers** (un juron en plein vol, un gag) : c'est ce qui rend la démo partageable.
+6. **Ne pas étirer une scène d'action dans un seul décor au-delà de 30 à 45 s** : changer de lieu ou d'échelle.
+Pour nous : pas de franchise ni de personnage protégé (Star Wars, Toy Story) : le « et si ? » doit porter sur nos propres personnages et sur le quotidien du spectateur (sa rue, son garage, son bureau).
+
 ## 5. Recette A — « Les capacités de Creative sont infinies » (effets spéciaux, dragons, explosions, batailles spatiales, duels au sabre lumineux)
 
 **Idée** : une seule personne ordinaire, une seule phrase à la fois, et le monde qui monte d'une marche à chaque phrase. Le fil : la phrase tapée (ou dite) dans Creative, qui devient le plan suivant. Personnage proposé : une technicienne d'atelier québécoise (jamais de célébrité ni de franchise : « sabre de lumière » générique, vaisseaux originaux, aucun logo de film).
@@ -148,6 +158,14 @@ Le concept existant (`campagne-films/films/opsys/CONCEPT.md`, « Ils travaillent
 7. **Son** : funk ou big beat à 124 BPM avec cuivres (registre « mission » de *Catch Me If You Can*, comme la promo MiniMax H3 très bien notée), échantillons « Go! » ; voix de l'avatar au même niveau que la musique sur les impacts.
 8. **Durées** : 60 s (site), 30 s (chaos → 4 départements → approuvé → carton), 15 s (chaos → « Approuvé. » → carton).
 
+**Ce que font les 9 films d'entreprise du lot 2** (NVIDIA GTC et CES, Salesforce Agentforce, LG U+, OpenAI), à appliquer à OPSYS-AI :
+- **Voix posée et grave sur un montage frénétique** : Salesforce pose une voix rauque de bande-annonce (« Is AI going to replace us, or are we going to be in command of it? ») sur des coupes de moins d'une seconde (75 plans en 60 s) ; LG U+ : 34 plans en 30 s sous une voix institutionnelle grave. Pour OPSYS-AI, si narration il y a, c'est celle-là : grave, lente, peu de mots, **jamais sur un montage lent**.
+- **Rendre visible le travail invisible de l'IA** par des incrustations d'interface (compteurs qui défilent, fiches qui s'ouvrent, boîtes de détection, jauges) **posées sur les plans de vie réels**, et par le raccord « simulation → réel » (NVIDIA : jumeau numérique de la gare de Marseille, puis la vraie foule). Chez nous : la carte « M3 · soumission prête » s'ouvre au-dessus du chantier filmé, puis le client signe dans le plan suivant.
+- **Rafales rythmiques** de 4 à 6 plans de 0,3 s sur les temps forts au milieu d'une narration plus posée (NVIDIA GTC 2026) : idéal pour l'entrée des dix départements.
+- **Raccord géométrique** (LG U+ : un cercle gardé au centre de l'écran pendant 6 à 8 plans différents) et **jeu de format** : le problème enfermé dans un cadre réduit, l'image qui s'ouvre en plein écran quand l'IA entre en scène.
+- **Une question universelle comme enjeu** (Salesforce : remplacer ou commander) ; pour OPSYS-AI : « Qui garde la main ? » → « Vous. Toujours. » (cohérent avec les approbations N0-N5, réelles).
+- **Ce qu'il ne faut pas copier** : les ouvertures de keynote lentes (noir, violons, particules pendant 5 à 20 s) sont faites pour une salle obscure ; Gemini les juge peu efficaces en ligne. En ligne, l'accroche reste R1.
+
 ## 7. Contrôle avant livraison (mesurable, à automatiser dans `revue.py`)
 
 | Contrôle | Seuil | Comment le mesurer |
@@ -178,9 +196,9 @@ Le concept existant (`campagne-films/films/opsys/CONCEPT.md`, « Ils travaillent
 
 - BPM, énergie et notes sont des estimations d'un modèle ; aucune écoute humaine. Le compteur de coupes sous-compte les transitions animées.
 - Les vidéos longues n'ont été analysées que sur leurs 150 premières secondes.
-- Le corpus est biaisé vers les chaînes officielles (promos montées par des pros) ; peu de démos virales d'amateurs dans le lot 1 (le lot 2 les ajoute).
+- Le corpus est biaisé vers les chaînes officielles (promos montées par des pros) ; 12 démos virales seulement.
 - Les vues ne mesurent pas la conversion ; aucune donnée de clics ni d'inscriptions.
-- Prochaines étapes (v1.1, v2) : intégrer le lot 2, passer à 150 puis 300 vidéos par lots, mesurer automatiquement la synchronisation des coupes sur les temps (onsets), et confronter les recettes A et B à un vrai montage noté par le fondateur.
+- Prochaines étapes (v2) : passer à 200 puis 300 vidéos par lots (TikTok et Instagram n'ont pas été explorés), mesurer automatiquement la synchronisation des coupes sur les temps (onsets), et confronter les recettes A et B à un vrai montage noté par le fondateur.
 
 ## Annexe A — Corpus du lot 1 (trié par note Gemini, puis par marque)
 
@@ -258,3 +276,39 @@ Colonnes : durée analysée (s) ; plans mesurés (estimation Gemini entre parent
 | 68 | OpenAI | [Higgsfield takes AI video from 1 minute to over 10](https://youtu.be/inrYeej3Big) | 20261026 | 61347 | 86 | 33 (33) | 2.61 | 118 | 6 | présentateur | -19.4 | 6 |
 | 69 | Higgsfield | [How to get the same AI face in every shot](https://youtu.be/MsxIRbuYmyU) | 20261026 | 67138 | 34 | 8 (8) | 4.25 | 95 | 3 | présentateur | -14.2 | 5 |
 | 70 | OpenArt | [AI VFX For The Beginner or Pro!](https://youtu.be/P_uaf2HI92M) | 20260917 | 223974 | 150 | 51 (51) | 2.94 | 115 | 2 | présentateur | -21.7 | 5 |
+
+## Annexe B — Corpus du lot 2 (mêmes colonnes)
+
+| # | Marque | Vidéo (id) | Date | Vues | Durée s | Plans | s/plan | BPM | Énergie | Voix | LUFS | Note |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Entreprise | [Tokens, the Building Blocks of AI / Official GTC 2026 Keynot](https://youtu.be/O-_-CEeFHCM) | 20260318 | 13997 | 150 | 64 (64) | 2.34 | 112 | 8 | voix off | -22.5 | 9 |
+| 2 | Entreprise | [The Rise of AI: NVIDIA Live at CES 2026 Opening Video](https://youtu.be/d24W8AqeOHM) | 20260106 | 38840 | 150 | 58 (58) | 2.59 | 124 | 9 | personnages | -17.3 | 9 |
+| 3 | Higgsfield | [Claude Opus 5.5 + Higgsfield Make Insane Motion Graphics! (C](https://youtu.be/5HYYXYYCrL4) | 20261013 | 358062 | 150 | 53 (53) | 2.83 | 122 | 8 | présentateur | -15.4 | 9 |
+| 4 | Higgsfield | [This AI Movie Trailer Looks Insane… / ALRIGHT (2027) — made ](https://youtu.be/kvXojaSEDM4) | 20260217 | 1219 | 61 | 51 (51) | 1.2 | 130 | 9 | personnages | -13.3 | 9 |
+| 5 | Luma | [Ray3 Modify is now available. Your vision. Your performance,](https://youtu.be/BoM25iSp_V4) | 20251218 | 2753 | 44 | 16 (22) | 2.73 | 130 | 9 | aucune | -7.9 | 9 |
+| 6 | Runway | [Introducing Solaris our first Interface World Model / Runway](https://youtu.be/c2yCePPnrSA) | 20260831 | 66396 | 83 | 28 (28) | 2.95 | 112 | 5 | voix off | -24.8 | 9 |
+| 7 | VFX-viral | [Seedance 2.0 Created This Superhero Suit-Up in Seconds 🤯 / A](https://youtu.be/Vd1H80XqBho) | 20260226 | 1011 | 15 | 9 (9) | 1.64 | 145 | 9 | personnages | -6.9 | 9 |
+| 8 | VFX-viral | [100% AI Generated Dragon POV / Seedance 2.0 Cinematic VFX Te](https://youtu.be/nE_q54w6BZw) | 20260825 | 924 | 29 | 21 (1) | 1.37 | 130 | 8 | personnages | -18.8 | 9 |
+| 9 | VFX-viral | [Breakfast, Interrupted — Time Freeze VFX with Seedance 2.5](https://youtu.be/w4wqR0L7V6A) | 20260813 | 23925 | 30 | 2 (1) | 15.01 | 85 | 6 | personnages | -23.2 | 9 |
+| 10 | Entreprise | [AX 기술로, 미래를 선명하게 / LG U+ Enterprise 브랜드필름 30s ver](https://youtu.be/028R5_G0qno) | 20261030 | 646045 | 30 | 34 (34) | 0.88 | 124 | 8 | voix off | -9.0 | 8 |
+| 11 | Entreprise | [The Rise of the Agentic Enterprise / Salesforce Agentforce](https://youtu.be/Ad5NUrYD9yc) | 20260207 | 7539 | 60 | 75 (75) | 0.8 | 120 | 8 | voix off | -24.1 | 8 |
+| 12 | Entreprise | [Official Keynote Opening Video / NVIDIA GTC Berlin 2026](https://youtu.be/VsZpy3aFLeY) | 20261021 | 25004 | 150 | 44 (46) | 3.41 | 96 | 7 | voix off | -24.3 | 8 |
+| 13 | Entreprise | [I Am AI / NVIDIA GTC 2024 / Official Keynote Intro](https://youtu.be/jMW8_YVFgzY) | 20240319 | 122420 | 150 | 25 (35) | 6.0 | 110 | 7 | voix off | -20.1 | 8 |
+| 14 | Entreprise | [There are many futures. Which do you want to build?](https://youtu.be/o4D1J1YWjhg) | 20261030 | 121689 | 77 | 37 (18) | 2.08 | 128 | 6 | aucune | -14.8 | 8 |
+| 15 | Entreprise | [GPT-6.1 Terra is now in orbit](https://youtu.be/tTuk4pGnT0A) | 20261026 | 523804 | 31 | 4 (7) | 7.87 | 122 | 8 | aucune | -16.0 | 8 |
+| 16 | LTX | [How I Made Crazy Macro Shots in Seconds!](https://youtu.be/N_jrBqhGorI) | 20250930 | 183115 | 70 | 56 (56) | 1.25 | 130 | 7 | voix off | -19.2 | 8 |
+| 17 | OpenArt | [“Storm” Viral Preset Available](https://youtu.be/3eUbF8l2prg) | 20260921 | 4228 | 23 | 5 (4) | 4.61 | 115 | 8 | aucune | -19.4 | 8 |
+| 18 | Tripo | [Why is my head so brittle？](https://youtu.be/DYVVOiGYeiM) | 20261028 | 574055 | 52 | 63 (62) | 0.82 | 140 | 7 | voix off | -8.0 | 8 |
+| 19 | VFX-viral | [Did AI Just Change Movies Forever?](https://youtu.be/BRESQ8NX-us) | 20260807 | 8838770 | 150 | 48 (48) | 3.13 | 125 | 8 | présentateur | -13.7 | 8 |
+| 20 | VFX-viral | [End of Humanity / Short AI Film](https://youtu.be/VBlxAP8hGZ8) | 20261011 | 3286231 | 150 | 44 (44) | 3.41 | 75 | 6 | aucune | -11.4 | 8 |
+| 21 | VFX-viral | [FIFA World Cup 2026  / Cinematic AI Trailer / Made with Goog](https://youtu.be/Xcmge73Mkr0) | 20260703 | 7193 | 128 | 50 (50) | 2.56 | 128 | 9 | aucune | -15.3 | 8 |
+| 22 | VFX-viral | [Did AI Just Kill VFX?](https://youtu.be/eIq1uw8q3dE) | 20260605 | 1846668 | 150 | 86 (86) | 1.74 | 125 | 8 | présentateur | -13.6 | 8 |
+| 23 | VFX-viral | [Is AI The New VFX?](https://youtu.be/jfGVMfle07g) | 20261003 | 1382911 | 150 | 66 (65) | 2.27 | 125 | 8 | présentateur | -13.0 | 8 |
+| 24 | VFX-viral | [Yoda vs Vader: The Duel That Never Was (AI Generated)](https://youtu.be/vSBmAeKZ5nw) | 20250621 | 108445 | 72 | 21 (21) | 3.45 | 130 | 9 | personnages | -18.4 | 8 |
+| 25 | Runway | [Introducing Praxis-1 / Runway](https://youtu.be/sXiLq_3TaAI) | 20260930 | 12844 | 115 | 57 (57) | 2.01 | 95 | 4 | voix off | -15.9 | 7 |
+| 26 | Tripo | [3D prints are too fragile!](https://youtu.be/VgHscVzMOXo) | 20261009 | 883161 | 29 | 34 (34) | 0.86 | 130 | 6 | voix off | -13.7 | 7 |
+| 27 | VFX-viral | [GRANNY MOVIE Trailer (2026) Concept](https://youtu.be/LDmrS2BUBfI) | 20260630 | 4121914 | 61 | 40 (40) | 1.52 | 110 | 9 | personnages | -15.6 | 7 |
+| 28 | VFX-viral | [Medusa: Cursed Beauty (2026) - Angelina Jolie, Jason Momoa /](https://youtu.be/RXYMizkPhAk) | 20260131 | 1338258 | 99 | 44 (44) | 2.25 | 90 | 8 | voix off et personnages | -9.4 | 7 |
+| 29 | Runway | [Introducing Continuum: A Real-Time Video Operating System / ](https://youtu.be/K7Q7FESRHJY) | 20261001 | 109494 | 150 | 9 (9) | 16.67 | 95 | 3 | voix off | -14.1 | 6 |
+| 30 | Seedance | [Dreamina Seedance 2.0: Video Editing](https://youtu.be/MgQlW5IhXjc) | 20260605 | 5179 | 46 | 5 (6) | 9.16 | 130 | 6 | aucune | -14.6 | 6 |
+| 31 | VFX-viral | [STAR WARS: DARK FORCES Amazing Lightsaber Fight! Jaina Solo ](https://youtu.be/lHbSPoyeegI) | 20260827 | 84054 | 142 | 296 (296) | 0.48 | 140 | 9 | personnages | -14.3 | 6 |
