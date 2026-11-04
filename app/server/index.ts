@@ -4210,7 +4210,7 @@ app.get('/api/studio/transcription/:id', async (req, reply) => {
           let tr = null;
           try {
             const { stdout } = await executer(config.ffmpegBin, ['-v', 'error', '-i', t.output_path!, '-vn', '-ac', '1', '-ar', '16000', '-f', 'wav', '-']);
-            tr = await transcrireSurGpu(stdout, { url: urlGpu });
+            tr = await transcrireSurGpu(stdout, { url: urlGpu, jeton: process.env.NEXORA_TRANSCRIPTION_TOKEN });
           } catch { /* Échec d'extraction pour le GPU : reprendre le chemin CPU. */ }
           if (tr !== null) return { ...tr, sousTitres: decouperSousTitres(tr), moteur: 'gpu' };
           if (!existsSync(PYTHON_TRANSCRIPTION)) throw Object.assign(new Error('La transcription n’est pas installée sur ce serveur.'), { statusCode: 503 });

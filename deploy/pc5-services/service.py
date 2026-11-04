@@ -12,14 +12,14 @@ from transcrire_endpoint import installer
 app = FastAPI()
 LOCK = threading.Lock()
 CACHE = {}
-LAST = {}
+LAST = [time.time()]  # comme en production : LAST[0]
 
 
 def charge(nom, construire):
-    """À appeler sous LOCK ; LAST contient la dernière utilisation par modèle."""
+    """À appeler sous LOCK ; LAST[0] = dernière utilisation."""
     if nom not in CACHE:
         CACHE[nom] = construire()
-    LAST[nom] = time.time()
+    LAST[0] = time.time()
     return CACHE[nom]
 
 
@@ -47,4 +47,4 @@ def stt(file: UploadFile = File(...), language: str = Form("fr")):
                 for s in segments
             ]}
         finally:
-            LAST["stt"] = time.time()
+            LAST[0] = time.time()
