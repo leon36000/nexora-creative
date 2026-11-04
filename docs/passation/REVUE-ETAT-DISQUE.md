@@ -846,3 +846,9 @@ fatal: unable to access 'https://pc4.tail0c55ff.ts.net/root/nexora-creative.git/
 ```
 
 Aucun push tenté ; ne pas remplacer le proxy ou contourner les restrictions de cette session. Après rétablissement autorisé : relire les refs, pipeline et accès des projets, puis pousser seulement les changements explicitement destinés à la documentation.
+
+## Écriture concurrente sur la branche documentaire
+
+Pendant la revue, l’autre session a copié la passation et créé **203c633**, le04/11 à06:13:17−05:00, aprèsa854130, trailerClaudeSonnet5.5. Présence vérifiée par `git -C /home/pc6/Desktop/NexoraCreative-doc-passation log -3`. Le tableau au début reste l’instantané initial, antérieur à cette écriture. La présente revue préserve ce commit et actualise ensuite la même branche. Les worktrees de code n’ont pas été modifiés par notre agent.
+
+Tentative finale `git add` sur liste explicite de documents : refus `Unable to create .../.git/worktrees/NexoraCreative-doc-passation/index.lock: Read-only file system`. Aucun changement indexé, aucun commit final créé par la revue ; dernier HEAD constaté 203c633. Le script documentaire prêt `~/Desktop/nexora-commiter-passation.sh` permet au fondateur de terminer depuis son terminal normal, sans push.

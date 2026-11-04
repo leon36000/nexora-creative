@@ -1,9 +1,9 @@
 # Sources, méthode et limites — revue Nexora du 04/11/2026
 
-Relevé documentaire/local achevé à 2026-11-04T11:03:40+00:00. Les dates individuelles du catalogue sont celles de la source, pas celles de la revue.
+Premier relevé documentaire/local à 2026-11-04T11:03:40+00:00. Les dates individuelles du catalogue sont celles de la source, pas celles de la revue.
 
-- Source JSONL unique à la racine du dossier demandé : `/home/pc6/.claude/projects/-home-pc6-Desktop-Nexora-Creative/4a161a25-a3c4-4a78-94f6-c7dc7ebef37d.jsonl` (109 178 946 octets).
-- SHA-256 : `75802d7d92d6191f6460670033dd8200f2d024c4ca5dde14f9130e6889f5bc2d`.
+- Instantané initial du JSONL unique à la racine du dossier demandé : `/home/pc6/.claude/projects/-home-pc6-Desktop-Nexora-Creative/4a161a25-a3c4-4a78-94f6-c7dc7ebef37d.jsonl` (109 178 946 octets).
+- SHA-256 initial : `75802d7d92d6191f6460670033dd8200f2d024c4ca5dde14f9130e6889f5bc2d`.
 - Lecture Python ligne par ligne, `json.loads`, de tout le fichier, pour conserver timestamp/type/ligne et repérer les demandes anciennes encore actives. Les `tool_result` et notifications sont exclus des paroles du fondateur.
 - 225 entrées utilisateur avec contenu textuel potentiel ; 114 candidats U après premier filtrage ; au final **93 messages réels uniques**, dont **69 à partir du 02/11 vers midi**. 14 messages d’images seules signalés séparément, 3 doublons exacts et 4 enveloppes automatiques écartés. Les « oui/continue » restent au catalogue, sans inventer leur portée.
 - Une ligne illisible : **L16978**, 805 caractères contenant des répétitions littérales de `\u0000`, à proximité de la première panne. Aucun message récupérable à cette ligne ; ne pas prétendre un corpus matériellement parfait.
@@ -53,3 +53,15 @@ Relevé documentaire/local achevé à 2026-11-04T11:03:40+00:00. Les dates indiv
 ## Usage durable
 
 Les annexes REVUE-*.md sont conservées sur le Bureau et copiées dans `docs/passation/` de la branche `docs/passation-maj`. Aucun fichier de `/tmp` n’est requis pour reprendre. Les données de films et de recherche hors Git restent à leurs chemins persistants : leurs emplacements sont consignés, pas déplacés.
+
+## Source vivante : complément reçu pendant la revue
+
+L’autre session a continué à écrire après l’instantané initial. La source a été relue ligne par ligne jusqu’à **L21043**, dernier événement **04/11/2026 11:13:26.991Z / 06:13:26.991 Montréal**. Huit vrais messages supplémentaires, U115–U122, portent le corpus final à **101 messages uniques, dont 77 récents** (122 candidats intermédiaires). Aucun nouveau résumé. Les 93/69 et l’empreinte précédents décrivent donc l’instantané initial, pas le total final.
+
+Taille finale lue : **109609671 octets** ; SHA-256 : `248015bf13ef1c6437c4b2a0f7bc39d1f0c0ad0497cfc87db57adb27f36695b9`.
+
+L’addendum de l’autre session à la passation et son commit local `203c633` ont été préservés et réconciliés (section16). Les patchs/recréations de pods GitLab et le diagnostic Garage sont **ses opérations rapportées**, pas des actions ni des vérifications de notre agent d’audit. Le projet API Anthropic a ensuite été abandonné par U121 ; aucune clé ni courriel n’a été lu. Le cutoff final est explicite, une éventuelle écriture plus tardive exigerait un nouveau contrôle.
+
+Limite finale supplémentaire : création de l’index Git interdite par montage `.git` en lecture seule (`git add` échoué, aucun fichier indexé). Les validations documentaires passent, mais le commit de cette revue reste à effectuer dans le terminal normal ; aucune permission/sécurité modifiée pour contourner ce blocage.
+
+Contrôle complémentaire de la source vivante après l’instantané : message d’assistant L21049 à11:17:23Z, dernier événement observé11:17:25.339Z. Seulement une notification ancienne et sa prise en compte, **aucun nouveau texte saisi par le fondateur** : total101/77 inchangé. L’assistant rapporte encore502 et un surveillant actif ; aucune vérification distante supplémentaire par notre revue. L’empreinte finale ci-dessus correspond au préfixe arrêté àL21043, pas aux ajouts ultérieurs du fichier vivant.

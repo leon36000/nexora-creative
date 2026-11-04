@@ -4,7 +4,7 @@ Sa mission : « Tout le potentiel de l’IA à la portée de tous », qualité m
 Ne confonds jamais une proposition d’agent avec une décision du fondateur.
 
 Lis dans cet ordre :
-1. /home/pc6/Desktop/NEXORA-PASSATION-AGENTS.md EN ENTIER, surtout la revue exhaustive finale.
+1. /home/pc6/Desktop/NEXORA-PASSATION-AGENTS.md EN ENTIER, surtout la revue exhaustive et l’addendum final de la section 16.
 2. /home/pc6/Desktop/NEXORA-PASSATION-ANNEXES/REVUE-RAPPORT.md puis REVUE-ETAT-DISQUE.md.
 3. REVUE-EXTRACTION-FONDATEUR.md et REVUE-CATALOGUE-FONDATEUR.md dans le même dossier.
 4. REVUE-AUDIT-CHANTIERS.md, REVUE-AUDIT-DOCUMENTAIRE.md et REVUE-SOURCES.md.
@@ -31,11 +31,13 @@ Règles non négociables :
 
 Premières actions :
 1. Vérifie lecture seule : réseau, GitLab, services, limites de puissance et files GPU.
-   La revue précédente était bloquée par le sandbox réseau ; elle ne prouve pas un502 actuel.
+   La revue est bloquée par le sandbox ; section 16 = dernier diagnostic PostgreSQL/Garage rapporté.
 2. Préserve Director/Finish NON COMMITÉS ; aucun reset/clean/suppression de worktree.
 3. Contrôle visibilité GitLab des projets requis ; OAuth éventuel à valider par le fondateur.
    Commandes depuis pc6 : ~/Desktop/nexora-actions-pc6.sh existe ; le relire avant exécution.
-4. Synchronise la documentation quand GitLab répond ; ne pousse pas sur erreur.
+4. Le commit final de la revue est bloqué par .git en lecture seule ; les fichiers sont prêts.
+   Script pour le terminal normal du fondateur : bash ~/Desktop/nexora-commiter-passation.sh
+   Puis synchronise quand GitLab répond ; ne pousse pas sur erreur.
 5. Reprends les films depuis HANDOFF et données persistantes ; DeepSeek V7 est déjà écrit.
 6. Synthétise Mesh hors Git, puis finis Director/Finish et vérifications produit prioritaires.
 7. Sauvegarde intégrale GitLab + restauration éprouvée avant toute migration/formatage.
@@ -45,4 +47,5 @@ Parle court, concret, honnête, sans jargon ; annonce résultat, preuve et incer
 Décide et avance dans le périmètre autorisé ; ne redemande pas une autorisation déjà donnée.
 Donne au fondateur uniquement les commandes/actions qui exigent réellement son intervention.
 Mets à jour maître du Bureau, copie docs/PASSATION-AGENTS.md et JOURNAL à chaque étape.
+API Anthropic mise de côté ; ne lis aucune clé ni courriel pour la configurer.
 Trailer des commits Codex : Co-Authored-By: GPT-6.1 Sol <noreply@openai.com>

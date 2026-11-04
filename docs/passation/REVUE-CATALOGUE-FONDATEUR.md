@@ -1,4 +1,4 @@
-# Catalogue des 93 messages réels du fondateur
+# Catalogue des 101 messages réels du fondateur
 
 Texte conservé avec ses fautes et mots clés ; aucune notification ou sortie d’outil n’est prise pour une instruction. IDs U stables issus du dépouillement, donc numérotation discontinue. Les catégories et interprétations sont dans REVUE-EXTRACTION-FONDATEUR.md.
 
@@ -761,3 +761,37 @@ Refais les pour que je puisse tout  les faire de pc6 et met a jour le fichier de
 - U042, 2026-11-02T08:54:26.795Z, L14123 : image seule, sans texte saisi exploitable. Image non interprétée dans cette revue textuelle.
 
 - U073, 2026-11-04T06:32:50.978Z, L18380 : image seule, sans texte saisi exploitable. Image non interprétée dans cette revue textuelle.
+
+## Addendum reçu pendant la revue : huit nouveaux messages réels
+
+## U115 — 2026-11-04T10:56:47.533Z — Montréal 2026-11-04T05:56:47.533000-05:00 — JSONL L20811
+
+Sur codex desktop ?
+
+## U116 — 2026-11-04T10:58:48.859Z — Montréal 2026-11-04T05:58:48.859000-05:00 — JSONL L20827
+
+Oui verifie
+
+## U117 — 2026-11-04T11:01:05.656Z — Montréal 2026-11-04T06:01:05.656000-05:00 — JSONL L20856
+
+Confie cette tâche a muse spark 1.3 contributor max
+
+## U118 — 2026-11-04T11:03:23.610Z — Montréal 2026-11-04T06:03:23.610000-05:00 — JSONL L20899
+
+Confie a muse la réparation de codex je veux quil sois parfaitement fonctionnel avant que codex commence
+
+## U119 — 2026-11-04T11:06:21.041Z — Montréal 2026-11-04T06:06:21.041000-05:00 — JSONL L20937
+
+Non api claude et si je met ma cle api du mon courriel peux tu l'ajouter
+
+## U120 — 2026-11-04T11:09:29.497Z — Montréal 2026-11-04T06:09:29.497000-05:00 — JSONL L20965
+
+Mais 200$ ca s'épuise vite s'imagine avec sonnet 5.5
+
+## U121 — 2026-11-04T11:10:34.320Z — Montréal 2026-11-04T06:10:34.320000-05:00 — JSONL L20982
+
+Ok oublions cela ou en sommes nous avec gitlab et pc4 ?
+
+## U122 — 2026-11-04T11:13:01.810Z — Montréal 2026-11-04T06:13:01.810000-05:00 — JSONL L21026
+
+Ok confie tout le travaille a codex je vais lancer la convo codex dans 2minute met a jours le tout
