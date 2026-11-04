@@ -784,3 +784,9 @@ Commit local **0200277** dans le worktree Viewer : les liens `/extend` conserven
 Sur la chaise Pixal BF16 déjà produite, avec `decimerGlb` du code Creative local et cible 50 000 triangles : **149 898 → 49 996 triangles**, **8 177 296 → 4 940 320 octets**, fonction 0,31 s sur deux cœurs pour cet essai (hors lecture initiale/analyses). Les cartes de couleur et métal/rugosité détectées ont des SHA-256 identiques. Le contrôle topologique local rapporte arêtes ouvertes 549 → 539, arêtes non-variété 96 → 111, 11 composantes et zéro triangle dégénéré avant/après ; aucun des deux n’est étanche selon ce contrôle. Original préservé ; GLB et deux mesures copiés sur pc1, SHA vérifiés, inventaire **3 919 entrées**.
 
 Un objet, aucun rendu ou verdict visuel : résultat prometteur pour la taille, mais l’augmentation des arêtes non-variété interdit de conclure à une amélioration générale ou d’activer ce réglage automatiquement. Mesures et limites sur Storage `rnd-codex-20261104/mesh-essai-decimation/` et note `mesh.md`.
+
+### OPSYS : garde-fous après revue Gemini
+
+Commit local **71499dd** : un plan vidéo sans source résolue et une voix sans identifiant valide sont refusés ; un rapport du validateur explicitement `ok:false` arrête le rendu ; les nouveaux journaux indiquent le mode brouillon et la résolution. Les quatre lacunes ont été reproduites avant correction ; **18 tests ciblés** relancés indépendamment passent. Limites : si le validateur est absent et retourne `None`, la validation n’est pas démontrée ; les exports échoués restent conservés sans faux succès ; ABA reste explicitement hors attestation.
+
+Un nouvel essai CPU étiqueté du vertical DeepSeek tourne avec un nom différent pour vérifier ces derniers changements sur un vrai montage ; résultat et archivage en attente. Tous les essais précédents sont conservés.
