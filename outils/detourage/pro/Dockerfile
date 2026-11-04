@@ -7,14 +7,14 @@ FROM ${PYTHON_IMAGE}
 ARG TORCH_INDEX=https://download.pytorch.org/whl/cu130
 ARG TORCH_VERSION=2.14.1
 ARG TORCHVISION_VERSION=0.29.1
-ARG TORCHAUDIO_VERSION=2.14.1
 ARG COMFYUI_REF=2c75dc1b379a59e0880619d029607af5169a62ef
 ARG LTXVIDEO_REF=220e1d45aa0469f518e982102fca4dca92a61862
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ffmpeg git ca-certificates \
  && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir "torch==${TORCH_VERSION}" "torchvision==${TORCHVISION_VERSION}" "torchaudio==${TORCHAUDIO_VERSION}" --index-url "${TORCH_INDEX}"
+# torchaudio : plus publié pour torch 2.14 ; non requis par le graphe vidéo vers alpha (sans piste audio)
+RUN pip install --no-cache-dir "torch==${TORCH_VERSION}" "torchvision==${TORCHVISION_VERSION}" --index-url "${TORCH_INDEX}"
 # ComfyUI v0.44.0 et ComfyUI-LTXVideo, commits épinglés
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI \
  && git -C /opt/ComfyUI checkout -q ${COMFYUI_REF} \
