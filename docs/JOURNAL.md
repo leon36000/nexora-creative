@@ -545,3 +545,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Montage `94da540` : revue indépendante du contrat TypeScript et du pont Python sans incompatibilité réelle trouvée; les 21 tests ciblés ont été relancés. Une réponse fabriquée `ok:true` de durée 0 ou supérieure à 180 s passerait le garde Python, mais le validateur officiel ne produit pas ces cas réussis.
 - Mesh : un tétraèdre fermé translaté, avec une face inversée, reste déclaré étanche alors que son volume calculé peut valoir 5/6 ou 13/6 au lieu de 1/6. Garde supplémentaire en cours, sans prétendre détecter les auto-intersections.
 - GitLab pc4, lecture seule : pod `garage-0` non prêt, `CrashLoopBackOff`, 59 redémarrages observés. Pas de diagnostic de perte de données, pas de redémarrage ni de push.
+
+
+### Reprise Codex — orientation Mesh et plan Gemini, 4 novembre 2026
+
+- Commit local `a35a2d7` : détection d'orientation incohérente par arête, volume `null` et avertissement; l'étanchéité reste un constat topologique. Les 14 tests ciblés ont été repassés indépendamment; typecheck réussi par l'agent. Cela ne détecte pas les auto-intersections; une formulation UI plus prudente est en cours. Revue indépendante et réconciliation GitLab nécessaires.
+- Films : le fichier retenu Gemini p19 contient effectivement 124 images à 24 i/s. Son plan c23 demande 96 images depuis l'image 36, jusqu'à la borne exclusive 132 : dépassement de 8 images confirmé. Les 11 plans existants des quatre équipes ont été vérifiés avec le vrai validateur; seul Gemini long échoue. Les options préservent l'ancien plan et les exports; aucune modification encore faite.
