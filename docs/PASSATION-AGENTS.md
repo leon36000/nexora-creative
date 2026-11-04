@@ -461,3 +461,7 @@ Pour ménager la racine pc1, cette vague est physiquement dans `/run/media/pc1/I
 ### GitLab : sonde PostgreSQL non propagée
 
 À 06 h 45 Montréal, diagnostic en lecture seule : le StatefulSet `gitlab-postgresql` est bien configuré avec `startupProbe.failureThreshold=240`, période 10 s, génération 4 observée. **Mais le pod effectif utilise encore 30 × 10 s**, ancienne révision `gitlab-postgresql-bbc96b578`, alors que la révision désirée est `gitlab-postgresql-5cd6988b69` (stratégie RollingUpdate). Le réglage à 240 existe donc mais n'est pas appliqué au pod observé. PostgreSQL non prêt, 8 redémarrages ; événements Unhealthy/Killing ; Garage `CrashLoopBackOff`, 25 redémarrages ; GitLab encore 502. pc4 disposait d'environ 40 Gio de mémoire disponible et de swap libre à ce relevé. La cause complète, la corruption Garage et l'intégrité de la base ne sont pas établies par ces seuls éléments. Aucun pod, volume ou service modifié ; sauvegarde complète/restauration toujours manquantes.
+
+### Tests produit ciblés
+
+Sur le worktree Director basé sur `da27fa4`, exécution Vitest sous environnement vide des tests `auth`, `credits`, `studio` et `transcriptionGpu` : **30/30 passent** (4 fichiers). Les collaborateurs réseau et les jetons utilisés dans les tests sont fictifs ; ceci n'est ni une vérification de bout en bout dans la VM, ni une preuve de débit réel ou d'isolation complète du Studio.
