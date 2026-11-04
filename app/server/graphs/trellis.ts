@@ -40,7 +40,7 @@ export const TRELLIS_SHAPE_VAE = 'trellis_2_shape_vae_bf16.safetensors';
 export const TRELLIS_TEXTURE_VAE = 'trellis_2_texture_vae_bf16.safetensors';
 export const TRELLIS_ENCODER = 'dino_v3_vit_l.safetensors';
 export const BG_REMOVAL_MODEL = 'birefnet.safetensors';
-/** Relief multi-images : Pixal3D multi-vues (5,58 Go int8, nœud natif ComfyUI 0.43.2) et son encodeur DINOv3 + NAF (1,21 Go). Moteurs Turing de pc5. */
+/** Nexora Mesh (ex-Relief) multi-images : Pixal3D multi-vues (5,58 Go int8, nœud natif ComfyUI 0.43.2) et son encodeur DINOv3 + NAF (1,21 Go). Moteurs Turing de pc5. */
 export const PIXAL3D_MODEL = 'pixal3d_multiview_int8_convrot.safetensors';
 export const PIXAL3D_ENCODER = 'dino_v3_L_naf_fp32.safetensors';
 /** Ordre des vues acceptées par Pixal3DMultiViewConditioning. */
@@ -75,7 +75,7 @@ export interface TrellisParams {
   /** Frames in the turntable; 0 skips it. */
   turntableFrames?: number;
   /**
-   * Relief multi-images (Pixal3D) : jusqu'à quatre vues du même objet (face, gauche, dos, droite), dans cet ordre ; `image`
+   * Nexora Mesh (ex-Relief) multi-images (Pixal3D) : jusqu'à quatre vues du même objet (face, gauche, dos, droite), dans cet ordre ; `image`
    * est la vue de face. `fov` : 20 pour des rendus ou des générateurs multi-vues, plus large pour des photos.
    */
   vues?: { left?: string; back?: string; right?: string; fov?: number };

@@ -117,7 +117,7 @@ export default function Creer() {
   }, [toutes]);
 
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
-  // « Animer avec H3 » depuis Relief : /?mode=video&jeton=asset:…&intention=… pose la vue 3D comme plan clé.
+  // « Animer avec H3 » depuis Nexora Mesh : /?mode=video&jeton=asset:…&intention=… pose la vue 3D comme plan clé.
   useEffect(() => {
     const jeton = params.get('jeton');
     if (!jeton || !/^asset:[0-9a-f-]{36}$/i.test(jeton) || jetonsRecus.current.has(jeton)) return;

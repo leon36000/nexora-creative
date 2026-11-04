@@ -1,6 +1,6 @@
 """Scène d'effets visuels sans interface (Blender 5.2, bpy) pour Nexora Creative.
 
-Place un modèle Relief (GLB) dans une scène, anime l'objet et une caméra, éclaire, puis rend les passes utiles :
+Place un modèle Nexora Mesh (ex-Relief, GLB) dans une scène, anime l'objet et une caméra, éclaire, puis rend les passes utiles :
 couleur (RGBA, fond transparent pour la composition), profondeur (PNG 16 bits, 1 = proche), normales (espace caméra),
 masque (alpha de l'objet). Les passes de données sont rendues par substitution de matériau : aucune dépendance au
 compositeur, dont l'API change d'une version de Blender à l'autre.

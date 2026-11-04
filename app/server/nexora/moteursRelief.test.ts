@@ -12,7 +12,7 @@ function parc() {
 }
 afterEach(() => retablirMoteursEnv());
 
-describe('Relief : routage des brouillons 3D', () => {
+describe('Nexora Mesh : routage des brouillons 3D', () => {
   it('lireSecondes ignore le bruit', () => {
     expect(lireSecondes('{"a":38,"b":"x","c":-1}')).toEqual({ a: 38 });
     expect(lireSecondes('pas du json')).toBeUndefined();

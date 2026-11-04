@@ -88,7 +88,7 @@ export const JETONS_TACHE: Record<string, { entree: number; sortie: number }> = 
   marketing_propositions: { entree: 2400, sortie: 1700 },
   marketing_logos: { entree: 1700, sortie: 3600 },
   marketing_variantes: { entree: 1900, sortie: 900 },
-  // Juge de Relief : une planche 2×2 (≈ 900 jetons d'image) et la consigne ; réponse JSON courte.
+  // Juge de Nexora Mesh (ex-Relief) : une planche 2×2 (≈ 900 jetons d'image) et la consigne ; réponse JSON courte.
   juge3d: { entree: 1500, sortie: 300 },
   // Réalisateur (recherche/25, Expert, 32 demandes) : 1 990 / 740 en moyenne, une réparation rare.
   realisation: { entree: 2000, sortie: 800 },
@@ -117,7 +117,7 @@ export function devisLlm(tache: string, palier: Palier, o: { livre?: GrandLivreU
 }
 
 /**
- * Juge de Relief : prix de liste du modèle vision (USD par million de jetons, entrée puis sortie), réglables par
+ * Juge de Nexora Mesh (ex-Relief) : prix de liste du modèle vision (USD par million de jetons, entrée puis sortie), réglables par
  * NEXORA_PRIX_JUGE3D_ENTREE_USD_M / NEXORA_PRIX_JUGE3D_SORTIE_USD_M (à confirmer sur la facture du fournisseur).
  */
 export function coutJuge3dUsd(u: { entree: number; sortie: number }, env: NodeJS.ProcessEnv = process.env): number {

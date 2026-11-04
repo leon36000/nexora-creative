@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildTrellisGraph, PIXAL3D_ENCODER, PIXAL3D_MODEL } from './trellis.js';
 
 const base = { image: 'a.png', seed: 1, quality: 'draft' as const, removeBackground: true };
-describe('graphe Relief', () => {
+describe('graphe Nexora Mesh', () => {
   it('une image : TRELLIS.2 et son conditionnement', () => {
     const g = buildTrellisGraph(base) as any;
     expect(g.cond.class_type).toBe('Trellis2Conditioning');

@@ -808,6 +808,6 @@ input[type="color"].swatch::-webkit-color-swatch { border: 0; border-radius: 5px
 .nx-montage a.nx-puce { text-decoration: none; }
 .nx-devis { color: var(--fg-2, #b9b2a8); font-size: 13px; margin: 10px 0 0; }
 
-/* Relief → plan clé H3 (recherche/25) */
+/* Nexora Mesh (ex-Relief) → plan clé H3 (recherche/25) */
 .relief-animer { display: grid; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line, rgba(255,255,255,.08)); }
 .relief-animer .seg { flex-wrap: wrap; }

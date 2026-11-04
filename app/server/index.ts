@@ -49,6 +49,7 @@ import { reecrireH3 } from './nexora/reecritureH3.js';
 import { xmlFcp7 } from './nexora/projetExport.js';
 import { demanderEffet, lireDemandeEffet } from './nexora/effets.js';
 import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
+import { transcrireSurGpu } from './nexora/transcriptionGpu.js';
 import { argsAvecMusique, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
 import { lireCartons } from './nexora/cartons.js';
@@ -1918,7 +1919,7 @@ app.get('/api/nexora/objet/:take', async (req, reply) => {
   };
 });
 
-// ---------- Relief : rapport, exports, cartes PBR, GIF de la tournette, juge ----------
+// ---------- Nexora Mesh (ex-Relief) : rapport, exports, cartes PBR, GIF de la tournette, juge ----------
 
 type PriseRelief = { id: number; glb: string; t: NonNullable<ReturnType<typeof takes.get>> };
 function priseRelief(req: FastifyRequest, reply: FastifyReply): PriseRelief | null {
@@ -2008,7 +2009,7 @@ app.get('/api/nexora/relief/:take/gif', async (req, reply) => {
 });
 
 /**
- * Juge de Relief : quatre côtés de la tournette, une note de 0 à 10, les jetons mesurés un à un et facturés comme les autres
+ * Juge de Nexora Mesh (ex-Relief) : quatre côtés de la tournette, une note de 0 à 10, les jetons mesurés un à un et facturés comme les autres
  * appels LLM (réservation au plafond du devis, règlement du réel, ligne au grand livre). Sans LLM : null, rien n'est dû.
  */
 async function evaluerRelief(takeId: number, description: string, tournette: string): Promise<(VerdictVues & { credits: number }) | null> {
@@ -2928,7 +2929,7 @@ async function upscaleGraph(b: any, seed: number): Promise<Built> {
   };
 }
 
-// ---------- Relief (image to 3D; ex-Object) ----------
+// ---------- Nexora Mesh (image to 3D; ex-Relief, ex-Object) ----------
 
 const ASSET_TOKEN_RE = /^asset:[0-9a-f-]{36}$/i;
 
@@ -4195,7 +4196,8 @@ const transcriptions = new Map<number, Promise<unknown>>();
 app.get('/api/studio/transcription/:id', async (req, reply) => {
   const t = priseStudio((req.params as any).id, reply);
   if (!t) return;
-  if (!existsSync(PYTHON_TRANSCRIPTION)) return reply.code(503).send({ error: 'La transcription n’est pas installée sur ce serveur.' });
+  const urlGpu = process.env.NEXORA_TRANSCRIPTION_URL;
+  if (!urlGpu && !existsSync(PYTHON_TRANSCRIPTION)) return reply.code(503).send({ error: 'La transcription n’est pas installée sur ce serveur.' });
   // Une seule transcription à la fois par prise ; le résultat reste en mémoire le temps du processus.
   let p = transcriptions.get(t.id);
   if (!p) {
@@ -4204,11 +4206,20 @@ app.get('/api/studio/transcription/:id', async (req, reply) => {
       const { tmpdir } = await import('os');
       const dossier = await mkdtemp(join(tmpdir(), 'nexora-transcription-'));
       try {
+        if (urlGpu) {
+          let tr = null;
+          try {
+            const { stdout } = await executer(config.ffmpegBin, ['-v', 'error', '-i', t.output_path!, '-vn', '-ac', '1', '-ar', '16000', '-f', 'wav', '-']);
+            tr = await transcrireSurGpu(stdout, { url: urlGpu, jeton: process.env.NEXORA_TRANSCRIPTION_TOKEN });
+          } catch { /* Échec d'extraction pour le GPU : reprendre le chemin CPU. */ }
+          if (tr !== null) return { ...tr, sousTitres: decouperSousTitres(tr), moteur: 'gpu' };
+          if (!existsSync(PYTHON_TRANSCRIPTION)) throw Object.assign(new Error('La transcription n’est pas installée sur ce serveur.'), { statusCode: 503 });
+        }
         const audio = join(dossier, 'a.f32');
         await executer(config.ffmpegBin, ['-v', 'error', '-y', '-i', t.output_path!, '-vn', '-ac', '1', '-ar', '16000', '-f', 'f32le', audio]);
         const { stdout } = await executer(PYTHON_TRANSCRIPTION, ['-I', join(ROOT, 'server/nexora/transcrire.py'), audio], 900_000);
         const tr = lireTranscription(stdout.toString('utf-8'));
-        return { ...tr, sousTitres: decouperSousTitres(tr) };
+        return { ...tr, sousTitres: decouperSousTitres(tr), moteur: 'cpu' };
       } finally {
         rm(dossier, { recursive: true, force: true }).catch(() => {});
       }

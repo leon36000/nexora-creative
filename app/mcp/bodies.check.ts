@@ -11,6 +11,7 @@
  *
  * No network, no GPU.
  */
+import { ROUTE_3D } from '../src/produit3d.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
@@ -530,7 +531,7 @@ const { VIDEO_MODELS, IMAGE_MODELS, IMAGE_RES, compilePrompt, presetById, sizeFo
   assert.ok(viewer.includes('navigate(`${ROUTE_3D}?take=${take.id}`)'), 'Viewer.tsx Make 3D no longer opens <route 3D>?take=<id>');
   assert.ok(src.includes("useTakeParam(params.get('take'),"), 'Object.tsx no longer reads ?take=');
   passed++;
-  console.log('ok  viewer Make 3D deep-links /object?take=<id>, which the page reads');
+  console.log(`ok  viewer Make 3D deep-links ${ROUTE_3D}?take=<id> (/relief and /object stay aliases), which the page reads`);
 }
 
 // ---------- Viewer.tsx (upscale + continue actions) ----------

@@ -99,7 +99,7 @@ describe('texte → 3D : prochaine étape', () => {
   });
 });
 
-describe('Relief : vues et GIF', () => {
+describe('Nexora Mesh : vues et GIF', () => {
   it('quatre vues régulièrement espacées d’une tournette de n images', async () => {
     const { indicesQuatreVues, argsGif } = await import('./objet3d.js');
     expect(indicesQuatreVues(32)).toEqual([0, 8, 16, 24]);
