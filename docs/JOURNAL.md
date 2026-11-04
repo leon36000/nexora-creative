@@ -433,3 +433,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS DeepSeek : v02 généré, décodé et archivé avec sa planche et ses empreintes ; v03 lancé seul après file vide.
 
 - OPSYS DeepSeek : brouillon long 140,46 s/32 plans produit, décodé sans erreur et validé techniquement ; export, 94 tranches, mix et planche archivés SHA sur pc1 (3 872 entrées). Images fixes seulement examinées ; son, mouvement et verdict humain restent à faire. v03 vertical en cours.
+
+- OPSYS DeepSeek : v03 généré, décodé et archivé avec planche ; v04 lancé seul. Contrôle automatique du long : aucun noir ≥0,5 s au seuil 0,05 ; volume moyen −15,7 dB, pic −1,5 dB, sans verdict sur son ou image.
