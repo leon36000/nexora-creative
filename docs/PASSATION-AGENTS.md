@@ -664,3 +664,9 @@ Le premier transfert seul n’avait presque rien libéré, car des données éta
 Le dossier historique `~/nexora-creative-data/promo/montage` (~3,4 Gio) ne présentait aucun fichier ouvert ni modification récente à notre relevé. Ses 128 médias ont **128 empreintes distinctes et 128 copies pc1 effectivement relues et vérifiées SHA-256**. Dossier complet copié sur Storage dans `relocalisation-pc6-20261104/montage`, comparé deux fois par checksum sans différence, puis chemin initial préservé par lien symbolique ; ancienne copie racine retirée après contrôle et sans toucher aux archives pc1.
 
 Après les deux déplacements, racine pc6 **98 %**, 19 592 982 528 octets disponibles (~18,2 Gio), soit environ **13,2 Gio libérés** depuis 5 431 083 008 octets ; Storage ~623 Gio libres. Tous les médias, essais et chemins sont conservés. Ne pas considérer cette marge comme infinie ; vérifier avant les opérations volumineuses.
+
+### Délégation effective et reprise du vertical OPSYS
+
+Les trois profils de passerelle ont maintenant fourni des réponses textuelles : `eco-muse` (2343 jetons de sortie) et `eco-deepseek` (7364 ; deux essais antérieurs sans texte car plafond atteint) proposent des grilles de contrôle ; `eco-gemini-eleve` a fourni la réponse partielle déjà signalée. Les trois sont sous `Storage/Nexora/travail/rnd-codex-20261104/modeles/` et ne constituent ni preuves empiriques ni décisions fondateur. Les seuils proposés par Muse ne sont pas adoptés automatiquement. Les agents Luna mènent en parallèle trois recherches sourcées sur Mesh, Sync et détourage/Wan.
+
+Après récupération d’environ 13,2 Gio sur pc6, et après contrôle d’une file GPU vide et du plafond 475 W configuré, le plan OPSYS DeepSeek `v05` a été lancé seul. Au contrôle précédant le lancement, la 5090 avait seulement 1 784 Mio libres malgré 0 % d’activité ; les modèles déjà chargés restent intacts et aucun processus tiers n’a été touché. Le résultat et son archive restent à vérifier.
