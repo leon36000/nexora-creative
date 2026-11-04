@@ -47,6 +47,27 @@ describe('réalisateur', () => {
     expect(r.prompt).not.toContain(intention);
   });
 
+  it('demande les explications en anglais quand la personne choisit en, sans traduire le prompt technique H3', async () => {
+    let demandeLlm = '';
+    const fiche = {
+      ...FICHE,
+      compris: 'A family maple-syrup ad with three clear shots.',
+      hypotheses: ['Bright spring daylight.'],
+      variantes: ['A lantern-lit evening version.', 'A hand-drawn 2D version.', 'An aerial view of the sugar shack.'],
+    };
+    const llm: ClientLlm = { async completer(_role, messages) {
+      const contenu = messages[1].content;
+      demandeLlm = typeof contenu === 'string' ? contenu : contenu.map((partie) => partie.type === 'text' ? partie.text : '').join('');
+      return JSON.stringify(fiche);
+    } };
+    const entree = { ...ENTREE, langueClient: 'en' as const, dialogues: [{ texte: 'Come enjoy maple taffy with us!', langue: 'English' }] };
+    const r = await realiser(entree, llm);
+    expect(JSON.parse(demandeLlm)).toMatchObject({ langue_client: 'en' });
+    expect(r.fiche.compris).toBe('A family maple-syrup ad with three clear shots.');
+    expect(r.prompt).toContain('a low-angle wide shot on a 24mm Cooke S4 lens');
+    expect(r.prompt).not.toContain('A family maple-syrup ad');
+  });
+
   it('répare un nom protégé et ne réintroduit pas les consignes brutes de l’interface', async () => {
     const f = { ...FICHE, plans: [{ ...FICHE.plans[0], texte: 'a medium shot on a 50mm Cooke S4 lens of a Jedi lifting a lightsaber, then striking under practical rain-soaked street lamps.' }] };
     const e = { ...ENTREE, intention: 'un Jedi comme Star Wars', consignes: ['epic cinematic Unreal 8K'], dialogues: [] };

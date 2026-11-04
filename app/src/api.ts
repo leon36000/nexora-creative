@@ -1,5 +1,6 @@
 /** Client-side API + live socket. */
 import type { RenderTier, TierState } from './renderTier';
+import type { LangueClient } from '../shared/creationLanguage';
 
 export interface Take {
   id: number;
@@ -179,7 +180,7 @@ export type VarianteProducteur = 'format-16:9' | 'format-9:16' | 'format-1:1' | 
 export const api = {
   status: () => j<Status>('/api/status'),
   /** Nexora Creative : une intention en français devient une vidéo (prompt écrit par le LLM, rendu MiniMax H3). */
-  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string; musique?: boolean; replique?: string; camera?: string }) =>
+  nexoraCreer: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; duree: 5 | 10 | 15; son: boolean; qualite?: 'rapide' | 'max'; image?: string; musique?: boolean; replique?: string; langueReplique?: LangueClient; camera?: string; langueClient?: LangueClient }) =>
     j<CreerReponse>('/api/nexora/creer', { method: 'POST', body: JSON.stringify(b) }),
   nexoraEtat: () => j<EtatNexora>('/api/nexora/etat'),
   producteurListe: () => j<{ sessions: { id: string; titre: string; updated_at: string }[] }>('/api/nexora/producteur'),
@@ -209,14 +210,14 @@ export const api = {
   monterFilm: (film: number, b: { genre?: string; duree?: number } = {}) => j<VueMontage>(`/api/nexora/film/${film}/monter`, { method: 'POST', body: JSON.stringify(b) }),
   ameliorerMontage: (id: string) => j<VueMontage>(`/api/nexora/montage/${id}/ameliorer`, { method: 'POST', body: '{}' }),
   producteurVariante: (id: string, film: number, genre: VarianteProducteur) => j<SessionProducteur>(`/api/nexora/producteur/${id}/variante`, { method: 'POST', body: JSON.stringify({ film, genre }) }),
-  nexoraIdees: (b: { mode: 'video' | 'image' | 'film'; theme?: string }) =>
+  nexoraIdees: (b: { mode: 'video' | 'image' | 'film'; theme?: string; langueClient?: LangueClient }) =>
     j<{ idees: string[]; source: 'llm' | 'repli' }>('/api/nexora/idees', { method: 'POST', body: JSON.stringify(b) }),
   nexoraPublication: (b: { id: number; plateforme: string; langue: 'fr' | 'en' }) =>
     j<{ titre: string; texte: string; hashtags: string[]; mention: string; source: 'llm' | 'repli' }>('/api/nexora/publication', { method: 'POST', body: JSON.stringify(b) }),
   nexoraMoteursGpu: () => j<MoteurGpu[]>('/api/nexora/moteurs-gpu'),
-  nexoraAmeliorer: (b: { intention: string; mode: 'video' | 'image' | 'film' }) =>
+  nexoraAmeliorer: (b: { intention: string; mode: 'video' | 'image' | 'film'; langueClient?: LangueClient }) =>
     j<{ texte: string }>('/api/nexora/ameliorer', { method: 'POST', body: JSON.stringify(b) }),
-  nexoraImage: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; nombre?: number; qualite?: 'rapide' | 'max' }) =>
+  nexoraImage: (b: { intention: string; format: '16:9' | '9:16' | '1:1'; nombre?: number; qualite?: 'rapide' | 'max'; langueClient?: LangueClient }) =>
     j<{ takeIds: number[]; prompt: string; source: 'llm' | 'repli'; modele: string }>('/api/nexora/image', { method: 'POST', body: JSON.stringify(b) }),
   nexoraImageJeton: (id: number) => j<{ jeton: string }>(`/api/nexora/image/${id}/jeton`, { method: 'POST', body: '{}' }),
   nexoraDevis: (b: { format: string; duree: number; son: boolean; qualite: string; image?: string }) =>

@@ -17,6 +17,8 @@ import Producteur from '../studio/Producteur';
 import { CAMERAS } from '../studio/apps';
 import { setParams, useRoute } from '../router';
 import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
+import { creationVideoCopy, erreurVisibleCreationVideo, nomCameraCreation } from '../creationVideoCopy';
+import type { LangueClient } from '../../shared/creationLanguage';
 
 type Mode = 'producteur' | 'video' | 'image' | 'film';
 const MODES: Mode[] = ['producteur', 'video', 'image', 'film'];
@@ -50,12 +52,20 @@ const DUREES_VIDEO = [5, 10, 15] as const;
 const DUREES_FILM = [{ v: 30, label: '30 s' }, { v: 60, label: '1 min' }, { v: 120, label: '2 min' }] as const;
 const SECONDES_PAR_PLAN_5S = 40;
 
-const fmtTemps = (s: number) => (s < 90 ? `${Math.round(s)} s` : `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')} s`);
+const fmtTemps = (s: number, langue: LangueClient = 'fr') => (s < 90 ? `${Math.round(s)} s` : langue === 'en' ? `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')} sec` : `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')} s`);
 
 export default function Creer() {
   const { params } = useRoute();
   const mode: Mode = MODES.includes(params.get('mode') as Mode) ? (params.get('mode') as Mode) : 'producteur';
   const setMode = (m: Mode) => setParams({ mode: m === 'producteur' ? null : m });
+  const [langueClient, setLangueClient] = useState<LangueClient>('fr');
+  const langueActive: LangueClient = mode === 'video' ? langueClient : 'fr';
+  const texteVideo = creationVideoCopy(langueActive);
+  const langueClientRef = useRef(langueClient);
+  langueClientRef.current = langueClient;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const texteCourantCreation = () => creationVideoCopy(modeRef.current === 'video' ? langueClientRef.current : 'fr');
   const [intention, setIntention] = useState('');
   const [format, setFormat] = useState<Format>('16:9');
   const [duree, setDuree] = useState<number>(5);
@@ -77,6 +87,7 @@ export default function Creer() {
   const [filmOuvert, setFilmOuvert] = useState<number | null>(null);
   const [filtre, setFiltre] = useState<Filtre>('tout');
   const [replique, setReplique] = useState('');
+  const [langueReplique, setLangueReplique] = useState<LangueClient>('fr');
   const [pub, setPub] = useState<number | null>(null);
   const [idees, setIdees] = useState<Partial<Record<Exclude<Mode, 'producteur'>, string[]>>>({});
   const [inspire, setInspire] = useState(false);
@@ -84,6 +95,9 @@ export default function Creer() {
   const toutes = useStore((s) => s.takes);
   const lances = useRef(new Set<number>());
   const jetonsRecus = useRef(new Set<string>());
+  const versionLangueRef = useRef(0);
+  const requeteIdeesRef = useRef(0);
+  const requeteBoostRef = useRef(0);
 
   const visibles = useStore((s) => s.takes.filter((t) => inFeed(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null && t.kind !== 'audio'));
   const montrees = useMemo(() => visibles.filter((t) => {
@@ -103,7 +117,9 @@ export default function Creer() {
       const dejaMixee = toutes.some((x) => settingsOf(x).nexoraAvecMusique && settingsOf(x).musique === m.output_path);
       if (m.status !== 'done' || lances.current.has(m.id) || dejaMixee || settingsOf(toutes.find((x) => x.id === clip) ?? m).film) continue;
       lances.current.add(m.id);
-      api.nexoraClipAvecMusique(clip, m.id).then(() => toast('Ta vidéo avec sa musique est prête.')).catch((e) => toast(e instanceof Error ? e.message : 'Le mixage de la musique a échoué.', true));
+      api.nexoraClipAvecMusique(clip, m.id)
+        .then(() => toast(texteCourantCreation().toastMusicMixReady))
+        .catch(() => toast(texteCourantCreation().errorMusicMix, true));
     }
   }, [musiques, toutes]);
   // « Avec musique » demandé à la création : la musique se compose dès que le clip est terminé.
@@ -129,7 +145,7 @@ export default function Creer() {
     setCle({ jeton, apercu });
     setDepart('cle');
     if (texte) setIntention(texte.slice(0, 4000));
-    toast('Vue 3D posée comme plan clé : ajuste la description puis lance « Animer avec H3 ».');
+    toast(texteCourantCreation().toast3dKeyframe);
   }, [params.get('jeton')]);
   // « Animer » depuis la Bibliothèque : /?mode=video&cle=<image> pose l'image comme plan clé.
   useEffect(() => {
@@ -151,57 +167,92 @@ export default function Creer() {
   const prete = intention.trim().length > 0 && !occupe;
   const nomImage = etat?.image ?? 'Qwen-Image';
 
+  function choisirLangueClient(langue: LangueClient) {
+    if (langueClientRef.current === langue) return;
+    langueClientRef.current = langue;
+    versionLangueRef.current++;
+    requeteIdeesRef.current++;
+    requeteBoostRef.current++;
+    setLangueClient(langue);
+    setIdees((x) => ({ ...x, video: undefined }));
+    setBoost(null);
+    setCompris(null);
+    setVoirPrompt(false);
+    setInspire(false);
+    if (envoi === 'boost') setEnvoi(null);
+  }
+
   async function inspirer() {
+    const versionLangue = versionLangueRef.current;
+    const requete = ++requeteIdeesRef.current;
+    const langueRequete = langueClientRef.current;
     setInspire(true);
     try {
       if (mode === 'producteur') return;
-      const r = await api.nexoraIdees({ mode, theme: intention.trim() || undefined });
+      const r = await api.nexoraIdees({ mode, theme: intention.trim() || undefined, ...(mode === 'video' ? { langueClient: langueRequete } : {}) });
+      if (mode === 'video' && versionLangue !== versionLangueRef.current) return;
       setIdees((x) => ({ ...x, [mode]: r.idees }));
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Pas d’idée pour l’instant.', true);
+      if (mode === 'video' && versionLangue !== versionLangueRef.current) return;
+      const texteCourant = texteCourantCreation();
+      toast(mode === 'video' ? erreurVisibleCreationVideo(e, texteCourant.errorIdeas, texteCourant.errorNetwork) : e instanceof Error ? e.message : 'Pas d’idée pour l’instant.', true);
     } finally {
-      setInspire(false);
+      if (requete === requeteIdeesRef.current) setInspire(false);
     }
   }
 
   async function booster() {
     if (!intention.trim()) return;
+    const versionLangue = versionLangueRef.current;
+    const requete = ++requeteBoostRef.current;
+    const langueRequete = langueClientRef.current;
     setEnvoi('boost');
     try {
       if (mode === 'producteur') return;
-      const r = await api.nexoraAmeliorer({ intention: intention.trim(), mode });
+      const r = await api.nexoraAmeliorer({ intention: intention.trim(), mode, ...(mode === 'video' ? { langueClient: langueRequete } : {}) });
+      if (mode === 'video' && versionLangue !== versionLangueRef.current) return;
       setBoost(r.texte);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Impossible d’améliorer la phrase.', true);
+      if (mode === 'video' && versionLangue !== versionLangueRef.current) return;
+      const texteCourant = texteCourantCreation();
+      toast(mode === 'video' ? erreurVisibleCreationVideo(e, texteCourant.errorBoost, texteCourant.errorNetwork) : e instanceof Error ? e.message : 'Impossible d’améliorer la phrase.', true);
     } finally {
-      setEnvoi(null);
+      if (requete === requeteBoostRef.current) setEnvoi(null);
     }
   }
 
   async function creerVideo() {
+    const versionLangue = versionLangueRef.current;
+    const langueRequete = langueClientRef.current;
     setEnvoi('creer');
     try {
       const cam = CAMERAS.find((c) => c.id === camera);
-      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined, camera: cam?.texte });
-      toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : l’assistant est indisponible).');
-      setCompris(r.comprehension ? { ...r.comprehension, credits: r.usageRedaction?.credits, prompt: r.prompt } : null);
+      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined, langueReplique, camera: cam?.texte, langueClient: langueRequete });
+      const texteCourant = texteCourantCreation();
+      toast(r.source === 'llm' ? texteCourant.toastStarted : texteCourant.toastFallbackStarted);
+      if (versionLangue === versionLangueRef.current) setCompris(r.comprehension ? { ...r.comprehension, credits: r.usageRedaction?.credits, prompt: r.prompt } : null);
       setVoirPrompt(false);
       setCle(null);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'La création a échoué.', true);
+      const texteCourant = texteCourantCreation();
+      toast(versionLangue === versionLangueRef.current ? erreurVisibleCreationVideo(e, texteCourant.errorCreate, texteCourant.errorNetwork) : texteCourant.errorCreate, true);
     } finally {
       setEnvoi(null);
     }
   }
 
   async function dessinerCles() {
+    const versionLangue = versionLangueRef.current;
+    const langueRequete = langueClientRef.current;
     setEnvoi('cle');
     try {
-      await api.nexoraImage({ intention: intention.trim(), format, nombre: nombreImages, qualite });
-      toast(`${nombreImages > 1 ? `${nombreImages} plans clés` : 'Un plan clé'} en cours de dessin avec ${nomImage}. Clique « Animer » sur celui que tu préfères.`);
+      await api.nexoraImage({ intention: intention.trim(), format, nombre: nombreImages, qualite, ...(mode === 'video' ? { langueClient: langueRequete } : {}) });
+      const texteCourant = texteCourantCreation();
+      toast(mode === 'video' ? texteCourant.toastIdeasStarted(nombreImages, nomImage) : `${nombreImages > 1 ? `${nombreImages} plans clés` : 'Un plan clé'} en cours de dessin avec ${nomImage}. Clique « Animer » sur celui que tu préfères.`);
       setFiltre('images');
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Le dessin a échoué.', true);
+      const texteCourant = texteCourantCreation();
+      toast(mode === 'video' ? versionLangue !== versionLangueRef.current ? texteCourant.errorDrawing : erreurVisibleCreationVideo(e, texteCourant.errorDrawing, texteCourant.errorNetwork) : e instanceof Error ? e.message : 'Le dessin a échoué.', true);
     } finally {
       setEnvoi(null);
     }
@@ -236,13 +287,13 @@ export default function Creer() {
 
   async function choisirPhoto(f: File | undefined) {
     if (!f) return;
-    if (!f.type.startsWith('image/')) { toast('Choisis une image (JPG, PNG ou WebP).', true); return; }
+    if (!f.type.startsWith('image/')) { toast(texteCourantCreation().errorInvalidPhoto, true); return; }
     setEnvoi('photo');
     try {
       const jeton = await uploadFile(f);
       setCle({ jeton, apercu: URL.createObjectURL(f) });
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'La photo n’a pas pu être envoyée.', true);
+      toast(mode === 'video' ? texteCourantCreation().errorPhoto : e instanceof Error ? e.message : 'La photo n’a pas pu être envoyée.', true);
     } finally {
       setEnvoi(null);
     }
@@ -254,9 +305,9 @@ export default function Creer() {
       setCle({ jeton, apercu: posterUrl(id) });
       setMode('video');
       setDepart('cle');
-      toast('Plan clé prêt : choisis la durée puis lance « Animer avec H3 ».');
+      toast(texteCourantCreation().toastKeyReady);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Impossible d’utiliser cette image.', true);
+      toast(mode === 'video' ? texteCourantCreation().errorUseImage : e instanceof Error ? e.message : 'Impossible d’utiliser cette image.', true);
     }
   }
 
@@ -272,12 +323,12 @@ export default function Creer() {
   }
 
   const cleRequise = mode === 'video' && depart === 'cle' && !cle;
-  const libelle = envoi === 'creer' ? 'L’IA écrit le scénario…'
+  const libelle = envoi === 'creer' ? (mode === 'video' ? texteVideo.writingScenario : 'L’IA écrit le scénario…')
     : envoi === 'plan' ? 'L’IA découpe ton film…'
-      : envoi === 'cle' ? 'Dessin en cours…'
+      : envoi === 'cle' ? (mode === 'video' ? texteVideo.drawing : 'Dessin en cours…')
         : mode === 'image' ? `Dessiner ${nombreImages > 1 ? `${nombreImages} images` : 'l’image'}`
           : film ? 'Proposer le découpage'
-            : cleRequise ? `Dessiner ${nombreImages} plans clés` : cle ? 'Animer avec H3' : 'Créer la vidéo';
+            : cleRequise ? texteVideo.drawKeyFrameCount(nombreImages) : cle ? texteVideo.animate : texteVideo.createVideo;
   function lancer() {
     if (mode === 'image') void dessinerCles();
     else if (film) void proposerDecoupage();
@@ -287,126 +338,140 @@ export default function Creer() {
   const minutesFilm = storyboard ? Math.ceil((storyboard.plans.reduce((n, p) => n + (p.duree === 10 ? 2 : 1), 0) * SECONDES_PAR_PLAN_5S) / 60) : 0;
 
   return (
-    <div className="st">
+    <div className="st" lang={langueActive === 'en' ? 'en-CA' : 'fr-CA'}>
       <section className="st-hero">
         <div>
-          <h1>Écris-le. <em>Nexora</em> le filme.</h1>
+          <h1>{mode === 'video' ? texteVideo.title : <>Écris-le. <em>Nexora</em> le filme.</>}</h1>
           <p>{mode === 'producteur'
             ? 'Dis ce que tu veux produire. Le Producteur IA découpe, chiffre, tourne, contrôle chaque plan et assemble. Tu valides le devis d’un clic.'
-            : 'Une phrase en français suffit. L’IA écrit le scénario, dessine le plan clé, tourne avec son et compose la musique.'}</p>
+            : mode === 'video' ? texteVideo.intro : 'Une phrase en français suffit. L’IA écrit le scénario, dessine le plan clé, tourne avec son et compose la musique.'}</p>
         </div>
-        <div className="st-pile" aria-label="Modèles utilisés">
-          <span>Vidéo <b>MiniMax H3</b></span>
-          <span>Image <b>{etat?.image ?? 'Qwen-Image'}</b></span>
-          <span>Musique <b>MiniMax-Music3</b></span>
+        <div className="st-pile" aria-label={langueActive === 'en' ? texteVideo.models : 'Modèles utilisés'}>
+          <span>{texteVideo.modelVideo} <b>MiniMax H3</b></span>
+          <span>{texteVideo.modelImage} <b>{etat?.image ?? 'Qwen-Image'}</b></span>
+          <span>{texteVideo.modelMusic} <b>MiniMax-Music3</b></span>
         </div>
       </section>
 
-      <div className="st-modes st-modes-haut" role="tablist" aria-label="Que veux-tu créer ?">
-        {([['producteur', 'Producteur IA', IcEtincelle], ['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => (
+      <div className="st-modes st-modes-haut" role="tablist" aria-label={langueActive === 'en' ? texteVideo.tabs : 'Que veux-tu créer ?'}>
+        {([['producteur', 'Producteur IA', IcEtincelle], ['video', 'Vidéo', IcVideo], ['image', 'Image', IcImage], ['film', 'Film', IcFilm]] as const).map(([v, label, Ic]) => {
+          const modeLabel = langueActive === 'en'
+            ? v === 'producteur' ? texteVideo.tabProducer : v === 'video' ? texteVideo.tabVideo : v === 'image' ? texteVideo.tabImage : texteVideo.tabFilm
+            : label;
+          return (
           <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
-            <Ic />{v === 'producteur' ? <>Producteur<span className="st-ia"> IA</span></> : label}
+            <Ic />{modeLabel}
           </button>
-        ))}
+        );})}
       </div>
 
       {mode === 'producteur' ? (
         <div className="st-grid"><Producteur onOuvrirFilm={setFilmOuvert} objectif={params.get('objectif')} /></div>
       ) : (
       <div className="st-grid">
-        <aside className="st-composer" aria-label="Composeur">
+        <aside className="st-composer" aria-label={langueActive === 'en' ? texteVideo.composer : 'Composeur'}>
+
+          {mode === 'video' && (
+            <div className="st-bloc">
+              <span className="st-etiq">{texteVideo.language}</span>
+              <div className="st-seg" role="group" aria-label={texteVideo.language}>
+                <button type="button" className={langueClient === 'fr' ? 'on' : ''} aria-pressed={langueClient === 'fr'} onClick={() => choisirLangueClient('fr')}>Français</button>
+                <button type="button" className={langueClient === 'en' ? 'on' : ''} aria-pressed={langueClient === 'en'} onClick={() => choisirLangueClient('en')}>English</button>
+              </div>
+            </div>
+          )}
 
           <div className="st-champ">
             <textarea
               value={intention}
               onChange={(e) => setIntention(e.target.value)}
               onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && prete && !cleRequise) lancer(); }}
-              placeholder={mode === 'image' ? 'Décris l’image : sujet, décor, lumière, ambiance…' : mode === 'film' ? 'Raconte ton film : une idée, des personnages, une ambiance…' : 'Décris ta scène : ce qu’on voit, ce qui bouge, la caméra…'}
+              placeholder={mode === 'video' ? texteVideo.placeholder : mode === 'image' ? 'Décris l’image : sujet, décor, lumière, ambiance…' : mode === 'film' ? 'Raconte ton film : une idée, des personnages, une ambiance…' : 'Décris ta scène : ce qu’on voit, ce qui bouge, la caméra…'}
               maxLength={4000}
-              aria-label="Description"
+              aria-label={mode === 'video' ? texteVideo.description : 'Description'}
             />
             <div className="st-champ-pied">
-              <span>{intention.length}/4000 · Ctrl+Entrée pour lancer</span>
-              <button type="button" className={`st-boost ${envoi === 'boost' ? 'charge' : ''}`} disabled={!intention.trim() || occupe} onClick={() => void booster()} title="L’assistant réécrit ta phrase en version plus riche et plus filmable">
-                {envoi === 'boost' ? <IcRond /> : <IcEtincelle />}Booster ma phrase
+              <span>{intention.length}/4000 · {mode === 'video' ? texteVideo.count : 'Ctrl+Entrée pour lancer'}</span>
+              <button type="button" className={`st-boost ${envoi === 'boost' ? 'charge' : ''}`} disabled={!intention.trim() || occupe} onClick={() => void booster()} title={mode === 'video' ? texteVideo.boostTitle : 'L’assistant réécrit ta phrase en version plus riche et plus filmable'}>
+                {envoi === 'boost' ? <IcRond /> : <IcEtincelle />}{mode === 'video' ? texteVideo.boost : 'Booster ma phrase'}
               </button>
             </div>
           </div>
 
           {boost && (
             <div className="st-suggestion" role="status">
-              <span className="st-etiq">Version boostée</span>
+              <span className="st-etiq">{mode === 'video' ? texteVideo.boosted : 'Version boostée'}</span>
               <p>{boost}</p>
               <div className="st-ligne">
-                <button type="button" className="st-bouton primaire" onClick={() => { setIntention(boost); setBoost(null); }}>Utiliser cette version</button>
-                <button type="button" className="st-bouton" onClick={() => setBoost(null)}>Garder la mienne</button>
+                <button type="button" className="st-bouton primaire" onClick={() => { setIntention(boost); setBoost(null); }}>{mode === 'video' ? texteVideo.useBoost : 'Utiliser cette version'}</button>
+                <button type="button" className="st-bouton" onClick={() => setBoost(null)}>{mode === 'video' ? texteVideo.keepOriginal : 'Garder la mienne'}</button>
               </div>
             </div>
           )}
 
           {compris && mode === 'video' && (
             <div className="st-suggestion st-compris" role="status" aria-live="polite">
-              <span className="st-etiq">Ce que l’IA a compris</span>
+              <span className="st-etiq">{texteVideo.understood}</span>
               <p>{compris.compris}</p>
-              {compris.plans.length > 1 && <p className="st-compris-plans">{compris.plans.map((p, i) => `${i + 1}. ${p.cadrage} (${p.debut.toFixed(1).replace('.', ',')} s)`).join('  ·  ')}</p>}
+              {compris.plans.length > 1 && <p className="st-compris-plans" aria-label={texteVideo.planList}>{compris.plans.map((p, i) => `${i + 1}. ${p.cadrage} (${langueActive === 'fr' ? p.debut.toFixed(1).replace('.', ',') : p.debut.toFixed(1)} s)`).join('  ·  ')}</p>}
               {compris.hypotheses.length > 0 && (
-                <ul className="st-compris-choix" aria-label="Choix faits pour toi">{compris.hypotheses.map((h) => <li key={h}>{h}</li>)}</ul>
+                <ul className="st-compris-choix" aria-label={texteVideo.choices}>{compris.hypotheses.map((h) => <li key={h}>{h}</li>)}</ul>
               )}
               {compris.variantes.length > 0 && (
                 <div className="st-compris-variantes">
-                  <span className="st-etiq">Autres directions</span>
-                  <div className="st-idees">{compris.variantes.map((v) => <button key={v} type="button" className="st-idee" title="Mettre cette direction dans la description" onClick={() => { setIntention(`${intention.trim()} — ${v}`); setCompris(null); }}>{v}</button>)}</div>
+                  <span className="st-etiq">{texteVideo.directions}</span>
+                  <div className="st-idees">{compris.variantes.map((v) => <button key={v} type="button" className="st-idee" title={texteVideo.useDirection} onClick={() => { setIntention(`${intention.trim()} — ${v}`); setCompris(null); }}>{v}</button>)}</div>
                 </div>
               )}
               <div className="st-ligne">
-                <button type="button" className="st-bouton" onClick={() => setVoirPrompt((x) => !x)}>{voirPrompt ? 'Masquer' : 'Voir'} le prompt envoyé à H3</button>
-                <button type="button" className="st-bouton" onClick={() => setCompris(null)}>Fermer</button>
-                {compris.credits != null && compris.credits > 0 && <span className="st-credit">Écriture : {compris.credits} crédit{compris.credits > 1 ? 's' : ''}</span>}
+                <button type="button" className="st-bouton" onClick={() => setVoirPrompt((x) => !x)}>{voirPrompt ? texteVideo.hidePrompt : texteVideo.viewPrompt}</button>
+                <button type="button" className="st-bouton" onClick={() => setCompris(null)}>{texteVideo.close}</button>
+                {compris.credits != null && compris.credits > 0 && <span className="st-credit">{compris.credits === 1 ? texteVideo.writingOne : texteVideo.writingMany(compris.credits)}</span>}
               </div>
               {voirPrompt && <pre className="st-compris-prompt">{compris.prompt}</pre>}
             </div>
           )}
 
           {(!intention || idees[mode]) && (
-            <div className="st-idees" aria-label="Idées">
-              {(idees[mode] ?? IDEES[mode]).map((i) => <button key={i} type="button" className="st-idee" onClick={() => setIntention(i)}>{i.length > 72 ? `${i.slice(0, 70)}…` : i}</button>)}
-              <button type="button" className="st-idee" disabled={inspire} onClick={() => void inspirer()} style={{ borderColor: 'rgba(255,90,31,.45)', color: 'var(--accent-hi)' }}>{inspire ? 'Je cherche…' : '✦ Inspire-moi'}</button>
+            <div className="st-idees" aria-label={mode === 'video' ? texteVideo.ideas : 'Idées'}>
+              {(idees[mode] ?? (mode === 'video' ? texteVideo.ideaExamples : IDEES[mode])).map((i) => <button key={i} type="button" className="st-idee" onClick={() => setIntention(i)}>{i.length > 72 ? `${i.slice(0, 70)}…` : i}</button>)}
+              <button type="button" className="st-idee" disabled={inspire} onClick={() => void inspirer()} style={{ borderColor: 'rgba(255,90,31,.45)', color: 'var(--accent-hi)' }}>{inspire ? texteVideo.searching : texteVideo.inspire}</button>
             </div>
           )}
 
           {mode === 'video' && (
             <div className="st-bloc">
-              <span className="st-etiq">Départ</span>
-              <div className="st-seg" role="group" aria-label="Point de départ">
-                {([['texte', 'Texte seul', 'H3 imagine'], ['photo', 'Ma photo', 'import'], ['cle', 'Plan clé IA', nomImage]] as const).map(([v, label, sub]) => (
+              <span className="st-etiq">{texteVideo.departure}</span>
+              <div className="st-seg" role="group" aria-label={texteVideo.startPoint}>
+                {([['texte', texteVideo.textOnly, texteVideo.h3Imagines], ['photo', texteVideo.photo, texteVideo.import], ['cle', texteVideo.keyFrame, nomImage]] as const).map(([v, label, sub]) => (
                   <button key={v} type="button" className={depart === v ? 'on' : ''} onClick={() => { setDepart(v); if (v === 'texte') setCle(null); }}>{label}<small>{sub}</small></button>
                 ))}
               </div>
               {depart === 'photo' && !cle && (
                 <label className="st-bouton" style={{ textAlign: 'center', cursor: 'pointer' }}>
-                  {envoi === 'photo' ? 'Envoi de la photo…' : 'Choisir une photo (ta voiture, ton produit, ton lieu)'}
+                  {envoi === 'photo' ? texteVideo.uploadingPhoto : texteVideo.choosePhoto}
                   <input type="file" accept="image/*" hidden onChange={(e) => void choisirPhoto(e.target.files?.[0])} />
                 </label>
               )}
               {cle && (
                 <div className="st-cle">
-                  <img src={cle.apercu} alt="Image de départ" />
-                  <span>La vidéo part de cette image.</span>
-                  <button type="button" className="st-bouton" onClick={() => { setCle(null); }}>Retirer</button>
+                  <img src={cle.apercu} alt={texteVideo.startImageAlt} />
+                  <span>{texteVideo.startsFromImage}</span>
+                  <button type="button" className="st-bouton" onClick={() => { setCle(null); }}>{texteVideo.remove}</button>
                 </div>
               )}
-              {depart === 'cle' && !cle && <span className="st-credit" style={{ textAlign: 'left' }}>Écris ta scène, clique « Dessiner », puis « Animer » sur le plan clé que tu préfères.</span>}
+              {depart === 'cle' && !cle && <span className="st-credit" style={{ textAlign: 'left' }}>{texteVideo.keyFrameHint}</span>}
             </div>
           )}
 
           {mode === 'video' && (
             <div className="st-bloc">
-              <span className="st-etiq">Mouvement de caméra {camera && <button type="button" className="nx-lien" style={{ fontSize: 11, marginLeft: 6 }} onClick={() => setCamera(null)}>retirer</button>}</span>
-              <div className="st-cameras" role="group" aria-label="Mouvement de caméra">
+              <span className="st-etiq">{texteVideo.cameraMove} {camera && <button type="button" className="nx-lien" style={{ fontSize: 11, marginLeft: 6 }} onClick={() => setCamera(null)}>{texteVideo.remove.toLowerCase()}</button>}</span>
+              <div className="st-cameras" role="group" aria-label={texteVideo.cameraAria}>
                 {CAMERAS.map((c) => (
-                  <button key={c.id} type="button" className={`st-camera ${camera === c.id ? 'on' : ''}`} aria-pressed={camera === c.id} onClick={() => setCamera(camera === c.id ? null : c.id)} title={c.nom}>
+                  <button key={c.id} type="button" className={`st-camera ${camera === c.id ? 'on' : ''}`} aria-pressed={camera === c.id} onClick={() => setCamera(camera === c.id ? null : c.id)} title={nomCameraCreation(langueActive, c.id, c.nom)}>
                     <video src={c.clip} muted loop playsInline preload="metadata" onMouseEnter={(e) => void e.currentTarget.play().catch(() => {})} onMouseLeave={(e) => e.currentTarget.pause()} />
-                    <span>{c.nom}</span>
+                    <span>{nomCameraCreation(langueActive, c.id, c.nom)}</span>
                   </button>
                 ))}
               </div>
@@ -414,18 +479,18 @@ export default function Creer() {
           )}
 
           <div className="st-bloc">
-            <span className="st-etiq">Format</span>
-            <div className="st-seg" role="group" aria-label="Format">
+            <span className="st-etiq">{texteVideo.format}</span>
+            <div className="st-seg" role="group" aria-label={texteVideo.formatAria}>
               {FORMATS.map((f) => (
-                <button key={f.v} type="button" className={format === f.v ? 'on' : ''} onClick={() => setFormat(f.v)}><Ratio v={f.v} />{f.label}<small>{f.aide}</small></button>
+                <button key={f.v} type="button" className={format === f.v ? 'on' : ''} onClick={() => setFormat(f.v)}><Ratio v={f.v} />{f.v === '16:9' ? texteVideo.landscape : f.v === '9:16' ? texteVideo.vertical : texteVideo.square}<small>{f.v === '16:9' ? texteVideo.landscapeHelp : f.v === '9:16' ? texteVideo.verticalHelp : texteVideo.squareHelp}</small></button>
               ))}
             </div>
           </div>
 
           {mode === 'video' && (
             <div className="st-bloc">
-              <span className="st-etiq">Durée</span>
-              <div className="st-seg" role="group" aria-label="Durée">
+              <span className="st-etiq">{texteVideo.duration}</span>
+              <div className="st-seg" role="group" aria-label={texteVideo.duration}>
                 {DUREES_VIDEO.map((d) => <button key={d} type="button" className={duree === d ? 'on' : ''} onClick={() => setDuree(d)}>{d} s</button>)}
               </div>
             </div>
@@ -449,10 +514,10 @@ export default function Creer() {
 
           {mode !== 'image' && (
             <div className="st-bloc">
-              <span className="st-etiq">Qualité</span>
-              <div className="st-seg" role="group" aria-label="Qualité">
-                <button type="button" className={qualite === 'rapide' ? 'on' : ''} onClick={() => setQualite('rapide')}>Rapide<small>FastH3 · 832×480</small></button>
-                <button type="button" className={qualite === 'max' ? 'on' : ''} onClick={() => setQualite('max')}>{etat?.cinema ? 'Cinéma' : 'Qualité max'}<small>{etat?.cinema ? 'H3 complet · 768p' : '1344×768'}</small></button>
+              <span className="st-etiq">{texteVideo.quality}</span>
+              <div className="st-seg" role="group" aria-label={texteVideo.quality}>
+                <button type="button" className={qualite === 'rapide' ? 'on' : ''} onClick={() => setQualite('rapide')}>{texteVideo.fast}<small>FastH3 · 832×480</small></button>
+                <button type="button" className={qualite === 'max' ? 'on' : ''} onClick={() => setQualite('max')}>{etat?.cinema ? texteVideo.cinema : texteVideo.maxQuality}<small>{etat?.cinema ? `${texteVideo.fullH3} · 768p` : '1344×768'}</small></button>
               </div>
             </div>
           )}
@@ -468,17 +533,21 @@ export default function Creer() {
 
           {mode === 'video' && son && (
             <div className="st-bloc">
-              <span className="st-etiq">Réplique (facultatif)</span>
-              <input className="st-champ-ligne" value={replique} maxLength={300} onChange={(e) => setReplique(e.target.value)} placeholder="Ce qu’un personnage dit, ex. : On y va." aria-label="Réplique" />
+              <span className="st-etiq">{texteVideo.reply}</span>
+              <div className="st-seg" role="group" aria-label={texteVideo.replyLanguage}>
+                <button type="button" className={langueReplique === 'fr' ? 'on' : ''} aria-pressed={langueReplique === 'fr'} onClick={() => setLangueReplique('fr')}>{texteVideo.replyFrench}</button>
+                <button type="button" className={langueReplique === 'en' ? 'on' : ''} aria-pressed={langueReplique === 'en'} onClick={() => setLangueReplique('en')}>{texteVideo.replyEnglish}</button>
+              </div>
+              <input className="st-champ-ligne" value={replique} maxLength={300} onChange={(e) => setReplique(e.target.value)} placeholder={texteVideo.replyPlaceholder} aria-label={texteVideo.replyAria} />
             </div>
           )}
 
           {mode !== 'image' && (
             <div className="st-interrupteurs">
-              <button type="button" className="st-inter" aria-pressed={son} onClick={() => setSon(!son)}><span>Son<small>bruitages et voix H3</small></span><i /></button>
+              <button type="button" className="st-inter" aria-pressed={son} onClick={() => setSon(!son)}><span>{texteVideo.sound}<small>{texteVideo.soundDetail}</small></span><i /></button>
               {mode === 'video' && (
-                <button type="button" className="st-inter" aria-pressed={musique} onClick={() => setMusique(!musique)} disabled={!etat?.musique} title={etat?.musique ? '' : 'Aucun moteur de musique en ligne'}>
-                  <span>Musique<small>MiniMax-Music3</small></span><i />
+                <button type="button" className="st-inter" aria-pressed={musique} onClick={() => setMusique(!musique)} disabled={!etat?.musique} title={etat?.musique ? '' : texteVideo.musicUnavailable}>
+                  <span>{texteVideo.music}<small>{texteVideo.musicDetail}</small></span><i />
                 </button>
               )}
             </div>
@@ -489,16 +558,16 @@ export default function Creer() {
             <button type="button" className="st-go" disabled={!prete} onClick={lancer}>{libelle}</button>
             {mode === 'video' && devis && devis.secondesEstimees != null && !cleRequise && (
               <div className="st-devis">
-                <span>Tournage ≈ <b>{fmtTemps(devis.secondesEstimees)}</b></span>
-                <span>{qualite === 'max' && etat?.cinema ? 'H3 complet' : 'FastH3'} · RTX 5090{devis.credits !== null ? ` · ${devis.credits} crédits` : ''}</span>
+                <span>{texteVideo.estimate} <b>{fmtTemps(devis.secondesEstimees, langueActive)}</b></span>
+                <span>{qualite === 'max' && etat?.cinema ? texteVideo.fullH3 : texteVideo.fastH3} · RTX 5090{devis.credits !== null ? ` · ${texteVideo.creditUnit(devis.credits)}` : ''}</span>
               </div>
             )}
             {mode === 'image' && <div className="st-devis"><span>{nomImage} · DGX Spark GB10</span><span>≈ {qualite === 'max' ? '50 s' : '25 s'} par image</span></div>}
-            <p className="st-credit">Propulsé par MiniMax H3 · {etat?.image ?? 'Qwen-Image'} · MiniMax-Music3</p>
+            <p className="st-credit">{mode === 'video' ? texteVideo.powered : 'Propulsé par MiniMax H3'} · {etat?.image ?? 'Qwen-Image'} · MiniMax-Music3</p>
           </div>
         </aside>
 
-        <section className="st-galerie" aria-label="Tes créations">
+        <section className="st-galerie" aria-label={mode === 'video' ? texteVideo.galleryAria : 'Tes créations'}>
           {storyboard && (
             <div className="st-decoupage">
               <div className="nx-sb-tete">
@@ -538,9 +607,9 @@ export default function Creer() {
           )}
 
           <div className="st-g-tete">
-            <h2>Tes créations</h2>
-            <div className="st-filtres" role="group" aria-label="Filtrer">
-              {([['tout', 'Tout'], ['videos', 'Vidéos'], ['films', 'Films'], ['images', 'Images']] as const).map(([v, label]) => (
+            <h2>{mode === 'video' ? texteVideo.creations : 'Tes créations'}</h2>
+            <div className="st-filtres" role="group" aria-label={mode === 'video' ? texteVideo.filter : 'Filtrer'}>
+              {([['tout', mode === 'video' ? texteVideo.all : 'Tout'], ['videos', mode === 'video' ? texteVideo.videos : 'Vidéos'], ['films', mode === 'video' ? texteVideo.films : 'Films'], ['images', mode === 'video' ? texteVideo.images : 'Images']] as const).map(([v, label]) => (
                 <button key={v} type="button" className={filtre === v ? 'on' : ''} onClick={() => setFiltre(v)}>{label}</button>
               ))}
             </div>
@@ -551,8 +620,8 @@ export default function Creer() {
               <div className="st-mosaique" aria-hidden>
                 {Array.from({ length: 18 }, (_, i) => <i key={i} style={{ opacity: [1, 0.15, 0.6, 0.3, 0.9, 0.2][(i * 5) % 6] }} />)}
               </div>
-              <strong>Ta première scène t’attend.</strong>
-              <span>Écris une idée à gauche, ou pars d’un exemple. Les vidéos, images et films apparaîtront ici, avec leur progression en direct.</span>
+              <strong>{mode === 'video' ? texteVideo.emptyTitle : 'Ta première scène t’attend.'}</strong>
+              <span>{mode === 'video' ? texteVideo.emptyDescription : 'Écris une idée à gauche, ou pars d’un exemple. Les vidéos, images et films apparaîtront ici, avec leur progression en direct.'}</span>
             </div>
           ) : (
             <div className="st-cartes">
@@ -562,25 +631,25 @@ export default function Creer() {
                 const faits = plans.filter((p) => p.take && toutes.find((x) => x.id === p.take)?.status === 'done').length;
                 const image = isImage(t);
                 const actions = t.status !== 'done' ? undefined : s.film ? (
-                  <div className="st-actions-carte"><button type="button" onClick={() => setFilmOuvert(t.id)}>Plans et montage</button></div>
+                  <div className="st-actions-carte"><button type="button" onClick={() => setFilmOuvert(t.id)}>{mode === 'video' ? texteVideo.openPlans : 'Plans et montage'}</button></div>
                 ) : image ? (
                   <div className="st-actions-carte">
-                    <button type="button" onClick={() => void animer(t.id)}>Animer avec H3</button>
-                    <a href={mediaUrl(t.id)} download>Télécharger</a>
+                    <button type="button" onClick={() => void animer(t.id)}>{mode === 'video' ? texteVideo.animate : 'Animer avec H3'}</button>
+                    <a href={mediaUrl(t.id)} download>{mode === 'video' ? texteVideo.download : 'Télécharger'}</a>
                   </div>
                 ) : (
                   <div className="st-actions-carte">
                     {!s.nexoraAvecMusique && !s.nexoraMusiqueLance && etat?.musique && (
-                      <button type="button" onClick={() => { api.nexoraClipMusique(t.id, {}).then(() => toast('Composition de la musique lancée (moins d’une minute).')).catch((e) => toast(e instanceof Error ? e.message : 'Impossible de composer la musique.', true)); }}>Ajouter une musique</button>
+                      <button type="button" onClick={() => { api.nexoraClipMusique(t.id, {}).then(() => toast(mode === 'video' ? texteVideo.toastMusicStarted : 'Composition de la musique lancée (moins d’une minute).')).catch((e) => toast(mode === 'video' ? texteVideo.errorMusic : e instanceof Error ? e.message : 'Impossible de composer la musique.', true)); }}>{mode === 'video' ? texteVideo.addMusic : 'Ajouter une musique'}</button>
                     )}
-                    <button type="button" onClick={() => setPub(t.id)}>Texte réseaux</button>
-                    <a href={mediaUrl(t.id)} download>Télécharger</a>
+                    <button type="button" onClick={() => setPub(t.id)}>{mode === 'video' ? texteVideo.socialText : 'Texte réseaux'}</button>
+                    <a href={mediaUrl(t.id)} download>{mode === 'video' ? texteVideo.download : 'Télécharger'}</a>
                   </div>
                 );
                 return (
                   <MediaCard key={t.id} take={t} onOpen={() => (s.film ? setFilmOuvert(t.id) : setVue(t.id))}
-                    tag={s.film ? 'Film' : s.nexoraAvecMusique ? '+ musique' : image ? 'Image' : undefined}
-                    pendingLabel={s.film ? `Film : ${faits}/${plans.length} plans tournés` : 'En file d’attente'}
+                    tag={s.film ? (mode === 'video' ? texteVideo.filmTag : 'Film') : s.nexoraAvecMusique ? (mode === 'video' ? texteVideo.musicTag : '+ musique') : image ? (mode === 'video' ? texteVideo.imageTag : 'Image') : undefined}
+                    pendingLabel={s.film ? (mode === 'video' ? texteVideo.filmProgress(faits, plans.length) : `Film : ${faits}/${plans.length} plans tournés`) : mode === 'video' ? texteVideo.queued : 'En file d’attente'}
                     actions={actions} />
                 );
               })}

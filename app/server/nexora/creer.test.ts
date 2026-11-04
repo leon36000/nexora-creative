@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { bundlesFor } from '../models.js';
 import { verdictLicence } from './licences.js';
-import { choisirMoteur, corpsRendu, corpsRenduH3, lireDemandeCreer } from './creer.js';
+import { choisirMoteur, corpsRendu, corpsRenduH3, entreeRealisateurCreation, lireDemandeCreer } from './creer.js';
 
 describe('demande « Créer » (parcours simple)', () => {
   it('valide et complète la demande', () => {
@@ -12,6 +12,32 @@ describe('demande « Créer » (parcours simple)', () => {
     expect(() => lireDemandeCreer({ intention: 'x'.repeat(4001) })).toThrow(/long/);
     expect(lireDemandeCreer({ intention: 'a', format: '9:16', duree: 10, son: false })).toMatchObject({ format: '9:16', duree: 10, son: false });
     expect(lireDemandeCreer({ intention: 'a', format: '4:3', duree: 7 })).toMatchObject({ format: '16:9', duree: 5 });
+  });
+
+  it('transmet la langue choisie au réalisateur, et omet le champ historique si absent', () => {
+    const anglais = lireDemandeCreer({ intention: 'A dragon lands', langueClient: 'en', langueReplique: 'en', replique: 'Here we go.' });
+    expect(anglais.langueClient).toBe('en');
+    expect(entreeRealisateurCreation(anglais, { moteur: 'h3-fast' })).toMatchObject({
+      langueClient: 'en', mode: 't2va', dialogues: [{ texte: 'Here we go.', langue: 'English' }],
+    });
+
+    const historique = lireDemandeCreer({ intention: 'Un dragon atterrit', replique: 'On y va.' });
+    expect(historique).not.toHaveProperty('langueClient');
+    expect(entreeRealisateurCreation(historique, { moteur: 'h3-fast' })).toMatchObject({
+      mode: 't2va', dialogues: [{ texte: 'On y va.', langue: 'French' }],
+    });
+    expect(entreeRealisateurCreation(historique, { moteur: 'h3-fast' })).not.toHaveProperty('langueClient');
+
+    const interfaceAnglaiseRepliqueFrancaise = lireDemandeCreer({ intention: 'A dragon lands', langueClient: 'en', langueReplique: 'fr', replique: 'Bonjour.' });
+    expect(entreeRealisateurCreation(interfaceAnglaiseRepliqueFrancaise, { moteur: 'h3-fast' })).toMatchObject({
+      langueClient: 'en', dialogues: [{ texte: 'Bonjour.', langue: 'French' }],
+    });
+  });
+
+  it('traduit les erreurs de saisie uniquement quand une langue est choisie', () => {
+    expect(() => lireDemandeCreer({ intention: '', langueClient: 'en' })).toThrow('Describe the video you want in one sentence or more.');
+    expect(() => lireDemandeCreer({ intention: 'x'.repeat(4001), langueClient: 'en' })).toThrow('Description is too long (4,000 characters maximum).');
+    expect(() => lireDemandeCreer({ intention: '' })).toThrow('Décris la vidéo que tu veux en une phrase ou plus.');
   });
 
   it('produit un rendu FastH3 sur la grille d’images de H3, en multiples de 32', () => {

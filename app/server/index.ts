@@ -18,7 +18,9 @@ import * as eng from './engine.js';
 import { enregistrerDetourage } from './nexora/detourage/routes.js';
 import { config, ROOT } from './config.js';
 import { buildH3Graph, snapH3Length } from './graphs/h3.js';
-import { besoinDe, intentionAvecCamera, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, lireDemandeCreer, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
+import { besoinDe, CHECKPOINT_FASTH3, choisirMoteur, corpsRendu, dureeEffective, entreeRealisateurCreation, lireDemandeCreer, messageErreurParcoursCreer, type FormatCreer, type MoteurVideo } from './nexora/creer.js';
+import { consignesAmeliorationCreation, erreurAmeliorationCreation, erreurImageCreation, ideesRepliCreation, lireLangueClient, messageErreurRendu } from './nexora/creationLanguage.js';
+import type { LangueClient } from '../shared/creationLanguage.js';
 import { buildMusic3Graph } from './graphs/music3.js';
 import { reecrireImage } from './nexora/reecritureImage.js';
 import { demarrerLectureReglages } from './nexora/reglagesSite.js';
@@ -1013,18 +1015,20 @@ app.post('/api/nexora/creer', async (req, reply) => {
   const moteur = moteurDuCompte(demande.qualite, besoinDe(demande));
   if (!moteur) {
     const plan = planifierMoteurs(besoinDe(demande), { territoire: territoireDuCompte(), recettes: recettesDuParc() });
-    return reply.code(422).send({ error: `Aucun moteur ne peut faire cette vidéo pour ton compte : ${plan.exclus.map((e) => e.raison).join(' ; ')}.` });
+    const error = demande.langueClient === 'en'
+      ? messageErreurParcoursCreer('en', 'moteurIndisponible')
+      : `Aucun moteur ne peut faire cette vidéo pour ton compte : ${plan.exclus.map((e) => e.raison).join(' ; ')}.`;
+    return reply.code(422).send({ error });
   }
-  const verdict = await moderer(`${demande.intention} ${demande.replique ?? ''}`, llmCourant(), (m) => app.log.warn(m));
+  const verdict = await moderer(`${demande.intention} ${demande.replique ?? ''}`, llmCourant(), (m) => app.log.warn(m), demande.langueClient);
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
   // Personnages @ : sur le moteur cinéma (Ref2VA), @nom joint les images du personnage ; ailleurs, seulement ses mots.
   const persos = moteur === 'h3-max' && !demande.image ? await resoudrePersonnages(demande.intention) : null;
-  const entree = {
-    intention: intentionAvecCamera(persos?.sujets.length ? { ...demande, intention: persos.texteClair } : demande), mode: (demande.image ? 'i2va' : persos?.sujets.length ? 'ref2va' : 't2va') as 'i2va' | 'ref2va' | 't2va',
-    ...(persos?.sujets.length ? { references: { sujets: persos.sujets } } : {}), dureeS: dureeEffective(demande),
-    moteur, format: demande.format, ...(demande.replique ? { dialogues: [{ texte: demande.replique, langue: 'French' }] } : {}),
-  };
+  const entree = entreeRealisateurCreation(demande, {
+    moteur,
+    ...(persos?.sujets.length ? { intention: persos.texteClair, references: { sujets: persos.sujets } } : {}),
+  });
   // Le réalisateur (recherche/25) écrit le prompt ; ses jetons sont réservés, mesurés et réglés comme ceux de l'agent.
   const palierRedaction = palierDuRole('redaction');
   let r: Awaited<ReturnType<typeof reecrireH3>>;
@@ -1039,14 +1043,14 @@ app.post('/api/nexora/creer', async (req, reply) => {
       r = resultat;
       usageRedaction = { credits: bilan.factures, usd: bilan.totaux.coutUsd, jetons: bilan.totaux.entree + bilan.totaux.sortie, palier: palierRedaction };
     } catch (e) {
-      if (e instanceof ErreurLlm && !(e instanceof ErreurPlafondLlm)) return reply.code(402).send({ error: e.message });
+      if (e instanceof ErreurLlm && !(e instanceof ErreurPlafondLlm)) return reply.code(402).send({ error: demande.langueClient === 'en' ? messageErreurParcoursCreer('en', 'assistantRedaction') : e.message });
       r = await reecrireH3(entree, null);
     }
   } else r = await reecrireH3(entree, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur, nexoraAutoMusique: (req.body as any)?.musique === true };
   if (persos?.sujets.length) Object.assign(corps, { refImages: persos.jetons, personnages: persos.noms });
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
-  const res = await generate(corps, reply);
+  const res = await generate(corps, reply, demande.langueClient);
   if (reply.sent || (res && (res as any).error)) return res;
   return { ...res, prompt: corps.prompt, source: r.source, tentatives: r.tentatives, moteur, ...comprehensionDe(r.fiche), ...(usageRedaction ? { usageRedaction } : {}) };
 });
@@ -1773,10 +1777,11 @@ function modeleImage(): 'qwen21' | 'qwen' | null {
 }
 app.post('/api/nexora/image', async (req, reply) => {
   const b = (req.body ?? {}) as any;
+  const langueClient = lireLangueClient(b.langueClient);
   const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
-  if (!intention) return reply.code(400).send({ error: 'Décris l’image que tu veux.' });
-  if (intention.length > 4000) return reply.code(400).send({ error: 'Description trop longue (4 000 caractères au plus).' });
-  const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
+  if (!intention) return reply.code(400).send({ error: erreurImageCreation(langueClient, 'descriptionVide') });
+  if (intention.length > 4000) return reply.code(400).send({ error: erreurImageCreation(langueClient, 'descriptionLongue') });
+  const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m), langueClient);
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   const format = b.format === '9:16' || b.format === '1:1' ? b.format : '16:9';
   const modele = modeleImage() ?? 'qwen21';
@@ -1790,7 +1795,7 @@ app.post('/api/nexora/image', async (req, reply) => {
     prompt: r.prompt, width: dims[0], height: dims[1], count: nb,
     intention, promptSource: r.source, app: 'nexora-image', shotName: intention.slice(0, 60),
   };
-  const res = await generate(corps, reply);
+  const res = await generate(corps, reply, langueClient);
   if (reply.sent || (res && (res as any).error)) return res;
   return { ...res, prompt: r.prompt, source: r.source, modele: modele === 'qwen21' ? 'Qwen-Image-2.1' : 'Qwen-Image-2512' };
 });
@@ -2124,51 +2129,45 @@ app.get('/api/nexora/personnage/:take', async (req, reply) => {
  */
 app.post('/api/nexora/ameliorer', async (req, reply) => {
   const b = (req.body ?? {}) as any;
+  const langueClient = lireLangueClient(b.langueClient);
   const intention = typeof b.intention === 'string' ? b.intention.trim() : '';
-  if (!intention) return reply.code(400).send({ error: 'Écris d’abord une idée.' });
+  const mode = b.mode === 'image' || b.mode === 'film' ? b.mode : 'video';
+  if (!intention) return reply.code(400).send({ error: erreurAmeliorationCreation(langueClient, 'ideeVide') });
   const llm = llmCourant();
-  if (!llm) return reply.code(503).send({ error: 'L’assistant d’écriture n’est pas branché sur ce poste.' });
+  if (!llm) return reply.code(503).send({ error: erreurAmeliorationCreation(langueClient, 'llmAbsent') });
   try {
     const brut = await llm.completer('boost', [
-      { role: 'system', content: [
-        'Tu es le directeur artistique de Nexora Creative. Réécris l’idée de l’utilisateur en français, en 2 à 4 phrases (90 mots au plus), plus vivante et plus filmable :',
-        'sujet précis, action, décor, lumière, ambiance, mouvement de caméra et sons importants.',
-        'Garde tous les sujets et toutes les intentions de l’utilisateur, n’en retire aucun, n’invente ni marque, ni personnage connu, ni texte à l’écran.',
-        b.mode === 'image' ? 'C’est pour une image fixe : décris une seule image, pas de mouvement.' : 'C’est pour une vidéo de quelques secondes : une seule action claire.',
-        'Réponds en JSON {"texte": "..."} et rien d’autre.',
-      ].join(' ') },
+      { role: 'system', content: consignesAmeliorationCreation(langueClient, mode) },
       { role: 'user', content: intention },
     ], { json: true, temperature: 0.8 });
     const texte = String(lireJson<{ texte?: unknown }>(brut).texte ?? '').trim();
-    if (texte.length < 20 || texte.length > 1200) throw new Error('réponse inutilisable');
+    if (texte.length < 20 || texte.length > 1200) throw new Error('invalid response');
     return { texte };
   } catch {
-    return reply.code(502).send({ error: 'L’assistant n’a pas pu améliorer ta phrase. Réessaie.' });
+    return reply.code(502).send({ error: erreurAmeliorationCreation(langueClient, 'echec') });
   }
 });
 
-const IDEES_REPLI: Record<string, string[]> = {
-  video: ['Un dragon d’obsidienne jaillit d’une mer de nuages d’orage et rugit vers la caméra.', 'Combat de karaté sur un toit trempé de pluie, la nuit, sous des lanternes rouges.', 'Une flotte de vaisseaux surgit de l’hyperespace au-dessus d’une planète à anneaux.', 'Publicité pour un café glacé : gouttes au ralenti, lumière dorée.'],
-  image: ['Une guerrière en kimono noir face à un dragon sur une falaise, au crépuscule.', 'Affiche de film : un astronaute seul sur une plage de cendres sous deux lunes.', 'Un renard en papier découpé dans une forêt d’automne, lumière douce.', 'Une ville flottante au-dessus des nuages à l’aube.'],
-  film: ['Un livreur à vélo voit une ville entière s’illuminer sur son passage, de l’aube à la nuit.', 'Une flotte surgit de l’hyperespace ; un duel éclate dans un temple au bord d’un volcan.'],
-};
 /** « Inspire-moi » : des idées neuves, courtes et filmables, écrites par le LLM (rôle « idées »). Repli : exemples fixes. */
 app.post('/api/nexora/idees', async (req) => {
   const b = (req.body ?? {}) as any;
   const mode = b.mode === 'image' || b.mode === 'film' ? b.mode : 'video';
+  const langueClient = lireLangueClient(b.langueClient);
   const theme = typeof b.theme === 'string' ? b.theme.trim().slice(0, 200) : '';
   const llm = llmCourant();
   if (llm) {
     try {
       const brut = await llm.completer('idees', [
-        { role: 'system', content: `Tu proposes 4 idées ${mode === 'image' ? 'd’images' : mode === 'film' ? 'de courts films' : 'de scènes vidéo de 5 secondes'} spectaculaires et variées, en français, une phrase de 25 mots au plus chacune, concrètes (sujet, action, décor, ambiance). Aucune marque, aucun personnage connu, aucune personne réelle. Réponds en JSON {"idees":["...","...","...","..."]}.` },
-        { role: 'user', content: theme ? `Thème : ${theme}` : 'Surprends-moi.' },
+        { role: 'system', content: langueClient === 'en'
+          ? `Suggest 4 vivid, varied ${mode === 'image' ? 'image ideas' : mode === 'film' ? 'short film ideas' : 'five-second video scene ideas'} in English. Keep each to one concrete sentence of at most 25 words (subject, action, setting, mood). No brands, famous characters, or real people. Return only JSON {"idees":["...","...","...","..."]}.`
+          : `Tu proposes 4 idées ${mode === 'image' ? 'd’images' : mode === 'film' ? 'de courts films' : 'de scènes vidéo de 5 secondes'} spectaculaires et variées, en français, une phrase de 25 mots au plus chacune, concrètes (sujet, action, décor, ambiance). Aucune marque, aucun personnage connu, aucune personne réelle. Réponds en JSON {"idees":["...","...","...","..."]}.` },
+        { role: 'user', content: theme ? (langueClient === 'en' ? `Theme: ${theme}` : `Thème : ${theme}`) : (langueClient === 'en' ? 'Surprise me.' : 'Surprends-moi.') },
       ], { json: true, temperature: 1 });
       const idees = (lireJson<{ idees?: unknown }>(brut).idees as unknown[] ?? []).map((x) => String(x).trim()).filter((x) => x.length > 10 && x.length < 300).slice(0, 4);
       if (idees.length >= 2) return { idees, source: 'llm' };
     } catch { /* repli */ }
   }
-  return { idees: IDEES_REPLI[mode], source: 'repli' };
+  return { idees: ideesRepliCreation(mode, langueClient), source: 'repli' };
 });
 
 /** Texte de publication d'une création (titre, texte, hashtags) pour un réseau social. */
@@ -2492,47 +2491,45 @@ function moteurDuCompte(qualite: 'rapide' | 'max' = 'rapide', besoin?: Parameter
 
 const REFUS_TERRITOIRE = 'MiniMax H3 n’est pas offert dans le territoire de ton compte : sa licence exclut les États-Unis, l’Union européenne, le Royaume-Uni et la Corée du Sud.';
 
-async function generate(b: any, reply: FastifyReply) {
+async function generate(b: any, reply: FastifyReply, langueClient?: LangueClient) {
+  const erreurLocalisee = (fr: string, en: string, legacy = fr) => messageErreurRendu(langueClient, fr, en, legacy);
   stripServerKeys(b);
   // Scene bookkeeping is set by the scene runner only; a recreated shot is a plain take.
   delete b.sceneOf; delete b.sceneIndex; delete b.sceneStep;
-  if (b.cut) return reply.code(400).send({ error: 'A cut is made from its shots. Use /api/director/scene (Recreate in the app does).' });
+  if (b.cut) return reply.code(400).send({ error: erreurLocalisee('Un montage se crée à partir de ses plans.', 'A cut is assembled from its shots.', 'A cut is made from its shots. Use /api/director/scene (Recreate in the app does).') });
   const status = eng.isLocal() ? await comfy.getStatus() : { up: true };
   if (status.up && !(await eng.ensureProxy())) {
-    return reply.code(503).send({
-      error: `Comfy API v2 is not answering at ${config.comfyBaseUrl}. Install comfy-api-proxy (pip install comfy-api-proxy) or set COMFY_BASE_URL.`,
-    });
+    return reply.code(503).send({ error: erreurLocalisee('Le service de rendu ne répond pas. Réessaie plus tard.', 'The rendering service is not responding. Please try again later.', `Comfy API v2 is not answering at ${config.comfyBaseUrl}. Install comfy-api-proxy (pip install comfy-api-proxy) or set COMFY_BASE_URL.`) });
   }
   if (!status.up) {
-    return reply.code(503).send({
-      error: comfy.canLaunchEngine()
-        ? 'ComfyUI is not running — press START ENGINE'
-        : `ComfyUI is not answering at ${config.comfyUrl}. Start it, or set COMFY_URL / COMFY_LAUNCH in .env.`,
-    });
+    const legacy = comfy.canLaunchEngine()
+      ? 'ComfyUI is not running — press START ENGINE'
+      : `ComfyUI is not answering at ${config.comfyUrl}. Start it, or set COMFY_URL / COMFY_LAUNCH in .env.`;
+    return reply.code(503).send({ error: erreurLocalisee('Le moteur vidéo est hors ligne. Réessaie plus tard.', 'The video engine is offline. Please try again later.', legacy) });
   }
 
   // Say exactly which weights are missing rather than letting ComfyUI reject
   // the graph with a node id the user has never heard of.
   const missing = await blockingReasonFor(eng.isLocal() && eng.recetteSurPrincipal(recetteDe(b)), bundlesFor({ ...b, castEngine: castEngineFor(b) }));
-  if (missing) return reply.code(412).send({ error: missing });
+  if (missing) return reply.code(412).send({ error: erreurLocalisee('Les fichiers requis pour ce modèle ne sont pas prêts sur ce serveur.', 'The files required for this model are not ready on this server.', missing) });
   const postMissing = eng.isLocal() ? await postBlockingReason(b) : null;
-  if (postMissing) return reply.code(412).send({ error: postMissing });
+  if (postMissing) return reply.code(412).send({ error: erreurLocalisee('Les fichiers requis pour ce modèle ne sont pas prêts sur ce serveur.', 'The files required for this model are not ready on this server.', postMissing) });
   if (eng.isLocal() && b.kind === 'effect') {
     const fx = effectById(b.effect);
     const fxMissing = fx ? await effectBlockingReason(fx.bundle, fx.lora, fx.name) : null;
-    if (fxMissing) return reply.code(412).send({ error: fxMissing });
+    if (fxMissing) return reply.code(412).send({ error: erreurLocalisee('Les fichiers requis pour cet effet ne sont pas prêts sur ce serveur.', 'The files required for this effect are not ready on this server.', fxMissing) });
   }
 
   if (Array.isArray(b.loras) && b.loras.length) {
     const fam = loraFamily(b);
-    if (!fam) return reply.code(400).send({ error: 'Your own LoRAs work in Image and Video (LTX-2.5) for now.' });
+    if (!fam) return reply.code(400).send({ error: erreurLocalisee('Tes LoRA fonctionnent actuellement avec Image et Video (LTX-2.5).', 'Custom LoRAs are currently supported for Image and Video (LTX-2.5) only.', 'Your own LoRAs work in Image and Video (LTX-2.5) for now.') });
     try { await pickLoras(b.loras, fam, b.kind === 'still' ? 'Image' : 'Video'); }
-    catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'bad LoRA' }); }
+    catch (e) { return reply.code(400).send({ error: erreurLocalisee('La LoRA sélectionnée n’a pas pu être utilisée.', 'The selected LoRA could not be used.', e instanceof Error ? e.message : 'bad LoRA') }); }
   }
 
   const orgEnCours = compteCourant()?.organisationId;
   if (configAuth && orgEnCours && espacePlein(orgEnCours)) {
-    return reply.code(409).send({ error: 'Ton espace Nexora est plein : supprime des vidéos ou ajoute de l’espace dans ton compte pour continuer.' });
+    return reply.code(409).send({ error: erreurLocalisee('Ton espace Nexora est plein : supprime des vidéos ou ajoute de l’espace dans ton compte pour continuer.', 'Your Nexora storage is full. Delete videos or add storage to continue.') });
   }
   const count = Math.max(1, Math.min(8, Number(b.count) || 1));
   // Nexora : avec une session du portail, chaque prise réserve son devis en crédits avant de partir au moteur.
@@ -2544,7 +2541,7 @@ async function generate(b: any, reply: FastifyReply) {
       const r = await fac.reserver({ idempotence: randomUUID(), credits, libelle: `Nexora Creative · ${b.kind === 'still' ? 'image' : 'vidéo'}` });
       if (!r.ok) {
         for (const x of reservations) await fac.liberer(x.reservationId).catch(() => {});
-        return reply.code(402).send({ error: r.message });
+        return reply.code(402).send({ error: erreurLocalisee('Il n’y a pas assez de crédits pour lancer ce rendu.', 'There are not enough credits to start this render.', r.message) });
       }
       reservations.push({ reservationId: r.reservationId, credits: r.credits, etat: 'reservee' });
     }
@@ -2556,7 +2553,7 @@ async function generate(b: any, reply: FastifyReply) {
     return { takeIds, takeId: takeIds[0], credits: reservations.reduce((n, r) => n + r.credits, 0) || undefined };
   } catch (e) {
     for (const x of reservations) await fac?.liberer(x.reservationId).catch(() => {});
-    return reply.code(400).send({ error: e instanceof Error ? e.message : 'bad request', takeIds: (e as any)?.takeIds });
+    return reply.code(400).send({ error: erreurLocalisee('La vidéo n’a pas pu être mise en file. Vérifie la demande et réessaie.', 'The video could not be queued. Review the request and try again.', e instanceof Error ? e.message : 'bad request'), takeIds: (e as any)?.takeIds });
   }
 }
 

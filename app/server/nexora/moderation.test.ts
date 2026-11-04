@@ -28,6 +28,19 @@ describe('modération avant rendu', () => {
     expect(await moderer('x', llm('```json\n{"verdict":"ok"}\n```'))).toMatchObject({ ok: true, source: 'llm' });
   });
 
+  it('retourne un refus et demande le motif en anglais lorsque la langue est explicitement choisie', async () => {
+    expect(modererParRegles('fake video of a named person', 'en').raison).toBe('Deceptive impersonations of real people are not allowed.');
+    let systeme = '';
+    const anglais: ClientLlm = { async completer(_role, messages) {
+      const contenu = messages[0].content;
+      systeme = typeof contenu === 'string' ? contenu : contenu.map((partie) => partie.type === 'text' ? partie.text : '').join('');
+      return '{"verdict":"refuse","categorie":"personne_reelle","raison":"Deceptive impersonation is not allowed."}';
+    } };
+    expect(await moderer('x', anglais, () => {}, 'en')).toMatchObject({ ok: false, raison: 'Deceptive impersonation is not allowed.' });
+    expect(systeme).toContain('one short sentence in English for the user');
+    expect(modererParRegles('fake video of a named person').raison).toBe('Les imitations trompeuses de personnes réelles sont interdites.');
+  });
+
   it('en cas de panne ou de réponse illisible du LLM, applique les règles seules et le journalise', async () => {
     const msgs: string[] = [];
     expect(await moderer('un renard', llm(new Error('HTTP 503')), (m) => msgs.push(m))).toMatchObject({ ok: true, source: 'regles_seules' });
