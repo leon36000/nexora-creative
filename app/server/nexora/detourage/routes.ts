@@ -89,7 +89,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     let sante: Record<string, unknown> | null = null;
     if (rapide) sante = await clientDe(rapide.id)?.sante().catch(() => null) ?? null;
     return {
-      rapide: { disponible: !!sante, moteur: rapide ? { id: rapide.id, nom: rapide.nom } : null, modeles: sante?.modeles ?? null,
+      rapide: { disponible: sante?.ok === true, moteur: rapide ? { id: rapide.id, nom: rapide.nom } : null, modeles: sante?.modeles ?? null,
         description: 'SAM 3.1 (sélection par clics, boîte ou mot, suivi) + ViTMatte (bords) + stabilisation par flux optique' },
       pro: { disponible: false, moteur: pro ? { id: pro.id, nom: pro.nom } : null,
         description: 'Détourage avancé indisponible actuellement.' },

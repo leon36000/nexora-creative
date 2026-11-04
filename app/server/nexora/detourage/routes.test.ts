@@ -87,6 +87,43 @@ describe('disponibilité du détourage pro', () => {
   });
 });
 
+describe('santé du détourage rapide', () => {
+  it('distingue un moteur déclaré mais refusant la santé d’un moteur qui répond', async () => {
+    let statut = 401;
+    let corps: Record<string, unknown> = {};
+    const faux = createServer((_req, res) => {
+      res.statusCode = statut;
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify(corps));
+    });
+    await new Promise<void>((r) => faux.listen(0, '127.0.0.1', r));
+    const port = (faux.address() as AddressInfo).port;
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-sante-')),
+      moteurs: () => [{ id: 'rapide', nom: 'Rapide', recettes: ['detourage-rapide'], detourageUrl: `http://127.0.0.1:${port}` }],
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const refus = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(refus.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      statut = 200;
+      const incomplet = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(incomplet.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      corps = { ok: false };
+      const malade = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(malade.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      corps = { ok: true };
+      const ok = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(ok.json().rapide).toMatchObject({ disponible: true, moteur: { id: 'rapide' } });
+    } finally {
+      arreter();
+      await app.close();
+      await new Promise<void>((r) => faux.close(() => r()));
+    }
+  });
+});
+
 describe('routes /api/nexora/detourage (moteur simulé)', () => {
   let faux: Server;
   const recu: string[] = [];
