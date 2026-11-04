@@ -109,6 +109,7 @@ def juger(f, texte_id, passes=2):
     notes = []
     for i in range(passes):
         corps = {"model": "google/gemini-4-argon", "temperature": 0.3 if i else 0.0, "response_format": {"type": "json_object"},
+             "provider": {"order": ["google-ai-studio/flex"], "allow_fallbacks": False},
                  "messages": [{"role": "user", "content": [{"type": "input_audio", "input_audio": {"data": b, "format": "mp3"}},
                                                           {"type": "text", "text": GRILLE.format(role=texte_id, texte=TEXTES[texte_id])}]}]}
         try:

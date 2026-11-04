@@ -1,0 +1,1 @@
+- Technique (producteur) : termes_cles du boost o1 alignés sur la version boostée réelle capturée (« rue pavée », « ailes », « voitures garées », « grondement »).

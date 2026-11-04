@@ -115,3 +115,7 @@ sa musique (et peut en demander une 4e), et rend un `dossier.json` révisé.
 ## 10. Jugement
 Le producteur note sévèrement (crédibilité live action, spectacle, clarté du produit, musique et son, rythme, voix) ; le fondateur
 choisit.
+
+## Précision technique (chaîne, 04/11)
+Un plan 9:16 natif a son propre identifiant (ex. `p03v`, `format: "9:16"`) ; le montage le cite par `"fichier_vertical": "plan_v:p03v"`.
+Validation : `python3 -B chaine/v7.py valider <equipe>` (depuis `marketing/creative/video-v7/`).

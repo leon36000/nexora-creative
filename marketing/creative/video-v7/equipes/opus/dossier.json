@@ -85,7 +85,7 @@
    "id": "k10",
    "format": "16:9",
    "graine": 7109,
-   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an 85mm lens, handheld; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, a woman in her thirties with short dark hair, an oversized grey hoodie and plain clothing with no logo on her rainy balcony at night, seen from behind and the side, her face hidden by her hood, lit orange by distant explosions in the sky, rain on her shoulders, a laptop glowing on the table behind her"
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an 85mm lens, handheld; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, a woman in her thirties with short dark hair, an oversized grey hoodie and plain clothing with no logo on her rainy balcony at night, seen from behind and the side, her face hidden by her hood, lit orange by distant explosions in the sky, rain on her shoulders, an open laptop screen lighting the table behind her"
   },
   {
    "id": "k11",
@@ -297,19 +297,22 @@
    "id": "d1",
    "moteur": "h3-natif",
    "plan": "p06",
-   "texte": "Regarde en haut !"
+   "texte": "Regarde en haut !",
+   "direction": "cri d'un voisin, stupéfait"
   },
   {
    "id": "d2",
    "moteur": "h3-natif",
    "plan": "p08",
-   "texte": "Encore !"
+   "texte": "Encore !",
+   "direction": "grognement de combat"
   },
   {
    "id": "d3",
    "moteur": "h3-natif",
    "plan": "p12",
-   "texte": "Bon. Demain, je fais pire."
+   "texte": "Bon. Demain, je fais pire.",
+   "direction": "à mi-voix, amusée, pour elle-même"
   }
  ],
  "temps_forts": [
@@ -535,9 +538,10 @@
     ],
     "termes_cles": [
      "dragon",
-     "rue",
-     "pluie",
-     "rugit"
+     "rue pavée",
+     "ailes",
+     "voitures garées",
+     "grondement"
     ]
    },
    {
@@ -555,7 +559,7 @@
       0.8
      ]
     ],
-    "fichier_vertical": "plan_v:p03"
+    "fichier_vertical": "plan_v:p03v"
    },
    {
     "type": "plan",
@@ -612,7 +616,7 @@
       1.05
      ]
     ],
-    "fichier_vertical": "plan_v:p05"
+    "fichier_vertical": "plan_v:p05v"
    },
    {
     "type": "plan",
@@ -745,7 +749,7 @@
       1.5
      ]
     ],
-    "fichier_vertical": "plan_v:p09"
+    "fichier_vertical": "plan_v:p09v"
    },
    {
     "type": "plan",
@@ -755,7 +759,7 @@
     "entree": 0.8,
     "etalonnage": "nuit_feu",
     "son_db": -4,
-    "fichier_vertical": "plan_v:p11"
+    "fichier_vertical": "plan_v:p11v"
    },
    {
     "type": "plan",

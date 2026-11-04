@@ -59,7 +59,7 @@ P = {
             "hull, rain, the city lights below, real atmospheric haze", "camera on a tripod, slight pan following the dragon", "The dragon "
             "breathes a long jet of fire along the hull; explosions roll and debris falls slowly into the clouds.", "Distant explosions, the roar of fire, wind, a deep hum."),
     "p10": ("an 85mm lens, handheld", f"{LEA} on her rainy balcony at night, seen from behind and the side, her face hidden by her hood, lit "
-            "orange by distant explosions in the sky, rain on her shoulders, a laptop glowing on the table behind her", "handheld camera "
+            "orange by distant explosions in the sky, rain on her shoulders, an open laptop screen lighting the table behind her", "handheld camera "
             "slowly circling her", "She steps forward to the railing and her shoulders shake with laughter as orange flashes light the rain.",
             "Rain, distant explosions, her laugh."),
     "p11": ("a 24mm lens from the street, looking up", "night street in the rain: the dragon perched on the roof edge of the brick building, "
@@ -119,7 +119,7 @@ SEG = []
 def plan(b0, b1, pid, entree, **kw):
     s = {"type": "plan", "debut": t(b0), "duree": round(t(b1) - t(b0), 3), "fichier": f"plan:{pid}", "entree": entree, "etalonnage": "nuit_feu", **kw}
     if pid in V:
-        s["fichier_vertical"] = f"plan_v:{pid}"
+        s["fichier_vertical"] = f"plan_v:{pid}v"
     SEG.append(s)
 
 
@@ -129,7 +129,7 @@ plan(3, 8, "p02", 0.6, son_db=-6, cadrage=[[0, .5, .5, 1], [2.5, .5, .5, 1.08]])
 SEG.append({"type": "saisie", "debut": t(8), "duree": t(3), "dossier": f"{CAP}/boost/o1", "etapes": ["saisie", "saisie-fin"],
             "viewport": [1600, 900], "zone": [100, 296, 532, 474], "zone_texte": [104, 300, 470, 345], "zoom_texte": 1.3, "zoom_texte_v": 2.0})
 SEG.append({"type": "boost", "debut": t(11), "duree": t(2), "dossier": f"{CAP}/boost/o1", "viewport": [1600, 900], "zone": [100, 490, 532, 765],
-            "termes_cles": ["dragon", "rue", "pluie", "rugit"]})
+            "termes_cles": ["dragon", "rue pavée", "ailes", "voitures garées", "grondement"]})
 plan(13, 18, "p03", 0.8, son_db=-2, secousses=[[0.5, 22, 0.8]])                    # DROP 6,5 s : le dragon dans la rue
 plan(18, 21, "p04", 0.5, son_db=-4, secousses=[[0.3, 16, 1.0]])
 plan(21, 25, "p13", 0.6, son_db=-3)                                                 # il décolle
@@ -161,9 +161,9 @@ DOSSIER = {
     "concept": "Une femme ordinaire tape trois mots dans Creative ; devant sa fenêtre, sa vraie rue de Montréal devient le film.",
     "captures_demandees": [{"id": "o1", "mots": "dragn dans ma rue"}],
     "cles": cles(), "plans": plans(),
-    "voix": [{"id": "d1", "moteur": "h3-natif", "plan": "p06", "texte": "Regarde en haut !"},
-             {"id": "d2", "moteur": "h3-natif", "plan": "p08", "texte": "Encore !"},
-             {"id": "d3", "moteur": "h3-natif", "plan": "p12", "texte": "Bon. Demain, je fais pire."}],
+    "voix": [{"id": "d1", "moteur": "h3-natif", "plan": "p06", "texte": "Regarde en haut !", "direction": "cri d'un voisin, stupéfait"},
+             {"id": "d2", "moteur": "h3-natif", "plan": "p08", "texte": "Encore !", "direction": "grognement de combat"},
+             {"id": "d3", "moteur": "h3-natif", "plan": "p12", "texte": "Bon. Demain, je fais pire.", "direction": "à mi-voix, amusée, pour elle-même"}],
     "temps_forts": [{"t": 0.0, "evenement": "l'œil s'ouvre : sub seul"}, {"t": 1.5, "evenement": "le motif de 4 notes au célesta, seul"},
                     {"t": 4.0, "evenement": "frappe des touches : pulsation sèche, montée"}, {"t": 6.5, "evenement": "DROP : le dragon rugit dans la rue"},
                     {"t": 12.5, "evenement": "« PLUS GROS. » impact"}, {"t": 13.5, "evenement": "le vaisseau : tout se retire, grave tenu"},

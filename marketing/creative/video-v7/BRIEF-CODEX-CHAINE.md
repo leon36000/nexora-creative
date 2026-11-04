@@ -52,3 +52,7 @@ lourdes dans `~/nexora-creative-data/promo/v7-creative/` (lien vers un disque ex
 Tests unitaires (validation, budget, substitution, calage auto, file limitée) avec doublures ; un `equipes/essai/dossier.json`
 minimal (2 clés, 2 plans, 1 musique, 1 voix, montage de 10 s) qui passe `valider` et `monter --a-blanc` (médias factices).
 Dernier message : commandes exactes, ce qui reste approximatif.
+
+## Ajout (consigne du fondateur, 04/11 02 h)
+Tout appel direct à Gemini 4 Argon par OpenRouter (juges image, vidéo, audio) passe **seulement par Flex** :
+`"provider": {"order": ["google-ai-studio/flex"], "allow_fallbacks": false}` dans le corps de la requête.

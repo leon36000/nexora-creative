@@ -61,6 +61,7 @@ def image_de(media, largeur=1024):
 
 def demander(contenu, temperature=0.0):
     corps = {"model": MODELE, "temperature": temperature, "response_format": {"type": "json_object"},
+             "provider": {"order": ["google-ai-studio/flex"], "allow_fallbacks": False},
              "messages": [{"role": "user", "content": contenu}]}
     r = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=json.dumps(corps).encode(),
                                headers={"Authorization": "Bearer " + cle(), "Content-Type": "application/json"})
