@@ -743,3 +743,10 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 ### Reprise Codex — seconde revue Director, 4 novembre 2026
 
 - Les trois correctifs anime/citation/spatial ont passé 104 tests ciblés relancés indépendamment sous configuration sans `.env`; aucune publication supplémentaire. La revue Terra détecte encore deux cas non couverts : un vaisseau demandé mais omis du prompt peut passer le garde; les substitutions et espaces peuvent encore altérer le texte cité, et les guillemets français/courbes ne sont pas tous reconnus. Corrections et nouveaux tests en cours. La MR !42 reste brouillon; son pipeline vert sur l'ancien commit ne démontre pas ces corrections.
+
+
+### Reprise Codex — tests Director et garde H3, 4 novembre 2026
+
+- Director : préservation des citations et distinction entre vaisseau non demandé et vaisseau demandé mais omis corrigées localement. 110 tests ciblés relancés indépendamment, configuration Vite sans fichiers d'environnement; typecheck signalé réussi. Revue Terra finale en cours, pas encore commit/push de ces corrections.
+- Garde H3 partielle : revue indépendante confirme le refus avant réservation dans `/api/nexora/creer` et le devis; le chemin `/api/generate` reste contournable et certains checkpoints non reconnus peuvent être substitués. Films/suites existants et réservations ne sont pas réglés. Ne pas présenter cette variante comme correction complète; examen de la portée du chemin API en cours.
+- Pipeline #2858 de la MR passation réussi sur `28e8146`.
