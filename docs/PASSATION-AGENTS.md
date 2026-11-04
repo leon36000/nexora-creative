@@ -726,3 +726,7 @@ La relecture indépendante du commit `5d27dc6` a aussi trouvé qu’un ancien tr
 ### Détourage : anciens travaux protégés
 
 Deux commits locaux complémentaires à `5d27dc6` : **826b604** contrôle que le moteur enregistré sur un ancien travail accepte bien le rapide avant lancement ou reprise ; un moteur déclaré rapide et pro reste accepté pour le rapide. **575e5cd** refuse aussi une reprise dont les paramètres historiques déclarent explicitement `palier: pro`, même sur moteur mixte. Les deux cas ont été reproduits en échec avant correction ; **24 tests ciblés** et `npm run typecheck` passent après. Les très anciens registres ne stockant pas le palier ne permettent pas de distinguer avec certitude un ancien pro d’un rapide sur un moteur mixte ; aucun lancement pro historique par la route bloquée n’a été démontré. Aucun push, pipeline ni déploiement.
+
+### Détourage : promesse visuelle corrigée localement
+
+Le relevé indépendant a retrouvé une phrase d’interface promettant « sans scintillement », alors que les mesures historiques montrent une réduction et non l’absence d’artefacts. Commit local **c3dbee0** sur le worktree de détourage : formulation factuelle « avec stabilisation des contours ». Correction de texte vérifiée par `git diff --check`, pas de test d’interface ni de déploiement. L’interface de détourage reste majoritairement française : la couverture FR/EN demeure un chantier distinct, non livrée.

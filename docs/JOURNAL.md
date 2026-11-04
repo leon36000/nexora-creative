@@ -486,3 +486,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Relecture de `5d27dc6` : ancien travail sur moteur seulement pro contournait le refus ; régression reproduite et correctif complémentaire local en vérification.
 
 - Détourage : `826b604` protège lancement/reprise des anciens travaux liés à un moteur seulement pro ; `575e5cd` bloque aussi la reprise de paramètres pro explicites sur moteur mixte. 24 tests ciblés et typecheck passent ; anciennes données sans palier restent ambiguës. Pas de déploiement.
+
+- Détourage : `c3dbee0` retire localement la garantie non prouvée « sans scintillement » ; pas de déploiement. Interface FR/EN encore à compléter.
