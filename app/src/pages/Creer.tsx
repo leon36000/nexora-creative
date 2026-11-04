@@ -7,7 +7,7 @@
  * propose un découpage relisible, tourne chaque plan et assemble.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, mediaUrl, posterUrl, uploadFile, type EtatNexora, type Storyboard } from '../api';
+import { api, mediaUrl, posterUrl, uploadFile, type Comprehension, type EtatNexora, type Storyboard } from '../api';
 import { inFeed, isImage, isModel, settingsOf, toast, useStore } from '../store';
 import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
@@ -69,6 +69,8 @@ export default function Creer() {
   const [cle, setCle] = useState<{ jeton: string; apercu: string } | null>(null);
   const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo'>(null);
   const [boost, setBoost] = useState<string | null>(null);
+  const [compris, setCompris] = useState<(Comprehension & { credits?: number; prompt: string }) | null>(null);
+  const [voirPrompt, setVoirPrompt] = useState(false);
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
   const [etat, setEtat] = useState<EtatNexora | null>(null);
   const [vue, setVue] = useState<number | null>(null);
@@ -81,6 +83,7 @@ export default function Creer() {
   const [devis, setDevis] = useState<{ credits: number | null; secondesEstimees: number | null } | null>(null);
   const toutes = useStore((s) => s.takes);
   const lances = useRef(new Set<number>());
+  const jetonsRecus = useRef(new Set<string>());
 
   const visibles = useStore((s) => s.takes.filter((t) => inFeed(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null && t.kind !== 'audio'));
   const montrees = useMemo(() => visibles.filter((t) => {
@@ -114,6 +117,20 @@ export default function Creer() {
   }, [toutes]);
 
   useEffect(() => { void api.nexoraEtat().then(setEtat).catch(() => setEtat(null)); }, []);
+  // « Animer avec H3 » depuis Relief : /?mode=video&jeton=asset:…&intention=… pose la vue 3D comme plan clé.
+  useEffect(() => {
+    const jeton = params.get('jeton');
+    if (!jeton || !/^asset:[0-9a-f-]{36}$/i.test(jeton) || jetonsRecus.current.has(jeton)) return;
+    jetonsRecus.current.add(jeton);
+    let apercu = '';
+    try { apercu = sessionStorage.getItem('nexora-plan-cle-apercu') ?? ''; sessionStorage.removeItem('nexora-plan-cle-apercu'); } catch { /* sans aperçu */ }
+    const texte = params.get('intention');
+    setParams({ jeton: null, intention: null });
+    setCle({ jeton, apercu });
+    setDepart('cle');
+    if (texte) setIntention(texte.slice(0, 4000));
+    toast('Vue 3D posée comme plan clé : ajuste la description puis lance « Animer avec H3 ».');
+  }, [params.get('jeton')]);
   // « Animer » depuis la Bibliothèque : /?mode=video&cle=<image> pose l'image comme plan clé.
   useEffect(() => {
     const id = Number(params.get('cle'));
@@ -167,6 +184,8 @@ export default function Creer() {
       const cam = CAMERAS.find((c) => c.id === camera);
       const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined, camera: cam?.texte });
       toast(r.source === 'llm' ? 'Scénario écrit, tournage lancé.' : 'Tournage lancé (scénario simplifié : l’assistant est indisponible).');
+      setCompris(r.comprehension ? { ...r.comprehension, credits: r.usageRedaction?.credits, prompt: r.prompt } : null);
+      setVoirPrompt(false);
       setCle(null);
     } catch (e) {
       toast(e instanceof Error ? e.message : 'La création a échoué.', true);
@@ -322,6 +341,29 @@ export default function Creer() {
                 <button type="button" className="st-bouton primaire" onClick={() => { setIntention(boost); setBoost(null); }}>Utiliser cette version</button>
                 <button type="button" className="st-bouton" onClick={() => setBoost(null)}>Garder la mienne</button>
               </div>
+            </div>
+          )}
+
+          {compris && mode === 'video' && (
+            <div className="st-suggestion st-compris" role="status" aria-live="polite">
+              <span className="st-etiq">Ce que l’IA a compris</span>
+              <p>{compris.compris}</p>
+              {compris.plans.length > 1 && <p className="st-compris-plans">{compris.plans.map((p, i) => `${i + 1}. ${p.cadrage} (${p.debut.toFixed(1).replace('.', ',')} s)`).join('  ·  ')}</p>}
+              {compris.hypotheses.length > 0 && (
+                <ul className="st-compris-choix" aria-label="Choix faits pour toi">{compris.hypotheses.map((h) => <li key={h}>{h}</li>)}</ul>
+              )}
+              {compris.variantes.length > 0 && (
+                <div className="st-compris-variantes">
+                  <span className="st-etiq">Autres directions</span>
+                  <div className="st-idees">{compris.variantes.map((v) => <button key={v} type="button" className="st-idee" title="Mettre cette direction dans la description" onClick={() => { setIntention(`${intention.trim()} — ${v}`); setCompris(null); }}>{v}</button>)}</div>
+                </div>
+              )}
+              <div className="st-ligne">
+                <button type="button" className="st-bouton" onClick={() => setVoirPrompt((x) => !x)}>{voirPrompt ? 'Masquer' : 'Voir'} le prompt envoyé à H3</button>
+                <button type="button" className="st-bouton" onClick={() => setCompris(null)}>Fermer</button>
+                {compris.credits != null && compris.credits > 0 && <span className="st-credit">Écriture : {compris.credits} crédit{compris.credits > 1 ? 's' : ''}</span>}
+              </div>
+              {voirPrompt && <pre className="st-compris-prompt">{compris.prompt}</pre>}
             </div>
           )}
 

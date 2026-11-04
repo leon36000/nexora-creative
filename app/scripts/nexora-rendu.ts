@@ -5,7 +5,7 @@
  * Usage : npx tsx scripts/nexora-rendu.ts spec.json   (spec : voir Spec ci-dessous ; un tableau = plusieurs rendus à la suite)
  * Sortie : une ligne JSON par rendu (moteur, réglages, secondes, fichier local).
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { buildH3Graph } from '../server/graphs/h3.js';
 
@@ -38,7 +38,13 @@ async function envoyerImage(comfy: string, chemin: string): Promise<string> {
   return j.name;
 }
 
-async function rendre(s: Spec): Promise<Record<string, unknown>> {
+async function rendre(s: Spec, dejaId?: string): Promise<Record<string, unknown>> {
+  const t0 = performance.now();
+  const sent = dejaId ? { prompt_id: dejaId } : await soumettre(s);
+  return attendre(s, sent, t0);
+}
+
+async function soumettre(s: Spec): Promise<{ prompt_id?: string }> {
   const graph = buildH3Graph({
     prompt: s.prompt,
     width: s.largeur ?? 1344,
@@ -54,13 +60,15 @@ async function rendre(s: Spec): Promise<Record<string, unknown>> {
     refImages: s.refs ? await Promise.all(s.refs.map((r) => envoyerImage(s.comfy, r))) : undefined,
   });
   (graph.save as { inputs: Record<string, unknown> }).inputs.filename_prefix = `nexora-promo/${s.nom}`;
-  const t0 = performance.now();
   const r = await fetch(`${s.comfy}/prompt`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ prompt: graph }),
   });
-  const sent = (await r.json()) as { prompt_id?: string };
+  return (await r.json()) as { prompt_id?: string };
+}
+
+async function attendre(s: Spec, sent: { prompt_id?: string }, t0: number): Promise<Record<string, unknown>> {
   if (!sent.prompt_id) throw new Error(`refus du moteur : ${JSON.stringify(sent).slice(0, 2000)}`);
   for (;;) {
     await new Promise((ok) => setTimeout(ok, 3000));
@@ -87,12 +95,35 @@ async function rendre(s: Spec): Promise<Record<string, unknown>> {
   }
 }
 
+/** Rendu déjà soumis (file ou historique du moteur) sous ce nom : on l'attend et on le rapatrie au lieu de le refaire. */
+async function dejaSoumis(s: Spec): Promise<string | null> {
+  const prefixe = `nexora-promo/${s.nom}`;
+  const q = (await (await fetch(`${s.comfy}/queue`)).json()) as Record<string, any[]>;
+  for (const it of [...q.queue_running, ...q.queue_pending]) {
+    if (Object.values(it[2] as Record<string, any>).some((n) => n?.inputs?.filename_prefix === prefixe)) return it[1] as string;
+  }
+  const h = (await (await fetch(`${s.comfy}/history?max_items=200`)).json()) as Record<string, any>;
+  for (const [id, e] of Object.entries(h)) {
+    if (Object.values((e.prompt?.[2] ?? {}) as Record<string, any>).some((n) => n?.inputs?.filename_prefix === prefixe) && e.status?.status_str !== 'error') return id;
+  }
+  return null;
+}
+
 const brut = JSON.parse(readFileSync(resolve(process.argv[2]), 'utf8'));
 const specs: Spec[] = Array.isArray(brut) ? brut : [brut];
-for (const s of specs) {
-  try {
-    console.log(JSON.stringify(await rendre({ ...s, sortie: resolve(dirname(process.argv[2]), s.sortie) })));
-  } catch (e) {
-    console.log(JSON.stringify({ nom: s.nom, erreur: (e as Error).message }));
+// RENDU_PARALLELE : nombre de rendus à soi dans la file du moteur (6 au plus : la file est partagée).
+const parallele = Math.min(6, Math.max(1, Number(process.env.RENDU_PARALLELE) || 1));
+let suivant = 0;
+await Promise.all(Array.from({ length: parallele }, async () => {
+  while (suivant < specs.length) {
+    const s = specs[suivant++];
+    const sortie = resolve(dirname(process.argv[2]), s.sortie);
+    if (existsSync(join(sortie, `${s.nom}.mp4`))) continue;
+    try {
+      const id = await dejaSoumis(s).catch(() => null);
+      console.log(JSON.stringify(await rendre({ ...s, sortie }, id ?? undefined)));
+    } catch (e) {
+      console.log(JSON.stringify({ nom: s.nom, erreur: (e as Error).message }));
+    }
   }
-}
+}));

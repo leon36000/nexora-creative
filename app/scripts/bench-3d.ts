@@ -64,7 +64,7 @@ async function main() {
   const [mode, ...a] = process.argv.slice(2);
   if (mode === 'still') {
     const [prompt, out, seed = '7'] = a;
-    const g = buildStillsGraph({ model: 'qwen21', quality: 'quality', prompt, width: 1024, height: 1024, seed: Number(seed) });
+    const g = buildStillsGraph({ model: 'qwen21', quality: 'quality', prompt, width: Number(process.env.STILL_W ?? 1024), height: Number(process.env.STILL_H ?? 1024), seed: Number(seed) });
     const r = await run(g);
     const img = r.h.outputs.save.images[0];
     const f = await fetch(`${URL_}/view?filename=${img.filename}&subfolder=${img.subfolder}&type=${img.type}`);

@@ -35,10 +35,11 @@ import { ecrirePublication, PLATEFORMES, type Plateforme } from './nexora/public
 import { ecrireMusique } from './nexora/musique.js';
 import { planifierMoteurs } from './nexora/registre.js';
 import { compteCourant, territoireDuCompte } from './nexora/compte.js';
-import { clientLlmCourant, type ClientLlm } from './nexora/llm.js';
+import { clientLlmCourant, ErreurLlm, type ClientLlm } from './nexora/llm.js';
 import { clientPalier, LIBELLES_PALIER, estPalier, type Palier } from './nexora/niveaux.js';
 import { palierDuRole, paliersDisponibles, palierSuivant } from './nexora/paliers.js';
-import { coutJuge3dUsd, devisJuge3d, devisLlm, executerSousReservation, ErreurPlafondLlm, GrandLivreUsage, type BilanRun } from './nexora/usage.js';
+import { coutJuge3dUsd, devisJuge3d, devisLlm, executerSousReservation, ErreurPlafondLlm, GrandLivreUsage, Releve, type BilanRun } from './nexora/usage.js';
+import { clientAvecSecours, type FicheRealisation } from './nexora/realisateur.js';
 import { BRIEFS_FILMS } from './nexora/bench/briefsFilms.js';
 import { escalader, optionsPalier, type BriefFilm } from './nexora/montage/film.js';
 import { accesOrganisation, configAuthDepuisEnv, monterAuthentification } from './nexora/auth.js';
@@ -163,6 +164,20 @@ async function compterEspace() {
 }
 /** LLM de la requête : clé de l'organisation connectée, ou configuration du poste. */
 const llmCourant = () => clientLlmCourant(compteCourant(), accesOrganisation);
+
+/**
+ * Client du réalisateur (rôle « redaction ») : palier du rôle (Expert par défaut, recherche/25 : 8,0/10 contre 5,4 pour
+ * l'ancien réécrivain, 0,0055 $ la demande), secours sur le palier suivant puis sur Équilibré, chaque jeton au grand
+ * livre. Sans clé de palier sur le poste : le LLM du poste. `rel` : relevé d'un run facturé (sinon un relevé au livre).
+ */
+function llmRedaction(rel?: Releve): ClientLlm | null {
+  const p = palierDuRole('redaction');
+  if (!p) return llmCourant();
+  const compte = compteCourant();
+  const releve = rel ?? new Releve({ run: randomUUID(), tache: 'realisation', utilisateur: compte?.utilisateurId, organisation: compte?.organisationId }, 0.1, livreUsage);
+  const secours = [palierSuivant(p), p === 'equilibre' ? null : 'equilibre' as Palier].filter((x): x is Palier => !!x && x !== p);
+  return clientAvecSecours([p, ...new Set(secours)].map((x) => clientPalier(x, { surveillant: releve, autoriserRepli: true })));
+}
 
 let judgeState: (() => JudgeState) | undefined;
 if (config.judge.on) {
@@ -1004,17 +1019,41 @@ app.post('/api/nexora/creer', async (req, reply) => {
   // Avec une photo de départ, le prompt suit le guide I2VA : il part de l'image et développe l'action.
   // Personnages @ : sur le moteur cinéma (Ref2VA), @nom joint les images du personnage ; ailleurs, seulement ses mots.
   const persos = moteur === 'h3-max' && !demande.image ? await resoudrePersonnages(demande.intention) : null;
-  const r = await reecrireH3({
-    intention: intentionAvecCamera(persos?.sujets.length ? { ...demande, intention: persos.texteClair } : demande), mode: demande.image ? 'i2va' : 't2va', dureeS: dureeEffective(demande),
-    ...(demande.replique ? { dialogues: [{ texte: demande.replique, langue: 'French' }] } : {}),
-  }, llmCourant());
+  const entree = {
+    intention: intentionAvecCamera(persos?.sujets.length ? { ...demande, intention: persos.texteClair } : demande), mode: (demande.image ? 'i2va' : 't2va') as 'i2va' | 't2va', dureeS: dureeEffective(demande),
+    moteur, format: demande.format, ...(demande.replique ? { dialogues: [{ texte: demande.replique, langue: 'French' }] } : {}),
+  };
+  // Le réalisateur (recherche/25) écrit le prompt ; ses jetons sont réservés, mesurés et réglés comme ceux de l'agent.
+  const palierRedaction = palierDuRole('redaction');
+  let r: Awaited<ReturnType<typeof reecrireH3>>;
+  let usageRedaction: { credits: number; usd: number; jetons: number; palier: string } | null = null;
+  if (palierRedaction) {
+    const compte = compteCourant();
+    try {
+      const { resultat, bilan } = await executerSousReservation(
+        { fac: facturationCourante(), devis: devisLlm('realisation', palierRedaction, { livre: livreUsage, marge: 4 }), ctx: { run: randomUUID(), tache: 'realisation', utilisateur: compte?.utilisateurId, organisation: compte?.organisationId }, livre: livreUsage },
+        (rel) => reecrireH3(entree, llmRedaction(rel)),
+      );
+      r = resultat;
+      usageRedaction = { credits: bilan.factures, usd: bilan.totaux.coutUsd, jetons: bilan.totaux.entree + bilan.totaux.sortie, palier: palierRedaction };
+    } catch (e) {
+      if (e instanceof ErreurLlm && !(e instanceof ErreurPlafondLlm)) return reply.code(402).send({ error: e.message });
+      r = await reecrireH3(entree, null);
+    }
+  } else r = await reecrireH3(entree, llmCourant());
   const corps: any = { ...corpsRendu(demande, r.prompt, moteur), intention: demande.intention, promptSource: r.source, moteur, nexoraAutoMusique: (req.body as any)?.musique === true };
   if (persos?.sujets.length) Object.assign(corps, { prompt: convertirEnPromptRef(r.prompt, persos.sujets), refImages: persos.jetons, personnages: persos.noms });
   if (typeof (req.body as any)?.projectId === 'number') corps.projectId = (req.body as any).projectId;
   const res = await generate(corps, reply);
   if (reply.sent || (res && (res as any).error)) return res;
-  return { ...res, prompt: corps.prompt, source: r.source, tentatives: r.tentatives, moteur };
+  return { ...res, prompt: corps.prompt, source: r.source, tentatives: r.tentatives, moteur, ...comprehensionDe(r.fiche), ...(usageRedaction ? { usageRedaction } : {}) };
 });
+
+/** Ce que le réalisateur a compris, pour le client : résumé, choix faits sans demander, plans, variantes. */
+function comprehensionDe(f: FicheRealisation | undefined) {
+  if (!f) return {};
+  return { comprehension: { compris: f.compris, famille: f.famille, hypotheses: f.hypotheses, variantes: f.variantes, plans: f.plans.map((p) => ({ debut: p.debut, cadrage: p.cadrage })) } };
+}
 
 /** Director, étape 1 : l'idée devient un storyboard (plans, caméra, durées, bible de continuité), sans rien tourner. */
 app.post('/api/nexora/film/plan', async (req, reply) => {
@@ -1062,7 +1101,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
     }
   }
   try {
-    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur, reservations, reservationsCandidats, qualite: demande.qualite, candidats, cartons }, llmCourant());
+    const filmId = await tournerFilm(sb, { format: demande.format, son: demande.son, intention: String(b.intention ?? sb.titre), projectId: b.projectId ?? null, moteur, reservations, reservationsCandidats, qualite: demande.qualite, candidats, cartons }, llmRedaction());
     // Musique MiniMax-Music3 composée en parallèle (GB10) depuis le storyboard ; le film l'attend avant d'assembler.
     const envie = typeof b.musique?.envie === 'string' ? b.musique.envie.slice(0, 500) : b.musique === true ? '' : null;
     if (envie !== null && eng.moteursPour('music3').length) {
@@ -1122,7 +1161,7 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
     }
     reservations.push({ reservationId: r.reservationId, credits: r.credits, etat: 'reservee' });
   }
-  const filmId = await tournerFilm({ ...sb, titre: sb.titre }, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur, reservations: reservations as CreditsPrise[], qualite: s.qualite }, llmCourant());
+  const filmId = await tournerFilm({ ...sb, titre: sb.titre }, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur, reservations: reservations as CreditsPrise[], qualite: s.qualite }, llmRedaction());
   takes.patchSettings(filmId, { versionDe: film.id });
   void avancerFilm(filmId);
   return { filmId, take: takes.get(filmId) };
@@ -1151,7 +1190,7 @@ async function lancerRaccord(req: FastifyRequest, reply: FastifyReply, r: { stor
     }
     reservations.push({ reservationId: res.reservationId, credits: res.credits, etat: 'reservee' });
   }
-  const filmId = await tournerFilm(r.storyboard, { format: r.format, son: r.son, intention: intention || r.storyboard.titre, moteur, reservations: reservations as CreditsPrise[], qualite: r.qualite }, llmCourant());
+  const filmId = await tournerFilm(r.storyboard, { format: r.format, son: r.son, intention: intention || r.storyboard.titre, moteur, reservations: reservations as CreditsPrise[], qualite: r.qualite }, llmRedaction());
   takes.patchSettings(filmId, { app: 'nexora-raccord' });
   void avancerFilm(filmId);
   return { filmId };
@@ -1515,7 +1554,7 @@ app.post('/api/nexora/film/:id/plan/:n/reference', async (req, reply) => {
   const persos = role === 'composition' ? await resoudrePersonnages(intentionDuPlan(sb, n)) : null;
   const dureeS = (plan.duree === 10 ? 243 : 124) / 24;
   const dialogues = plan.replique ? { dialogues: [{ texte: plan.replique, langue: 'French' }] } : {};
-  const llm = llmCourant();
+  const llm = llmRedaction();
   let corps: any;
   if (role === 'depart') {
     const r = await reecrireH3({ intention: `${intentionDuPlan(sb, n)}\nThe video starts exactly from the provided first frame and continues the action from it.`, mode: 'i2va', dureeS, ...dialogues }, llm);
@@ -1624,7 +1663,7 @@ app.post('/api/nexora/projet/:id/lancer', async (req, reply) => {
   const secondes = lot.reduce((n, x) => n + secondesGpuEstimees(corpsRendu(demandeDe(x.plan), '', moteur)), 0);
   const refus = depassement({ credits: configAuth ? cout : null, secondesGpu: secondes }, PLAFOND_PRODUCTEUR);
   if (refus) return reply.code(409).send({ error: `${refus} Lance un lot plus petit.`, cout, secondes });
-  const llm = llmCourant();
+  const llm = llmRedaction();
   const cast = castDb.list().filter((m) => m.kind === 'character');
   const lances: number[] = [];
   try {

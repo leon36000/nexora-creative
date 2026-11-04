@@ -9,6 +9,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { type ClientLlm, lireJson, type MessageLlm } from './llm.js';
 import { instructionH3, type ModeH3, validerPromptH3 } from './promptH3.js';
+import { type FicheRealisation, realiser } from './realisateur.js';
 
 export interface EntreeReecriture {
   /** Ce que la personne a écrit, tel quel. */
@@ -19,6 +20,9 @@ export interface EntreeReecriture {
   dialogues?: { texte: string; langue: string; locuteur?: string }[];
   /** Consignes de cinéma choisies dans l'interface (caméra, lumière, style), en anglais du guide. */
   consignes?: string[];
+  /** Moteur visé et format : le réalisateur adapte son dialecte (FastH3 832×480 contre H3 cinéma). */
+  moteur?: 'h3-fast' | 'h3-max';
+  format?: '16:9' | '9:16' | '1:1';
 }
 
 export interface ResultatReecriture {
@@ -27,6 +31,8 @@ export interface ResultatReecriture {
   tentatives: number;
   /** Erreurs restantes de la dernière tentative LLM (vide si le prompt LLM est retenu). */
   erreurs: string[];
+  /** Fiche du réalisateur (ce que le LLM a compris, hypothèses, variantes) quand c'est lui qui a écrit le prompt. */
+  fiche?: FicheRealisation;
 }
 
 const ICI = dirname(fileURLToPath(import.meta.url));
@@ -105,7 +111,23 @@ export function remarquesParasites(prompt: string): string[] {
     .map((m) => `remove the meta remark ${m[0]}: describe only what is seen and heard`);
 }
 
-export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, maxTentatives = 3): Promise<ResultatReecriture> {
+/**
+ * Réécriture d'une intention en prompt H3 : le réalisateur (fiche de réalisation compilée par le code, recherche/25)
+ * d'abord ; le réécrivain classique (guide complet, réparations) s'il échoue ; un repli conforme sans LLM.
+ * NEXORA_REALISATEUR=off rétablit l'ancien comportement.
+ */
+export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, maxTentatives = 3, env: NodeJS.ProcessEnv = process.env): Promise<ResultatReecriture> {
+  if (llm && env.NEXORA_REALISATEUR !== 'off') {
+    try {
+      const r = await realiser(e, llm, maxTentatives);
+      return { prompt: r.prompt, source: 'llm', tentatives: r.tentatives, erreurs: [], fiche: r.fiche };
+    } catch { /* réécrivain classique */ }
+  }
+  return reecrireH3Classique(e, llm, maxTentatives);
+}
+
+/** Réécrivain classique (avant le 04/11/2026) : guide officiel complet en consignes, deux réparations, repli. */
+export async function reecrireH3Classique(e: EntreeReecriture, llm: ClientLlm | null, maxTentatives = 3): Promise<ResultatReecriture> {
   const ctx = { mode: e.mode, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
   let erreurs: string[] = ['aucun LLM configuré'];
   let tentatives = 0;

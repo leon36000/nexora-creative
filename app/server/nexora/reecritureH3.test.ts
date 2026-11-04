@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ClientLlm, MessageLlm } from './llm.js';
-import { reecrireH3, remarquesParasites, texteEcranNonDemande } from './reecritureH3.js';
+import { reecrireH3Classique, remarquesParasites, texteEcranNonDemande } from './reecritureH3.js';
 
 const bon = `integrated_multimodal_description: [Shot 1] Live-action, cinematic, a wide shot of a red car. The camera performs an arc shot at slow speed around it.
 
@@ -26,7 +26,7 @@ const entree = { intention: 'ma voiture rouge au bord de la mer, la caméra tour
 describe('réécrivain H3', () => {
   it('donne le guide officiel au LLM et rend un prompt conforme', async () => {
     const llm = faux([JSON.stringify({ prompt: bon })]);
-    const r = await reecrireH3(entree, llm);
+    const r = await reecrireH3Classique(entree, llm);
     expect(r.prompt).toBe(bon);
     expect(r.source).toBe('llm');
     expect(r.tentatives).toBe(1);
@@ -36,24 +36,24 @@ describe('réécrivain H3', () => {
 
   it('renvoie les erreurs du validateur au LLM pour réparation', async () => {
     const llm = faux([JSON.stringify({ prompt: 'n’importe quoi' }), JSON.stringify({ prompt: bon })]);
-    const r = await reecrireH3(entree, llm);
+    const r = await reecrireH3Classique(entree, llm);
     expect(r.tentatives).toBe(2);
     expect(r.prompt).toBe(bon);
     expect(llm.appels[1].at(-1)?.content).toMatch(/overall_soundscape/);
   });
 
   it('retombe sur un prompt minimal conforme si le LLM échoue ou est absent', async () => {
-    const r1 = await reecrireH3(entree, faux(['pas du json', 'toujours pas', 'non']));
+    const r1 = await reecrireH3Classique(entree, faux(['pas du json', 'toujours pas', 'non']));
     expect(r1.source).toBe('repli');
     expect(r1.prompt).toMatch(/^integrated_multimodal_description: \[Shot 1\]/);
-    const r2 = await reecrireH3(entree, null);
+    const r2 = await reecrireH3Classique(entree, null);
     expect(r2.source).toBe('repli');
     expect(r2.erreurs).toEqual([]);
   });
 
   it('protège les répliques de l’utilisateur', async () => {
     const llm = faux([JSON.stringify({ prompt: bon }), JSON.stringify({ prompt: bon }), JSON.stringify({ prompt: bon })]);
-    const r = await reecrireH3({ ...entree, dialogues: [{ texte: 'On y va.', langue: 'French' }] }, llm);
+    const r = await reecrireH3Classique({ ...entree, dialogues: [{ texte: 'On y va.', langue: 'French' }] }, llm);
     expect(r.source).toBe('repli');
     expect(r.prompt).toContain('<d>[French] On y va.</d>');
   });
@@ -69,7 +69,7 @@ describe('texte à l’écran non demandé', () => {
 
   it('fait réécrire le prompt pour retirer ce texte', async () => {
     const llm = faux([JSON.stringify({ prompt: avecEnseigne }), JSON.stringify({ prompt: bon })]);
-    const r = await reecrireH3({ ...entree, intention: 'une moto dans une ruelle néon' }, llm);
+    const r = await reecrireH3Classique({ ...entree, intention: 'une moto dans une ruelle néon' }, llm);
     expect(r.prompt).toBe(bon);
     expect(llm.appels[1].at(-1)?.content).toMatch(/Ruelle Néon/);
   });
@@ -82,7 +82,7 @@ describe('remarques parasites', () => {
     expect(remarquesParasites(parasite)).toHaveLength(1);
     expect(remarquesParasites(bon)).toEqual([]);
     const llm = faux([JSON.stringify({ prompt: parasite }), JSON.stringify({ prompt: bon })]);
-    const r = await reecrireH3(entree, llm);
+    const r = await reecrireH3Classique(entree, llm);
     expect(r.prompt).toBe(bon);
     expect(r.tentatives).toBe(2);
   });

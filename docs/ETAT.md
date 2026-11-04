@@ -1,10 +1,26 @@
-# Nexora Creative — où nous en sommes (mis à jour le 03/11/2026)
+# Nexora Creative — où nous en sommes (mis à jour le 04/11/2026)
 
 Document pour le fondateur : ce qui est fait, ce qui est prouvé, ce qui ne l'est pas. Détail jour par jour : `docs/JOURNAL.md`. Mesures : `recherche/08-mesures-gb10.md`.
 
 ## En une phrase
 
 **Nexora Creative tourne dans le navigateur sur le DGX Spark (pc6)** : une phrase en français devient une vidéo avec son (MiniMax H3), ou un **film de plusieurs plans** écrit et tourné par l'AI Director, retouchable plan par plan, remontable sans nouveau rendu et exportable pour Premiere ou DaVinci. Il est prêt à être branché au portail Nexora ; **le site, lui, n'a pas encore les routes nécessaires** (contrat écrit dans `docs/INTEGRATION-NEXORA.md`).
+
+## Mise à jour du 04/11 : le réalisateur (« le LLM qui booste le tout ») et la chaîne Relief + Blender (recherche/25)
+
+Branche `feat/llm-booste`. La phrase écrite à l'arrache devient une **fiche de réalisation** en un appel (compris, choix faits sans question, personnages, plans en prose de réalisateur, variantes), que le **code** compile en prompt H3 (forme du guide, répliques mot pour mot, personnages décrits une fois).
+
+| Brique | État | Preuve |
+|---|---|---|
+| Réalisateur (`server/nexora/realisateur.ts`), Expert par défaut, secours Équilibré, ancien réécrivain en repli | **fait, testé** (6 tests) | 32 demandes : 32/32 valides, 0 repli |
+| Qualité du prompt (deux juges à l'aveugle) | **mesurée** | GPT-6.1 Sol : 23 victoires contre 9, 7,1 contre 5,9 ; Argon : 8,0 contre 5,4 (probablement gonflé : il juge son propre texte) |
+| Qualité de la vidéo (10 paires h3-fast, juge visuel, deux ordres) | **mesurée** | 17 jugements sur 20 ; global 5,9 contre 4,75, mouvement 5,9 contre 4,7 |
+| Coût par demande | **mesuré, facturé** | 0,0055 $ (1 crédit) contre 0,0103 $ (2 crédits) avant ; 14 s ; réservé et réglé au grand livre dans `/creer` |
+| Panneau « Ce que l'IA a compris » (choix, plans, variantes, prompt H3) dans Créer | **fait, vu dans le navigateur** | `captures-v3/llm-booste-01-compris.jpg` |
+| Blender sans interface (bpy, passes couleur, profondeur, normales, masque) | **prototype** sur pc1 (pas d'ARM64 officiel) | `server/nexora/vfx/scene_blender.py`, `captures-v3/vfx-blender-*.jpg` |
+| Relief → « Animer avec H3 » (la vue 3D devient le plan clé) | **fait** ; composition vérifiée dans le navigateur, pas encore sur un vrai modèle de la page | `captures-v3/llm-booste-02-relief-plan-cle.png` |
+
+**Décision Blender** : gain réel mais étroit (fidélité d'un objet précis et d'une trajectoire ; H3 seul garde le spectacle mais invente le produit). Le gain vient du plan clé, que Relief donne sans Blender : intégré ainsi. Le travailleur Blender n'est pas déployé ; il deviendra utile avec un modèle guidé par profondeur (Wan2.2-Fun/VACE-Fun, décision de moteur au fondateur).
 
 ## Mise à jour du 04/11 : détourage vidéo pro, palier rapide livré, palier pro bloqué (recherche/22)
 

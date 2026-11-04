@@ -8,7 +8,8 @@
 import { type RoleLlm, reglagesLlmCourants } from './llm.js';
 import { type Palier, PALIERS, estPalier, palierDisponible } from './niveaux.js';
 
-export const PALIER_PAR_DEFAUT: Partial<Record<RoleLlm, Palier>> = { tournage: 'eco', montage: 'eco', monteur: 'eco', design: 'eco', producteur: 'expert' };
+// redaction : le réalisateur (recherche/25) part d'Expert : 8,0/10 contre 5,8 en Éco pour un coût facturé identique (1 crédit).
+export const PALIER_PAR_DEFAUT: Partial<Record<RoleLlm, Palier>> = { tournage: 'eco', montage: 'eco', monteur: 'eco', design: 'eco', producteur: 'expert', redaction: 'expert' };
 
 export function palierDuRole(role: RoleLlm, o: { projet?: Palier | null; env?: NodeJS.ProcessEnv; reglages?: Partial<Record<RoleLlm, string>> } = {}): Palier | null {
   const env = o.env ?? process.env;

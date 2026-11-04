@@ -90,6 +90,8 @@ export const JETONS_TACHE: Record<string, { entree: number; sortie: number }> = 
   marketing_variantes: { entree: 1900, sortie: 900 },
   // Juge de Relief : une planche 2×2 (≈ 900 jetons d'image) et la consigne ; réponse JSON courte.
   juge3d: { entree: 1500, sortie: 300 },
+  // Réalisateur (recherche/25, Expert, 32 demandes) : 1 990 / 740 en moyenne, une réparation rare.
+  realisation: { entree: 2000, sortie: 800 },
 };
 
 export interface Devis { tache: string; palier: Palier; entree: number; sortie: number; usd: number; credits: number; creditsReserves: number; plafondUsd: number; source: 'historique' | 'tables' }
