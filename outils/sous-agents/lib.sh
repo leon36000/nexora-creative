@@ -20,5 +20,5 @@ sa_extract() {  # sa_extract <Nom> : valeur de « Nom: valeur » dans le fichier
 }
 sa_up() { curl -s -m 3 -o /dev/null -w '%{http_code}' "$SA_URL/health/liveliness" 2>/dev/null | grep -q '^200$'; }
 sa_alias() {  # deepseek|muse|gemini -> alias
-  case "$1" in deepseek|eco-deepseek) echo eco-deepseek;; muse|eco-muse) echo eco-muse;; gemini|eco-gemini) echo eco-gemini;; *) return 1;; esac
+  case "$1" in deepseek|eco-deepseek) echo eco-deepseek;; muse|eco-muse) echo eco-muse;; gemini|eco-gemini) echo eco-gemini;; gemini-eleve|eco-gemini-eleve) echo eco-gemini-eleve;; *) return 1;; esac
 }
