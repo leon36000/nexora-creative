@@ -1,0 +1,10 @@
+# Dépendances du serveur de détourage (hors torch/torchvision, installés à part depuis l'index CUDA choisi : voir Dockerfile).
+# Versions relevées sur pc3 le 04/11/2026 (mêmes que la GB10 pour transformers).
+transformers==5.22.1
+huggingface-hub==2.4.0
+safetensors==0.8.0
+tokenizers==0.23.3
+numpy==2.5.4
+pillow==13.0.0
+opencv-python-headless==5.0.0.93
+openexr==3.5.3

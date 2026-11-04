@@ -24,6 +24,8 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
   let faux: Server;
   const recu: string[] = [];
   const octetsRecus: number[] = [];
+  const sansJeton: string[] = [];
+  const JETON = 'jeton-de-test-0123456789abcdefghijklmnop';
   const app = Fastify();
   // comme monterAuthentification : la requête s'exécute dans le contexte du compte
   app.addHook('onRequest', (req, _r, done) => avecCompte({ organisationId: String(req.headers['x-org']), utilisateurId: 'u', territoire: 'CA' }, done));
@@ -34,6 +36,10 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
   beforeAll(async () => {
     faux = createServer((req, res) => {
       recu.push(`${req.method} ${req.url}`);
+      if (req.headers.authorization !== `Bearer ${JETON}`) { // comme serveur.py : 401 sans le jeton partagé
+        sansJeton.push(`${req.method} ${req.url}`);
+        res.statusCode = 401; res.end('{"erreur":"jeton manquant ou invalide"}'); return;
+      }
       const morceaux: Buffer[] = [];
       req.on('data', (d) => morceaux.push(d));
       req.on('end', () => {
@@ -41,6 +47,7 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
         res.setHeader('content-type', 'application/json');
         if (req.method === 'PUT') res.end(JSON.stringify({ ok: true, info: { largeur: 1280, hauteur: 720, fps: 25, duree: 4, audio: false } }));
         else if (req.url?.endsWith('/lancer')) { res.statusCode = 202; res.end('{"ok":true}'); }
+        else if (req.url === '/texte') res.end(JSON.stringify({ objets: [{ masque_b64: 'MASQUE', score: 0.9, boite: [0.1, 0.1, 0.5, 0.9], aire: 0.25 }], secondes: 0.5, largeur: 1280, hauteur: 720 }));
         else if (req.method === 'GET' && /\/travaux\/[0-9a-f]+$/.test(req.url ?? '')) res.end(JSON.stringify({ etat: 'termine', etape: 'termine', progression: 1, message: 'terminé', mesures: { temps_total_s: 9 }, sorties: { fichiers: { 'matte.mp4': 10 }, sequences: { alpha: 4 } } }));
         else if (req.url?.includes('/sorties/matte.mp4')) { res.setHeader('content-type', 'video/mp4'); res.end('VIDEO'); }
         else res.end('{"ok":true}');
@@ -50,7 +57,7 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     const port = (faux.address() as AddressInfo).port;
     enregistrerDetourage(app, {
       dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-routes-')),
-      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['*'], detourageUrl: `http://127.0.0.1:${port}` }],
+      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['*'], detourageUrl: `http://127.0.0.1:${port}`, detourageJeton: JETON }],
       facturation: () => null, nexora: false,
     });
     await app.ready();
@@ -82,6 +89,8 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     expect(video.body).toBe('VIDEO');
     const evade = await inj(A, { method: 'GET', url: `/api/nexora/detourage/travaux/${t.id}/sorties/..%2F..%2Fetc%2Fpasswd` });
     expect(evade.statusCode).toBe(404);
+    expect(sansJeton).toEqual([]); // chaque requête vers la machine GPU porte le jeton
+    expect(JSON.stringify(etat.json())).not.toContain(JETON); // et il n'est jamais renvoyé au navigateur
   });
 
   it('une autre organisation ne voit rien et ne peut rien faire', async () => {
@@ -94,6 +103,20 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     expect(liste.json()).toEqual([]);
     const put = await inj(B, { method: 'PUT', url: `/api/nexora/detourage/travaux/${t.id}/source`, headers: { 'content-type': 'application/octet-stream' }, payload: Buffer.alloc(10) });
     expect(put.statusCode).toBe(404);
+  });
+
+  it('sélection par mot : les objets reviennent, un mot vide est refusé sans appeler le moteur', async () => {
+    const imageB64 = 'A'.repeat(200);
+    const ok = await inj(A, { method: 'POST', url: '/api/nexora/detourage/texte', payload: { imageB64, texte: ' person ' } });
+    expect(ok.statusCode).toBe(200);
+    expect(ok.json()).toMatchObject({ objets: [{ masqueB64: 'MASQUE', score: 0.9, boite: [0.1, 0.1, 0.5, 0.9], aire: 0.25 }], secondes: 0.5, largeur: 1280, hauteur: 720 });
+    const avant = recu.length;
+    for (const payload of [{ imageB64, texte: '   ' }, { imageB64, texte: 'person', seuil: 2 }]) {
+      const r = await inj(A, { method: 'POST', url: '/api/nexora/detourage/texte', payload });
+      expect(r.statusCode).toBe(400);
+    }
+    expect(recu.length).toBe(avant); // rien n'a été demandé au moteur
+    expect(sansJeton).toEqual([]); // le jeton accompagne la requête au moteur
   });
 
   it('identifiant mal formé : 404 sans rien demander au moteur', async () => {

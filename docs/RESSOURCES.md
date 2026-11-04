@@ -44,7 +44,7 @@ Qui vit où : `docs/ENVIRONNEMENTS.md`. Journal des suppressions : `docs/JOURNAL
 | Élément | Propriétaire | Taille | Rétention | Statut |
 |---|---|---|---|---|
 | `~/nexora-creative-data/models` | Nexora | 28 Go | permanente | garder |
-| `~/nexora-creative-data/models/detourage/` : `hf/` (SAM 2.1 hiera-large 0,90 Go et small 0,18 Go, Apache-2.0 ; ViTMatte small 0,10 Go et base 0,39 Go, Apache-2.0) et `pylibs/` (OpenCV, OpenEXR, hors venv ComfyUI) | Nexora Creative, détourage vidéo (`outils/detourage/`, recherche/22) | 1,6 Go | permanente | garder ; poids libres, aucun jeton |
+| `~/nexora-creative-data/models/detourage/` : `hf/` (ViTMatte small 0,10 Go et base 0,39 Go, Apache-2.0) et `pylibs/` (OpenCV, OpenEXR, hors venv ComfyUI) | Nexora Creative, détourage vidéo (`outils/detourage/`, recherche/22) | 0,49 Go (était 1,6 Go) | permanente | garder ; poids libres, aucun jeton ; **détourage SAM 2.1 retiré le 04/11/2026 (1,08 Go), reste ViTMatte 0,49 Go** |
 | `~/nexora-creative-data/work/detourage/` : dossiers de travail du serveur de détourage (images, masques, sorties) | Nexora Creative | ≈ 0,08 Go par seconde de vidéo à 720p (4,7 Go par minute) ; garde-fou : le serveur refuse un travail qui laisserait moins de 3 Go libres ; limite par défaut 120 s par travail | 48 h après la fin (suppression par l'interface ou par TTL), 14 j maximum | nettoyer ; les essais de la mission du 04/11 y sont à supprimer |
 | `…/engine` | Nexora | 13 Go | permanente | garder |
 | `…/models/diffusion_models/trellis_2_int8_convrot.safetensors` (5,25 Go), `…/models/vae/trellis_2_{shape,texture}_vae_bf16.safetensors` (1,10 + 0,95 Go), `…/engine/ComfyUI/models/clip_vision/dino_v3_vit_l.safetensors` (1,21 Go), `…/models/background_removal/birefnet.safetensors` (0,44 Go) | Nexora Creative (mode 3D, TRELLIS.2) | 8,95 Go au total | permanente | lot A1 du 03/11/2026 (autorisé par le fondateur), variante int8 retenue au lieu du bf16 (10,34 Go, non téléchargé) ; dépôts Comfy-Org/TRELLIS.2 et Comfy-Org/BiRefNet (MIT ; DINOv3 sous licence Meta, copie Comfy-Org sans accès restreint) ; reste ≥ 21 Go libres sur `/` |
@@ -69,6 +69,25 @@ Qui vit où : `docs/ENVIRONNEMENTS.md`. Journal des suppressions : `docs/JOURNAL
 | `~/.cache/tracker3` (index GNOME) | 9,5 Go | n/a | pas à Nexora : proposé au fondateur |
 | `/tmp/nvidia-r595-*` | ~2 Go | n/a | pas à Nexora : proposé au fondateur |
 | RTX 5090 : plafond 475 W + ventilateur 100 % permanent (`nexora-gpu-5090.service` + minuterie `-watch.timer`, script `/usr/local/sbin/nexora-gpu-5090.sh`, réglage `/etc/default/nexora-gpu-5090`) | n/a | permanente | Nexora, créé le 03/11/2026, ordre du fondateur : préserver la carte plutôt que les ventilateurs ; sources et retour arrière dans `deploy/pc1-gpu-5090/` ; mesures dans ce tableau |
+
+### pc3 (RTX 5080, V100 dans une VM)
+RTX 5080 16 Go (sm_120, pilote 595.99), 30 Go de RAM dont ≈ 14 Go pris par la VM qemu `pc3-v100-skinny`, nœud agent k3s (contrôle sur pc1), opérateur GPU NVIDIA, sans sudo. Tesla V100 16 Go (sm_70, pilote 580.178) dans la VM qemu `pc3-v100-vm`, réseau « user » (NAT, joignable seulement par SSH 127.0.0.1:22223 sur pc3). Linger systemd désactivé (`loginctl enable-linger pc3` à faire par le fondateur si on revient au natif).
+| Élément | Propriétaire | Taille | Rétention | Statut |
+|---|---|---|---|---|
+| `~/nexora-detourage/` : dossier unique (bin, venvs, python, modeles, k8s, secrets 700, journaux, bancs, code, outils/blender, ffmpeg) | Nexora Creative, détourage vidéo | voir les lignes suivantes | permanente | garder ; un seul dossier, rien d'épars |
+| `…/modeles/hf` : ViTMatte small et base (Apache-2.0) | Nexora Creative | 0,49 Go | permanente | garder ; SAM 2.1 retiré le 04/11/2026 |
+| `…/modeles/pro/` : LTX-2.5 22B distilled nvfp4, encodeur Gemma 4 12B int8, trois VAE, IC-LoRA Alpha-Gen, **dont SAM 3.1 (1,75 Go)** | Nexora Creative, palier pro et sélection par mot | 40,4 Go | permanente | garder ; sha256 vérifiés contre les métadonnées LFS publiées ; dépôt `facebook/sam3.1` encore en attente (403), non utilisé |
+| `…/k8s/registre` : stockage du registre d'images provisoire (htpasswd) | Nexora Creative, k3s | 8,4 Go après ménage | provisoire | à retirer avec le registre dès que les images partent au registre commun |
+| `…/k8s/travaux` et `…/k8s/travaux-pro` : dossiers de travail des pods (images, masques, sorties ; sorties ComfyUI du pro) | Nexora Creative | ≈ 0,08 Go par seconde de vidéo à 720p | 48 h après la fin (TTL de Creative), 14 j maximum | nettoyer ; les essais du 04/11 sont à supprimer |
+| `…/venvs` et cache : venv uv Python 3.12 de l'installation native, caches pip et uv | Nexora Creative | venv de l'ordre du Go (non relevé), caches purgés au-delà de 200 Mo | régénérable | garder le venv tant que l'installation native de secours reste (`deploy/pc3/`) |
+| `…/outils/blender` | Nexora Creative, vérité terrain (`outils/detourage/verite/`) | 1,2 Go | permanente | garder ; Blender 5.2.3 pour les scènes à alpha exact |
+| `…/ffmpeg` | Nexora Creative | binaire, quelques dizaines de Mo | permanente | garder (`FFMPEG_BIN` de l'installation native) |
+| `…/bancs` : résultats de `banc.py` et de `verite/` | Nexora Creative | quelques Mo | 14 jours | copie de référence dans `marketing/creative/captures-v3/detourage-mesures-pc3-*.json` |
+| Pod `detourage` (namespace `nexora`) : 1 GPU, hostPort 8231 sur 192.168.1.126, Service ClusterIP, NetworkPolicy | Nexora Creative, production | image `detourage:<version>-cu130` | permanent | prod ; entrée seulement depuis 192.168.1.122/32, jeton exigé |
+| Pod `comfyui-pro` : ComfyUI v0.44.0 + ComfyUI-LTXVideo 220e1d4 (image `detourage-pro`) | Nexora Creative, palier pro | `replicas: 0` | permanent | arrêté par défaut : la 5080 est attribuée en entier, rapide et pro ne tournent pas ensemble |
+| Pod `registre-provisoire` : 127.0.0.1:5000, htpasswd | Nexora Creative, k3s | partage `…/k8s/registre` | provisoire | à retirer avec le registre commun |
+| Pod `poids-webdav` : rclone WebDAV en lecture seule de `…/modeles`, 127.0.0.1:8095 | Nexora Creative, VM V100 | 64 Mo demandés, 512 Mo max | provisoire | sert les poids à la VM V100 par `rclone mount`, rien d'exposé au LAN |
+| `~/nexora-detourage-v100/` dans la VM V100 : venv 7,1 Go, ffmpeg, montage des poids | Nexora Creative, essais V100 | 7,1 Go | 14 jours (essai) | validé techniquement, pas en production : la VM 202 ne peut pas joindre la VM (réseau qemu « user ») |
 
 ### pc1, RTX 5090 : plafond de puissance (mesures du 03/11/2026)
 Banc : multiplications bf16 8192×8192 (GPU saturé, pire cas), 60 s par palier après 10 s de chauffe, ventilateur en automatique, ComfyUI 18388 au repos (file vide). Aucun job H3 réel chronométré : la carte était occupée par les modèles du film (30 Go de VRAM), le banc ne fait que le calcul brut.

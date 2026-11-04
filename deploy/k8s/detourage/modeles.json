@@ -1,0 +1,54 @@
+{
+ "format": 1,
+ "usage": "outils/detourage (palier rapide)",
+ "hf_home": "hf",
+ "depots": [
+  {
+   "depot": "hustvl/vitmatte-base-composition-1k",
+   "revision": "bf486d01a7d9e3dbcc8400f7942835caf0eaf76e",
+   "licence": "apache-2.0",
+   "source": "https://huggingface.co/hustvl/vitmatte-base-composition-1k",
+   "fichiers": [
+    {
+     "chemin": "config.json",
+     "octets": 783,
+     "sha256": "67d70e8cbd850adfde5714af6e1b4078cd266b8867a362cdf6023f1f9e045634"
+    },
+    {
+     "chemin": "preprocessor_config.json",
+     "octets": 284,
+     "sha256": "0db558038b96a3f5c97e46d4ec8966fcc479e9aa58a391bca60b5094a5f7fee0"
+    },
+    {
+     "chemin": "pytorch_model.bin",
+     "octets": 386836309,
+     "sha256": "b2521bcc4b719fb24611c39605b6642162fd7502e69b3cc846506ca921757b41"
+    }
+   ]
+  },
+  {
+   "depot": "hustvl/vitmatte-small-composition-1k",
+   "revision": "6a58ad7646403c1df626fbd746900aec7361ea1d",
+   "licence": "apache-2.0",
+   "source": "https://huggingface.co/hustvl/vitmatte-small-composition-1k",
+   "fichiers": [
+    {
+     "chemin": "config.json",
+     "octets": 837,
+     "sha256": "ae1006f5a83227048b563b2e60709d4203e432b2276949ebef41a8cfeeeaf45f"
+    },
+    {
+     "chemin": "model.safetensors",
+     "octets": 103294572,
+     "sha256": "bda9289db1bb6762d978b42d1c62ae3f34daf7497171a347a1d09657efd788cb"
+    },
+    {
+     "chemin": "preprocessor_config.json",
+     "octets": 284,
+     "sha256": "0db558038b96a3f5c97e46d4ec8966fcc479e9aa58a391bca60b5094a5f7fee0"
+    }
+   ]
+  }
+ ],
+ "octets_total": 490133069
+}

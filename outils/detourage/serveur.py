@@ -4,6 +4,7 @@ Creative le pilote comme un moteur : il envoie la source, lance, interroge la pr
 
   GET    /sante                              modèles chargés, mémoire GPU, travaux en cours
   POST   /segmenter                          aperçu interactif d'une image : {image_b64, points:[[x,y,l]], boite?} (x, y en 0..1)
+  POST   /texte                              sélection par texte (SAM 3.1) : {image_b64, texte, seuil?} -> {objets:[{masque_b64, score, boite}]}
   PUT    /travaux/<id>/fichiers/<nom>        dépose un fichier (source, fond)
   POST   /travaux/<id>/lancer                {params} ; reprend ce qui est déjà fait dans le dossier
   GET    /travaux/<id>                       état, progression, mesures
@@ -11,7 +12,15 @@ Creative le pilote comme un moteur : il envoie la source, lance, interroge la pr
   GET    /travaux/<id>/sorties/<chemin>      télécharge (Range géré)
   DELETE /travaux/<id>                       supprime tout le dossier (nettoyage)
 
-Variables : NEXORA_DETOURAGE_DOSSIER (travaux), NEXORA_DETOURAGE_POIDS, NEXORA_DETOURAGE_PORT, FFMPEG_BIN.
+Variables : NEXORA_DETOURAGE_DOSSIER (travaux), NEXORA_DETOURAGE_POIDS, NEXORA_DETOURAGE_PORT, FFMPEG_BIN,
+NEXORA_DETOURAGE_HOTE (une ou plusieurs adresses d'écoute séparées par des virgules ; 127.0.0.1 par défaut),
+NEXORA_DETOURAGE_JETON_FICHIER (fichier du jeton partagé, mode 600 ; exigé dès qu'une adresse n'est pas locale),
+NEXORA_DETOURAGE_AUTORISES (adresses ou réseaux clients autorisés, ex. « 192.168.1.122 » ; exigé de même),
+NEXORA_DETOURAGE_SOCKET (prise Unix d'administration locale, mode 600 : contrôles et bancs sur la machine même ; la
+liste d'adresses ne s'y applique pas, le jeton si).
+
+Protection : chaque requête doit venir d'une adresse autorisée (sinon 403) et porter « Authorization: Bearer <jeton> »
+(sinon 401), comparé en temps constant. Le jeton n'est jamais journalisé ni renvoyé.
 """
 from __future__ import annotations
 
@@ -24,6 +33,7 @@ import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import ThreadingMixIn, UnixStreamServer
 from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -32,10 +42,13 @@ sys.path.insert(0, os.path.expanduser('~/nexora-creative-data/models/detourage/p
 import cv2  # noqa: E402
 import numpy as np  # noqa: E402
 
+from acces import Acces  # noqa: E402
 from modeles import Modeles  # noqa: E402
 from traitement import Tache, regler, sonder  # noqa: E402
 
 DOSSIER = os.environ.get('NEXORA_DETOURAGE_DOSSIER') or os.path.expanduser('~/nexora-creative-data/work/detourage')
+HOTES = [h.strip() for h in (os.environ.get('NEXORA_DETOURAGE_HOTE') or '127.0.0.1').split(',') if h.strip()]
+acces = Acces.depuis_env(HOTES)  # refuse de démarrer si l'écoute réseau n'est pas protégée
 ID = re.compile(r'^[a-zA-Z0-9_-]{6,64}$')
 NOM = re.compile(r'^[a-zA-Z0-9._-]{1,80}$')
 os.makedirs(DOSSIER, exist_ok=True)
@@ -76,6 +89,12 @@ class H(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     server_version = 'nexora-detourage/1'
 
+    def address_string(self):
+        return 'unix' if self._unix() else self.client_address[0]
+
+    def _unix(self) -> bool:
+        return isinstance(self.server, ServeurUnix)
+
     def log_message(self, fmt, *a):  # journal sobre, jamais de contenu
         sys.stderr.write('[detourage] %s\n' % (fmt % a))
 
@@ -94,7 +113,29 @@ class H(BaseHTTPRequestHandler):
     def _route(self):
         return [unquote(x) for x in urlparse(self.path).path.strip('/').split('/') if x]
 
+    def _refuse(self) -> bool:
+        """Adresse puis jeton, avant toute lecture du corps ; la connexion est fermée en cas de refus."""
+        if self._unix():  # accès réservé au propriétaire du fichier de la prise : seul le jeton est vérifié
+            code = 0 if acces.jeton_valide(self.headers.get('Authorization')) else 401
+        else:
+            code = acces.verifier(self.client_address[0], self.headers.get('Authorization'))
+        if not code:
+            return False
+        self.close_connection = True
+        b = json.dumps({'erreur': 'adresse non autorisée' if code == 403 else 'jeton manquant ou invalide'}, ensure_ascii=False).encode()
+        self.send_response(code)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(b)))
+        self.send_header('Connection', 'close')
+        if code == 401:
+            self.send_header('WWW-Authenticate', 'Bearer')
+        self.end_headers()
+        self.wfile.write(b)
+        return True
+
     def do_GET(self):
+        if self._refuse():
+            return
         r = self._route()
         if r == ['sante']:
             return self._json(200, {'ok': True, 'modeles': modeles.etat(), 'travaux_en_cours': [k for k, v in travaux.items() if v['fil'].is_alive()],
@@ -151,6 +192,8 @@ class H(BaseHTTPRequestHandler):
                 restant -= len(b)
 
     def do_PUT(self):
+        if self._refuse():
+            return
         r = self._route()
         if len(r) == 4 and r[0] == 'travaux' and r[2] == 'fichiers' and ID.match(r[1]) and NOM.match(r[3]):
             os.makedirs(chemin(r[1]), exist_ok=True)
@@ -179,6 +222,8 @@ class H(BaseHTTPRequestHandler):
         self._json(404, {'erreur': 'route inconnue'})
 
     def do_POST(self):
+        if self._refuse():
+            return
         r = self._route()
         try:
             corps = json.loads(self._corps() or b'{}')
@@ -194,13 +239,33 @@ class H(BaseHTTPRequestHandler):
                 if not g['points'] and not g['boite']:
                     raise ValueError('au moins un clic ou une boîte')
                 t = time.time()  # pas de file : l'aperçu d'une image s'intercale avec un travail en cours
-                proba, score = modeles.masque_image(rgb, g, corps.get('sam') or 'large')
+                proba, score = modeles.masque_image(rgb, g, corps.get('sam') or 'sam3.1')
                 ok, png = cv2.imencode('.png', np.rint(proba.astype(np.float32) * 255).astype(np.uint8))
                 return self._json(200, {'masque_b64': base64.b64encode(png.tobytes()).decode(), 'score': round(score, 2),
                                         'aire': round(float((proba > 0.5).mean()), 4), 'secondes': round(time.time() - t, 2),
                                         'largeur': rgb.shape[1], 'hauteur': rgb.shape[0]})
             except (KeyError, ValueError) as e:
                 return self._json(400, {'erreur': str(e)})
+        if r == ['texte']:  # sélection par texte (SAM 3.1) : {image_b64, texte, seuil?} -> objets {masque_b64, score, boite}
+            try:
+                im = cv2.imdecode(np.frombuffer(base64.b64decode(corps['image_b64']), np.uint8), cv2.IMREAD_COLOR)
+                if im is None:
+                    raise ValueError('image illisible')
+                texte = str(corps.get('texte') or '').strip()
+                if not texte or len(texte) > 200:
+                    raise ValueError('texte vide ou trop long')
+                t = time.time()
+                objets = modeles.detecter_texte(cv2.cvtColor(im, cv2.COLOR_BGR2RGB), texte, float(corps.get('seuil') or 0.4))
+                sortie = []
+                for o in objets:
+                    ok, png = cv2.imencode('.png', np.rint(o['masque'].astype(np.float32) * 255).astype(np.uint8))
+                    sortie.append({'masque_b64': base64.b64encode(png.tobytes()).decode(), 'score': o['score'], 'boite': o['boite'],
+                                   'aire': round(float((o['masque'] > 0.5).mean()), 4)})
+                return self._json(200, {'objets': sortie, 'secondes': round(time.time() - t, 2), 'largeur': im.shape[1], 'hauteur': im.shape[0]})
+            except (KeyError, ValueError) as e:
+                return self._json(400, {'erreur': str(e)})
+            except RuntimeError as e:
+                return self._json(503, {'erreur': str(e)})
         if len(r) == 3 and r[0] == 'travaux' and ID.match(r[1]):
             id_ = r[1]
             if r[2] == 'lancer':
@@ -218,6 +283,8 @@ class H(BaseHTTPRequestHandler):
         self._json(404, {'erreur': 'route inconnue'})
 
     def do_DELETE(self):
+        if self._refuse():
+            return
         r = self._route()
         if len(r) == 2 and r[0] == 'travaux' and ID.match(r[1]):
             t = travaux.get(r[1])
@@ -230,17 +297,40 @@ class H(BaseHTTPRequestHandler):
         self._json(404, {'erreur': 'route inconnue'})
 
 
+class ServeurUnix(ThreadingMixIn, UnixStreamServer):
+    daemon_threads = True
+
+    def get_request(self):
+        r, _ = super().get_request()
+        return r, ('unix', 0)
+
+
+def serveur_unix(chemin_prise: str) -> ServeurUnix:
+    if os.path.exists(chemin_prise):
+        os.remove(chemin_prise)
+    ancien = os.umask(0o177)  # la prise naît en mode 600
+    try:
+        return ServeurUnix(chemin_prise, H)
+    finally:
+        os.umask(ancien)
+
+
 def main():
     port = int(os.environ.get('NEXORA_DETOURAGE_PORT') or 8231)
-    hote = os.environ.get('NEXORA_DETOURAGE_HOTE') or '127.0.0.1'
     # au redémarrage, un travail resté « en_cours » n'a plus de processus : on le marque pour qu'il soit relancé (reprise)
     for d in os.listdir(DOSSIER):
         e = lire_etat(d)
         if e and e.get('etat') in ('en_cours', 'en_attente'):
             e.update(etat='interrompu', message='serveur redémarré : relance pour reprendre')
             json.dump(e, open(chemin(d, 'etat.json'), 'w'))
-    print(f'[detourage] écoute {hote}:{port}, dossier {DOSSIER}, {modeles.etat()}', flush=True)
-    ThreadingHTTPServer((hote, port), H).serve_forever()
+    serveurs = [ThreadingHTTPServer((h, port), H) for h in HOTES]
+    prise = (os.environ.get('NEXORA_DETOURAGE_SOCKET') or '').strip()
+    if prise:
+        serveurs.append(serveur_unix(prise))
+    print(f'[detourage] écoute {",".join(HOTES)} port {port}{" + prise unix" if prise else ""}, dossier {DOSSIER}, {acces.resume()}, {modeles.etat()}', flush=True)
+    for s in serveurs[1:]:
+        threading.Thread(target=s.serve_forever, daemon=True).start()
+    serveurs[0].serve_forever()
 
 
 if __name__ == '__main__':

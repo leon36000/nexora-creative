@@ -1,0 +1,21 @@
+# Serveur de détourage de Nexora Creative sur pc3 (systemd utilisateur, sans root).
+# Ne s'active utilement qu'avec `sudo loginctl enable-linger pc3` (à faire par le fondateur) ; d'ici là : demarrer.sh.
+# Installation : ln -s ~/nexora-detourage/systemd/nexora-detourage.service ~/.config/systemd/user/ ;
+#   ~/nexora-detourage/arreter.sh ; systemctl --user daemon-reload ; systemctl --user enable --now nexora-detourage
+[Unit]
+Description=Nexora Creative : serveur de detourage video (pc3, RTX 5080)
+After=network-online.target
+[Service]
+EnvironmentFile=%h/nexora-detourage/detourage.env
+Environment=NEXORA_DETOURAGE_DOSSIER=%h/nexora-detourage/travaux
+Environment=NEXORA_DETOURAGE_POIDS=%h/nexora-detourage/modeles
+Environment=HF_HOME=%h/nexora-detourage/modeles/hf
+Environment=NEXORA_DETOURAGE_JETON_FICHIER=%h/nexora-detourage/secrets/jeton
+Environment=FFMPEG_BIN=%h/nexora-detourage/ffmpeg/bin/ffmpeg
+Environment=NEXORA_DETOURAGE_SOCKET=%h/nexora-detourage/secrets/detourage.sock
+ExecStart=%h/nexora-detourage/venvs/rapide/bin/python -I %h/nexora-detourage/code/detourage/serveur.py
+Restart=on-failure
+RestartSec=5
+MemoryMax=10G
+[Install]
+WantedBy=default.target

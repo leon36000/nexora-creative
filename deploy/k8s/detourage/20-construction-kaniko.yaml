@@ -1,0 +1,43 @@
+# Construction de l'image du détourage sur pc3, sans démon ni root sur l'hôte (kaniko), poussée au registre provisoire.
+# Gabarit : construire.sh remplace __IMAGE__, __TAG__, __TORCH_INDEX__ et __CONTEXTE__ puis applique ce Job.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: construction-__IMAGE__-__TAG__
+  namespace: nexora
+  labels: {app: construction-detourage}
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels: {app: construction-detourage}
+    spec:
+      nodeSelector: {kubernetes.io/hostname: pc3}
+      hostNetwork: true            # pour joindre le registre provisoire sur 127.0.0.1:5000
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Never
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:v1.23.2@sha256:9e69fd4330ec887829c780f5126dd80edc663df6def362cd22e79bcdf00ac53f
+          args:
+            - --context=dir:///contexte
+            - --dockerfile=/contexte/Dockerfile
+            - --destination=127.0.0.1:5000/nexora/__IMAGE__:__TAG__
+            - --build-arg=TORCH_INDEX=__TORCH_INDEX__
+            - --insecure
+            - --skip-tls-verify
+            - --compressed-caching=false
+            - --snapshot-mode=redo
+            - --use-new-run
+          resources:
+            requests: {cpu: "2", memory: 2Gi}
+            limits: {memory: 10Gi}
+          volumeMounts:
+            - {name: contexte, mountPath: /contexte, readOnly: true}
+            - {name: auth, mountPath: /kaniko/.docker, readOnly: true}
+      volumes:
+        - name: contexte
+          hostPath: {path: __CONTEXTE__, type: Directory}
+        - name: auth
+          secret: {secretName: registre-tirage, items: [{key: .dockerconfigjson, path: config.json}]}
