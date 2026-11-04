@@ -369,3 +369,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Passerelle économique : santé HTTP 200, catalogue sans authentification HTTP 401 ; le lanceur lit une clé maître, donc pas utilisé sous la consigne « aucun secret lu ». Trois agents Luna max lancés.
 
 - Conservation, deuxième vague : 412 contenus déjà vérifiés, 1 394 supplémentaires copiés sur le SSD Infrastructure de pc1 et accessibles depuis le Bureau ; empreintes SHA-256 vérifiées, inventaire à 3 720 lignes et 15 colonnes. Racine pc1 33 Gio libres, Infrastructure 244 Gio libres. Sources conservées ; parc complet non encore audité.
+
+- État Creative : H3, Qwen, Music3, détourage configuré et 3D annoncés par `/api/nexora/etat`, sans essai utilisateur de bout en bout. GitLab encore 502 ; les 2 015 nouveaux médias ont chacun une entrée correspondante et un fichier présent sur pc1.
