@@ -30,8 +30,6 @@ spec:
             - --compressed-caching=false
             - --snapshot-mode=redo
             - --use-new-run
-            - --cache=true
-            - --cache-repo=127.0.0.1:5000/nexora/cache-__IMAGE__
           resources:
             requests: {cpu: "2", memory: 2Gi}
             limits: {memory: 10Gi}
