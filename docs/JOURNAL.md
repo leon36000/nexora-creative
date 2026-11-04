@@ -510,3 +510,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Agent Gemini Flex élevé outillé isolé : revue achevée ; sources vidéo omises et validation négative à reproduire/corriger. Les suggestions restent à vérifier ; tous les essais doivent rester conservés.
 
 - Viewer : `0200277` conserve l’identifiant du clip en redirigeant Prolonger/raccord ; 4 tests ciblés et typecheck relancés, pas de test navigateur ou déploiement.
+
+- Mesh : décimation CPU d’une chaise Pixal, 149 898 → 49 996 triangles et 8,18 → 4,94 Mo ; deux cartes PBR identiques par SHA. Non-variété 96 → 111 ; pas de verdict visuel ou activation par défaut. Essai et mesures archivés sur pc1.

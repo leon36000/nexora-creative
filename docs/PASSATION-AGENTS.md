@@ -778,3 +778,9 @@ La revue isolée `agents/gemini-revue-provenance/revue.md` sur Storage est termi
 ### Viewer : clip conservé lors de la redirection Prolonger
 
 Commit local **0200277** dans le worktree Viewer : les liens `/extend` conservent `take` en allant vers `/prolonger`, y compris `mode=transition` traduit en `mode=raccord`; sans identifiant les destinations restent celles d’origine. Quatre tests ciblés et le typecheck complet ont été relancés indépendamment avec succès. Pas de test navigateur ni déploiement ; réconcilier la branche avec le `developpement` serveur plus récent avant MR.
+
+### Mesh : premier essai réel de décimation CPU
+
+Sur la chaise Pixal BF16 déjà produite, avec `decimerGlb` du code Creative local et cible 50 000 triangles : **149 898 → 49 996 triangles**, **8 177 296 → 4 940 320 octets**, fonction 0,31 s sur deux cœurs pour cet essai (hors lecture initiale/analyses). Les cartes de couleur et métal/rugosité détectées ont des SHA-256 identiques. Le contrôle topologique local rapporte arêtes ouvertes 549 → 539, arêtes non-variété 96 → 111, 11 composantes et zéro triangle dégénéré avant/après ; aucun des deux n’est étanche selon ce contrôle. Original préservé ; GLB et deux mesures copiés sur pc1, SHA vérifiés, inventaire **3 919 entrées**.
+
+Un objet, aucun rendu ou verdict visuel : résultat prometteur pour la taille, mais l’augmentation des arêtes non-variété interdit de conclure à une amélioration générale ou d’activer ce réglage automatiquement. Mesures et limites sur Storage `rnd-codex-20261104/mesh-essai-decimation/` et note `mesh.md`.
