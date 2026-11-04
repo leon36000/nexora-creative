@@ -401,3 +401,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Finish : inspection de trois recadrages fixes comparatifs, sans différence flagrante à l'échelle vue ; insuffisant pour valider le mouvement ou activer les codecs. Quatre planches, y compris l'essai noir, archivées et vérifiées sur pc1.
 
 - OPSYS DeepSeek : p29 rendu, décodé et archivé avec planche ; p30 lancé seul après contrôle de file et puissance.
+
+- OPSYS : commit `65acfe4` conserve les tranches et refuse l'écrasement, 7 tests relancés. Le court DeepSeek (EditPlan validé, 13,5 s) est lancé en brouillon CPU sur deux cœurs ; résultat et archivage en attente.

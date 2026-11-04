@@ -530,3 +530,9 @@ Codex a comparé des recadrages 640×360 de la source et des quatre variantes p7
 ### OPSYS DeepSeek : p29
 
 `p29-r1.mp4` rendu en 138,3 s de moteur ; H.264 1344×768, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1 et vérifiées SHA-256 ; inventaire **3 753 entrées**. La planche montre le représentant devant une maison avec téléphone ; son et mouvement restent à juger. Après file vide et plafond 475 W confirmés, `p30` (plan plus long) a été lancé seul ; résultat en attente.
+
+### OPSYS : conservation des tranches et brouillon court
+
+Commit local **65acfe4** sur `feat/opsys-ultime` : conservation des tranches MP4 et du mix dans un dossier unique étiqueté ; refus d'écraser l'export existant, y compris symlink, et `ffmpeg -n`. Sept tests ciblés passent, relancés indépendamment ; `equipes/essai` non suivi préservé. Aucun push.
+
+Après validation réelle de l'EditPlan court DeepSeek (`ok: true`, 13,5 s), présence des plans, voix et musique, et contrôle qu'aucun export du même nom n'existe, le brouillon court a été lancé en CPU (`--jobs 1`, affinité deux cœurs, priorité basse), en parallèle du seul plan GPU p30. Il est **en cours** : ne pas déclarer le film complet, ni supprimer les tranches ; à la fin, vérifier et archiver chaque MP4 ainsi que le film et leurs planches sur pc1.
