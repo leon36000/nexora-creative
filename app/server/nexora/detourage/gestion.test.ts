@@ -12,6 +12,7 @@ function faux() {
   const client: ClientDetourage = {
     async sante() { return { ok: true }; },
     async segmenter() { return { masqueB64: '', score: 1, aire: 0.1, secondes: 0.1, largeur: 2, hauteur: 2 }; },
+    async texte() { return { objets: [], secondes: 0.1, largeur: 2, hauteur: 2 }; },
     async deposer(id, nom) { journal.push(`deposer ${id} ${nom}`); return { largeur: 1280, hauteur: 720, fps: 24, duree: 5, audio: false }; },
     async lancer(id) { journal.push(`lancer ${id}`); etats.set(id, { etat: 'en_attente', progression: 0 }); },
     async etat(id) { return etats.get(id) ?? null; },

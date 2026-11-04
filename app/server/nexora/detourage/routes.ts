@@ -84,18 +84,18 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     if (rapide) sante = await clientDe(rapide.id)?.sante().catch(() => null) ?? null;
     return {
       rapide: { disponible: !!sante, moteur: rapide ? { id: rapide.id, nom: rapide.nom } : null, modeles: sante?.modeles ?? null,
-        description: 'SAM 2.1 (sélection et suivi) + ViTMatte (bords) + stabilisation par flux optique' },
+        description: 'SAM 3.1 (sélection par clics, boîte ou mot, suivi) + ViTMatte (bords) + stabilisation par flux optique' },
       pro: { disponible: !!pro, moteur: pro ? { id: pro.id, nom: pro.nom } : null,
-        description: 'LTX-2.5 Alpha-Gen (cheveux, fumée, verre) : poids sous licence à accepter, non installés' },
+        description: 'LTX-2.5 Alpha-Gen (cheveux, fumée, verre) : poids installés sur pc3, pas encore branché à Creative' },
       limites: { secondesMax: SECONDES_MAX(), largeurMax: 3840, sourceOctetsMax: MAX_SOURCE },
       sorties: ['alpha PNG 16 bits', 'RGBA PNG 16 bits (avant-plan estimé)', 'EXR demi-flottant ZIP (premultiplié, linéaire)', 'EXR alpha', 'ProRes 4444', 'WebM VP9 alpha', 'matte', 'composite sur nouveau fond'],
       tarif: deps.nexora ? tarifDepuisEnv() : null,
     };
   });
 
-  /** Aperçu interactif : une image + des clics -> masque. Rapide (une image), sans travail ni crédit. */
+  /** Aperçu interactif : une image + des clics (ou une boîte) -> masque. Rapide (une image), sans travail ni crédit. */
   app.post(`${P}/apercu`, { bodyLimit: 16 * 1024 * 1024 }, async (req, reply) => garde(reply, async () => {
-    const b = (req.body ?? {}) as { imageB64?: string; points?: unknown; boite?: unknown; sam?: string };
+    const b = (req.body ?? {}) as { imageB64?: string; points?: unknown; boite?: unknown };
     if (typeof b.imageB64 !== 'string' || b.imageB64.length < 100 || b.imageB64.length > 14_000_000) throw new ErreurDetourage('Image absente ou trop lourde.');
     const points = (Array.isArray(b.points) ? b.points : []).slice(0, 64).map((p) => (Array.isArray(p) ? p.map(Number) : [NaN]));
     if (points.some((p) => p.length !== 3 || p.slice(0, 2).some((v) => !(v >= 0 && v <= 1)) || ![0, 1].includes(p[2]))) throw new ErreurDetourage('Clics invalides.');
@@ -104,7 +104,22 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     const m = moteurPour(deps.moteurs(), 'rapide');
     const c = m && clientDe(m.id);
     if (!c) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
-    return c.segmenter({ imageB64: b.imageB64, points, boite, sam: b.sam === 'small' ? 'small' : 'large' });
+    // Le moteur choisit SAM 3.1 : plus de variante à envoyer.
+    return c.segmenter({ imageB64: b.imageB64, points, boite });
+  }));
+
+  /** Sélection par un mot (en anglais, l’encodeur de SAM 3.1) : une image -> les objets trouvés, sans travail ni crédit. */
+  app.post(`${P}/texte`, { bodyLimit: 16 * 1024 * 1024 }, async (req, reply) => garde(reply, async () => {
+    const b = (req.body ?? {}) as { imageB64?: string; texte?: unknown; seuil?: unknown };
+    if (typeof b.imageB64 !== 'string' || b.imageB64.length < 100 || b.imageB64.length > 14_000_000) throw new ErreurDetourage('Image absente ou trop lourde.');
+    const texte = typeof b.texte === 'string' ? b.texte.trim() : '';
+    if (!texte || texte.length > 120) throw new ErreurDetourage('Écris ce qu’il faut détourer, en anglais (ex. person).');
+    const seuil = b.seuil === undefined || b.seuil === null ? 0.4 : Number(b.seuil);
+    if (!(seuil >= 0.05 && seuil <= 0.95)) throw new ErreurDetourage('Seuil invalide (0,05 à 0,95).');
+    const m = moteurPour(deps.moteurs(), 'rapide');
+    const c = m && clientDe(m.id);
+    if (!c) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
+    return c.texte({ imageB64: b.imageB64, texte, seuil });
   }));
 
   app.get(`${P}/travaux`, async () => detourage.lister(qui().org).map(vue));

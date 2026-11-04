@@ -3,7 +3,7 @@
  * (server/nexora/detourage/client.ts), l'URL et le jeton de /etc/nexora/creative.env (lus ici, jamais affichés),
  * un vrai clip : santé, aperçu d'un clic, dépôt, travail complet, suivi, téléchargement de chaque export, nettoyage.
  *
- *   cd /srv/creative/app && sudo -u nexora node_modules/.bin/tsx ../verifier-detourage.mts <clip.mp4> <dossier_sortie>
+ *   cd /srv/creative/app && sudo -u nexora node_modules/.bin/tsx ../verifier-detourage.mts <clip.mp4> <dossier_sortie> [mot en anglais]
  */
 import { execFileSync } from 'node:child_process';
 import { createReadStream, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -23,11 +23,17 @@ const s = (x: number) => `${((Date.now() - x) / 1000).toFixed(1)} s`;
 const sante = await c.sante();
 console.log('santé', JSON.stringify({ gpu: (sante.modeles as any)?.gpu, libre: (sante.modeles as any)?.memoire_gpu_libre_go }));
 const image = execFileSync(ff, ['-v', 'error', '-i', clip, '-frames:v', '1', '-vf', 'scale=1280:-2', '-f', 'image2', '-c:v', 'png', '-'], { maxBuffer: 64 << 20 });
-const clic = { imageB64: image.toString('base64'), points: [[0.47, 0.55, 1], [0.48, 0.22, 1], [0.1, 0.9, 0]] };
+const clic: { imageB64: string; points: number[][] } = { imageB64: image.toString('base64'), points: [[0.47, 0.55, 1], [0.48, 0.22, 1], [0.1, 0.9, 0]] };
 const apercu = await c.segmenter(clic);
 writeFileSync(join(sortie, 'apercu-masque.png'), Buffer.from(apercu.masqueB64, 'base64'));
 console.log('aperçu du clic', JSON.stringify({ score: apercu.score, aire: apercu.aire, secondes: apercu.secondes }));
 
+const mot = process.argv[4];
+if (mot) {
+  const tx = await c.texte({ imageB64: clic.imageB64, texte: mot });
+  console.log('sélection par texte', JSON.stringify({ mot, objets: tx.objets.map((o) => ({ score: o.score, boite: o.boite, aire: o.aire })), secondes: tx.secondes }));
+  if (tx.objets[0]) clic.points = [[(tx.objets[0].boite[0] + tx.objets[0].boite[2]) / 2, (tx.objets[0].boite[1] + tx.objets[0].boite[3]) / 2, 1]];
+}
 const id = `verif${Date.now().toString(16)}`;
 const info = await c.deposer(id, 'source.mp4', createReadStream(clip) as never, statSync(clip).size);
 console.log('dépôt', JSON.stringify(info));

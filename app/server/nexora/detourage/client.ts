@@ -15,6 +15,8 @@ export interface InfoSource { largeur: number; hauteur: number; fps: number; dur
 export interface ClientDetourage {
   sante(): Promise<Record<string, unknown>>;
   segmenter(corps: { imageB64: string; points: number[][]; boite?: number[] | null; sam?: string }): Promise<{ masqueB64: string; score: number; aire: number; secondes: number; largeur: number; hauteur: number }>;
+  /** Sélection par texte (SAM 3.1) : un mot ou une phrase en anglais -> les objets trouvés, du plus sûr au moins sûr. */
+  texte(corps: { imageB64: string; texte: string; seuil?: number }): Promise<{ objets: { masqueB64: string; score: number; boite: number[]; aire: number }[]; secondes: number; largeur: number; hauteur: number }>;
   /** Dépose un fichier ; pour la source, le serveur renvoie ses caractéristiques (sonde ffprobe). */
   deposer(id: string, nom: string, flux: Readable | Buffer, octets?: number): Promise<InfoSource | undefined>;
   lancer(id: string, params: Record<string, unknown>): Promise<void>;
@@ -48,6 +50,12 @@ export function clientDetourage(base: string, f0: typeof fetch = fetch, jeton?: 
       const r = await verifier(await f(u('/segmenter'), { ...json({ image_b64: c.imageB64, points: c.points, boite: c.boite ?? null, sam: c.sam }), signal: AbortSignal.timeout(120_000) }));
       const j = (await r.json()) as any;
       return { masqueB64: j.masque_b64, score: j.score, aire: j.aire, secondes: j.secondes, largeur: j.largeur, hauteur: j.hauteur };
+    },
+    async texte(c) {
+      const r = await verifier(await f(u('/texte'), { ...json({ image_b64: c.imageB64, texte: c.texte, seuil: c.seuil }), signal: AbortSignal.timeout(120_000) }));
+      const j = (await r.json()) as any;
+      const objets = (Array.isArray(j.objets) ? j.objets : []).map((o: any) => ({ masqueB64: o.masque_b64, score: o.score, boite: o.boite, aire: o.aire }));
+      return { objets, secondes: j.secondes, largeur: j.largeur, hauteur: j.hauteur };
     },
     async deposer(id, nom, flux, octets) {
       const init: RequestInit & { duplex?: 'half' } = { method: 'PUT', body: flux as never, duplex: 'half', headers: { 'content-type': 'application/octet-stream', ...(octets ? { 'content-length': String(octets) } : {}) } };
