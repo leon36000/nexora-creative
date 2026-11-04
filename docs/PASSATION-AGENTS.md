@@ -698,3 +698,11 @@ La planche montre le travailleur, le signal, le serveur et le retour à la maiso
 ### Mesh : contrôle structurel complémentaire
 
 Un analyseur Python standard a vérifié entêtes GLB 2, longueurs de blocs, JSON et indices d’accesseurs pour **34 fichiers** existants : 20 Step1X AMD, 3 Pixal AMD BF16, 7 TRELLIS GB10 et 4 Hunyuan forme, tous analysables selon ce contrôle limité. Textures déclarées : respectivement **0/20, 3/3, 7/7 et 0/4** ; aucune image externe déclarée dans ce lot. Résultats détaillés `Storage/Nexora/travail/rnd-codex-20261104/mesh-inventaire-structure-glb-20261104.json`. Pas de rendu, de contrôle de topologie complet ni de classement qualité ; jeux et matériels diffèrent.
+
+### R&D voix, films et sauvegarde ; cohérence des montages
+
+Trois nouvelles notes d’agents Luna sur Storage : `voix-doublage.md` (mesures locales, sources et protocole d’écoute FR-CA/EN-CA, sans validation d’accent), `films-qualite.md` (mesures, sources et protocole de visionnement humain) et `fiabilite-backup.md` (sauvegarde GitLab et restauration isolée à préparer). Le coordinateur y a ajouté la copie Git de 278 fichiers/13,14 Go relevée dans les annexes : elle reste insuffisante pour une restauration GitLab complète. Garage était toujours `CrashLoopBackOff`, 44 redémarrages au dernier relevé ; pipeline 2847 en attente.
+
+Comparaison indépendante du plan actuel à `ffprobe` : Gemini long 112,000 s contre 105,583 s rendu ; Muse long 90,458 s contre 109,708 s ; Muse court 14,500 s contre 14,000 s. Des révisions différentes peuvent expliquer les écarts : la provenance exacte reste à établir avant tout remplacement ou verdict. DeepSeek long, court et vertical correspondent chacun à leur durée prévue ; Opus long/court aussi. Aucune note créative attribuée.
+
+Une revue de code supplémentaire par DeepSeek n’a pas abouti (délai réseau dépassé) ; une réponse DeepSeek antérieure a bien été reçue. Un essai de sous-agent Muse avec outils isolés est en cours, en passant par un relais privé qui garde la clé de passerelle hors du sous-agent ; résultat non encore établi.

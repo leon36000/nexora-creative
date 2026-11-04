@@ -474,3 +474,6 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - OPSYS DeepSeek : brouillon vertical 14,5 s produit, décodé et archivé avec dix tranches, mix et planche ; jugement audiovisuel humain non fait.
 - Mesh : 34 GLB ont passé un contrôle structurel limité ; 10 déclarent des textures. Aucune conclusion sur rendu visuel, topologie complète ou classement entre modèles.
+
+- Nouvelles recherches voix FR-CA/EN-CA, qualité films et sauvegarde GitLab ; Garage en panne, backup et restauration complète non prouvés. Les durées des plans courants divergent des brouillons Gemini long, Muse long et Muse court ; provenance à vérifier.
+- Une revue DeepSeek supplémentaire a expiré ; essai isolé d’un agent Muse outillé en cours, clé de passerelle non exposée à l’agent.
