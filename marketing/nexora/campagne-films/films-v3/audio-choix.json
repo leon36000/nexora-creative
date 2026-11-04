@@ -1,0 +1,7 @@
+{
+ "_note": "Choix audio des films V5. PROVISOIRE tant que le fondateur n'a pas tranché (fichier ~/nexora-creative-data/work/ecoute/CHOIX.md ou décision relayée). Changer « voix » ou « musique » puis relancer `outils/refaire_audio.sh <film>` : seuls la narration et le mixage sont refaits, jamais les plaques ni l'image.",
+ "statut": "voix choisie par le fondateur (03/11) ; musique provisoire",
+ "voix": "eleven-v4-alexandre",
+ "musique": "lyria-3-pro",
+ "raison": "Verdict d'écoute du fondateur relayé le 03/11 : ElevenLabs v4 « Alexandre » est la meilleure narration. Fish Audio Drama 3 (bon mais trop lent) en second tour : stems prêts à remplacer (refaire_audio.sh <film> drama3-clone-alexandre-direction). Musique : Lyria 3 Pro, provisoire (pas encore de verdict)."
+}

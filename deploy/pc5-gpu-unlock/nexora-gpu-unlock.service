@@ -1,0 +1,13 @@
+[Unit]
+Description=Nexora GPU - déblocage tensoriel Turing (gpu-unlock PR #294) à l'exécution
+After=systemd-modules-load.service systemd-udev-settle.service
+Before=nvidia-persistenced.service nexora-comfy@0.service nexora-comfy@1.service nexora-services.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/nexora-gpu-unlock.sh
+TimeoutStartSec=400
+
+[Install]
+WantedBy=multi-user.target

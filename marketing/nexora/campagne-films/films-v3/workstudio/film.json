@@ -1,0 +1,336 @@
+{
+ "id": "workstudio",
+ "titre": "Nexora WorkStudio · Rien ne part sans vous",
+ "produit": "WorkStudio",
+ "idee": "Les agents lisent, trient et préparent ; puis ils s'arrêtent et attendent votre accord.",
+ "duree": 46.6,
+ "etiquette": null,
+ "plaques": {
+  "aube": {
+   "recette": "max",
+   "secondes": 5,
+   "image": "Dawn in a bright, minimal Montreal apartment kitchen: a woman in her mid-forties, owner of a small business, sits at a pale wooden table by a large window, a closed plain unbranded laptop with a blank lid in front of her; her phone lies face-down on the table and glows softly at its edges as it vibrates. She looks at it calmly, unhurried. Soft blue-gold window light, bright airy interior, plants, lifted shadows, natural skin, 35mm, shallow depth of field.",
+   "mouvement": "Slow push-in; the phone glows twice; she glances at it, then out of the window, composed.",
+   "son": "Quiet early morning room tone, a phone vibrating softly on wood, distant birds."
+  },
+  "ecran": {
+   "recette": "rapide",
+   "secondes": 5,
+   "image": "Close-up from the front side of the same woman at a pale wooden table at dawn as she opens a plain unbranded matte grey laptop with a blank lid and no logo; the camera faces her, the screen faces away from camera; its cool light gently reaches her calm face. Bright window light behind, minimal, calm, shallow depth of field.",
+   "mouvement": "The lid opens smoothly; the camera holds, then drifts slightly closer.",
+   "son": "A soft laptop hinge, quiet room tone."
+  },
+  "sortie": {
+   "recette": "rapide",
+   "secondes": 5,
+   "image": "Medium shot: the same woman in her mid-forties, shoulder-length brown hair, olive shirt and light coat, steps out of her front door onto the outdoor staircase of a Montreal brick triplex on a bright autumn morning, leather bag on her shoulder, relaxed confident smile; golden leaves, warm low sunlight on her face.",
+   "mouvement": "Gentle tracking shot as she walks down the steps into the sunlight; easy, light.",
+   "son": "Morning street ambience, footsteps, light breeze in leaves."
+  }
+ },
+ "plans": [
+  {
+   "id": "p01",
+   "t": 0.0,
+   "d": 3.8,
+   "type": "plaque",
+   "src": "aube",
+   "debut": 0.4,
+   "zoom": [
+    1.0,
+    1.06
+   ],
+   "entree": "noir"
+  },
+  {
+   "id": "p02",
+   "t": 3.8,
+   "d": 2.6,
+   "type": "plaque",
+   "src": "ecran",
+   "debut": 0.8,
+   "zoom": [
+    1.02,
+    1.06
+   ]
+  },
+  {
+   "id": "p03",
+   "t": 6.4,
+   "d": 8.0,
+   "type": "chaine",
+   "image": "ui/ws-tri.jpg",
+   "aspect": 2.2,
+   "de": [
+    0.5,
+    0.48,
+    1.0
+   ],
+   "a": [
+    0.36,
+    0.48,
+    0.78
+   ],
+   "aspect_v": 0.9,
+   "de_v": [
+    0.24,
+    0.48,
+    0.42
+   ],
+   "a_v": [
+    0.5,
+    0.48,
+    0.42
+   ],
+   "trajet": [
+    [
+     0.0,
+     0.497
+    ],
+    [
+     0.073,
+     0.497
+    ],
+    [
+     0.292,
+     0.497
+    ],
+    [
+     0.388,
+     0.497
+    ],
+    [
+     0.607,
+     0.497
+    ],
+    [
+     0.705,
+     0.497
+    ],
+    [
+     1.0,
+     0.497
+    ]
+   ]
+  },
+  {
+   "id": "p04",
+   "t": 14.4,
+   "d": 7.0,
+   "type": "ui",
+   "image": "ui/ws-approuver.jpg",
+   "aspect": 1.7,
+   "de": [
+    0.5,
+    0.36,
+    1.0
+   ],
+   "a": [
+    0.55,
+    0.36,
+    0.86
+   ],
+   "aspect_v": 1.15,
+   "de_v": [
+    0.52,
+    0.33,
+    0.95
+   ],
+   "a_v": [
+    0.6,
+    0.33,
+    0.8
+   ]
+  },
+  {
+   "id": "p05",
+   "t": 21.4,
+   "d": 4.4,
+   "type": "ui",
+   "image": "ui/ws-approuver.jpg",
+   "appui": [
+    0.5,
+    0.758,
+    0.08
+   ],
+   "aspect": 1.9,
+   "de": [
+    0.5,
+    0.75,
+    1.0
+   ],
+   "a": [
+    0.42,
+    0.76,
+    0.8
+   ],
+   "aspect_v": 0.9,
+   "de_v": [
+    0.3,
+    0.72,
+    0.6
+   ],
+   "a_v": [
+    0.3,
+    0.74,
+    0.56
+   ]
+  },
+  {
+   "id": "p06",
+   "t": 25.8,
+   "d": 5.2,
+   "type": "envoye"
+  },
+  {
+   "id": "p07",
+   "t": 31.0,
+   "d": 5.0,
+   "type": "plaque",
+   "src": "sortie",
+   "debut": 0.3,
+   "zoom": [
+    1.0,
+    1.05
+   ]
+  },
+  {
+   "id": "p08",
+   "t": 36.0,
+   "d": 5.6,
+   "type": "ligne",
+   "texte": "Rien ne part|*sans vous.*"
+  },
+  {
+   "id": "p09",
+   "t": 41.6,
+   "d": 5.0,
+   "type": "carton",
+   "sous": "Vos agents préparent. Vous décidez."
+  }
+ ],
+ "textes": [
+  {
+   "t": 6.7,
+   "d": 2.6,
+   "texte": "Tri du courrier entrant",
+   "style": "sur"
+  },
+  {
+   "t": 17.4,
+   "d": 3.6,
+   "texte": "Tout est prêt. *Rien n'est parti.*",
+   "style": "impact"
+  }
+ ],
+ "narration": [
+  {
+   "id": "n1",
+   "t": 0.9,
+   "texte": "Cette nuit, le courrier a continué d'entrer."
+  },
+  {
+   "id": "n2",
+   "t": 6.9,
+   "texte": "WorkStudio l'a lu, trié… et il a préparé les réponses.",
+   "dit": "Work Studio l'a lu, trié… et il a préparé les réponses."
+  },
+  {
+   "id": "n3",
+   "t": 14.8,
+   "texte": "Puis il s'est arrêté."
+  },
+  {
+   "id": "n4",
+   "t": 21.7,
+   "texte": "Il attend votre accord."
+  },
+  {
+   "id": "n5",
+   "t": 26.3,
+   "texte": "Vous approuvez. Ça part."
+  },
+  {
+   "id": "n6",
+   "t": 31.4,
+   "texte": "Vos agents font le travail. Vous gardez le dernier mot."
+  }
+ ],
+ "sfx": [
+  {
+   "t": 0.3,
+   "type": "souffle",
+   "db": -24
+  },
+  {
+   "t": 1.6,
+   "type": "vibre",
+   "db": -20
+  },
+  {
+   "t": 14.4,
+   "type": "silence"
+  },
+  {
+   "t": 24.0,
+   "type": "clic",
+   "db": -12
+  },
+  {
+   "t": 25.8,
+   "type": "impact",
+   "db": -11
+  },
+  {
+   "t": 36.0,
+   "type": "impact",
+   "db": -14
+  }
+ ],
+ "musique": {
+  "gain_db": -2,
+  "prompt": "A 55-second instrumental for a premium, Apple-style product film about work that gets prepared overnight and waits for a human's approval. Quiet, precise, modern and warm. 0-6 s: near silence, soft air and one felt-piano note. 6-14 s: a delicate analog-synth pulse at 90 BPM with soft felt piano, gently moving forward. 14-24 s: suspense, the music almost stops, only a held low note and space. At 25 s: one deep soft hit then a warm release with light percussion and round bass, bright and relieved, until 36 s. 36-46 s: calm, spacious resolution on a single warm chord; clean ending by 47 s. No vocals, no risers, no cliches.",
+  "courbe": [
+   [
+    0,
+    0.05
+   ],
+   [
+    6,
+    0.35
+   ],
+   [
+    14,
+    0.4
+   ],
+   [
+    15,
+    0.12
+   ],
+   [
+    24,
+    0.12
+   ],
+   [
+    25.8,
+    0.9
+   ],
+   [
+    31,
+    0.75
+   ],
+   [
+    36,
+    0.45
+   ],
+   [
+    42,
+    0.3
+   ],
+   [
+    46,
+    0.1
+   ]
+  ]
+ }
+}

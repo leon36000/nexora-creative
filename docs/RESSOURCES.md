@@ -143,6 +143,7 @@ Ordre : 2 (risque de perte), 1 (inconnu), 4, 5, 3.
 | VM 204 `nexora-gpu` | moteur GPU LAN | 4 vCPU, **8 Go fixes** (ballon coupé : le passthrough épingle la RAM), disque 60 Go fin `ssd-1tb` (≈ 40 Go utilisés : modèles 8,4 Go, deux venv), swap 8 Go interne, `onboot`, étiquettes `nexora;gpu;prod`, **hors vzdump** (tout se régénère ; modèles : sources sur la GB10) ; 192.168.1.124 |
 | RTX 2080 SUPER (hôte 06:00.0-.3, lien x4) | travailleur ComfyUI 0, port 8188 | `vfio-pci` sur l'hôte, pilote `nvidia` 595 dans la VM ; 243 W max mesurés, 35 W au repos |
 | RTX 2070 SUPER (hôte 01:00.0-.3, lien x16) | travailleur ComfyUI 1, port 8189, et services audio/texte, port 8190 | 212 W max mesurés, 14 W au repos |
+| Déblocage tensoriel Turing (`gpu-unlock` PR #294) | unité `nexora-gpu-unlock.service` dans la VM 204 | fp16 accumulation fp32 : 45→71 TFLOPS (2080 SUPER), 38→59 (2070 SUPER) ; jobs TRELLIS int8 inchangés ; même puissance ; santé et retour arrière dans `docs/gpu-pc5.md` ; instantané Proxmox `avant-gpu-unlock-pr294` à supprimer quand le fondateur valide |
 | Ports LAN | 8188, 8189, 8190 | pare-feu Proxmox : seulement 192.168.1.0/24 (+ SSH) ; jamais exposés ailleurs |
 | Hôte `pve` | `intel_iommu=on iommu=pt`, `vfio*`, `nouveau`/`nvidia` en liste noire | copies d'origine : `/root/backup-gpu-pc5/` (retour arrière : `docs/gpu-pc5.md`) |
 | Mémoire hôte | engagée : 22 Go → **30 Go** sur 62 Go | une seule VM nouvelle, 8 Go non ballonnables |

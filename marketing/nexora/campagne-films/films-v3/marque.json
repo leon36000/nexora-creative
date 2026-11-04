@@ -1,0 +1,48 @@
+{
+ "_note": "Marque des films V5 (films-v3) : nom, couleurs et polices ; le nom va changer : modifier ce fichier puis relancer composer.py (aucun nom de marque n'est dans les plaques générées). Accent : orange KTM #FF6600.",
+ "marque": "NEXORA",
+ "logo": null,
+ "url": "",
+ "couleurs": {
+  "encre": [
+   8,
+   8,
+   10
+  ],
+  "os": [
+   246,
+   244,
+   238
+  ],
+  "brume": [
+   160,
+   160,
+   172
+  ],
+  "signal": [
+   255,
+   102,
+   0
+  ],
+  "charbon": [
+   22,
+   22,
+   26
+  ]
+ },
+ "polices": {
+  "dossier": "~/Desktop/NexoraSite/web/src/fonts",
+  "titre": "geist-latin-wght-normal.woff2",
+  "mono": "jetbrains-mono-latin-wght-normal.woff2"
+ },
+ "langues": {
+  "fr": {
+   "prepa": "En préparation",
+   "reel": "Capture réelle"
+  },
+  "en": {
+   "prepa": "In preparation",
+   "reel": "Real screen capture"
+  }
+ }
+}
