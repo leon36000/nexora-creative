@@ -183,6 +183,18 @@ def substituer(d, base, travail, musique=None, factices=None):
         return obj
     m = rec(m)
     m.setdefault('marque', str(V7 / 'marque-v7.json'))
+    # Textes à l'écran propres à l'équipe (equipes/<e>/textes.json, BRIEF) : fusionnés dans une copie de la marque.
+    t_equipe = m.pop('textes', None)
+    t_equipe = chemin_source(t_equipe, base) if isinstance(t_equipe, str) else Path(base) / 'textes.json'
+    if Path(t_equipe).exists():
+        marque = lire_json(Path(m['marque']))
+        for lang, tx in lire_json(Path(t_equipe)).items():
+            if isinstance(tx, dict):
+                marque.setdefault('textes', {}).setdefault(lang, {}).update({k: v for k, v in tx.items() if isinstance(v, str)})
+        Path(travail).mkdir(parents=True, exist_ok=True)
+        fusion = Path(travail) / 'marque-equipe.json'
+        fusion.write_text(json.dumps(marque, ensure_ascii=False, indent=1))
+        m['marque'] = str(fusion)
     mu = m.get('musique')
     if musique:
         if musique not in {x['id'] for x in d['musiques']}:
