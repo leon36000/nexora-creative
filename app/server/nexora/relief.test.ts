@@ -72,6 +72,20 @@ describe('Relief : contrôle du maillage', () => {
     expect(r.volume).toBeCloseTo(1 / 6, 6);
     expect(r.composantes).toBe(1);
   });
+  it('refuse le volume d’un tétraèdre fermé dont une face est inversée', () => {
+    const positions = Float32Array.from([2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3]);
+    const faces = [0, 2, 1, 0, 1, 3, 0, 3, 2, 1, 2, 3];
+    const propre = analyser({ positions, uvs: null, indices: Uint32Array.from(faces), couleur: null });
+    expect(propre.volume).toBeCloseTo(1 / 6, 6);
+    const indices = [...faces];
+    [indices[1], indices[2]] = [indices[2], indices[1]];
+    const r = analyser({ positions, uvs: null, indices: Uint32Array.from(indices), couleur: null });
+    expect(r.etanche).toBe(true);
+    expect(r.aretesOuvertes).toBe(0);
+    expect(r.aretesNonVariete).toBe(0);
+    expect(r.volume).toBeNull();
+    expect(r.avertissements).toContain('Volume non calculé : orientation incohérente des faces.');
+  });
   it('ne donne pas un volume physique ambigu pour plusieurs coquilles fermées', () => {
     const tetra = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]];
     const faces = [0, 2, 1, 0, 1, 3, 0, 3, 2, 1, 2, 3];

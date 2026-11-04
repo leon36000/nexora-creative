@@ -21,10 +21,11 @@ const AIDE_FORMAT: Record<FormatRelief, string> = {
 const n = (x: number) => x.toLocaleString('fr-FR');
 
 export function ResumeMaillage({ r }: { r: RapportMaillage }) {
+  const orientationIncoherente = r.avertissements.includes('Volume non calculé : orientation incohérente des faces.');
   return (
     <div className="dim" style={{ fontSize: 12, lineHeight: 1.5 }}>
       <div>{n(r.triangles)} triangles · {n(r.sommets)} sommets · {r.composantes} morceau{r.composantes > 1 ? 'x' : ''}</div>
-      <div style={{ color: r.etanche ? 'var(--ok, #3fb950)' : undefined }}>{r.etanche ? 'Étanche : prêt à imprimer' : r.aretesOuvertes > 0 ? `Non étanche (${n(r.aretesOuvertes)} arêtes ouvertes)` : 'Non étanche'}</div>
+      <div style={{ color: r.etanche && !orientationIncoherente ? 'var(--ok, #3fb950)' : undefined }}>{r.etanche ? orientationIncoherente ? 'Étanche topologiquement · orientation incohérente' : 'Étanche : prêt à imprimer' : r.aretesOuvertes > 0 ? `Non étanche (${n(r.aretesOuvertes)} arêtes ouvertes)` : 'Non étanche'}</div>
       {r.avertissements.filter((a) => !/ouvertes/.test(a)).slice(0, 3).map((a) => <div key={a}>{a}</div>)}
     </div>
   );

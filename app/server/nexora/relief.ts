@@ -45,7 +45,7 @@ export interface RapportMaillage {
   etanche: boolean;
   /** Boîte englobante (largeur, hauteur, profondeur) dans l'unité du modèle. */
   taille: [number, number, number];
-  /** Volume (unité³) si une composante fermée a un volume calculable ; null si ouvert ou ambigu. */
+  /** Volume (unité³) si une composante fermée et orientée de façon cohérente a un volume calculable ; null sinon. */
   volume: number | null;
   avertissements: string[];
 }
@@ -139,15 +139,24 @@ export function analyser(m: Maillage): RapportMaillage {
     const vx = m.positions[ic] - m.positions[ia], vy = m.positions[ic + 1] - m.positions[ia + 1], vz = m.positions[ic + 2] - m.positions[ia + 2];
     const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
     if (a === b || b === c || a === c || nx * nx + ny * ny + nz * nz < 1e-18) { degeneres++; continue; }
-    for (const [x, y] of [[a, b], [b, c], [c, a]] as const) { const k = cle(x, y); aretes.set(k, (aretes.get(k) ?? 0) + 1); }
+    for (const [x, y] of [[a, b], [b, c], [c, a]] as const) {
+      const k = cle(x, y), sens = x < y ? 1 : -1, precedent = aretes.get(k);
+      if (precedent === undefined) aretes.set(k, sens);
+      else if (Math.abs(precedent) === 1) aretes.set(k, precedent === -sens ? 2 : -2);
+      else if (Math.abs(precedent) === 2) aretes.set(k, 3);
+    }
     utilises[a] = utilises[b] = utilises[c] = 1;
     p[racine(a)] = racine(b); p[racine(b)] = racine(c);
     volume6 += m.positions[ia] * (m.positions[ib + 1] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic + 1])
       - m.positions[ia + 1] * (m.positions[ib] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic])
       + m.positions[ia + 2] * (m.positions[ib] * m.positions[ic + 1] - m.positions[ib + 1] * m.positions[ic]);
   }
-  let ouvertes = 0, nonVariete = 0;
-  for (const n of aretes.values()) { if (n === 1) ouvertes++; else if (n > 2) nonVariete++; }
+  let ouvertes = 0, nonVariete = 0, orientationIncoherente = false;
+  for (const etat of aretes.values()) {
+    if (Math.abs(etat) === 1) ouvertes++;
+    else if (Math.abs(etat) === 3) nonVariete++;
+    else if (etat === -2) orientationIncoherente = true;
+  }
   const racines = new Set<number>();
   for (let i = 0; i < nbSoudes; i++) if (utilises[i]) racines.add(racine(i));
   const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
@@ -158,13 +167,14 @@ export function analyser(m: Maillage): RapportMaillage {
   if (ouvertes > 0) avertissements.push(`${ouvertes} arêtes ouvertes : le modèle n’est pas étanche (impression 3D : à réparer).`);
   if (nonVariete > 0) avertissements.push(`${nonVariete} arêtes partagées par plus de deux faces (non-variété).`);
   if (degeneres > 0) avertissements.push(`${degeneres} triangles dégénérés.`);
+  if (etanche && orientationIncoherente) avertissements.push('Volume non calculé : orientation incohérente des faces.');
   if (etanche && racines.size > 1) avertissements.push('Volume non calculé : plusieurs composantes fermées peuvent représenter des solides distincts ou des cavités imbriquées.');
   if (racines.size > 1) avertissements.push(`${racines.size} morceaux séparés (fragments flottants possibles).`);
   return {
     sommets: m.positions.length / 3, triangles: nTri, degeneres, aretesOuvertes: ouvertes, aretesNonVariete: nonVariete,
     composantes: racines.size, etanche,
     taille: nTri ? [max[0] - min[0], max[1] - min[1], max[2] - min[2]] : [0, 0, 0],
-    volume: etanche && racines.size === 1 ? Math.abs(volume6) / 6 : null, avertissements,
+    volume: etanche && racines.size === 1 && !orientationIncoherente ? Math.abs(volume6) / 6 : null, avertissements,
   };
 }
 
