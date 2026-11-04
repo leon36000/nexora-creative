@@ -592,3 +592,7 @@ Sur le brouillon court, une détection automatique n’a trouvé aucun passage n
 ### OPSYS Muse : origine du vertical absent
 
 Diagnostic documentaire d’un sous-agent, complété par vérification du texte source : le HANDOFF rapporte une décision commune des quatre équipes de recadrer le 16:9 pour le vertical à cause de la file GPU ; le dossier Muse évoque ce recadrage si la file ne permet pas de 9:16 natif. Ce sont des indications d’équipe, **pas une décision attribuable au fondateur**. Le dossier actuel ne contient aucun montage vertical Muse défini, et les prises retrouvées sont horizontales. Le recadrage reste à concevoir et vérifier ; ne pas le déclarer livré. DeepSeek possède séparément six spécifications 9:16 propres.
+
+### OPSYS DeepSeek : v02
+
+`v02-r1.mp4` généré en 138,1 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1, SHA-256 vérifiés ; inventaire **3 775 entrées**. La planche montre le signal montant depuis le téléphone ; son et mouvement restent à juger. Après file vide et limite 475 W confirmées, `v03` a été lancé seul.
