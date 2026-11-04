@@ -92,6 +92,8 @@ def resoudre(equipe, plan, version):
             continue
         f = T.plan_retenu(equipe, sid)
         if f is None and vert and sid.endswith("v"):  # 9:16 natif non tourné : le plan 16:9 du même nom, recadré
+            # Le suffixe « v » encode la paire, p.ex. p02v → p02. Ne pas
+            # deviner de paire pour des IDs indépendants comme v01.
             f = T.plan_retenu(equipe, sid[:-1])
         vid[sid] = str(f) if f else None
     voix = {}
@@ -115,6 +117,26 @@ def resoudre(equipe, plan, version):
         return vid, voix, (str(m) if m.exists() else None)
     m = T.TRAVAIL / equipe / "musique" / f"lyria-{n}.wav"
     return vid, voix, (str(m) if m.exists() else None)
+
+
+class PlansVideoManquants(ValueError):
+    """Le montage référence des plans vidéo qui ne sont pas encore disponibles."""
+
+
+def verifier_sources_video(equipe, version, sources):
+    """Refuse un rendu quand un plan manque au lieu de remplir ses images d'encre."""
+    manquants = sorted(
+        sid for sid, fichier in sources.items()
+        if sid not in ("noir", "carton")
+        and (not fichier or not Path(fichier).is_file())
+    )
+    if manquants:
+        liste = ", ".join(manquants)
+        raise PlansVideoManquants(
+            f"Plans vidéo manquants pour {equipe}/{version} : {liste}. "
+            "Générez les plans manquants ou corrigez l'EditPlan avant le rendu."
+        )
+    return manquants
 
 
 def sonder(f):
@@ -432,8 +454,8 @@ def mixer(ctx, sortie_wav):
 def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     t0 = time.time()
     ctx = Contexte(equipe, version, brouillon)
+    manquants = verifier_sources_video(equipe, version, ctx.vid)
     rapport = valider_ts(ctx.plan)
-    manquants = [s for s, f in ctx.vid.items() if f is None and s not in ("noir", "carton")]
     out_dir = T.dossier_travail(equipe, "montage")
     sortie = Path(sortie) if sortie else out_dir / f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
     tmp = out_dir / f"tranches-{version}-{int(t0)}"
@@ -465,4 +487,8 @@ if __name__ == "__main__":
     a.add_argument("--sortie")
     a.add_argument("--jobs", type=int, default=14)
     o = a.parse_args()
-    construire(o.equipe, o.version, o.brouillon, o.sortie, o.jobs)
+    try:
+        construire(o.equipe, o.version, o.brouillon, o.sortie, o.jobs)
+    except PlansVideoManquants as e:
+        print(f"ERREUR : {e}", file=sys.stderr)
+        raise SystemExit(2)
