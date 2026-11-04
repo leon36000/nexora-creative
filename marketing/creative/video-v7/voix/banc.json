@@ -1,0 +1,1282 @@
+[
+ {
+  "id": "vox3-marie-excitee",
+  "texte": "narration",
+  "fichier": "vox3-marie-excitee-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "fr_marie_excited",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 7.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.0,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Cela sonne clairement comme une voix de synthèse (TTS) québécoise, beaucoup trop plate, robotique et sans relief pour une bande-annonce.",
+   "Voix synthétique féminine avec une légère teinte québécoise, mais la livraison est beaucoup trop plate et robotique pour une bande-annonce."
+  ],
+  "score": 2.6
+ },
+ {
+  "id": "vox3-marie-colere",
+  "texte": "narration",
+  "fichier": "vox3-marie-colere-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "fr_marie_angry",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 0.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 5.0,
+   "cheap": 7.5
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix très lisse à l'accent français standard, sonnant comme une synthèse vocale et manquant totalement de l'accent québécois et de l'intensité dramatique requis pour une bande-annonce.",
+   "Voix féminine lisse à l'accent français standard, manquant totalement d'énergie et d'identité québécoise pour une bande-annonce."
+  ],
+  "score": 3.25
+ },
+ {
+  "id": "vox3-clone-h3",
+  "texte": "narration",
+  "erreur": "HTTP 404 {\"error\":{\"message\":\"No endpoints supporting voice cloning found for this model.\",\"code\":404,\"metadata\":{\"routing_funnel\":[{\"step\":\"Initial Endpoints\",\"endpoint_count\":3},{\"step\":\"Filter by R"
+ },
+ {
+  "id": "vox2603-marie-excitee",
+  "texte": "narration",
+  "fichier": "vox2603-marie-excitee-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-2603",
+  "voix": "fr_marie_excited",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 1.5,
+   "energie": 5.5,
+   "caractere": 5.0,
+   "naturel": 8.5,
+   "cheap": 2.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "La diction est soignée mais l'accent est clairement européen et non québécois, avec un ton trop doux pour une bande-annonce.",
+   "Une belle voix grave et dramatique qui capte bien l'attention, mais l'accent sonne trop international pour un public purement québécois."
+  ],
+  "score": 6.47
+ },
+ {
+  "id": "vox2603-clone-h3",
+  "texte": "narration",
+  "erreur": "HTTP 404 {\"error\":{\"message\":\"No endpoints supporting voice cloning found for this model.\",\"code\":404,\"metadata\":{\"routing_funnel\":[{\"step\":\"Initial Endpoints\",\"endpoint_count\":3},{\"step\":\"Filter by R"
+ },
+ {
+  "id": "minimax28-narrateur",
+  "texte": "narration",
+  "fichier": "minimax28-narrateur-narration.mp3",
+  "modele": "minimax/speech-2.8-hd",
+  "voix": "French_MaleNarrator",
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 7.0,
+   "energie": 5.0,
+   "caractere": 4.5,
+   "naturel": 5.0,
+   "cheap": 5.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "La voix a du caractère avec une légère pointe québécoise, mais la qualité sonore métallique trahit un traitement artificiel.",
+   "L'accent québécois est réussi avec la prononciation de « tout », mais la livraison est trop plate et robotique pour une bande-annonce."
+  ],
+  "score": 5.0
+ },
+ {
+  "id": "minimax28-homme",
+  "texte": "narration",
+  "fichier": "minimax28-homme-narration.mp3",
+  "modele": "minimax/speech-2.8-hd",
+  "voix": "French_Male_Speech_New",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 1.5,
+   "energie": 4.0,
+   "caractere": 3.0,
+   "naturel": 6.5,
+   "cheap": 4.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix masculine posée avec un français standard (plutôt européen ou international), manquant de grain et de couleur québécoise pour une bande-annonce locale.",
+   "Voix masculine très lisse au français standard européen (aucun accent québécois), qui manque de mordant et sonne légèrement synthétique."
+  ],
+  "score": 4.75
+ },
+ {
+  "id": "mai21-grant",
+  "texte": "narration",
+  "fichier": "mai21-grant-narration.mp3",
+  "modele": "microsoft/mai-voice-2.1",
+  "voix": "fr-FR-Grant:MAI-Voice-2.1",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 1.5,
+   "energie": 5.0,
+   "caractere": 6.0,
+   "naturel": 6.0,
+   "cheap": 4.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix grave au ton mystérieux, mais l'accent est très standard et le rendu sonne un peu synthétique.",
+   "Bonne intention dramatique pour une bande-annonce, mais l'accent sonne trop standard/français et manque de couleur québécoise."
+  ],
+  "score": 5.33
+ },
+ {
+  "id": "mai21-marc",
+  "texte": "narration",
+  "fichier": "mai21-marc-narration.mp3",
+  "modele": "microsoft/mai-voice-2.1",
+  "voix": "fr-FR-Marc:MAI-Voice-2.1",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 1.5,
+   "energie": 3.5,
+   "caractere": 2.5,
+   "naturel": 6.5,
+   "cheap": 4.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix masculine très lisse en français standard, manquant d'accent québécois et de relief dramatique pour une bande-annonce.",
+   "Français de France standard, livraison très plate et lisse qui manque cruellement d'impact dramatique pour une bande-annonce, et aucun accent québécois."
+  ],
+  "score": 4.58
+ },
+ {
+  "id": "mai21-harper",
+  "texte": "narration",
+  "fichier": "mai21-harper-narration.mp3",
+  "modele": "microsoft/mai-voice-2.1",
+  "voix": "fr-FR-Harper:MAI-Voice-2.1",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 0.5,
+   "energie": 3.5,
+   "caractere": 2.0,
+   "naturel": 5.0,
+   "cheap": 7.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix féminine lisse à l'accent français standard, manquant totalement de couleur québécoise et de tension dramatique pour une bande-annonce.",
+   "Voix féminine à l'accent français standard très lisse qui ressemble fortement à une synthèse vocale, manquant d'authenticité québécoise et de tension dramatique."
+  ],
+  "score": 3.5
+ },
+ {
+  "id": "fish21-direction",
+  "texte": "narration",
+  "fichier": "fish21-direction-narration.mp3",
+  "modele": "fish-audio/s2.1-pro",
+  "voix": null,
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 2.0,
+   "energie": 3.0,
+   "caractere": 5.0,
+   "naturel": 5.5,
+   "cheap": 5.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Très belle voix grave et cinématographique avec du grain, mais l'accent sonne beaucoup plus français standard que québécois.",
+   "Voix synthétique extrêmement robotique avec un accent français standard et un manque flagrant d'énergie."
+  ],
+  "score": 4.42
+ },
+ {
+  "id": "fish21-clone-h3",
+  "texte": "narration",
+  "fichier": "fish21-clone-h3-narration.mp3",
+  "modele": "fish-audio/s2.1-pro",
+  "voix": null,
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 0.5,
+   "energie": 6.5,
+   "caractere": 6.5,
+   "naturel": 6.5,
+   "cheap": 4.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Bonne voix grave avec du grain, mais l'accent est clairement français de France et non québécois.",
+   "Voix masculine grave et dramatique mais qui sonne très européenne ou internationale, sans aucun accent québécois, avec un rendu légèrement synthétique."
+  ],
+  "score": 5.72
+ },
+ {
+  "id": "gemini38-fenrir",
+  "texte": "narration",
+  "fichier": "gemini38-fenrir-narration.mp3",
+  "modele": "google/gemini-3.8-flash-tts",
+  "voix": "Fenrir",
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 2.0,
+   "energie": 7.0,
+   "caractere": 7.5,
+   "naturel": 6.5,
+   "cheap": 4.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Bonne intensité dramatique avec un grain grave intéressant, mais l'accent sonne plutôt français européen ou international que purement québécois.",
+   "Voix grave au timbre intéressant mais la fin soufflée sonne très artificielle et l'accent est purement européen."
+  ],
+  "score": 6.18
+ },
+ {
+  "id": "gemini38-puck",
+  "texte": "narration",
+  "fichier": "gemini38-puck-narration.mp3",
+  "modele": "google/gemini-3.8-flash-tts",
+  "voix": "Puck",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 6.5,
+   "energie": 7.5,
+   "caractere": 9.0,
+   "naturel": 9.0,
+   "cheap": 1.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Excellente voix grave et rocailleuse, parfaite pour une bande-annonce dramatique, avec une touche d'accent québécois bien dosée.",
+   "Excellente voix grave et dramatique avec un beau grain cinématographique, idéale pour une bande-annonce à suspense."
+  ],
+  "score": 8.5
+ },
+ {
+  "id": "vox3-voice3150",
+  "texte": "narration",
+  "fichier": "vox3-voice3150-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3150",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 7.0,
+   "energie": 2.5,
+   "caractere": 2.0,
+   "naturel": 4.0,
+   "cheap": 7.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "L'accent est bon, mais l'intonation est robotique, plate et manque totalement de l'impact dramatique requis pour une bande-annonce.",
+   "Voix synthétique plate et robotique sur la fin de la phrase, manquant d'impact dramatique pour une bande-annonce."
+  ],
+  "score": 3.2
+ },
+ {
+  "id": "vox3-voice478",
+  "texte": "narration",
+  "fichier": "vox3-voice478-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_478",
+  "oreille": {
+   "langue_francaise": 5.0,
+   "accent_quebecois": 0.5,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.0,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique plate avec un accent français standard, manquant totalement d'énergie et d'authenticité québécoise pour une bande-annonce.",
+   "Voix synthétique avec un fort accent anglophone (le 'r' de 'trois' est très anglais) qui ne convient pas du tout à une bande-annonce québécoise."
+  ],
+  "score": 1.2
+ },
+ {
+  "id": "vox3-voice447",
+  "texte": "narration",
+  "fichier": "vox3-voice447-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_447",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 2.0,
+   "energie": 5.0,
+   "caractere": 2.5,
+   "naturel": 5.0,
+   "cheap": 6.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix féminine posée et claire, mais l'accent est très standard/européen et le timbre manque de caractère pour une bande-annonce québécoise.",
+   "Voix trop lisse et synthétique avec un accent français standard, manquant de grain et d'authenticité québécoise pour une bande-annonce."
+  ],
+  "score": 4.25
+ },
+ {
+  "id": "vox3-voice485",
+  "texte": "narration",
+  "fichier": "vox3-voice485-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_485",
+  "oreille": {
+   "langue_francaise": 2.0,
+   "accent_quebecois": 0.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.0,
+   "cheap": 9.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique avec un fort accent anglophone (notamment sur « tout »), totalement inadaptée pour une bande-annonce québécoise.",
+   "Voix synthétique avec un fort accent anglophone (prononce « toua mo » et « tate explose »), inutilisable pour un projet francophone."
+  ],
+  "score": 0.2
+ },
+ {
+  "id": "vox3-voice3149",
+  "texte": "narration",
+  "fichier": "vox3-voice3149-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3149",
+  "oreille": {
+   "langue_francaise": 8.5,
+   "accent_quebecois": 1.5,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 4.0,
+   "cheap": 7.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix très lisse avec un accent européen, qui manque d'intensité dramatique et de couleur québécoise pour une bande-annonce.",
+   "Voix synthétique plate avec un accent français standard, manquant totalement d'authenticité québécoise et de tension dramatique."
+  ],
+  "score": 2.87
+ },
+ {
+  "id": "vox3-voice3147",
+  "texte": "narration",
+  "fichier": "vox3-voice3147-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3147",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 6.0,
+   "energie": 4.5,
+   "caractere": 3.5,
+   "naturel": 3.5,
+   "cheap": 8.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Il y a un bruit parasite et un mot en trop au tout début de l'enregistrement, et la voix manque de profondeur et de naturel pour une bande-annonce.",
+   "Le clip ajoute « Il n'y a » au début, et la voix sonne très synthétique avec des artefacts audio évidents de TTS qui ruinent toute crédibilité pour une bande-annonce."
+  ],
+  "score": 3.47
+ },
+ {
+  "id": "vox3-voice591",
+  "texte": "narration",
+  "fichier": "vox3-voice591-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_591",
+  "oreille": {
+   "langue_francaise": 1.5,
+   "accent_quebecois": 0.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 1.5,
+   "cheap": 9.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix synthétique anglophone qui prononce le texte en anglais (« trauma and two explodes »), totalement inutilisable.",
+   "Le modèle est configuré en anglais, ce qui rend la prononciation française totalement incompréhensible et inutilisable."
+  ],
+  "score": -0.15
+ },
+ {
+  "id": "vox3-voice590",
+  "texte": "narration",
+  "fichier": "vox3-voice590-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_590",
+  "oreille": {
+   "langue_francaise": 2.0,
+   "accent_quebecois": 0.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.0,
+   "cheap": 9.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique avec un fort accent anglophone (le R dans 'trois' et le T aspiré dans 'tout'), totalement inutilisable pour une production francophone.",
+   "Voix synthétique anglophone très évidente, incapable de prononcer le français correctement, encore moins avec un accent québécois."
+  ],
+  "score": 0.2
+ },
+ {
+  "id": "vox3-voice1788",
+  "texte": "narration",
+  "fichier": "vox3-voice1788-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_1788",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 4.5,
+   "energie": 4.5,
+   "caractere": 4.5,
+   "naturel": 3.5,
+   "cheap": 7.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix grave au timbre intéressant pour une bande-annonce, mais l'intonation trahit un côté synthétique et un manque d'accent typiquement québécois.",
+   "Voix masculine très synthétique qui manque totalement de l'impact dramatique requis pour une bande-annonce."
+  ],
+  "score": 3.72
+ },
+ {
+  "id": "vox3-voice1787",
+  "texte": "narration",
+  "fichier": "vox3-voice1787-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_1787",
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 2.0,
+   "energie": 3.5,
+   "caractere": 2.5,
+   "naturel": 5.0,
+   "cheap": 6.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "La voix est très lisse et neutre, manquant de caractère, d'impact dramatique et d'ancrage québécois pour une bande-annonce.",
+   "Voix féminine lisse et sans personnalité avec un accent européen, qui sonne très synthétique et manque cruellement de punch pour une bande-annonce."
+  ],
+  "score": 3.7
+ },
+ {
+  "id": "vox3-voice1786",
+  "texte": "narration",
+  "fichier": "vox3-voice1786-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_1786",
+  "oreille": {
+   "langue_francaise": 1.5,
+   "accent_quebecois": 0.0,
+   "energie": 3.0,
+   "caractere": 1.5,
+   "naturel": 2.0,
+   "cheap": 9.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique anglophone qui prononce le texte avec un fort accent anglais et une erreur de lecture ('toi' au lieu de 'tout').",
+   "C'est une voix synthétique anglophone qui lit phonétiquement le français avec un très fort accent anglais, totalement inutilisable."
+  ],
+  "score": -0.02
+ },
+ {
+  "id": "vox3-voice479",
+  "texte": "narration",
+  "fichier": "vox3-voice479-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_479",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 6.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique très lisse et plate, avec une intonation interrogative finale qui manque totalement de l'impact dramatique requis pour une bande-annonce.",
+   "Voix synthétique plate et monotone, manquant totalement de l'impact dramatique requis pour une bande-annonce."
+  ],
+  "score": 2.62
+ },
+ {
+  "id": "vox3-voice3143",
+  "texte": "narration",
+  "fichier": "vox3-voice3143-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3143",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 7.0,
+   "energie": 3.0,
+   "caractere": 4.0,
+   "naturel": 5.0,
+   "cheap": 6.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "L'accent québécois est perceptible, mais la livraison manque grandement d'énergie et de grain pour une bande-annonce, sonnant plutôt comme une voix de synthèse générique.",
+   "Voix masculine grave avec un léger accent québécois, mais le ton est un peu monotone et sonne légèrement synthétique."
+  ],
+  "score": 4.15
+ },
+ {
+  "id": "vox3-voice481",
+  "texte": "narration",
+  "fichier": "vox3-voice481-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_481",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 3.5,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique plate et robotique, manquant totalement de l'intensité dramatique requise pour une bande-annonce.",
+   "Voix synthétique de type TTS avec un accent français standard et une livraison très plate, inadaptée pour une bande-annonce québécoise."
+  ],
+  "score": 2.38
+ },
+ {
+  "id": "vox3-voice483",
+  "texte": "narration",
+  "fichier": "vox3-voice483-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_483",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 3.5,
+   "energie": 7.0,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix de synthèse en français standard avec un ton enthousiaste de type publicitaire, sans aucun accent québécois ni gravité.",
+   "Voix clairement synthétique avec un ton publicitaire trop lisse qui manque cruellement d'impact cinématographique pour une bande-annonce."
+  ],
+  "score": 3.18
+ },
+ {
+  "id": "vox3-voice592",
+  "texte": "narration",
+  "fichier": "vox3-voice592-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_592",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 1.5,
+   "energie": 3.5,
+   "caractere": 3.0,
+   "naturel": 6.0,
+   "cheap": 5.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "La voix a un fort accent de France, manque d'intensité dramatique et sonne comme une voix synthétique générique.",
+   "La prononciation est très française standard sans aucun accent québécois, avec un ton trop doux et neutre qui manque d'impact pour une bande-annonce."
+  ],
+  "score": 4.45
+ },
+ {
+  "id": "vox3-voice3137",
+  "texte": "narration",
+  "fichier": "vox3-voice3137-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3137",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 1.5,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 3.0,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique au ton plat et à l'accent européen, manquant totalement de l'énergie et de l'authenticité requises pour une bande-annonce québécoise.",
+   "Voix synthétique très plate, avec un accent français standard et un manque total d'émotion pour une bande-annonce."
+  ],
+  "score": 2.3
+ },
+ {
+  "id": "vox3-voice589",
+  "texte": "narration",
+  "fichier": "vox3-voice589-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_589",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 0.5,
+   "energie": 2.5,
+   "caractere": 1.5,
+   "naturel": 4.0,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "L'accent est très hexagonal et l'intonation manque cruellement de punch et de naturel pour une bande-annonce.",
+   "C'est une voix de synthèse (TTS) avec un accent de France très lisse, sans aucune intensité dramatique ni accent québécois."
+  ],
+  "score": 2.62
+ },
+ {
+  "id": "vox3-voice3141",
+  "texte": "narration",
+  "fichier": "vox3-voice3141-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3141",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 1.0,
+   "energie": 4.0,
+   "caractere": 3.0,
+   "naturel": 7.0,
+   "cheap": 4.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix féminine posée mais à l'accent français standard trop lisse, manquant de grain et d'authenticité pour une bande-annonce québécoise.",
+   "La prononciation est très française métropolitaine (notamment sur le « r » de « trois ») et le ton manque d'impact dramatique et de grain pour une bande-annonce."
+  ],
+  "score": 4.95
+ },
+ {
+  "id": "vox3-voice3153",
+  "texte": "narration",
+  "fichier": "vox3-voice3153-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3153",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 4.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 4.0,
+   "cheap": 7.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix trop lisse et manquant d'impact dramatique, sonnant un peu artificielle pour une bande-annonce.",
+   "Voix synthétique plate et sans caractère, avec un accent français standard plutôt que québécois."
+  ],
+  "score": 3.0
+ },
+ {
+  "id": "vox3-voice3139",
+  "texte": "narration",
+  "fichier": "vox3-voice3139-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3139",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 4.0,
+   "energie": 2.5,
+   "caractere": 1.5,
+   "naturel": 2.0,
+   "cheap": 9.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Malgré la prononciation de « toute » à la québécoise, c'est clairement une voix de synthèse robotique sans aucune émotion ni intention dramatique.",
+   "Voix synthétique féminine avec un accent français standard ; le mot « tout » est prononcé « toute » mais sans l'authenticité québécoise et l'ensemble manque grandement d'impact."
+  ],
+  "score": 1.9
+ },
+ {
+  "id": "vox3-voice3146",
+  "texte": "narration",
+  "fichier": "vox3-voice3146-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3146",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 9.0,
+   "energie": 3.5,
+   "caractere": 5.5,
+   "naturel": 8.0,
+   "cheap": 2.5
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Bonne prononciation québécoise avec le « tout » prononcé « toute », mais le ton posé manque un peu de tension dramatique pour une bande-annonce.",
+   "L'accent québécois est bien marqué (notamment avec le « toute »), mais l'interprétation manque cruellement d'intensité dramatique pour une bande-annonce."
+  ],
+  "score": 6.58
+ },
+ {
+  "id": "vox3-voice482",
+  "texte": "narration",
+  "fichier": "vox3-voice482-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_482",
+  "oreille": {
+   "langue_francaise": 8.5,
+   "accent_quebecois": 4.0,
+   "energie": 5.0,
+   "caractere": 4.5,
+   "naturel": 5.0,
+   "cheap": 5.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Bonne intensité dramatique avec un timbre grave qui fonctionne bien pour une bande-annonce, malgré une finale légèrement abrupte.",
+   "Voix synthétique typique avec un accent français standard et un manque flagrant d'intensité dramatique pour une bande-annonce."
+  ],
+  "score": 4.58
+ },
+ {
+  "id": "vox3-voice3133",
+  "texte": "narration",
+  "fichier": "vox3-voice3133-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3133",
+  "oreille": {
+   "langue_francaise": 5.0,
+   "accent_quebecois": 3.5,
+   "energie": 5.0,
+   "caractere": 4.5,
+   "naturel": 2.0,
+   "cheap": 8.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix d'homme grave et granuleuse au style bande-annonce, mais dénaturée par d'importants artefacts synthétiques et l'ajout de syllabes parasites au début.",
+   "Voix synthétique de basse qualité avec un fort accent anglophone et des erreurs de prononciation."
+  ],
+  "score": 2.3
+ },
+ {
+  "id": "vox3-voice3136",
+  "texte": "narration",
+  "fichier": "vox3-voice3136-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3136",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 1.5,
+   "energie": 3.5,
+   "caractere": 4.0,
+   "naturel": 5.0,
+   "cheap": 5.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix synthétique avec un accent français standard très marqué et un manque total d'intensité dramatique pour une bande-annonce.",
+   "Bonne voix grave avec une tension retenue intéressante, mais l'accent est trop standardisé (français international) pour sonner authentiquement québécois."
+  ],
+  "score": 4.3
+ },
+ {
+  "id": "vox3-voice3135",
+  "texte": "narration",
+  "fichier": "vox3-voice3135-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3135",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 1.5,
+   "energie": 4.5,
+   "caractere": 4.5,
+   "naturel": 5.5,
+   "cheap": 5.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix au français standard manquant totalement d'accent québécois, avec un rendu très lisse et synthétique qui manque de puissance pour une bande-annonce.",
+   "Une voix grave et intéressante avec un bon grain pour une bande-annonce, mais l'accent sonne beaucoup trop français standard et manque cruellement de couleur québécoise."
+  ],
+  "score": 4.7
+ },
+ {
+  "id": "vox3-voice3145",
+  "texte": "narration",
+  "fichier": "vox3-voice3145-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3145",
+  "oreille": {
+   "langue_francaise": 6.5,
+   "accent_quebecois": 4.0,
+   "energie": 3.5,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "La prononciation de « trois » sonne comme « toi », et la voix est lisse, synthétique et dépourvue de l'accent québécois recherché.",
+   "Voix synthétique plate et robotique qui manque totalement d'impact dramatique pour une bande-annonce."
+  ],
+  "score": 2.15
+ },
+ {
+  "id": "vox3-voice3134",
+  "texte": "narration",
+  "fichier": "vox3-voice3134-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3134",
+  "oreille": {
+   "langue_francaise": 5.0,
+   "accent_quebecois": 3.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix synthétique de basse qualité avec un fort accent anglophone, totalement inutilisable pour une bande-annonce.",
+   "Voix synthétique plate et monotone qui manque cruellement d'intensité dramatique pour une bande-annonce."
+  ],
+  "score": 1.47
+ },
+ {
+  "id": "vox3-voice3154",
+  "texte": "narration",
+  "fichier": "vox3-voice3154-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3154",
+  "oreille": {
+   "langue_francaise": 8.5,
+   "accent_quebecois": 6.0,
+   "energie": 5.5,
+   "caractere": 5.0,
+   "naturel": 7.5,
+   "cheap": 2.5
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix féminine posée et sérieuse avec une légère inflexion québécoise sur les voyelles, bien que l'effet reste un peu retenu pour une bande-annonce.",
+   "Une livraison maîtrisée et dramatique avec une légère teinte québécoise, mais la voix reste un peu trop lisse et manque de grain pour vraiment marquer les esprits."
+  ],
+  "score": 6.2
+ },
+ {
+  "id": "vox3-voice480",
+  "texte": "narration",
+  "fichier": "vox3-voice480-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_480",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 2.0,
+   "energie": 3.0,
+   "caractere": 4.0,
+   "naturel": 4.0,
+   "cheap": 7.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix féminine au ton dramatique et posé, mais l'accent sonne davantage européen que québécois avec une légère teinte synthétique.",
+   "Voix synthétique ou très lisse avec un accent français standard, manquant totalement du grain et de l'intensité nécessaires pour une bande-annonce québécoise."
+  ],
+  "score": 3.58
+ },
+ {
+  "id": "vox3-voice3155",
+  "texte": "narration",
+  "fichier": "vox3-voice3155-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3155",
+  "oreille": {
+   "langue_francaise": 0.0,
+   "accent_quebecois": 0.0,
+   "energie": 0.5,
+   "caractere": 0.0,
+   "naturel": 0.0,
+   "cheap": 10.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Le modèle TTS est complètement bogué, répétant les premiers mots en boucle avant de dégénérer en bruits d'aboiement aigus.",
+   "L'audio est complètement défaillant : la voix synthétique boucle indéfiniment sur les premiers mots avant de dégénérer en un bruit strident."
+  ],
+  "score": -1.9
+ },
+ {
+  "id": "vox3-voice3132",
+  "texte": "narration",
+  "fichier": "vox3-voice3132-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3132",
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 3.0,
+   "energie": 3.5,
+   "caractere": 4.0,
+   "naturel": 6.0,
+   "cheap": 5.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "La voix sonne très synthétique et robotique, manquant totalement d'émotion et de grain pour une bande-annonce.",
+   "Belle voix grave et posée, mais l'accent est français de France et ça manque d'intensité dramatique pour une bande-annonce."
+  ],
+  "score": 4.55
+ },
+ {
+  "id": "vox3-voice3138",
+  "texte": "narration",
+  "fichier": "vox3-voice3138-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3138",
+  "oreille": {
+   "langue_francaise": 5.0,
+   "accent_quebecois": 1.5,
+   "energie": 3.0,
+   "caractere": 2.5,
+   "naturel": 4.0,
+   "cheap": 7.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix plate et artificielle avec un faible accent québécois, manquant totalement de l'énergie et de l'intensité requises pour une bande-annonce.",
+   "L'accent anglophone très prononcé rend le mot « trois » incompréhensible, et l'intonation plate et synthétique ne convient pas du tout pour une bande-annonce québécoise."
+  ],
+  "score": 2.0
+ },
+ {
+  "id": "vox3-voice3140",
+  "texte": "narration",
+  "fichier": "vox3-voice3140-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3140",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 3.5,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique plate qui manque totalement d'énergie et d'intensité dramatique pour une bande-annonce.",
+   "Voix manifestement synthétique à l'accent français standard, manquant totalement d'énergie et d'authenticité québécoise."
+  ],
+  "score": 2.38
+ },
+ {
+  "id": "vox3-voice3144",
+  "texte": "narration",
+  "fichier": "vox3-voice3144-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3144",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 1.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 6.0,
+   "cheap": 6.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix féminine lisse et posée avec un accent français standard, manquant de caractère et d'authenticité québécoise pour une bande-annonce.",
+   "La prononciation est très française standard (pas du tout québécoise) et la voix est beaucoup trop lisse et plate pour une bande-annonce."
+  ],
+  "score": 3.77
+ },
+ {
+  "id": "vox3-voice3142",
+  "texte": "narration",
+  "fichier": "vox3-voice3142-narration.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "voice_3142",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 3.5,
+   "energie": 3.5,
+   "caractere": 2.0,
+   "naturel": 4.0,
+   "cheap": 6.5
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix féminine lisse et sans relief avec un accent européen, manquant totalement de caractère et d'authenticité québécoise pour une bande-annonce.",
+   "Voix synthétique lisse avec une légère coloration québécoise, manquant totalement de gravité et d'intensité dramatique pour une bande-annonce."
+  ],
+  "score": 3.15
+ },
+ {
+  "id": "vox3-marie-excitee",
+  "texte": "cri",
+  "fichier": "vox3-marie-excitee-cri.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "fr_marie_excited",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 4.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.5
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Malgré l'élision « Y arrivent », la voix est très robotique et manque totalement de l'urgence et de la puissance attendues pour un cri.",
+   "Cela sonne comme une voix de synthèse (TTS) française standard, avec une intonation très plate et un manque total d'urgence malgré le texte."
+  ],
+  "score": 2.32
+ },
+ {
+  "id": "vox3-marie-colere",
+  "texte": "cri",
+  "fichier": "vox3-marie-colere-cri.mp3",
+  "modele": "mistralai/voxtral-mini-tts-3-0",
+  "voix": "fr_marie_angry",
+  "oreille": {
+   "langue_francaise": 8.5,
+   "accent_quebecois": 1.0,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.5,
+   "cheap": 8.5
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique à l'accent français standard qui manque totalement d'urgence, lisant 'Maintenant' comme une question au lieu de crier.",
+   "Voix synthétique à l'accent français standard qui lit le texte sur un ton de question plutôt que de crier."
+  ],
+  "score": 2.15
+ },
+ {
+  "id": "vox3-clone-h3",
+  "texte": "cri",
+  "erreur": "HTTP 404 {\"error\":{\"message\":\"No endpoints supporting voice cloning found for this model.\",\"code\":404,\"metadata\":{\"routing_funnel\":[{\"step\":\"Initial Endpoints\",\"endpoint_count\":3},{\"step\":\"Filter by R"
+ },
+ {
+  "id": "vox2603-marie-excitee",
+  "texte": "cri",
+  "fichier": "vox2603-marie-excitee-cri.mp3",
+  "modele": "mistralai/voxtral-mini-tts-2603",
+  "voix": "fr_marie_excited",
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 0.5,
+   "energie": 1.0,
+   "caractere": 1.0,
+   "naturel": 1.5,
+   "cheap": 9.5
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique de type TTS à l'accent européen, complètement plate, sans aucune émotion d'urgence et coupée avant la fin.",
+   "Voix synthétique de type GPS en français européen, totalement plate, sans aucune émotion ni accent québécois."
+  ],
+  "score": 0.93
+ },
+ {
+  "id": "vox2603-clone-h3",
+  "texte": "cri",
+  "erreur": "HTTP 404 {\"error\":{\"message\":\"No endpoints supporting voice cloning found for this model.\",\"code\":404,\"metadata\":{\"routing_funnel\":[{\"step\":\"Initial Endpoints\",\"endpoint_count\":3},{\"step\":\"Filter by R"
+ },
+ {
+  "id": "minimax28-narrateur",
+  "texte": "cri",
+  "fichier": "minimax28-narrateur-cri.mp3",
+  "modele": "minimax/speech-2.8-hd",
+  "voix": "French_MaleNarrator",
+  "oreille": {
+   "langue_francaise": 8.5,
+   "accent_quebecois": 0.5,
+   "energie": 3.0,
+   "caractere": 2.0,
+   "naturel": 2.0,
+   "cheap": 8.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix synthétique très plate avec un accent français standard qui ne transmet aucune urgence pour un cri de bataille.",
+   "Voix synthétique au français hexagonal qui récite le texte platement sans aucune énergie ni l'accent québécois demandé."
+  ],
+  "score": 1.97
+ },
+ {
+  "id": "minimax28-homme",
+  "texte": "cri",
+  "fichier": "minimax28-homme-cri.mp3",
+  "modele": "minimax/speech-2.8-hd",
+  "voix": "French_Male_Speech_New",
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 1.0,
+   "energie": 1.0,
+   "caractere": 1.0,
+   "naturel": 2.0,
+   "cheap": 9.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "C'est une voix synthétique au ton complètement plat avec un accent français standard, à l'opposé du cri d'urgence québécois demandé.",
+   "Voix synthétique plate sans aucune urgence ni cri, avec un accent de France standard."
+  ],
+  "score": 1.45
+ },
+ {
+  "id": "mai21-grant",
+  "texte": "cri",
+  "fichier": "mai21-grant-cri.mp3",
+  "modele": "microsoft/mai-voice-2.1",
+  "voix": "fr-FR-Grant:MAI-Voice-2.1",
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 2.0,
+   "energie": 3.0,
+   "caractere": 7.5,
+   "naturel": 4.0,
+   "cheap": 7.5
+  },
+  "genre": "homme",
+  "commentaires": [
+   "La voix a un grain grave intéressant mais manque totalement d'énergie pour un cri d'urgence, sonnant comme une synthèse vocale en français standard plutôt que québécois.",
+   "Voix très grave et texturée en français international, mais l'interprétation manque totalement de l'urgence demandée pour un cri et sonne comme une voix de synthèse."
+  ],
+  "score": 4.05
+ },
+ {
+  "id": "mai21-marc",
+  "texte": "cri",
+  "fichier": "mai21-marc-cri.mp3",
+  "modele": "microsoft/mai-voice-2.1",
+  "voix": "fr-FR-Marc:MAI-Voice-2.1",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 1.0,
+   "energie": 7.5,
+   "caractere": 5.0,
+   "naturel": 7.0,
+   "cheap": 4.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "L'énergie et l'urgence du cri sont très convaincantes, mais l'accent sonne beaucoup plus européen que québécois.",
+   "L'accent est très français de France et la voix sonne légèrement synthétique, avec une urgence qui manque de puissance viscérale."
+  ],
+  "score": 6.05
+ },
+ {
+  "id": "mai21-harper",
+  "texte": "cri",
+  "fichier": "mai21-harper-cri.mp3",
+  "modele": "microsoft/mai-voice-2.1",
+  "voix": "fr-FR-Harper:MAI-Voice-2.1",
+  "oreille": {
+   "langue_francaise": 9.5,
+   "accent_quebecois": 2.0,
+   "energie": 1.0,
+   "caractere": 2.0,
+   "naturel": 2.0,
+   "cheap": 9.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Voix synthétique plate et robotique sans aucune urgence ni émotion.",
+   "Voix de synthèse en français standard, totalement plate et sans aucune de l'énergie requise pour un cri."
+  ],
+  "score": 1.88
+ },
+ {
+  "id": "fish21-direction",
+  "texte": "cri",
+  "fichier": "fish21-direction-cri.mp3",
+  "modele": "fish-audio/s2.1-pro",
+  "voix": null,
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 3.5,
+   "energie": 8.0,
+   "caractere": 5.5,
+   "naturel": 4.0,
+   "cheap": 7.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "L'énergie et le grain du cri sont très convaincants, mais l'audio souffre d'artéfacts numériques prononcés qui trahissent une génération par IA.",
+   "Voix synthétique féminine avec un accent français standard qui tente de crier mais manque totalement de naturel et d'accent québécois."
+  ],
+  "score": 4.65
+ },
+ {
+  "id": "fish21-clone-h3",
+  "texte": "cri",
+  "fichier": "fish21-clone-h3-cri.mp3",
+  "modele": "fish-audio/s2.1-pro",
+  "voix": null,
+  "oreille": {
+   "langue_francaise": 8.0,
+   "accent_quebecois": 0.5,
+   "energie": 3.5,
+   "caractere": 2.0,
+   "naturel": 2.0,
+   "cheap": 9.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "Voix manifestement synthétique avec un accent français de France, manquant cruellement d'intensité et de naturel pour un cri de bande-annonce.",
+   "Voix manifestement synthétique (TTS) à l'accent européen, manquant totalement de l'urgence et de l'énergie requises pour un cri."
+  ],
+  "score": 1.85
+ },
+ {
+  "id": "gemini38-fenrir",
+  "texte": "cri",
+  "fichier": "gemini38-fenrir-cri.mp3",
+  "modele": "google/gemini-3.8-flash-tts",
+  "voix": "Fenrir",
+  "oreille": {
+   "langue_francaise": 10.0,
+   "accent_quebecois": 1.5,
+   "energie": 8.5,
+   "caractere": 7.0,
+   "naturel": 9.0,
+   "cheap": 2.0
+  },
+  "genre": "femme",
+  "commentaires": [
+   "Excellente intensité dramatique et belle texture de voix, mais l'accent sonne résolument français d'Europe (ou international) plutôt que québécois.",
+   "Bonne intensité et voix naturelle qui évoque un jeune personnage ou une femme, mais l'accent sonne beaucoup plus français standard que québécois."
+  ],
+  "score": 7.6
+ },
+ {
+  "id": "gemini38-puck",
+  "texte": "cri",
+  "fichier": "gemini38-puck-cri.mp3",
+  "modele": "google/gemini-3.8-flash-tts",
+  "voix": "Puck",
+  "oreille": {
+   "langue_francaise": 9.0,
+   "accent_quebecois": 1.5,
+   "energie": 8.5,
+   "caractere": 7.0,
+   "naturel": 6.0,
+   "cheap": 5.0
+  },
+  "genre": "homme",
+  "commentaires": [
+   "L'énergie d'urgence est présente mais la voix manque cruellement de coffre et d'accent québécois, sonnant davantage comme un doublage standard européen un peu forcé.",
+   "L'énergie de la panique est là, mais l'accent est français standard et l'enregistrement sature avec des artefacts numériques."
+  ],
+  "score": 6.0
+ }
+]

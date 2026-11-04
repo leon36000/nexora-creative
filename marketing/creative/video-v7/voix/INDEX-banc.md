@@ -1,0 +1,66 @@
+# Banc des voix V7 (même texte pour tous ; oreille de machine Gemini 4 Argon, 2 passes ; à confirmer à l'oreille)
+
+| rang | fichier | modèle | voix | genre | français | québécois | énergie | caractère | naturel | cheap | score |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | gemini38-puck-narration.mp3 | google/gemini-3.8-flash-tts | Puck | homme | 10.0 | 6.5 | 7.5 | 9.0 | 9.0 | 1.0 | 8.5 |
+| 2 | gemini38-fenrir-cri.mp3 | google/gemini-3.8-flash-tts | Fenrir | femme | 10.0 | 1.5 | 8.5 | 7.0 | 9.0 | 2.0 | 7.6 |
+| 3 | vox3-voice3146-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3146 | femme | 9.5 | 9.0 | 3.5 | 5.5 | 8.0 | 2.5 | 6.58 |
+| 4 | vox2603-marie-excitee-narration.mp3 | mistralai/voxtral-mini-tts-2603 | fr_marie_excited | femme | 10.0 | 1.5 | 5.5 | 5.0 | 8.5 | 2.0 | 6.47 |
+| 5 | vox3-voice3154-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3154 | femme | 8.5 | 6.0 | 5.5 | 5.0 | 7.5 | 2.5 | 6.2 |
+| 6 | gemini38-fenrir-narration.mp3 | google/gemini-3.8-flash-tts | Fenrir | homme | 9.0 | 2.0 | 7.0 | 7.5 | 6.5 | 4.0 | 6.18 |
+| 7 | mai21-marc-cri.mp3 | microsoft/mai-voice-2.1 | fr-FR-Marc:MAI-Voice-2.1 | homme | 10.0 | 1.0 | 7.5 | 5.0 | 7.0 | 4.0 | 6.05 |
+| 8 | gemini38-puck-cri.mp3 | google/gemini-3.8-flash-tts | Puck | homme | 9.0 | 1.5 | 8.5 | 7.0 | 6.0 | 5.0 | 6.0 |
+| 9 | fish21-clone-h3-narration.mp3 | fish-audio/s2.1-pro | None | homme | 9.0 | 0.5 | 6.5 | 6.5 | 6.5 | 4.0 | 5.72 |
+| 10 | mai21-grant-narration.mp3 | microsoft/mai-voice-2.1 | fr-FR-Grant:MAI-Voice-2.1 | homme | 9.5 | 1.5 | 5.0 | 6.0 | 6.0 | 4.5 | 5.33 |
+| 11 | minimax28-narrateur-narration.mp3 | minimax/speech-2.8-hd | French_MaleNarrator | homme | 9.0 | 7.0 | 5.0 | 4.5 | 5.0 | 5.5 | 5.0 |
+| 12 | vox3-voice3141-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3141 | femme | 10.0 | 1.0 | 4.0 | 3.0 | 7.0 | 4.0 | 4.95 |
+| 13 | minimax28-homme-narration.mp3 | minimax/speech-2.8-hd | French_Male_Speech_New | homme | 9.5 | 1.5 | 4.0 | 3.0 | 6.5 | 4.0 | 4.75 |
+| 14 | vox3-voice3135-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3135 | homme | 9.5 | 1.5 | 4.5 | 4.5 | 5.5 | 5.0 | 4.7 |
+| 15 | fish21-direction-cri.mp3 | fish-audio/s2.1-pro | None | homme | 8.0 | 3.5 | 8.0 | 5.5 | 4.0 | 7.0 | 4.65 |
+| 16 | mai21-marc-narration.mp3 | microsoft/mai-voice-2.1 | fr-FR-Marc:MAI-Voice-2.1 | homme | 10.0 | 1.5 | 3.5 | 2.5 | 6.5 | 4.5 | 4.58 |
+| 17 | vox3-voice482-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_482 | homme | 8.5 | 4.0 | 5.0 | 4.5 | 5.0 | 5.5 | 4.58 |
+| 18 | vox3-voice3132-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3132 | femme | 9.0 | 3.0 | 3.5 | 4.0 | 6.0 | 5.0 | 4.55 |
+| 19 | vox3-voice592-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_592 | femme | 10.0 | 1.5 | 3.5 | 3.0 | 6.0 | 5.0 | 4.45 |
+| 20 | fish21-direction-narration.mp3 | fish-audio/s2.1-pro | None | homme | 9.0 | 2.0 | 3.0 | 5.0 | 5.5 | 5.0 | 4.42 |
+| 21 | vox3-voice3136-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3136 | homme | 10.0 | 1.5 | 3.5 | 4.0 | 5.0 | 5.5 | 4.3 |
+| 22 | vox3-voice447-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_447 | femme | 10.0 | 2.0 | 5.0 | 2.5 | 5.0 | 6.0 | 4.25 |
+| 23 | vox3-voice3143-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3143 | homme | 8.0 | 7.0 | 3.0 | 4.0 | 5.0 | 6.0 | 4.15 |
+| 24 | mai21-grant-cri.mp3 | microsoft/mai-voice-2.1 | fr-FR-Grant:MAI-Voice-2.1 | homme | 9.0 | 2.0 | 3.0 | 7.5 | 4.0 | 7.5 | 4.05 |
+| 25 | vox3-voice3144-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3144 | femme | 9.5 | 1.0 | 3.0 | 2.0 | 6.0 | 6.0 | 3.77 |
+| 26 | vox3-voice1788-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_1788 | homme | 8.0 | 4.5 | 4.5 | 4.5 | 3.5 | 7.0 | 3.72 |
+| 27 | vox3-voice1787-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_1787 | femme | 9.0 | 2.0 | 3.5 | 2.5 | 5.0 | 6.0 | 3.7 |
+| 28 | vox3-voice480-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_480 | femme | 9.5 | 2.0 | 3.0 | 4.0 | 4.0 | 7.0 | 3.58 |
+| 29 | mai21-harper-narration.mp3 | microsoft/mai-voice-2.1 | fr-FR-Harper:MAI-Voice-2.1 | femme | 10.0 | 0.5 | 3.5 | 2.0 | 5.0 | 7.0 | 3.5 |
+| 30 | vox3-voice3147-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3147 | homme | 8.0 | 6.0 | 4.5 | 3.5 | 3.5 | 8.0 | 3.47 |
+| 31 | vox3-marie-colere-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | fr_marie_angry | femme | 10.0 | 0.0 | 3.0 | 2.0 | 5.0 | 7.5 | 3.25 |
+| 32 | vox3-voice3150-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3150 | homme | 8.0 | 7.0 | 2.5 | 2.0 | 4.0 | 7.0 | 3.2 |
+| 33 | vox3-voice483-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_483 | femme | 8.0 | 3.5 | 7.0 | 2.0 | 2.5 | 8.0 | 3.18 |
+| 34 | vox3-voice3142-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3142 | femme | 8.0 | 3.5 | 3.5 | 2.0 | 4.0 | 6.5 | 3.15 |
+| 35 | vox3-voice3153-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3153 | homme | 8.0 | 4.0 | 3.0 | 2.0 | 4.0 | 7.0 | 3.0 |
+| 36 | vox3-voice3149-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3149 | homme | 8.5 | 1.5 | 3.0 | 2.0 | 4.0 | 7.0 | 2.87 |
+| 37 | vox3-voice479-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_479 | femme | 8.0 | 6.0 | 3.0 | 2.0 | 2.5 | 8.0 | 2.62 |
+| 38 | vox3-voice589-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_589 | femme | 9.5 | 0.5 | 2.5 | 1.5 | 4.0 | 8.0 | 2.62 |
+| 39 | vox3-marie-excitee-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | fr_marie_excited | femme | 8.0 | 7.0 | 3.0 | 2.0 | 2.0 | 8.0 | 2.6 |
+| 40 | vox3-voice481-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_481 | femme | 8.0 | 3.5 | 3.0 | 2.0 | 2.5 | 8.0 | 2.38 |
+| 41 | vox3-voice3140-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3140 | femme | 8.0 | 3.5 | 3.0 | 2.0 | 2.5 | 8.0 | 2.38 |
+| 42 | vox3-marie-excitee-cri.mp3 | mistralai/voxtral-mini-tts-3-0 | fr_marie_excited | femme | 8.0 | 4.0 | 3.0 | 2.0 | 2.5 | 8.5 | 2.32 |
+| 43 | vox3-voice3137-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3137 | femme | 8.0 | 1.5 | 3.0 | 2.0 | 3.0 | 8.0 | 2.3 |
+| 44 | vox3-voice3133-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3133 | homme | 5.0 | 3.5 | 5.0 | 4.5 | 2.0 | 8.5 | 2.3 |
+| 45 | vox3-voice3145-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3145 | femme | 6.5 | 4.0 | 3.5 | 2.0 | 2.5 | 8.0 | 2.15 |
+| 46 | vox3-marie-colere-cri.mp3 | mistralai/voxtral-mini-tts-3-0 | fr_marie_angry | femme | 8.5 | 1.0 | 3.0 | 2.0 | 2.5 | 8.5 | 2.15 |
+| 47 | vox3-voice3138-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3138 | homme | 5.0 | 1.5 | 3.0 | 2.5 | 4.0 | 7.5 | 2.0 |
+| 48 | minimax28-narrateur-cri.mp3 | minimax/speech-2.8-hd | French_MaleNarrator | homme | 8.5 | 0.5 | 3.0 | 2.0 | 2.0 | 8.5 | 1.97 |
+| 49 | vox3-voice3139-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3139 | femme | 8.0 | 4.0 | 2.5 | 1.5 | 2.0 | 9.0 | 1.9 |
+| 50 | mai21-harper-cri.mp3 | microsoft/mai-voice-2.1 | fr-FR-Harper:MAI-Voice-2.1 | femme | 9.5 | 2.0 | 1.0 | 2.0 | 2.0 | 9.0 | 1.88 |
+| 51 | fish21-clone-h3-cri.mp3 | fish-audio/s2.1-pro | None | homme | 8.0 | 0.5 | 3.5 | 2.0 | 2.0 | 9.0 | 1.85 |
+| 52 | vox3-voice3134-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3134 | homme | 5.0 | 3.0 | 3.0 | 2.0 | 2.5 | 8.5 | 1.47 |
+| 53 | minimax28-homme-cri.mp3 | minimax/speech-2.8-hd | French_Male_Speech_New | homme | 9.0 | 1.0 | 1.0 | 1.0 | 2.0 | 9.0 | 1.45 |
+| 54 | vox3-voice478-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_478 | femme | 5.0 | 0.5 | 3.0 | 2.0 | 2.0 | 8.0 | 1.2 |
+| 55 | vox2603-marie-excitee-cri.mp3 | mistralai/voxtral-mini-tts-2603 | fr_marie_excited | femme | 8.0 | 0.5 | 1.0 | 1.0 | 1.5 | 9.5 | 0.93 |
+| 56 | vox3-voice485-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_485 | femme | 2.0 | 0.0 | 3.0 | 2.0 | 2.0 | 9.0 | 0.2 |
+| 57 | vox3-voice590-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_590 | femme | 2.0 | 0.0 | 3.0 | 2.0 | 2.0 | 9.0 | 0.2 |
+| 58 | vox3-voice1786-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_1786 | femme | 1.5 | 0.0 | 3.0 | 1.5 | 2.0 | 9.0 | -0.02 |
+| 59 | vox3-voice591-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_591 | homme | 1.5 | 0.0 | 3.0 | 2.0 | 1.5 | 9.5 | -0.15 |
+| 60 | vox3-voice3155-narration.mp3 | mistralai/voxtral-mini-tts-3-0 | voice_3155 | femme | 0.0 | 0.0 | 0.5 | 0.0 | 0.0 | 10.0 | -1.9 |
+
+Échecs : vox3-clone-h3/narration (HTTP 404 {"error":{"message":"No endpoints supporting voice ), vox2603-clone-h3/narration (HTTP 404 {"error":{"message":"No endpoints supporting voice ), vox3-clone-h3/cri (HTTP 404 {"error":{"message":"No endpoints supporting voice ), vox2603-clone-h3/cri (HTTP 404 {"error":{"message":"No endpoints supporting voice )

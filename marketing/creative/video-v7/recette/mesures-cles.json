@@ -1,0 +1,38 @@
+{
+ "r01-dragon-chateau": {
+  "victoires_v6": 0,
+  "victoires_recette": 2,
+  "reel_v6": 2.5,
+  "reel_recette": 7.5
+ },
+ "r02-dragon-survol": {
+  "victoires_v6": 0,
+  "victoires_recette": 2,
+  "reel_v6": 3.5,
+  "reel_recette": 7.5
+ },
+ "r03-espace-plongee": {
+  "victoires_v6": 0,
+  "victoires_recette": 2,
+  "reel_v6": 2.5,
+  "reel_recette": 7.0
+ },
+ "r04-dragon-croiseur": {
+  "victoires_v6": 1,
+  "victoires_recette": 1,
+  "reel_v6": 5.0,
+  "reel_recette": 5.0
+ },
+ "r05-flotte-aube": {
+  "victoires_v6": 0,
+  "victoires_recette": 2,
+  "reel_v6": 2.5,
+  "reel_recette": 8.0
+ },
+ "r06-duel-pluie": {
+  "victoires_v6": 0,
+  "victoires_recette": 2,
+  "reel_v6": 3.0,
+  "reel_recette": 7.0
+ }
+}
