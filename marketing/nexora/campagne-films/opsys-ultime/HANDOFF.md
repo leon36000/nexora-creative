@@ -1,4 +1,4 @@
-# Film ultime OPSYS-AI : passation (04/11/2026, ≈ 04 h 30)
+# Film ultime OPSYS-AI : passation (04/11/2026, mise à jour 04 h 50)
 
 Arrêt anticipé demandé (abonnement Claude du fondateur à 95 %). La production continue **seule** : des scripts en arrière-plan
 tournent, révisent, mettent en musique et montent les quatre films. Ce document dit où en est chaque chose et comment reprendre.
@@ -33,13 +33,19 @@ tournent, révisent, mettent en musique et montent les quatre films. Ce document
 4. Codex : évaluation de LatentSync 1.6 / MuseTalk 1.5 contre la parole native de H3 (dossier
    `/tmp/claude-1000/…/scratchpad/codex-lipsync/`, installation sur pc1 `NexoraStudioWork/lipsync/`), en attente d'une fenêtre GPU.
 
+## État à 04 h 50
+- Plans 16:9 : opus 28/32, deepseek 18/32, muse 20/20 (fini), gemini 18/20. Muse est en session de révision depuis 04 h 31.
+- Révision Opus écrite et commitée (REVISION.json : 8 unités de reprises en prise de vues réelle ; voix n01, n07, m01 refaites) ; son
+  `apres_revision.sh` part tout seul dès que ses plans sont tournés.
+- Chaîne musique testée de bout en bout sur Opus (évaluation de 2 candidates sur le film mixé) : Lyria c1 note du juge 7,5/10 (accord 7,
+  dynamique 8, motif 7), ACE-Step c2 6,9 ; Music3 c3 à régénérer (le GB10 est chargé par d'autres bancs).
+- 99 vidéos déjà archivées sur pc1 et inventoriées (rushes, essais de synchronisation labiale, voix natives H3, essai de chaîne).
+- `chaine/finir.sh` attend les quatre « FINI » puis écrit `COMPARAISON.md` (rapporteur gemini-eleve), commite et pousse.
+
 ## Ce qui reste
-- **Équipe Opus** : écrire sa révision (`equipes/opus/REVISION.json` + dossier révisé via `fabriquer.py`), puis
-  `chaine/apres_revision.sh opus`. Notes de révision prévues : voix courtes ratées (n01 « Une photo. », n07 « OPSYS-AI. », m01 « Déjà?! »)
-  à refaire en `eleven-frederic` / `drama3-adamqc` ; reprises p05 (signal invisible sur les fils), p06 (figurants), p03 utilisable dès
-  1,2 s ; carton ≤ 3,5 s + scène bonus ; trou de 0,5 s avant la révélation ; 3 musiques candidates (Lyria ×2, ACE-Step).
-- `COMPARAISON.md` : à écrire quand les quatre films finaux existent (`comparaison.json` + juges + notes sévères par critère : spectacle,
-  clarté des fonctions, voix, musique, rythme, crédibilité ; coût en jetons `outils/sous-agents/cout.sh --run ou`, GPU dans comparaison.json).
+- Surveiller les journaux `apres-revision-<e>.log` (le premier passage réel de cette chaîne sera Muse) et `finir.log` ; en cas d'échec
+  d'une étape, la relancer seule (chaque script est idempotent : ce qui existe est sauté).
+- Relire `COMPARAISON.md` (écrit par un sous-agent à partir des seules données) et y ajouter, si possible, une note humaine sévère.
 - Fusion de la MR !27 après relecture ; nettoyage : `equipes/essai/` (essai de chaîne, non commité), fichiers temporaires du scratchpad,
   courts YouTube déjà supprimés.
 
