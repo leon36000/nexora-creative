@@ -20,6 +20,30 @@ describe('choix du moteur', () => {
   });
 });
 
+describe('disponibilité du détourage pro', () => {
+  it('reste indisponible même si un moteur pro est déclaré, avant tout dépôt', async () => {
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-pro-')),
+      moteurs: () => [{ id: 'pro', nom: 'Pro', recettes: ['detourage-pro'], detourageUrl: 'http://127.0.0.1:1' }],
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const capacites = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(capacites.statusCode).toBe(200);
+      expect(capacites.json().pro.disponible).toBe(false);
+      const creation = await app.inject({ method: 'POST', url: '/api/nexora/detourage/travaux', payload: { palier: 'pro' } });
+      expect(creation.statusCode).toBe(503);
+      expect(creation.json().error).not.toMatch(/poids.*install/i);
+      const travaux = await app.inject({ method: 'GET', url: '/api/nexora/detourage/travaux' });
+      expect(travaux.json()).toEqual([]);
+    } finally {
+      arreter();
+      await app.close();
+    }
+  });
+});
+
 describe('routes /api/nexora/detourage (moteur simulé)', () => {
   let faux: Server;
   const recu: string[] = [];

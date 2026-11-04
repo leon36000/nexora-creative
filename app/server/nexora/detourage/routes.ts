@@ -85,8 +85,8 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     return {
       rapide: { disponible: !!sante, moteur: rapide ? { id: rapide.id, nom: rapide.nom } : null, modeles: sante?.modeles ?? null,
         description: 'SAM 3.1 (sélection par clics, boîte ou mot, suivi) + ViTMatte (bords) + stabilisation par flux optique' },
-      pro: { disponible: !!pro, moteur: pro ? { id: pro.id, nom: pro.nom } : null,
-        description: 'LTX-2.5 Alpha-Gen (cheveux, fumée, verre) : poids installés sur pc3, pas encore branché à Creative' },
+      pro: { disponible: false, moteur: pro ? { id: pro.id, nom: pro.nom } : null,
+        description: 'Détourage avancé indisponible actuellement.' },
       limites: { secondesMax: SECONDES_MAX(), largeurMax: 3840, sourceOctetsMax: MAX_SOURCE },
       sorties: ['alpha PNG 16 bits', 'RGBA PNG 16 bits (avant-plan estimé)', 'EXR demi-flottant ZIP (premultiplié, linéaire)', 'EXR alpha', 'ProRes 4444', 'WebM VP9 alpha', 'matte', 'composite sur nouveau fond'],
       tarif: deps.nexora ? tarifDepuisEnv() : null,
@@ -126,6 +126,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
 
   app.post(`${P}/travaux`, async (req, reply) => garde(reply, async () => {
     const b = (req.body ?? {}) as { nom?: string; palier?: string };
+    if (b.palier === 'pro') throw new ErreurDetourage('Le détourage pro n’est pas encore disponible.', 503);
     const { org, user } = qui();
     return vue(detourage.creer(org, user, String(b.nom ?? ''), b.palier === 'pro' ? 'pro' : 'rapide'));
   }));
@@ -158,7 +159,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     const lu = ParamsSchema.safeParse(req.body);
     if (!lu.success) throw new ErreurDetourage(lu.error.issues.map((i) => `${i.path.join('.') || 'réglages'} : ${i.message}`).join(' ; '));
     const p = lu.data;
-    if (p.palier === 'pro') throw new ErreurDetourage('Le palier pro n’est pas disponible : les poids LTX-2.5 Alpha-Gen ne sont pas installés.', 503);
+    if (p.palier === 'pro') throw new ErreurDetourage('Le détourage pro n’est pas encore disponible.', 503);
     const src = t.source;
     const duree = Math.min(p.dureeS ?? Infinity, Math.max(0, (src?.duree ?? 5) - p.debutS));
     if (duree > SECONDES_MAX()) throw new ErreurDetourage(`Plage trop longue (${Math.round(duree)} s, ${SECONDES_MAX()} s au plus) : choisis une durée plus courte.`);
