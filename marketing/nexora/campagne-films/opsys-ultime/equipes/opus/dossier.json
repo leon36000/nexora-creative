@@ -60,9 +60,9 @@
   {
    "id": "n01",
    "role": "narrateur",
-   "voix": "drama3-frederic",
-   "texte": "Une photo.",
-   "direction": "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, rythme vif.",
+   "voix": "eleven-frederic",
+   "texte": "Tout commence par une seule photo.",
+   "direction": "[confident, punchy, energetic]",
    "vitesse": 1.1,
    "prises": 2
   },
@@ -114,9 +114,9 @@
   {
    "id": "n07",
    "role": "narrateur",
-   "voix": "drama3-frederic",
-   "texte": "OPSYS-AI.",
-   "direction": "Assuré, chaleureux, prononcé « op-sisse A-I ».",
+   "voix": "eleven-frederic",
+   "texte": "OPSYS-AI, par Nexora.",
+   "direction": "[confident, warm, punchy]",
    "vitesse": 1.0,
    "prises": 2
   },
@@ -132,9 +132,9 @@
   {
    "id": "m01",
    "role": "morin",
-   "voix": "eleven-alexandre",
-   "texte": "Déjà?!",
-   "direction": "[surprised, delighted, older man]",
+   "voix": "eleven-adamqc",
+   "texte": "Hein? C'est déjà prêt?!",
+   "direction": "[surprised, delighted, laughing]",
    "vitesse": 1.0,
    "prises": 2
   },
@@ -907,7 +907,82 @@
     "t_s": 123.4,
     "evenement": "Les ressources d'une grande entreprise"
    }
-  ]
+  ],
+  "candidats": [
+   {
+    "id": "c1",
+    "moteur": "lyria",
+    "version": "long",
+    "duree_s": 128,
+    "prompt": "Instrumental cinematic big-beat trailer score, 125 BPM, D minor to F major, uplifting and heroic, never sad. A memorable four-note heroic synth hook (rising: D, F, A, C) that returns at every big moment, stated by brass and synth together; real dynamics: hard stops, tension builds, huge drops, never a flat loop. Structure: 0-4 s ticking tension; 4 s first hit; 4-18 s fast build with risers; 18 s full stop for half a second then the biggest drop (the reveal); 18-50 s anthem with the hook; 50 s hit and switch to a tight funky groove with room for dialogue (bass, drums, claps, small hook stabs); 104 s riser; 108-120 s triumphant final chorus with the hook; 120 s final hit and short tail. Punchy modern mix, wide, loud."
+   },
+   {
+    "id": "c2",
+    "moteur": "acestep",
+    "version": "long",
+    "duree_s": 128,
+    "prompt": "cinematic big beat, electronic orchestral hybrid, 125 BPM, D minor, heroic brass hook, punchy drums, funky bass, claps, risers, huge drops, hard stops, triumphant, uplifting, instrumental"
+   },
+   {
+    "id": "c3",
+    "moteur": "music3",
+    "version": "long",
+    "duree_s": 128,
+    "prompt": "Global Metadata: Cinematic big-beat trailer score, 125 BPM, D minor resolving to F major, heroic, energetic, punchy drums, funky bass, brass and synth hook. A memorable four-note heroic synth hook (rising: D, F, A, C) that returns at every big moment, stated by brass and synth together; real dynamics: hard stops, tension builds, huge drops, never a flat loop.\n\nVocal Details: Instrumental, no vocals.\n\nArrangement: [Intro] 0-4 s ticking tension. [Build] 4-18 s rising. [Drop] 18 s biggest drop. [Anthem] 18-50 s. [Groove] 50-104 s tight groove for dialogue. [Build] 104-108 s. [Final] 108-120 s triumphant. [Outro] 120-128 s final hit."
+   }
+  ],
+  "carte": {
+   "long": {
+    "impacts": [
+     3.83,
+     17.62,
+     38.29,
+     49.67,
+     107.33,
+     121.75,
+     124.62
+    ],
+    "trous": [
+     [
+      17.07,
+      17.57
+     ],
+     [
+      121.35,
+      121.75
+     ]
+    ],
+    "montees": [
+     [
+      13.96,
+      17.07
+     ],
+     [
+      101.08,
+      107.33
+     ]
+    ],
+    "climax": 112.12,
+    "fin": 128.0
+   },
+   "court": {
+    "impacts": [
+     1.46,
+     5.79,
+     8.71,
+     12.96
+    ],
+    "trous": [
+     [
+      5.49,
+      5.77
+     ]
+    ],
+    "montees": [],
+    "climax": 10.62,
+    "fin": 14.88
+   }
+  }
  },
  "montage": {
   "long": {
@@ -1073,7 +1148,7 @@
      "id": "c01",
      "src": "p01",
      "entree_f": 14,
-     "duree_f": 93,
+     "duree_f": 92,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1083,7 +1158,7 @@
      "id": "c02",
      "src": "p02",
      "entree_f": 7,
-     "duree_f": 70,
+     "duree_f": 69,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1092,7 +1167,7 @@
     {
      "id": "c03",
      "src": "p03",
-     "entree_f": 12,
+     "entree_f": 29,
      "duree_f": 58,
      "transition_in": {
       "type": "cut",
@@ -1123,7 +1198,7 @@
      "id": "c06",
      "src": "p06",
      "entree_f": 5,
-     "duree_f": 93,
+     "duree_f": 92,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1137,7 +1212,7 @@
      "id": "c07",
      "src": "p07",
      "entree_f": 0,
-     "duree_f": 139,
+     "duree_f": 138,
      "transition_in": {
       "type": "dip",
       "duree_f": 4
@@ -1157,7 +1232,7 @@
      "id": "c09",
      "src": "p09",
      "entree_f": 12,
-     "duree_f": 70,
+     "duree_f": 69,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1177,7 +1252,7 @@
      "id": "c11",
      "src": "p11",
      "entree_f": 7,
-     "duree_f": 116,
+     "duree_f": 115,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1225,7 +1300,7 @@
      "id": "c15",
      "src": "p15",
      "entree_f": 0,
-     "duree_f": 93,
+     "duree_f": 92,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1235,7 +1310,7 @@
      "id": "c16",
      "src": "p16",
      "entree_f": 0,
-     "duree_f": 70,
+     "duree_f": 69,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1245,7 +1320,7 @@
      "id": "c17",
      "src": "p17",
      "entree_f": 10,
-     "duree_f": 93,
+     "duree_f": 92,
      "transition_in": {
       "type": "dip",
       "duree_f": 4
@@ -1255,7 +1330,7 @@
      "id": "c18",
      "src": "p18",
      "entree_f": 12,
-     "duree_f": 70,
+     "duree_f": 69,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1265,7 +1340,7 @@
      "id": "c19",
      "src": "p19",
      "entree_f": 10,
-     "duree_f": 93,
+     "duree_f": 92,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1275,7 +1350,7 @@
      "id": "c20",
      "src": "p20",
      "entree_f": 0,
-     "duree_f": 68,
+     "duree_f": 58,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1289,7 +1364,7 @@
      "id": "c21",
      "src": "p21",
      "entree_f": 0,
-     "duree_f": 240,
+     "duree_f": 219,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1299,7 +1374,7 @@
      "id": "c22",
      "src": "p22",
      "entree_f": 10,
-     "duree_f": 93,
+     "duree_f": 92,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1309,7 +1384,7 @@
      "id": "c23",
      "src": "p23",
      "entree_f": 0,
-     "duree_f": 92,
+     "duree_f": 81,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1319,7 +1394,7 @@
      "id": "c24",
      "src": "p24",
      "entree_f": 5,
-     "duree_f": 128,
+     "duree_f": 127,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1329,7 +1404,7 @@
      "id": "c25",
      "src": "p25",
      "entree_f": 14,
-     "duree_f": 70,
+     "duree_f": 69,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1339,7 +1414,7 @@
      "id": "c26",
      "src": "p26",
      "entree_f": 0,
-     "duree_f": 231,
+     "duree_f": 208,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1363,7 +1438,7 @@
      "id": "c28",
      "src": "p28",
      "entree_f": 12,
-     "duree_f": 70,
+     "duree_f": 69,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1383,7 +1458,7 @@
      "id": "c30",
      "src": "p30",
      "entree_f": 0,
-     "duree_f": 93,
+     "duree_f": 92,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1393,7 +1468,7 @@
      "id": "c31",
      "src": "p31",
      "entree_f": 7,
-     "duree_f": 116,
+     "duree_f": 115,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1403,7 +1478,7 @@
      "id": "c32",
      "src": "p32",
      "entree_f": 0,
-     "duree_f": 232,
+     "duree_f": 231,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1413,13 +1488,13 @@
      "id": "c-noir",
      "src": "noir",
      "entree_f": 0,
-     "duree_f": 70
+     "duree_f": 69
     },
     {
      "id": "c-carton",
      "src": "carton",
      "entree_f": 0,
-     "duree_f": 232
+     "duree_f": 81
     }
    ],
    "audio": {
@@ -1434,91 +1509,91 @@
      {
       "src": "n01",
       "debut_f": 11,
-      "duree_f": 22,
+      "duree_f": 44,
       "gain_db": 0
      },
      {
       "src": "n02",
-      "debut_f": 250,
-      "duree_f": 77,
+      "debut_f": 248,
+      "duree_f": 53,
       "gain_db": 0
      },
      {
       "src": "n03",
-      "debut_f": 445,
-      "duree_f": 80,
+      "debut_f": 442,
+      "duree_f": 69,
       "gain_db": 0
      },
      {
       "src": "n04",
-      "debut_f": 756,
-      "duree_f": 123,
+      "debut_f": 751,
+      "duree_f": 103,
       "gain_db": 0
      },
      {
       "src": "n05",
-      "debut_f": 2662,
-      "duree_f": 118,
+      "debut_f": 2581,
+      "duree_f": 81,
       "gain_db": 0
      },
      {
       "src": "n06",
-      "debut_f": 3011,
-      "duree_f": 72,
+      "debut_f": 2928,
+      "duree_f": 54,
       "gain_db": 0
      },
      {
       "src": "n07",
-      "debut_f": 3087,
-      "duree_f": 20,
+      "debut_f": 3003,
+      "duree_f": 51,
       "gain_db": 0
      },
      {
       "src": "e01",
-      "debut_f": 1041,
-      "duree_f": 78,
+      "debut_f": 1035,
+      "duree_f": 63,
       "gain_db": 0
      },
      {
       "src": "m01",
-      "debut_f": 1134,
-      "duree_f": 15,
+      "debut_f": 1127,
+      "duree_f": 41,
       "gain_db": 0
      },
      {
       "src": "l01",
-      "debut_f": 1456,
-      "duree_f": 60,
+      "debut_f": 1445,
+      "duree_f": 39,
       "gain_db": 0
      },
      {
       "src": "c01",
-      "debut_f": 1524,
-      "duree_f": 231,
+      "debut_f": 1503,
+      "duree_f": 185,
       "gain_db": 0
      },
      {
       "src": "g01",
-      "debut_f": 1857,
-      "duree_f": 84,
+      "debut_f": 1814,
+      "duree_f": 58,
       "gain_db": 0
      },
      {
       "src": "a01",
-      "debut_f": 2147,
-      "duree_f": 222,
+      "debut_f": 2091,
+      "duree_f": 151,
       "gain_db": 0
      },
      {
       "src": "e02",
-      "debut_f": 2378,
-      "duree_f": 30,
+      "debut_f": 2299,
+      "duree_f": 29,
       "gain_db": 0
      },
      {
       "src": "l02",
-      "debut_f": 2564,
-      "duree_f": 37,
+      "debut_f": 2484,
+      "duree_f": 27,
       "gain_db": 0
      }
     ],
@@ -1555,9 +1630,6 @@
      "kind": "video"
     },
     "p07": {
-     "kind": "video"
-    },
-    "p09": {
      "kind": "video"
     },
     "p11": {
@@ -1648,16 +1720,6 @@
     },
     {
      "id": "k07",
-     "src": "p09",
-     "entree_f": 19,
-     "duree_f": 23,
-     "transition_in": {
-      "type": "cut",
-      "duree_f": 0
-     }
-    },
-    {
-     "id": "k08",
      "src": "p11",
      "entree_f": 24,
      "duree_f": 35,
@@ -1667,7 +1729,7 @@
      }
     },
     {
-     "id": "k09",
+     "id": "k08",
      "src": "p13",
      "entree_f": 14,
      "duree_f": 23,
@@ -1677,7 +1739,7 @@
      }
     },
     {
-     "id": "k10",
+     "id": "k09",
      "src": "p14",
      "entree_f": 24,
      "duree_f": 23,
@@ -1687,10 +1749,10 @@
      }
     },
     {
-     "id": "k11",
+     "id": "k10",
      "src": "p16",
      "entree_f": 0,
-     "duree_f": 35,
+     "duree_f": 56,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1715,13 +1777,13 @@
      {
       "src": "n01",
       "debut_f": 6,
-      "duree_f": 22,
+      "duree_f": 44,
       "gain_db": 0
      },
      {
       "src": "m01",
-      "debut_f": 278,
-      "duree_f": 15,
+      "debut_f": 255,
+      "duree_f": 41,
       "gain_db": 0
      }
     ],
@@ -1758,9 +1820,6 @@
      "kind": "video"
     },
     "p07v": {
-     "kind": "video"
-    },
-    "p09": {
      "kind": "video"
     },
     "p11v": {
@@ -1851,16 +1910,6 @@
     },
     {
      "id": "k07",
-     "src": "p09",
-     "entree_f": 19,
-     "duree_f": 23,
-     "transition_in": {
-      "type": "cut",
-      "duree_f": 0
-     }
-    },
-    {
-     "id": "k08",
      "src": "p11v",
      "entree_f": 24,
      "duree_f": 35,
@@ -1870,7 +1919,7 @@
      }
     },
     {
-     "id": "k09",
+     "id": "k08",
      "src": "p13",
      "entree_f": 14,
      "duree_f": 23,
@@ -1880,7 +1929,7 @@
      }
     },
     {
-     "id": "k10",
+     "id": "k09",
      "src": "p14v",
      "entree_f": 24,
      "duree_f": 23,
@@ -1890,10 +1939,10 @@
      }
     },
     {
-     "id": "k11",
+     "id": "k10",
      "src": "p16v",
      "entree_f": 0,
-     "duree_f": 35,
+     "duree_f": 56,
      "transition_in": {
       "type": "cut",
       "duree_f": 0
@@ -1918,13 +1967,13 @@
      {
       "src": "n01",
       "debut_f": 6,
-      "duree_f": 22,
+      "duree_f": 44,
       "gain_db": 0
      },
      {
       "src": "m01",
-      "debut_f": 278,
-      "duree_f": 15,
+      "debut_f": 255,
+      "duree_f": 41,
       "gain_db": 0
      }
     ],
@@ -1945,14 +1994,14 @@
     {
      "type": "statut",
      "texte": "Photo reçue.",
-     "debut_f": 100,
+     "debut_f": 99,
      "duree_f": 53,
      "position": "bas-gauche"
     },
     {
      "type": "flash",
      "intensite": 0.8,
-     "debut_f": 92,
+     "debut_f": 91,
      "duree_f": 4
     },
     {
@@ -1972,61 +2021,61 @@
       ]
      ],
      "couleur": "signal",
-     "debut_f": 98,
+     "debut_f": 97,
      "duree_f": 48
     },
     {
      "type": "statut",
      "texte": "Signal : satellite · tour 5G · réseau électrique",
-     "debut_f": 170,
+     "debut_f": 168,
      "duree_f": 167,
      "position": "bas-gauche"
     },
     {
      "type": "flash",
      "intensite": 1.0,
-     "debut_f": 424,
+     "debut_f": 421,
      "duree_f": 4
     },
     {
      "type": "titre",
      "texte": "Dix départements.|*Une seule équipe.*",
      "zone": "colonne",
-     "debut_f": 455,
+     "debut_f": 452,
      "duree_f": 86
     },
     {
      "type": "surtitre",
      "texte": "M1 · RÉCEPTION",
-     "debut_f": 567,
+     "debut_f": 563,
      "duree_f": 53,
      "position": "haut-gauche"
     },
     {
      "type": "surtitre",
      "texte": "M3 · ESTIMATION",
-     "debut_f": 625,
-     "duree_f": 239,
+     "debut_f": 621,
+     "duree_f": 237,
      "position": "haut-gauche"
     },
     {
      "type": "etiquette",
      "texte": "VISION · MESURE PAR PHOTO",
-     "debut_f": 630,
+     "debut_f": 626,
      "duree_f": 58,
      "position": "bas-droite"
     },
     {
      "type": "statut",
      "texte": "Façade : 62,8 m². Moulures : 46 m.",
-     "debut_f": 637,
+     "debut_f": 633,
      "duree_f": 53,
      "position": "bas-gauche"
     },
     {
      "type": "statut",
      "texte": "Simulation des coûts…",
-     "debut_f": 698,
+     "debut_f": 693,
      "duree_f": 48,
      "position": "bas-gauche"
     },
@@ -2054,35 +2103,35 @@
      ],
      "total": "18 940 $",
      "tampon": null,
-     "debut_f": 756,
-     "duree_f": 111,
+     "debut_f": 751,
+     "duree_f": 110,
      "position": "droite"
     },
     {
      "type": "statut",
      "texte": "Revue en 11 critères : conforme.",
-     "debut_f": 809,
+     "debut_f": 804,
      "duree_f": 58,
      "position": "bas-gauche"
     },
     {
      "type": "surtitre",
      "texte": "APPROBATION HUMAINE",
-     "debut_f": 869,
+     "debut_f": 863,
      "duree_f": 55,
      "position": "haut-gauche"
     },
     {
      "type": "statut",
      "texte": "Approuvée par Luc. Envoi.",
-     "debut_f": 889,
+     "debut_f": 883,
      "duree_f": 36,
      "position": "bas-gauche"
     },
     {
      "type": "glitch",
      "intensite": 0.5,
-     "debut_f": 925,
+     "debut_f": 919,
      "duree_f": 5
     },
     {
@@ -2109,7 +2158,7 @@
      ],
      "total": "18 940 $",
      "tampon": "PRÊTE",
-     "debut_f": 993,
+     "debut_f": 987,
      "duree_f": 94,
      "position": "droite",
      "echelle": 0.85
@@ -2117,48 +2166,48 @@
     {
      "type": "flash",
      "intensite": 0.7,
-     "debut_f": 1199,
+     "debut_f": 1191,
      "duree_f": 4
     },
     {
      "type": "surtitre",
      "texte": "M4 · TERRAIN",
-     "debut_f": 1202,
+     "debut_f": 1194,
      "duree_f": 86,
      "position": "haut-gauche"
     },
     {
      "type": "statut",
      "texte": "Dossier de chantier : Morin, lundi 7 h.",
-     "debut_f": 1214,
+     "debut_f": 1206,
      "duree_f": 72,
      "position": "bas-gauche"
     },
     {
      "type": "surtitre",
      "texte": "M6 · MATÉRIEL",
-     "debut_f": 1295,
+     "debut_f": 1286,
      "duree_f": 62,
      "position": "haut-gauche"
     },
     {
      "type": "statut",
      "texte": "Réservé : 14 boîtes de vinyle gris.",
-     "debut_f": 1303,
+     "debut_f": 1294,
      "duree_f": 58,
      "position": "bas-gauche"
     },
     {
      "type": "surtitre",
      "texte": "M5 · FINANCE",
-     "debut_f": 1365,
+     "debut_f": 1355,
      "duree_f": 86,
      "position": "haut-gauche"
     },
     {
      "type": "etiquette",
      "texte": "VISION · AVATAR",
-     "debut_f": 1375,
+     "debut_f": 1365,
      "duree_f": 72,
      "position": "bas-droite"
     },
@@ -2178,8 +2227,8 @@
      "pointille_depuis": 5,
      "etiquette": "PROFITS ANTICIPÉS",
      "valeur": "+7 %",
-     "debut_f": 1572,
-     "duree_f": 285,
+     "debut_f": 1551,
+     "duree_f": 263,
      "position": "droite",
      "echelle": 0.9
     },
@@ -2189,15 +2238,15 @@
      "a": 7,
      "suffixe": " %",
      "etiquette": "PRODUCTIVITÉ",
-     "debut_f": 1766,
-     "duree_f": 91,
+     "debut_f": 1724,
+     "duree_f": 90,
      "position": "gauche"
     },
     {
      "type": "surtitre",
      "texte": "M4 · CÉDULE",
-     "debut_f": 1859,
-     "duree_f": 215,
+     "debut_f": 1816,
+     "duree_f": 203,
      "position": "haut-gauche"
     },
     {
@@ -2248,15 +2297,15 @@
        "Fascia Bélanger"
       ]
      ],
-     "debut_f": 1954,
-     "duree_f": 123,
+     "debut_f": 1900,
+     "duree_f": 122,
      "position": "centre",
      "echelle": 0.95
     },
     {
      "type": "etiquette",
      "texte": "EN PRÉPARATION",
-     "debut_f": 1961,
+     "debut_f": 1907,
      "duree_f": 60,
      "position": "bas-droite"
     },
@@ -2265,21 +2314,21 @@
      "nom": "Adjointe",
      "sous_titre": "Appel entrant",
      "voix": "a01",
-     "debut_f": 2089,
-     "duree_f": 289,
+     "debut_f": 2034,
+     "duree_f": 265,
      "position": "haut-droite"
     },
     {
      "type": "surtitre",
      "texte": "M1 · RÉCEPTION",
-     "debut_f": 2149,
+     "debut_f": 2093,
      "duree_f": 72,
      "position": "haut-gauche"
     },
     {
      "type": "etiquette",
      "texte": "VISION · RÉCEPTIONNISTE VOCALE",
-     "debut_f": 2161,
+     "debut_f": 2105,
      "duree_f": 72,
      "position": "bas-droite"
     },
@@ -2288,29 +2337,29 @@
      "heure": "06:58",
      "nom": "Kevin Tremblay",
      "etat": "ARRIVÉE",
-     "debut_f": 2443,
-     "duree_f": 63,
+     "debut_f": 2364,
+     "duree_f": 62,
      "position": "droite",
      "echelle": 0.8
     },
     {
      "type": "etiquette",
      "texte": "EN PRÉPARATION",
-     "debut_f": 2448,
+     "debut_f": 2369,
      "duree_f": 48,
      "position": "bas-droite"
     },
     {
      "type": "surtitre",
      "texte": "M5 · PAYE",
-     "debut_f": 2566,
+     "debut_f": 2486,
      "duree_f": 72,
      "position": "haut-gauche"
     },
     {
      "type": "etiquette",
      "texte": "VISION",
-     "debut_f": 2576,
+     "debut_f": 2496,
      "duree_f": 60,
      "position": "bas-droite"
     },
@@ -2328,26 +2377,26 @@
       "M9 Stratégie",
       "M10 Mémoire"
      ],
-     "debut_f": 2787,
+     "debut_f": 2705,
      "duree_f": 206,
      "zone": "colonne"
     },
     {
      "type": "flash",
      "intensite": 1.0,
-     "debut_f": 3003,
+     "debut_f": 2920,
      "duree_f": 4
     },
     {
      "type": "impact",
      "texte": "Les ressources d'une *grande entreprise.*",
-     "debut_f": 3007,
-     "duree_f": 65
+     "debut_f": 2924,
+     "duree_f": 64
     },
     {
      "type": "carton",
-     "debut_f": 3075,
-     "duree_f": 232
+     "debut_f": 2991,
+     "duree_f": 81
     }
    ],
    "sfx": [
@@ -2358,43 +2407,43 @@
     },
     {
      "type": "fouet",
-     "debut_f": 89,
+     "debut_f": 88,
      "db": -3
     },
     {
      "type": "impact",
-     "debut_f": 93,
+     "debut_f": 92,
      "db": -2
     },
     {
      "type": "montee",
-     "debut_f": 337,
-     "duree_s": 3.71,
+     "debut_f": 335,
+     "duree_s": 3.67,
      "db": -6
     },
     {
      "type": "boom",
-     "debut_f": 426,
+     "debut_f": 423,
      "db": -1
     },
     {
      "type": "inverse",
-     "debut_f": 911,
+     "debut_f": 905,
      "db": -6
     },
     {
      "type": "impact",
-     "debut_f": 1200,
+     "debut_f": 1192,
      "db": -4
     },
     {
      "type": "impact",
-     "debut_f": 3005,
+     "debut_f": 2922,
      "db": -1
     },
     {
      "type": "chute",
-     "debut_f": 3075,
+     "debut_f": 2991,
      "db": -3
     }
    ],
@@ -2468,7 +2517,7 @@
      "suffixe": " s",
      "etiquette": "SOUMISSION",
      "debut_f": 35,
-     "duree_f": 243,
+     "duree_f": 220,
      "position": "haut-droite",
      "echelle": 0.45
     },
@@ -2505,7 +2554,7 @@
      ],
      "total": "18 940 $",
      "tampon": "PRÊTE",
-     "debut_f": 197,
+     "debut_f": 174,
      "duree_f": 92,
      "position": "droite",
      "echelle": 0.8
@@ -2519,7 +2568,7 @@
     },
     {
      "type": "carton",
-     "debut_f": 313,
+     "debut_f": 311,
      "duree_f": 46
     }
    ],
@@ -2541,12 +2590,12 @@
     },
     {
      "type": "inverse",
-     "debut_f": 220,
+     "debut_f": 197,
      "db": -6
     },
     {
      "type": "impact",
-     "debut_f": 313,
+     "debut_f": 311,
      "db": -2
     }
    ],
@@ -2577,7 +2626,7 @@
      "suffixe": " s",
      "etiquette": "SOUMISSION",
      "debut_f": 35,
-     "duree_f": 243,
+     "duree_f": 220,
      "position": "haut-droite",
      "echelle": 0.45
     },
@@ -2614,7 +2663,7 @@
      ],
      "total": "18 940 $",
      "tampon": "PRÊTE",
-     "debut_f": 197,
+     "debut_f": 174,
      "duree_f": 92,
      "position": "droite",
      "echelle": 0.8
@@ -2628,7 +2677,7 @@
     },
     {
      "type": "carton",
-     "debut_f": 313,
+     "debut_f": 311,
      "duree_f": 46
     }
    ],
@@ -2650,12 +2699,12 @@
     },
     {
      "type": "inverse",
-     "debut_f": 220,
+     "debut_f": 197,
      "db": -6
     },
     {
      "type": "impact",
-     "debut_f": 313,
+     "debut_f": 311,
      "db": -2
     }
    ],
@@ -2679,9 +2728,9 @@
   }
  },
  "_grille": {
-  "bpm": 124.0,
+  "bpm": 124.77,
   "phase": 0.0,
   "decalage": 0.0,
-  "duree_long_s": 137.79
+  "duree_long_s": 128.0
  }
 }

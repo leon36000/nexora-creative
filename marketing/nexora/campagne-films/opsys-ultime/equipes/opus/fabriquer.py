@@ -63,16 +63,16 @@ LIEUX = [
 # ------------------------------------------------------------------------------------------------------------------ voix
 V = [
     # narration (Frédéric : québécois, énergique ; jamais « smooth » : phrases courtes, frappées sur le temps)
-    ("n01", "narrateur", "drama3-frederic", "Une photo.", "Narrateur de publicité québécoise, énergique et punché, voix qui sourit, rythme vif."),
+    ("n01", "narrateur", "eleven-frederic", "Tout commence par une seule photo.", "[confident, punchy, energetic]"),
     ("n02", "narrateur", "drama3-frederic", "Et toute une entreprise se met au travail.", "Énergique, l'excitation qui monte, rythme vif, accent québécois."),
     ("n03", "narrateur", "drama3-frederic", "Dedans : dix départements. Une seule équipe.", "Énergique, émerveillé, punché, accent québécois."),
     ("n04", "narrateur", "drama3-frederic", "Elle mesure. Elle chiffre. Elle vérifie… et elle attend votre accord.", "Énergique et précis, frappé sur chaque verbe, un sourire à la fin, accent québécois."),
     ("n05", "narrateur", "drama3-frederic", "Dix départements qui ne dorment jamais. Et c'est vous qui décidez.", "Fier, énergique, accent québécois."),
     ("n06", "narrateur", "drama3-frederic", "Les ressources d'une grande entreprise.", "Puissant, assuré, accent québécois."),
-    ("n07", "narrateur", "drama3-frederic", "OPSYS-AI.", "Assuré, chaleureux, prononcé « op-sisse A-I »."),
+    ("n07", "narrateur", "eleven-frederic", "OPSYS-AI, par Nexora.", "[confident, warm, punchy]"),
     # dialogues (synchronisés sur les plans)
     ("e01", "etienne", "eleven-thomas", "Monsieur Morin… votre soumission est prête.", "[proud, friendly, casual]"),
-    ("m01", "morin", "eleven-alexandre", "Déjà?!", "[surprised, delighted, older man]"),
+    ("m01", "morin", "eleven-adamqc", "Hein? C'est déjà prêt?!", "[surprised, delighted, laughing]"),
     ("l01", "luc", "drama3-adamqc", "Pis, les profits, ça donne quoi?", "Patron québécois décontracté et curieux, naturel, parle vite."),
     ("c01", "comptable", "eleven-amelie",
      "Voici les profits anticipés, mis à jour avec les nouveaux ratios de productivité des employés : leur productivité a augmenté de 7 %.",
@@ -293,7 +293,7 @@ def montage(bpm, phase, decalage, durees_voix):
     b = 60.0 / bpm
     f = lambda s: int(round(s * FPS))  # noqa: E731
     # (plan, temps de musique en battements, entrée dans la source en s)
-    L = [("p01", 8, 0.6), ("p02", 6, 0.3), ("p03", 5, 0.5), ("p04", 5, 0.4), ("p05", 5, 0.5), ("p06", 8, 0.2),
+    L = [("p01", 8, 0.6), ("p02", 6, 0.3), ("p03", 5, 1.2), ("p04", 5, 0.4), ("p05", 5, 0.5), ("p06", 8, 0.2),
          ("p07", 12, 0.0), ("p08", 5, 0.6), ("p09", 6, 0.5), ("p10", 5, 0.5), ("p11", 10, 0.3), ("p12", 5, 0.8),
          ("p13", 5, 0.3), ("p14", 5, 0.6), ("p15", 8, 0.0), ("p16", 6, 0.0),
          ("p17", 8, 0.4), ("p18", 6, 0.5), ("p19", 8, 0.4), ("p20", 5, 0.0), ("p21", 19, 0.0), ("p22", 8, 0.4),
@@ -318,9 +318,9 @@ def montage(bpm, phase, decalage, durees_voix):
     t_noir = t
     video.append({"id": "c-noir", "src": "noir", "entree_f": 0, "duree_f": f(6 * b)})
     t += f(6 * b) / FPS
-    video.append({"id": "c-carton", "src": "carton", "entree_f": 0, "duree_f": f(20 * b)})
+    video.append({"id": "c-carton", "src": "carton", "entree_f": 0, "duree_f": f(7 * b)})
     t_carton = t
-    t += f(20 * b) / FPS
+    t += f(7 * b) / FPS
     total_f = sum(c["duree_f"] - (c["transition_in"]["duree_f"] if c.get("transition_in", {}).get("type", "cut") != "cut" else 0) for c in video)
 
     def voix_a(lid, s):
@@ -390,7 +390,7 @@ def montage(bpm, phase, decalage, durees_voix):
                                     "M8 Analytique", "M9 Stratégie", "M10 Mémoire"], "debut_f": f(D["p32"] + 0.6), "duree_f": f(8.6), "zone": "colonne"},
         {"type": "flash", "intensite": 1.0, "debut_f": f(t_noir - 0.08), "duree_f": 4},
         {"type": "impact", "texte": "Les ressources d'une *grande entreprise.*", "debut_f": f(t_noir + 0.1), "duree_f": f(6 * b - 0.2)},
-        {"type": "carton", "debut_f": f(t_carton), "duree_f": f(20 * b)},
+        {"type": "carton", "debut_f": f(t_carton), "duree_f": f(7 * b)},
     ]
     sfx = [{"type": "clic", "debut_f": f(D["p01"] + 2.9), "db": -4}, {"type": "fouet", "debut_f": f(D["p02"] - 0.15), "db": -3},
            {"type": "impact", "debut_f": f(D["p02"]), "db": -2}, {"type": "montee", "debut_f": f(D["p06"]), "duree_s": round(D["p07"] - D["p06"], 2), "db": -6},
@@ -409,7 +409,7 @@ def court(bpm, phase, decalage, durees_voix, vertical=False):
     f = lambda s: int(round(s * FPS))  # noqa: E731
     v = "v" if vertical else ""
     L = [("p01", 3, 1.4), (f"p02{v}", 3, 0.4), ("p03", 2, 0.8), (f"p05{v}", 2, 0.8), ("p06", 2, 1.2), (f"p07{v}", 3, 0.0),
-         ("p09", 2, 0.8), (f"p11{v}", 3, 1.0), ("p13", 2, 0.6), (f"p14{v}", 2, 1.0), (f"p16{v}", 3, 0.0)]
+         (f"p11{v}", 3, 1.0), ("p13", 2, 0.6), (f"p14{v}", 2, 1.0), (f"p16{v}", 3, 0.0)]
     if vertical:  # les plans non tournés en 9:16 sont recadrés au centre
         L = [(p if p.endswith("v") else p, n, e) for p, n, e in L]
     video, t, D = [], 0.0, {}
@@ -462,7 +462,24 @@ def main():
         j = sorted(travail.glob(f"{lid}-p*.json"))
         dv[lid] = json.loads(j[0].read_text())["utile_s"] if j else round(len(txt) / 14 + 0.2, 2)
     long_, ann_long, total = montage(o.bpm, o.phase, o.decalage, dv)
+    D_ = {}
+    t_ = 0
+    for c in long_["video"]:
+        tr = c.get("transition_in") or {}
+        t_ -= tr.get("duree_f", 0) if tr.get("type", "cut") != "cut" else 0
+        D_[c["src"]] = t_ / FPS
+        t_ += c["duree_f"]
+    carte_long = {"impacts": [round(D_[k], 2) for k in ("p02", "p07", "p13", "p17", "p31", "noir", "carton")],
+                  "trous": [[round(D_["p07"] - 0.55, 2), round(D_["p07"] - 0.05, 2)], [round(D_["noir"] - 0.4, 2), round(D_["noir"], 2)]],
+                  "montees": [[round(D_["p06"], 2), round(D_["p07"] - 0.55, 2)], [round(D_["p29"], 2), round(D_["p31"], 2)]],
+                  "climax": round(D_["p32"], 2), "fin": round(t_ / FPS, 2)}
     court_, ann_court = court(o.bpm, o.phase, o.decalage, dv)
+    Dc, tc = {}, 0
+    for c in court_["video"]:
+        Dc[c["src"]] = tc / FPS
+        tc += c["duree_f"]
+    carte_court = {"impacts": [round(Dc[k], 2) for k in ("p02", "p07", "p13", "carton")], "trous": [[round(Dc["p07"] - 0.3, 2), round(Dc["p07"] - 0.02, 2)]],
+                   "montees": [], "climax": round(Dc["p16"], 2), "fin": round(tc / FPS, 2)}
     vert_, ann_vert = court(o.bpm, o.phase, o.decalage, dv, vertical=True)
     plans = []
     for x in PL:
@@ -487,6 +504,24 @@ def main():
         "coups": [{"t_s": 3.9, "evenement": "le signal quitte le téléphone"}, {"t_s": 17.9, "evenement": "révélation du siège social"},
                   {"t_s": 50.3, "evenement": "acte 2 : le chantier"}, {"t_s": 108.4, "evenement": "le réseau"},
                   {"t_s": 123.4, "evenement": "Les ressources d'une grande entreprise"}]}
+    motif = ("A memorable four-note heroic synth hook (rising: D, F, A, C) that returns at every big moment, "
+             "stated by brass and synth together; real dynamics: hard stops, tension builds, huge drops, never a flat loop.")
+    musique["candidats"] = [
+        {"id": "c1", "moteur": "lyria", "version": "long", "duree_s": 128,
+         "prompt": "Instrumental cinematic big-beat trailer score, 125 BPM, D minor to F major, uplifting and heroic, never sad. " + motif +
+                   " Structure: 0-4 s ticking tension; 4 s first hit; 4-18 s fast build with risers; 18 s full stop for half a second then the biggest drop "
+                   "(the reveal); 18-50 s anthem with the hook; 50 s hit and switch to a tight funky groove with room for dialogue (bass, drums, claps, small hook "
+                   "stabs); 104 s riser; 108-120 s triumphant final chorus with the hook; 120 s final hit and short tail. Punchy modern mix, wide, loud."},
+        {"id": "c2", "moteur": "acestep", "version": "long", "duree_s": 128,
+         "prompt": "cinematic big beat, electronic orchestral hybrid, 125 BPM, D minor, heroic brass hook, punchy drums, funky bass, claps, risers, huge drops, "
+                   "hard stops, triumphant, uplifting, instrumental"},
+        {"id": "c3", "moteur": "music3", "version": "long", "duree_s": 128,
+         "prompt": "Global Metadata: Cinematic big-beat trailer score, 125 BPM, D minor resolving to F major, heroic, energetic, punchy drums, funky bass, "
+                   "brass and synth hook. " + motif + "\n\nVocal Details: Instrumental, no vocals.\n\nArrangement: [Intro] 0-4 s ticking tension. [Build] 4-18 s "
+                   "rising. [Drop] 18 s biggest drop. [Anthem] 18-50 s. [Groove] 50-104 s tight groove for dialogue. [Build] 104-108 s. [Final] 108-120 s "
+                   "triumphant. [Outro] 120-128 s final hit."},
+    ]
+    musique["carte"] = {"long": carte_long, "court": carte_court}
     dossier = {
         "equipe": "opus", "titre": "Le siège social",
         "logline": "Une photo prise devant une maison de Laval met au travail, en dix secondes, une entreprise entière qui vit dans un serveur.",

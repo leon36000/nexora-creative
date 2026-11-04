@@ -1,0 +1,68 @@
+{
+ "reprises": [
+  {
+   "plan": "p05",
+   "graine": 7105,
+   "prompt": "summary:\nA single continuous live-action shot: a pulse of warm orange light races along real power lines across rural Québec at dusk.\n\ndetailed_description:\nLive-action footage shot on an ARRI Alexa 35 with Cooke anamorphic lenses: real location, practical lighting, real people, natural skin texture, real film grain, photographic realism. Light effects are subtle in-camera practical VFX integrated in the real shot. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image. A straight country road in rural Québec at dusk, real wooden utility poles and sagging power lines, autumn fields, real overcast dusk light.\n[Shot 1] Low tracking shot from a car window: a bright orange glint of light travels fast along the power line itself, from pole to pole, like a spark running on the wire, each insulator flashing as it passes; long exposure light trail on the wire. No text, no logos.\n\noverall_soundscape:\nCrackling electricity, whoosh of the passing poles, wind.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "plan": "p06",
+   "graine": 7106,
+   "prompt": "summary:\nA single continuous live-action shot: a pulse of orange light dives into one server in an empty real data centre.\n\ndetailed_description:\nLive-action footage shot on an ARRI Alexa 35 with Cooke anamorphic lenses: real location, practical lighting, real people, natural skin texture, real film grain, photographic realism. Light effects are subtle in-camera practical VFX integrated in the real shot. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image. A real, empty data centre aisle at night, black server racks with blinking blue status LEDs, cold white overhead light, no people.\n[Shot 1] A small bright orange glint races along the cable tray above the racks, drops down and enters the front panel of one server; the camera pushes in fast to an extreme macro of the server's circuit board, where tiny copper traces glow warm orange. No text, no logos.\n\noverall_soundscape:\nServer fans, rising electronic tone.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "plan": "p07",
+   "graine": 7107,
+   "refs": [],
+   "prompt": "summary:\nA single continuous live-action shot: the camera emerges into an immense real corporate headquarters atrium at night as every floor lights up.\n\ndetailed_description:\nLive-action footage shot on an ARRI Alexa 35 with Cooke anamorphic lenses: real location, practical lighting, real people, natural skin texture, real film grain, photographic realism. Light effects are subtle in-camera practical VFX integrated in the real shot. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image. A real, enormous modern headquarters atrium at night: ten open office floors of glass and concrete around a central void, hundreds of real office workers at their desks under warm practical desk lamps, polished stone floor.\n[Shot 1] Drone shot: the camera flies out of a dark corridor into the atrium; a warm orange streak of light (like a lens flare) flies in ahead of it, and floor after floor the office lights switch on in sequence, workers look up and get to work; the camera rises up through the void. No text, no logos.\n\noverall_soundscape:\nHuge reverberant whoosh, lights clunking on floor after floor, office ambience.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "plan": "p08",
+   "graine": 7108,
+   "refs": [],
+   "prompt": "summary:\nA single continuous live-action shot: a receptionist in a real corporate lobby receives the photo as a small glowing card.\n\ndetailed_description:\nLive-action footage shot on an ARRI Alexa 35 with Cooke anamorphic lenses: real location, practical lighting, real people, natural skin texture, real film grain, photographic realism. Light effects are subtle in-camera practical VFX integrated in the real shot. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image. The reception desk of a real modern headquarters at night, warm wood and stone, practical lights, a few real employees in business clothes.\n[Shot 1] Medium shot: a smiling receptionist in her thirties (business blouse, wireless headset) catches a small glowing orange card of light in her hand, glances at it and sends it upward with a flick; it flies up the atrium like a firefly. No text, no logos.\n\noverall_soundscape:\nSoft chime, lobby ambience.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "plan": "p09",
+   "graine": 7109,
+   "refs": [
+    "maison"
+   ],
+   "prompt": "summary:\nA single continuous live-action shot: a team of estimators studies a light-projected model of the house wall.\n\ndetailed_description:\nLive-action footage shot on an ARRI Alexa 35 with Cooke anamorphic lenses: real location, practical lighting, real people, natural skin texture, real film grain, photographic realism. Light effects are subtle in-camera practical VFX integrated in the real shot. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image. A real dark meeting room of a headquarters at night, a large table, practical warm lamps.\n[Shot 1] Five real estimators in shirts stand around the table; above it floats a projected life-size model of the front wall of @maison made of thin lines of light, measurement points snapping onto each panel and window; one estimator opens his hands and the projection expands; light from the projection falls on their faces. No text, no logos.\n\noverall_soundscape:\nPrecise digital ticks, room tone.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "plan": "p10",
+   "graine": 7110,
+   "prompt": "summary:\nA single continuous live-action shot: thousands of sparks of light swirl and converge into one line above a desk.\n\ndetailed_description:\nLive-action footage shot on an ARRI Alexa 35 with Cooke anamorphic lenses: real location, practical lighting, real people, natural skin texture, real film grain, photographic realism. Light effects are subtle in-camera practical VFX integrated in the real shot. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image. A real dark office at night, shallow depth of field, a man's hands in the foreground.\n[Shot 1] Close-up: thousands of tiny orange and blue sparks of light rise from a desk like embers, swirl in the air and converge into one bright precise line; the man's hands guide them; real bokeh of city lights behind. No text, no logos.\n\noverall_soundscape:\nShimmering granular sound converging into one tone.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+   "plan": "p17",
+   "graine": 7117,
+   "prompt": "summary:\nA single continuous live-action shot: at dawn, the job file reaches an installer in front of the work shop.\n\ndetailed_description:\nLive-action footage shot on an ARRI Alexa 35 with Cooke anamorphic lenses: real location, practical lighting, real people, natural skin texture, real film grain, photographic realism. Light effects are subtle in-camera practical VFX integrated in the real shot. Plain clothing, phones and vehicles with no logo; no text, no letters, no numbers anywhere in the image. Dawn in front of @atelier, frost on the asphalt, blue morning light, warm light from the open garage door.\n[Shot 1] @kevin looks at his phone; a small orange glint falls from the sky into it; he raises his eyebrows, nods, and turns to the white pickup truck; breath vapour in the cold. No text, no logos.\n\noverall_soundscape:\nCold morning birds, distant highway, soft chime.\n\nnon_diegetic_music:\nN/A",
+   "refs": [
+    "atelier",
+    "kevin"
+   ]
+  }
+ ],
+ "voix": {
+  "n01": 2,
+  "n07": 2,
+  "m01": 1,
+  "e01": 2,
+  "l01": 2,
+  "c01": 2,
+  "g01": 2,
+  "a01": 2,
+  "e02": 1,
+  "l02": 1,
+  "n02": 2,
+  "n03": 1,
+  "n05": 2
+ },
+ "voix_reprises": [],
+ "musique": {
+  "choix": "juge"
+ },
+ "notes": "Reprises en prise de vues réelle (consigne du 04/11, juge « réel » 3 à 5/10 sur ces plans) : le siège social devient un vrai atrium filmé, les effets restent lumineux et intégrés ; p05 signal invisible, p06 figurants. Voix courtes refaites (n01, n07, m01). Carton 3,4 s ; trou de 0,5 s avant la révélation ; trois musiques (Lyria, ACE-Step, Music3) conformées, choix par le juge."
+}
