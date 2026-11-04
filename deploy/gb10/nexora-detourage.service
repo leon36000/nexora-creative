@@ -1,0 +1,17 @@
+# Serveur de détourage vidéo de Nexora Creative sur une machine GPU (utilisateur systemd, pas de root).
+# Installation : copier dans ~/.config/systemd/user/, puis systemctl --user daemon-reload && systemctl --user enable --now nexora-detourage
+# Prérequis : un Python avec torch >= 2.5 (CUDA) et transformers >= 5, OpenCV, numpy, Pillow, ffmpeg (voir outils/detourage/README.md).
+[Unit]
+Description=Nexora Creative : serveur de detourage video (SAM 2.1 + ViTMatte)
+After=network-online.target
+[Service]
+Environment=NEXORA_DETOURAGE_PORT=8231
+Environment=NEXORA_DETOURAGE_HOTE=127.0.0.1
+Environment=NEXORA_DETOURAGE_DOSSIER=%h/nexora-creative-data/work/detourage
+Environment=NEXORA_DETOURAGE_POIDS=%h/nexora-creative-data/models/detourage
+Environment=FFMPEG_BIN=%h/nexora-creative-data/engine/ffmpeg/ffmpeg-7.0.2-arm64-static/ffmpeg
+ExecStart=%h/nexora-creative-data/engine/venv/bin/python -I %h/Desktop/NexoraCreative-detourage/outils/detourage/serveur.py
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=default.target

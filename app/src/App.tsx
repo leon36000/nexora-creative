@@ -15,6 +15,7 @@ import EditPage from './pages/Edit';
 import CastPage from './pages/Cast';
 import ProjetPage from './pages/Projet';
 import CutoutPage from './pages/Cutout';
+import DetouragePage from './pages/Detourage';
 // three.js is only needed by Stage and Object: load them when opened, not on every page
 const ObjectPage = lazy(() => import('./pages/Object'));
 import { Apps, Explore, Library, Soon } from './pages/Home';
@@ -31,7 +32,7 @@ const SECTIONS = [
   { to: '/apps', label: 'Outils' },
   { to: '/library', label: 'Bibliothèque' },
 ];
-const APP_LINKS = APPS_NEXORA.filter((a) => ['marketing', 'parler', 'prolonger', 'raccord', 'cast', 'projet', 'cutout', 'upscale', 'object'].includes(a.id));
+const APP_LINKS = APPS_NEXORA.filter((a) => ['marketing', 'parler', 'prolonger', 'raccord', 'cast', 'projet', 'cutout', 'detourage', 'upscale', 'object'].includes(a.id));
 /**
  * Pages d'OpenField qui reposaient sur LTX-2.x (bloqué par la politique de licences) : leur adresse mène à l'outil
  * Nexora qui les remplace, jamais à un écran « indisponible ».
@@ -63,6 +64,7 @@ export default function App() {
     if (path === '/cast') return <CastPage />;
     if (path === '/projet') return <ProjetPage />;
     if (path === '/cutout') return <CutoutPage />;
+    if (path === '/detourage') return <DetouragePage />;
     if (estRoute3D(path)) return <ObjectPage />;
     if (path === '/marketing') return <MarketingPage />;
     if (path === '/apps') return <Apps />;

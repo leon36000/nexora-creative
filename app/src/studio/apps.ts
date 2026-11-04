@@ -35,6 +35,7 @@ export const APPS_NEXORA: AppDef[] = [
   { id: 'relight', name: 'Éclairage', blurb: 'Déplace la lumière et change sa couleur, une ambiance par résultat.', route: '/edit?app=relight', icon: 'light', hue: 38, cat: 'transform', cover: 'golden' },
   { id: 'expand', name: 'Agrandir le cadre', blurb: 'Passe à un autre format et peins ce qui était hors champ.', route: '/edit?app=expand', icon: 'aspect', hue: 220, cat: 'transform', cover: 'pull-back' },
   { id: 'cutout', name: 'Détourer', blurb: 'Sors le sujet d’une image ou d’un clip, sur fond transparent ou nouveau.', route: '/cutout', icon: 'cutout', hue: 120, cat: 'transform', cover: 'static' },
+  { id: 'detourage', name: 'Détourage pro', blurb: 'Isole un sujet dans une vidéo, cheveux et fourrure compris : alpha 16 bits, EXR, ProRes 4444, nouveau fond.', route: '/detourage', icon: 'cutout', hue: 150, cat: 'transform', badge: 'new', cover: 'static' },
   { id: 'upscale', name: 'Netteté et taille', blurb: 'Rends une image ou un clip plus net et plus grand (Real-ESRGAN, SeedVR2).', route: '/upscale', icon: 'up', hue: 50, cat: 'finish', cover: 'rack-focus', clip: '/apps/upscale.mp4' },
   { id: 'object', name: PRODUIT_3D, blurb: 'Une image, plusieurs vues ou une phrase deviennent un modèle 3D texturé : à tourner, à exporter (GLB, OBJ, STL, 3MF, USDZ).', route: ROUTE_3D, icon: 'cube', hue: 30, cat: 'create', cover: 'turntable', clip: '/apps/object.mp4' },
 ];
