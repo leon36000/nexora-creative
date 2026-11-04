@@ -464,3 +464,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - pc6 : 128 médias des anciens montages ont chacun une copie pc1 relue et SHA vérifiée ; dossier intégral déplacé sur Storage, chemin préservé et double vérification sans écart. Racine 98 %, ~18,2 Gio libres, gain total ~13,2 Gio depuis le début de la libération.
 
 - Passerelle : réponses effectives DeepSeek, Muse et Gemini élevé conservées sur Storage comme propositions à vérifier. Recherche Luna en cours sur Mesh, Sync et détourage/Wan. Après libération de marge et file vide, v05 OPSYS DeepSeek lancé seul ; résultat en attente.
+
+- R&D triple A : quatre notes sourcées sur Storage (Mesh, Sync, détourage/Wan, montage/évaluation). Existence de plusieurs articles vérifiée indépendamment ; critères et expériences restent des propositions, sans résultats ou intégration inventés.
