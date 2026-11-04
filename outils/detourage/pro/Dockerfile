@@ -36,4 +36,5 @@ WORKDIR /opt/ComfyUI
 ENV PYTHONUNBUFFERED=1 HF_HUB_OFFLINE=1 HOME=/tmp PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 EXPOSE 8188
 # Écoute dans l'espace réseau du pod seulement ; joint par le serveur de détourage (même nœud) ou kubectl port-forward.
-ENTRYPOINT ["python", "-I", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--disable-auto-launch", "--preview-method", "none"]
+# sans -I : ComfyUI importe ses modules depuis le dossier du script
+ENTRYPOINT ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--disable-auto-launch", "--preview-method", "none"]

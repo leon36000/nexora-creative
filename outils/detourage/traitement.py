@@ -195,7 +195,7 @@ class Tache:
         rec = max(2, min(int(seg['recouvrement']), int(seg['taille']) - 1))  # ≥ 2 : le raccord en a besoin pour graîner
         segs = N.plan_plans(n, self.coupures, seg['taille'], rec)
         self.segs = segs
-        sam = self.mod.sam_effectif(p['sam']) if hasattr(self.mod, 'sam_effectif') else p['sam']  # repli éventuel sur SAM 2.1
+        sam = self.mod.sam_effectif(p['sam']) if hasattr(self.mod, 'sam_effectif') else p['sam']
         self.etat['mesures']['sam'] = sam
         self.cle_suivi = _cle(self.cle_trames, invites, seg, sam, self.coupures)
         dsuivi = os.path.join(d, 'travail', 'suivi')
