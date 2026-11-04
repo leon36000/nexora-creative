@@ -31,9 +31,10 @@ class Modeles:
         import torch
         self.torch = torch
         self.appareil = 'cuda' if torch.cuda.is_available() else 'cpu'
-        # bf16 sur Ampere et plus (GB10, 5080, 5090) ; fp16 sur Turing (pc5) ; fp32 sur CPU
+        # bf16 sur Ampere et plus (GB10, 5080, 5090) ; fp16 sur Volta et Turing (V100 de pc3, pc5) ; fp32 sur CPU.
+        # La capacité est lue directement : is_bf16_supported() répond oui par émulation sur Volta (lent).
         if self.appareil == 'cuda':
-            self.dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+            self.dtype = torch.bfloat16 if torch.cuda.get_device_capability(0) >= (8, 0) else torch.float16
         else:
             self.dtype = torch.float32
         self.verrou = threading.RLock()
