@@ -840,3 +840,7 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 
 - Sur la chaise Pixal de 149 898 triangles, trois analyses CPU à deux cœurs après ajout du contrôle d'orientation ont pris 0,222 / 0,192 / 0,154 s; 549 arêtes ouvertes, 96 non-variété et 11 composantes, identiques aux contrôles précédents. Comparaison indicative sur un seul objet, sans preuve de performance générale. Résultat conservé dans `Nexora/travail/rnd-codex-20261104/mesh-essai-decimation/controle-orientation-a35a2d7.json` sur Storage.
 - Le reste de l'environnement Ming de voix comprend des fichiers à plusieurs liens physiques, et un nom potentiellement sensible détecté dans son environnement; il n'a pas été déplacé ni lu. Aucun gain d'espace n'est présumé.
+
+### Reprise Codex — contrôle visuel Gemini p19, 4 novembre 2026
+
+- Une planche CPU des images 24, 28, 32, 36 et 123 de la source Gemini p19 a été créée sur Storage `Nexora/travail/films-reprise-codex/controle-gemini-c23-20261104/`. Elle montre une structure futuriste aux premières images et un bureau avec serveur à la 123e; les images intermédiaires et l'intention narrative restent à vérifier. Aucune conclusion de qualité ni note humaine. Planche archivée physiquement sur Infrastructure pc1, copie vérifiée par SHA-256, inventaire pc1 porté à 3933 entrées. Première tentative de commande sans chemin absolu FFmpeg : binaire introuvable, aucun fichier produit; seconde réussie.
