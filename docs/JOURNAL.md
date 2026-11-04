@@ -516,3 +516,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS `71499dd` : sources vidéo oubliées, voix sans identifiant et plan explicitement invalide refusés ; brouillon et résolution journalisés. 18 tests relancés ; essai réel CPU séparé en cours, validateur absent reste une limite.
 
 - Détourage : `2ba45b0` exige une réponse de santé `ok:true` plutôt que n’importe quel JSON HTTP 200 ; 25 tests et typecheck passent. Raccordement et essai réel toujours absents.
+
+- OPSYS : après `71499dd`, nouvel essai réel vertical décodé, mode/résolution et SHA vérifiés ; film, dix tranches, mix, planche et provenance conservés sur pc1. Pas de verdict humain.

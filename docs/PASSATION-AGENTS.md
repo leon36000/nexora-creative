@@ -794,3 +794,7 @@ Un nouvel essai CPU étiqueté du vertical DeepSeek tourne avec un nom différen
 ### Détourage : contrôle de santé explicite
 
 Un test réseau local simulé a montré que `/capacites` annonçait le rapide disponible même si `/sante` répondait HTTP 200 avec `{}` ou `ok:false`. Le serveur de détourage documenté renvoie `ok:true` en santé. Commit local **2ba45b0** : disponibilité vraie seulement avec `ok:true`, tandis qu’un moteur déclaré mais refusant ou renvoyant une réponse incomplète reste identifié comme indisponible. Régression observée avant correction ; **25 tests ciblés** et typecheck passent. Cela ne remplace pas un vrai parcours connecté, ne rajoute pas la recette manquante et n’est pas déployé.
+
+### OPSYS : garde-fous vérifiés sur un vrai montage
+
+Après `71499dd`, nouvel essai distinct du vertical DeepSeek : 14,5 s, six plans, validation `ok:true`, 52,3 s CPU ; décodage intégral sans erreur. Le journal indique correctement `brouillon:true`, 540×960, empreintes et couverture partielle ; SHA de l’export vérifié indépendamment. Film, dix tranches, mix et planche copiés sur pc1 et SHA vérifiés ; détails de provenance aussi copiés, inventaire **3 932 entrées**. Cet essai a la même empreinte export que l’essai précédent, sans conclure à un déterminisme général. Aucun verdict humain attribué.
