@@ -385,3 +385,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Finish : six comparaisons x264/NVENC à débit mesuré égal (±0,41 %) sur trois clips, CPU pc6 deux threads. SSIM indexé légèrement favorable à x264 ; ancien écart SSIM reproduit avec alignement PTS. Résultats et six vidéos conservés, inventaire pc1 3 741 entrées ; avis visuel/activation restent ouverts.
 
 - Finish : tranche locale `e29ca2a`, codecs désactivés, 14 tests TS relancés indépendamment ; l'agent rapporte aussi 12 tests Python simulés et typecheck verts. Aucun déploiement/push. Les documents non commités du worktree Finish restent préservés et ne remplacent pas ce maître.
+
+- Director : commits locaux `35e680a` et `adc14a8`, respect du médium demandé et correction du faux positif « anime cette photo » ; 452 tests et typecheck rapportés sur la première tranche, 60 ciblés relancés après correctif. Pas de banc LLM, rendu, push ou déploiement.
