@@ -520,3 +520,10 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS : après `71499dd`, nouvel essai réel vertical décodé, mode/résolution et SHA vérifiés ; film, dix tranches, mix, planche et provenance conservés sur pc1. Pas de verdict humain.
 
 - Mesh `bfafe59` : collision d’arêtes à très grands indices reproduite puis corrigée, 12 tests et typecheck OK ; revue mathématique indépendante et mêmes métriques sur la chaise Pixal. Autres limites de volume/instancing/matériaux documentées ; aucun déploiement.
+
+
+### Reprise Codex — Viewer et volume Mesh, 4 novembre 2026
+
+- Viewer : commit local `368ae95` dans `fix/viewer-speak-button-codex` : masquage de cinq actions Restyle, Add effect et Stage dont les routes redirigent vers Apps et perdent la prise. Les pages et fonctions restent présentes. Typecheck et contrôle du diff réussis; pas de test navigateur ni déploiement. Les extraits retirés correspondent à GitLab, mais le ref local est en retard : réconciliation indispensable avant MR. Les autres actions n’ont pas été auditées exhaustivement.
+- Mesh : reproduction en mémoire de deux tétraèdres fermés séparés : orientations identiques, volume 1/3; seconde orientation inversée, volume 0 malgré deux composantes étanches. Une cavité orientée inversement demande au contraire une soustraction : sommer les volumes absolus serait incorrect. Correctif prudent en cours, aucun résultat de volume matériel à promettre avant validation.
+- Stockage vérifié : racine pc6 16 Gio libres (99 %), Storage 623 Gio libres. Les déplacements déjà documentés ont préservé les chemins et les fichiers; aucune nouvelle suppression.
