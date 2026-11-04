@@ -1,4 +1,4 @@
-# 22 · Détourage vidéo pro (SAM 2.1 + ViTMatte, palier « pro » LTX-2.5 Alpha-Gen)
+# 22 · Détourage vidéo pro (SAM 3.1 + ViTMatte, palier « pro » LTX-2.5 Alpha-Gen)
 
 Date : 03/11/2026. Branche `feat/detourage-video`. Cadre : les questions juridiques sont gérées par le fondateur ; ce document consigne des **faits** (licence, accès), sans commentaire juridique.
 
@@ -8,6 +8,8 @@ Légende : **[LU]** lu aujourd'hui (README, fiche, API publique) ; **[MESURÉ]**
 
 - Le palier **rapide** (SAM 2.1 pour le clic et le suivi, ViTMatte pour les bords, stabilisation par flux optique, sorties PNG 16 bits / EXR / ProRes 4444 / WebM alpha) est **construit de bout en bout et mesuré** sur la GB10 : de l'importation d'une vidéo dans la page `/detourage` aux fichiers vérifiés par des lecteurs indépendants.
 - Le palier **pro** (LTX-2.5 22B + IC-LoRA Alpha-Gen) est **bloqué à la source** : le modèle de base, le LoRA et SAM 3 sont **protégés par un formulaire d'accès** (HTTP 401 sans compte accepté) ; je n'ai accepté aucune licence. Aucune mesure pro n'existe donc : le plan de comparaison (§6) est prêt et chiffré comme protocole, pas comme résultat.
+- **Mise à jour du 04/11 : le rapide tourne en production sur la RTX 5080 de pc3** (pod k3s, SAM 3.1 + ViTMatte base, 0,54 s par image sur 224 images à 1280 px, contre 0,67 s sur la GB10) ; la V100 est validée techniquement (0,84 s par image) mais pas en production ; le pro est installé et mesuré : meilleur que le rapide sur le verre (SAD de bande 19,4 contre 102,8), moins bon sur fourrure et fumée (§11).
+- **Mise à jour du 04/11 : SAM 3.1 remplace SAM 2.1** (sélection par mot, détecteur ouvert, Object Multiplex) et SAM 2.1 est retiré ; une vérité terrain Blender chiffre la qualité (§9) et fixe le nouveau défaut de trimap (base, bande 5 %).
 - Le dépôt de référence a changé de licence pendant la mission : **PolyForm Noncommercial jusqu'au 27/10/2026, puis GPL-3.0-or-later** (commit « Relicense to GPL-3.0-or-later with a commercial option », avec une licence commerciale à part pour du code fermé) **[LU API GitHub]**. Nous n'avons ni copié, ni embarqué, ni exécuté son code : l'intégration est écrite pour Nexora.
 
 ## 2. Ce que le dépôt de référence ajoute au-delà d'un workflow ComfyUI [LU README, code non lu]
@@ -113,6 +115,72 @@ Sources de risque connues : l'Alpha-Gen est limité à 145 images par passe et 1
 2. **Demander au fondateur** d'accepter lui-même, s'il le décide, les formulaires Hugging Face de `Lightricks/LTX-2.5` et `LTX-2.5-22b-IC-LoRA-Alpha-Gen` (et, séparément, `facebook/sam3`), puis de me fournir un jeton de lecture sur la machine de mesure. Je lance alors le plan §6 sur la GB10. Avant cela, **ne pas promettre le pro**.
 3. En attendant, améliorer le rapide là où il est faible : texte → sujet (SAM 3 si accès), personnes qui se croisent (profondeur Depth Anything V2 Small, libre), BiRefNet-matting pour une seconde opinion.
 
-## 8. Pc3 (RTX 5080 16 Go, 32 Go de RAM)
+## 8. Pc3 (04/11/2026)
 
-Je n'ai pas d'accès SSH à pc3 (clé refusée depuis pc6) ; rien n'y a été touché. Le rapide y tiendrait avec large marge (pic mesuré 2,6 Go de VRAM, 4,1 Go de RAM). Détails des accès nécessaires dans `outils/detourage/README.md`.
+Installation réelle sur la RTX 5080 16 Go de pc3 (sm_120, pilote 595.99, 30 Go de RAM dont ≈ 14 Go pris par la VM qemu), nœud agent k3s (contrôle sur pc1), sans sudo.
+
+- **En pod** (`deploy/k8s/detourage/`, 00 à 50) : serveur `detourage` en production (1 GPU, hostPort 8231 lié à 192.168.1.126 seulement, Service ClusterIP, NetworkPolicy limitée à 192.168.1.122/32), jeton partagé + liste d'adresses dans le serveur ; image construite par Job kaniko (`construire.sh cu130|cu126`) et poussée au registre provisoire de pc3 (8,4 Go de stockage après ménage) ; pods `poids-webdav` (lecture seule des poids pour la VM V100) et `comfyui-pro` (`replicas: 0`).
+- **Installation native de secours** : venv uv Python 3.12, superviseur `demarrer.sh` / `arreter.sh`, unité systemd utilisateur, scripts gardés dans `deploy/pc3/` ; arrêtée après validation du pod. Linger désactivé (`loginctl enable-linger pc3` à faire par le fondateur).
+- **Creative branché** : `NEXORA_DETOURAGE_URL=http://192.168.1.126:8231` + jeton dans `/etc/nexora/creative.env` de la VM 202, `/api/nexora/etat` répond `detourage: true`. Parcours de bout en bout vérifié sur la VM 202 : santé, aperçu d'un clic (0,11 à 0,16 s), dépôt, travail complet (16,4 s pour 49 images), téléchargement des six sorties, nettoyage ; long clip de 224 images en 126,5 s.
+- **V100 dans la VM** : torch 2.14.1 cu126 (les roues cu128 et cu130 n'ont plus sm_70), fp16, poids montés par `rclone mount` depuis pc3, venv local 7,1 Go. Validée, pas en production : la VM 202 ne peut pas joindre la VM V100 (réseau qemu « user »).
+
+Mesures pc3 contre GB10 (mêmes 5 clips Big Buck Bunny, mêmes clics, 1280 px de large, `outils/detourage/banc.py`, long continu de 224 images) :
+
+| Machine, réglage | Total | s/image | Suivi | Matting | Stabilisation + images | Encodage | VRAM pic (torch) | RAM pic | Scintillement après |
+|---|---|---|---|---|---|---|---|---|---|
+| GB10, SAM 2.1 + ViTMatte small, bande 1,5 % (03/11) | 151 s | 0,67 | 67,6 | 10,2 | 59,0 | 13,4 | 2,6 Go | 4,1 Go | 0,0041 |
+| 5080 native, même réglage | 110,8 s | 0,49 | 35,7 | 12,6 | 53,9 | 6,9 | 2,56 Go | 4,9 Go | 0,00415 |
+| 5080 native, ViTMatte base, bande 5 % | 135,6 s | 0,61 | 37,1 | 32,6 | 56,9 | 7,2 | 2,75 Go | 5,6 Go | 0,00371 |
+| 5080 en pod, ViTMatte base, bande 5 % | 127,9 s | 0,57 | 34,9 | 29,4 | 55,3 | 7,3 | 2,7 Go | 4,7 Go | 0,00371 |
+| **5080 en pod, SAM 3.1 + ViTMatte base, bande 5 %** | **120,0 s** | **0,54** | 27,6 | 29,2 | 54,6 | 7,5 | 2,69 Go (3,27 Go par `nvidia-smi`) | 5,9 Go | **0,00362** |
+| V100 (VM), SAM 3.1 fp16 + ViTMatte base, bande 5 % | 188,7 s | 0,84 | 64,8 | 54,6 | 58,3 | 8,1 | 2,89 Go | 4,8 Go | 0,00363 |
+
+Lecture : la 5080 fait le travail en 0,54 s par image, soit 20 % de moins que la GB10 ; le pod coûte un peu moins que le natif à réglage égal (le premier chargement passe par le disque local) ; la V100 tient la chaîne complète à 0,84 s par image malgré l'absence de bf16 (fp16). Fichiers : `marketing/creative/captures-v3/detourage-mesures-pc3-*.json`.
+
+## 9. Qualité à vérité terrain
+
+Méthode (`outils/detourage/verite/`) : quatre scènes Blender 5.2.3 rendues sur pc3 avec un alpha exact au pixel près (fourrure, fumée, verre, bords nets), 49 images 1280×720, composées par `composer.py` sur des fonds de la bande-annonce de Sintel (Blender, CC-BY) ; la vérité est l'alpha du rendu, sans estimation. `noter.py` calcule SAD, MSE, Grad et dtSSD dans la bande incertaine (pixels où 0,002 < vérité < 0,998, dilatés de 10 px). Une même sélection (boîte + point au centre) est donnée à toutes les variantes ; `banc_verite.py` réutilise le suivi déjà calculé (clés de contenu) et ne refait que le matting.
+
+SAD de bande (plus bas = mieux) :
+
+| Réglage | fourrure | fumée | bords nets | verre |
+|---|---|---|---|---|
+| SAM seul (pas de matting) | 13,56 | 11,89 | 1,65 | 100,8 |
+| ViTMatte small, bande 1,5 % (ancien défaut) | 13,28 | 14,01 | 0,683 | 102,9 |
+| ViTMatte base, bande 1,5 % | 13,67 | 12,21 | – | 102,8 |
+| ViTMatte small, bande 5 % | 5,98 | 8,49 | 0,689 | 102,7 |
+| **ViTMatte base, bande 5 % (nouveau défaut)** | **6,05** | **6,59** | **0,668** | 102,8 |
+| ViTMatte base, bande 8 % | 8,90 | 4,40 | 0,869 | 101,6 |
+
+Conclusions :
+- La largeur de la bande du trimap pèse plus que la taille du modèle ; base + 5 % divise l'erreur par 2 sur fourrure et fumée sans dégrader les bords nets.
+- Sur les vrais clips, ce réglage baisse le scintillement de 11 % et coûte +22 % de temps par image : il est devenu le défaut.
+- Le **verre transparent** échoue avec toutes les variantes rapides (SAD ≈ 100 : le sujet est rendu opaque) ; c'est le cas d'usage du palier pro.
+- Ces mesures ont été faites avec SAM 2.1 ; SAM 3.1 a été adopté ensuite sans nouveau banc comparatif (consigne du fondateur).
+- Non testés : BiRefNet (arrêté faute de temps, le trimap domine), MatAnyone (licence non commerciale S-Lab), ViTMatte plus grand (n'existe pas en Composition-1k au-delà de base).
+
+## 10. SAM 3.1
+
+Ce qu'il apporte :
+- **Sélection par mot** (en anglais) en plus du clic et de la boîte : la route `POST /api/nexora/detourage/texte` renvoie les objets trouvés avec leur score, un clic choisit l'objet et sert de graine ; champ « Désigner par un mot (en anglais) » dans l'étape « 2 · Sujet » de `/detourage`.
+- **Détecteur ouvert** : les objets sont proposés par le modèle, sans liste fermée de classes.
+- **Object Multiplex** : plusieurs objets suivis ensemble par un seul passage, au lieu d'un suivi par objet.
+- Intégration : le code SAM 3 de ComfyUI v0.44.0 est appelé comme bibliothèque (`outils/detourage/sam31.py`) ; pas de second serveur, un seul processus tient le GPU.
+- Poids : `Comfy-Org/sam3.1`, révision 7bb8374, `checkpoints/sam3.1_multiplex_fp16.safetensors`, 1,75 Go, sha256 vérifié ; licence SAM de Meta jointe au dépôt. Le dépôt officiel `facebook/sam3.1` répond encore 403 (accès en attente) et n'est pas utilisé.
+
+Mesures :
+
+| Machine | Chargement | Clic | Mot | Suivi de 49 images | IoU contre la vérité terrain | VRAM pic |
+|---|---|---|---|---|---|---|
+| 5080 (pod) | 4 s | 0,81 s | 0,55 s (« furry ball », score 0,94) | 4,3 s | 0,971 | 2,9 Go |
+| V100 (VM) | ≈ 70 s (lecture par le montage WebDAV) | 0,56 s | 0,67 s | 9,0 s | 0,970 | 2,85 Go |
+
+Limite de suivi : un masque initial unique par segment (les autres clics du segment ne servent qu'à l'image où ils sont posés) et masques suivis binaires, contre des probabilités par image avec SAM 2.1.
+
+SAM 2.1 **retiré le 04/11/2026** (consigne du fondateur) : code de repli supprimé, poids effacés sur pc3 (`~/nexora-detourage/modeles/hf`) et sur pc6 (`~/nexora-creative-data/models/detourage/hf`, blobs 1,08 Go et cache `xet`) ; les anciens noms `large` et `small` envoyés par d'anciens clients désignent désormais SAM 3.1.
+
+## 11. Palier pro mesuré sur la RTX 5080 (04/11/2026)
+
+Essai du 04/11 sur la 5080 (nvfp4, LoRA 1,0, 8 pas distillés, `executer_pro.py`) : fonctionne ; 25 images en 1280×736 en 18 à 20 s une fois les poids en mémoire (0,73 à 0,8 s par image ; premier passage 768×448 avec chargement : 34,4 s), 97 images en 88,3 s (0,91 s par image) ; VRAM pleine (15,3 à 16,1 Go, déchargement dynamique en RAM) ; RAM de pc3 au pic 29,2 Go sur 30 (pod 14,8 Go) : 1920×1088 ou 145 images saturerait pc3 tant que la VM V100 garde ses 14 Go. Qualité à vérité terrain (SAD de bande, 25 images, 1280 px) : le pro choisit seul l'avant-plan et prend le personnage du fond de Sintel (fourrure brute 123, ignorée) ; guidé par notre masque SAM (hors sujet remplacé par du gris), il donne **verre 19,4 contre 102,8 pour le rapide (5 fois mieux)**, mais **fourrure 22,5 contre 6,05** et **fumée 35,4 contre 6,59** (moins bien). Scènes de synthèse : le modèle est entraîné sur des prises réelles, à revérifier sur de vrais plans.
+
+Graphe : `outils/detourage/pro/executer_pro.py` (d'après le flux officiel « LTX-2.5 V2V IC-LoRA Single Stage Distilled ») ; poids officiels et sha256 : `outils/detourage/pro/modeles-pro.json`. Règle de décision du §6 : le pro n'est gardé que là où il bat le rapide ; aujourd'hui, le verre seulement.
