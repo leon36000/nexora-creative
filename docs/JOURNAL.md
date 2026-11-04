@@ -456,3 +456,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Le fondateur demande recherches approfondies sur sources primaires et projets open source, intégration et amélioration de toutes les technologies ; trois agents Luna max mobilisés en parallèle.
 - Son « OK » autorise uniquement la lecture technique interne de la clé de passerelle, sans exposition, pour utiliser DeepSeek, Muse et Gemini ; aucune autre clé ou fichier .env réel ne doit être lu ou affiché.
+
+- Passerelle : clé de passerelle lue uniquement en interne avec accord ; quatre alias visibles. Réponse Gemini élevé reçue, possiblement tronquée et non validée ; sa suggestion de stopper des workers partagés est rejetée. Premiers appels DeepSeek/Muse sans texte, nouvelle tentative en cours.
