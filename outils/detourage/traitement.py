@@ -65,7 +65,7 @@ def sonder(chemin: str) -> dict:
 
 DEFAUTS = {
     'largeur_max': 1920, 'debut_s': 0.0, 'duree_s': None, 'invites': [], 'segment': {'taille': 96, 'recouvrement': 12},
-    'sam': 'large', 'matting': 'vitmatte-base', 'bande': 0.05,  # mesuré sur vérité terrain (recherche/22 §9)
+    'sam': 'sam3.1', 'matting': 'vitmatte-base', 'bande': 0.05,  # mesuré sur vérité terrain (recherche/22 §9)
     'lissage': 1.0, 'etapes': ['suivi', 'matting', 'sorties'],
     'sorties': {'png16': True, 'rgba16': True, 'exr': True, 'prores': True, 'webm': True, 'matte': True, 'apercu': True},
     'composite': None, 'conserver_travail': True, 'mesure_scintillement': True,
@@ -195,7 +195,9 @@ class Tache:
         rec = max(2, min(int(seg['recouvrement']), int(seg['taille']) - 1))  # ≥ 2 : le raccord en a besoin pour graîner
         segs = N.plan_plans(n, self.coupures, seg['taille'], rec)
         self.segs = segs
-        self.cle_suivi = _cle(self.cle_trames, invites, seg, p['sam'], self.coupures)
+        sam = self.mod.sam_effectif(p['sam']) if hasattr(self.mod, 'sam_effectif') else p['sam']  # repli éventuel sur SAM 2.1
+        self.etat['mesures']['sam'] = sam
+        self.cle_suivi = _cle(self.cle_trames, invites, seg, sam, self.coupures)
         dsuivi = os.path.join(d, 'travail', 'suivi')
         _cle_dossier(dsuivi, self.cle_suivi)
         dmask = os.path.join(d, 'travail', 'masques')
@@ -244,7 +246,7 @@ class Tache:
                         k = s['fin'] - 1
                         graines.setdefault(k - s['debut'], {})['masque'] = pp[k - segs[i + 1]['debut']].astype(np.float32)
                         depart, sens = k - s['debut'], 'arriere'
-                    proba, vis = self.mod.suivre(trames, graines, depart, sens, p['sam'], self.annule)
+                    proba, vis = self.mod.suivre(trames, graines, depart, sens, sam, self.annule)
                     np.savez_compressed(fichiers[i], p=proba, vis=vis)
                     fait += 1
             # raccord en flux : les images avant le début du segment suivant sont définitives

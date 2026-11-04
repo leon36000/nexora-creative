@@ -4,6 +4,7 @@ Creative le pilote comme un moteur : il envoie la source, lance, interroge la pr
 
   GET    /sante                              modèles chargés, mémoire GPU, travaux en cours
   POST   /segmenter                          aperçu interactif d'une image : {image_b64, points:[[x,y,l]], boite?} (x, y en 0..1)
+  POST   /texte                              sélection par texte (SAM 3.1) : {image_b64, texte, seuil?} -> {objets:[{masque_b64, score, boite}]}
   PUT    /travaux/<id>/fichiers/<nom>        dépose un fichier (source, fond)
   POST   /travaux/<id>/lancer                {params} ; reprend ce qui est déjà fait dans le dossier
   GET    /travaux/<id>                       état, progression, mesures
@@ -238,13 +239,33 @@ class H(BaseHTTPRequestHandler):
                 if not g['points'] and not g['boite']:
                     raise ValueError('au moins un clic ou une boîte')
                 t = time.time()  # pas de file : l'aperçu d'une image s'intercale avec un travail en cours
-                proba, score = modeles.masque_image(rgb, g, corps.get('sam') or 'large')
+                proba, score = modeles.masque_image(rgb, g, corps.get('sam') or 'sam3.1')
                 ok, png = cv2.imencode('.png', np.rint(proba.astype(np.float32) * 255).astype(np.uint8))
                 return self._json(200, {'masque_b64': base64.b64encode(png.tobytes()).decode(), 'score': round(score, 2),
                                         'aire': round(float((proba > 0.5).mean()), 4), 'secondes': round(time.time() - t, 2),
                                         'largeur': rgb.shape[1], 'hauteur': rgb.shape[0]})
             except (KeyError, ValueError) as e:
                 return self._json(400, {'erreur': str(e)})
+        if r == ['texte']:  # sélection par texte (SAM 3.1) : {image_b64, texte, seuil?} -> objets {masque_b64, score, boite}
+            try:
+                im = cv2.imdecode(np.frombuffer(base64.b64decode(corps['image_b64']), np.uint8), cv2.IMREAD_COLOR)
+                if im is None:
+                    raise ValueError('image illisible')
+                texte = str(corps.get('texte') or '').strip()
+                if not texte or len(texte) > 200:
+                    raise ValueError('texte vide ou trop long')
+                t = time.time()
+                objets = modeles.detecter_texte(cv2.cvtColor(im, cv2.COLOR_BGR2RGB), texte, float(corps.get('seuil') or 0.4))
+                sortie = []
+                for o in objets:
+                    ok, png = cv2.imencode('.png', np.rint(o['masque'].astype(np.float32) * 255).astype(np.uint8))
+                    sortie.append({'masque_b64': base64.b64encode(png.tobytes()).decode(), 'score': o['score'], 'boite': o['boite'],
+                                   'aire': round(float((o['masque'] > 0.5).mean()), 4)})
+                return self._json(200, {'objets': sortie, 'secondes': round(time.time() - t, 2), 'largeur': im.shape[1], 'hauteur': im.shape[0]})
+            except (KeyError, ValueError) as e:
+                return self._json(400, {'erreur': str(e)})
+            except RuntimeError as e:
+                return self._json(503, {'erreur': str(e)})
         if len(r) == 3 and r[0] == 'travaux' and ID.match(r[1]):
             id_ = r[1]
             if r[2] == 'lancer':

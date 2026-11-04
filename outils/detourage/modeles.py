@@ -12,6 +12,8 @@ import threading
 import numpy as np
 
 VARIANTES_SAM = {'large': 'facebook/sam2.1-hiera-large', 'small': 'facebook/sam2.1-hiera-small'}
+SAM3 = 'sam3.1'  # SAM 3.1 (sam31.py) : défaut ; SAM 2.1 large en repli s'il ne se charge pas
+REPLI_SAM = 'large'
 VARIANTES_MATTING = {'vitmatte-small': 'hustvl/vitmatte-small-composition-1k', 'vitmatte-base': 'hustvl/vitmatte-base-composition-1k'}
 
 
@@ -40,6 +42,41 @@ class Modeles:
         self.verrou = threading.RLock()
         self._sam: dict = {}
         self._mat: dict = {}
+        self._sam3 = None
+        self.repli: str | None = None  # raison du repli sur SAM 2.1, s'il a eu lieu
+
+    # ----- SAM 3.1, avec repli
+    def sam3(self):
+        """L'adaptateur SAM 3.1 chargé, ou None (repli SAM 2.1, raison dans self.repli)."""
+        with self.verrou:
+            if self._sam3 is None and self.repli is None:
+                try:
+                    from sam31 import Sam31
+                    s = Sam31(self.torch, self.appareil)
+                    s.charger()
+                    self._sam3 = s
+                except Exception as e:  # noqa: BLE001 - tout échec de chargement mène au repli, consigné
+                    self.repli = f'{type(e).__name__}: {e}'[:300]
+                    import sys
+                    print(f'[detourage] SAM 3.1 indisponible, repli sur SAM 2.1 : {self.repli}', file=sys.stderr, flush=True)
+            return self._sam3
+
+    def _resoudre(self, variante: str):
+        """(adaptateur SAM 3.1 ou None, variante SAM 2.1 effective)."""
+        if variante == SAM3:
+            s = self.sam3()
+            return (s, None) if s else (None, REPLI_SAM)
+        return None, variante
+
+    def sam_effectif(self, variante: str) -> str:
+        s3, v = self._resoudre(variante)
+        return SAM3 if s3 else v
+
+    def detecter_texte(self, rgb: np.ndarray, texte: str, seuil: float = 0.4) -> list[dict]:
+        s = self.sam3()
+        if not s:
+            raise RuntimeError(f'sélection par texte indisponible (SAM 3.1 non chargé : {self.repli})')
+        return s.detecter_texte(rgb, texte, seuil)
 
     # ----- SAM 2.1
     def sam(self, variante: str = 'large'):
@@ -74,8 +111,11 @@ class Modeles:
         m = p.post_process_masks([sortie.pred_masks], original_sizes=[[h, w]], binarize=False)[0]
         return self.torch.sigmoid(m[0, 0].float()).cpu().numpy().astype(np.float16)
 
-    def masque_image(self, rgb: np.ndarray, graine: dict, variante: str = 'large') -> tuple[np.ndarray, float]:
+    def masque_image(self, rgb: np.ndarray, graine: dict, variante: str = SAM3) -> tuple[np.ndarray, float]:
         """Aperçu interactif : une image, des points/boîte -> (probabilité H×W float16, score d'objet)."""
+        s3, variante = self._resoudre(variante)
+        if s3:
+            return s3.masque_image(rgb, graine)
         h, w = rgb.shape[:2]
         with self.torch.inference_mode():
             m, p, s = self.session([rgb], variante)
@@ -91,6 +131,9 @@ class Modeles:
         ou 'deux'. Retourne (probabilités T×H×W float16, visible T bool). Une trame dont le score d'objet est ≤ 0
         est déclarée non visible (occlusion ou sortie de champ) et son masque est mis à zéro.
         """
+        s3, variante = self._resoudre(variante)
+        if s3:
+            return s3.suivre(trames, graines, depart, sens, annule, progres)
         h, w = trames[0].shape[:2]
         n = len(trames)
         proba = np.zeros((n, h, w), np.float16)
@@ -143,8 +186,8 @@ class Modeles:
 
     def etat(self) -> dict:
         t = self.torch
-        d = {'appareil': self.appareil, 'dtype': str(self.dtype).replace('torch.', ''), 'sam': sorted(self._sam),
-             'matting': sorted(self._mat)}
+        d = {'appareil': self.appareil, 'dtype': str(self.dtype).replace('torch.', ''), 'sam': sorted(self._sam) + ([SAM3] if self._sam3 else []),
+             'matting': sorted(self._mat), 'sam3_repli': self.repli}
         if self.appareil == 'cuda':
             d['gpu'] = t.cuda.get_device_name(0)
             d['vram_pic_go'] = round(t.cuda.max_memory_allocated() / 1e9, 2)
