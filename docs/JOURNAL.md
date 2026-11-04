@@ -784,3 +784,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 ### Reprise Codex — MR de garde H3 partielle, 4 novembre 2026
 
 - Commit `7a94779` poussé sur `fix/h3-ancrage-creer-limite-codex`, MR brouillon !43 ciblant la branche Director de !42. Garde avant réservation des nouvelles créations/devis et `/api/generate`, y compris variantes/kind inconnu; ancien devis écarté en UI. 56 tests CPU ciblés signalés, 34 repassés indépendamment, typechecks signalés; liste des genres comparée lexicalement au répartiteur pour limiter les dérives. Fusion simulée avec `d988a9d` sans conflit. Pipeline du nouveau SHA à suivre. Protection partielle : suites de films et réservations préexistantes inchangées, pas de test HTTP/navigateur ni inspection des poids. Aucune fusion ou production modifiée.
+
+
+### Reprise Codex — pipelines Director/H3 et essai navigateur, 4 novembre 2026
+
+- Pipelines #2861 Director `d988a9d`, #2865 garde H3 `7a94779` et #2864 passation `f726766` : succès vérifiés via API. Les MR !42/!43 restent brouillons; succès CI ne prouve ni la couverture des films/suites ni le comportement réel des modèles.
+- Essai navigateur Director isolé : Firefox a expiré avant page, puis Chromium a échoué avant ouverture (`Socket path too long`); la config Vite isolée ne résolvait pas `react-refresh`. Aucun DOM ou résultat navigateur vérifié. Les serveurs simulés locaux ont été arrêtés; un processus Firefox issu de l'essai a résisté à l'arrêt par permission et n'a pas été forcé. Une tentative corrigée avec chemin court vers Storage et résolution explicite est en cours; aucun service production ni GPU.
