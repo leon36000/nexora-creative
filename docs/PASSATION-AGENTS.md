@@ -542,3 +542,7 @@ Après validation réelle de l'EditPlan court DeepSeek (`ok: true`, 13,5 s), pr�
 Le brouillon `~/nexora-creative-data/work/opsys-ultime/deepseek/montage/deepseek-court-brouillon.mp4` a été rendu en 50,4 s CPU après validation de l'EditPlan (13,5 s, 7 plans, aucune source manquante). `ffprobe` confirme H.264 960×540, AAC, 13,5 s ; décodage intégral sans erreur. Neuf tranches MP4, le mix WAV, l'export et une planche ont été copiés sur le SSD Infrastructure de pc1, vérifiés SHA-256 et inscrits dans l'inventaire (**3 765 entrées**), via le dossier du Bureau `codex-opsys-deepseek-court-brouillon-20261104`. Tous les originaux et tranches restent sur Storage.
 
 Inspection de la planche uniquement : représentant/maison, signal, serveurs et carton sont présents ; plusieurs images sont sombres. Le rythme, la voix, le son, le mouvement et la qualité globale ne sont pas encore évalués. C'est un **brouillon interne**, pas une finale ni une note fondateur. `p30` du long est toujours en cours à cet instant.
+
+### Finish : protocole consolidé
+
+Commit local **9c223cb** sur `feat/sortie-video-nvenc` : rapport 30, JSON des six paires et protocole portable, avec empreintes, 288 images, divergence d'alignement PTS et limites de l'aperçu fixe. Contrôle indépendant : SHA du JSON commité identique à la mesure sur Storage ; syntaxe Python valide. Le script portable n'a pas été relancé et ne prouve pas, à lui seul, la reproductibilité. Codecs toujours désactivés ; aucun push ni déploiement.
