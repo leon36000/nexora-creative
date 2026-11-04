@@ -1,0 +1,1187 @@
+{
+ "marque": "marque-v6.json",
+ "bpm": 124.81,
+ "phase": 2.4,
+ "musique": {
+  "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/musique/lyria-3.wav",
+  "entree": 5.6087,
+  "gain_db": -4,
+  "ducking_db": 7,
+  "trous": [
+   [
+    17.543,
+    18.0237
+   ]
+  ]
+ },
+ "dossiers_voix": {
+  "fr": "/home/pc6/nexora-creative-data/promo/v6-creative/voix/narration/h3-fr",
+  "en": "/home/pc6/nexora-creative-data/promo/v6-creative/voix/narration/eleven4-liam-en"
+ },
+ "voix": [
+  {
+   "id": "d1",
+   "t": 9.851,
+   "db": 2
+  },
+  {
+   "id": "d2",
+   "t": 15.861,
+   "db": 2
+  }
+ ],
+ "sfx": [
+  {
+   "t": 0.0,
+   "type": "sub",
+   "db": -4
+  },
+  {
+   "t": 0.0,
+   "type": "impact",
+   "db": -6
+  },
+  {
+   "t": 5.7651,
+   "type": "impact",
+   "db": -6
+  },
+  {
+   "t": 12.4953,
+   "type": "impact",
+   "db": -6
+  },
+  {
+   "t": 18.0237,
+   "type": "impact",
+   "db": -5
+  },
+  {
+   "t": 36.5319,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 37.9741,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 38.9355,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 39.4163,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 39.897,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 40.8585,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 41.8199,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 42.3006,
+   "type": "impact",
+   "db": -9
+  },
+  {
+   "t": 46.6272,
+   "type": "boom",
+   "db": -6
+  }
+ ],
+ "duree": 53.8382,
+ "segments": [
+  {
+   "debut": 0.0,
+   "duree": 0.72,
+   "type": "plan",
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/791.mp4",
+   "entree": 3.55,
+   "vitesse": 1.0,
+   "etalonnage": "nuit_feu",
+   "son_db": -2,
+   "cadrage": [
+    [
+     0,
+     0.62,
+     0.5,
+     1.25
+    ],
+    [
+     0.72,
+     0.6,
+     0.5,
+     1.12
+    ]
+   ],
+   "cadrage_v": [
+    [
+     0,
+     0.62,
+     0.5,
+     1.0
+    ],
+    [
+     0.72,
+     0.6,
+     0.5,
+     1.0
+    ]
+   ],
+   "secousses": [
+    [
+     0.05,
+     26,
+     0.45
+    ]
+   ]
+  },
+  {
+   "debut": 0.72,
+   "duree": 0.96,
+   "type": "saisie",
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s01",
+   "etapes": [
+    "saisie",
+    "saisie-fin"
+   ],
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    296,
+    532,
+    474
+   ],
+   "zone_texte": [
+    104,
+    300,
+    470,
+    345
+   ],
+   "zoom_texte": 1.25,
+   "zoom_texte_v": 2.0,
+   "clavier_db": -14
+  },
+  {
+   "debut": 1.68,
+   "duree": 0.72,
+   "type": "boost",
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s01",
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    490,
+    532,
+    765
+   ],
+   "termes_cles": [
+    "dragon",
+    "château",
+    "feu",
+    "flammes",
+    "rugissant",
+    "travelling circulaire",
+    "nuit"
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 2.4,
+   "duree": 1.4422,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/791.mp4",
+   "entree": 2.9,
+   "fichier_vertical": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/822.mp4",
+   "vitesse": [
+    [
+     0,
+     1.0
+    ],
+    [
+     0.6,
+     0.45
+    ],
+    [
+     1.44,
+     0.6
+    ]
+   ],
+   "etalonnage": "nuit_feu",
+   "son_db": -6,
+   "cadrage": [
+    [
+     0,
+     0.55,
+     0.5,
+     1.0
+    ],
+    [
+     1.44,
+     0.58,
+     0.48,
+     1.12
+    ]
+   ],
+   "cadrage_v": [
+    [
+     0,
+     0.62,
+     0.5,
+     1.0
+    ],
+    [
+     1.44,
+     0.66,
+     0.5,
+     1.0
+    ]
+   ],
+   "secousses": [
+    [
+     0.55,
+     18,
+     0.5
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 3.8422,
+   "duree": 0.9615,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/809.mp4",
+   "entree": 2.0,
+   "vitesse": 1.15,
+   "etalonnage": "nuit_feu",
+   "son_db": -8,
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     0.96,
+     0.5,
+     0.5,
+     1.08
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 4.8037,
+   "duree": 0.9614,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/790.mp4",
+   "entree": 2.4,
+   "vitesse": 1.2,
+   "etalonnage": "nuit_feu",
+   "son_db": -8,
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.45,
+     1.05
+    ],
+    [
+     0.96,
+     0.52,
+     0.47,
+     1.15
+    ]
+   ]
+  },
+  {
+   "type": "titre",
+   "debut": 5.7651,
+   "duree": 0.4807,
+   "texte_id": "plus_gros",
+   "style": "claque",
+   "sur_video": "precedent"
+  },
+  {
+   "type": "saisie",
+   "debut": 6.2458,
+   "duree": 0.7211,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s02",
+   "etapes": [
+    "saisie",
+    "saisie-fin"
+   ],
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    296,
+    532,
+    474
+   ],
+   "zone_texte": [
+    104,
+    300,
+    470,
+    345
+   ],
+   "zoom_texte": 1.25,
+   "zoom_texte_v": 2.0,
+   "clavier_db": -16
+  },
+  {
+   "type": "boost",
+   "debut": 6.9669,
+   "duree": 0.4808,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s02",
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    490,
+    532,
+    765
+   ],
+   "termes_cles": [
+    "bataille spatiale",
+    "vaisseaux",
+    "laser",
+    "explosions",
+    "croiseurs",
+    "planète"
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 7.4477,
+   "duree": 1.6825,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/797.mp4",
+   "entree": 1.6,
+   "vitesse": 1.25,
+   "etalonnage": "espace",
+   "son_db": -6,
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     1.68,
+     0.5,
+     0.52,
+     1.1
+    ]
+   ],
+   "secousses": [
+    [
+     1.0,
+     12,
+     0.6
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 9.1302,
+   "duree": 0.7211,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/794.mp4",
+   "entree": 2.9,
+   "vitesse": 1.3,
+   "etalonnage": "espace",
+   "son_db": -8,
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     1.2,
+     0.48,
+     0.5,
+     1.1
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 9.8513,
+   "duree": 2.1633,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/dialogues/d1-pilote-fr-coupe.mp4",
+   "entree": 0.0,
+   "etalonnage": "espace",
+   "son_db": -24,
+   "fichier_en": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/dialogues/d1-pilote-en-coupe.mp4",
+   "cadrage": [
+    [
+     0,
+     0.42,
+     0.45,
+     1.0
+    ],
+    [
+     1.44,
+     0.42,
+     0.45,
+     1.08
+    ]
+   ],
+   "secousses": [
+    [
+     0.2,
+     14,
+     1.2
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 12.0146,
+   "duree": 0.4807,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/793.mp4",
+   "entree": 3.6,
+   "vitesse": 1.2,
+   "etalonnage": "espace",
+   "son_db": -8,
+   "flash": [
+    [
+     0.5,
+     "signal",
+     0.08
+    ]
+   ]
+  },
+  {
+   "type": "titre",
+   "debut": 12.4953,
+   "duree": 0.4808,
+   "texte_id": "plus_fou",
+   "style": "claque",
+   "sur_video": "precedent"
+  },
+  {
+   "type": "saisie",
+   "debut": 12.9761,
+   "duree": 0.7211,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s03",
+   "etapes": [
+    "saisie",
+    "saisie-fin"
+   ],
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    296,
+    532,
+    474
+   ],
+   "zone_texte": [
+    104,
+    300,
+    470,
+    345
+   ],
+   "zoom_texte": 1.25,
+   "zoom_texte_v": 2.0,
+   "clavier_db": -16
+  },
+  {
+   "type": "boost",
+   "debut": 13.6972,
+   "duree": 0.4807,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s03",
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    490,
+    532,
+    765
+   ],
+   "termes_cles": [
+    "sabres laser",
+    "orange incandescent",
+    "orage",
+    "étincelles",
+    "orbite",
+    "ralenti"
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 14.1779,
+   "duree": 0.9615,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/795.mp4",
+   "entree": 1.9,
+   "fichier_vertical": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/828.mp4",
+   "vitesse": 1.1,
+   "etalonnage": "orage",
+   "son_db": -6,
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.45,
+     1.0
+    ],
+    [
+     1.2,
+     0.5,
+     0.45,
+     1.06
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 15.1394,
+   "duree": 0.7211,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/796.mp4",
+   "entree": 2.4,
+   "vitesse": 1.0,
+   "etalonnage": "orage",
+   "son_db": -6
+  },
+  {
+   "type": "plan",
+   "debut": 15.8605,
+   "duree": 1.6825,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/dialogues/d2-duel-fr-coupe.mp4",
+   "entree": 0.0,
+   "etalonnage": "orage",
+   "son_db": -24,
+   "fichier_en": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/dialogues/d2-duel-en-coupe.mp4"
+  },
+  {
+   "type": "plan",
+   "debut": 17.543,
+   "duree": 0.4807,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/795.mp4",
+   "entree": 3.6,
+   "vitesse": [
+    [
+     0,
+     0.35
+    ],
+    [
+     0.48,
+     0.35
+    ]
+   ],
+   "etalonnage": "orage",
+   "son_db": 0,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.08
+    ]
+   ],
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.42,
+     1.25
+    ],
+    [
+     0.48,
+     0.5,
+     0.42,
+     1.32
+    ]
+   ]
+  },
+  {
+   "type": "titre",
+   "debut": 18.0237,
+   "duree": 0.4808,
+   "texte_id": "plus_grand",
+   "style": "claque",
+   "sur_video": "precedent"
+  },
+  {
+   "type": "saisie",
+   "debut": 18.5045,
+   "duree": 0.7211,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s09",
+   "etapes": [
+    "saisie",
+    "saisie-fin"
+   ],
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    296,
+    532,
+    474
+   ],
+   "zone_texte": [
+    104,
+    300,
+    470,
+    345
+   ],
+   "zoom_texte": 1.25,
+   "zoom_texte_v": 2.0,
+   "clavier_db": -16
+  },
+  {
+   "type": "boost",
+   "debut": 19.2256,
+   "duree": 0.4807,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s09",
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    490,
+    532,
+    765
+   ],
+   "termes_cles": [
+    "explose",
+    "ultra-ralenti",
+    "flammes",
+    "éclats de verre",
+    "orbite",
+    "crépuscule"
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 19.7063,
+   "duree": 2.4037,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/812.mp4",
+   "entree": 0.4,
+   "vitesse": [
+    [
+     0,
+     0.8
+    ],
+    [
+     0.8,
+     0.4
+    ],
+    [
+     2.4,
+     0.5
+    ]
+   ],
+   "etalonnage": "aube",
+   "son_db": -4,
+   "secousses": [
+    [
+     0.05,
+     20,
+     0.6
+    ]
+   ]
+  },
+  {
+   "type": "avant_apres",
+   "debut": 22.11,
+   "duree": 1.9229,
+   "couches": [
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/detourage-src/duel-795.mp4",
+     "entree": 0.2,
+     "texte_id": "brut"
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/detourage/sorties/apercu-echecs.mp4",
+     "entree": 0.2,
+     "texte_id": "masque"
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/detourage/sorties/composite.mp4",
+     "entree": 0.2,
+     "texte_id": "final"
+    }
+   ],
+   "textes": [
+    {
+     "t": 0.0,
+     "duree": 1.9,
+     "texte_id": "ch_detourage",
+     "style": "balayage",
+     "position": "haut"
+    }
+   ]
+  },
+  {
+   "type": "avant_apres",
+   "debut": 24.0329,
+   "duree": 1.4422,
+   "couches": [
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/798.png",
+     "texte_id": "ch_image"
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/810.mp4",
+     "entree": 2.2,
+     "texte_id": "ch_video"
+    }
+   ]
+  },
+  {
+   "type": "chapitre",
+   "debut": 25.4751,
+   "duree": 1.4422,
+   "texte_id": "ch_relief",
+   "media": {
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/relief",
+    "etapes": [
+     "tour-wire",
+     "tour-clay",
+     "tour-textured"
+    ]
+   }
+  },
+  {
+   "type": "chapitre",
+   "debut": 26.9173,
+   "duree": 0.9614,
+   "texte_id": "ch_voix",
+   "media": {
+    "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/dialogues/d1-pilote-fr-coupe.mp4",
+    "entree": 0.3,
+    "fichier_en": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/dialogues/d1-pilote-en-coupe.mp4"
+   }
+  },
+  {
+   "type": "chapitre",
+   "debut": 27.8787,
+   "duree": 0.4808,
+   "texte_id": "ch_studio",
+   "media": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/studio2/0006-editeur.jpg"
+  },
+  {
+   "type": "chapitre",
+   "debut": 28.3595,
+   "duree": 0.4807,
+   "texte_id": "ch_marketing",
+   "media": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/marketing/0033-propositions.jpg"
+  },
+  {
+   "type": "mosaique",
+   "debut": 28.8402,
+   "duree": 0.9615,
+   "rushes": [
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/791.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/797.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/795.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/812.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/796.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/810.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/819.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/809.mp4",
+     "entree": 1.5
+    },
+    {
+     "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/794.mp4",
+     "entree": 1.5
+    }
+   ],
+   "temps": [
+    0.0,
+    0.107,
+    0.214,
+    0.321,
+    0.428,
+    0.535,
+    0.642,
+    0.749,
+    0.856
+   ],
+   "textes": [
+    {
+     "t": 0.45,
+     "duree": 0.5,
+     "texte_id": "ch_tout",
+     "style": "grand",
+     "position": "centre"
+    }
+   ]
+  },
+  {
+   "type": "saisie",
+   "debut": 29.8017,
+   "duree": 2.4036,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/tout",
+   "dossier_en": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/tout-en",
+   "etapes": [
+    "saisie",
+    "saisie-fin"
+   ],
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    296,
+    532,
+    474
+   ],
+   "zone_texte": [
+    104,
+    300,
+    470,
+    345
+   ],
+   "clavier_db": -10
+  },
+  {
+   "type": "boost",
+   "debut": 32.2053,
+   "duree": 0.9615,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s07",
+   "texte": "Un dragon aux écailles sombres fond en rugissant sur un château médiéval en pierre, dont les tours s'embrasent sous des gerbes de feu orange. La nuit tombe, la lueur des flammes danse sur les remparts tandis qu'un épais fumée noire s'élève dans le ciel. La caméra suit le dragon en un ample travelling circulaire autour de la forteresse, captant chaque battement d'ailes. On entend le grondement sourd du feu, le craquement du bois qui cède et le rugissement caverneux de la bête, dans une ambiance épique et menaçante. Une immense bataille spatiale : des dizaines de vaisseaux aux coques métalliques sillonnent l'espace dans un ballet de laser vert et bleu. Des explosions silencieuses illuminent les débris flottants au-dessus d'une planète ocree. La caméra effectue un lent travelling latéral qui plonge au coeur du combat, entre deux croiseurs qui se croisent en rase-moteur. Des lueurs de moteur orange percent l'obscurité, rythmées par le grondement sourd des tirs et le vrombissement grave des propulseurs, créant une ambiance épique et vertigineuse. Nuit d'orage : deux silhouettes encapuchonnées s'affrontent sur une plateforme métallique battue par la pluie, leurs sabres laser d'un orange incandescent s'entrechoquant en gerbes d'étincelles. Chaque choc illumine leurs visages tendus d'une lueur dorée, tandis que la caméra tourne en orbite serrée autour d'eux et ralentit sur une parade au ralenti. Le bourdonnement grave des lames, le crépitement des impacts et un tonnerre lointain emplissent l'air électrifié. Sur une route déserte au crépuscule, une voiture sombre roule tranquillement quand une détonation sourde la déchire : capot, tôles et éclats de verre s'envolent dans une gerbe de flammes orange, suspendue en ultra-ralenti. La caméra orbite lentement autour du véhicule, captant chaque débris incandescent qui tournoie dans la lumière dorée du soir. Le grondement grave, étiré et presque feutré, se mêle au crépitement du feu et au tintement lointain du métal, dans une ambiance spectaculaire et presque irréelle. Un dragon colossal aux écailles sombres fond sur un croiseur spatial blindé en orbite autour d'une planète rouge. Dans un travelling latéral rapide, la caméra accompagne sa plongée pendant qu'il crache un jet de feu incandescent sur la coque, arrachant des plaques de métal en gerbes d'étincelles. La lumière froide de l'étoile contraste avec les flammes orange reflétées sur le fuselage, tandis que retentissent son rugissement sourd et les explosions du blindage. Ambiance épique et oppressante. Au petit matin, une flotte de dragons aux écailles sombres fend la brume dorée de l'aube, leurs ailes immenses battant en rythme au-dessus de montagnes bleutées. La caméra accompagne le dragon de tête en travelling latéral, puis s'élève pour révéler toute la formation ondulant comme une vague majestueuse. Lumière rasante et chaude, air vibrant, souffle profond des battements d'ailes et rugissements sourds résonnant dans la vallée encore endormie.",
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    490,
+    532,
+    765
+   ],
+   "termes_cles": [
+    "dragon",
+    "vaisseaux",
+    "sabres laser",
+    "explose",
+    "flotte",
+    "croiseur"
+   ]
+  },
+  {
+   "type": "titre",
+   "debut": 33.1668,
+   "duree": 0.9614,
+   "texte_id": "tout",
+   "style": "claque",
+   "sur_video": "suivant"
+  },
+  {
+   "type": "plan",
+   "debut": 34.1282,
+   "duree": 2.4037,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/810.mp4",
+   "entree": 0.3,
+   "fichier_vertical": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/826.mp4",
+   "vitesse": 1.0,
+   "etalonnage": "espace",
+   "son_db": -6,
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     2.4,
+     0.5,
+     0.5,
+     1.12
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 36.5319,
+   "duree": 1.4422,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/820.mp4",
+   "entree": 1.0,
+   "vitesse": 1.15,
+   "etalonnage": "espace",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 37.9741,
+   "duree": 0.9614,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/797.mp4",
+   "entree": 3.2,
+   "vitesse": 1.15,
+   "etalonnage": "espace",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 38.9355,
+   "duree": 0.4808,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/796.mp4",
+   "entree": 3.6,
+   "vitesse": 1.15,
+   "etalonnage": "orage",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 39.4163,
+   "duree": 0.4807,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/791.mp4",
+   "entree": 4.1,
+   "vitesse": 1.15,
+   "etalonnage": "nuit_feu",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 39.897,
+   "duree": 0.9615,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/812.mp4",
+   "entree": 1.8,
+   "vitesse": 1.15,
+   "etalonnage": "aube",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 40.8585,
+   "duree": 0.9614,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/809.mp4",
+   "entree": 3.6,
+   "vitesse": 1.15,
+   "etalonnage": "nuit_feu",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 41.8199,
+   "duree": 0.4807,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/794.mp4",
+   "entree": 3.8,
+   "vitesse": 1.15,
+   "etalonnage": "espace",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 42.3006,
+   "duree": 0.4808,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/795.mp4",
+   "entree": 4.2,
+   "vitesse": 1.15,
+   "etalonnage": "orage",
+   "son_db": -8,
+   "flash": [
+    [
+     0.0,
+     "os",
+     0.04
+    ]
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 42.7814,
+   "duree": 3.8458,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/819.mp4",
+   "entree": 0.4,
+   "fichier_vertical": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/811.mp4",
+   "vitesse": 0.9,
+   "etalonnage": "aube",
+   "son_db": -10,
+   "cadrage": [
+    [
+     0,
+     0.5,
+     0.5,
+     1.0
+    ],
+    [
+     3.85,
+     0.5,
+     0.5,
+     1.06
+    ]
+   ]
+  },
+  {
+   "type": "carton",
+   "debut": 46.6272,
+   "duree": 2.8844
+  },
+  {
+   "type": "saisie",
+   "debut": 49.5116,
+   "duree": 1.2018,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s10",
+   "etapes": [
+    "saisie",
+    "saisie-fin"
+   ],
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    296,
+    532,
+    474
+   ],
+   "zone_texte": [
+    104,
+    300,
+    470,
+    345
+   ],
+   "zoom_texte": 1.25,
+   "zoom_texte_v": 2.0,
+   "clavier_db": -16
+  },
+  {
+   "type": "boost",
+   "debut": 50.7134,
+   "duree": 0.7211,
+   "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s10",
+   "viewport": [
+    1600,
+    900
+   ],
+   "zone": [
+    100,
+    490,
+    532,
+    765
+   ],
+   "termes_cles": [
+    "petit chat",
+    "crache un jet de flammes",
+    "comme un dragon",
+    "ronronnement"
+   ]
+  },
+  {
+   "type": "plan",
+   "debut": 51.4345,
+   "duree": 2.4037,
+   "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/823.mp4",
+   "entree": 0.6,
+   "fichier_vertical": "/home/pc6/nexora-creative-data/promo/v6-creative/rushes/825.mp4",
+   "vitesse": 1.0,
+   "etalonnage": "aube",
+   "son_db": -2,
+   "textes": [
+    {
+     "t": 0.5,
+     "duree": 1.6,
+     "texte_id": "bonus",
+     "style": "legende",
+     "position": "bas"
+    }
+   ]
+  }
+ ]
+}
