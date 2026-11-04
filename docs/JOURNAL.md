@@ -779,3 +779,8 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 
 - Garde locale H3 : création/devis et nouvelles requêtes `/api/generate` refusent les combinaisons max/ancre avec checkpoint incompatible ou inconnu avant réservation; variantes contrôlées, genres non H3 connus conservés. 34 tests ciblés repassés indépendamment, 55 signalés par l'agent avec typechecks. Revue Films : pas de divergence actuelle du classement des genres mais liste dupliquée avec le répartiteur, risque de dérive future; test de cohérence examiné. Les suites de films et leurs réservations préexistantes restent hors couverture. Aucun déploiement ni modification de solde.
 - Le SHA courant `d988a9d` de la MR Director !42 a 114 tests ciblés indépendants; l'essai navigateur isolé a échoué avec Firefox avant ouverture d'une page, une tentative Chromium isolée est examinée. Aucune réussite navigateur affirmée.
+
+
+### Reprise Codex — MR de garde H3 partielle, 4 novembre 2026
+
+- Commit `7a94779` poussé sur `fix/h3-ancrage-creer-limite-codex`, MR brouillon !43 ciblant la branche Director de !42. Garde avant réservation des nouvelles créations/devis et `/api/generate`, y compris variantes/kind inconnu; ancien devis écarté en UI. 56 tests CPU ciblés signalés, 34 repassés indépendamment, typechecks signalés; liste des genres comparée lexicalement au répartiteur pour limiter les dérives. Fusion simulée avec `d988a9d` sans conflit. Pipeline du nouveau SHA à suivre. Protection partielle : suites de films et réservations préexistantes inchangées, pas de test HTTP/navigateur ni inspection des poids. Aucune fusion ou production modifiée.
