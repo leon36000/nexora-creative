@@ -437,3 +437,5 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - OPSYS DeepSeek : v03 généré, décodé et archivé avec planche ; v04 lancé seul. Contrôle automatique du long : aucun noir ≥0,5 s au seuil 0,05 ; volume moyen −15,7 dB, pic −1,5 dB, sans verdict sur son ou image.
 
 - pc6 : racine 100 %, ~5,1 Gio disponibles, cause de baisse non établie ; données de montage sur Storage, inodes 28 %. Aucun nettoyage. v04 déjà en cours à vérifier/archiver puis suspendre les nouveaux rendus tant que la marge est insuffisante.
+
+- OPSYS DeepSeek : v04 généré, décodé et archivé avec planche ; v05–v06 restent à générer après rétablissement de la marge disque racine. Aucun nouveau rendu lancé.

@@ -612,3 +612,7 @@ Sur le brouillon long, un contrôle automatique n’a trouvé aucun passage noir
 ### pc6 : espace racine critique
 
 `df` affiche maintenant la racine à **100 %**, environ **5,1 Gio disponibles** ; deux mesures espacées sont presque stables, mais la cause de la baisse depuis le précédent relevé n’est pas établie. Inodes à 28 %. Le montage OPSYS utilise le répertoire réel sur Storage (environ 120 Mio) et les planches aussi ; aucune attribution de la baisse ne peut être faite à partir de ces chiffres. Aucune suppression ou nettoyage automatique : caches, journaux et données sont conservés. Terminer la vérification et l’archivage de v04 déjà lancé, puis suspendre les nouveaux rendus jusqu’à disposer d’une marge fiable sur la racine.
+
+### OPSYS DeepSeek : v04, pause de génération
+
+`v04-r1.mp4` généré en 141,0 s moteur sans erreur signalée ; H.264 768×1344, AAC, 5,166688 s, décodage complet sans erreur. Vidéo et planche archivées sur pc1, SHA-256 vérifiés ; inventaire **3 876 entrées**. La planche montre un serveur puis une façade de bureaux ; son et mouvement restent à juger. Les plans verticaux `v05` et `v06` restent à générer lorsque la marge disque racine pc6 sera rétablie ; aucun autre rendu lancé.
