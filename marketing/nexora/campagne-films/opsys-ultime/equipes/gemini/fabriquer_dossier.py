@@ -288,40 +288,6 @@ CLES = [
             "glows softly behind them, deep ink sky, warm tungsten and ion-blue contrast, no text, no logos."
         ),
     },
-    {
-        "id": "k21",
-        "format": "9:16",
-        "prompt": (
-            "Vertical 9:16 cinematic frame outside a two-story Québécois house: a 34-year-old sales rep in a plain slate-blue jacket raises a "
-            "matte black phone toward the high roof gable, launching a vertical spear of signal-orange and cyan light straight up into the sky, "
-            "crisp morning sunlight, no text, no logos."
-        ),
-    },
-    {
-        "id": "k22",
-        "format": "9:16",
-        "prompt": (
-            "Vertical 9:16 cinematic frame following a blazing bolt of signal-orange light rocketing from an orbital satellite down into a tall "
-            "5G tower and plunging along vertical fiber cables into a sleek black server rack, dramatic speed lines, no text, no logos."
-        ),
-    },
-    {
-        "id": "k23",
-        "format": "9:16",
-        "prompt": (
-            "Vertical 9:16 monumental interior shot looking straight up the ten-story cylindrical atrium of the virtual enterprise inside the "
-            "server: ten glowing rings of specialists and a floating 3D wireframe house roof surrounded by cascading golden particles, "
-            "breathtaking vertical scale, no text, no logos."
-        ),
-    },
-    {
-        "id": "k24",
-        "format": "9:16",
-        "prompt": (
-            "Vertical 9:16 cinematic shot: the 52-year-old owner taps a glowing golden approval seal in mid-air, and the completed luminous "
-            "architectural quote materializes instantly in the hand of the smiling sales rep in front of the house, no text, no logos."
-        ),
-    },
 ]
 
 VOIX = [
@@ -338,7 +304,7 @@ VOIX = [
         "id": "v02",
         "role": "etienne",
         "voix": "drama3-adamqc",
-        "texte": "Façade nord, monsieur Morin. Deux étages d'aluminium pis les gouttières. Envoie-moi l'estimé !",
+        "texte": "Façade nord, monsieur Morin : deux étages d'aluminium et les gouttières. Envoie-moi l'estimé !",
         "direction": "Vendeur de terrain québécois vif et décidé, parle avec entrain sur un chantier, naturel et chaleureux.",
         "vitesse": 1.12,
         "prises": 3,
@@ -420,17 +386,17 @@ VOIX = [
         "role": "claire",
         "voix": "eleven-jeannemance",
         "texte": "Voici les profits anticipés, mis à jour avec les nouveaux ratios de productivité des employés : leur productivité a augmenté de 7 %.",
-        "direction": "[clear, confident, executive Québécois financial presentation]",
-        "vitesse": 1.04,
+        "direction": "[energetic, proud, dynamic Québécois executive presentation, upbeat commercial delivery]",
+        "vitesse": 1.12,
         "prises": 3,
     },
     {
         "id": "v12",
         "role": "sonia",
-        "voix": "drama3-jeannemance",
+        "voix": "eleven-jeannemance",
         "texte": "Voici la cédule des trois prochaines semaines. Toutes les tournées sont optimisées, monsieur Benoît.",
-        "direction": "Directrice des opérations québécoise, ton assuré, vif, précis et énergique.",
-        "vitesse": 1.08,
+        "direction": "[confident, brisk, energetic Québécois operations director, warm and decisive]",
+        "vitesse": 1.10,
         "prises": 3,
     },
     {
@@ -464,9 +430,9 @@ VOIX = [
         "id": "v16",
         "role": "narrateur",
         "voix": "drama3-frederic",
-        "texte": "Dix départements. La puissance d'une grande entreprise, bâtie pour la vôtre.",
-        "direction": "Apothéose vocale, grande ampleur, fierté québécoise, franc et vibrant.",
-        "vitesse": 1.06,
+        "texte": "Dix départements complets : la puissance d'une grande entreprise, bâtie pour la vôtre.",
+        "direction": "Apothéose vocale, grande ampleur, fierté québécoise, franc et vibrant, prononcer dix sans liaison sonore devant départements.",
+        "vitesse": 1.08,
         "prises": 3,
     },
     {
@@ -481,9 +447,9 @@ VOIX = [
     {
         "id": "v18",
         "role": "narrateur",
-        "voix": "drama3-frederic",
-        "texte": "OPSYS-AI.",
-        "direction": "Signature finale franche, grave, énergique et nette (isolée pour remplacement rapide).",
+        "voix": "eleven-frederic",
+        "texte": "Opsys I.A.",
+        "direction": "[authoritative, warm, proud Québécois trailer signature, crisp French pronunciation]",
         "vitesse": 1.00,
         "prises": 3,
     },
@@ -583,20 +549,20 @@ PLANS = [
         "sequence": "S2",
         "recette": "h3-max",
         "images": 124,
-        "graine": 4104,
+        "graine": 5104,
         "format": "16:9",
         "refs": ["citadelle_opsys"],
         "premiere": "k04",
         "parole": None,
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: inside @citadelle_opsys, all ten circular department floors ignite with synchronized activity as the signal rises through the central column.\n\n"
+            "A single continuous live-action shot inside a monumental glass-and-steel ten-story corporate atrium at night in @citadelle_opsys as all ten circular mezzanine rings light up.\n\n"
             "detailed_description:\n"
-            "Cinematic frame from a 2026 sci-fi blockbuster, shot on a large-format digital cinema camera with anamorphic lenses, dark ink atmosphere, volumetric ion-blue and signal-orange light beams. "
-            "The monumental ten-story cylindrical atrium of @citadelle_opsys.\n"
-            "[Shot 1] Wide crane shot rising along the central energy core of @citadelle_opsys. As the signal-orange pulse climbs the column, ten circular glass floors light up one after another in rapid succession; luminous specialist silhouettes and holographic architectural models spin into motion across every level. Sweeping upward crane movement. No text, no logos, no letters anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 35 mm anamorphic lens, natural practical light, real architectural location, fine film grain, rich optical contrast, shallow depth of field. "
+            "Inside @citadelle_opsys, a real monumental ten-story cylindrical atrium built of brushed dark steel, smoked glass balustrades, and concrete columns.\n"
+            "[Shot 1] Wide crane shot rising smoothly up the central atrium shaft of @citadelle_opsys. As a warm signal-orange optical fiber beam climbs the central glass column, ten circular mezzanine floors illuminate in rapid succession with cool cyan and warm tungsten practical office lights, casting real reflections on the glass railings and polished stone floor while real human specialists move across the walkways in silhouette. Sweeping upward camera crane movement. No text, no numbers, no logos, no letters anywhere.\n\n"
             "overall_soundscape:\n"
-            "Ten rapid harmonic power-up chimes, orchestral synth swell, futuristic atrium ambience.\n\n"
+            "Ten rapid harmonic power-up chimes, deep architectural atrium resonance, subtle electrical hum.\n\n"
             "non_diegetic_music:\n"
             "N/A"
         ),
@@ -610,25 +576,25 @@ PLANS = [
         "sequence": "S2",
         "recette": "h3-max",
         "images": 124,
-        "graine": 4105,
+        "graine": 5105,
         "format": "16:9",
         "refs": ["citadelle_opsys", "maison_morin"],
         "premiere": "k05",
         "parole": None,
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: on the estimation floor of @citadelle_opsys, a glowing 3D wireframe replica of @maison_morin is analysed by thousands of golden Monte Carlo particles.\n\n"
+            "A single continuous live-action shot in a dark glass boardroom of @citadelle_opsys where an optical light projection of @maison_morin is scanned by golden light points.\n\n"
             "detailed_description:\n"
-            "Cinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, dark obsidian room lit by glowing cyan and signal-orange holograms, shallow depth of field. "
-            "Inside the estimation department of @citadelle_opsys, a translucent three-dimensional wireframe model of @maison_morin hovers above an obsidian table.\n"
-            "[Shot 1] Medium orbital shot around the floating 3D replica of @maison_morin. Thousands of golden and ion-blue light particles cascade over the roof eaves, gutters, and siding panels like a precision Monte Carlo simulation, then snap into eleven glowing verification rings that lock into a crisp golden blueprint sheet. Orbiting camera push-in. No text, no numbers, no logos anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 50 mm anamorphic prime lens, real location, natural practical light, optical lens flare, fine film grain, shallow depth of field. "
+            "Inside a real dark slate-and-glass architectural engineering room of @citadelle_opsys, a physical polished black granite table reflects a crisp optical laser projection of @maison_morin.\n"
+            "[Shot 1] Medium orbital dolly shot around the granite table. Thousands of fine golden and cyan optical laser pinpoints cascade over the roof eaves and aluminum siding of the projected @maison_morin model, casting real interactive warm light reflections onto the polished stone table and glass walls behind it, then converging into eleven clean glowing circular rings of light with no writing. Smooth orbiting camera push-in. Plain surfaces with no text, no numbers, no logos, no letters anywhere.\n\n"
             "overall_soundscape:\n"
             "Rapid crystalline calculation ticks, eleven harmonic locks, golden chime.\n\n"
             "non_diegetic_music:\n"
             "N/A"
         ),
-        "camera": "Travelling circulaire rapide autour de la maquette holographique 3D de la maison Morin",
-        "effets": "Simulation Monte Carlo en nuage de particules d'or et verrouillage des 11 anneaux de contrôle du devis brouillon",
+        "camera": "Travelling circulaire rapide autour de la maquette optique de la maison Morin sur table de granit",
+        "effets": "Simulation Monte Carlo en nuage de points laser d'or avec reflets physiques sur le granit et 11 anneaux de contrôle",
         "son": "Crépitement de calcul haute précision et verrouillage cristallin",
         "statut": "RÉEL",
     },
@@ -637,18 +603,18 @@ PLANS = [
         "sequence": "S2",
         "recette": "h3-max",
         "images": 158,
-        "graine": 4106,
+        "graine": 5106,
         "format": "16:9",
         "refs": ["benoit", "shop_bureau"],
         "premiere": "k06",
         "parole": "v05",
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: in @shop_bureau, @benoit speaks to <Audio 1> and presses a floating golden approval seal in mid-air.\n\n"
+            "A single continuous live-action shot in @shop_bureau: @benoit speaks to camera matching <Audio 1> and touches a clean glowing ring of golden light in mid-air.\n\n"
             "detailed_description:\n"
-            "Cinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, warm tungsten desk lamp and cool ion-blue holographic rim light, natural skin texture, shallow depth of field. "
-            "Inside the mezzanine office of @shop_bureau, @benoit in his plain dark navy sweater stands behind his oak desk.\n"
-            "[Shot 1] Medium close-up on @benoit. He looks into the camera with calm authority, speaks matching <Audio 1>, and taps a glowing translucent golden seal hovering in mid-air before him; the seal flashes bright signal-orange and shoots a beam of light back into the server rack behind him. Slow confident push-in. Plain clothing with no logo, no text, no letters anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 50 mm anamorphic lens, natural practical tungsten desk lamp and cool cyan rim light, real renovation office location, authentic weathered skin pores and beard texture, shallow depth of field. "
+            "Inside the glass-walled mezzanine office of @shop_bureau, @benoit in his plain dark navy merino sweater stands behind a real solid oak desk.\n"
+            "[Shot 1] Medium close-up on @benoit. He looks directly into the lens with calm authority and speaks matching <Audio 1> word for word; at the end of his sentence, he reaches his hand forward and taps a pure translucent golden ring of light floating in the air in front of the desk, which casts real warm orange interactive light across his fingers and face and sends a clean streak of light into the server cabinet behind him. Slow dolly push-in. Plain clothing and pure light ring with no text, no symbols, no letters, no logos anywhere.\n\n"
             "dialogue:\n"
             "@benoit speaks in Québécois French, matching <Audio 1> word for word.\n\n"
             "overall_soundscape:\n"
@@ -657,7 +623,7 @@ PLANS = [
             "N/A"
         ),
         "camera": "Plan rapproché poitrine sur Benoît, lent travelling avant affirmant son autorité de décideur",
-        "effets": "Sceau holographique d'approbation humaine N3/N4 qui s'embrase en orange signal au toucher de Benoît",
+        "effets": "Anneau optique pur d'approbation humaine N3/N4 éclairant physiquement la main et le visage de Benoît",
         "son": "Impulsion grave de validation et résonance cristalline",
         "statut": "RÉEL",
     },
@@ -750,25 +716,25 @@ PLANS = [
         "sequence": "S3",
         "recette": "h3-fast",
         "images": 124,
-        "graine": 4110,
+        "graine": 5110,
         "format": "16:9",
         "refs": [],
         "premiere": "k10",
         "parole": None,
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: inside the renovation warehouse, cyan and signal-orange light beams scan racks of aluminum coils and highlight reserved bundles.\n\n"
+            "A single continuous live-action shot inside a real industrial aluminum warehouse where optical laser beams scan steel storage racks.\n\n"
             "detailed_description:\n"
-            "Cinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, dramatic industrial lighting with volumetric beams. "
-            "Inside a high-bay renovation warehouse filled with neat racks of matte charcoal aluminum siding coils and gutter boxes.\n"
-            "[Shot 1] The shot begins from <Picture 1>. Sweeping planes of ion-blue laser light scan across the storage racks from left to right; three pallets of aluminum coils light up with a warm signal-orange containment aura as reservation beacons lock onto them. Smooth sideways dolly tracking shot. No text, no logos, no labels anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 35 mm anamorphic lens, natural practical high-bay sodium and daylight lighting, real industrial warehouse location, fine film grain, shallow depth of field. "
+            "Inside a real Québécois exterior-renovation warehouse with heavy steel shelving holding rolls of matte charcoal aluminum coil stock and stacked gutter crates.\n"
+            "[Shot 1] The shot begins from <Picture 1>. A crisp plane of cyan optical laser light sweeps physically across the metal racks, casting real interactive cyan and warm amber reflections on the brushed aluminum coils and concrete floor as three pallets are highlighted by a warm golden light rim. Smooth lateral dolly tracking shot. Plain industrial packaging with no text, no logos, no labels, no numbers anywhere.\n\n"
             "overall_soundscape:\n"
             "Laser scan sweep, three deep harmonic reservation locks, warehouse echo.\n\n"
             "non_diegetic_music:\n"
             "N/A"
         ),
         "camera": "Travelling latéral fluide le long des travées d'entrepôt de matériaux",
-        "effets": "Scan laser bleu ion et halo de réservation orange signal sur les bobines d'aluminium du chantier Morin (M6 Matériel)",
+        "effets": "Scan optique bleu ion avec reflets physiques sur les bobines d'aluminium du chantier Morin (M6 Matériel)",
         "son": "Balayage optique grave et triple verrouillage magnétique",
         "statut": "RÉEL",
     },
@@ -778,27 +744,27 @@ PLANS = [
         "sequence": "S4",
         "recette": "h3-max",
         "images": 209,
-        "graine": 4111,
+        "graine": 5111,
         "format": "16:9",
         "refs": ["claire", "citadelle_opsys"],
         "premiere": "k11",
         "parole": "v07",
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: inside @citadelle_opsys, the virtual executive assistant @claire speaks to <Audio 1> while rearranging floating calendar spheres.\n\n"
+            "A single continuous live-action shot in @citadelle_opsys: @claire speaks to camera matching <Audio 1> while sliding a pure glowing sphere of amber light.\n\n"
             "detailed_description:\n"
-            "Cinematic frame from a 2026 sci-fi feature film, shot on a large-format digital cinema camera, shallow depth of field, dark ink background with glowing ion-blue and warm amber accents. "
-            "On the reception command floor of @citadelle_opsys, @claire in her midnight-ink blazer with glowing cyan seam lines stands poised amidst floating translucent time spheres.\n"
-            "[Shot 1] Medium close-up on @claire. She looks warmly into the lens and speaks with crisp professional grace matching <Audio 1>; with a light flick of her fingers, a glowing amber sphere glides smoothly along a luminous timeline arc to a new slot. Gentle orbital push-in. Plain clothing with no logo, no text, no numbers anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 50 mm anamorphic lens, real glass-walled executive office location at dusk, natural skin pores and realistic hair texture, warm practical key light and soft cyan optical rim light, shallow depth of field. "
+            "Inside @citadelle_opsys, @claire in a plain dark tailored blazer with no lapel pin and no logo stands before a dark glass wall.\n"
+            "[Shot 1] Medium close-up on @claire. She looks warmly into the camera lens and speaks with natural professional poise matching <Audio 1> word for word; with a subtle gesture of her hand, a pure unlabelled sphere of warm amber light glides along a clean horizontal filament of cyan light, casting real warm interactive light on her cheek and fingers. Gentle dolly push-in. Plain clothing and pure light spheres with no text, no numbers, no clock digits, no letters, no logos anywhere.\n\n"
             "dialogue:\n"
             "@claire speaks in Québécois French, matching <Audio 1> word for word.\n\n"
             "overall_soundscape:\n"
-            "Soft crystalline chime as the time sphere slides, subtle futuristic room tone.\n\n"
+            "Soft crystalline chime as the light sphere slides, quiet executive room tone.\n\n"
             "non_diegetic_music:\n"
             "N/A"
         ),
-        "camera": "Plan rapproché sur l'avatar Claire dans l'atrium M1, léger mouvement circulaire élégant",
-        "effets": "Sphères temporelles holographiques qui glissent d'un créneau à l'autre d'un geste de la main de Claire",
+        "camera": "Plan rapproché sur Claire dans le bureau vitré M1, léger travelling avant",
+        "effets": "Sphère lumineuse ambrée pure sans chiffre qui glisse le long d'un fil optique en éclairant le visage de Claire",
         "son": "Glissement cristallin et ambiance feutrée du département M1",
         "statut": "VISION",
     },
@@ -866,27 +832,27 @@ PLANS = [
         "sequence": "S5",
         "recette": "h3-max",
         "images": 209,
-        "graine": 4114,
+        "graine": 5114,
         "format": "16:9",
         "refs": ["claire", "citadelle_opsys"],
         "premiere": "k14",
         "parole": "v11",
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: @claire speaks to <Audio 1> as a luminous 3D profit projection wave rises dramatically beside her.\n\n"
+            "A single continuous live-action shot in @citadelle_opsys: @claire speaks to camera matching <Audio 1> beside a rising ribbon of warm golden optical light.\n\n"
             "detailed_description:\n"
-            "Cinematic frame from a 2026 sci-fi feature film, shot on a large-format digital cinema camera with anamorphic lenses, rich dark ink contrast, glowing ion-blue and signal-orange light. "
-            "Inside the finance floor of @citadelle_opsys, @claire in her midnight-ink blazer stands beside a glowing three-dimensional ribbon of golden light.\n"
-            "[Shot 1] Medium close-up on @claire. She speaks with executive clarity matching <Audio 1> and raises her hand; beside her, a luminous three-dimensional wave of cyan and signal-orange particles surges upward into a soaring golden peak that illuminates her face. Smooth push-in camera movement. Plain clothing with no logo, no text, no numbers anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 50 mm anamorphic lens, real modern glass boardroom location at night, natural skin texture with realistic pores, warm practical tungsten key light and interactive golden optical glow, shallow depth of field. "
+            "Inside the finance boardroom of @citadelle_opsys, @claire in a plain dark tailored blazer with a completely bare lapel and no pin stands beside a glass conference table.\n"
+            "[Shot 1] Medium close-up on @claire. She speaks with warm executive clarity matching <Audio 1> word for word as a clean continuous ribbon of golden and amber optical light rises smoothly in the air beside her, casting real warm interactive light reflections across her cheek, eyes, and blazer fabric. Smooth dolly push-in. Plain clothing with no lapel pin, no brooch, no logo, no text, no numbers anywhere.\n\n"
             "dialogue:\n"
             "@claire speaks in Québécois French, matching <Audio 1> word for word.\n\n"
             "overall_soundscape:\n"
-            "Rising crystalline synth shimmer as the profit wave climbs, resonant confirmation chime.\n\n"
+            "Rising crystalline harmonic shimmer as the light ribbon climbs, resonant confirmation chime.\n\n"
             "non_diegetic_music:\n"
             "N/A"
         ),
-        "camera": "Plan rapproché sur l'avatar comptable Claire, travelling avant accompagné de la montée d'une vague lumineuse 3D",
-        "effets": "Nappe lumineuse tridimensionnelle bleu ion et or qui s'élève en crête ascendante (+7 % affiché par l'incrustation `courbe`)",
+        "camera": "Plan rapproché sur Claire (M5 Finance), travelling avant accompagné d'un ruban optique doré",
+        "effets": "Ruban optique doré éclairant physiquement le visage de Claire (+7 % affiché par l'incrustation `courbe`)",
         "son": "Montée cristalline harmonique suivant la courbe de rentabilité",
         "statut": "EN PRÉPARATION",
     },
@@ -955,27 +921,27 @@ PLANS = [
         "sequence": "S7",
         "recette": "h3-max",
         "images": 141,
-        "graine": 4117,
+        "graine": 5117,
         "format": "16:9",
         "refs": ["benoit", "marc", "shop_bureau"],
         "premiere": "k17",
         "parole": "v14",
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: inside @shop_bureau, @benoit hands a crisp pay cheque envelope with a golden light seal to @marc while speaking to <Audio 1>.\n\n"
+            "A single continuous live-action shot in @shop_bureau: @benoit speaks to camera matching <Audio 1> while handing a normal folded paper pay stub to @marc.\n\n"
             "detailed_description:\n"
-            "Cinematic frame from a 2026 feature film, shot on a large-format digital cinema camera, warm afternoon sunlight streaming through the workshop office window, rich natural skin tones, shallow depth of field. "
-            "Inside @shop_bureau, @benoit in his plain navy sweater stands with @marc in his olive-grey work jacket.\n"
-            "[Shot 1] Medium close-up framing @benoit and @marc. A golden filament of light from the server rack traces across a crisp cream pay envelope in @benoit's hand; @benoit hands the envelope to the smiling @marc, claps him warmly on the shoulder, and looks toward the lens speaking matching <Audio 1>. Gentle push-in. Plain clothing with no logo, no text, no letters anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 50 mm anamorphic lens, natural practical afternoon sunlight through the workshop office window, real location, authentic skin pores and fabric texture, shallow depth of field. "
+            "Inside @shop_bureau, @benoit in his plain dark navy sweater stands in the foreground while @marc stands in three-quarter back profile beside him with his mouth closed in a quiet nod.\n"
+            "[Shot 1] Medium close-up focused on @benoit. @benoit speaks warmly directly to the camera matching <Audio 1> word for word while handing a standard small folded cream paper pay stub to @marc, who receives it silently with a grateful nod and a pat on the shoulder as a subtle warm golden optical reflection glints on the desk glass. Gentle dolly push-in on @benoit. Plain clothing and plain paper envelope with no text, no writing, no logos, no letters anywhere.\n\n"
             "dialogue:\n"
             "@benoit speaks in Québécois French, matching <Audio 1> word for word.\n\n"
             "overall_soundscape:\n"
-            "Crisp paper envelope rustle, warm pat on the shoulder, harmonic golden chime.\n\n"
+            "Crisp paper rustle, warm pat on the shoulder, quiet workshop room tone.\n\n"
             "non_diegetic_music:\n"
             "N/A"
         ),
-        "camera": "Plan rapproché chaleureux réunissant Benoît et Marc lors de la remise du chèque de paye",
-        "effets": "Fil d'or holographique reliant le serveur à l'enveloppe de paye remise en main propre",
+        "camera": "Plan rapproché chaleureux centré sur Benoît qui parle en remettant le talon de paye à Marc (vu de trois-quarts dos)",
+        "effets": "Reflet optique doré subtil reliant le serveur au talon de paye remis en main propre",
         "son": "Froissement net du papier, tape amicale sur l'épaule et accord lumineux",
         "statut": "VISION",
     },
@@ -1039,135 +1005,26 @@ PLANS = [
         "sequence": "S8",
         "recette": "h3-max",
         "images": 124,
-        "graine": 4120,
+        "graine": 5120,
         "format": "16:9",
         "refs": ["benoit", "etienne", "marc", "shop_bureau"],
         "premiere": "k20",
         "parole": None,
         "prompt": (
             "summary:\n"
-            "A single continuous cinematic shot: @benoit, @etienne, and @marc stand proudly together at the open bay door of @shop_bureau at blue hour while the server glows behind them.\n\n"
+            "A single continuous live-action shot at blue hour: @benoit, @etienne, and @marc stand shoulder-to-shoulder at the open bay door of @shop_bureau.\n\n"
             "detailed_description:\n"
-            "Cinematic hero frame from a 2026 feature film, shot on a large-format digital cinema camera with anamorphic lenses, deep blue-hour twilight sky outside, warm tungsten workshop lights and a single vertical strip of ion-blue and signal-orange light on the server rack behind them. "
-            "At the open bay door of @shop_bureau, @benoit, @etienne, and @marc stand shoulder to shoulder in their plain work clothes.\n"
-            "[Shot 1] Wide heroic low-angle shot of @benoit in the center flanked by @etienne and @marc. They look out with calm pride and confidence as the warm lights of @shop_bureau frame their silhouettes and the server rack pulses softly in the background, then the scene settles into deep ink shadow for the final title card. Slow majestic dolly pull-back. Plain clothing with no logo, no text, no letters anywhere.\n\n"
+            "Live-action feature film footage shot on ARRI Alexa 35 with a 50 mm anamorphic prime lens, real renovation workshop location at twilight, natural practical tungsten overhead lights and deep blue-hour evening sky, authentic weathered human skin texture and pores, shallow depth of field. "
+            "At the open bay door of @shop_bureau, only three men—@benoit in the center flanked by @etienne and @marc—stand close together in their plain work clothes.\n"
+            "[Shot 1] Medium hero shot framing @benoit, @etienne, and @marc from chest up. They look forward with calm pride and genuine human warmth as warm workshop tungsten light models their faces and a stationary dark glass server cabinet glows softly with a single steady cyan and amber reflection in the background behind them, then the exposure gently dims into dark shadow for the end card. Slow steady dolly pull-back. Plain clothing with no text, no logos, no letters anywhere.\n\n"
             "overall_soundscape:\n"
-            "Deep resonant final bass boom, peaceful evening breeze, subtle server pulse.\n\n"
+            "Deep resonant final bass boom, peaceful evening air, subtle server hum.\n\n"
             "non_diegetic_music:\n"
             "N/A"
         ),
-        "camera": "Plan large héroïque en contre-plongée sur Benoît, Étienne et Marc devant la grande porte ouverte à l'heure bleue, lent recul",
-        "effets": "Halo bleu ion et orange signal du serveur en arrière-plan veillant sur l'équipe humaine, fondu progressif vers l'encre du carton",
+        "camera": "Plan moyen héroïque sur Benoît, Étienne et Marc devant la grande porte de l'atelier à l'heure bleue, lent recul",
+        "effets": "Reflet fixe bleu ion et ambre du serveur en arrière-plan veillant sur les trois humains, fondu vers l'encre du carton",
         "son": "Impact grave final et souffle apaisé du soir",
-        "statut": "RÉEL",
-    },
-    # --- PLANS NATIFS 9:16 POUR LA VERSION VERTICALE (6 unités max) ---
-    {
-        "id": "pv01",
-        "sequence": "V1",
-        "recette": "h3-max",
-        "images": 124,
-        "graine": 4201,
-        "format": "9:16",
-        "refs": ["etienne", "maison_morin"],
-        "premiere": "k21",
-        "parole": None,
-        "prompt": (
-            "summary:\n"
-            "A single continuous vertical 9:16 cinematic shot: @etienne aims his smartphone at @maison_morin and launches a blazing signal-orange light spear straight up into the sky.\n\n"
-            "detailed_description:\n"
-            "Vertical 9:16 cinematic frame from a 2026 feature film, crisp morning sunlight, rich contrast, shallow depth of field. "
-            "Outside @maison_morin, @etienne in his plain slate-blue jacket raises a matte black phone toward the high roof gable.\n"
-            "[Shot 1] Vertical medium shot tilting rapidly upward. @etienne taps his phone; a cyan wireframe scans @maison_morin and a vertical spear of signal-orange light rockets straight up into the blue sky. Fast vertical tilt up. Plain clothing with no logo, no text, no letters anywhere.\n\n"
-            "overall_soundscape:\n"
-            "Camera shutter chime, supersonic vertical launch whoosh.\n\n"
-            "non_diegetic_music:\n"
-            "N/A"
-        ),
-        "camera": "Cadrage 9:16 vertical, contre-plongée sur Étienne et panoramique vertical fulgurant suivant le rayon vers le ciel",
-        "effets": "Scan filaire vertical de la façade et lance de lumière orange signal vers la stratosphère",
-        "son": "Déclencheur optique et propulsion verticale",
-        "statut": "VISION",
-    },
-    {
-        "id": "pv02",
-        "sequence": "V1",
-        "recette": "h3-fast",
-        "images": 124,
-        "graine": 4202,
-        "format": "9:16",
-        "refs": [],
-        "premiere": "k22",
-        "parole": None,
-        "prompt": (
-            "summary:\n"
-            "A single continuous vertical 9:16 cinematic shot: the signal-orange light bolt plunges from a 5G tower down vertical utility cables into a black server rack.\n\n"
-            "detailed_description:\n"
-            "Vertical 9:16 cinematic frame from a 2026 sci-fi commercial, dramatic vertical composition, high speed motion blur. "
-            "A tall 5G tower and overhead fiber cables plunging down into a sleek black local server rack.\n"
-            "[Shot 1] The shot begins from <Picture 1>. A blazing bolt of signal-orange and ion-blue light drops from the top of the 5G antenna, races down the vertical fiber conduit, and plunges straight through the smoked glass of the server rack. Fast vertical dive camera motion. No text, no logos, no letters anywhere.\n\n"
-            "overall_soundscape:\n"
-            "Electromagnetic dive whoosh, deep server ignition boom.\n\n"
-            "non_diegetic_music:\n"
-            "N/A"
-        ),
-        "camera": "Plongée verticale 9:16 suivant l'éclair du sommet de la tour 5G jusqu'au cœur du serveur",
-        "effets": "Éclair vertical orange signal et bleu ion traversant les infrastructures jusqu'au serveur",
-        "son": "Plongée électromagnétique et impact sub-basse",
-        "statut": "RÉEL",
-    },
-    {
-        "id": "pv03",
-        "sequence": "V1",
-        "recette": "h3-max",
-        "images": 124,
-        "graine": 4203,
-        "format": "9:16",
-        "refs": ["citadelle_opsys", "maison_morin"],
-        "premiere": "k23",
-        "parole": None,
-        "prompt": (
-            "summary:\n"
-            "A single continuous vertical 9:16 cinematic shot: inside the ten-story vertical atrium of @citadelle_opsys, a 3D hologram of @maison_morin is calculated in a shower of golden particles.\n\n"
-            "detailed_description:\n"
-            "Vertical 9:16 cinematic frame from a 2026 sci-fi blockbuster, monumental vertical scale inside @citadelle_opsys, glowing ion-blue and signal-orange rings. "
-            "All ten circular department levels stacked vertically above a floating 3D wireframe of @maison_morin.\n"
-            "[Shot 1] Low-angle vertical crane shot looking straight up the ten glowing rings of @citadelle_opsys as cascading golden Monte Carlo particles crystallize around the 3D model of @maison_morin and lock into a glowing blueprint. Rising vertical camera movement. No text, no logos, no numbers anywhere.\n\n"
-            "overall_soundscape:\n"
-            "Ten harmonic chimes, rapid crystalline calculation ticks, power swell.\n\n"
-            "non_diegetic_music:\n"
-            "N/A"
-        ),
-        "camera": "Contre-plongée vertigineuse 9:16 au centre du puits cylindrique des 10 étages de la Citadelle OPSYS",
-        "effets": "Perspective verticale des 10 anneaux départementaux et cristallisation Monte Carlo du devis 3D",
-        "son": "Cascade harmonique et verrouillage cristallin",
-        "statut": "RÉEL",
-    },
-    {
-        "id": "pv04",
-        "sequence": "V1",
-        "recette": "h3-max",
-        "images": 124,
-        "graine": 4204,
-        "format": "9:16",
-        "refs": ["benoit", "etienne", "maison_morin"],
-        "premiere": "k24",
-        "parole": None,
-        "prompt": (
-            "summary:\n"
-            "A single continuous vertical 9:16 cinematic shot: @benoit taps a glowing golden approval seal, and the completed quote materializes in @etienne's hand outside @maison_morin.\n\n"
-            "detailed_description:\n"
-            "Vertical 9:16 cinematic frame from a 2026 feature film, dynamic vertical split-to-unified transition, rich contrast. "
-            "@benoit in his plain navy sweater approves the glowing seal, sending the light beam back to @etienne outside @maison_morin.\n"
-            "[Shot 1] Vertical shot: @benoit taps the floating golden seal in the upper frame, launching a signal-orange bolt downward that lands directly in @etienne's smartphone in front of @maison_morin as a luminous architectural sheet unfolds above his hand and the frame settles into dark ink for the end card. Fast vertical whip-pan down. Plain clothing with no logo, no text, no letters anywhere.\n\n"
-            "overall_soundscape:\n"
-            "Resonant approval pulse, lightning return zip, triumphant final boom.\n\n"
-            "non_diegetic_music:\n"
-            "N/A"
-        ),
-        "camera": "Panoramique vertical éclair 9:16 reliant le geste d'approbation de Benoît au retour du devis dans la main d'Étienne",
-        "effets": "Sceau d'approbation doré, retour fulgurant du signal et ouverture du devis holographique",
-        "son": "Impulsion de validation, retour éclair et impact final",
         "statut": "RÉEL",
     },
 ]
@@ -1179,79 +1036,154 @@ print(f"Plans: {len(PLANS)} total | u169={u169}/40 | u916={u916}/6 | parlants={p
 
 MUSIQUE = {
     "prompt": (
-        "Energetic cinematic electro-orchestral hybrid trailer soundtrack at 125 BPM, bright uplifting minor-to-major progression, "
-        "driving analog bass arpeggios, crisp punchy electronic drums, soaring heroic brass and staccato string ostinatos, "
-        "high-tech crystalline synth pulses, powerful, triumphant, propulsive, inspiring, never depressing, instrumental only. "
-        "Structure: 0-14s tight rhythmic pulse and rising synth arpeggio (the signal launch); 14-35s first big brass and percussion drop "
-        "(entering the ten-story virtual enterprise citadel); 35-65s propulsive driving groove with crisp rhythmic accents (field operations, "
-        "warehouse scan, executive voice assistant); 65-86s soaring melodic build with warm heroic strings and high-tech shimmer "
-        "(financial projection, 3-week schedule, time-clock to pay cheque); 86-105.6s massive full-orchestra and synth climax with thunderous "
-        "drums, resolving on a clean resonant final chord at 101s with warm tail to 105.6s."
+        "Energetic cinematic electro-orchestral hybrid trailer soundtrack at 125 BPM in D minor resolving to D major, built around a memorable 4-note brass and analog-synth motif (D-F-A-D octave leap), "
+        "crisp punchy drums, staccato string ostinatos, driving French-touch bass arpeggios, sharp dynamic contrasts with hard stops and sub-bass drops, triumphant, propulsive, never a flat pad, instrumental only. "
+        "Timed structure for 112.0s edit: 0.0-11.2s tight camera-shutter synth pulse and supersonic rising arpeggio; 11.2-12.0s dramatic hard stop silence as the signal hits the server glass; "
+        "12.0-32.2s first monumental brass and percussion drop igniting the 10-story citadel, pausing briefly at 32.2-33.0s for the human approval tap; 33.0-66.0s high-energy driving groove with syncopated accents; "
+        "66.0-66.8s clean acoustic break; 66.8-91.4s warm heroic strings and rising melodic build (+7% profit curve, 3-week schedule, and 07:02 time-clock); 91.4-92.2s breath before final ascent; "
+        "92.2-108.5s massive full-orchestra and synth climax with thunderous drums on all 10 departments blazing; 108.5-112.0s clean resonant final D-major chord and warm sub-bass tail."
     ),
     "prompts": [
         (
-            "Energetic cinematic electro-orchestral hybrid trailer soundtrack at 125 BPM, bright uplifting progression, driving analog bass "
-            "arpeggios, crisp punchy drums, soaring heroic brass and staccato strings, high-tech crystalline synth pulses, powerful, triumphant, "
-            "never depressing, instrumental only. 0-14s rising pulse; 14-35s monumental drop; 35-65s propulsive groove; 65-86s heroic build; "
-            "86-106s massive climax and clean resonant finale."
-        ),
-        (
-            "Upbeat futuristic corporate-blockbuster anthem at 125 BPM, French-touch driving synth bassline mixed with grand cinema percussion "
-            "and brass, crisp rhythmic stabs on every bar, bright energetic momentum, optimistic and powerful technology theme, instrumental only."
-        ),
-        (
-            "High-energy 15-second commercial blitz at 125 BPM: instant camera-shutter synth hook at 0s, supersonic rising arpeggio 0-6s, "
-            "massive orchestral-electronic drop at 6s, triumphant brass hit at 11s, clean resonant tail to 14s, instrumental only."
+            "Energetic cinematic electro-orchestral hybrid trailer soundtrack at 125 BPM in D minor to D major, memorable 4-note brass and analog-synth hook, "
+            "crisp punchy drums, staccato strings, sharp dynamic contrasts and hard stops, instrumental only."
         ),
     ],
     "bpm_vise": 125,
-    "duree_s": 110,
+    "duree_s": 112,
+    "carte": {
+        "long": {
+            "impacts": [0.0, 6.42, 12.0, 17.5, 23.0, 26.42, 33.0, 37.25, 42.0, 48.42, 53.17, 61.58, 66.75, 72.33, 80.75, 87.17, 92.17, 97.67, 103.42, 108.5],
+            "trous": [[11.2, 12.0], [32.2, 33.0], [66.0, 66.75], [91.4, 92.17]],
+            "montees": [[6.42, 11.2], [17.5, 26.42], [72.33, 80.75], [92.17, 103.42]],
+            "climax": 103.42,
+            "fin": 112.0,
+        },
+        "court": {
+            "impacts": [0.0, 2.67, 5.0, 7.17, 10.0, 10.92],
+            "trous": [[4.5, 5.0], [9.5, 10.0]],
+            "montees": [[0.5, 4.5], [7.17, 9.5]],
+            "climax": 10.0,
+            "fin": 13.0,
+        },
+    },
+    "candidats": [
+        {
+            "id": "m-lyria-citadelle",
+            "moteur": "lyria",
+            "cible": "long",
+            "duree_s": 112,
+            "prompt": (
+                "Cinematic electro-orchestral hybrid trailer score at 125 BPM in D minor resolving to triumphant D major, instrumental only. "
+                "Signature hook: a bold 4-note staccato French horn and analog Moog brass motif (D-F-A-D octave leap) answered by crisp 16th-note cello spiccato and punchy electronic drums. "
+                "0.0-11.2s: high-tension clockwork synth pulse and supersonic rising arpeggio following a fiber-optic signal race. "
+                "11.2-12.0s: sudden total silence hard-stop before server impact. "
+                "12.0-32.2s: massive sub-bass boom and first heroic brass drop as a ten-story architectural citadel ignites floor by floor. "
+                "32.2-33.0s: brief suspended silence for the human approval touch, then a resonant golden chord at 33.0s. "
+                "33.0-66.0s: propulsive French-touch bass groove at 125 BPM with tight snare rimshots and sparkling marimba-synth pulses for field operations. "
+                "66.0-66.8s: clean breath break. "
+                "66.8-91.4s: warm soaring strings and ascending harmonic synth arpeggios building momentum across financial projections, 3-week scheduling, and morning time-clock. "
+                "91.4-92.2s: dramatic drum-fill stop. "
+                "92.2-108.5s: monumental full-orchestra and analog synth climax with thunderous taiko percussion and blazing brass stating the 4-note theme in radiant D major at 103.4s. "
+                "108.5-112.0s: clean final orchestral hit at 108.5s with a warm resonant tail for the title card."
+            ),
+        },
+        {
+            "id": "m-music3-citadelle",
+            "moteur": "music3",
+            "cible": "long",
+            "duree_s": 112,
+            "prompt": (
+                "Global Metadata: Style: Cinematic Hybrid Electro-Orchestral Trailer Anthem | Tempo: 125 BPM | Key: D Minor to D Major | "
+                "Instruments: Analog Bass Synth, Staccato Strings, Heroic Brass Section, Punchy Electronic Drums, Crystalline Pluck Arpeggiator, Taiko Percussion.\n\n"
+                "Vocal Details: Instrumental only, no vocals, no choir, no spoken words.\n\n"
+                "Arrangement:\n"
+                "[Intro - Signal Launch 0:00-0:11] Crisp camera-shutter pluck and accelerating 16th-note analog synth arpeggio building intense forward velocity, ending on a sharp hard-stop silence at 0:11.\n"
+                "[Drop 1 - The Server Citadel 0:12-0:33] Massive sub-bass impact at 0:12 launches a bold 4-note heroic brass motif over driving staccato strings and tight kick-snare groove; brief stop at 0:32 then golden brass hit at 0:33.\n"
+                "[Groove - Field & Warehouse 0:33-1:06] Propulsive 125 BPM electro-acoustic groove with syncopated bassline, crisp percussion accents, and bright crystalline synth counter-melody, pausing cleanly at 1:06.\n"
+                "[Build - Executive Vision 1:07-1:31] Warm emotional cellos and rising golden synth waves steadily increase in pitch and intensity with snare rolls, cutting to a 0.8-second silence at 1:31.\n"
+                "[Climax & Finale 1:32-1:52] Full orchestra, soaring D-major brass fanfare, and thunderous hybrid drums unleash the main 4-note anthem at maximum power from 1:38 to 1:48.5, resolving on a single clean resonant final chord at 1:48.5 with warm decay to 1:52."
+            ),
+        },
+        {
+            "id": "m-acestep-citadelle",
+            "moteur": "acestep",
+            "cible": "long",
+            "duree_s": 112,
+            "prompt": (
+                "cinematic hybrid orchestral electronic trailer, 125 bpm, D minor to D major, instrumental only, no vocals, "
+                "memorable 4-note heroic brass and analog synth lead motif, staccato strings, punchy French-touch bassline, crisp cinematic percussion, "
+                "high dynamic range with hard stops and sub-bass drops, never a flat pad. "
+                "[0:00-0:11] tight clockwork synth pulse and rising arpeggio; [0:11-0:12] hard stop silence; "
+                "[0:12-0:33] massive bass drop and heroic brass theme with brief stop at 0:32; "
+                "[0:33-1:06] propulsive 125 bpm driving bass and staccato string groove; [1:06-1:07] clean break; "
+                "[1:07-1:31] soaring melodic string and synth build; [1:31-1:32] breath stop; "
+                "[1:32-1:48] triumphant full-orchestra and synth climax; [1:48-1:52] clean final hit and resonant tail."
+            ),
+        },
+        {
+            "id": "m-lyria-blitz-court",
+            "moteur": "lyria",
+            "cible": "court",
+            "duree_s": 14,
+            "prompt": (
+                "High-impact 13-second cinematic electro-orchestral commercial blitz at 125 BPM in D major, instrumental only. "
+                "0.0-4.5s: instant camera-shutter synth hook and supersonic rising analog arpeggio with tight ticking percussion. "
+                "4.5-5.0s: dramatic half-second hard-stop silence as the signal hits the server glass. "
+                "5.0-9.5s: massive sub-bass boom and driving 4-note heroic brass and staccato string groove. "
+                "9.5-10.0s: quick breath stop, then at 10.0s a triumphant full-orchestra and synth climax hit resolving cleanly at 10.9s with a warm resonant tail to 13.0s."
+            ),
+        },
+    ],
     "coups": [
         {"t_s": 0.0, "evenement": "Accroche : Étienne lève son téléphone devant la maison de M. Morin"},
-        {"t_s": 3.2, "evenement": "Éclair orange signal : la photo quitte le téléphone vers le ciel"},
-        {"t_s": 6.4, "evenement": "Relais tour 5G et course supersonique sur la fibre des poteaux"},
-        {"t_s": 10.4, "evenement": "Plongée à travers la vitre du serveur local de la PME"},
-        {"t_s": 15.2, "evenement": "Premier grand drop musical : allumage des 10 étages de la Citadelle"},
-        {"t_s": 20.0, "evenement": "M3 Estimation : simulation Monte Carlo et 11 critères sur la maison 3D"},
-        {"t_s": 24.8, "evenement": "Approbation humaine : Benoît touche le sceau doré (18 940 $)"},
-        {"t_s": 31.2, "evenement": "Retour du devis à Étienne et rebond du signal vers la shop"},
-        {"t_s": 36.0, "evenement": "Le signal file sur les poteaux électriques jusqu'à l'atelier"},
-        {"t_s": 40.8, "evenement": "M4 Terrain : Marc reçoit le dossier de chantier Morin devant son camion"},
-        {"t_s": 47.2, "evenement": "M6 Matériel : scan laser bleu ion et réservation des bobines d'aluminium"},
-        {"t_s": 52.0, "evenement": "M1 Réception : l'adjointe virtuelle Claire appelle Étienne (14 h / 16 h)"},
-        {"t_s": 60.4, "evenement": "Étienne remercie Claire dans son camion et repart vers M. Thibault"},
-        {"t_s": 65.2, "evenement": "M5 Finance : Benoît interroge l'avatar comptable Claire au bureau"},
-        {"t_s": 70.8, "evenement": "Projection comptable : courbe ascendante et productivité +7 %"},
-        {"t_s": 79.2, "evenement": "M4 Opérations : l'avatar Sonia déploie la cédule des 3 semaines"},
-        {"t_s": 85.6, "evenement": "Pointage 07:02 de Marc à l'entrée de la shop"},
-        {"t_s": 90.4, "evenement": "Remise du chèque de paye par Benoît à Marc"},
-        {"t_s": 96.0, "evenement": "M7-M10 : façade terminée, mémoire chaînée et embrasement des 10 départements"},
-        {"t_s": 100.8, "evenement": "Plan héroïque final et ouverture du carton remplaçable OPSYS-AI"},
+        {"t_s": 6.42, "evenement": "Relais tour 5G et course supersonique sur la fibre des poteaux"},
+        {"t_s": 12.0, "evenement": "Premier grand drop après silence (11.2-12.0s) : plongée dans le serveur local"},
+        {"t_s": 17.5, "evenement": "Allumage des 10 étages de la Citadelle dans le serveur"},
+        {"t_s": 23.0, "evenement": "M3 Estimation : simulation Monte Carlo et 11 critères sur la maison"},
+        {"t_s": 33.0, "evenement": "Approbation humaine après micro-silence : Benoît valide (18 940 $)"},
+        {"t_s": 37.25, "evenement": "Le signal file sur les poteaux électriques jusqu'à l'atelier"},
+        {"t_s": 42.0, "evenement": "M4 Terrain : Marc reçoit le dossier de chantier Morin devant son camion"},
+        {"t_s": 48.42, "evenement": "M6 Matériel : scan optique bleu ion des bobines d'aluminium en entrepôt"},
+        {"t_s": 53.17, "evenement": "M1 Réception : l'adjointe Claire confirme le RDV de 14 h et déplace 16 h"},
+        {"t_s": 61.58, "evenement": "Étienne remercie Claire dans son camion et repart vers M. Thibault"},
+        {"t_s": 66.75, "evenement": "Reprise après respiration : M5 Finance, Benoît interroge sa comptabilité"},
+        {"t_s": 72.33, "evenement": "Projection comptable : montée mélodique sur la productivité +7 %"},
+        {"t_s": 80.75, "evenement": "M4 Opérations : Sonia déploie la cédule des 3 prochaines semaines"},
+        {"t_s": 87.17, "evenement": "Pointage 07:02 de Marc à l'entrée de la shop"},
+        {"t_s": 92.17, "evenement": "Remise du talon de paye après respiration et lancement du final"},
+        {"t_s": 97.67, "evenement": "M7-M10 : façade terminée et mémoire chaînée"},
+        {"t_s": 103.42, "evenement": "Climax : embrasement des 10 départements et retour au serveur PME"},
+        {"t_s": 108.5, "evenement": "Accord final résolu et ouverture du carton remplaçable OPSYS-AI"},
     ],
 }
 
-# --- CONSTRUCTION DE L'EDITPLAN LONG (105.6 s = 2534 images à 24 i/s) ---
+# --- CONSTRUCTION DE L'EDITPLAN LONG (106.5 s = 2556 images à 24 i/s) ---
 VIDEO_LONG_SPEC = [
     ("c01", "p01", 0, 154, "S1_Photo", "Étienne photographie la façade de M. Morin et lance le signal"),
-    ("c02", "p02", 0, 96, "S1_Signal", "Le signal bondit de la tour 5G le long des câbles des poteaux"),
-    ("c03", "p03", 0, 115, "S1_Serveur", "Le signal plonge dans le serveur local et ouvre la Citadelle"),
-    ("c04", "p04", 0, 115, "S2_Citadelle", "Allumage séquentiel des 10 étages départementaux dans le serveur"),
-    ("c05", "p05", 0, 115, "S2_Estimation", "M3 chiffre le devis par simulation Monte Carlo et 11 critères"),
-    ("c06", "p06", 0, 154, "S2_Approbation", "Benoît vérifie et approuve humainement la soumission"),
-    ("c07", "p07", 0, 115, "S2_Retour", "La soumission revient à Étienne et repart vers la shop"),
-    ("c08", "p08", 0, 115, "S3_FibreShop", "Le signal file sur les poteaux jusqu'à la shop de travail"),
-    ("c09", "p09", 0, 154, "S3_ChantierMorin", "Marc reçoit le dossier de chantier de M. Morin devant son camion"),
-    ("c10", "p10", 0, 115, "S3_Materiel", "M6 réserve automatiquement les bobines d'aluminium en entrepôt"),
-    ("c11", "p11", 0, 202, "S4_Adjointe", "L'adjointe Claire annonce le RDV de 14 h et le déplacement de 16 h"),
-    ("c12", "p12", 0, 115, "S4_RepCamion", "Étienne remercie Claire dans son camion et file chez M. Thibault"),
-    ("c13", "p13", 0, 134, "S5_QuestionCFO", "Benoît interroge l'avatar de sa comptabilité sur la rentabilité"),
-    ("c14", "p14", 0, 202, "S5_Projection7", "L'avatar comptable Claire présente les profits anticipés (+7 %)"),
-    ("c15", "p15", 0, 154, "S6_Cedule3Sem", "L'avatar de gestion Sonia présente la cédule des 3 prochaines semaines"),
-    ("c16", "p16", 0, 115, "S7_Pointage", "Marc pointe son arrivée à 07:02 sous l'arche lumineuse de la shop"),
-    ("c17", "p17", 0, 134, "S7_Paye", "Benoît remet le chèque de paye à Marc dans le bureau"),
-    ("c18", "p18", 0, 65, "S8_Memoire", "M7 Marketing sur la maison finie et M10 Mémoire chaînée"),
-    ("c19", "p19", 0, 65, "S8_Apotheose", "Les 10 départements flambent à l'unisson et retour au serveur"),
-    ("c20", "p20", 0, 100, "S8_Carton", "Plan héroïque des trois humains et carton final OPSYS-AI"),
+    ("c02", "p02", 0, 66, "S1_Signal5G", "Le signal bondit du sommet de la tour 5G vers la fibre aérienne"),
+    ("c03", "p02", 52, 68, "S1_SignalFibre", "Accélération supersonique de la comète orange le long des poteaux"),
+    ("c04", "p03", 0, 64, "S1_Serveur", "Le signal plonge à travers la vitre fumée du serveur local de la PME"),
+    ("c05", "p03", 56, 68, "S1_Ouverture", "L'intérieur du serveur s'ouvre sur l'atrium monumental des 10 étages"),
+    ("c06", "p04", 0, 66, "S2_CitadelleBas", "Allumage séquentiel des premiers étages départementaux dans le serveur"),
+    ("c07", "p04", 54, 66, "S2_CitadelleHaut", "Mouvement de grue ascendant : les 10 départements tournent à plein régime"),
+    ("c08", "p05", 0, 82, "S2_Estimation", "M3 chiffre le devis par simulation Monte Carlo et verrouille les 11 critères"),
+    ("c09", "p06", 0, 158, "S2_Approbation", "Benoît vérifie et approuve humainement la soumission d'un geste"),
+    ("c10", "p07", 0, 102, "S2_Retour", "La soumission approuvée revient à Étienne et rebondit vers la shop"),
+    ("c11", "p08", 0, 114, "S3_FibreShop", "Le signal file sur les poteaux électriques jusqu'à l'atelier"),
+    ("c12", "p09", 0, 154, "S3_ChantierMorin", "Marc reçoit le dossier de chantier de M. Morin devant son camion"),
+    ("c13", "p10", 0, 114, "S3_Materiel", "M6 scanne et réserve automatiquement les bobines d'aluminium en entrepôt"),
+    ("c14", "p11", 0, 202, "S4_Adjointe", "L'adjointe Claire annonce le RDV de 14 h et le déplacement de 16 h"),
+    ("c15", "p12", 0, 124, "S4_RepCamion", "Étienne remercie Claire dans son camion et file chez M. Thibault"),
+    ("c16", "p13", 0, 134, "S5_QuestionCFO", "Benoît interroge sa directrice financière sur la rentabilité de l'automne"),
+    ("c17", "p14", 0, 202, "S5_Projection7", "Claire présente les profits anticipés et la productivité à +7 %"),
+    ("c18", "p15", 0, 154, "S6_Cedule3Sem", "Sonia déploie la cédule optimisée des 3 prochaines semaines"),
+    ("c19", "p16", 0, 120, "S7_Pointage", "Marc pointe son arrivée à 07:02 sous l'arche optique de la shop"),
+    ("c20", "p17", 0, 132, "S7_Paye", "Benoît remet le talon de paye à Marc dans le bureau de l'atelier"),
+    ("c21", "p18", 0, 68, "S8_Marketing", "M7 Marketing : capture optique de la façade rénovée au coucher du soleil"),
+    ("c22", "p18", 52, 70, "S8_Memoire", "M10 Mémoire : verrouillage des blocs cristallins dans le registre chaîné"),
+    ("c23", "p19", 36, 96, "S8_Apotheose", "Traversée retour de la vitre du serveur vers la réalité du bureau PME"),
+    ("c24", "p20", 0, 110, "S8_Carton", "Plan héroïque de Benoît, Étienne et Marc à l'heure bleue et carton OPSYS-AI"),
 ]
 
 # Vérification des débuts d'images sur la timeline longue
@@ -1261,7 +1193,7 @@ for cid, src, ent, dur, sec, pq in VIDEO_LONG_SPEC:
     DEBUTS_LONG[cid] = (cur, cur + dur)
     cur += dur
 TOTAL_LONG_F = cur
-print(f"Total long: {TOTAL_LONG_F} frames = {TOTAL_LONG_F/24:.2f} s")
+print(f"Total long: {TOTAL_LONG_F} frames = {TOTAL_LONG_F/24:.2f} s ({len(VIDEO_LONG_SPEC)} clips)")
 
 SOURCES_LONG = {
     p["id"]: {"kind": "video", "duree_f": p["images"]}
@@ -1273,40 +1205,39 @@ for vid in VOIX_LONG_IDS:
     SOURCES_LONG[vid] = {"kind": "audio"}
 
 VOIX_TIMELINE_LONG = [
-    # c01 (0..154) : v02 ancré sur Étienne (0..140)
-    {"src": "v02", "debut_f": 4, "entree_f": 0, "duree_f": 136, "gain_db": 0},
-    # c02 (154..250) : v01 narrateur accroche (154..248)
-    {"src": "v01", "debut_f": 156, "entree_f": 0, "duree_f": 92, "gain_db": 0},
-    # c03 (250..365) : v03 narrateur plongée serveur (252..360)
-    {"src": "v03", "debut_f": 252, "entree_f": 0, "duree_f": 108, "gain_db": 0},
-    # c04+c05 (365..595) : v04 narrateur 10 départements (370..520)
-    {"src": "v04", "debut_f": 370, "entree_f": 0, "duree_f": 150, "gain_db": 0},
-    # c06 (595..749) : v05 ancré sur Benoît (600..740)
-    {"src": "v05", "debut_f": 600, "entree_f": 0, "duree_f": 140, "gain_db": 0},
-    # c09 (979..1133) : v06 ancré sur Marc (984..1124)
-    {"src": "v06", "debut_f": 984, "entree_f": 0, "duree_f": 140, "gain_db": 0},
-    # c11 (1248..1450) : v07 ancré sur Claire (1252..1442)
-    {"src": "v07", "debut_f": 1252, "entree_f": 0, "duree_f": 190, "gain_db": 0},
-    # c12 (1450..1565) : v08 ancré sur Étienne (1454..1554)
-    {"src": "v08", "debut_f": 1454, "entree_f": 0, "duree_f": 100, "gain_db": 0},
-    # transition entre c12 et c13 / début c10 (1133..1248) : v09 narrateur (1138..1238)
-    {"src": "v09", "debut_f": 1138, "entree_f": 0, "duree_f": 100, "gain_db": 0},
-    # c13 (1565..1699) : v10 ancré sur Benoît (1570..1690)
-    {"src": "v10", "debut_f": 1570, "entree_f": 0, "duree_f": 120, "gain_db": 0},
-    # c14 (1699..1901) : v11 ancré sur Claire (1704..1894)
-    {"src": "v11", "debut_f": 1704, "entree_f": 0, "duree_f": 190, "gain_db": 0},
-    # c15 (1901..2055) : v12 ancré sur Sonia (1906..2046)
-    {"src": "v12", "debut_f": 1906, "entree_f": 0, "duree_f": 140, "gain_db": 0},
-    # c16 (2055..2170) : v13 ancré sur Marc (2060..2160)
-    {"src": "v13", "debut_f": 2060, "entree_f": 0, "duree_f": 100, "gain_db": 0},
-    # c17 (2170..2304) : v14 ancré sur Benoît (2175..2295)
-    {"src": "v14", "debut_f": 2175, "entree_f": 0, "duree_f": 120, "gain_db": 0},
-    # c18 (2304..2369) : v15 narrateur (2306..2368)
-    {"src": "v15", "debut_f": 2306, "entree_f": 0, "duree_f": 62, "gain_db": 0},
-    # c19 (2369..2434) : v16 narrateur apothéose (2372..2434)
-    {"src": "v16", "debut_f": 2372, "entree_f": 0, "duree_f": 62, "gain_db": 0},
-    # c20 (2434..2534) : v18 nom de marque isolé (2444..2474)
-    {"src": "v18", "debut_f": 2444, "entree_f": 0, "duree_f": 30, "gain_db": 0},
+    # c01 (0..154) : v02 ancré sur Étienne dès l'image 0 (fin à 124)
+    {"src": "v02", "debut_f": 0, "entree_f": 0, "duree_f": 124, "gain_db": 0},
+    # c02+c03 (154..288) : v01 narrateur accroche (prise 1 = 5.32s = 128f -> 156..284, zéro chevauchement)
+    {"src": "v01", "debut_f": 156, "entree_f": 0, "duree_f": 128, "gain_db": 0},
+    # c04+c05 (288..420) : v03 narrateur plongée serveur (prise 2 = 5.22s = 126f -> 290..416)
+    {"src": "v03", "debut_f": 290, "entree_f": 0, "duree_f": 126, "gain_db": 0},
+    # c06+c07+c08 (420..634) : v04 narrateur 10 départements (prise 1 = 7.48s = 180f -> 424..604)
+    {"src": "v04", "debut_f": 424, "entree_f": 0, "duree_f": 180, "gain_db": 0},
+    # c09 (634..792) : v05 ancré sur Benoît dès le début du plan (prise 2 = 6.38s = 154f -> 634..788)
+    {"src": "v05", "debut_f": 634, "entree_f": 0, "duree_f": 154, "gain_db": 0},
+    # c12 (1008..1162) : v06 ancré sur Marc dès le début du plan (prise 3 = 5.64s = 136f -> 1008..1144)
+    {"src": "v06", "debut_f": 1008, "entree_f": 0, "duree_f": 136, "gain_db": 0},
+    # c13 (1162..1276) : v09 narrateur transition entrepôt -> bureaux (prise 3 = 5.32s, coupé proprement à 108f -> 1166..1274)
+    {"src": "v09", "debut_f": 1166, "entree_f": 0, "duree_f": 108, "gain_db": 0},
+    # c14 (1276..1478) : v07 ancré sur Claire dès le début du plan (prise 2 = 6.12s = 148f -> 1276..1424)
+    {"src": "v07", "debut_f": 1276, "entree_f": 0, "duree_f": 148, "gain_db": 0},
+    # c15 (1478..1602) : v08 ancré sur Étienne dès le début du plan (prise 3 = 3.76s = 91f -> 1478..1569)
+    {"src": "v08", "debut_f": 1478, "entree_f": 0, "duree_f": 91, "gain_db": 0},
+    # c16 (1602..1736) : v10 ancré sur Benoît dès le début du plan (prise 2 = 3.78s = 91f -> 1602..1693)
+    {"src": "v10", "debut_f": 1602, "entree_f": 0, "duree_f": 91, "gain_db": 0},
+    # c17 (1736..1938) : v11 ancré sur Claire dès le début du plan (1736..1920)
+    {"src": "v11", "debut_f": 1736, "entree_f": 0, "duree_f": 184, "gain_db": 0},
+    # c18 (1938..2092) : v12 ancré sur Sonia dès le début du plan (1938..2070)
+    {"src": "v12", "debut_f": 1938, "entree_f": 0, "duree_f": 132, "gain_db": 0},
+    # c19 (2092..2212) : v13 ancré sur Marc dès le début du plan (prise 2 = 4.40s = 106f -> 2092..2198)
+    {"src": "v13", "debut_f": 2092, "entree_f": 0, "duree_f": 106, "gain_db": 0},
+    # c20 (2212..2344) : v14 ancré sur Benoît dès le début du plan (prise 3 = 4.74s = 114f -> 2212..2326)
+    {"src": "v14", "debut_f": 2212, "entree_f": 0, "duree_f": 114, "gain_db": 0},
+    # c21+c22 (2344..2482) : v15 narrateur M7-M10 (prise 1 = 5.52s = 133f -> 2346..2479)
+    {"src": "v15", "debut_f": 2346, "entree_f": 0, "duree_f": 133, "gain_db": 0},
+    # c23+début c24 (2482..2688) : v16 narrateur apothéose (2484..2596) puis v18 signature isolée (2604..2628)
+    {"src": "v16", "debut_f": 2484, "entree_f": 0, "duree_f": 112, "gain_db": 0},
+    {"src": "v18", "debut_f": 2604, "entree_f": 0, "duree_f": 24, "gain_db": 0},
 ]
 
 EDITPLAN_LONG = {
@@ -1345,37 +1276,37 @@ EDITPLAN_LONG = {
         "fondu_coupe_ms": 35,
     },
     "textes": [
-        {"texte": "1 PHOTO. 10 DÉPARTEMENTS.", "debut_f": 156, "duree_f": 88, "style": "titre", "position": "bas", "taille_pct": 6},
-        {"texte": "LE CODE CALCULE.\nVOUS APPROUVEZ.", "debut_f": 605, "duree_f": 120, "style": "sous-titre", "position": "bas", "taille_pct": 5},
-        {"texte": "PRODUIT EN CONSOLIDATION", "debut_f": 2372, "duree_f": 60, "style": "bas", "position": "bas", "taille_pct": 4},
+        {"texte": "1 PHOTO. 10 DÉPARTEMENTS.", "debut_f": 156, "duree_f": 124, "style": "titre", "position": "bas", "taille_pct": 6},
+        {"texte": "LE CODE CALCULE.\nVOUS APPROUVEZ.", "debut_f": 636, "duree_f": 148, "style": "sous-titre", "position": "bas", "taille_pct": 5},
+        {"texte": "PRODUIT EN CONSOLIDATION", "debut_f": 2484, "duree_f": 42, "style": "bas", "position": "bas", "taille_pct": 4},
     ],
     "generations": [],
     "metadonnees": {
         "modele": "gemini-4-argon",
-        "savoir": ["higgsfield-status-hook", "kling-kinetic-proof", "signal-ion-orange", "honest-labels"],
+        "savoir": ["higgsfield-status-hook", "kling-kinetic-proof", "signal-ion-orange", "honest-labels", "zero-voice-overlap", "live-action-arri"],
     },
 }
 
 # --- ANNEXE LONG ---
 ANNEXE_LONG = {
     "incrustations": [
-        # S1 : Photo et course du signal (0..365)
+        # S1 : Photo et course du signal (0..420)
         {"type": "surtitre", "debut_f": 6, "duree_f": 140, "position": "haut-gauche", "texte": "M2 · CRM → M3 · ESTIMATION"},
         {"type": "etiquette", "debut_f": 6, "duree_f": 140, "position": "haut-droite", "texte": "VISION"},
         {"type": "statut", "debut_f": 70, "duree_f": 80, "position": "bas-gauche", "texte": "Photo reçue. Mesures de façade en cours…"},
         {"type": "trajet", "debut_f": 90, "duree_f": 60, "position": "centre", "points": [[0.48, 0.62], [0.52, 0.35], [0.58, 0.08]], "couleur": "signal"},
         {"type": "flash", "debut_f": 154, "duree_f": 3, "position": "centre", "intensite": 0.75},
-        {"type": "trajet", "debut_f": 158, "duree_f": 88, "position": "centre", "points": [[0.50, 0.12], [0.46, 0.42], [0.78, 0.68], [0.92, 0.74]], "couleur": "ion"},
-        {"type": "statut", "debut_f": 254, "duree_f": 105, "position": "bas-gauche", "texte": "Serveur local PME atteint. Réveil des 10 départements…"},
-        # S2 : La Citadelle et l'estimation M3 (365..864)
-        {"type": "flash", "debut_f": 365, "duree_f": 3, "position": "centre", "intensite": 0.85},
-        {"type": "impact", "debut_f": 370, "duree_f": 100, "position": "centre", "texte": "DIX DÉPARTEMENTS. *UNE ENTREPRISE.*"},
-        {"type": "surtitre", "debut_f": 484, "duree_f": 260, "position": "haut-gauche", "texte": "M3 · ESTIMATION DÉTERMINISTE"},
-        {"type": "statut", "debut_f": 488, "duree_f": 102, "position": "bas-gauche", "texte": "Simulation Monte Carlo · Revue en 11 critères…"},
+        {"type": "trajet", "debut_f": 158, "duree_f": 124, "position": "centre", "points": [[0.50, 0.12], [0.46, 0.42], [0.78, 0.68], [0.92, 0.74]], "couleur": "ion"},
+        {"type": "statut", "debut_f": 292, "duree_f": 122, "position": "bas-gauche", "texte": "Serveur local PME atteint. Réveil des 10 départements…"},
+        # S2 : La Citadelle et l'estimation M3 (420..894)
+        {"type": "flash", "debut_f": 420, "duree_f": 3, "position": "centre", "intensite": 0.85},
+        {"type": "impact", "debut_f": 424, "duree_f": 120, "position": "centre", "texte": "DIX DÉPARTEMENTS. *UNE ENTREPRISE.*"},
+        {"type": "surtitre", "debut_f": 552, "duree_f": 236, "position": "haut-gauche", "texte": "M3 · ESTIMATION DÉTERMINISTE"},
+        {"type": "statut", "debut_f": 554, "duree_f": 76, "position": "bas-gauche", "texte": "Simulation Monte Carlo · Revue en 11 critères…"},
         {
             "type": "document",
-            "debut_f": 520,
-            "duree_f": 225,
+            "debut_f": 560,
+            "duree_f": 228,
             "position": "droite",
             "titre": "SOUMISSION BROUILLON #M3-408",
             "destinataire": "Client : Monsieur Morin",
@@ -1388,35 +1319,35 @@ ANNEXE_LONG = {
             "total": "18 940 $",
             "tampon": "APPROUVÉ",
         },
-        {"type": "trajet", "debut_f": 754, "duree_f": 105, "position": "centre", "points": [[0.52, 0.10], [0.48, 0.58], [0.85, 0.22]], "couleur": "signal"},
-        # S3 : M. Morin, la shop et le matériel M4 / M6 (864..1248)
-        {"type": "trajet", "debut_f": 868, "duree_f": 105, "position": "centre", "points": [[0.15, 0.25], [0.55, 0.38], [0.82, 0.55]], "couleur": "signal"},
-        {"type": "surtitre", "debut_f": 982, "duree_f": 148, "position": "haut-gauche", "texte": "M4 · OPÉRATIONS TERRAIN"},
-        {"type": "etiquette", "debut_f": 982, "duree_f": 148, "position": "haut-droite", "texte": "EN PRÉPARATION"},
-        {"type": "statut", "debut_f": 988, "duree_f": 136, "position": "bas-gauche", "texte": "Dossier chantier M. Morin transmis à la shop."},
-        {"type": "surtitre", "debut_f": 1136, "duree_f": 108, "position": "haut-gauche", "texte": "M6 · MATÉRIEL & RÉSERVATIONS"},
-        {"type": "statut", "debut_f": 1140, "duree_f": 102, "position": "bas-gauche", "texte": "Bobines aluminium et gouttières réservées depuis le devis."},
-        # S4 : L'adjointe administrative M1 (1248..1565)
-        {"type": "surtitre", "debut_f": 1252, "duree_f": 308, "position": "haut-gauche", "texte": "M1 · RÉCEPTION & ADJOINTE VOCALE"},
-        {"type": "etiquette", "debut_f": 1252, "duree_f": 308, "position": "haut-droite", "texte": "VISION"},
+        {"type": "trajet", "debut_f": 794, "duree_f": 96, "position": "centre", "points": [[0.52, 0.10], [0.48, 0.58], [0.85, 0.22]], "couleur": "signal"},
+        # S3 : M. Morin, la shop et le matériel M4 / M6 (894..1276)
+        {"type": "trajet", "debut_f": 898, "duree_f": 106, "position": "centre", "points": [[0.15, 0.25], [0.55, 0.38], [0.82, 0.55]], "couleur": "signal"},
+        {"type": "surtitre", "debut_f": 1010, "duree_f": 148, "position": "haut-gauche", "texte": "M4 · OPÉRATIONS TERRAIN"},
+        {"type": "etiquette", "debut_f": 1010, "duree_f": 148, "position": "haut-droite", "texte": "EN PRÉPARATION"},
+        {"type": "statut", "debut_f": 1014, "duree_f": 140, "position": "bas-gauche", "texte": "Dossier chantier M. Morin transmis à la shop."},
+        {"type": "surtitre", "debut_f": 1164, "duree_f": 108, "position": "haut-gauche", "texte": "M6 · MATÉRIEL & RÉSERVATIONS"},
+        {"type": "statut", "debut_f": 1168, "duree_f": 102, "position": "bas-gauche", "texte": "Bobines aluminium et gouttières réservées depuis le devis."},
+        # S4 : L'adjointe administrative M1 (1276..1602)
+        {"type": "surtitre", "debut_f": 1278, "duree_f": 320, "position": "haut-gauche", "texte": "M1 · RÉCEPTION & ADJOINTE VOCALE"},
+        {"type": "etiquette", "debut_f": 1278, "duree_f": 320, "position": "haut-droite", "texte": "VISION"},
         {
             "type": "appel",
-            "debut_f": 1254,
+            "debut_f": 1280,
             "duree_f": 192,
             "position": "gauche",
             "nom": "Claire · Adjointe M1",
             "sous_titre": "RDV M. Thibault 14 h · 16 h déplacé",
             "voix": "v07",
         },
-        {"type": "statut", "debut_f": 1454, "duree_f": 105, "position": "bas-gauche", "texte": "Agenda mis à jour : M. Thibault 14 h confirmé."},
-        # S5 : La comptabilité qui parle & projection +7 % (1565..1901)
-        {"type": "surtitre", "debut_f": 1568, "duree_f": 328, "position": "haut-gauche", "texte": "M5 · FINANCE & PRÉVISION 26 SEMAINES"},
-        {"type": "etiquette", "debut_f": 1568, "duree_f": 130, "position": "haut-droite", "texte": "VISION"},
-        {"type": "etiquette", "debut_f": 1702, "duree_f": 195, "position": "haut-droite", "texte": "EN PRÉPARATION"},
+        {"type": "statut", "debut_f": 1482, "duree_f": 114, "position": "bas-gauche", "texte": "Agenda mis à jour : M. Thibault 14 h confirmé."},
+        # S5 : La comptabilité qui parle & projection +7 % (1602..1938)
+        {"type": "surtitre", "debut_f": 1604, "duree_f": 330, "position": "haut-gauche", "texte": "M5 · FINANCE & PRÉVISION 26 SEMAINES"},
+        {"type": "etiquette", "debut_f": 1604, "duree_f": 130, "position": "haut-droite", "texte": "VISION"},
+        {"type": "etiquette", "debut_f": 1738, "duree_f": 196, "position": "haut-droite", "texte": "EN PRÉPARATION"},
         {
             "type": "courbe",
-            "debut_f": 1706,
-            "duree_f": 190,
+            "debut_f": 1740,
+            "duree_f": 192,
             "position": "droite",
             "points": [100, 108, 115, 124, 136, 149, 164],
             "etiquette": "PROFITS ANTICIPÉS · PRODUCTIVITÉ EMPLOYÉS",
@@ -1425,8 +1356,8 @@ ANNEXE_LONG = {
         },
         {
             "type": "compteur",
-            "debut_f": 1740,
-            "duree_f": 152,
+            "debut_f": 1770,
+            "duree_f": 160,
             "position": "bas-gauche",
             "de": 0,
             "a": 7,
@@ -1435,12 +1366,12 @@ ANNEXE_LONG = {
             "suffixe": " %",
             "etiquette": "PRODUCTIVITÉ DES ÉQUIPES",
         },
-        # S6 : La cédule des 3 prochaines semaines (1901..2055)
-        {"type": "surtitre", "debut_f": 1904, "duree_f": 148, "position": "haut-gauche", "texte": "M4 · CÉDULE PAR TOURNÉES"},
-        {"type": "etiquette", "debut_f": 1904, "duree_f": 148, "position": "haut-droite", "texte": "EN PRÉPARATION"},
+        # S6 : La cédule des 3 prochaines semaines (1938..2092)
+        {"type": "surtitre", "debut_f": 1940, "duree_f": 148, "position": "haut-gauche", "texte": "M4 · CÉDULE PAR TOURNÉES"},
+        {"type": "etiquette", "debut_f": 1940, "duree_f": 148, "position": "haut-droite", "texte": "EN PRÉPARATION"},
         {
             "type": "cedule",
-            "debut_f": 1906,
+            "debut_f": 1942,
             "duree_f": 145,
             "position": "droite",
             "titre": "CÉDULE DES 3 PROCHAINES SEMAINES",
@@ -1455,26 +1386,26 @@ ANNEXE_LONG = {
                 [2, 3, 4, 1, "Inspection & Finition"],
             ],
         },
-        # S7 : Le pointage et la paye (2055..2304)
-        {"type": "surtitre", "debut_f": 2058, "duree_f": 108, "position": "haut-gauche", "texte": "M4 · POINTAGE TERRAIN"},
-        {"type": "etiquette", "debut_f": 2058, "duree_f": 108, "position": "haut-droite", "texte": "EN PRÉPARATION"},
+        # S7 : Le pointage et la paye (2092..2344)
+        {"type": "surtitre", "debut_f": 2094, "duree_f": 114, "position": "haut-gauche", "texte": "M4 · POINTAGE TERRAIN"},
+        {"type": "etiquette", "debut_f": 2094, "duree_f": 114, "position": "haut-droite", "texte": "EN PRÉPARATION"},
         {
             "type": "pointage",
-            "debut_f": 2060,
-            "duree_f": 105,
+            "debut_f": 2096,
+            "duree_f": 110,
             "position": "gauche",
             "heure": "07:02",
             "nom": "Marc · Chef d'équipe",
             "etat": "ARRIVÉE",
         },
-        {"type": "surtitre", "debut_f": 2173, "duree_f": 128, "position": "haut-gauche", "texte": "M5 · DE LA POINTEUSE À LA PAYE"},
-        {"type": "etiquette", "debut_f": 2173, "duree_f": 128, "position": "haut-droite", "texte": "VISION"},
-        # S8 : Convergence M7-M10, Apothéose et Carton (2304..2534)
-        {"type": "surtitre", "debut_f": 2306, "duree_f": 60, "position": "haut-gauche", "texte": "M7 MARKETING · M8 ANALYTIQUE · M9 STRATÉGIE · M10 MÉMOIRE"},
+        {"type": "surtitre", "debut_f": 2214, "duree_f": 126, "position": "haut-gauche", "texte": "M5 · DE LA POINTEUSE À LA PAYE"},
+        {"type": "etiquette", "debut_f": 2214, "duree_f": 126, "position": "haut-droite", "texte": "VISION"},
+        # S8 : Convergence M7-M10, Apothéose et Carton (2344..2688)
+        {"type": "surtitre", "debut_f": 2346, "duree_f": 132, "position": "haut-gauche", "texte": "M7 MARKETING · M8 ANALYTIQUE · M9 STRATÉGIE · M10 MÉMOIRE"},
         {
             "type": "pile",
-            "debut_f": 2370,
-            "duree_f": 62,
+            "debut_f": 2414,
+            "duree_f": 160,
             "position": "gauche",
             "lignes": [
                 "M1 Réception · M2 CRM · M3 Estimation",
@@ -1482,38 +1413,42 @@ ANNEXE_LONG = {
                 "M7 Marketing · M8 Analytique · M9 Stratégie · *M10 Mémoire*",
             ],
         },
-        {"type": "titre", "debut_f": 2372, "duree_f": 60, "position": "haut", "zone": "haut", "texte": "Une grande entreprise *pour la vôtre.*"},
-        {"type": "flash", "debut_f": 2434, "duree_f": 3, "position": "centre", "intensite": 0.9},
-        {"type": "carton", "debut_f": 2450, "duree_f": 84, "position": "centre"},
+        {"type": "titre", "debut_f": 2484, "duree_f": 112, "position": "haut", "zone": "haut", "texte": "Une grande entreprise *pour la vôtre.*"},
+        {"type": "flash", "debut_f": 2482, "duree_f": 3, "position": "centre", "intensite": 0.9},
+        {"type": "carton", "debut_f": 2604, "duree_f": 84, "position": "centre"},
     ],
     "sfx": [
         {"type": "clic", "debut_f": 68, "db": -5},
         {"type": "montee", "debut_f": 90, "db": -6, "duree_s": 2.5},
         {"type": "fouet", "debut_f": 154, "db": -5},
-        {"type": "boom", "debut_f": 250, "db": -4},
-        {"type": "impact", "debut_f": 365, "db": -3},
-        {"type": "frappe", "debut_f": 520, "db": -6},
-        {"type": "impact", "debut_f": 690, "db": -4},
-        {"type": "fouet", "debut_f": 749, "db": -5},
-        {"type": "fouet", "debut_f": 864, "db": -5},
-        {"type": "clic", "debut_f": 982, "db": -6},
-        {"type": "souffle", "debut_f": 1135, "db": -7},
-        {"type": "clic", "debut_f": 1252, "db": -6},
-        {"type": "montee", "debut_f": 1705, "db": -6, "duree_s": 3.0},
-        {"type": "frappe", "debut_f": 1910, "db": -6},
-        {"type": "clic", "debut_f": 2060, "db": -4},
-        {"type": "impact", "debut_f": 2369, "db": -4},
-        {"type": "boom", "debut_f": 2434, "db": -3},
+        {"type": "fouet", "debut_f": 220, "db": -6},
+        {"type": "inverse", "debut_f": 268, "db": -6, "duree_s": 0.8},
+        {"type": "boom", "debut_f": 288, "db": -3},
+        {"type": "impact", "debut_f": 420, "db": -3},
+        {"type": "frappe", "debut_f": 552, "db": -5},
+        {"type": "impact", "debut_f": 703, "db": -4},
+        {"type": "fouet", "debut_f": 792, "db": -5},
+        {"type": "fouet", "debut_f": 894, "db": -5},
+        {"type": "clic", "debut_f": 1008, "db": -6},
+        {"type": "souffle", "debut_f": 1162, "db": -7},
+        {"type": "clic", "debut_f": 1276, "db": -6},
+        {"type": "chute", "debut_f": 1500, "db": -7},
+        {"type": "montee", "debut_f": 1736, "db": -6, "duree_s": 3.0},
+        {"type": "frappe", "debut_f": 1938, "db": -6},
+        {"type": "clic", "debut_f": 2092, "db": -4},
+        {"type": "inverse", "debut_f": 2192, "db": -6, "duree_s": 0.8},
+        {"type": "impact", "debut_f": 2344, "db": -4},
+        {"type": "boom", "debut_f": 2482, "db": -3},
     ],
     "son_plans": [
-        {"plan": "p01", "db": -10},
         {"plan": "p02", "db": -9},
         {"plan": "p03", "db": -8},
         {"plan": "p04", "db": -9},
         {"plan": "p05", "db": -10},
+        {"plan": "p07", "db": -10},
         {"plan": "p08", "db": -9},
         {"plan": "p10", "db": -10},
-        {"plan": "p16", "db": -9},
+        {"plan": "p18", "db": -10},
         {"plan": "p19", "db": -8},
     ],
     "etalonnage": {"contraste": 1.08, "saturation": 1.04, "chaleur": 0.02, "grain": 0.85},
@@ -1524,7 +1459,7 @@ VIDEO_COURT_SPEC = [
     ("sc01", "p01", 20, 64, "C1_Photo", "Étienne prend la photo de la façade et lance le signal"),
     ("sc02", "p02", 0, 56, "C2_Signal", "Le signal bondit de la tour 5G sur la fibre des poteaux"),
     ("sc03", "p03", 0, 52, "C3_Serveur", "Plongée dans le serveur local vers la Citadelle"),
-    ("sc04", "p05", 0, 68, "C4_Estimation", "M3 chiffre le devis 3D avec Monte Carlo et 11 critères"),
+    ("sc04", "p05", 0, 68, "C4_Estimation", "M3 chiffre le devis par projection optique et 11 critères"),
     ("sc05", "p07", 0, 72, "C5_RetourCarton", "Le devis approuvé revient dans la main d'Étienne + carton"),
 ]
 TOTAL_COURT_F = sum(x[3] for x in VIDEO_COURT_SPEC)
@@ -1569,8 +1504,8 @@ EDITPLAN_COURT = {
             "fondu_out_f": 18,
         },
         "voix": [
-            {"src": "v17", "debut_f": 4, "entree_f": 0, "duree_f": 252, "gain_db": 0},
-            {"src": "v18", "debut_f": 264, "entree_f": 0, "duree_f": 32, "gain_db": 0},
+            {"src": "v17", "debut_f": 4, "entree_f": 0, "duree_f": 188, "gain_db": 0},
+            {"src": "v18", "debut_f": 264, "entree_f": 0, "duree_f": 24, "gain_db": 0},
         ],
         "ducking": {"actif": True, "profondeur_db": 9},
         "cible_lufs": -14,
@@ -1615,19 +1550,21 @@ ANNEXE_COURT = {
         {"type": "impact", "debut_f": 262, "db": -3},
     ],
     "son_plans": [
-        {"plan": "p01", "db": -10},
         {"plan": "p02", "db": -9},
         {"plan": "p03", "db": -8},
+        {"plan": "p05", "db": -10},
+        {"plan": "p07", "db": -10},
     ],
     "etalonnage": {"contraste": 1.08, "saturation": 1.04, "chaleur": 0.02, "grain": 0.85},
 }
 
-# --- CONSTRUCTION DE L'EDITPLAN VERTICAL 9:16 (13.0 s = 312 images à 24 i/s) ---
+# --- CONSTRUCTION DE L'EDITPLAN VERTICAL 9:16 (13.0 s = 312 images à 24 i/s, recadré depuis 16:9) ---
 VIDEO_VERT_SPEC = [
-    ("vc01", "pv01", 0, 72, "V1_Photo", "Étienne lance le rayon vertical depuis le chantier"),
-    ("vc02", "pv02", 0, 72, "V2_Signal", "Plongée verticale de la tour 5G au serveur local"),
-    ("vc03", "pv03", 0, 84, "V3_Citadelle", "Les 10 étages verticaux chiffrent la maison 3D"),
-    ("vc04", "pv04", 0, 84, "V4_RetourCarton", "Approbation de Benoît, retour à Étienne et carton final"),
+    ("vc01", "p01", 20, 64, "V1_Photo", "Étienne prend la photo sur le chantier et lance le signal"),
+    ("vc02", "p02", 0, 56, "V2_Signal", "Course du signal de la tour 5G sur la fibre aérienne"),
+    ("vc03", "p03", 0, 52, "V3_Serveur", "Plongée à travers la vitre du serveur local vers la Citadelle"),
+    ("vc04", "p05", 0, 68, "V4_Citadelle", "M3 chiffre le devis par simulation Monte Carlo et 11 critères"),
+    ("vc05", "p07", 0, 72, "V5_RetourCarton", "Retour du devis approuvé dans la main d'Étienne et carton final"),
 ]
 TOTAL_VERT_F = sum(x[3] for x in VIDEO_VERT_SPEC)
 print(f"Total vertical 9:16: {TOTAL_VERT_F} frames = {TOTAL_VERT_F/24:.2f} s")
@@ -1639,10 +1576,11 @@ EDITPLAN_VERTICAL = {
     "genre": "social",
     "titre": "OPSYS-AI — La soumission en 10 secondes (Vertical 9:16)",
     "sources": {
-        "pv01": {"kind": "video", "duree_f": 124},
-        "pv02": {"kind": "video", "duree_f": 124},
-        "pv03": {"kind": "video", "duree_f": 124},
-        "pv04": {"kind": "video", "duree_f": 124},
+        "p01": {"kind": "video", "duree_f": 158},
+        "p02": {"kind": "video", "duree_f": 124},
+        "p03": {"kind": "video", "duree_f": 124},
+        "p05": {"kind": "video", "duree_f": 124},
+        "p07": {"kind": "video", "duree_f": 124},
         "musique_court": {"kind": "audio", "duree_f": TOTAL_VERT_F},
         "v17": {"kind": "audio"},
         "v18": {"kind": "audio"},
@@ -1670,8 +1608,8 @@ EDITPLAN_VERTICAL = {
             "fondu_out_f": 18,
         },
         "voix": [
-            {"src": "v17", "debut_f": 4, "entree_f": 0, "duree_f": 252, "gain_db": 0},
-            {"src": "v18", "debut_f": 264, "entree_f": 0, "duree_f": 32, "gain_db": 0},
+            {"src": "v17", "debut_f": 4, "entree_f": 0, "duree_f": 188, "gain_db": 0},
+            {"src": "v18", "debut_f": 264, "entree_f": 0, "duree_f": 24, "gain_db": 0},
         ],
         "ducking": {"actif": True, "profondeur_db": 9},
         "cible_lufs": -14,
@@ -1679,21 +1617,21 @@ EDITPLAN_VERTICAL = {
         "fondu_coupe_ms": 35,
     },
     "textes": [
-        {"texte": "1 PHOTO. 10 DÉPARTEMENTS.", "debut_f": 72, "duree_f": 96, "style": "titre", "position": "bas", "taille_pct": 6},
+        {"texte": "1 PHOTO. 10 DÉPARTEMENTS.", "debut_f": 68, "duree_f": 96, "style": "titre", "position": "bas", "taille_pct": 6},
     ],
     "generations": [],
-    "metadonnees": {"modele": "gemini-4-argon", "savoir": ["vertical-signal-run"]},
+    "metadonnees": {"modele": "gemini-4-argon", "savoir": ["vertical-signal-run-crop"]},
 }
 
 ANNEXE_VERTICAL = {
     "incrustations": [
-        {"type": "etiquette", "debut_f": 4, "duree_f": 68, "position": "haut-droite", "texte": "VISION"},
-        {"type": "statut", "debut_f": 6, "duree_f": 64, "position": "bas", "texte": "Photo reçue. Mesures en cours…"},
-        {"type": "trajet", "debut_f": 72, "duree_f": 72, "position": "centre", "points": [[0.50, 0.08], [0.50, 0.50], [0.50, 0.88]], "couleur": "signal"},
+        {"type": "etiquette", "debut_f": 4, "duree_f": 60, "position": "haut-droite", "texte": "VISION"},
+        {"type": "statut", "debut_f": 6, "duree_f": 56, "position": "bas", "texte": "Photo reçue. Mesures en cours…"},
+        {"type": "trajet", "debut_f": 64, "duree_f": 56, "position": "centre", "points": [[0.50, 0.08], [0.50, 0.50], [0.50, 0.88]], "couleur": "signal"},
         {
             "type": "document",
-            "debut_f": 148,
-            "duree_f": 108,
+            "debut_f": 172,
+            "duree_f": 88,
             "position": "centre",
             "titre": "SOUMISSION #M3-408",
             "destinataire": "Client : Monsieur Morin",
@@ -1704,20 +1642,29 @@ ANNEXE_VERTICAL = {
             "total": "18 940 $",
             "tampon": "APPROUVÉ",
         },
-        {"type": "flash", "debut_f": 258, "duree_f": 3, "position": "centre", "intensite": 0.8},
+        {"type": "flash", "debut_f": 240, "duree_f": 3, "position": "centre", "intensite": 0.8},
         {"type": "carton", "debut_f": 262, "duree_f": 50, "position": "centre"},
     ],
     "sfx": [
         {"type": "clic", "debut_f": 10, "db": -5},
-        {"type": "fouet", "debut_f": 72, "db": -5},
-        {"type": "boom", "debut_f": 144, "db": -4},
+        {"type": "fouet", "debut_f": 64, "db": -5},
+        {"type": "boom", "debut_f": 120, "db": -4},
+        {"type": "frappe", "debut_f": 180, "db": -5},
         {"type": "impact", "debut_f": 262, "db": -3},
     ],
     "son_plans": [
-        {"plan": "pv01", "db": -10},
-        {"plan": "pv02", "db": -9},
-        {"plan": "pv03", "db": -9},
+        {"plan": "p02", "db": -9},
+        {"plan": "p03", "db": -8},
+        {"plan": "p05", "db": -10},
+        {"plan": "p07", "db": -10},
     ],
+    "recadrage_v": {
+        "p01": 0.45,
+        "p02": 0.50,
+        "p03": 0.50,
+        "p05": 0.50,
+        "p07": 0.46,
+    },
     "etalonnage": {"contraste": 1.08, "saturation": 1.04, "chaleur": 0.02, "grain": 0.85},
 }
 
