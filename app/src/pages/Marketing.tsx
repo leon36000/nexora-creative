@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { marketing, type CalqueTexteUi, type Constat, type KitMarque, type MarqueEtat, type PropositionUi, type RenduMarketing, type SpecUi } from '../api';
 import { setParams, useRoute } from '../router';
 import { toast } from '../store';
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import '../marketing.css';
 
 const VIDE: KitMarque = {
@@ -35,7 +36,7 @@ export default function MarketingPage() {
   return (
     <div className="page-scroll">
       <div className="page-pad mk">
-        <h1 className="display mk-h1">Marketing <span className="hl">sur ta marque</span></h1>
+        <h1 className="display mk-h1">{NEXORA_PRODUCT_NAMES.campaign} <span className="hl">sur ta marque</span></h1>
         <p className="dim mk-lead">Cartes, dépliants et accroche-portes en PDF prêts pour l’imprimeur (fond perdu, traits de coupe). Ta marque est saisie une fois ; chaque pièce la reprend.</p>
         <div className="mk-tabs" role="tablist">
           <button role="tab" aria-selected={onglet === 'creer'} className={onglet === 'creer' ? 'on' : ''} onClick={() => setParams({ onglet: 'creer' })}>Créer une pièce</button>
