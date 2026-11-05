@@ -73,6 +73,12 @@ class Preparation(unittest.TestCase):
             P.construire(path, '0' * 64, self.root / 'autre', lambda *a, **k: None)
         self.assertFalse((self.root / 'autre').exists())
 
+    def test_build_reel_hors_chroot_refuse_avant_creation(self):
+        source, sha = self.archive()
+        with self.assertRaisesRegex(ValueError, 'chroot CI isolé'):
+            P.construire(source, sha, self.root / 'interdit')
+        self.assertFalse((self.root / 'interdit').exists())
+
     def test_archive_git_exclut_env_et_npmrc_sans_les_lire(self):
         repo = self.root / 'repo'
         repo.mkdir()
@@ -101,6 +107,29 @@ class Preparation(unittest.TestCase):
         self.assertEqual(len(digest), 64)
         with self.assertRaises(ValueError):
             P.archive(repo, 'main', self.root / 'invalide.tar')
+
+    def test_import_artefact_ci_et_sha_git(self):
+        source, sha = self.archive()
+        release = self.root / 'release'
+        def fake(cmd, **opts):
+            if cmd[1] == 'ci':
+                (opts['cwd'] / 'node_modules').mkdir()
+            else:
+                (opts['cwd'] / 'dist').mkdir()
+                (opts['cwd'] / 'dist/index.html').write_text('fixture')
+        P.construire(source, sha, release, fake)
+        (release / 'CI_COMMIT_SHA').write_text('a' * 40 + '\n')
+        artefact = self.root / 'artefact.tar'
+        with tarfile.open(artefact, 'w') as tar:
+            for item in ('app', 'mode-studio/dist', 'BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
+                tar.add(release / item, arcname='release/' + item)
+        with artefact.open('rb') as f:
+            empreinte = hashlib.file_digest(f, 'sha256').hexdigest()
+        P.importer(artefact, empreinte, 'a' * 40, self.root / 'importe')
+        self.assertEqual((self.root / 'importe/BUILD_OK').read_text().strip(), sha)
+        with self.assertRaisesRegex(ValueError, 'SHA Git'):
+            P.importer(artefact, empreinte, 'b' * 40, self.root / 'refuse')
+        self.assertFalse((self.root / 'refuse/BUILD_OK').exists())
 
 
 if __name__ == '__main__':

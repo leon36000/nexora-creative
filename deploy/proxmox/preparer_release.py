@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import posixpath
 from pathlib import Path, PurePosixPath
 import re
 import subprocess
@@ -10,6 +11,7 @@ import sys
 import tarfile
 
 from transaction_release import empreinte_dependances
+from transaction_release import verifier_ancetres
 
 
 def interdit(path):
@@ -65,6 +67,10 @@ def archive(repo, revision, sortie):
 
 
 def construire(archive_path, sha, dossier, runner=subprocess.run):
+    if runner is subprocess.run and (os.environ.get('NEXORA_RELEASE_SANDBOX') != 'ci-chroot'
+                                      or os.geteuid() != 65534 or Path('/proc/self/environ').exists()
+                                      or Path('/etc/nexora').exists()):
+        raise ValueError('construction autorisée seulement dans le chroot CI isolé')
     if Path(archive_path).name.startswith('.env') or Path(archive_path).name == '.npmrc':
         raise ValueError('archive à nom interdit')
     if not re.fullmatch('[0-9a-f]{64}', sha):
@@ -131,10 +137,72 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
         marker.write(sha + '\n')
 
 
+def importer(archive_path, sha, revision, dossier):
+    """Importe un artefact CI vérifié ; le marqueur n'est écrit qu'après contrôle."""
+    if not re.fullmatch('[0-9a-f]{64}', sha) or not re.fullmatch('[0-9a-f]{40}', revision):
+        raise ValueError('empreinte ou SHA Git invalide')
+    if Path(archive_path).name.startswith('.env') or Path(archive_path).name == '.npmrc':
+        raise ValueError('archive à nom interdit')
+    verifier_ancetres(archive_path)
+    dossier = Path(dossier)
+    verifier_ancetres(dossier.parent)
+    with open(archive_path, 'rb') as f:
+        if hashlib.file_digest(f, 'sha256').hexdigest() != sha:
+            raise ValueError('artefact altéré')
+        f.seek(0)
+        dossier.mkdir(mode=0o700)
+        seen, marqueur = set(), None
+        with tarfile.open(fileobj=f, mode='r:') as tar:
+            for item in tar:
+                p = PurePosixPath(item.name)
+                if p.is_absolute() or not p.parts or p.parts[0] != 'release' or '..' in p.parts:
+                    raise ValueError('chemin artefact interdit')
+                rel = PurePosixPath(*p.parts[1:])
+                if not rel.parts:
+                    continue
+                name = rel.as_posix()
+                if name in seen:
+                    raise ValueError('entrée artefact dupliquée')
+                seen.add(name)
+                meta = name in ('BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA')
+                dependance = name == 'app/node_modules' or name.startswith('app/node_modules/')
+                dep_interdite = dependance and any(x.startswith('.env') or x in ('.npmrc', '.git', 'secrets') for x in rel.parts)
+                studio_interdit = rel.parts[0] == 'mode-studio' and len(rel.parts) > 1 and rel.parts[1] != 'dist'
+                if dep_interdite or studio_interdit or not meta and not dependance and interdit(name):
+                    raise ValueError('contenu artefact interdit')
+                if item.issym():
+                    cible = posixpath.normpath(posixpath.join(posixpath.dirname(name), item.linkname))
+                    if not name.startswith('app/node_modules/') or not cible.startswith('app/node_modules/'):
+                        raise ValueError('lien artefact interdit')
+                elif not (item.isdir() or item.isfile()):
+                    raise ValueError('entrée artefact non ordinaire')
+                if name == 'BUILD_OK':
+                    source = tar.extractfile(item)
+                    if source is None:
+                        raise ValueError('marqueur absent')
+                    with source:
+                        marqueur = source.read(128).decode('ascii')
+                    continue
+                item.name = name
+                verifier_ancetres(dossier / name)
+                tar.extract(item, path=dossier, filter='data')
+        if not marqueur or not re.fullmatch('[0-9a-f]{64}\\n', marqueur):
+            raise ValueError('marqueur de build invalide')
+        if (dossier / 'CI_COMMIT_SHA').read_text(encoding='ascii').strip() != revision:
+            raise ValueError('SHA Git de l’artefact incorrect')
+        deps = (dossier / 'DEPENDANCES_SHA256').read_text(encoding='ascii').strip()
+        if deps != empreinte_dependances(dossier / 'app/node_modules'):
+            raise ValueError('dépendances de l’artefact altérées')
+        with (dossier / 'BUILD_OK').open('x', encoding='ascii') as marker:
+            marker.write(marqueur)
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 5 and sys.argv[1] == 'archive':
         print(archive(Path(sys.argv[2]), sys.argv[3], Path(sys.argv[4])))
     elif len(sys.argv) == 5 and sys.argv[1] == 'construire':
         construire(Path(sys.argv[2]), sys.argv[3], Path(sys.argv[4]))
+    elif len(sys.argv) == 6 and sys.argv[1] == 'importer':
+        importer(Path(sys.argv[2]), sys.argv[3], sys.argv[4], Path(sys.argv[5]))
     else:
-        raise SystemExit('usage : preparer_release.py archive DEPOT SHA_GIT ARCHIVE | construire ARCHIVE SHA256 DOSSIER_NEUF')
+        raise SystemExit('usage : preparer_release.py archive DEPOT SHA_GIT ARCHIVE | construire ARCHIVE SHA256 DOSSIER_NEUF | importer ARTEFACT SHA256 SHA_GIT DOSSIER_NEUF')

@@ -3,6 +3,24 @@ pc4_ci_fallback:
   image: alpine:3.22
   script: [echo "Local security scans completed"]
 
+nexora_release_amd64:
+  stage: test
+  image: node:24.22.2-bookworm@sha256:994ed664b2644b1b186516daaa1fb7aa93a1e717da2a0ff17094c765d5dbfde1
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "fix/deploiement-creative-isole-20261105"'
+    - if: '$CI_COMMIT_BRANCH == "developpement"'
+      when: manual
+      allow_failure: true
+  script:
+    - sh deploy/proxmox/ci-build-release.sh
+  artifacts:
+    when: on_success
+    expire_in: 7 days
+    paths:
+      - .ci-release/artefact/release.tar
+      - .ci-release/artefact/release.sha256
+      - .ci-release/artefact/source.sha256
+
 nexora_sonar_developpement:
   stage: test
   needs:

@@ -1,9 +1,11 @@
 import hashlib
+import io
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import tarfile
 import unittest
 
 
@@ -32,18 +34,25 @@ class Transport(unittest.TestCase):
             git('add', '.')
             git('commit', '-qm', 'fixture')
             sha = git('rev-parse', 'HEAD').decode().strip()
+            artefact = base / 'artefact.tar'
+            with tarfile.open(artefact, 'w') as t:
+                contenu = (sha + '\n').encode()
+                entree = tarfile.TarInfo('release/CI_COMMIT_SHA')
+                entree.size = len(contenu)
+                t.addfile(entree, io.BytesIO(contenu))
+            sha_artefact = hashlib.sha256(artefact.read_bytes()).hexdigest()
             script = origine / 'transporter-release.sh'
             local = base / 'local-neuf'
-            cmd = ['bash', str(script), str(repo), sha, str(local), 'test-12345678']
+            cmd = ['bash', str(script), str(repo), sha, str(artefact), sha_artefact, str(local), 'test-12345678']
             subprocess.run(cmd, env=env, check=True, stdout=subprocess.DEVNULL)
             recu = distant / 'livraisons/test-12345678'
-            for nom in ('archive.tar', 'archive.sha256', 'preparer_release.py', 'transaction_release.py', 'livrer_release.py', 'mettre-a-jour-creative.sh'):
+            for nom in ('release.tar', 'release.sha256', 'commit.sha', 'preparer_release.py', 'transaction_release.py', 'livrer_release.py', 'mettre-a-jour-creative.sh'):
                 self.assertEqual(hashlib.sha256((local / nom).read_bytes()).digest(), hashlib.sha256((recu / nom).read_bytes()).digest())
-            original = (recu / 'archive.tar').read_bytes()
-            cmd[4] = str(base / 'local-autre')
+            original = (recu / 'release.tar').read_bytes()
+            cmd[6] = str(base / 'local-autre')
             with self.assertRaises(subprocess.CalledProcessError):
                 subprocess.run(cmd, env=env, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            self.assertEqual((recu / 'archive.tar').read_bytes(), original)
+            self.assertEqual((recu / 'release.tar').read_bytes(), original)
 
 
 if __name__ == '__main__':
