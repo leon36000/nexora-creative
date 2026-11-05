@@ -10,6 +10,8 @@ command -v git >/dev/null
 ROOT="$CI_PROJECT_DIR/.ci-release/chroot"
 OUT="$CI_PROJECT_DIR/.ci-release/artefact"
 mkdir -p "$ROOT" "$OUT"
+mkdir -p "$CI_PROJECT_DIR/.ci-release/canari"
+printf '%s\n' 'CANARI_SYNTHETIQUE=interdit' > "$CI_PROJECT_DIR/.ci-release/canari/.env"
 env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent PYTHONDONTWRITEBYTECODE=1 \
   python3 -B "$CI_PROJECT_DIR/deploy/proxmox/preparer_release.py" archive "$CI_PROJECT_DIR" "$CI_COMMIT_SHA" "$OUT/source.tar" > "$OUT/source.sha256"
 # Seuls les exécutables/libs de l'image publique sont copiés ; aucun montage du workspace ni du HOME.
@@ -31,14 +33,14 @@ chmod 644 "$ROOT/tools/"*.py "$ROOT/input/source.tar"
 chown 65534:65534 "$ROOT/work"
 SHA="$(cat "$OUT/source.sha256")"
 env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent \
-  python3 -B - "$ROOT" "$SHA" <<'PY'
+  python3 -B - "$ROOT" "$SHA" "$CI_PROJECT_DIR/.ci-release/canari/.env" <<'PY'
 import os, subprocess, sys
-root, sha = sys.argv[1:]
+root, sha, canari = sys.argv[1:]
 cmd = ['chroot', '--userspec=65534:65534', '--groups=65534', root, '/usr/bin/env', '-i',
        'PATH=/usr/local/bin:/usr/bin:/bin', 'HOME=/work', 'PYTHONDONTWRITEBYTECODE=1',
        'NEXORA_RELEASE_SANDBOX=ci-chroot', '/usr/bin/python3', '-B']
-check = "import os; assert os.geteuid()==65534 and os.getegid()==65534 and set(os.getgroups())<={65534}; assert not os.path.exists('/proc/self/environ'); assert not os.path.exists('/etc/nexora'); assert not os.path.exists('/root/.npmrc')"
-subprocess.run(cmd + ['-c', check], check=True, close_fds=True, stdin=subprocess.DEVNULL)
+check = "import os,sys; assert os.geteuid()==65534 and os.getegid()==65534 and set(os.getgroups())<={65534}; assert not os.path.exists('/proc/self/environ'); assert not os.path.exists('/etc/nexora'); assert not os.path.exists('/root/.npmrc'); assert not os.path.exists(sys.argv[1])"
+subprocess.run(cmd + ['-c', check, canari], check=True, close_fds=True, stdin=subprocess.DEVNULL)
 subprocess.run(cmd + ['/tools/preparer_release.py', 'construire', '/input/source.tar', sha, '/work/release'],
                check=True, close_fds=True, stdin=subprocess.DEVNULL)
 PY
