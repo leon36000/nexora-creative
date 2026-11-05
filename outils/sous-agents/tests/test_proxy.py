@@ -95,9 +95,17 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.upstream.received, [])
 
     def test_count_tokens_is_explicitly_disabled_before_audit_or_upstream(self):
-        code, body = self.send(path='/v1/messages/count_tokens?beta=true', body='not-json')
-        self.assertEqual(code, 501)
-        self.assertIn('suivi de coût fiable', json.loads(body)['error'])
+        c = UnixHTTP(self.sockpath)
+        try:
+            c.putrequest('POST', '/v1/messages/count_tokens?beta=true')
+            c.putheader('Content-Type', 'application/json')
+            c.putheader('Content-Length', '8')
+            c.endheaders()
+            response = c.getresponse()
+            self.assertEqual(response.status, 501)
+            self.assertIn('suivi de coût fiable', json.loads(response.read())['error'])
+        finally:
+            c.close()
         audit = Path(self.tmp.name) / 'audit.jsonl'
         self.assertEqual(audit.read_text(), '')
         self.assertEqual(self.server._sequence, 0)
@@ -262,19 +270,39 @@ class Tests(unittest.TestCase):
         self.upstream.status = 429; self.upstream.chunks = [b'data: x\n\n', b'data: y\n\n']
         self.assertEqual(self.send(), (429, b'data: x\n\ndata: y\n\n'))
 
+    def test_zero_length_upstream_is_not_rejected(self):
+        self.upstream.chunks = []
+        self.upstream.content_length = 0
+        self.assertEqual(self.send(), (200, b''))
+
     def test_socket_is_private(self):
         self.assertEqual(self.sockpath.stat().st_mode & 0o777, 0o700 - 0o100)
 
 class ProcessTests(unittest.TestCase):
+    def test_status_is_sent_before_upstream_headers_are_read(self):
+        events = []
+        handler = object.__new__(proxy.Handler)
+        handler.send_response = lambda status: events.append(('statut', status))
+        class FakeResponse:
+            status = 200
+            def getheaders(self):
+                events.append(('en-têtes', None))
+                raise http.client.HTTPException('fictif')
+        response = FakeResponse()
+        with self.assertRaises(http.client.HTTPException):
+            handler._send_stream_headers(response)
+        self.assertEqual(events, [('statut', 200), ('en-têtes', None)])
+
     def test_socket_path_too_long_preserves_original_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             audit, ledger = root / 'audit', root / 'ledger'
             ledger.write_text('')
+            path = str(root / ('x' * 150))
+            kwargs = dict(key=FAKE_KEY, run='test-run', model='eco-deepseek', port=1, timeout=1,
+                          audit_path=str(audit), ledger_path=str(ledger), budget=Decimal('1'))
             with self.assertRaises(OSError) as erreur:
-                proxy.Server(str(root / ('x' * 150)), proxy.Handler, key=FAKE_KEY, run='test-run',
-                             model='eco-deepseek', port=1, timeout=1, audit_path=str(audit),
-                             ledger_path=str(ledger), budget=Decimal('1'))
+                proxy.Server(path, proxy.Handler, **kwargs)
             self.assertIn('path too long', str(erreur.exception).lower())
 
     def test_chmod_failure_closes_listener_and_preserves_error(self):
@@ -282,11 +310,12 @@ class ProcessTests(unittest.TestCase):
             root = Path(tmp)
             audit, ledger, sockpath = root / 'audit', root / 'ledger', root / 'socket'
             ledger.write_text('')
+            path = str(sockpath)
+            kwargs = dict(key=FAKE_KEY, run='test-run', model='eco-deepseek', port=1, timeout=1,
+                          audit_path=str(audit), ledger_path=str(ledger), budget=Decimal('1'))
             with patch.object(proxy.os, 'chmod', side_effect=PermissionError('chmod factice')):
                 with self.assertRaisesRegex(PermissionError, 'chmod factice'):
-                    proxy.Server(str(sockpath), proxy.Handler, key=FAKE_KEY, run='test-run',
-                                 model='eco-deepseek', port=1, timeout=1, audit_path=str(audit),
-                                 ledger_path=str(ledger), budget=Decimal('1'))
+                    proxy.Server(path, proxy.Handler, **kwargs)
             client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             try:
                 with self.assertRaises(ConnectionRefusedError):
@@ -329,10 +358,7 @@ class ProcessTests(unittest.TestCase):
                 })
             finally:
                 (root / 'proxy-stop').write_text('arrêt fictif')
-                try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    self.fail('arrêt coopératif du relais non confirmé')
+                process.wait(timeout=5)
 
     def test_world_readable_key_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
