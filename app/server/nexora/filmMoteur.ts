@@ -20,6 +20,7 @@ import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
 import { encoderSurGpu } from './encodageGpu.js';
 import { dossierFilmUnique, sansEcrasement } from './filmSorties.js';
+import { erreurAncrageMaxFilm } from './filmAncrage.js';
 
 export interface DepsFilm {
   queueTakes: (b: any, count: number) => Promise<number[]>;
@@ -48,6 +49,8 @@ export async function tournerFilm(
   },
   llm: ClientLlm | null,
 ): Promise<number> {
+  const erreurAncrage = erreurAncrageMaxFilm(opts.moteur, sb);
+  if (erreurAncrage) throw new Error(erreurAncrage);
   const filmId = takes.create({
     project_id: opts.projectId ?? null,
     kind: 'video',
@@ -108,6 +111,9 @@ const dureePlan = (p: PlanFilm) => (p.duree === 10 ? 243 : 124) / 24;
 async function lancerSuite(film: Take, i: number, precedent: string) {
   const s = reglages(film);
   const sb = s.storyboard as Storyboard;
+  const moteur = s.moteur ?? 'h3-fast';
+  const erreurAncrage = erreurAncrageMaxFilm(moteur, sb);
+  if (erreurAncrage) throw new Error(erreurAncrage);
   const p = sb.plans[i] as PlanFilm & { reservation?: CreditsPrise };
   const dossier = join(config.outputDir, 'films', 'images');
   mkdirSync(dossier, { recursive: true });
@@ -136,12 +142,12 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
       : `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
     mode: fin ? 'fl2va' : 'i2va',
     dureeS: dureePlan(p),
-    moteur: s.moteur ?? 'h3-fast',
+    moteur,
     format: s.format,
     ...dialoguesDe(p),
   }, deps.llmPour(org));
   const corps = {
-    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite, image: jeton }, ecrit.prompt, s.moteur ?? 'h3-fast'),
+    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite, image: jeton }, ecrit.prompt, moteur),
     startImage: jeton,
     ...(fin ? { endImage: fin } : {}),
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
