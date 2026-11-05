@@ -255,9 +255,9 @@ class Handler(BaseHTTPRequestHandler):
             return False, None
         return True, int(lengths[0]) if lengths else None
 
-    def _send_stream_headers(self, status, upstream_headers):
-        self.send_response(status)
-        for key, value in upstream_headers:
+    def _send_stream_headers(self, response):
+        self.send_response(response.status)
+        for key, value in response.getheaders():
             lower = key.lower()
             if lower in STREAMED_HEADERS or lower.startswith(STREAMED_HEADER_PREFIXES):
                 self.send_header(key, value.replace(self.server.key, '[redacted]'))
@@ -289,7 +289,7 @@ class Handler(BaseHTTPRequestHandler):
             valid, expected = self._check_upstream_response(response)
             if not valid:
                 return
-            self._send_stream_headers(response.status, response.getheaders())
+            self._send_stream_headers(response)
             received = self._stream_body(response, expected)
             if received is None:
                 return  # Missing terminal chunk makes upstream truncation observable.

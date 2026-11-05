@@ -271,6 +271,20 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.sockpath.stat().st_mode & 0o777, 0o700 - 0o100)
 
 class ProcessTests(unittest.TestCase):
+    def test_status_is_sent_before_upstream_headers_are_read(self):
+        events = []
+        handler = object.__new__(proxy.Handler)
+        handler.send_response = lambda status: events.append(('statut', status))
+        class FakeResponse:
+            status = 200
+            def getheaders(self):
+                events.append(('en-têtes', None))
+                raise http.client.HTTPException('fictif')
+        response = FakeResponse()
+        with self.assertRaises(http.client.HTTPException):
+            handler._send_stream_headers(response)
+        self.assertEqual(events, [('statut', 200), ('en-têtes', None)])
+
     def test_socket_path_too_long_preserves_original_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

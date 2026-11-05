@@ -7,6 +7,7 @@ import subprocess
 import sys
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import lot
@@ -14,6 +15,13 @@ import test_lot
 
 
 class LotDirectTests(unittest.TestCase):
+    def test_cost_report_write_error_is_classified_as_127(self):
+        config = SimpleNamespace(sa_dir=Path('/fictif'))
+        report = SimpleNamespace(stdout='donnée fictive', returncode=0)
+        with patch.object(lot.subprocess, 'run', return_value=report), patch('builtins.print', side_effect=OSError('fictif')):
+            result = lot.report_costs(config, 'lot-fictif', {})
+        self.assertEqual(result, 127)
+
     def test_workdir_creation_error_blocks_other_tasks(self):
         root = Path('/fictif')
         failed = lot.Task('bad', root / 'bad.txt', root / 'bad', detail='a_creer')

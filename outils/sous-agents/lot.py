@@ -792,11 +792,11 @@ def report_costs(config: LotConfig, lot_id: str, env: dict[str, str]) -> int:
             stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
             text=True, encoding="utf-8", errors="replace", check=False,
         )
+        if report.stdout:
+            print(report.stdout.rstrip())
+        return report.returncode
     except OSError:
         return 127
-    if report.stdout:
-        print(report.stdout.rstrip())
-    return report.returncode
 
 
 def finalize_lot(config: LotConfig, state: SupervisorState, lot_id: str, lot_dir: Path,
