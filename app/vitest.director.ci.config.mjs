@@ -32,7 +32,7 @@ export default {
         'app/server/nexora/film.ts', 'app/server/nexora/filmMoteur.ts', 'app/server/nexora/filmEchec.ts',
         'app/server/nexora/filmClePlan.ts', 'app/server/nexora/reconciliationArrets.ts',
         'app/server/nexora/personnagesCast.ts', 'app/src/api.ts', 'app/src/pages/Creer.tsx',
-        'app/server/nexora/detourage/routes.ts',
+        'app/server/nexora/detourage/routes.ts', 'app/server/nexora/detourage/identite.ts',
         'app/src/filmPartielActions.ts', 'app/src/FilmPartielAlerte.tsx', 'app/src/LangueSelection.tsx', 'app/src/FilmPlans.tsx',
       ],
     },

@@ -7,6 +7,7 @@ import { Readable } from 'node:stream';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ParamsSchema, secondesEstimees, versParamsMoteur } from './schema.js';
 import { clientDetourage, type ClientDetourage } from './client.js';
+import { ID_DETOURAGE_NATIF } from './identite.js';
 import { Detourage, ErreurDetourage } from './gestion.js';
 import { compteCourant } from '../compte.js';
 import { tarifDepuisEnv, type Facturation } from '../credits.js';
@@ -34,15 +35,15 @@ export function moteurPour(moteurs: MoteurDetourageDeclare[], palier: string): M
 }
 
 function serviceNatifUnique(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): ServiceDetourage | undefined {
-  return natif && !moteurs.some((m) => m.id === natif.id) ? natif : undefined;
+  return natif?.id === ID_DETOURAGE_NATIF && !moteurs.some((m) => m.id === natif.id) ? natif : undefined;
 }
 
-function moteursSansCollision(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): MoteurDetourageDeclare[] {
-  return natif ? moteurs.filter((m) => m.id !== natif.id) : moteurs;
+function moteursSansCollision(moteurs: MoteurDetourageDeclare[]): MoteurDetourageDeclare[] {
+  return moteurs.filter((m) => m.id !== ID_DETOURAGE_NATIF);
 }
 
 export function serviceRapide(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): ServiceDetourage | MoteurDetourageDeclare | undefined {
-  return serviceNatifUnique(moteurs, natif) ?? moteurPour(moteursSansCollision(moteurs, natif), 'rapide');
+  return serviceNatifUnique(moteurs, natif) ?? moteurPour(moteursSansCollision(moteurs), 'rapide');
 }
 
 export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage): { detourage: Detourage; arreter: () => void } {
@@ -50,8 +51,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   const clientDe = (id: string): ClientDetourage | null => {
     const moteurs = deps.moteurs();
     const natif = deps.serviceNatif?.();
-    if (natif?.id === id && !serviceNatifUnique(moteurs, natif)) return null;
-    const m = natif?.id === id ? natif : moteurs.find((x) => x.id === id && x.detourageUrl);
+    const m = id === ID_DETOURAGE_NATIF ? serviceNatifUnique(moteurs, natif) : moteurs.find((x) => x.id === id && x.detourageUrl);
     if (!m?.detourageUrl) return null;
     const cle = `${id}@${m.detourageUrl}#${m.detourageJeton ?? ""}`; // en mémoire seulement
     let c = clients.get(cle);
@@ -62,7 +62,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     registre: join(deps.dossierDonnees, 'detourage', 'registre.json'),
     moteur: (palier) => {
       const moteurs = deps.moteurs(), natif = deps.serviceNatif?.();
-      const m = palier === 'rapide' ? serviceRapide(moteurs, natif) : moteurPour(moteursSansCollision(moteurs, natif), palier);
+      const m = palier === 'rapide' ? serviceRapide(moteurs, natif) : moteurPour(moteursSansCollision(moteurs), palier);
       const c = m && clientDe(m.id);
       return m && c ? { id: m.id, client: c } : null;
     },
@@ -94,7 +94,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   const verifierMoteurRapide = (t: ReturnType<Detourage['obtenir']>) => {
     const moteurs = deps.moteurs(), service = deps.serviceNatif?.();
     const natif = serviceNatifUnique(moteurs, service);
-    const moteur = moteursSansCollision(moteurs, service).find((m) => m.id === t.moteurId);
+    const moteur = moteursSansCollision(moteurs).find((m) => m.id === t.moteurId);
     if (natif?.id !== t.moteurId && (!moteur || !moteurPour([moteur], 'rapide'))) {
       throw new ErreurDetourage('Le moteur rapide de ce travail n’est pas disponible.', 503);
     }
@@ -105,7 +105,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   app.get(`${P}/capacites`, async () => {
     const m = deps.moteurs();
     const rapide = serviceRapide(m, deps.serviceNatif?.());
-    const pro = moteurPour(moteursSansCollision(m, deps.serviceNatif?.()), 'pro');
+    const pro = moteurPour(moteursSansCollision(m), 'pro');
     let sante: Record<string, unknown> | null = null;
     if (rapide) sante = await clientDe(rapide.id)?.sante().catch(() => null) ?? null;
     return {

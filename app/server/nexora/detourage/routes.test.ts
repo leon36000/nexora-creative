@@ -25,6 +25,7 @@ describe('choix du moteur', () => {
     expect(serviceRapide([m('detourage-natif', ['h3-max'], 'http://dedie')], natif)).toBeUndefined();
     for (const recette of ['detourage-rapide', 'detourage-pro', '*']) {
       expect(serviceRapide([m('detourage-natif', [recette], 'http://dedie')], natif)).toBeUndefined();
+      expect(serviceRapide([m('detourage-natif', [recette], 'http://dedie')])).toBeUndefined();
     }
   });
 });
@@ -112,10 +113,11 @@ describe('santé du détourage rapide', () => {
     mkdirSync(join(dossierDonnees, 'detourage'), { recursive: true });
     writeFileSync(join(dossierDonnees, 'detourage', 'registre.json'), JSON.stringify([ancien, { ...ancien, id: reprise, etat: 'interrompu' }]));
     const app = Fastify();
+    let natifActif = true;
     const { arreter, detourage } = enregistrerDetourage(app, {
       dossierDonnees,
       moteurs: () => [{ id: 'detourage-natif', nom: 'Autre', recettes: ['detourage-rapide', 'detourage-pro', '*'], detourageUrl: `http://127.0.0.1:${port}` }],
-      serviceNatif: () => ({ id: 'detourage-natif', nom: 'Natif', detourageUrl: `http://127.0.0.1:${port}` }),
+      serviceNatif: () => natifActif ? { id: 'detourage-natif', nom: 'Natif', detourageUrl: `http://127.0.0.1:${port}` } : undefined,
       facturation: () => null, nexora: false,
     });
     try {
@@ -129,6 +131,10 @@ describe('santé du détourage rapide', () => {
       expect((await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${reprise}/reprendre` })).statusCode).toBe(503);
       expect(detourage.obtenir('local', reprise).etat).toBe('interrompu');
       expect(detourage.obtenir('local', reprise).credits?.etat).toBe('reservee');
+      natifActif = false;
+      expect((await app.inject({ method: 'GET', url: `/api/nexora/detourage/travaux/${suivi}` })).json().etat).toBe('en_cours');
+      expect((await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${reprise}/reprendre` })).statusCode).toBe(503);
+      expect(detourage.obtenir('local', suivi).credits?.etat).toBe('reservee');
       expect(appels).toBe(0);
     } finally { arreter(); await app.close(); await new Promise<void>((r) => faux.close(() => r())); }
   });
