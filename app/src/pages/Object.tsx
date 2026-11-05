@@ -9,7 +9,6 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { api, downloadUrl, mediaUrl, posterUrl, subjectUrl, uploadFile, type ObjetTexteEtat, type Take } from '../api';
 import { FONDS_PLAN_CLE, planCleDepuisCanevas, type FondPlanCle } from '../planCle3d';
-import { OBJECT_DETAIL } from '../catalog';
 import { navigate, setParams, useRoute } from '../router';
 import { SourceSlot, loadFile, useTakeParam, type Source } from '../SourcePick';
 import { inFeed, isModel, settingsOf, toast, useStore } from '../store';
@@ -19,11 +18,16 @@ import { usePageDrop } from '../drop';
 import type { ModelLook } from '../ModelView';
 import { PRODUIT_3D } from '../produit3d.js';
 import ReliefOutils from './ReliefOutils';
+import type { LangueClient } from '../../shared/creationLanguage';
+import { meshCopy, meshNumber } from '../meshCopy';
+import { MeshLanguageSwitch } from './MeshLanguageSwitch';
 
 const ModelView = lazy(() => import('../ModelView'));
 
 export default function ObjectPage() {
   const { params } = useRoute();
+  const [langue, setLangue] = useState<LangueClient>('fr');
+  const c = meshCopy(langue);
   const [source, setSource] = useState<Source | null>(null);
   const [quality, setQuality] = useState<'draft' | 'quality'>('draft');
   const [cutout, setCutout] = useState(true);
@@ -65,22 +69,22 @@ export default function ObjectPage() {
         if (mort) return;
         setChaine(e);
         if (e.etat === 'fini' && e.objet) { setSelected(e.objet); return; }
-        if (e.etat === 'echec') { toast(e.erreur ?? 'La création 3D a échoué', true); return; }
+        if (e.etat === 'echec') { toast(c.requestFailure, true); return; }
       } catch { /* réessaie au prochain tour */ }
       if (!mort) setTimeout(() => void tour(), 2500);
     };
     void tour();
     return () => { mort = true; };
-  }, [chaineId]);
+  }, [chaineId, c]);
 
   async function creerDepuisTexte() {
-    setBusy('Lancement...');
+    setBusy(c.inProgress);
     try {
       const r = await api.objetTexte({ intention, qualite: quality });
       setChaine(null);
       setChaineId(r.id);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'échec', true);
+      toast(c.requestFailure, true);
     } finally {
       setBusy(null);
     }
@@ -88,9 +92,9 @@ export default function ObjectPage() {
   const enCours = chaine !== null && chaine.etat !== 'fini' && chaine.etat !== 'echec' || (chaineId !== null && chaine === null);
 
   // Deep link from the Viewer's Make 3D: /mesh?take=44 (and the /object, /relief aliases) preloads that still.
-  useTakeParam(params.get('take'), (s) => { setSource(s); setParams({ take: null }); });
-  usePageDrop('Drop a still to make it 3D', (files) => {
-    void (async () => { const s = await loadFile(files[0], ['image']); if (s) setSource(s); })();
+  useTakeParam(params.get('take'), (s) => { setSource(s); setParams({ take: null }); }, c.takeFailure);
+  usePageDrop(c.addStill, (files) => {
+    void (async () => { const s = await loadFile(files[0], ['image'], langue); if (s) setSource(s); })();
   });
 
   const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && isModel(t)));
@@ -109,7 +113,7 @@ export default function ObjectPage() {
       });
       setCut({ takeId: r.takeIds[0], forSource: sourceKey });
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'failed', true);
+      toast(c.backgroundFailure, true);
     } finally {
       setCutting(false);
     }
@@ -117,7 +121,7 @@ export default function ObjectPage() {
 
   async function go() {
     if (!source) return;
-    setBusy('Queuing...');
+    setBusy(c.inProgress);
     try {
       const r = await api.generate({
         kind: 'object', app: 'object', quality, count,
@@ -128,9 +132,9 @@ export default function ObjectPage() {
         userPrompt: source.prompt ? `3D: ${source.prompt}` : `3D from ${source.name}`,
       });
       setSelected(r.takeIds[0]);
-      toast(`${PRODUIT_3D} : ${r.takeIds.length} modèle${r.takeIds.length > 1 ? 's' : ''} en construction`);
+      toast(`${PRODUIT_3D} : ${c.buildingModels(r.takeIds.length)}`);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'failed', true);
+      toast(c.requestFailure, true);
     } finally {
       setBusy(null);
     }
@@ -139,7 +143,7 @@ export default function ObjectPage() {
   /** Plusieurs vues du même objet : Pixal3D, brouillon, une prise (sur les GPU Turing qui portent ce modèle). */
   async function goVues() {
     if (!source) return;
-    setBusy('Mise en file...');
+    setBusy(c.inProgress);
     try {
       const versSpec = (s: Source | null) => (s ? (s.takeId ? { sourceTake: s.takeId } : { image: s.token }) : undefined);
       const r = await api.generate({
@@ -149,58 +153,58 @@ export default function ObjectPage() {
         shotName: `${PRODUIT_3D.toLowerCase()}_vues_${(source.name || 'vue').slice(0, 24)}`, userPrompt: `3D à partir de plusieurs vues de ${source.name || 'l’objet'}`,
       });
       setSelected(r.takeIds[0]);
-      toast(`${PRODUIT_3D} : modèle en construction à partir de plusieurs vues`);
+      toast(`${PRODUIT_3D} : ${c.modelFromViews(1 + [vueGauche, vueDos, vueDroite].filter(Boolean).length)}`);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'échec', true);
+      toast(c.requestFailure, true);
     } finally {
       setBusy(null);
     }
   }
 
-  const q = OBJECT_DETAIL.find((x) => x.id === quality)!;
   return (
-    <div className="rail-layout" style={{ gridTemplateColumns: '372px 1fr' }}>
+    <div className="rail-layout" lang={langue === 'fr' ? 'fr-CA' : 'en-CA'} style={{ gridTemplateColumns: '372px 1fr' }}>
       <aside className="rail">
         <Spill src={presetClip('turntable')} video />
         <div className="display" style={{ fontSize: 26 }}>{PRODUIT_3D}</div>
-        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Une image, plusieurs vues ou une phrase deviennent un modèle 3D texturé : à tourner, à exporter (GLB, OBJ, STL, 3MF, USDZ) et à poser dans une scène. Sur nos GPU.</div>
+        <MeshLanguageSwitch langue={langue} onChange={setLangue} />
+        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>{c.intro}</div>
 
-        <div className="seg" role="group" aria-label="Point de départ">
-          <button type="button" className={mode === 'image' ? 'on' : ''} onClick={() => setMode('image')}>Image → 3D</button>
-          <button type="button" className={mode === 'vues' ? 'on' : ''} onClick={() => setMode('vues')}>Multi-vues</button>
-          <button type="button" className={mode === 'texte' ? 'on' : ''} onClick={() => setMode('texte')}>Texte → 3D</button>
+        <div className="seg" role="group" aria-label={c.startingPoint}>
+          <button type="button" className={mode === 'image' ? 'on' : ''} onClick={() => setMode('image')}>{c.imageTo3d}</button>
+          <button type="button" className={mode === 'vues' ? 'on' : ''} onClick={() => setMode('vues')}>{c.multiView}</button>
+          <button type="button" className={mode === 'texte' ? 'on' : ''} onClick={() => setMode('texte')}>{c.textTo3d}</button>
         </div>
 
         {mode === 'texte' ? (
           <div className="rail-section">
-            <div className="label">L’objet</div>
+            <div className="label">{c.object}</div>
             <div className="st-champ">
               <textarea value={intention} onChange={(e) => setIntention(e.target.value)} maxLength={1000} style={{ minHeight: 90 }}
-                placeholder="Une chaise en bois clair aux pieds fuselés, un robot jouet en métal rouge…" aria-label="Description de l’objet" />
+                placeholder={c.objectDescription} aria-label={c.object} />
             </div>
-            <div className="dim" style={{ fontSize: 12 }}>Nexora dessine d’abord une photo de produit propre de l’objet seul, puis la reconstruit en 3D, puis vérifie quatre côtés. Une seule relance si le contrôle est sévère.</div>
+            <div className="dim" style={{ fontSize: 12 }}>{c.text3dIntro}</div>
           </div>
         ) : (
           <>
-            <SourceSlot label={mode === 'vues' ? 'Vue de face' : 'Still'} value={source} onChange={setSource} accept={['image']}
-              title={mode === 'vues' ? 'Ajoute la vue de face' : 'Add a still of the thing'} sub="One subject, whole in frame, on a plain background works best." />
+            <SourceSlot label={mode === 'vues' ? c.frontView : c.image} value={source} onChange={setSource} accept={['image']} langue={langue}
+              title={mode === 'vues' ? c.addFrontView : c.addStill} sub={c.frontViewHint} />
             {mode === 'vues' && (
               <>
-                <SourceSlot label="Vue de gauche" value={vueGauche} onChange={setVueGauche} accept={['image']} title="Gauche (facultatif)" sub="Le même objet, vu de son côté gauche." />
-                <SourceSlot label="Vue de dos" value={vueDos} onChange={setVueDos} accept={['image']} title="Dos (facultatif)" sub="Le même objet, vu de derrière." />
-                <SourceSlot label="Vue de droite" value={vueDroite} onChange={setVueDroite} accept={['image']} title="Droite (facultatif)" sub="Le même objet, vu de son côté droit." />
-                <div className="dim" style={{ fontSize: 12 }}>Pixal3D recoupe les vues pour deviner ce qu’une seule photo cache. Au moins une vue en plus de la face, trois vues au plus pour l’instant (mémoire des GPU Turing) ; brouillon seulement, environ 3 à 4 minutes.</div>
+                <SourceSlot label={c.leftView} value={vueGauche} onChange={setVueGauche} accept={['image']} langue={langue} title={`${c.addLeftView}${c.optional}`} sub={c.sameObjectLeft} />
+                <SourceSlot label={c.backView} value={vueDos} onChange={setVueDos} accept={['image']} langue={langue} title={`${c.addBackView}${c.optional}`} sub={c.sameObjectBack} />
+                <SourceSlot label={c.rightView} value={vueDroite} onChange={setVueDroite} accept={['image']} langue={langue} title={`${c.addRightView}${c.optional}`} sub={c.sameObjectRight} />
+                <div className="dim" style={{ fontSize: 12 }}>{c.multiViewInfo}</div>
               </>
             )}
           </>
         )}
 
         {mode !== 'vues' && <div className="rail-section">
-          <div className="label">Detail</div>
+            <div className="label">{c.detail}</div>
           <div className="seg">
-            {OBJECT_DETAIL.map((x) => <button key={x.id} type="button" className={quality === x.id ? 'on' : ''} onClick={() => setQuality(x.id)}>{x.label}</button>)}
+            {(['draft', 'quality'] as const).map((level) => <button key={level} type="button" className={quality === level ? 'on' : ''} onClick={() => setQuality(level)}>{level === 'draft' ? c.draft : c.high}</button>)}
           </div>
-          <div className="dim" style={{ fontSize: 12 }}>{q.note}</div>
+          <div className="dim" style={{ fontSize: 12 }}>{quality === 'draft' ? c.draftInfo : c.highInfo}</div>
         </div>}
 
         {mode === 'image' && source && (
@@ -208,51 +212,51 @@ export default function ObjectPage() {
             {cutReady && (
               <>
                 <div className="seg">
-                  <button type="button" className={!showCut ? 'on' : ''} onClick={() => setShowCut(false)}>Original</button>
-                  <button type="button" className={showCut ? 'on' : ''} onClick={() => setShowCut(true)}>Cut out</button>
+                  <button type="button" className={!showCut ? 'on' : ''} onClick={() => setShowCut(false)}>{c.original}</button>
+                  <button type="button" className={showCut ? 'on' : ''} onClick={() => setShowCut(true)}>{c.cutout}</button>
                 </div>
                 {showCut && (
                   <div className="checker" style={{ borderRadius: 12, overflow: 'hidden', aspectRatio: '4 / 3', display: 'grid', placeItems: 'center' }}>
-                    <img src={mediaUrl(cut!.takeId)} alt="The subject with the background removed" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }} />
+                    <img src={mediaUrl(cut!.takeId)} alt={c.cutoutAlt} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }} />
                   </div>
                 )}
               </>
             )}
             <button type="button" className="btn sm" disabled={cutting || (!!cut && cut.forSource === sourceKey && !cutReady && cutTake?.status !== 'failed')} onClick={() => void removeBackground()}>
               <Icon name="sparkle" size={13} />
-              {cutting || (cut && cut.forSource === sourceKey && !cutReady && cutTake?.status !== 'failed') ? 'Removing the background...' : cutReady ? 'Remove the background again' : 'Remove background'}
+              {cutting || (cut && cut.forSource === sourceKey && !cutReady && cutTake?.status !== 'failed') ? c.removingBackground : cutReady ? c.removeBackgroundAgain : c.removeBackground}
             </button>
-            {cutReady && <div className="dim" style={{ fontSize: 12 }}>{showCut ? 'Make 3D builds exactly this cutout.' : 'Make 3D uses the original picture.'}</div>}
+            {cutReady && <div className="dim" style={{ fontSize: 12 }}>{showCut ? c.useThisCutout : c.useOriginal}</div>}
           </div>
         )}
 
         {mode === 'image' && !usingCut && <div className="rail-section">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <span className="dim" style={{ fontSize: 12.5 }}>Cut the subject out first</span>
-            <Switch on={cutout} onChange={setCutout} label="cut the subject out first" />
+            <span className="dim" style={{ fontSize: 12.5 }}>{c.cutFirst}</span>
+            <Switch on={cutout} onChange={setCutout} label={c.cutFirst} />
           </div>
           <div className="label" style={{ textTransform: 'none', letterSpacing: 0 }}>
-            {cutout ? 'BiRefNet finds the subject and drops the background.' : 'Uses the picture\'s own transparency. Turn this off only for a PNG that is already cut out.'}
+            {cutout ? c.cutoutBehavior : c.transparencyBehavior}
           </div>
         </div>}
 
         {mode !== 'texte' && <div className="chip-row" style={{ alignItems: 'center' }}>
-          <Stepper value={count} min={1} max={4} onChange={setCount} fmt={(v) => `${v}/4`} />
-          <span className="dim" style={{ fontSize: 12 }}>Each take uses a new seed.</span>
+          <Stepper value={count} min={1} max={4} onChange={setCount} fmt={(v) => `${v}/4`} labels={{ decrease: c.decreaseCount, increase: c.increaseCount }} />
+          <span className="dim" style={{ fontSize: 12 }}>{c.eachTakeNewSeed}</span>
         </div>}
 
         {mode === 'texte' ? (
           <>
-            {chaine && <EtapesTexte e={chaine} />}
+            {chaine && <EtapesTexte e={chaine} langue={langue} />}
             <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || enCours || intention.trim().length < 3} onClick={() => void creerDepuisTexte()}>
-              <span>{busy ?? (enCours ? 'En cours…' : 'Créer en 3D')}</span>
-              <span className="cost">{devisT ? `${devisT.credits !== null ? `${devisT.credits} crédits · ` : ''}≈ ${fmtSeconds(devisT.secondesEstimees)}` : 'TRELLIS.2'}</span>
+              <span>{busy ?? (enCours ? c.inProgress : c.create3d)}</span>
+              <span className="cost">{devisT ? `${devisT.credits !== null ? `${devisT.credits} ${c.credits} · ` : ''}≈ ${fmtSeconds(devisT.secondesEstimees)}` : 'TRELLIS.2'}</span>
             </button>
           </>
         ) : (
           <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source || (mode === 'vues' && !vueGauche && !vueDos && !vueDroite)} onClick={() => void (mode === 'vues' ? goVues() : go())}>
             <span>{busy ?? (count > 1 ? `${PRODUIT_3D} · ${count}` : mode === 'vues' ? `${PRODUIT_3D} depuis ${1 + [vueGauche, vueDos, vueDroite].filter(Boolean).length} vues` : PRODUIT_3D)}</span>
-            <span className="cost">{devisT?.credits != null ? `${devisT.credits * count} crédits · ` : ''}{est ? fmtSeconds(est * count) : devisT ? `≈ ${fmtSeconds(devisT.secondesEstimees * count)}` : 'TRELLIS.2'}</span>
+            <span className="cost">{devisT?.credits != null ? `${devisT.credits * count} ${c.credits} · ` : ''}{est ? fmtSeconds(est * count) : devisT ? `≈ ${fmtSeconds(devisT.secondesEstimees * count)}` : 'TRELLIS.2'}</span>
           </button>
         )}
       </aside>
@@ -260,29 +264,29 @@ export default function ObjectPage() {
       <section className="canvas">
         <div className="canvas-head">
           <div className="tabs" style={{ borderBottom: 0 }}>
-            <button type="button" className="on">Models</button>
+            <button type="button" className="on">{c.models}</button>
           </div>
         </div>
         <div className="canvas-body">
           {takes.length === 0 ? (
             <div className="hero-empty">
               <div className="object-hero"><video src={presetClip('turntable')} muted loop autoPlay playsInline /></div>
-              <div className="display" style={{ fontSize: 'clamp(34px,4.6vw,60px)' }}>{PRODUIT_3D} : <span className="hl">en volume</span></div>
+              <div className="display" style={{ fontSize: 'clamp(34px,4.6vw,60px)' }}>{PRODUIT_3D} : <span className="hl">{c.emptyTitle}</span></div>
               <div className="steps3">
-                <div><span className="label">01</span><b>Add a still</b><span className="dim">Or press Make 3D on any image in the Library.</span></div>
-                <div><span className="label">02</span><b>Pick the detail</b><span className="dim">Draft to check the shape, High for the keeper.</span></div>
-                <div><span className="label">03</span><b>Turn it</b><span className="dim">Drag to orbit, download the GLB, block it into a scene.</span></div>
+                <div><span className="label">01</span><b>{c.addStill}</b><span className="dim">{c.addStillHelp}</span></div>
+                <div><span className="label">02</span><b>{c.chooseDetail}</b><span className="dim">{c.chooseDetailHelp}</span></div>
+                <div><span className="label">03</span><b>{c.turnModel}</b><span className="dim">{c.turnModelHelp}</span></div>
               </div>
             </div>
           ) : (
             <>
-              {shown && shown.status === 'done' && <ObjectFocus take={shown} look={look} onLook={setLook} onOpen={() => setViewing(shown.id)} />}
+              {shown && shown.status === 'done' && <ObjectFocus take={shown} look={look} onLook={setLook} onOpen={() => setViewing(shown.id)} langue={langue} />}
               <div className="grid dense" style={{ marginTop: 18 }}>
                 {takes.map((t) => (
-                  <MediaCard key={t.id} take={t} onOpen={() => setSelected(t.id)} actions={<>
-                    {t.status === 'done' && <a className="icon-btn" title="Download GLB" href={downloadUrl(t.id)}><Icon name="download" size={14} /></a>}
-                    <button type="button" className="icon-btn" title="Recreate" onClick={() => void recreate(t)}><Icon name="redo" size={14} /></button>
-                    <button type="button" className="icon-btn" title="Delete" onClick={() => void remove(t)}><Icon name="trash" size={14} /></button>
+                  <MediaCard key={t.id} take={t} langue={langue} onOpen={() => setSelected(t.id)} actions={<>
+                    {t.status === 'done' && <a className="icon-btn" title={c.downloadGlb} href={downloadUrl(t.id)}><Icon name="download" size={14} /></a>}
+                    <button type="button" className="icon-btn" title={c.recreate} onClick={() => void recreate(t)}><Icon name="redo" size={14} /></button>
+                    <button type="button" className="icon-btn" title={c.delete} onClick={() => void remove(t)}><Icon name="trash" size={14} /></button>
                   </>} />
                 ))}
               </div>
@@ -296,14 +300,15 @@ export default function ObjectPage() {
 }
 
 /** The selected model, big: grab to orbit, switch looks, see what it was made from. */
-function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void; onOpen: () => void }) {
+function ObjectFocus({ take, look, onLook, onOpen, langue }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void; onOpen: () => void; langue: LangueClient }) {
+  const c = meshCopy(langue);
   const s = settingsOf(take);
   const vue = useRef<HTMLDivElement>(null);
   const [fond, setFond] = useState<FondPlanCle>('studio');
   const [envoi, setEnvoi] = useState(false);
   async function animer() {
     const canevas = vue.current?.querySelector('canvas');
-    if (!canevas) { toast('La vue 3D n’est pas prête.', true); return; }
+    if (!canevas) { toast(c.viewNotReady, true); return; }
     setEnvoi(true);
     try {
       const png = await planCleDepuisCanevas(canevas, fond);
@@ -313,7 +318,7 @@ function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLo
       try { sessionStorage.setItem('nexora-plan-cle-apercu', apercu); } catch { /* aperçu facultatif */ }
       navigate(`/?mode=video&jeton=${encodeURIComponent(jeton)}&intention=${encodeURIComponent('L’objet de l’image, exactement le même, tourne lentement sur lui-même pendant que la caméra fait un arc autour de lui ; éclairage studio haut de gamme, reflets qui glissent sur ses matières.')}`);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Capture impossible.', true);
+      toast(c.animationFailure, true);
     } finally {
       setEnvoi(false);
     }
@@ -325,53 +330,52 @@ function ObjectFocus({ take, look, onLook, onOpen }: { take: Take; look: ModelLo
         <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} />
       </Suspense>
       <div className="object-side">
-        <div className="label">From</div>
+        <div className="label">{c.from}</div>
         <img className="object-from" src={subjectUrl(take.id)} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
         <div className="seg">
           {(['lit', 'clay', 'wire'] as const).map((l) => (
-            <button key={l} type="button" className={look === l ? 'on' : ''} onClick={() => onLook(l)}>{l === 'lit' ? 'Textured' : l === 'clay' ? 'Clay' : 'Wire'}</button>
+            <button key={l} type="button" className={look === l ? 'on' : ''} onClick={() => onLook(l)}>{l === 'lit' ? c.textured : l === 'clay' ? c.clay : c.wire}</button>
           ))}
         </div>
         <div className="dim" style={{ fontSize: 12 }}>
-          {s.quality === 'quality' ? 'High' : 'Draft'} · up to {Number(s.faces).toLocaleString()} faces · {s.texture}px textures
-          {take.render_seconds ? ` · ${Math.round(take.render_seconds)}s` : ''}
+          {c.facesAndTextures(s.quality === 'quality' ? c.high : c.draft, meshNumber(Number(s.faces), langue), String(s.texture))}
+          {take.render_seconds ? ` · ${Math.round(take.render_seconds)}${langue === 'fr' ? ' s' : ' sec'}` : ''}
         </div>
-        <a className="btn sm accent" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download GLB</a>
-        <button type="button" className="btn sm" onClick={onOpen}><Icon name="sparkle" size={14} />Open</button>
+        <a className="btn sm accent" href={downloadUrl(take.id)}><Icon name="download" size={14} />{c.downloadGlb}</a>
+        <button type="button" className="btn sm" onClick={onOpen}><Icon name="sparkle" size={14} />{c.open}</button>
         {take.status === 'done' && (
-          <div className="relief-animer" title="Tourne le modèle à l’angle voulu, puis anime-le : la vidéo part exactement de cette vue">
-            <div className="label">Animer en vidéo</div>
+          <div className="relief-animer" title={c.animateInVideo}>
+            <div className="label">{c.animateInVideo}</div>
             <div className="seg">
-              {(Object.keys(FONDS_PLAN_CLE) as FondPlanCle[]).map((f) => <button key={f} type="button" className={fond === f ? 'on' : ''} onClick={() => setFond(f)}>{FONDS_PLAN_CLE[f].nom}</button>)}
+              {(Object.keys(FONDS_PLAN_CLE) as FondPlanCle[]).map((f) => <button key={f} type="button" className={fond === f ? 'on' : ''} onClick={() => setFond(f)}>{f === 'studio' ? c.darkStudio : f === 'clair' ? c.lightStudio : c.blueNight}</button>)}
             </div>
-            <button type="button" className="btn sm accent" disabled={envoi} onClick={() => void animer()}><Icon name="sparkle" size={14} />{envoi ? 'Capture…' : 'Animer avec H3'}</button>
+            <button type="button" className="btn sm accent" disabled={envoi} onClick={() => void animer()}><Icon name="sparkle" size={14} />{envoi ? c.capture : c.animateWithH3}</button>
           </div>
         )}
       </div>
     </div>
-    <ReliefOutils take={take} />
+    <ReliefOutils take={take} langue={langue} />
     </>
   );
 }
 
 /** Les trois temps du texte → 3D, avec la note du juge quand elle est tombée. */
-function EtapesTexte({ e }: { e: ObjetTexteEtat }) {
+function EtapesTexte({ e, langue }: { e: ObjetTexteEtat; langue: LangueClient }) {
+  const c = meshCopy(langue);
   const ordre = ['image', 'objet', 'jugement', 'fini'] as const;
   const rang = e.etat === 'echec' ? -1 : ordre.indexOf(e.etat);
-  const lignes = [
-    ['Image de référence', 0], ['Modèle 3D', 1], ['Contrôle sur quatre côtés', 2],
-  ] as const;
+  const lignes = [[c.textReferenceImage, 0], [c.textModel, 1], [c.textCheck, 2]] as const;
   const derniere = e.notes[e.notes.length - 1];
   return (
     <div className="rail-section" aria-live="polite">
       {lignes.map(([nom, i]) => (
         <div key={nom} style={{ display: 'flex', gap: 8, fontSize: 12.5, opacity: rang >= i || e.etat === 'fini' ? 1 : 0.5 }}>
           <span aria-hidden="true">{e.etat === 'fini' || rang > i ? '✓' : rang === i ? '…' : '·'}</span>
-          <span>{nom}{i === 1 && e.essai > 1 ? ' (2e essai)' : ''}</span>
+          <span>{nom}{i === 1 && e.essai > 1 ? c.secondAttempt : ''}</span>
         </div>
       ))}
-      {derniere && <div className="dim" style={{ fontSize: 12 }}>Juge : {derniere.note}/10{derniere.raison ? ` · ${derniere.raison}` : ''}</div>}
-      {e.etat === 'echec' && <div style={{ fontSize: 12.5, color: 'var(--danger, #e5534b)' }}>{e.erreur ?? 'Échec.'}</div>}
+      {derniere && <div className="dim" style={{ fontSize: 12 }}>{c.judge} : {derniere.note}/10{derniere.raison ? ` · ${derniere.raison}` : ''}</div>}
+      {e.etat === 'echec' && <div role="alert" style={{ fontSize: 12.5, color: 'var(--danger, #e5534b)' }}>{c.failed}</div>}
     </div>
   );
 }

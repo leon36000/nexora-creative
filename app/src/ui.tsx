@@ -4,6 +4,8 @@ import { api, posterUrl, mediaUrl, turntableUrl, type Take } from './api';
 import { isActive, isImage, isModel, refreshStatus, settingsOf, toast, useStore } from './store';
 import { APP_MAX_TIER, RENDER_TIERS, appTier, tierCapNote, tierDef, tiersUpTo, type RenderTier, type TierApp } from './renderTier';
 import { takeDragProps } from './drop';
+import type { LangueClient } from '../shared/creationLanguage';
+import { meshCopy as getMeshCopy } from './meshCopy';
 
 // ---------- icons (1.6px stroke, 16px box) ----------
 const P: Record<string, ReactNode> = {
@@ -129,12 +131,12 @@ export function ChipMenu<T extends string | number>(props: {
   );
 }
 
-export function Stepper({ value, min, max, onChange, fmt }: { value: number; min: number; max: number; onChange: (v: number) => void; fmt?: (v: number) => string }) {
+export function Stepper({ value, min, max, onChange, fmt, labels }: { value: number; min: number; max: number; onChange: (v: number) => void; fmt?: (v: number) => string; labels?: { decrease: string; increase: string } }) {
   return (
     <div className="stepper">
-      <button type="button" onClick={() => onChange(Math.max(min, value - 1))} aria-label="fewer"><Icon name="minus" size={13} /></button>
+      <button type="button" onClick={() => onChange(Math.max(min, value - 1))} aria-label={labels?.decrease ?? 'fewer'}><Icon name="minus" size={13} /></button>
       <span>{fmt ? fmt(value) : value}</span>
-      <button type="button" onClick={() => onChange(Math.min(max, value + 1))} aria-label="more"><Icon name="plus" size={13} /></button>
+      <button type="button" onClick={() => onChange(Math.min(max, value + 1))} aria-label={labels?.increase ?? 'more'}><Icon name="plus" size={13} /></button>
     </div>
   );
 }
@@ -271,13 +273,14 @@ function dureeCarte(s: any): string | null {
   return d ? `${Math.round(d * 10) / 10} s` : null;
 }
 
-export function MediaCard({ take, onOpen, actions, pendingLabel, tag }: { take: Take; onOpen?: () => void; actions?: ReactNode; pendingLabel?: string; tag?: string }) {
+export function MediaCard({ take, onOpen, actions, pendingLabel, tag, langue }: { take: Take; onOpen?: () => void; actions?: ReactNode; pendingLabel?: string; tag?: string; langue?: LangueClient }) {
   const progress = useStore((s) => (take.prompt_id ? s.progress[take.prompt_id] : undefined));
   const started = useStore((st) => !!take.prompt_id && !!st.started[take.prompt_id]);
   const preview = useStore((s) => s.preview);
   const status = useStore((s) => s.status);
   const vref = useRef<HTMLVideoElement>(null);
   const s = settingsOf(take);
+  const meshText = langue ? getMeshCopy(langue) : null;
   const style = { ['--ar' as any]: aspectOf(take) };
 
   if (isActive(take)) {
@@ -292,7 +295,7 @@ export function MediaCard({ take, onOpen, actions, pendingLabel, tag }: { take: 
         {running && preview && preview.promptId === take.prompt_id && <img src={preview.url} alt="" style={{ opacity: 0.85, filter: 'saturate(.9)' }} />}
         <div className="status">
           <div>
-            <div className="label" style={{ color: 'var(--accent)' }}>{running ? (progress?.max && progress.max !== 100 ? `Étape ${progress.value}/${progress.max}` : 'Rendu en cours') : first ? 'En attente du moteur' : pendingLabel ?? 'En file d’attente'}</div>
+            <div className="label" style={{ color: 'var(--accent)' }}>{running ? (progress?.max && progress.max !== 100 ? `${meshText?.cardStep ?? 'Étape'} ${progress.value}/${progress.max}` : meshText?.cardRendering ?? 'Rendu en cours') : first ? meshText?.cardWaiting ?? 'En attente du moteur' : pendingLabel ?? meshText?.cardQueued ?? 'En file d’attente'}</div>
           </div>
         </div>
         <div className="progress"><i style={{ width: `${running ? pct : 0}%` }} /></div>
@@ -301,8 +304,8 @@ export function MediaCard({ take, onOpen, actions, pendingLabel, tag }: { take: 
   }
   if (take.status !== 'done' || !take.output_path) {
     return (
-      <div className="card failed" style={style} title={take.error ?? ''}>
-        <div className="status"><div><div className="label">{take.status}</div><div style={{ marginTop: 6, fontSize: 12 }}>{(take.error ?? '').slice(0, 110)}</div></div></div>
+      <div className="card failed" style={style} title={langue ? meshText!.cardFailedHelp : take.error ?? ''}>
+        <div className="status"><div><div className="label">{langue ? meshText!.cardFailed : take.status}</div><div style={{ marginTop: 6, fontSize: 12 }}>{langue ? meshText!.cardFailedHelp : (take.error ?? '').slice(0, 110)}</div></div></div>
         <div className="quick" style={{ opacity: 1 }}>{actions}</div>
       </div>
     );
@@ -319,9 +322,9 @@ export function MediaCard({ take, onOpen, actions, pendingLabel, tag }: { take: 
       <div className="kind">
         {tag && <span className="badge" style={{ marginRight: 4 }}>{tag}</span>}
         {model && <span className="badge cool">3D</span>}
-        {!image && !model && <span className="badge cool">{dureeCarte(s) ?? 'vidéo'}</span>}
-        {s.cut && <span className="badge cool" style={{ marginLeft: 4 }}>{(s.shots ?? []).length} plans</span>}
-        {!image && s.seam && <span className={`badge seam ${s.seam.verdict === 'seamless' ? 'ok' : 'bad'}`} title={`Loop point: ${s.seam.ratio}x a frame step`}>{s.seam.verdict === 'seamless' ? 'Seamless' : 'Visible seam'}</span>}
+        {!image && !model && <span className="badge cool">{dureeCarte(s) ?? meshText?.cardVideo ?? 'vidéo'}</span>}
+        {s.cut && <span className="badge cool" style={{ marginLeft: 4 }}>{(s.shots ?? []).length} {meshText?.cardPlans ?? 'plans'}</span>}
+        {!image && s.seam && <span className={`badge seam ${s.seam.verdict === 'seamless' ? 'ok' : 'bad'}`} title={meshText?.cardSeamTitle(s.seam.ratio) ?? `Loop point: ${s.seam.ratio}x a frame step`}>{s.seam.verdict === 'seamless' ? meshText?.cardSeamless ?? 'Seamless' : meshText?.cardSeam ?? 'Visible seam'}</span>}
         {!image && s.app === 'hdr' && <span className="badge">HDR</span>}
       </div>
       <div className="quick" onClick={(e) => e.stopPropagation()}>{actions}</div>
