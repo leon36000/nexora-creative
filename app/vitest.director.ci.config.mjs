@@ -20,6 +20,8 @@ export default {
       'app/server/nexora/creer.test.ts', 'app/server/nexora/gardeNouveauRendu.test.ts',
       'app/server/nexora/creationLanguage.test.ts', 'app/server/nexora/personnages.test.ts',
       'app/server/nexora/credits.test.ts', 'app/src/filmErreurPartielle.test.ts',
+      'app/server/nexora/detourage/routes.test.ts',
+      'app/server/nexora/detourage/serviceNatif.test.ts',
       'app/src/FilmPartielAlerte.test.tsx', 'app/src/LangueSelection.test.tsx',
     ],
     coverage: {
@@ -30,6 +32,7 @@ export default {
         'app/server/nexora/film.ts', 'app/server/nexora/filmMoteur.ts', 'app/server/nexora/filmEchec.ts',
         'app/server/nexora/filmClePlan.ts', 'app/server/nexora/reconciliationArrets.ts',
         'app/server/nexora/personnagesCast.ts', 'app/src/api.ts', 'app/src/pages/Creer.tsx',
+        'app/server/nexora/detourage/routes.ts', 'app/server/nexora/detourage/identite.ts',
         'app/src/filmPartielActions.ts', 'app/src/FilmPartielAlerte.tsx', 'app/src/LangueSelection.tsx', 'app/src/FilmPlans.tsx',
       ],
     },

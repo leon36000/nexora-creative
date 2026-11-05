@@ -11,6 +11,7 @@
  *  'finished' { jobId }   (terminal state reached; call result())
  */
 import { Comfy, type Job } from '@comfyorg/sdk';
+import { ID_DETOURAGE_NATIF } from './nexora/detourage/identite.js';
 import { ComfyLow } from '@comfyorg/sdk/low';
 import { EventEmitter } from 'events';
 import { mkdir, readFile, writeFile } from 'fs/promises';
@@ -86,6 +87,12 @@ function lireMoteurs(): MoteurGpu[] {
 
 export const moteurs: MoteurGpu[] = lireMoteurs();
 const moteursEnv: MoteurGpu[] = moteurs.map((m) => ({ ...m }));
+
+/** Service natif configuré indépendamment des recettes et réglages Comfy. */
+export function serviceDetourageNatif() {
+  const { detourageUrl, detourageJeton } = moteursEnv[0];
+  return detourageUrl ? { id: ID_DETOURAGE_NATIF, nom: 'Détourage natif', detourageUrl, detourageJeton } : undefined;
+}
 
 /**
  * Nexora : applique la liste de moteurs de l'administration du site (lue toutes les minutes). Le moteur « principal » de
