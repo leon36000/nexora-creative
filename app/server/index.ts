@@ -55,6 +55,7 @@ import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demande
 import { transcrireSurGpu } from './nexora/transcriptionGpu.js';
 import { argsAvecMusique, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
+import { erreurAncrageMaxFilm, libererReservationsFilmEchoue } from './nexora/filmAncrage.js';
 import { lireCartons } from './nexora/cartons.js';
 import { buildLtxGraph } from './graphs/ltx.js';
 import { buildLtx25Graph, ltx25EffectiveSize, ltx25Mode, LTX25_FPS, snapFrames } from './graphs/ltx25.js';
@@ -130,7 +131,13 @@ function facturationPour(org: string | null | undefined) {
 }
 const facturationCourante = () => facturationPour(compteCourant()?.organisationId);
 /** Valide ou libère les crédits des prises terminées (appelé par la réconciliation, idempotent). */
-async function solderCredits() {
+let creditsEnReconciliation: Promise<void> | null = null;
+function solderCredits(): Promise<void> {
+  if (creditsEnReconciliation) return creditsEnReconciliation;
+  creditsEnReconciliation = solderCreditsInterne().finally(() => { creditsEnReconciliation = null; });
+  return creditsEnReconciliation;
+}
+async function solderCreditsInterne() {
   for (const t of takes.list(null, 300)) {
     const s = JSON.parse(t.settings);
     const action = actionFacturation({ status: t.status, credits: s.nexoraCredits });
@@ -146,6 +153,14 @@ async function solderCredits() {
     } catch (e) {
       console.error(`[nexora] crédits de la prise ${t.id} :`, e instanceof Error ? e.message : e);
     }
+  }
+  for (const t of takes.filmsAvecReservationsEnAttente()) {
+    const s = JSON.parse(t.settings);
+    const fac = facturationPour(t.organisation_id);
+    if (!fac || !accesOrganisation(t.organisation_id)) continue;
+    const r = await libererReservationsFilmEchoue(s.storyboard, fac);
+    if (r.liberees.length) takes.patchSettings(t.id, { storyboard: r.storyboard });
+    if (r.enAttente.length) app.log.warn(`film ${t.id} : ${r.enAttente.length} réservation(s) de suite en attente de libération`);
   }
 }
 /** Compte l'espace des prises terminées (réconciliation, idempotent) ; marque l'organisation pleine si refus. */
@@ -1093,6 +1108,8 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
   const demande = lireDemandeCreer({ intention: sb.titre, format: b.format, son: b.son, qualite: b.qualite });
   const moteur = moteurDuCompte(demande.qualite);
   if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
+  const erreurAncrage = erreurAncrageMaxFilm(moteur, sb);
+  if (erreurAncrage) return reply.code(422).send({ error: erreurAncrage, code: 'H3_MAX_ANCHOR_UNAVAILABLE' });
   const missing = await blockingReasonFor(eng.isLocal() && eng.recetteSurPrincipal(moteur), bundlesFor({ kind: 'video', videoModel: moteur }));
   if (missing) return reply.code(412).send({ error: missing });
   // Crédits : chaque plan réserve son devis avant le tournage ; les reprises automatiques sont offertes par Nexora.
@@ -1168,6 +1185,8 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
   catch (e) { return reply.code(400).send({ error: e instanceof Error ? e.message : 'plan invalide' }); }
   const moteur = s.moteur === 'h3-max' || s.moteur === 'h3-fast' ? s.moteur as MoteurVideo : moteurDuCompte(s.qualite);
   if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
+  const erreurAncrage = erreurAncrageMaxFilm(moteur, sb);
+  if (erreurAncrage) return reply.code(422).send({ error: erreurAncrage, code: 'H3_MAX_ANCHOR_UNAVAILABLE' });
   const fac = facturationCourante();
   const reservations: (CreditsPrise | undefined)[] = [];
   for (const p of sb.plans) {
@@ -1191,12 +1210,14 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
  * dont les clips d'origine gardent leur prise ; seul le nouveau plan est tourné (MiniMax H3), contrôlé et facturé.
  */
 async function lancerRaccord(req: FastifyRequest, reply: FastifyReply, r: { storyboard: Storyboard; format: FormatCreer; son: boolean; qualite: 'rapide' | 'max' }, intention: string) {
+  const moteur = moteurDuCompte(r.qualite);
+  if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
+  const erreurAncrage = erreurAncrageMaxFilm(moteur, r.storyboard);
+  if (erreurAncrage) return reply.code(422).send({ error: erreurAncrage, code: 'H3_MAX_ANCHOR_UNAVAILABLE' });
   if (intention) {
     const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
     if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
   }
-  const moteur = moteurDuCompte(r.qualite);
-  if (!moteur) return reply.code(422).send({ error: REFUS_TERRITOIRE });
   const fac = facturationCourante();
   const reservations: (CreditsPrise | undefined)[] = [];
   for (const p of r.storyboard.plans) {

@@ -107,11 +107,13 @@ describe('partir d’une photo (image vers vidéo)', () => {
     }
   });
 
-  it('passe la photo en première image, sur les deux moteurs H3', () => {
+  it('passe la photo à FastH3 et exige FL2VA pour le moteur Max', () => {
     const d = lireDemandeCreer({ intention: 'ma voiture', image: jeton });
     expect(corpsRendu(d, 'P', 'h3-fast')).toMatchObject({ startImage: jeton });
-    expect(corpsRendu(d, 'P', 'h3-max')).toMatchObject({ startImage: jeton, checkpoint: 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors', width: 1344, height: 768 });
-    expect(corpsRendu(d, 'P', 'h3-max')).not.toHaveProperty('refMode');
+    expect(() => corpsRendu(d, 'P', 'h3-max', {})).toThrow(/qualité maximale.*image ancrée/);
+    const cinemaFl2va = { NEXORA_H3_MAX_CHECKPOINT: 'minimax_h3_fl2va_pruned_fp8_scaled.safetensors' };
+    expect(corpsRendu(d, 'P', 'h3-max', cinemaFl2va)).toMatchObject({ startImage: jeton, checkpoint: 'minimax_h3_fl2va_pruned_fp8_scaled.safetensors', width: 1344, height: 768 });
+    expect(corpsRendu(d, 'P', 'h3-max', cinemaFl2va)).not.toHaveProperty('refMode');
     expect(corpsRendu(lireDemandeCreer({ intention: 'b' }), 'P', 'h3-fast')).not.toHaveProperty('startImage');
   });
 });
