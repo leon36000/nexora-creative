@@ -13,7 +13,7 @@ DEPOT="$1"; REVISION="$2"; ARTEFACT="$3"; SHA_ARTEFACT="$4"; LOCAL="$5"; ID="$6"
 [ -f "$ARTEFACT" ] && [ ! -L "$ARTEFACT" ] || { printf '%s\n' 'Artefact ordinaire requis' >&2; exit 2; }
 [ "$(git -C "$DEPOT" rev-parse "${REVISION}^{commit}")" = "$REVISION" ] || exit 1
 [ "$(sha256sum "$ARTEFACT" | cut -d ' ' -f 1)" = "$SHA_ARTEFACT" ] || { printf '%s\n' 'Empreinte artefact différente' >&2; exit 1; }
-env -i PATH=/usr/bin:/bin HOME=/nonexistent python3 -B - "$ARTEFACT" "$REVISION" <<'PY'
+env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent python3 -B - "$ARTEFACT" "$REVISION" <<'PY'
 import sys, tarfile
 with tarfile.open(sys.argv[1], 'r:') as t:
     matches = [m for m in t if m.name == 'release/CI_COMMIT_SHA']

@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import tarfile
 import unittest
@@ -22,9 +23,9 @@ class Transport(unittest.TestCase):
             (repo / 'app/package.json').write_text('{}')
             (repo / 'mode-studio/package.json').write_text('{}')
             ssh = binaires / 'ssh'
-            ssh.write_text('#!/usr/bin/python3\nimport os,subprocess,sys\nc=sys.argv[-1].replace("/srv/creative",os.environ["TEST_DISTANT"])\nsys.exit(subprocess.run(["/bin/bash","-c",c],stdin=sys.stdin).returncode)\n')
+            ssh.write_text(f'#!{sys.executable}\nimport os,subprocess,sys\nc=sys.argv[-1].replace("/srv/creative",os.environ["TEST_DISTANT"])\nsys.exit(subprocess.run(["/bin/bash","-c",c],stdin=sys.stdin).returncode)\n')
             ssh.chmod(0o755)
-            env = {'PATH': f'{binaires}:/usr/bin:/bin', 'HOME': str(base), 'TEST_DISTANT': str(distant),
+            env = {'PATH': f'{binaires}:{Path(sys.executable).parent}:/usr/local/bin:/usr/bin:/bin', 'HOME': str(base), 'TEST_DISTANT': str(distant),
                    'GIT_CONFIG_GLOBAL': '/dev/null', 'GIT_CONFIG_SYSTEM': '/dev/null',
                    'GIT_AUTHOR_NAME': 'Fixture', 'GIT_AUTHOR_EMAIL': 'fixture@example.invalid',
                    'GIT_COMMITTER_NAME': 'Fixture', 'GIT_COMMITTER_EMAIL': 'fixture@example.invalid'}
