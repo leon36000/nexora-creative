@@ -50,7 +50,7 @@ describe('MCP rapport Mesh via HTTP', () => {
       const resultat = await client.callTool({ name: 'nexora_mesh_rapport', arguments: args });
       expect(resultat.isError).toBe(true);
     }
-    expect(requetes.length).toBe(avant);
+    expect(requetes).toHaveLength(avant);
   });
   it('signale proprement les erreurs HTTP et les réponses invalides', async () => {
     for (const id of [999, 998]) {

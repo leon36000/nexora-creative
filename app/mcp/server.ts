@@ -201,7 +201,8 @@ server.registerTool('nexora_mesh_rapport', {
     data = await api.nexora<unknown>(`relief/${take_id}/rapport${query}`);
   } catch (error) {
     const status = error instanceof Error ? / -> (\d{3}):/.exec(error.message)?.[1] : undefined;
-    throw new Error(`${PRODUIT_3D}: unable to retrieve the mesh report${status ? ` (HTTP ${status})` : ''}. Check that the take exists and is ready.`);
+    const suffix = status ? ' (HTTP ' + status + ')' : '';
+    throw new Error(`${PRODUIT_3D}: unable to retrieve the mesh report${suffix}. Check that the take exists and is ready.`);
   }
   const parsed = meshResponse.safeParse(data);
   if (!parsed.success) throw new Error(`${PRODUIT_3D}: invalid mesh report returned by the server.`);
