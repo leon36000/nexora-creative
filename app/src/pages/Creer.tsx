@@ -331,6 +331,21 @@ export default function Creer() {
     }
   }
 
+  function traiterEchecTournage(e: unknown) {
+    if (!(e instanceof EchecFilmPartiel)) {
+      toast(e instanceof Error ? e.message : 'Le tournage a échoué.', true);
+      return;
+    }
+    setFilmPartiel(e);
+    const ids = e.prises.map((p) => '#' + p.takeId).join(', ');
+    let prises = '';
+    if (ids) prises = (langueClient === 'en' ? ', shots ' : ', prises ') + ids;
+    const detail = langueClient === 'en'
+      ? `Film #${e.filmId}${prises}: check their status before retrying.`
+      : `Film n° ${e.filmId}${prises} : vérifie leur état avant de réessayer.`;
+    toast(`${e.message} ${detail}`, true);
+  }
+
   async function tournerFilm() {
     if (!storyboard) return;
     setEnvoi('film');
@@ -339,14 +354,7 @@ export default function Creer() {
       toast(`Tournage lancé : ${storyboard.plans.length} plans. Le film s’assemble tout seul à la fin.`);
       setStoryboard(null);
     } catch (e) {
-      if (e instanceof EchecFilmPartiel) {
-        setFilmPartiel(e);
-        const ids = e.prises.map((p) => `#${p.takeId}`).join(', ');
-        const detail = langueClient === 'en'
-          ? `Film #${e.filmId}${ids ? `, shots ${ids}` : ''}: check their status before retrying.`
-          : `Film n° ${e.filmId}${ids ? `, prises ${ids}` : ''} : vérifie leur état avant de réessayer.`;
-        toast(`${e.message} ${detail}`, true);
-      } else toast(e instanceof Error ? e.message : 'Le tournage a échoué.', true);
+      traiterEchecTournage(e);
     } finally {
       setEnvoi(null);
     }

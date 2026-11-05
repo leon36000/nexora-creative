@@ -2793,10 +2793,7 @@ async function queueTakes(b: any, count: number, creditsInternes?: (CreditsPrise
   // Stage: the blocking is drawn once and one look frame serves every take of the batch.
   let staged: Promise<any> | undefined;
   let look: Promise<{ takeId: number; token: string }> | undefined;
-  for (let i = 0; i < n; i++) {
-    const seed = firstSeed + i;
-    const raw = variants.length ? { ...b, ...variants[i], variants: undefined, batch, batchIndex: i, batchSize: n }
-      : { ...b, batch: undefined, batchIndex: undefined, batchSize: undefined };
+  const preparer = async (raw: any, seed: number, i: number): Promise<{ one: any; built: Built } | null> => {
     let one: any;
     let built: Built;
     try {
@@ -2810,7 +2807,7 @@ async function queueTakes(b: any, count: number, creditsInternes?: (CreditsPrise
           return castHeroFrame(r.hero!.castIds, r.hero!.shot, opts);
         })();
         takeIds.push(queueAfter(one, seed, obtenirHero, b.projectId ?? null, (body, h) => ({ ...body, startImage: h.token, castHeroTake: h.takeId }), protegee, creditsInternes?.[i], clePlan, transfererDepuis));
-        continue;
+        return null;
       }
       if (one.kind === 'stage') {
         one = { ...(await (staged ??= prepareStage(one))), seed: one.seed, batch: one.batch, batchIndex: one.batchIndex, batchSize: one.batchSize };
@@ -2818,20 +2815,26 @@ async function queueTakes(b: any, count: number, creditsInternes?: (CreditsPrise
           const shot = one;
           const obtenirLook = () => look ??= stageLookFrame(queueTakes, { ...shot, seed, projectId: b.projectId });
           takeIds.push(queueAfter(one, seed, obtenirLook, b.projectId ?? null, (body, h) => ({ ...body, lookImage: h.token, lookTake: h.takeId }), protegee, creditsInternes?.[i], clePlan, transfererDepuis));
-          continue;
+          return null;
         }
       }
       built = await graphFor(one, seed);
     } catch (e) {
       throw Object.assign(e instanceof Error ? e : new Error('bad request'), { takeIds });
     }
+    return { one, built };
+  };
+  const suiviProtege = (i: number) => protegee
+    ? { nexoraSoumission: 'indeterminee', nexoraClePlan: clePlan, ...(creditsInternes?.[i] ? { nexoraCredits: creditsInternes[i] } : {}) }
+    : {};
+  const creerEtSoumettre = async (one: any, built: Built, seed: number, i: number): Promise<void> => {
     let takeId: number;
     try {
       const row = {
         project_id: b.projectId ?? (built.parent ? takes.get(built.parent)?.project_id ?? null : null),
         kind: built.kind,
         shot_name: String(built.settings?.shotName ?? one.shotName ?? 'shot'),
-        settings: { ...one, ...built.settings, seed, count: undefined, ...(protegee ? { nexoraSoumission: 'indeterminee', nexoraClePlan: clePlan, ...(creditsInternes?.[i] ? { nexoraCredits: creditsInternes[i] } : {}) } : {}) },
+        settings: { ...one, ...built.settings, seed, count: undefined, ...suiviProtege(i) },
         parent_take_id: built.parent,
       };
       takeId = protegee ? takes.createProtegee(row, clePlan!, transfererDepuis) : takes.create(row);
@@ -2847,6 +2850,15 @@ async function queueTakes(b: any, count: number, creditsInternes?: (CreditsPrise
       }
       throw Object.assign(e instanceof Error ? e : new Error('submit failed'), { takeIds });
     }
+  };
+  for (let i = 0; i < n; i++) {
+    const seed = firstSeed + i;
+    const raw = variants.length ? { ...b, ...variants[i], variants: undefined, batch, batchIndex: i, batchSize: n }
+      : { ...b, batch: undefined, batchIndex: undefined, batchSize: undefined };
+    const prepare = await preparer(raw, seed, i);
+    if (!prepare) continue;
+    const { one, built } = prepare;
+    await creerEtSoumettre(one, built, seed, i);
   }
   return takeIds;
 }
@@ -2865,7 +2877,10 @@ function queueAfter(
   const row = { project_id: projectId, kind: 'video', shot_name: String(one.shotName ?? 'shot'), settings: { ...one, seed, count: undefined, ...suivi } };
   const takeId = protegee ? takes.createProtegee(row, clePlan!, transfererDepuis) : takes.create(row);
   try { broadcast({ type: 'take', take: takes.get(takeId) }); }
-  catch (e) { if (!protegee) throw e; console.warn('Notification de prise différée indisponible'); }
+  catch (e) {
+    if (!protegee) throw e;
+    console.warn('Notification de prise différée indisponible');
+  }
   void (async () => {
     let soumissionCommencee = false;
     try {
