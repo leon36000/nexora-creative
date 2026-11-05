@@ -374,7 +374,7 @@ export async function realiser(e: EntreeRealisateur, llm: ClientLlm, maxTentativ
     { role: 'system', content: consignes(e) },
     { role: 'user', content: demande(e) },
   ];
-  const ctx = { mode: e.mode, references: e.references, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
+  const ctx = { mode: e.mode, references: e.references, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte), dialoguesAvecLangue: e.dialogues };
   let erreurs: string[] = [];
   const historique: string[][] = [];
   for (let tentatives = 1; tentatives <= maxTentatives; tentatives++) {

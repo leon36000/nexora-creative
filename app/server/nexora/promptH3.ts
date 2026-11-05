@@ -14,6 +14,8 @@ export interface ContexteH3 {
   dureeS: number;
   /** Répliques fournies par l'utilisateur, à recopier mot pour mot dans <d>…</d>. */
   dialogues?: string[];
+  /** Langue explicitement demandée pour chaque réplique ; distincte de la langue UI. */
+  dialoguesAvecLangue?: { texte: string; langue: string }[];
   references?: { sujets: SujetRef[]; composition?: number };
 }
 
@@ -94,9 +96,21 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
     else if ((texte.split('\n')[1] ?? 'x').trim() !== '') erreurs.push('une ligne vide doit suivre la ligne d’instruction');
   }
 
-  const blocs = [...texte.matchAll(/<d>\[[^\]]+\]\s*([\s\S]*?)<\/d>/g)].map((m) => m[1].trim());
+  const blocs = [...texte.matchAll(/<d>\[([^\]]+)\]\s*([\s\S]*?)<\/d>/g)].map((m) => ({ langue: m[1], texte: m[2].trim() }));
   for (const replique of ctx.dialogues ?? []) {
-    if (!blocs.some((b) => b === replique.trim())) erreurs.push(`réplique absente ou modifiée, à recopier mot pour mot : ${replique}`);
+    if (!blocs.some((b) => b.texte === replique.trim())) erreurs.push(`réplique absente ou modifiée, à recopier mot pour mot : ${replique}`);
+  }
+  const disponibles = [...blocs];
+  for (const replique of ctx.dialoguesAvecLangue ?? []) {
+    const i = disponibles.findIndex((b) => b.texte === replique.texte.trim() && b.langue === replique.langue);
+    if (i < 0) erreurs.push(`langue ou texte de la réplique incorrect : ${replique.texte}`);
+    else disponibles.splice(i, 1);
+  }
+  if (ctx.dialoguesAvecLangue !== undefined) {
+    const ouvertures = (texte.match(/<d>/g) ?? []).length;
+    const fermetures = (texte.match(/<\/d>/g) ?? []).length;
+    if (ouvertures !== blocs.length || fermetures !== blocs.length) erreurs.push('balises de réplique mal formées');
+    for (const bloc of disponibles) erreurs.push(`réplique en trop ou langue incorrecte : ${bloc.texte}`);
   }
   return erreurs;
 }
