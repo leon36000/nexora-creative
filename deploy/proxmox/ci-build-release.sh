@@ -48,7 +48,7 @@ printf '%s\n' "$CI_COMMIT_SHA" > "$ROOT/work/release/CI_COMMIT_SHA"
 env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent PYTHONPATH="$CI_PROJECT_DIR/deploy/proxmox" \
   python3 -B - "$ROOT/work/release" "$OUT/release.tar" <<'PY'
 import json, pathlib, sys, tarfile
-from transaction_release import chemin, digest, empreinte_dependances
+from transaction_release import ajouter_dependances_tar, chemin, digest, empreinte_dependances
 r, out = map(pathlib.Path, sys.argv[1:])
 files = json.loads((r / 'SOURCE_FILES.json').read_text())
 hashes = json.loads((r / 'FICHIERS_SHA256.json').read_text())
@@ -59,7 +59,7 @@ if empreinte_dependances(r / 'app/node_modules') != (r / 'DEPENDANCES_SHA256').r
 with tarfile.open(out, 'x:xz') as t:
     for name in sorted(files):
         t.add(chemin(r, name), arcname='release/' + name, recursive=False)
-    t.add(r / 'app/node_modules', arcname='release/app/node_modules')
+    ajouter_dependances_tar(t, r / 'app/node_modules')
     for name in ('BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'FICHIERS_SHA256.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
         t.add(r / name, arcname='release/' + name, recursive=False)
 PY

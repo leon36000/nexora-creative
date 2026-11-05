@@ -9,6 +9,7 @@ import sqlite3
 from pathlib import Path, PurePosixPath
 import shutil
 import stat
+import tarfile
 import tempfile
 from contextlib import contextmanager
 
@@ -267,6 +268,27 @@ def rollback(cible, backup):
             sync_dir(retired.parent)
         else:
             copier(chemin(backup / 'avant', action['chemin']), dst, action['avant'], action['apres'])
+
+
+def ajouter_dependances_tar(archive, root):
+    """Conserve les liens symboliques et matérialise les liens physiques en fichiers."""
+    root = Path(root)
+    prefix = PurePosixPath('release/app/node_modules')
+    if archive.dereference:
+        raise ValueError('suivi global des liens interdit')
+
+    def filtrer(info):
+        if info.islnk():
+            relatif = PurePosixPath(info.name).relative_to(prefix)
+            source = root.joinpath(*relatif.parts)
+            if source.is_symlink() or not source.is_file():
+                raise ValueError('source de lien physique invalide')
+            info.type = tarfile.REGTYPE
+            info.linkname = ''
+            info.size = source.stat().st_size
+        return info
+
+    archive.add(root, arcname=str(prefix), filter=filtrer)
 
 
 def empreinte_dependances(root):

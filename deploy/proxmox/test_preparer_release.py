@@ -2,6 +2,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import tarfile
@@ -11,6 +12,7 @@ import unittest
 SPEC = importlib.util.spec_from_file_location('preparer_release', Path(__file__).with_name('preparer_release.py'))
 P = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(P)
+from transaction_release import ajouter_dependances_tar, empreinte_dependances
 
 
 class Preparation(unittest.TestCase):
@@ -148,6 +150,7 @@ class Preparation(unittest.TestCase):
                 if opts['cwd'].name == 'app':
                     (opts['cwd'] / 'node_modules/pkg').mkdir()
                     (opts['cwd'] / 'node_modules/pkg/index.js').write_text('fixture')
+                    os.link(opts['cwd'] / 'node_modules/pkg/index.js', opts['cwd'] / 'node_modules/pkg/hard.js')
                     (opts['cwd'] / 'node_modules/.bin').mkdir()
                     (opts['cwd'] / 'node_modules/.bin/outil').symlink_to('../pkg/index.js')
             else:
@@ -157,13 +160,19 @@ class Preparation(unittest.TestCase):
         (release / 'CI_COMMIT_SHA').write_text('a' * 40 + '\n')
         artefact = self.root / 'artefact.tar'
         with tarfile.open(artefact, 'w:xz') as tar:
-            for item in ('app', 'mode-studio/dist', 'BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'FICHIERS_SHA256.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
+            for item in ('app/package.json', 'app/dist', 'mode-studio/dist', 'BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'FICHIERS_SHA256.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
                 tar.add(release / item, arcname='release/' + item)
+            ajouter_dependances_tar(tar, release / 'app/node_modules')
+        with tarfile.open(artefact, 'r:*') as tar:
+            self.assertFalse(any(item.islnk() for item in tar))
         with artefact.open('rb') as f:
             empreinte = hashlib.file_digest(f, 'sha256').hexdigest()
         P.importer(artefact, empreinte, 'a' * 40, self.root / 'importe')
         self.assertEqual((self.root / 'importe/BUILD_OK').read_text().strip(), sha)
         self.assertEqual((self.root / 'importe/app/node_modules/.bin/outil').read_text(), 'fixture')
+        self.assertTrue((self.root / 'importe/app/node_modules/.bin/outil').is_symlink())
+        self.assertEqual((self.root / 'importe/app/node_modules/pkg/hard.js').read_text(), 'fixture')
+        self.assertEqual(empreinte_dependances(release / 'app/node_modules'), empreinte_dependances(self.root / 'importe/app/node_modules'))
         with self.assertRaisesRegex(ValueError, 'SHA Git'):
             P.importer(artefact, empreinte, 'b' * 40, self.root / 'refuse')
         self.assertFalse((self.root / 'refuse/BUILD_OK').exists())
