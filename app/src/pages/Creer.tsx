@@ -276,7 +276,7 @@ export default function Creer() {
   }
 
   async function creerVideo() {
-    if (envoi !== null) return;
+    if (envoi !== null || (mode === 'video' && depart === 'photo' && !cle)) return;
     const intentionRequete = intentionRef.current.trim();
     const versionLangue = versionLangueRef.current;
     const langueRequete = langueClientRef.current;
@@ -394,6 +394,7 @@ export default function Creer() {
   }
 
   const cleRequise = mode === 'video' && depart === 'cle' && !cle;
+  const photoRequise = mode === 'video' && depart === 'photo' && !cle;
   const libelle = envoi === 'creer' ? (mode === 'video' ? texteVideo.writingScenario : 'L’IA écrit le scénario…')
     : envoi === 'plan' ? 'L’IA découpe ton film…'
       : envoi === 'cle' ? (mode === 'video' ? texteVideo.drawing : 'Dessin en cours…')
@@ -402,6 +403,7 @@ export default function Creer() {
           : film ? 'Proposer le découpage'
             : cleRequise ? texteVideo.drawKeyFrameCount(nombreImages) : cle ? texteVideo.animate : texteVideo.createVideo;
   function lancer() {
+    if (photoRequise) return;
     if (mode === 'image') void dessinerCles();
     else if (film) void proposerDecoupage();
     else if (cleRequise) void dessinerCles();
@@ -457,7 +459,7 @@ export default function Creer() {
             <textarea
               value={intention}
               onChange={(e) => changerIntention(e.target.value)}
-              onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && prete && !cleRequise) lancer(); }}
+              onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && prete && !cleRequise && !photoRequise) lancer(); }}
               placeholder={mode === 'video' ? texteVideo.placeholder : mode === 'image' ? 'Décris l’image : sujet, décor, lumière, ambiance…' : mode === 'film' ? 'Raconte ton film : une idée, des personnages, une ambiance…' : 'Décris ta scène : ce qu’on voit, ce qui bouge, la caméra…'}
               maxLength={4000}
               aria-label={mode === 'video' ? texteVideo.description : 'Description'}
@@ -520,10 +522,13 @@ export default function Creer() {
                 ))}
               </div>
               {depart === 'photo' && !cle && (
-                <label className="st-bouton" style={{ textAlign: 'center', cursor: 'pointer' }}>
-                  {envoi === 'photo' ? texteVideo.uploadingPhoto : texteVideo.choosePhoto}
-                  <input type="file" accept="image/*" hidden onChange={(e) => void choisirPhoto(e.target.files?.[0])} />
-                </label>
+                <>
+                  <label className="st-bouton" style={{ textAlign: 'center', cursor: 'pointer' }}>
+                    {envoi === 'photo' ? texteVideo.uploadingPhoto : texteVideo.choosePhoto}
+                    <input type="file" accept="image/*" hidden onChange={(e) => void choisirPhoto(e.target.files?.[0])} />
+                  </label>
+                  {envoi !== 'photo' && <span className="st-credit" role="status" style={{ textAlign: 'left' }}>{texteVideo.photoRequired}</span>}
+                </>
               )}
               {cle && (
                 <div className="st-cle">
@@ -627,7 +632,7 @@ export default function Creer() {
 
 
           <div className="st-cta">
-            <button type="button" className="st-go" disabled={!prete} onClick={lancer}>{libelle}</button>
+            <button type="button" className="st-go" disabled={!prete || photoRequise} onClick={lancer}>{libelle}</button>
             {mode === 'video' && devisCourant?.code === 'H3_MAX_ANCHOR_UNAVAILABLE' && <p className="st-credit" role="alert">{devisCourant.erreur}</p>}
             {mode === 'video' && devisCourant && devisCourant.secondesEstimees != null && !cleRequise && (
               <div className="st-devis">
