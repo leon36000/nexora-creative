@@ -7,6 +7,7 @@ import { linkProps, navigate, setParams, useRoute } from '../router';
 import { isImage, isModel, settingsOf, useStore, inFeed } from '../store';
 import { Clip, Icon, MediaCard, presetClip } from '../ui';
 import Viewer, { recreate, remove } from '../Viewer';
+import { videoFromStillHref } from '../viewerHandoff';
 
 /** Cover art for an app: a curated rendered clip, so a fresh install never shows an empty card. */
 function AppArt({ app }: { app: AppDef }) {
@@ -130,7 +131,10 @@ export function Library() {
           <div className="grid dense">
             {takes.map((t) => (
               <MediaCard key={t.id} take={t} onOpen={() => setViewing(t.id)} actions={<>
-                {isImage(t) && t.status === 'done' && <button type="button" className="icon-btn" title="Animer avec MiniMax H3" onClick={() => navigate(`/?mode=video&cle=${t.id}`)}><Icon name="video" size={14} /></button>}
+                {isImage(t) && t.status === 'done' && <button type="button" className="icon-btn" title="Animer avec MiniMax H3" onClick={() => {
+                  const href = videoFromStillHref(t.id, settingsOf(t).userPrompt ?? settingsOf(t).prompt);
+                  if (href) navigate(href);
+                }}><Icon name="video" size={14} /></button>}
                 {!isImage(t) && !isModel(t) && t.status === 'done' && !settingsOf(t).film && <button type="button" className="icon-btn" title="Prolonger" onClick={() => navigate(`/prolonger?take=${t.id}`)}><Icon name="plus" size={14} /></button>}
                 <button type="button" className="icon-btn" title="Refaire" onClick={() => void recreate(t)}><Icon name="redo" size={14} /></button>
                 <button type="button" className="icon-btn" title="Supprimer" onClick={() => void remove(t)}><Icon name="trash" size={14} /></button>

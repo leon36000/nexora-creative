@@ -16,6 +16,7 @@ import { Publication } from '../studio/Publication';
 import Producteur from '../studio/Producteur';
 import { CAMERAS } from '../studio/apps';
 import { setParams, useRoute } from '../router';
+import { isCurrentVideoHandoff, readVideoStillHandoff } from '../viewerHandoff';
 import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
 
 type Mode = 'producteur' | 'video' | 'image' | 'film';
@@ -55,7 +56,7 @@ const fmtTemps = (s: number) => (s < 90 ? `${Math.round(s)} s` : `${Math.floor(s
 export default function Creer() {
   const { params } = useRoute();
   const mode: Mode = MODES.includes(params.get('mode') as Mode) ? (params.get('mode') as Mode) : 'producteur';
-  const setMode = (m: Mode) => setParams({ mode: m === 'producteur' ? null : m });
+  const handoffEpoch = useRef(0);
   const [intention, setIntention] = useState('');
   const [format, setFormat] = useState<Format>('16:9');
   const [duree, setDuree] = useState<number>(5);
@@ -67,7 +68,7 @@ export default function Creer() {
   const [depart, setDepart] = useState<Depart>(() => (params.get('depart') === 'photo' ? 'photo' : 'texte'));
   const [camera, setCamera] = useState<string | null>(null);
   const [cle, setCle] = useState<{ jeton: string; apercu: string } | null>(null);
-  const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo'>(null);
+  const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo' | 'prise'>(null);
   const [boost, setBoost] = useState<string | null>(null);
   const [compris, setCompris] = useState<(Comprehension & { credits?: number; prompt: string }) | null>(null);
   const [voirPrompt, setVoirPrompt] = useState(false);
@@ -84,6 +85,33 @@ export default function Creer() {
   const toutes = useStore((s) => s.takes);
   const lances = useRef(new Set<number>());
   const jetonsRecus = useRef(new Set<string>());
+  const handoffsImageEnCours = useRef(new Set<string>());
+  const dernierMode = useRef(mode);
+
+  function invaliderSelectionImage() {
+    handoffEpoch.current += 1;
+    setEnvoi((courant) => courant === 'prise' || courant === 'photo' ? null : courant);
+  }
+  const setMode = (m: Mode) => {
+    invaliderSelectionImage();
+    dernierMode.current = m;
+    setParams({ mode: m === 'producteur' ? null : m });
+  };
+  function changerDepart(v: Depart) {
+    if (v === depart) return;
+    invaliderSelectionImage();
+    setDepart(v);
+    setCle(null);
+  }
+
+  // A browser back/forward or another route link can change mode without setMode().
+  useEffect(() => {
+    if (dernierMode.current !== mode) {
+      dernierMode.current = mode;
+      invaliderSelectionImage();
+    }
+    if (mode !== 'video' && params.has('cle')) setParams({ cle: null, intention: null, handoff: null });
+  }, [mode, params.get('cle')]);
 
   const visibles = useStore((s) => s.takes.filter((t) => inFeed(t) && !isModel(t) && settingsOf(t).nexoraFilm == null && settingsOf(t).nexoraMusiqueDe == null && t.kind !== 'audio'));
   const montrees = useMemo(() => visibles.filter((t) => {
@@ -133,11 +161,15 @@ export default function Creer() {
   }, [params.get('jeton')]);
   // « Animer » depuis la Bibliothèque : /?mode=video&cle=<image> pose l'image comme plan clé.
   useEffect(() => {
-    const id = Number(params.get('cle'));
-    if (!id) return;
-    setParams({ cle: null });
-    void animer(id);
-  }, [params.get('cle')]);
+    const handoff = readVideoStillHandoff(mode, params);
+    if (!handoff) return;
+    const handoffKey = handoff.handoffId ?? `${handoff.takeId}:${handoff.intention ?? ''}`;
+    if (handoffsImageEnCours.current.has(handoffKey)) return;
+    handoffsImageEnCours.current.add(handoffKey);
+    setParams({ cle: null, intention: null, handoff: null });
+    if (handoff.intention !== undefined) setIntention(handoff.intention);
+    void animer(handoff.takeId, `${location.pathname}${location.search}`).finally(() => handoffsImageEnCours.current.delete(handoffKey));
+  }, [mode, params.get('cle'), params.get('intention')]);
   const film = mode === 'film';
   const dureeClip = duree;
   useEffect(() => {
@@ -179,6 +211,7 @@ export default function Creer() {
   }
 
   async function creerVideo() {
+    if (envoi !== null) return;
     setEnvoi('creer');
     try {
       const cam = CAMERAS.find((c) => c.id === camera);
@@ -237,26 +270,39 @@ export default function Creer() {
   async function choisirPhoto(f: File | undefined) {
     if (!f) return;
     if (!f.type.startsWith('image/')) { toast('Choisis une image (JPG, PNG ou WebP).', true); return; }
+    const epoch = ++handoffEpoch.current;
     setEnvoi('photo');
+    setCle(null);
     try {
       const jeton = await uploadFile(f);
+      if (epoch !== handoffEpoch.current) return;
       setCle({ jeton, apercu: URL.createObjectURL(f) });
     } catch (e) {
+      if (epoch !== handoffEpoch.current) return;
       toast(e instanceof Error ? e.message : 'La photo n’a pas pu être envoyée.', true);
     } finally {
-      setEnvoi(null);
+      if (epoch === handoffEpoch.current) setEnvoi(null);
     }
   }
 
-  async function animer(id: number) {
+  async function animer(id: number, route?: string) {
+    setMode('video');
+    const epoch = ++handoffEpoch.current;
+    const routeCible = route ?? `${location.pathname}${location.search}`;
+    const courant = () => isCurrentVideoHandoff(epoch, handoffEpoch.current, routeCible, `${location.pathname}${location.search}`);
+    setEnvoi('prise');
+    setCle(null);
+    setDepart('cle');
     try {
       const { jeton } = await api.nexoraImageJeton(id);
+      if (!courant()) return;
       setCle({ jeton, apercu: posterUrl(id) });
-      setMode('video');
-      setDepart('cle');
       toast('Plan clé prêt : choisis la durée puis lance « Animer avec H3 ».');
     } catch (e) {
+      if (!courant()) return;
       toast(e instanceof Error ? e.message : 'Impossible d’utiliser cette image.', true);
+    } finally {
+      if (epoch === handoffEpoch.current) setEnvoi(null);
     }
   }
 
@@ -275,6 +321,7 @@ export default function Creer() {
   const libelle = envoi === 'creer' ? 'L’IA écrit le scénario…'
     : envoi === 'plan' ? 'L’IA découpe ton film…'
       : envoi === 'cle' ? 'Dessin en cours…'
+        : envoi === 'prise' ? 'Préparation du plan clé…'
         : mode === 'image' ? `Dessiner ${nombreImages > 1 ? `${nombreImages} images` : 'l’image'}`
           : film ? 'Proposer le découpage'
             : cleRequise ? `Dessiner ${nombreImages} plans clés` : cle ? 'Animer avec H3' : 'Créer la vidéo';
@@ -379,7 +426,7 @@ export default function Creer() {
               <span className="st-etiq">Départ</span>
               <div className="st-seg" role="group" aria-label="Point de départ">
                 {([['texte', 'Texte seul', 'H3 imagine'], ['photo', 'Ma photo', 'import'], ['cle', 'Plan clé IA', nomImage]] as const).map(([v, label, sub]) => (
-                  <button key={v} type="button" className={depart === v ? 'on' : ''} onClick={() => { setDepart(v); if (v === 'texte') setCle(null); }}>{label}<small>{sub}</small></button>
+                  <button key={v} type="button" className={depart === v ? 'on' : ''} onClick={() => changerDepart(v)}>{label}<small>{sub}</small></button>
                 ))}
               </div>
               {depart === 'photo' && !cle && (
