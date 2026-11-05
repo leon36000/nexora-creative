@@ -30,7 +30,46 @@ async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
   return new NodeIO().writeBinary(doc);
 }
 
+/** GLB minimal pour tester la lecture de géométries non conformes sans bricoler l'en-tête binaire. */
+async function glbMaillage(positions: Float32Array, indices: Uint32Array): Promise<Uint8Array> {
+  const doc = new Document();
+  const buf = doc.createBuffer();
+  const prim = doc.createPrimitive()
+    .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(positions).setBuffer(buf))
+    .setIndices(doc.createAccessor().setType('SCALAR').setArray(indices).setBuffer(buf));
+  doc.createScene().addChild(doc.createNode().setMesh(doc.createMesh().addPrimitive(prim)));
+  return new NodeIO().writeBinary(doc);
+}
+
 describe('Nexora Mesh : contrôle du maillage', () => {
+  it('refuse un accessoire d’indices qui pointe hors des sommets après lecture GLB', async () => {
+    const glb = await glbMaillage(Float32Array.from([0, 0, 0, 1, 0, 0, 0, 1, 0]), Uint32Array.from([0, 1, 99]));
+    const maillage = await lireGlb(glb);
+    expect(maillage.indices).toEqual(Uint32Array.from([0, 1, 99]));
+    expect(() => analyser(maillage)).toThrow(/indice 99 hors plage/);
+  });
+
+  it('refuse des coordonnées non finies après lecture GLB', async () => {
+    const glb = await glbMaillage(Float32Array.from([0, 0, 0, 1, 0, 0, 0, Number.NaN, 0]), Uint32Array.from([0, 1, 2]));
+    const maillage = await lireGlb(glb);
+    expect(maillage.positions.some((x) => !Number.isFinite(x))).toBe(true);
+    expect(() => analyser(maillage)).toThrow(/coordonnée de position non finie/);
+  });
+
+  it('refuse les tableaux de positions et d’indices dont les dimensions ne forment pas des triangles', () => {
+    expect(() => analyser({ positions: Float32Array.from([0, 0, 0, 1]), uvs: null, indices: Uint32Array.from([0, 0, 0]), couleur: null }))
+      .toThrow(/positions.*multiple de 3/);
+    expect(() => analyser({ positions: Float32Array.from([0, 0, 0]), uvs: null, indices: Uint32Array.from([0, 0, 0, 0]), couleur: null }))
+      .toThrow(/indices.*multiple de 3/);
+  });
+
+  it('conserve le rapport explicite d’un maillage vide', () => {
+    const r = analyser({ positions: new Float32Array(), uvs: null, indices: new Uint32Array(), couleur: null });
+    expect(r.triangles).toBe(0);
+    expect(r.taille).toEqual([0, 0, 0]);
+    expect(r.avertissements).toContain('Maillage vide.');
+  });
+
   it('distingue les arêtes des grands maillages et ignore leur orientation', () => {
     const a = 2 ** 21, b = a + 3, n = a + 10;
     expect(cleArete(a, b, n)).not.toBe(cleArete(a, b + 1, n));

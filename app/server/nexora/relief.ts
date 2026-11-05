@@ -121,7 +121,21 @@ export function cleArete(a: number, b: number, nombreSommets: number): number | 
   return (BigInt(bas) << 32n) | BigInt(haut);
 }
 
+/** Refuse les géométries qui rendraient les mesures de topologie ou de boîte englobante trompeuses. */
+function validerGeometrie(m: Maillage): void {
+  if (m.positions.length % 3 !== 0) throw new Error('Maillage invalide : la longueur des positions doit être un multiple de 3.');
+  if (m.indices.length % 3 !== 0) throw new Error('Maillage invalide : la longueur des indices doit être un multiple de 3.');
+  for (let i = 0; i < m.positions.length; i++) {
+    if (!Number.isFinite(m.positions[i])) throw new Error(`Maillage invalide : coordonnée de position non finie à l’offset ${i}.`);
+  }
+  const sommets = m.positions.length / 3;
+  for (let i = 0; i < m.indices.length; i++) {
+    if (m.indices[i] >= sommets) throw new Error(`Maillage invalide : indice ${m.indices[i]} hors plage (${sommets} sommets).`);
+  }
+}
+
 export function analyser(m: Maillage): RapportMaillage {
+  validerGeometrie(m);
   const soude = sommetsSoudes(m);
   const nTri = m.indices.length / 3;
   const aretes = new Map<number | bigint, number>();
