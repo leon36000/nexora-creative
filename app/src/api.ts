@@ -127,8 +127,9 @@ export interface CreerReponse {
   takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number; moteur: 'h3-fast' | 'h3-max';
   comprehension?: Comprehension; usageRedaction?: { credits: number; usd: number; jetons: number; palier: string };
 }
-export interface PlanFilm { resume: string; description: string; duree: 5 | 10; camera: string; take?: number }
+export interface PlanFilm { resume: string; description: string; duree: 5 | 10; camera: string; suite?: boolean; replique?: string; take?: number }
 export interface Storyboard {
+  langue?: LangueClient;
   titre: string;
   bible: { style: string; personnages: { nom: string; description: string }[]; lieux: { nom: string; description: string }[] };
   plans: PlanFilm[];
@@ -238,7 +239,7 @@ export const api = {
   nexoraImageJeton: (id: number) => j<{ jeton: string }>(`/api/nexora/image/${id}/jeton`, { method: 'POST', body: '{}' }),
   nexoraDevis: (b: { format: string; duree: number; son: boolean; qualite: string; image?: string; langueClient?: LangueClient }) =>
     j<{ credits: number | null; secondesEstimees: number | null; moteur: string | null; erreur?: string; code?: string }>('/api/nexora/devis', { method: 'POST', body: JSON.stringify(b) }),
-  nexoraFilmPlan: (b: { intention: string; duree: number }) =>
+  nexoraFilmPlan: (b: { intention: string; duree: number; langue?: LangueClient }) =>
     j<{ storyboard: Storyboard; source: 'llm' | 'repli' }>('/api/nexora/film/plan', { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmRefaire: (filmId: number, b: { plan: number; description?: string; camera?: string }) =>
     j<{ filmId: number }>(`/api/nexora/film/${filmId}/refaire`, { method: 'POST', body: JSON.stringify(b) }),

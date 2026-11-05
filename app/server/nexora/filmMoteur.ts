@@ -75,7 +75,7 @@ export async function tournerFilm(
     // Personnages @ : un plan qui cite @nom part en Ref2VA (moteur cinéma) avec les images du personnage.
     const persos = await Promise.all(sb.plans.map((p, i) => (p.suite || p.take || opts.moteur !== 'h3-max' ? null : resoudrePersonnages(intentionDuPlan(sb, i)))));
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, ...dialoguesDe(p) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, ...dialoguesDe(p, sb) }, llm))),
     );
     const lancerPlan = async (p: PlanFilm, i: number): Promise<void> => {
       const ecrit = prompts[i];
@@ -146,7 +146,7 @@ export async function tournerFilm(
 }
 
 /** Réplique d'un plan pour le réécrivain H3 (voix française synchronisée). */
-const dialoguesDe = (p: PlanFilm) => (p.replique ? { dialogues: [{ texte: p.replique, langue: 'French' }] } : {});
+const dialoguesDe = (p: PlanFilm, sb: Storyboard) => (p.replique ? { dialogues: [{ texte: p.replique, langue: sb.langue === 'en' ? 'English' : 'French' }] } : {});
 
 /** Durée effective d'un plan sur la grille de H3 (5 s → 124 images, 10 s → 243). */
 const dureePlan = (p: PlanFilm) => (p.duree === 10 ? 243 : 124) / 24;
@@ -214,7 +214,7 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
     dureeS: dureePlan(p),
     moteur,
     format: s.format,
-    ...dialoguesDe(p),
+    ...dialoguesDe(p, sb),
   }, deps.llmPour(org));
   const corps = {
     ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite, image: jeton }, ecrit.prompt, moteur),

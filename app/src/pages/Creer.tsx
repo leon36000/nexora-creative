@@ -23,6 +23,7 @@ import { cleDevisCreation, ControleDevis } from '../devisCreation';
 import { creationVideoCopy, erreurVisibleCreationVideo, nomCameraCreation } from '../creationVideoCopy';
 import type { LangueClient } from '../../shared/creationLanguage';
 import { FilmPartielAlerte } from '../FilmPartielAlerte';
+import { LangueSelection } from '../LangueSelection';
 
 type Mode = 'producteur' | 'video' | 'image' | 'film';
 const MODES: Mode[] = ['producteur', 'video', 'image', 'film'];
@@ -114,6 +115,7 @@ export default function Creer() {
   const dernierMode = useRef(mode);
   const versionLangueRef = useRef(0);
   const requeteIdeesRef = useRef(0);
+  const requetePlanRef = useRef(0);
   const requeteBoostRef = useRef(0);
 
   const controleDevis = useRef(new ControleDevis());
@@ -228,8 +230,10 @@ export default function Creer() {
     langueClientRef.current = langue;
     versionLangueRef.current++;
     requeteIdeesRef.current++;
+    requetePlanRef.current++;
     requeteBoostRef.current++;
     setLangueClient(langue);
+    if (mode === 'film') setStoryboard(null);
     setIdees((x) => ({ ...x, video: undefined }));
     setBoost(null);
     setCompris(null);
@@ -319,15 +323,18 @@ export default function Creer() {
   }
 
   async function proposerDecoupage() {
+    const versionLangue = versionLangueRef.current;
+    const requete = ++requetePlanRef.current;
     setEnvoi('plan');
     try {
-      const r = await api.nexoraFilmPlan({ intention: intention.trim(), duree: dureeFilm });
+      const r = await api.nexoraFilmPlan({ intention: intention.trim(), duree: dureeFilm, langue: langueClient });
+      if (requete !== requetePlanRef.current || versionLangue !== versionLangueRef.current || modeRef.current !== 'film') return;
       setStoryboard(r.storyboard);
       if (r.source === 'repli') toast('L’IA n’a pas répondu : découpage simple proposé.', true);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Le découpage a échoué.', true);
+      if (requete === requetePlanRef.current && versionLangue === versionLangueRef.current && modeRef.current === 'film') toast(e instanceof Error ? e.message : 'Le découpage a échoué.', true);
     } finally {
-      setEnvoi(null);
+      if (requete === requetePlanRef.current) setEnvoi(null);
     }
   }
 
@@ -450,7 +457,7 @@ export default function Creer() {
             ? v === 'producteur' ? texteVideo.tabProducer : v === 'video' ? texteVideo.tabVideo : v === 'image' ? texteVideo.tabImage : texteVideo.tabFilm
             : label;
           return (
-          <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
+          <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { requetePlanRef.current++; setEnvoi((x) => x === 'plan' ? null : x); setMode(v); setStoryboard(null); setBoost(null); }}>
             <Ic />{modeLabel}
           </button>
         );})}
@@ -462,15 +469,7 @@ export default function Creer() {
       <div className="st-grid">
         <aside className="st-composer" aria-label={langueActive === 'en' ? texteVideo.composer : 'Composeur'}>
 
-          {mode === 'video' && (
-            <div className="st-bloc">
-              <span className="st-etiq">{texteVideo.language}</span>
-              <div className="st-seg" role="group" aria-label={texteVideo.language}>
-                <button type="button" className={langueClient === 'fr' ? 'on' : ''} aria-pressed={langueClient === 'fr'} onClick={() => choisirLangueClient('fr')}>Français</button>
-                <button type="button" className={langueClient === 'en' ? 'on' : ''} aria-pressed={langueClient === 'en'} onClick={() => choisirLangueClient('en')}>English</button>
-              </div>
-            </div>
-          )}
+          <LangueSelection mode={mode} langue={langueClient} libelle={texteVideo.language} occupe={occupe} filmPartiel={!!filmPartiel} choisir={choisirLangueClient} />
 
           <div className="st-champ">
             <textarea
