@@ -54,8 +54,10 @@ import { demanderEffet, lireDemandeEffet } from './nexora/effets.js';
 import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
 import { transcrireSurGpu } from './nexora/transcriptionGpu.js';
 import { argsAvecMusique, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
-import { avancerFilm, filmsEnAttente, initFilms, tournerFilm } from './nexora/filmMoteur.js';
+import { avancerFilm, filmsEnAttente, initFilms, marquerReservationFilmLiberee, tournerFilm } from './nexora/filmMoteur.js';
 import { erreurAncrageMaxFilm, libererReservationsFilmEchoue } from './nexora/filmAncrage.js';
+import { resultatEchecTournage, soumissionIndeterminee } from './nexora/filmEchec.js';
+import { creerVerificationArrets } from './nexora/reconciliationArrets.js';
 import { lireCartons } from './nexora/cartons.js';
 import { buildLtxGraph } from './graphs/ltx.js';
 import { buildLtx25Graph, ltx25EffectiveSize, ltx25Mode, LTX25_FPS, snapFrames } from './graphs/ltx25.js';
@@ -145,6 +147,7 @@ function solderCredits(): Promise<void> {
 async function solderCreditsInterne() {
   for (const t of takes.list(null, 300)) {
     const s = JSON.parse(t.settings);
+    if (soumissionIndeterminee(s)) continue;
     const action = actionFacturation({ status: t.status, credits: s.nexoraCredits });
     if (!action) continue;
     // Plan d'un film encore en tournage : le film peut le relancer et lui transférer sa réservation ; on attend.
@@ -234,7 +237,7 @@ if (config.judge.on) {
 }
 
 /** Settings keys only the server writes. A request body must never set them: some are file paths we later serve. */
-const SERVER_KEYS = ['alphaPath', 'hdr', 'hdrTag', 'seam', 'seamFix', 'output_path', 'outputPath', 'nexoraCredits'] as const;
+const SERVER_KEYS = ['alphaPath', 'hdr', 'hdrTag', 'seam', 'seamFix', 'output_path', 'outputPath', 'nexoraCredits', 'nexoraSoumission', 'nexoraClePlan'] as const;
 function stripServerKeys(b: any): void {
   if (b && typeof b === 'object') for (const k of SERVER_KEYS) delete b[k];
 }
@@ -310,7 +313,7 @@ async function onPromptFinished(promptId: string) {
     const h = await eng.result(promptId);
     if (!h.done) return;
     if (!h.success || !h.output) {
-      takes.fail(take.id, h.error || 'No output produced', !!h.canceled);
+      takes.fail(take.id, h.error || 'No output produced', !!h.canceled, true);
       broadcast({ type: 'take', take: takes.get(take.id) });
       nextInScene(take);
       return;
@@ -1167,8 +1170,7 @@ app.post('/api/nexora/film/tourner', async (req, reply) => {
     }
     return { filmId, take: takes.get(filmId), credits: toutes().reduce((n, r) => n + r.credits, 0) || undefined };
   } catch (e) {
-    for (const x of toutes()) await fac?.liberer(x.reservationId).catch(() => {});
-    return reply.code(400).send({ error: e instanceof Error ? e.message : 'tournage impossible' });
+    return reply.code(400).send(await resultatEchecTournage(e, toutes(), fac, marquerReservationFilmLiberee));
   }
 });
 
@@ -1212,7 +1214,9 @@ app.post('/api/nexora/film/:id/refaire', async (req, reply) => {
     }
     reservations.push({ reservationId: r.reservationId, credits: r.credits, etat: 'reservee' });
   }
-  const filmId = await tournerFilm({ ...sb, titre: sb.titre }, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur, reservations: reservations as CreditsPrise[], qualite: s.qualite }, llmRedaction());
+  let filmId: number;
+  try { filmId = await tournerFilm({ ...sb, titre: sb.titre }, { format: s.format, son: !!s.son, intention: s.prompt, projectId: film.project_id, moteur, reservations, qualite: s.qualite }, llmRedaction()); }
+  catch (e) { return reply.code(400).send(await resultatEchecTournage(e, reservations.filter((x): x is CreditsPrise => !!x), fac, marquerReservationFilmLiberee)); }
   takes.patchSettings(filmId, { versionDe: film.id });
   void avancerFilm(filmId);
   return { filmId, take: takes.get(filmId) };
@@ -1243,7 +1247,9 @@ async function lancerRaccord(req: FastifyRequest, reply: FastifyReply, r: { stor
     }
     reservations.push({ reservationId: res.reservationId, credits: res.credits, etat: 'reservee' });
   }
-  const filmId = await tournerFilm(r.storyboard, { format: r.format, son: r.son, intention: intention || r.storyboard.titre, moteur, reservations: reservations as CreditsPrise[], qualite: r.qualite }, llmRedaction());
+  let filmId: number;
+  try { filmId = await tournerFilm(r.storyboard, { format: r.format, son: r.son, intention: intention || r.storyboard.titre, moteur, reservations, qualite: r.qualite }, llmRedaction()); }
+  catch (e) { return reply.code(400).send(await resultatEchecTournage(e, reservations.filter((x): x is CreditsPrise => !!x), fac, marquerReservationFilmLiberee)); }
   takes.patchSettings(filmId, { app: 'nexora-raccord' });
   void avancerFilm(filmId);
   return { filmId };
@@ -2770,11 +2776,14 @@ async function submitTake(takeId: number, built: Built) {
  * variant's take stores the merged body, so Recreate reruns just that one.
  * Throws with the ids queued so far.
  */
-async function queueTakes(b: any, count: number): Promise<number[]> {
+async function queueTakes(b: any, count: number, creditsInternes?: (CreditsPrise | undefined)[], clePlan?: string, transfererDepuis?: number): Promise<number[]> {
+  const protegee = creditsInternes !== undefined;
+  if (protegee && !clePlan) throw new Error('Identité du plan requise');
   const firstSeed = Number.isFinite(b.seed) ? b.seed : Math.floor(Math.random() * 1e9);
   const variants: Record<string, unknown>[] = Array.isArray(b.variants)
     ? b.variants.filter((v: unknown) => v && typeof v === 'object').slice(0, 9)
     : [];
+  if (transfererDepuis !== undefined && (!protegee || count !== 1 || variants.length)) throw new Error('Transfert réservé à une seule prise protégée');
   stripServerKeys(b);
   variants.forEach(stripServerKeys);
   const n = variants.length || count;
@@ -2795,20 +2804,20 @@ async function queueTakes(b: any, count: number): Promise<number[]> {
       one = r.body;
       if (r.hero) {
         // The take waits for its hero frame; one frame serves the whole batch.
-        hero ??= (async () => {
+        const obtenirHero = () => hero ??= (async () => {
           const opts = { ...r.hero!.opts, projectId: b.projectId ?? null };
           if (r.hero!.poseFrom) opts.poseImage = await firstFrame(r.hero!.poseFrom);
           return castHeroFrame(r.hero!.castIds, r.hero!.shot, opts);
         })();
-        takeIds.push(queueAfter(one, seed, hero, b.projectId ?? null, (body, h) => ({ ...body, startImage: h.token, castHeroTake: h.takeId })));
+        takeIds.push(queueAfter(one, seed, obtenirHero, b.projectId ?? null, (body, h) => ({ ...body, startImage: h.token, castHeroTake: h.takeId }), protegee, creditsInternes?.[i], clePlan, transfererDepuis));
         continue;
       }
       if (one.kind === 'stage') {
         one = { ...(await (staged ??= prepareStage(one))), seed: one.seed, batch: one.batch, batchIndex: one.batchIndex, batchSize: one.batchSize };
         if (!one.lookImage) {
           const shot = one;
-          look ??= stageLookFrame(queueTakes, { ...shot, seed, projectId: b.projectId });
-          takeIds.push(queueAfter(one, seed, look, b.projectId ?? null, (body, h) => ({ ...body, lookImage: h.token, lookTake: h.takeId })));
+          const obtenirLook = () => look ??= stageLookFrame(queueTakes, { ...shot, seed, projectId: b.projectId });
+          takeIds.push(queueAfter(one, seed, obtenirLook, b.projectId ?? null, (body, h) => ({ ...body, lookImage: h.token, lookTake: h.takeId }), protegee, creditsInternes?.[i], clePlan, transfererDepuis));
           continue;
         }
       }
@@ -2816,20 +2825,26 @@ async function queueTakes(b: any, count: number): Promise<number[]> {
     } catch (e) {
       throw Object.assign(e instanceof Error ? e : new Error('bad request'), { takeIds });
     }
-    const takeId = takes.create({
-      project_id: b.projectId ?? (built.parent ? takes.get(built.parent)?.project_id ?? null : null),
-      kind: built.kind,
-      shot_name: String(built.settings?.shotName ?? one.shotName ?? 'shot'),
-      settings: { ...one, ...built.settings, seed, count: undefined },
-      parent_take_id: built.parent,
-    });
+    let takeId: number;
+    try {
+      const row = {
+        project_id: b.projectId ?? (built.parent ? takes.get(built.parent)?.project_id ?? null : null),
+        kind: built.kind,
+        shot_name: String(built.settings?.shotName ?? one.shotName ?? 'shot'),
+        settings: { ...one, ...built.settings, seed, count: undefined, ...(protegee ? { nexoraSoumission: 'indeterminee', nexoraClePlan: clePlan, ...(creditsInternes?.[i] ? { nexoraCredits: creditsInternes[i] } : {}) } : {}) },
+        parent_take_id: built.parent,
+      };
+      takeId = protegee ? takes.createProtegee(row, clePlan!, transfererDepuis) : takes.create(row);
+    } catch (e) { throw Object.assign(e instanceof Error ? e : new Error('create failed'), { takeIds }); }
     try {
       takeIds.push(takeId);
       await submitTake(takeId, built);
     } catch (e) {
-      takeIds.pop();
-      takes.fail(takeId, e instanceof Error ? e.message : 'submit failed');
-      broadcast({ type: 'take', take: takes.get(takeId) });
+      if (!protegee) {
+        takeIds.pop();
+        takes.fail(takeId, e instanceof Error ? e.message : 'submit failed');
+        broadcast({ type: 'take', take: takes.get(takeId) });
+      }
       throw Object.assign(e instanceof Error ? e : new Error('submit failed'), { takeIds });
     }
   }
@@ -2842,21 +2857,27 @@ async function queueTakes(b: any, count: number): Promise<number[]> {
  * when the still is done. `apply` puts the still into the take's body.
  */
 function queueAfter(
-  one: any, seed: number, first: Promise<{ takeId: number; token: string }>, projectId: number | null,
+  one: any, seed: number, first: Promise<{ takeId: number; token: string }> | (() => Promise<{ takeId: number; token: string }>), projectId: number | null,
   apply: (body: any, still: { takeId: number; token: string }) => any,
+  protegee = false, credit?: CreditsPrise, clePlan?: string, transfererDepuis?: number,
 ): number {
-  const takeId = takes.create({ project_id: projectId, kind: 'video', shot_name: String(one.shotName ?? 'shot'), settings: { ...one, seed, count: undefined } });
-  broadcast({ type: 'take', take: takes.get(takeId) });
+  const suivi = protegee ? { nexoraSoumission: 'attente', nexoraClePlan: clePlan, ...(credit ? { nexoraCredits: credit } : {}) } : {};
+  const row = { project_id: projectId, kind: 'video', shot_name: String(one.shotName ?? 'shot'), settings: { ...one, seed, count: undefined, ...suivi } };
+  const takeId = protegee ? takes.createProtegee(row, clePlan!, transfererDepuis) : takes.create(row);
+  try { broadcast({ type: 'take', take: takes.get(takeId) }); }
+  catch (e) { if (!protegee) throw e; console.warn('Notification de prise différée indisponible'); }
   void (async () => {
+    let soumissionCommencee = false;
     try {
-      const h = await first;
+      const h = await (typeof first === 'function' ? first() : first);
       if (takes.get(takeId)?.status !== 'queued') return; // cancelled while waiting
       const body = apply(one, h);
       const built = await graphFor(body, seed);
-      takes.setSettings(takeId, { ...body, ...built.settings, seed, count: undefined });
+      takes.setSettings(takeId, { ...body, ...built.settings, seed, count: undefined, ...(protegee ? { ...suivi, nexoraSoumission: 'indeterminee' } : {}) });
+      soumissionCommencee = true;
       await submitTake(takeId, built);
     } catch (e) {
-      takes.fail(takeId, e instanceof Error ? e.message : 'the first frame failed');
+      if (!protegee || !soumissionCommencee) takes.fail(takeId, e instanceof Error ? e.message : 'the first frame failed');
       broadcast({ type: 'take', take: takes.get(takeId) });
     }
   })();
@@ -3963,9 +3984,11 @@ app.get('/api/media/:id', async (req, reply) => {
  * whose completion we missed and re-attach to jobs still running (e.g. after
  * a restart). Polling the job is authoritative; the event stream is a bonus.
  */
+const verifierArrets = creerVerificationArrets((apres, limite) => takes.arretsIndetermines(apres, limite), (prompt) => eng.etatTerminalConfirme(prompt), (id, prompt) => takes.confirmerArretTerminal(id, prompt));
 async function reconcile() {
   void eng.etatMoteurs();
   void solderCredits();
+  void verifierArrets().catch(() => app.log.warn('Vérification des prises arrêtées indisponible'));
   void compterEspace();
   for (const id of waitingCuts()) void advance(id);
   for (const id of filmsEnAttente()) void avancerFilm(id);
@@ -3994,7 +4017,10 @@ if (process.env.NEXORA_SITE_URL && process.env.NEXORA_CREATIVE_SERVICE_TOKEN) {
 setCastQueue(queueTakes);
 // A take still waiting on a hero frame when the server stopped can never run.
 // Nexora : un film attend ses plans sans travail moteur propre ; il reprend par reconcile (avancerFilm), pas un orphelin.
-for (const t of takes.orphans()) if (JSON.parse(t.settings).film !== true) takes.fail(t.id, 'interrupted: the server restarted while it waited for its hero frame', true);
+for (const t of takes.orphans()) {
+  const settings = JSON.parse(t.settings);
+  if (settings.film !== true && !soumissionIndeterminee(settings)) takes.fail(t.id, 'interrupted: the server restarted while it waited for its hero frame', true);
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Mode Studio (montage expert, éditeur FreeCut de mode-studio/) : créations, assistant, analyses. Voir server/nexora/studio.ts.

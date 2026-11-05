@@ -7,8 +7,8 @@
  * propose un découpage relisible, tourne chaque plan et assemble.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, mediaUrl, posterUrl, uploadFile, type Comprehension, type EtatNexora, type Storyboard } from '../api';
-import { inFeed, isImage, isModel, settingsOf, toast, useStore } from '../store';
+import { api, EchecFilmPartiel, mediaUrl, posterUrl, uploadFile, type Comprehension, type EtatNexora, type Storyboard } from '../api';
+import { getState, inFeed, isImage, isModel, refreshTakes, settingsOf, toast, useStore } from '../store';
 import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
 import FilmPlans from '../FilmPlans';
@@ -22,6 +22,7 @@ import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/
 import { cleDevisCreation, ControleDevis } from '../devisCreation';
 import { creationVideoCopy, erreurVisibleCreationVideo, nomCameraCreation } from '../creationVideoCopy';
 import type { LangueClient } from '../../shared/creationLanguage';
+import { FilmPartielAlerte } from '../FilmPartielAlerte';
 
 type Mode = 'producteur' | 'video' | 'image' | 'film';
 const MODES: Mode[] = ['producteur', 'video', 'image', 'film'];
@@ -95,6 +96,7 @@ export default function Creer() {
     }
   }
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+  const [filmPartiel, setFilmPartiel] = useState<EchecFilmPartiel | null>(null);
   const [etat, setEtat] = useState<EtatNexora | null>(null);
   const [vue, setVue] = useState<number | null>(null);
   const [filmOuvert, setFilmOuvert] = useState<number | null>(null);
@@ -337,7 +339,14 @@ export default function Creer() {
       toast(`Tournage lancé : ${storyboard.plans.length} plans. Le film s’assemble tout seul à la fin.`);
       setStoryboard(null);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Le tournage a échoué.', true);
+      if (e instanceof EchecFilmPartiel) {
+        setFilmPartiel(e);
+        const ids = e.prises.map((p) => `#${p.takeId}`).join(', ');
+        const detail = langueClient === 'en'
+          ? `Film #${e.filmId}${ids ? `, shots ${ids}` : ''}: check their status before retrying.`
+          : `Film n° ${e.filmId}${ids ? `, prises ${ids}` : ''} : vérifie leur état avant de réessayer.`;
+        toast(`${e.message} ${detail}`, true);
+      } else toast(e instanceof Error ? e.message : 'Le tournage a échoué.', true);
     } finally {
       setEnvoi(null);
     }
@@ -654,10 +663,14 @@ export default function Creer() {
                   <p className="nx-sous" style={{ margin: 0 }}>{storyboard.plans.length} plans · {storyboard.dureeTotale} s · tournage ≈ {minutesFilm} min. Retouche ce qui ne te plaît pas, puis lance.</p>
                 </div>
                 <div className="st-ligne">
-                  <button type="button" className="st-bouton" onClick={() => setStoryboard(null)}>Annuler</button>
-                  <button type="button" className="st-bouton primaire" disabled={occupe} onClick={() => void tournerFilm()}>{envoi === 'film' ? 'Lancement…' : 'Tourner le film'}</button>
+                  <button type="button" className="st-bouton" disabled={!!filmPartiel} onClick={() => setStoryboard(null)}>Annuler</button>
+                  <button type="button" className="st-bouton primaire" disabled={occupe || !!filmPartiel} onClick={() => void tournerFilm()}>{envoi === 'film' ? 'Lancement…' : 'Tourner le film'}</button>
                 </div>
               </div>
+              {filmPartiel && <FilmPartielAlerte erreur={filmPartiel} langue={langueClient} rafraichir={refreshTakes}
+                existe={(id) => getState().takes.some((t) => t.id === id)} ouvrirFilm={setFilmOuvert} ouvrirPrise={setVue}
+                indisponible={() => toast(langueClient === 'en' ? 'This item is not available. Try refreshing later.' : 'Cet élément est indisponible. Réessaie plus tard.', true)}
+                nouveauFilm={() => { setFilmPartiel(null); setStoryboard(null); changerIntention(''); }} />}
               <details className="nx-bible">
                 <summary>Bible de continuité (style, personnages, lieux)</summary>
                 <p><strong>Style :</strong> {storyboard.bible.style}</p>

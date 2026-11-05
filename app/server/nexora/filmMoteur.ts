@@ -21,9 +21,11 @@ import { reecrireH3 } from './reecritureH3.js';
 import { encoderSurGpu } from './encodageGpu.js';
 import { dossierFilmUnique, sansEcrasement } from './filmSorties.js';
 import { erreurAncrageMaxFilm } from './filmAncrage.js';
+import { EchecTournage, soumissionIndeterminee, type AttachementEnAttente, type PriseLancee } from './filmEchec.js';
+import { clePlanFilm } from './filmClePlan.js';
 
 export interface DepsFilm {
-  queueTakes: (b: any, count: number) => Promise<number[]>;
+  queueTakes: (b: any, count: number, credits?: (CreditsPrise | undefined)[], clePlan?: string, transfererDepuis?: number) => Promise<number[]>;
   broadcast: (msg: unknown) => void;
   /** Téléverse une image d'entrée au moteur (dernière image d'un plan) ; rend son jeton. */
   televerser: (nom: string, data: Buffer, type: string) => Promise<string>;
@@ -39,7 +41,7 @@ const pousser = (id: number) => deps.broadcast({ type: 'take', take: takes.get(i
 export async function tournerFilm(
   sb: Storyboard,
   opts: {
-    format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: CreditsPrise[]; qualite?: 'rapide' | 'max';
+    format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: (CreditsPrise | undefined)[]; qualite?: 'rapide' | 'max';
     /** 2 : deux prises par plan indépendant, le juge visuel garde la meilleure (juge.ts). */
     candidats?: 1 | 2;
     /** Réservations de la seconde prise de chaque plan (même index que les plans). */
@@ -62,6 +64,10 @@ export async function tournerFilm(
     },
   });
   pousser(filmId);
+  const prises: PriseLancee[] = [];
+  const reservationsConservees = new Set<string>();
+  const attachementsEnAttente: AttachementEnAttente[] = [];
+  const idsConnus = new Set<number>();
   try {
     // Les prompts des plans indépendants s'écrivent en parallèle, puis leurs rendus partent dans l'ordre. Un plan
     // « suite » attend la fin du précédent : il partira de sa dernière image (voir lancerSuite).
@@ -85,15 +91,66 @@ export async function tournerFilm(
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
       const n = opts.candidats === 2 ? 2 : 1;
-      const ids = await deps.queueTakes(corps, n);
-      if (opts.reservations?.[i]) takes.patchSettings(ids[0], { nexoraCredits: opts.reservations[i] });
-      if (ids[1] && opts.reservationsCandidats?.[i]) takes.patchSettings(ids[1], { nexoraCredits: opts.reservationsCandidats[i] });
-      majPlan(filmId, i, { take: ids[0], corps, ...(ids.length > 1 ? { candidats: ids } : {}) });
+      const credits = [opts.reservations?.[i], opts.reservationsCandidats?.[i]].slice(0, n);
+      const rattacher = (ids: unknown[]) => {
+        const valides: number[] = [];
+        for (const [k, id] of ids.entries()) {
+          if (k >= n || typeof id !== 'number' || !Number.isSafeInteger(id) || id <= 0 || idsConnus.has(id)) continue;
+          const reservation = credits[k];
+          let t: Take | undefined;
+          try { t = takes.get(id); }
+          catch {
+            // La lecture est impossible : ne pas libérer une réservation potentiellement liée à une prise créée.
+            if (reservation) reservationsConservees.add(reservation.reservationId);
+            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
+            continue;
+          }
+          if (!t) {
+            if (reservation) reservationsConservees.add(reservation.reservationId);
+            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
+            continue;
+          }
+          let settings: Record<string, any>;
+          try { settings = JSON.parse(t.settings); }
+          catch {
+            if (reservation) reservationsConservees.add(reservation.reservationId);
+            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
+            continue;
+          }
+          if (!settings || typeof settings !== 'object') {
+            if (reservation) reservationsConservees.add(reservation.reservationId);
+            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
+            continue;
+          }
+          if (settings.nexoraFilm !== filmId || settings.nexoraPlan !== i) continue;
+          idsConnus.add(id);
+          valides.push(id);
+          prises.push({ plan: i, takeId: id });
+          if (typeof settings.nexoraCredits?.reservationId === 'string') reservationsConservees.add(settings.nexoraCredits.reservationId);
+          if (reservation) {
+            reservationsConservees.add(reservation.reservationId);
+            if (settings.nexoraCredits?.reservationId !== reservation.reservationId) attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation.reservationId });
+          }
+        }
+        if (valides.length) majPlan(filmId, i, { take: valides[0], corps, clePlan, ...(valides.length > 1 ? { candidats: valides } : {}) });
+        return valides.length;
+      };
+      let ids: number[];
+      const clePlan = clePlanFilm(sb, p, { moteur: opts.moteur, format: opts.format, son: opts.son, qualite: opts.qualite, projectId: opts.projectId, intention: opts.intention, references: persos[i]?.fichiers });
+      try { ids = await deps.queueTakes(corps, n, credits, clePlan); }
+      catch (e) {
+        const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
+        if (Array.isArray(partiels)) { try { rattacher(partiels); } catch { /* Conserver l'erreur initiale. */ } }
+        throw e;
+      }
+      if (rattacher(ids) !== n || attachementsEnAttente.length) throw new Error('Prises ou réservations de tournage non confirmées');
     }
   } catch (e) {
-    takes.fail(filmId, `Les plans n'ont pas pu partir au tournage : ${e instanceof Error ? e.message : e}`);
-    pousser(filmId);
-    throw e;
+    try {
+      takes.fail(filmId, `Les plans n'ont pas pu partir au tournage : ${e instanceof Error ? e.message : e}`);
+      pousser(filmId);
+    } catch { /* Ne pas perdre l'erreur primaire ni les réservations déjà associées. */ }
+    throw new EchecTournage(e, filmId, prises, [...reservationsConservees], attachementsEnAttente);
   }
   return filmId;
 }
@@ -153,9 +210,23 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
     shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: film.project_id ?? undefined,
   };
-  const [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes(corps, 1));
-  if (p.reservation) takes.patchSettings(id, { nexoraCredits: p.reservation });
-  majPlan(film.id, i, { take: id, corps, attente: undefined });
+  const cle = clePlanFilm(sb, p, { moteur, format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, ancre: sb.plans[i - 1]?.take, references: suivant ? [String(suivant)] : [] });
+  let id: number;
+  try { [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes(corps, 1, [p.reservation], cle)); }
+  catch (e) {
+    const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
+    const candidat = Array.isArray(partiels) ? partiels[0] : undefined;
+    if (typeof candidat === 'number' && Number.isSafeInteger(candidat) && candidat > 0) {
+      const t = takes.get(candidat);
+      const settings = t ? reglages(t) : null;
+      if (settings?.nexoraFilm === film.id && settings?.nexoraPlan === i) {
+        majPlan(film.id, i, { take: candidat, corps, clePlan: cle, attente: undefined, attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
+        return;
+      }
+    }
+    throw e;
+  }
+  majPlan(film.id, i, { take: id, corps, clePlan: cle, attente: undefined });
 }
 
 function majPlan(filmId: number, i: number, patch: Record<string, unknown>) {
@@ -163,6 +234,21 @@ function majPlan(filmId: number, i: number, patch: Record<string, unknown>) {
   s.storyboard.plans[i] = { ...s.storyboard.plans[i], ...patch };
   takes.setSettings(filmId, s);
   pousser(filmId);
+}
+
+export function marquerReservationFilmLiberee(filmId: number, reservationId: string): void {
+  const film = takes.get(filmId);
+  if (!film) return;
+  const s = reglages(film);
+  let modifie = false;
+  for (const plan of (s.storyboard as Storyboard).plans) {
+    const p = plan as PlanFilm & { reservation?: CreditsPrise };
+    if (p.reservation?.reservationId === reservationId && p.reservation.etat === 'reservee') {
+      p.reservation = { ...p.reservation, etat: 'liberee' };
+      modifie = true;
+    }
+  }
+  if (modifie) takes.setSettings(filmId, s);
 }
 
 const verrous = new Map<number, Promise<void>>();
@@ -191,8 +277,10 @@ async function etape(filmId: number) {
     }
     const t = takes.get(p.take);
     if (!t) throw new Error(`Plan ${i + 1} : sa prise a été supprimée`);
+    if (soumissionIndeterminee(reglages(t))) return;
     // Deux candidats : on attend les deux, le contrôle qualité puis le juge visuel choisissent la prise du plan.
     const cands = (p as any).candidats as number[] | undefined;
+    if (cands?.some((id) => { const candidat = takes.get(id); return candidat && soumissionIndeterminee(reglages(candidat)); })) return;
     if (cands?.length === 2 && !(p as any).jugement) {
       const prises = cands.map((id) => takes.get(id));
       if (prises.some((x) => !x || x.status === 'queued' || x.status === 'rendering')) return;
@@ -204,16 +292,28 @@ async function etape(filmId: number) {
     const relances = Number((p as any).relances ?? 0);
     if (t.status === 'failed' && (p as any).corps && relances < 2) {
       const org = takes.organisationDe(filmId) ?? 'local';
+      const credits = reglages(t).nexoraCredits as CreditsPrise | undefined;
+      const cle = typeof (p as any).clePlan === 'string' ? (p as any).clePlan : clePlanFilm(sb, p, { moteur: s.moteur ?? 'h3-fast', format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, references: (p as any).corps?.refImages });
       let id: number;
       try {
-        [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes({ ...(p as any).corps }, 1));
+        [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes({ ...(p as any).corps }, 1, [credits], cle, credits ? t.id : undefined));
       } catch (e) {
+        const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
+        const candidat = Array.isArray(partiels) ? partiels[0] : undefined;
+        if (typeof candidat === 'number' && Number.isSafeInteger(candidat) && candidat > 0) {
+          const nouvelle = takes.get(candidat);
+          const settings = nouvelle ? reglages(nouvelle) : null;
+          if (settings?.nexoraFilm === filmId && settings?.nexoraPlan === i) {
+            majPlan(filmId, i, { take: candidat, relances: relances + 1, panne: t.error ?? 'échec', attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
+            return;
+          }
+          // Un ID transmis mais illisible ne prouve pas l'absence de soumission : ne pas relancer ni libérer.
+          throw e;
+        }
         // Moteur encore à terre : le plan attend ; la réconciliation (toutes les 20 s) refait cette étape.
         majPlan(filmId, i, { attenteMoteur: e instanceof Error ? e.message : 'moteur indisponible' });
         return;
       }
-      const credits = JSON.parse(t.settings).nexoraCredits;
-      if (credits) takes.patchSettings(id, { nexoraCredits: credits }), takes.patchSettings(t.id, { nexoraCredits: { ...credits, etat: 'transferee' } });
       majPlan(filmId, i, { take: id, relances: relances + 1, panne: t.error ?? 'échec', attenteMoteur: undefined });
       return;
     }
@@ -232,8 +332,24 @@ async function etape(filmId: number) {
       if (!c.ok && (plan.reprises ?? 0) < 1 && plan.corps) {
         // Hors requête (fin de rendu côté moteur) : la reprise doit naître dans l'organisation du film.
         const org = takes.organisationDe(filmId) ?? 'local';
-        const [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () =>
-          deps.queueTakes({ ...plan.corps!, seed: Math.floor(Math.random() * 1e9) }, 1));
+        const cle = typeof (p as any).clePlan === 'string' ? (p as any).clePlan : clePlanFilm(sb, p, { moteur: s.moteur ?? 'h3-fast', format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, references: plan.corps.refImages });
+        let id: number;
+        try {
+          [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () =>
+            deps.queueTakes({ ...plan.corps!, seed: Math.floor(Math.random() * 1e9) }, 1, [undefined], cle));
+        } catch (e) {
+          const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
+          const candidat = Array.isArray(partiels) ? partiels[0] : undefined;
+          if (typeof candidat === 'number' && Number.isSafeInteger(candidat) && candidat > 0) {
+            const nouvelle = takes.get(candidat);
+            const settings = nouvelle ? reglages(nouvelle) : null;
+            if (settings?.nexoraFilm === filmId && settings?.nexoraPlan === i) {
+              majPlan(filmId, i, { take: candidat, reprises: (plan.reprises ?? 0) + 1, controle: undefined, controleRefuse: { take: t.id, defauts: c.defauts }, attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
+              return;
+            }
+          }
+          throw e;
+        }
         majPlan(filmId, i, { take: id, reprises: (plan.reprises ?? 0) + 1, controle: undefined, controleRefuse: { take: t.id, defauts: c.defauts } });
         return;
       }
