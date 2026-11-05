@@ -94,6 +94,11 @@ class Preparation(unittest.TestCase):
             P.construire(source, sha, self.root / 'interdit')
         self.assertFalse((self.root / 'interdit').exists())
 
+    def test_test_vite_classe_sans_accepter_fichier_inconnu(self):
+        self.assertTrue(P.build_seulement('app/vite-build.test.ts'))
+        self.assertFalse(P.build_seulement('app/inconnu.ts'))
+        self.assertFalse(P.code_app('app/inconnu.ts'))
+
     def test_archive_git_exclut_env_et_npmrc_sans_les_lire(self):
         repo = self.root / 'repo'
         repo.mkdir()

@@ -144,6 +144,7 @@ def copier(source, target, attendu_source, attendu_cible=SANS_CONTROLE):
     fd, name = tempfile.mkstemp(prefix='.nexora-livraison-', dir=target.parent)
     try:
         with os.fdopen(fd, 'wb') as out, os.fdopen(os.open(source, os.O_RDONLY | os.O_NOFOLLOW), 'rb') as src:
+            source_stat = os.fstat(src.fileno())
             shutil.copyfileobj(src, out)
             out.flush()
             os.fsync(out.fileno())
@@ -151,7 +152,9 @@ def copier(source, target, attendu_source, attendu_cible=SANS_CONTROLE):
             raise ValueError('source modifiée pendant la copie')
         if attendu_cible is not SANS_CONTROLE and digest(target) != attendu_cible:
             raise ValueError('cible modifiée pendant la copie')
-        os.chmod(name, stat.S_IMODE(source.stat().st_mode))
+        os.chmod(name, stat.S_IMODE(source_stat.st_mode))
+        if os.geteuid() == 0:
+            os.chown(name, source_stat.st_uid, source_stat.st_gid)
         os.replace(name, target)
         sync_dir(target.parent)
     finally:

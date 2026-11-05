@@ -33,6 +33,7 @@ class Transaction(unittest.TestCase):
         actions = T.preparer(self.release, self.cible, self.backup, T.planifier(self.release, self.cible, self.liste))
         T.appliquer(self.release, self.cible, actions)
         self.assertEqual((self.cible / self.liste[0]).read_text(), 'nouveau')
+        self.assertEqual((self.cible / self.liste[0]).stat().st_uid, (self.release / self.liste[0]).stat().st_uid)
         T.rollback(self.cible, self.backup)
         self.assertEqual((self.cible / self.liste[0]).read_text(), 'ancien')
         self.assertFalse((self.cible / self.liste[1]).exists())
