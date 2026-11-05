@@ -207,3 +207,20 @@ class Transaction(unittest.TestCase):
         T.sauvegarder_base(data, self.backup)
         with sqlite3.connect(self.backup / 'openfield-avant.db') as copie:
             self.assertEqual(copie.execute('SELECT nombre FROM fixture').fetchone()[0], 42)
+
+    def test_prevol_verifie_les_plans_de_projets_longs(self):
+        data = self.root / 'data-projets'
+        data.mkdir()
+        dbpath = data / 'openfield.db'
+        projet = {'sequences': [{'scenes': [{'plans': [{'etat': 'en_cours'}]}]}]}
+        with sqlite3.connect(dbpath) as db:
+            db.execute('CREATE TABLE takes(status TEXT, settings TEXT)')
+            db.execute('CREATE TABLE projets_longs(data TEXT)')
+            db.execute('INSERT INTO projets_longs VALUES (?)', (json.dumps(projet),))
+        with self.assertRaisesRegex(ValueError, 'travaux actifs'):
+            T.verifier_travaux(data)
+        projet['sequences'][0]['scenes'][0]['plans'][0]['etat'] = 'inconnu'
+        with sqlite3.connect(dbpath) as db:
+            db.execute('UPDATE projets_longs SET data=?', (json.dumps(projet),))
+        with self.assertRaisesRegex(ValueError, 'indéterminé'):
+            T.verifier_travaux(data)

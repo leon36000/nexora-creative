@@ -37,6 +37,15 @@ def verifier_travaux(data):
     with sqlite3.connect(uri, uri=True) as conn:
         actifs = conn.execute("SELECT count(*) FROM takes WHERE status NOT IN ('done','failed','stopped') OR status IS NULL OR NOT json_valid(settings) OR json_extract(settings,'$.nexoraSoumission')='indeterminee'").fetchone()[0]
         inconnus = conn.execute("SELECT count(*) FROM projets_longs WHERE NOT json_valid(data) OR coalesce(json_type(data,'$.sequences'),'') <> 'array'").fetchone()[0]
+        if inconnus:
+            raise ValueError('état des projets indéterminé')
+        inconnus += conn.execute("SELECT count(*) FROM projets_longs p, json_each(p.data,'$.sequences') s WHERE coalesce(json_type(s.value,'$.scenes'),'') <> 'array'").fetchone()[0]
+        if inconnus:
+            raise ValueError('état des scènes indéterminé')
+        inconnus += conn.execute("SELECT count(*) FROM projets_longs p, json_each(p.data,'$.sequences') s, json_each(s.value,'$.scenes') c WHERE coalesce(json_type(c.value,'$.plans'),'') <> 'array'").fetchone()[0]
+        if inconnus:
+            raise ValueError('état des plans indéterminé')
+        inconnus += conn.execute("SELECT count(*) FROM projets_longs p, json_each(p.data,'$.sequences') s, json_each(s.value,'$.scenes') c, json_each(c.value,'$.plans') x WHERE coalesce(json_extract(x.value,'$.etat'),'') NOT IN ('a_tourner','en_cours','tourne','echec')").fetchone()[0]
         plans = conn.execute("SELECT count(*) FROM projets_longs p, json_each(p.data,'$.sequences') s, json_each(s.value,'$.scenes') c, json_each(c.value,'$.plans') x WHERE json_extract(x.value,'$.etat')='en_cours'").fetchone()[0]
     registry = data / 'detourage/registre.json'
     verifier_ancetres(registry)
