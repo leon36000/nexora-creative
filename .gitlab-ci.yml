@@ -11,7 +11,7 @@ nexora_sonar_developpement:
     - job: nexora_director_tests_cpu
       artifacts: true
     - job: nexora_sous_agents_tests
-      artifacts: false
+      artifacts: true
   image:
     name: sonarsource/sonar-scanner-cli:12.3.0.4285_8.1.0@sha256:47956b669bf486bdad919e1cbd0533223515aa0b6d1d31763e5a3754942df6d7
     entrypoint: [""]
@@ -22,7 +22,7 @@ nexora_sonar_developpement:
     - if: '$CI_COMMIT_BRANCH == "developpement"'
   script:
     - 'test "${SONAR_TOKEN:+present}" = present || { echo "SONAR_TOKEN absent"; exit 1; }'
-    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.tests=. '-Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.test.mjs,**/test_*.py,app/scripts/test-*.mjs,app/scripts/test-*.ts' '-Dsonar.test.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' '-Dsonar.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' -Dsonar.python.coverage.reportPaths=.ci-v7/coverage.xml -Dsonar.javascript.lcov.reportPaths=.ci-director/coverage/lcov.info -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
+    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.tests=. '-Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.test.mjs,**/test_*.py,app/scripts/test-*.mjs,app/scripts/test-*.ts' '-Dsonar.test.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' '-Dsonar.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' -Dsonar.python.coverage.reportPaths=.ci-v7/coverage.xml,.ci-sousagents/coverage.xml -Dsonar.javascript.lcov.reportPaths=.ci-director/coverage/lcov.info -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
 
 nexora_v7_tests_cpu:
   stage: test
@@ -60,9 +60,12 @@ nexora_sous_agents_tests:
   script:
     - mkdir -p ".ci-sousagents/job-$CI_JOB_ID"
     - 'if apt-get update > ".ci-sousagents/job-$CI_JOB_ID/dependances.log" 2>&1 && apt-get install -y --no-install-recommends curl jq >> ".ci-sousagents/job-$CI_JOB_ID/dependances.log" 2>&1; then cat ".ci-sousagents/job-$CI_JOB_ID/dependances.log"; else cat ".ci-sousagents/job-$CI_JOB_ID/dependances.log"; exit 1; fi'
+    - python3 -m pip install --no-cache-dir coverage==7.10.7
     - 'env -i HOME="$CI_PROJECT_DIR/.ci-sousagents/job-$CI_JOB_ID" PATH=/usr/local/bin:/usr/bin:/bin SA_CI_ROOT="$CI_PROJECT_DIR" SA_CI_RUN_ID="job-$CI_JOB_ID" bash outils/sous-agents/tests/ci_hors_ligne.sh'
   artifacts:
     when: always
     expire_in: 14 days
     paths:
       - .ci-sousagents/*/*.log
+      - .ci-sousagents/*/*.txt
+      - .ci-sousagents/coverage.xml

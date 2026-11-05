@@ -312,7 +312,12 @@ def main():
         with Server(sys.argv[1], Handler, key=key, run=run, model=model, port=port, timeout=timeout,
                     audit_path=audit, ledger_path=ledger, budget=budget, ledger_wait=float(ledger_wait)) as server:
             os.chmod(sys.argv[1], 0o600)
-            server.serve_forever(poll_interval=0.2)
+            # Le propriétaire du run peut demander l'arrêt sans envoyer de signal.
+            # Le dossier d'audit n'est pas exposé à la sandbox du client.
+            stop = os.path.join(os.path.dirname(audit), 'proxy-stop')
+            server.timeout = 0.2
+            while not os.path.exists(stop):
+                server.handle_request()
     except OSError:
         return 1
     return 0

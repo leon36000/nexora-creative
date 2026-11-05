@@ -311,7 +311,11 @@ class ProcessTests(unittest.TestCase):
                 self.assertNotIn(FAKE_KEY.encode(), Path(f'/proc/{process.pid}/environ').read_bytes())
                 self.assertNotIn(FAKE_KEY.encode(), Path(f'/proc/{process.pid}/cmdline').read_bytes())
             finally:
-                process.terminate(); process.wait(timeout=5)
+                (root / 'proxy-stop').write_text('arrêt fictif')
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    self.fail('arrêt coopératif du relais non confirmé')
 
     def test_world_readable_key_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

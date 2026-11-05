@@ -16,6 +16,15 @@ WAIT=0; [ "${1:-}" = "-w" ] && { WAIT=1; shift; }
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 ALIAS="$(sa_alias "$1")" || { echo "alias inconnu : $1 (deepseek|muse|gemini)" >&2; exit 2; }
 PYTHON_BIN="$(command -v python3)" || { echo "Python indisponible" >&2; exit 2; }
+TIMEOUT_LIMIT="$("$PYTHON_BIN" -E -s -S -c 'import decimal,re,sys
+x=sys.argv[1]; m=re.fullmatch(r"([+]?(?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[eE][+-]?[0-9]+)?)([smhd]?)",x)
+if not m: sys.exit(2)
+try:
+ d=decimal.Decimal(m.group(1))*{"":1,"s":1,"m":60,"h":3600,"d":86400}[m.group(2)]
+ if not d.is_finite() or d<=0 or d>1000000000: sys.exit(2)
+ print(int(d.to_integral_value(rounding=decimal.ROUND_CEILING)))
+except decimal.DecimalException: sys.exit(2)' "${SA_TIMEOUT:-900}")" || { echo "SA_TIMEOUT invalide" >&2; exit 2; }
+
 [[ -x "$PYTHON_BIN" ]] || { echo "Python indisponible" >&2; exit 2; }
 PROMPT="$(readlink -f "$2")"; WORK="$(readlink -f "$3")"; TURNS="${4:-30}"; BUDGET="${5:-0.50}"
 [[ "$TURNS" =~ ^[1-9][0-9]*$ ]] || { echo "max-tours invalide" >&2; exit 2; }
@@ -147,6 +156,21 @@ if [ -z "$INTERNAL_RUN_ID" ]; then
 fi
 
 
+# Le signal 0 peut lui-même être refusé : seul ESRCH ou un zombie lisible
+# permet de considérer un enfant comme terminé avant wait.
+child_ended() {
+  "$PYTHON_BIN" -E -s -S -c 'import os,sys
+p=int(sys.argv[1])
+try:
+ os.kill(p,0)
+except ProcessLookupError: sys.exit(0)
+except (PermissionError,OSError): sys.exit(2)
+try:
+ s=open("/proc/%d/stat"%p).read().rsplit(")",1)[1].split()[0]
+except (OSError,IndexError): sys.exit(2)
+sys.exit(0 if s=="Z" else 1)' "$1"
+}
+
 if [ "$WAIT" != 1 ]; then
   # Une nouvelle session survit à la fin du shell appelant ; les résultats restent dans OUT.
   ( set -o noclobber; printf '%s\n' "$RUN" > "$OUT/.runner-handoff" ) \
@@ -156,7 +180,7 @@ if [ "$WAIT" != 1 ]; then
   SUPERVISEUR=$!
   printf '%s\n' "$SUPERVISEUR" > "$OUT/superviseur.pid"
   for _ in 1 2 3 4 5 6 7 8 9 10; do
-    [ -s "$OUT/pid" ] || [ -e "$OUT/done" ] || { kill -0 "$SUPERVISEUR" 2>/dev/null && sleep 0.2 && continue; }
+    [ -s "$OUT/pid" ] || [ -e "$OUT/done" ] || { if ! child_ended "$SUPERVISEUR"; then sleep 0.2; continue; fi; }
     break
   done
   if [ -e "$OUT/done" ]; then
@@ -168,7 +192,7 @@ if [ "$WAIT" != 1 ]; then
     exit 1
   elif [ -s "$OUT/pid" ]; then
     echo "(arrière-plan confirmé ; suivre : $OUT/summary.txt et $OUT/done)"
-  elif kill -0 "$SUPERVISEUR" 2>/dev/null; then
+  elif ! child_ended "$SUPERVISEUR"; then
     echo "(démarrage non confirmé ; ne pas relancer, vérifier $OUT/summary.txt et $OUT/done)" >&2
     exit 2
   else
@@ -181,8 +205,57 @@ fi
 SOCKDIR="$(mktemp -d /tmp/nexora-sa.XXXXXXXX)" || { echo "création du socket impossible" >&2; exit 1; }
 chmod 700 "$SOCKDIR"
 BRIDGE_PID=""
+BRIDGE_STOP_RC=0
+# Le jeton est le starttime du noyau ; un PID réattribué ne peut pas le remplacer.
+capture_child() {
+  "$PYTHON_BIN" -E -s -S -c 'import os,sys
+try:
+ p, parent=map(int,sys.argv[1:]); s=open("/proc/%d/stat"%p).read().rsplit(")",1)[1].split()
+ if int(s[1]) != parent: sys.exit(1)
+ print(s[19])
+except (OSError,ValueError,IndexError): sys.exit(1)' "$1" "$$"
+}
+signal_child() {
+  "$PYTHON_BIN" -E -s -S -c 'import os,signal,sys
+try:
+ p,parent=map(int,sys.argv[1:3]); token=sys.argv[3]; sig=getattr(signal, "SIG"+sys.argv[4])
+ fd=os.pidfd_open(p)
+ try:
+  s=open("/proc/%d/stat"%p).read().rsplit(")",1)[1].split()
+  if int(s[1]) != parent or s[19] != token: sys.exit(2)
+  signal.pidfd_send_signal(fd,sig)
+ finally: os.close(fd)
+except (OSError,ValueError,IndexError,AttributeError): sys.exit(2)' "$1" "$$" "$2" "$3"
+}
+wait_child_bounded() {
+  local pid="$1"
+  WAIT_CHILD_CONFIRMED=0
+  for _ in {1..50}; do
+    if child_ended "$pid"; then WAIT_CHILD_CONFIRMED=1; wait "$pid" 2>/dev/null; return $?; fi
+    sleep 0.1
+  done
+  return 125
+}
+stop_bridge() {
+  [ -n "$BRIDGE_PID" ] || return 0
+  printf 'arrêt demandé\n' > "$OUT/proxy-stop" || return 1
+  local rc=0
+  wait_child_bounded "$BRIDGE_PID" || rc=$?
+  BRIDGE_STOP_RC="$rc"
+  if [ "$WAIT_CHILD_CONFIRMED" = 0 ]; then
+    printf 'arrêt du relais non confirmé, pid=%s ; socket conservé\n' "$BRIDGE_PID" >&2
+    return 1
+  fi
+  BRIDGE_PID=""
+  return 0
+}
 cleanup_socket() {
-  if [ -n "$BRIDGE_PID" ]; then kill "$BRIDGE_PID" 2>/dev/null || true; wait "$BRIDGE_PID" 2>/dev/null || true; fi
+  local avant=$?
+  if ! stop_bridge; then
+    printf 'arrêt du relais non confirmé\n' > "$OUT/proxy-stop-error"
+    [ "$avant" -ne 0 ] && exit "$avant"
+    exit 1
+  fi
   rm -f -- "$SOCKDIR/gw.sock" 2>/dev/null
   rmdir -- "$SOCKDIR" 2>/dev/null
 }
@@ -211,16 +284,6 @@ except (InvalidOperation, ValueError): sys.exit(2)
 if not d.is_finite() or d<0: sys.exit(2)
 print("<$0.00001" if 0<d<Decimal("0.00001") else "$"+format(d,".5f"))' "$1" 2>/dev/null
 }
-pid_is_running() {
-  local pid="$1" stat_line rest state
-  kill -0 "$pid" 2>/dev/null || return 1
-  if [ -r "/proc/$pid/stat" ]; then
-    IFS= read -r stat_line < "/proc/$pid/stat" || return 1
-    rest="${stat_line##*) }"; state="${rest%% *}"
-    [ "$state" != Z ] || return 1
-  fi
-  return 0
-}
 
 runner() {
   local t0=$SECONDS
@@ -236,15 +299,14 @@ runner() {
   local BRIDGE_RC=0
   for _ in 1 2 3 4 5 6 7 8 9 10; do
     [ -S "$SOCKDIR/gw.sock" ] && break
-    if ! kill -0 "$BRIDGE_PID" 2>/dev/null; then wait "$BRIDGE_PID" 2>/dev/null; BRIDGE_RC=$?; break; fi
+    if child_ended "$BRIDGE_PID"; then wait "$BRIDGE_PID" 2>/dev/null; BRIDGE_RC=$?; BRIDGE_PID=""; break; fi
     sleep 0.2
   done
   if [ ! -S "$SOCKDIR/gw.sock" ]; then
-    kill "$BRIDGE_PID" 2>/dev/null || true
-    wait "$BRIDGE_PID" 2>/dev/null
-    local WAIT_RC=$?
+    local WAIT_RC=0
+    stop_bridge || WAIT_RC=125
+    [ "$WAIT_RC" -eq 0 ] && WAIT_RC="$BRIDGE_STOP_RC"
     [ "$BRIDGE_RC" -eq 0 ] && BRIDGE_RC=$WAIT_RC
-    BRIDGE_PID=""
     local START_SUBTYPE="pont_indisponible"
     [ "$BRIDGE_RC" -eq 3 ] && START_SUBTYPE="cle_indisponible"
     [ "$BRIDGE_RC" -eq 4 ] && START_SUBTYPE="journal_indisponible"
@@ -258,6 +320,7 @@ runner() {
   local RO=(); IFS=: read -ra EX <<<"${SA_EXTRA_RO:-}"; for d in "${EX[@]}"; do [ -n "$d" ] && RO+=(--ro-bind "$d" "$d"); done
   local CLAUDE_REAL NODE_DIR; CLAUDE_REAL="$(readlink -f "$(command -v claude)")"; NODE_DIR="$(dirname "$(readlink -f "$(command -v node)")")"
   local SYS="Tu es un sous-agent d'exécution. Travaille UNIQUEMENT dans le dossier courant ($WORK). Pas de réseau, pas de web. N'écris rien hors de ce dossier. Sois concis et vérifie ton travail en exécutant les tests ou commandes demandés. Termine par un court compte rendu : fichiers modifiés, commandes lancées, résultat, doutes éventuels."
+  local CLIENT_START=$SECONDS TIMED_OUT=0
   timeout --kill-after=10 "${SA_TIMEOUT:-900}" bwrap --clearenv --die-with-parent --unshare-pid --unshare-net --unshare-ipc --unshare-uts \
     --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 \
     --ro-bind /etc /etc --proc /proc --dev /dev --tmpfs /tmp \
@@ -278,35 +341,41 @@ runner() {
       --disallowedTools "WebFetch WebSearch Agent Task Bash(git push:*) Bash(ssh:*) Bash(scp:*) Bash(sudo:*) Bash(curl:*) Bash(wget:*)" \
       --append-system-prompt "$SYS" --strict-mcp-config --disable-slash-commands \
       < "$PROMPT" > "$OUT/transcript.jsonl" 2> "$OUT/stderr.log" &
-  local PID=$!; echo $PID > "$OUT/pid"
+  local PID=$! CLIENT_TOKEN=""; echo $PID > "$OUT/pid"
+  CLIENT_TOKEN="$(capture_child "$PID")" || CLIENT_TOKEN=""
   # Surveillance locale indicative : une requête en vol peut dépasser le budget.
   local SPENT=0 COUNT=0 ATTEMPTS=0 PENDING=0 CAPPED=0 UNKNOWN=0 SNAP="" COMPARE_RC=0
-  while pid_is_running "$PID"; do
+  while ! child_ended "$PID"; do
     for _ in {1..40}; do
-      pid_is_running "$PID" || break
+      child_ended "$PID" && break
+      if (( SECONDS - CLIENT_START >= TIMEOUT_LIMIT )); then
+        TIMED_OUT=1; signal_child "$PID" "$CLIENT_TOKEN" TERM 2>/dev/null || true; break
+      fi
       sleep 0.1
     done
-    pid_is_running "$PID" || break
+    [ "$TIMED_OUT" = 1 ] && break
+    child_ended "$PID" && break
     if ! SNAP="$(spent_snapshot)"; then
       sleep 1
       if ! SNAP="$(spent_snapshot)"; then
-        UNKNOWN=1; kill -TERM "$PID" 2>/dev/null || true; break
+        UNKNOWN=1; signal_child "$PID" "$CLIENT_TOKEN" TERM 2>/dev/null || true; break
       fi
     fi
     read -r COUNT SPENT ATTEMPTS PENDING <<< "$SNAP"
     if decimal_ge "$SPENT" "$BUDGET"; then
-      CAPPED=1; kill -TERM "$PID" 2>/dev/null || true; sleep 2; kill -KILL "$PID" 2>/dev/null || true; break
+      CAPPED=1; signal_child "$PID" "$CLIENT_TOKEN" TERM 2>/dev/null || true; sleep 2; signal_child "$PID" "$CLIENT_TOKEN" KILL 2>/dev/null || true; break
     else
       COMPARE_RC=$?
       if [ "$COMPARE_RC" -gt 1 ]; then
-        UNKNOWN=1; kill -TERM "$PID" 2>/dev/null || true; break
+        UNKNOWN=1; signal_child "$PID" "$CLIENT_TOKEN" TERM 2>/dev/null || true; break
       fi
     fi
   done
-  wait "$PID" 2>/dev/null; local RC=$?
-  kill "$BRIDGE_PID" 2>/dev/null || true
-  wait "$BRIDGE_PID" 2>/dev/null || true
-  BRIDGE_PID=""
+  local RC=0 CLIENT_NON_CONFIRME=0
+  wait_child_bounded "$PID" || RC=$?
+  if [ "$WAIT_CHILD_CONFIRMED" = 0 ]; then CLIENT_NON_CONFIRME=1; UNKNOWN=1; fi
+  local RELAIS_NON_CONFIRME=0
+  stop_bridge || { RELAIS_NON_CONFIRME=1; UNKNOWN=1; }
   jq -c 'select(.type=="result")' "$OUT/transcript.jsonl" 2>/dev/null | tail -1 > "$OUT/result.json"
   [ -s "$OUT/result.json" ] || echo "{\"type\":\"result\",\"is_error\":true,\"subtype\":\"no_result\",\"rc\":$RC}" > "$OUT/result.json"
   # Wait a bounded interval for every audited call's exact call tag to appear in the ledger.
@@ -329,9 +398,9 @@ runner() {
   ' -r "$SA_STATE/usage.jsonl" 2>/dev/null || printf '?')"
   local ST; ST="$(jq -r 'if .type != "result" or .is_error != false then "FAIL:"+(.subtype//"error") else "OK:"+(.subtype//"success") end' "$OUT/result.json")"
   [ "$RC" -ne 0 ] && case "$ST" in OK:*) ST="FAIL:processus";; esac
-  [ "$CAPPED" = 1 ] && ST="FAIL:plafond_budget"
-  [ "$RC" = 124 ] && ST="FAIL:timeout"
   [ "$UNKNOWN" = 1 ] && ST="FAIL:cout_inconnu"
+  [ "$CAPPED" = 1 ] && ST="FAIL:plafond_budget"
+  { [ "$RC" = 124 ] || [ "$TIMED_OUT" = 1 ]; } && ST="FAIL:timeout"
 
   local TURNS_USED; TURNS_USED="$(jq -r '.num_turns // "?"' "$OUT/result.json")"
   local COUT COUT_EXACT
@@ -340,8 +409,11 @@ runner() {
     COUT_EXACT="$SPENT"
     COUT="$(format_cost "$SPENT")" || { COUT="inconnu"; COUT_EXACT="inconnu"; UNKNOWN=1; ST="FAIL:cout_inconnu"; }
   fi
-  printf '%s %s %s tours=%s cout=%s cout_exact=%s jetons=%s duree=%ss dossier=%s\n' \
-    "$ST" "$ALIAS" "$RUN" "$TURNS_USED" "$COUT" "$COUT_EXACT" "$TOK" "$((SECONDS-t0))" "$OUT" > "$OUT/summary.txt"
+  local ETAT_CLIENT="confirme" ETAT_RELAIS="confirme"
+  [ "$CLIENT_NON_CONFIRME" = 1 ] && ETAT_CLIENT="non_confirme"
+  [ "$RELAIS_NON_CONFIRME" = 1 ] && ETAT_RELAIS="non_confirme"
+  printf '%s %s %s tours=%s cout=%s cout_exact=%s jetons=%s duree=%ss arret_client=%s arret_relais=%s dossier=%s\n' \
+    "$ST" "$ALIAS" "$RUN" "$TURNS_USED" "$COUT" "$COUT_EXACT" "$TOK" "$((SECONDS-t0))" "$ETAT_CLIENT" "$ETAT_RELAIS" "$OUT" > "$OUT/summary.txt"
   touch "$OUT/done"
 }
 runner

@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 import time
@@ -23,6 +24,23 @@ class TestRunner(unittest.TestCase):
         self.bin = root / 'bin'; self.bin.mkdir()
         self.stub('curl', '#!/bin/sh\n[ "${1:-}" = "--noproxy" ] && [ "${2:-}" = "*" ] || exit 9\nprintf 200\n')
         self.stub('claude', '#!/bin/sh\nexit 0\n')
+        self.stub('python3', '''#!/bin/sh
+case "$*" in *'os.kill(p,0)'*)
+ if [ "${FAKE_DENY_PROBE:-0}" = 1 ]; then
+  for f in "$SA_STATE"/runs/*/pid; do
+   [ -f "$f" ] || continue
+   for arg in "$@"; do [ "$arg" = "$(cat "$f")" ] && exit 2; done
+  done
+ fi
+ if [ "${FAKE_DENY_SUPERVISOR:-0}" = 1 ]; then
+  for f in "$SA_STATE"/runs/*/superviseur.pid; do
+   [ -f "$f" ] || continue
+   for arg in "$@"; do [ "$arg" = "$(cat "$f")" ] && exit 2; done
+  done
+ fi;; esac
+case "$*" in *pidfd_send_signal*) if [ "${FAKE_DENY_PIDFD:-0}" = 1 ]; then echo refused >> "$FAKE_SIGNAL_LOG"; exit 2; fi;; esac
+exec /usr/bin/python3 "$@"
+''')
         self.stub('docker', '''#!/bin/sh
 if [ "${FAKE_DOCKER_MISMATCH:-0}" = 1 ]; then echo invalid; else printf 'true|%s|127.0.0.1:%s,\\n' "$FAKE_IMAGE" "${SA_PORT:-4410}"; fi
 ''')
@@ -34,7 +52,7 @@ s = socket.socket(socket.AF_UNIX); s.bind(path); s.listen()
 time.sleep(30)
 ''')
         self.stub('bwrap', '''#!/usr/bin/python3
-import json, os, sys
+import json, os, sys, time
 from pathlib import Path
 from decimal import Decimal
 Path(os.environ['FAKE_WORK']).joinpath('bwrap-called').write_text('yes')
@@ -59,6 +77,12 @@ if os.environ.get('FAKE_NO_LOG') != '1':
     cost = 'null' if os.environ.get('FAKE_UNKNOWN_COST') == '1' else format(Decimal(os.environ.get('FAKE_COST', '0.001')), 'f')
     with (Path(os.environ['SA_STATE']) / 'usage.jsonl').open('a') as f:
         f.write(json.dumps({'run': tags[0], 'in': 1, 'out': 1})[:-1] + ',"cost":' + cost + '}\\n')
+if os.environ.get('FAKE_BARRIER'):
+    marker = Path(os.environ['FAKE_BARRIER'])
+    marker.with_suffix('.pid').write_text(str(os.getpid()))
+    while not marker.exists(): time.sleep(0.05)
+elif os.environ.get('FAKE_STALL') == '1': time.sleep(12)
+if os.environ.get('FAKE_EXIT_125') == '1': sys.exit(125)
 if os.environ.get('FAKE_BAD_RESULT') == '1':
     print(json.dumps({'type':'result','subtype':'test'}))
 else:
@@ -72,9 +96,9 @@ else:
     def stub(self, name, source):
         p = self.bin / name; p.write_text(source); p.chmod(0o755)
 
-    def call(self, *flags, env=None):
+    def call(self, *flags, env=None, timeout=15):
         return subprocess.run([str(SCRIPT), *flags, 'deepseek', str(self.prompt), str(self.work), '2', '0.1'],
-                              env=env or self.env, text=True, capture_output=True, timeout=15)
+                              env=env or self.env, text=True, capture_output=True, timeout=timeout)
 
     def test_wait_mode_short_socket_and_key_not_in_arguments(self):
         r = self.call('-w')
@@ -84,6 +108,114 @@ else:
         self.assertTrue((out / 'summary.txt').read_text().startswith('OK:'))
         self.assertNotIn('FAKE_TEST_KEY', r.stdout + r.stderr)
         self.assertGreater(len(str(self.state)), 100)
+
+    def test_refused_signal_stops_proxy_cooperatively(self):
+        bash_env = self.tmp_path() / 'deny-signals.sh'
+        signal_log = self.tmp_path() / 'signals.log'
+        bash_env.write_text('kill() { if [ "${1:-}" = "-0" ]; then builtin kill "$@"; else echo refused >> "$FAKE_SIGNAL_LOG"; return 1; fi; }\n')
+        r = self.call('-w', env=dict(self.env, BASH_ENV=str(bash_env), FAKE_SIGNAL_LOG=str(signal_log)))
+        self.assertEqual(r.returncode, 0, r.stderr)
+        out = Path(r.stdout.splitlines()[0])
+        self.assertTrue((out / 'proxy-stop').exists())
+        self.assertFalse(signal_log.exists())
+        self.assertFalse((out / 'proxy-stop-error').exists())
+
+    def tmp_path(self):
+        return Path(self.tmp.name)
+
+    def release_barrier(self, marker):
+        marker.touch()
+        pidfile = marker.with_suffix('.pid')
+        pidfiles = list(self.state.glob('runs/*/pid'))
+        if pidfile.exists(): pidfiles.append(pidfile)
+        for path in pidfiles:
+            pid = int(path.read_text())
+            deadline = time.monotonic() + 10
+            while time.monotonic() < deadline:
+                try:
+                    state = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()[0]
+                except FileNotFoundError:
+                    break
+                if state == 'Z': break
+                time.sleep(0.05)
+            else:
+                self.fail('le faux client ne confirme pas sa sortie après libération')
+
+    def test_refused_client_stop_is_bounded_and_reported(self):
+        signal_log = self.tmp_path() / 'signals.log'
+        marker = self.tmp_path() / 'release-client'
+        debut = time.monotonic()
+        try:
+            r = self.call('-w', env=dict(self.env, FAKE_SIGNAL_LOG=str(signal_log), FAKE_DENY_PIDFD='1',
+                                         FAKE_BARRIER=str(marker), FAKE_COST='0.2'), timeout=30)
+            self.assertLess(time.monotonic() - debut, 25)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn('FAIL:plafond_budget', r.stdout)
+            self.assertIn('arret_client=non_confirme', r.stdout)
+            self.assertTrue(signal_log.exists())
+        finally:
+            self.release_barrier(marker)
+
+    def test_timeout_with_refused_signal_returns_without_claiming_exit(self):
+        self.stub('timeout', '#!/bin/sh\nshift 2\nexec "$@"\n')
+        marker = self.tmp_path() / 'release-client'
+        signal_log = self.tmp_path() / 'signals.log'
+        debut = time.monotonic()
+        try:
+            r = self.call('-w', env=dict(self.env, FAKE_SIGNAL_LOG=str(signal_log), FAKE_DENY_PIDFD='1',
+                                         FAKE_BARRIER=str(marker), SA_TIMEOUT='2'), timeout=30)
+            self.assertLess(time.monotonic() - debut, 25)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn('FAIL:timeout', r.stdout)
+            self.assertIn('arret_client=non_confirme', r.stdout)
+            self.assertTrue(signal_log.exists())
+        finally:
+            self.release_barrier(marker)
+
+    def test_inconclusive_signal_zero_keeps_monitoring_until_deadline(self):
+        self.stub('timeout', '#!/bin/sh\nshift 2\nexec "$@"\n')
+        marker = self.tmp_path() / 'release-client'
+        signal_log = self.tmp_path() / 'signals.log'
+        debut = time.monotonic()
+        try:
+            r = self.call('-w', env=dict(self.env, FAKE_DENY_PROBE='1', FAKE_DENY_PIDFD='1',
+                                         FAKE_SIGNAL_LOG=str(signal_log), FAKE_BARRIER=str(marker),
+                                         SA_TIMEOUT='2'), timeout=30)
+            self.assertGreaterEqual(time.monotonic() - debut, 1.5)
+            self.assertLess(time.monotonic() - debut, 25)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn('FAIL:timeout', r.stdout)
+            self.assertIn('arret_client=non_confirme', r.stdout)
+            self.assertTrue(signal_log.exists())
+        finally:
+            self.release_barrier(marker)
+
+    def test_unresponsive_proxy_is_reported_without_unbounded_wait(self):
+        runtime = self.tmp_path() / 'runtime'
+        runtime.mkdir()
+        for name in ('sous-agent.sh', 'lib.sh', 'proxy_launcher.py', 'cost_snapshot.py'):
+            shutil.copy2(ROOT / name, runtime / name)
+        (runtime / 'sa_proxy.py').write_text(
+            "import socket,sys,time\n"
+            "s=socket.socket(socket.AF_UNIX); s.bind(sys.argv[1]); s.listen(); time.sleep(8)\n"
+        )
+        bash_env = self.tmp_path() / 'deny-signals.sh'
+        signal_log = self.tmp_path() / 'signals.log'
+        bash_env.write_text('kill() { if [ "${1:-}" = "-0" ]; then builtin kill "$@"; else echo refused >> "$FAKE_SIGNAL_LOG"; return 1; fi; }\n')
+        debut = time.monotonic()
+        env = dict(self.env, BASH_ENV=str(bash_env), FAKE_SIGNAL_LOG=str(signal_log))
+        r = subprocess.run([str(runtime / 'sous-agent.sh'), '-w', 'deepseek', str(self.prompt), str(self.work), '2', '0.1'],
+                           env=env, text=True, capture_output=True, timeout=15)
+        self.assertLess(time.monotonic() - debut, 15)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('arret_relais=non_confirme', r.stdout)
+        self.assertFalse(signal_log.exists())
+
+    def test_exit_125_is_distinct_from_unconfirmed_stop(self):
+        r = self.call('-w', env=dict(self.env, FAKE_EXIT_125='1'))
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('arret_client=confirme', r.stdout)
+        self.assertNotIn('arret_client=non_confirme', r.stdout)
 
     def test_failure_result_returns_nonzero(self):
         r = self.call('-w', env=dict(self.env, FAKE_RESULT_FAIL='1'))
@@ -188,6 +320,17 @@ else:
             time.sleep(0.1)
         self.assertTrue((out / 'done').exists())
         self.assertTrue((out / 'summary.txt').read_text().startswith('OK:'))
+
+    def test_background_inconclusive_signal_zero_warns_against_retry(self):
+        self.stub('curl', '#!/bin/sh\nsleep 3\nprintf 200\n')
+        r = self.call(env=dict(self.env, FAKE_DENY_SUPERVISOR='1'))
+        self.assertEqual(r.returncode, 2)
+        self.assertIn('démarrage non confirmé', r.stderr)
+        self.assertIn('ne pas relancer', r.stderr)
+        out = Path(r.stdout.splitlines()[0])
+        end = time.monotonic() + 12
+        while not (out / 'done').exists() and time.monotonic() < end: time.sleep(0.1)
+        self.assertTrue((out / 'done').exists())
 
     def test_secret_mount_or_ancestor_is_refused_without_launch(self):
         for mount in (self.home, self.home.parent):
