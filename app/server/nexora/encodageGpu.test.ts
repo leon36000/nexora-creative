@@ -45,7 +45,7 @@ describe('encodage GPU distant', () => {
     expect(corps).toContain('filename="clip1.mp4"'); expect(corps).toContain('source-0'); expect(corps).toContain('source-1');
     expect(corps).toContain(JSON.stringify(options)); expect(corps).not.toContain(b.dir);
     expect(await readFile(b.sortie, 'utf8')).toBe('MP4-test');
-    expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(true);
+    expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(false);
   });
   it('reste fermé pour H264 non validé et sans URL ou jeton', async () => {
     let appels = 0; const b = await banc((_req, res) => { appels++; video(res); });
