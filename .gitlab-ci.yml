@@ -4,7 +4,10 @@ pc4_ci_fallback:
   script: [echo "Local security scans completed"]
 
 nexora_sonar_developpement:
-  stage: .pre
+  stage: test
+  needs:
+    - job: nexora_v7_tests_cpu
+      artifacts: true
   image:
     name: sonarsource/sonar-scanner-cli:12.3.0.4285_8.1.0@sha256:47956b669bf486bdad919e1cbd0533223515aa0b6d1d31763e5a3754942df6d7
     entrypoint: [""]
@@ -15,17 +18,17 @@ nexora_sonar_developpement:
     - if: '$CI_COMMIT_BRANCH == "developpement"'
   script:
     - 'test "${SONAR_TOKEN:+present}" = present || { echo "SONAR_TOKEN absent"; exit 1; }'
-    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
+    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.python.coverage.reportPaths=.ci-v7/coverage.xml -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
 
 nexora_v7_tests_cpu:
   stage: test
   image: python:3.12-slim-bookworm@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
   script:
-    - mkdir -p ".ci-v7/home-$CI_JOB_ID" ".ci-v7/cache-$CI_JOB_ID" ".ci-v7/tmp-$CI_JOB_ID" ".ci-v7/test-$CI_JOB_ID"
+    - mkdir -p ".ci-v7/home-$CI_JOB_ID" ".ci-v7/cache-$CI_JOB_ID" ".ci-v7/tmp-$CI_JOB_ID" ".ci-v7/test-$CI_JOB_ID" ".ci-v7/coverage-$CI_JOB_ID"
     - 'if python3 -B recherche/30-annexes/finish-banc/verifier_paquet.py > .ci-v7/finish-verification.log 2>&1; then cat .ci-v7/finish-verification.log; else cat .ci-v7/finish-verification.log; exit 1; fi'
     - apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
-    - python3 -m pip install --no-cache-dir numpy==2.2.6 Pillow==11.2.1
-    - 'if env -i HOME="$CI_PROJECT_DIR/.ci-v7/home-$CI_JOB_ID" PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin V7_CI_ROOT="$CI_PROJECT_DIR/.ci-v7" TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" V7_TEST_TMPDIR="$CI_PROJECT_DIR/.ci-v7/test-$CI_JOB_ID" V6_CACHE="$CI_PROJECT_DIR/.ci-v7/cache-$CI_JOB_ID" V6_FFMPEG=/usr/bin/ffmpeg V6_FFPROBE=/usr/bin/ffprobe python3 -B marketing/creative/video-v7/chaine/ci_tests.py > .ci-v7/tests.log 2>&1; then cat .ci-v7/tests.log; else cat .ci-v7/tests.log; exit 1; fi'
+    - python3 -m pip install --no-cache-dir numpy==2.2.6 Pillow==11.2.1 coverage==7.10.7
+    - 'if env -i HOME="$CI_PROJECT_DIR/.ci-v7/home-$CI_JOB_ID" PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin V7_CI_ROOT="$CI_PROJECT_DIR/.ci-v7" TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" V7_TEST_TMPDIR="$CI_PROJECT_DIR/.ci-v7/test-$CI_JOB_ID" V6_CACHE="$CI_PROJECT_DIR/.ci-v7/cache-$CI_JOB_ID" V6_FFMPEG=/usr/bin/ffmpeg V6_FFPROBE=/usr/bin/ffprobe PYTHONDONTWRITEBYTECODE=1 COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage" COVERAGE_RCFILE="$CI_PROJECT_DIR/marketing/creative/video-v7/chaine/coverage-ci.ini" sh marketing/creative/video-v7/chaine/ci_coverage.sh > .ci-v7/job.log 2>&1; then cat .ci-v7/job.log; else cat .ci-v7/job.log; exit 1; fi'
   artifacts:
     when: always
     expire_in: 14 days
