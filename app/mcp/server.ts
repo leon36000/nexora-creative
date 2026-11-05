@@ -170,10 +170,43 @@ async function tierFor(app: TierApp, asked: RenderTier | undefined): Promise<Ren
 const imageModel = z.enum(IMAGE_MODELS.map((m) => m.id) as ['qwen', 'flux2']).default('qwen')
   .describe('qwen = Qwen-Image (Apache 2.0, text/layout). flux2 = FLUX.2 dev (non-commercial license, photoreal).');
 
+// Only return structural measurements: the server also stores a free-text visual
+// judgement, which is not a mesh measurement and must not become agent instructions.
+const meshMeasurements = z.object({
+  sommets: z.number().int().nonnegative(), triangles: z.number().int().nonnegative(),
+  degeneres: z.number().int().nonnegative(), aretesOuvertes: z.number().int().nonnegative(),
+  aretesNonVariete: z.number().int().nonnegative(), composantes: z.number().int().nonnegative(),
+  etanche: z.boolean(), taille: z.tuple([z.number(), z.number(), z.number()]),
+  volume: z.number().nullable(),
+});
+const meshResponse = z.object({ rapport: meshMeasurements, decime: meshMeasurements.nullable(), cible: z.number().int().positive().nullable() });
+
 // ---------- read-only tools ----------
 
 const RO = { readOnlyHint: true, openWorldHint: false } as const;
 const GPU = { readOnlyHint: false, destructiveHint: false, openWorldHint: false } as const;
+
+server.registerTool('nexora_mesh_rapport', {
+  title: `${PRODUIT_3D} : rapport du maillage`,
+  description: `Inspect a finished ${PRODUIT_3D} take. Returns structural measurements, not an assessment of visual quality. Optional faces requests a decimated comparison (CPU only).`,
+  inputSchema: {
+    take_id: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).describe('ID of the finished 3D take'),
+    faces: z.number().int().min(500).max(2_000_000).optional().describe('Optional target triangle count for comparison (500–2,000,000)'),
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }, // The HTTP endpoint caches its CPU report.
+}, safe(async ({ take_id, faces }) => {
+  const query = faces === undefined ? '' : `?faces=${faces}`;
+  let data: unknown;
+  try {
+    data = await api.nexora<unknown>(`relief/${take_id}/rapport${query}`);
+  } catch (error) {
+    const status = error instanceof Error ? / -> (\d{3}):/.exec(error.message)?.[1] : undefined;
+    throw new Error(`${PRODUIT_3D}: unable to retrieve the mesh report${status ? ` (HTTP ${status})` : ''}. Check that the take exists and is ready.`);
+  }
+  const parsed = meshResponse.safeParse(data);
+  if (!parsed.success) throw new Error(`${PRODUIT_3D}: invalid mesh report returned by the server.`);
+  return { content: [text({ take_id, ...parsed.data })] };
+}));
 
 server.registerTool('status', {
   title: 'Engine status',
