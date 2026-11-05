@@ -318,7 +318,17 @@ def installer(app, verrou_gpu=None):
         dossier = None
         verrou_stockage = None
         reception = None
-        rendu = False
+        verrou_travail = True
+        def liberer_verrous():
+            nonlocal verrou_stockage, verrou_travail
+            fd, verrou_stockage = verrou_stockage, None
+            try:
+                if fd is not None:
+                    os.close(fd)
+            finally:
+                if verrou_travail:
+                    verrou_travail = False
+                    VERROU.release()
         try:
             verrou_stockage = admettre_essai()
             dossier = Path(tempfile.mkdtemp(prefix='enc-', dir=RACINE))
@@ -373,19 +383,16 @@ def installer(app, verrou_gpu=None):
                 raise HTTPException(422, 'sortie tronquee / truncated output')
             # Décodage complet : un -fs ou un flux corrompu ne doit pas livrer une vidéo tronquée.
             await programme([FFMPEG, '-v', 'error', '-xerror', '-nostdin', '-threads', '2', '-i', str(sortie), '-map', '0:v:0', '-map', '0:a?', '-f', 'null', '-'])
+            # Seule la lecture d'un résultat complet persiste hors verrou.
+            liberer_verrous()
             async def flux():
-                try:
-                    with sortie.open('rb') as f:
-                        while chunk := f.read(256*1024):
-                            yield chunk
-                finally:
-                    os.close(verrou_stockage)
-                    VERROU.release()
+                with sortie.open('rb') as f:
+                    while chunk := f.read(256*1024):
+                        yield chunk
             response = StreamingResponse(flux(), media_type='video/mp4', headers={
                 'Content-Length': str(sortie.stat().st_size), 'X-Nexora-Encodeur': codec,
                 'Content-Disposition': 'attachment; filename="export.mp4"', 'Cache-Control': 'no-store',
             })
-            rendu = True
             return response
         except TimeoutError:
             raise HTTPException(504, 'delai depasse / timeout')
@@ -394,9 +401,8 @@ def installer(app, verrou_gpu=None):
         except ValueError:
             raise HTTPException(422, 'requete invalide / invalid request')
         finally:
-            if reception:
-                reception.fermer()
-            if not rendu:
-                if verrou_stockage is not None:
-                    os.close(verrou_stockage)
-                VERROU.release()
+            try:
+                if reception:
+                    reception.fermer()
+            finally:
+                liberer_verrous()
