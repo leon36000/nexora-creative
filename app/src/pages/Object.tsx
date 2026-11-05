@@ -11,7 +11,7 @@ import { api, downloadUrl, mediaUrl, posterUrl, subjectUrl, uploadFile, type Obj
 import { FONDS_PLAN_CLE, planCleDepuisCanevas, type FondPlanCle } from '../planCle3d';
 import { navigate, setParams, useRoute } from '../router';
 import { SourceSlot, loadFile, useTakeParam, type Source } from '../SourcePick';
-import { inFeed, isModel, settingsOf, toast, useStore } from '../store';
+import { definirMessageEchecPriseMesh, inFeed, isModel, settingsOf, toast, useStore } from '../store';
 import { Icon, MediaCard, Spill, Stepper, Switch, fmtSeconds, presetClip, useEstimate } from '../ui';
 import Viewer, { recreate, remove } from '../Viewer';
 import { usePageDrop } from '../drop';
@@ -28,6 +28,7 @@ export default function ObjectPage() {
   const { params } = useRoute();
   const [langue, setLangue] = useState<LangueClient>('fr');
   const c = meshCopy(langue);
+  useEffect(() => definirMessageEchecPriseMesh(() => c.cardFailedHelp), [c]);
   const [source, setSource] = useState<Source | null>(null);
   const [quality, setQuality] = useState<'draft' | 'quality'>('draft');
   const [cutout, setCutout] = useState(true);
