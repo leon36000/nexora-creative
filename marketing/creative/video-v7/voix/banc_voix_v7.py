@@ -2,7 +2,7 @@
 Sortie : ~/nexora-creative-data/promo/v7-creative/voix-banc/<NN>-<moteur>-<voix>-<texte>.mp3 + banc.json + INDEX.md
 Chaque échantillon : Whisper (fidélité), mesures (débit, relief), et oreille de machine Gemini 4 Argon (2 passes).
   python3 banc_voix_v7.py [filtre]
-La clé OpenRouter est lue dans ~/Desktop/Deepinfra.env et reste en mémoire.
+Le banc exige V7_API_BASE_URL, V7_API_KEY et le modèle explicite de chaque requête ; aucun fichier secret n'est lu.
 Poids locaux : Voxtral-4B-TTS-2603 est ouvert mais sous CC BY-NC 4.0 (non commercial) : pas utilisable pour une publicité ;
 le banc n'utilise que l'API (usage commercial couvert par l'API de Mistral via OpenRouter).
 """
@@ -16,6 +16,9 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'chaine'))
+from commun import api_configuration
+
 D = Path.home() / "nexora-creative-data/promo/v7-creative/voix-banc"
 FF = str(Path.home() / "nexora-creative-data/engine/ffmpeg/ffmpeg-7.0.2-arm64-static/ffmpeg")
 REF_H3 = Path.home() / "nexora-creative-data/promo/v6-creative/voix/casting/K-h3-natif-a-fr.mp3"
@@ -28,14 +31,9 @@ JEU = {"narration": "Bande-annonce de film d'action : voix grave, rauque, attaqu
        "cri": "Pilote de chasse en plein combat, elle hurle des ordres, essoufflée, urgente, la voix qui casse sur « Maintenant »."}
 
 
-def cle():
-    for l in open(Path.home() / "Desktop/Deepinfra.env"):
-        if ":" in l and l.split(":", 1)[0].strip().lower() == "openrouter":
-            return l.split(":", 1)[1].strip()
-
-
-def post(url, corps, timeout=300):
-    r = urllib.request.Request(url, data=json.dumps(corps).encode(), headers={"Authorization": "Bearer " + cle(), "Content-Type": "application/json"})
+def post(chemin_api, corps, timeout=300):
+    url, cle = api_configuration(chemin_api, corps.get('model'))
+    r = urllib.request.Request(url, data=json.dumps(corps).encode(), headers={"Authorization": "Bearer " + cle, "Content-Type": "application/json"})
     for i in range(3):
         try:
             with urllib.request.urlopen(r, timeout=timeout) as x:
@@ -92,7 +90,7 @@ def generer(nom, texte_id):
         corps["instructions"] = JEU[texte_id]
     if opt.get("input_references"):
         corps["input_references"] = ref_clone()
-    b = post("https://openrouter.ai/api/v1/audio/speech", corps)
+    b = post("audio/speech", corps)
     f = D / f"{nom}-{texte_id}.mp3"
     if fmt == "pcm":
         brut = D / f"{nom}-{texte_id}.pcm"
@@ -113,7 +111,7 @@ def juger(f, texte_id, passes=2):
                  "messages": [{"role": "user", "content": [{"type": "input_audio", "input_audio": {"data": b, "format": "mp3"}},
                                                           {"type": "text", "text": GRILLE.format(role=texte_id, texte=TEXTES[texte_id])}]}]}
         try:
-            r = json.loads(post("https://openrouter.ai/api/v1/chat/completions", corps, timeout=180))
+            r = json.loads(post("chat/completions", corps, timeout=180))
             t = r["choices"][0]["message"]["content"]
             notes.append(json.loads(t[t.find("{"): t.rfind("}") + 1]))
         except Exception as e:

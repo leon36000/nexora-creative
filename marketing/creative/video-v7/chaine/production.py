@@ -8,7 +8,8 @@ import io
 import json
 import math
 import os
-from pathlib import Path
+import uuid
+from pathlib import Path, PurePosixPath
 import shlex
 import shutil
 import subprocess
@@ -19,10 +20,13 @@ import urllib.parse
 import urllib.request
 
 from commun import (ICI, V7, DATA, absolu, banc, budget, calage_auto, duree, ecrire_json,
-                    journal, juge, lignes, lire_json, module, montage_module, moteur,
-                    recette, substituer, unites, musique_legacy)
+                    api_configuration, ecrire_octets_exclusifs, journal, juge, lignes, lire_json, module,
+                    montage_module, moteur, recette, substituer, unites, musique_legacy)
 
 ENGINE = Path.home() / 'nexora-creative-data/engine'
+MEDIA_ARCHIVE_EXTENSIONS = frozenset({'.mp4', '.mov', '.webm', '.m4v', '.avi', '.png', '.jpg', '.jpeg',
+                                     '.webp', '.gif', '.tif', '.tiff', '.bmp', '.svg'})
+IMAGE_ARCHIVE_EXTENSIONS = frozenset({'.png', '.jpg', '.jpeg', '.webp', '.gif', '.tif', '.tiff', '.bmp', '.svg'})
 
 
 def binaire(nom):
@@ -62,6 +66,18 @@ def sha(f):
 
 def signature(obj):
     return hashlib.sha256(json.dumps(obj, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def destination_libre(base, avec_rapport=False):
+    """Choisit un nom libre sans remplacer une sortie ou son rapport existant."""
+    base = Path(base)
+    n = 1
+    while True:
+        candidate = base if n == 1 else base.with_name(f'{base.stem}-essai-{n:02d}{base.suffix}')
+        accompagne = [candidate.with_suffix('.rendu.json')] if avec_rapport else []
+        if not candidate.exists() and not any(p.exists() for p in accompagne):
+            return candidate
+        n += 1
 
 
 @contextlib.contextmanager
@@ -131,15 +147,32 @@ class Comfy:
         q = urllib.parse.urlencode({k: f.get(k, 'output' if k == 'type' else '')
                                     for k in ('filename', 'subfolder', 'type')})
         data = moteur().http(self.url + '/view?' + q, timeout=600)
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        temp = destination.with_suffix(destination.suffix + '.part')
-        temp.write_bytes(data)
-        temp.replace(destination)
+        if not data:
+            raise RuntimeError(f'ComfyUI : média vide pour {pid}')
+        destination = Path(destination)
+        empreinte = hashlib.sha256(data).hexdigest()[:12]
+        candidate = destination
+        n = 0
+        while True:
+            try:
+                ecrire_octets_exclusifs(candidate, data)
+                break
+            except FileExistsError:
+                # Reprise après crash : le même résultat est idempotent. Si les octets
+                # diffèrent, conserver l'ancien essai et publier cette réponse à part.
+                try:
+                    if sha(candidate) == hashlib.sha256(data).hexdigest():
+                        break
+                except OSError:
+                    pass
+                n += 1
+                candidate = destination.with_name(
+                    f'{destination.stem}-reprise-{empreinte}{"-"+str(n) if n > 1 else ""}{destination.suffix}')
         ts = {m[0]: m[1].get('timestamp') for m in st.get('messages', []) if isinstance(m[1], dict)}
         secs = None
         if ts.get('execution_start') is not None and ts.get('execution_success') is not None:
             secs = (ts['execution_success']-ts['execution_start'])/1000
-        return {'fichier': str(destination), 'secondesMoteur': secs}
+        return {'fichier': str(candidate), 'secondesMoteur': secs}
 
 
 class Atelier:
@@ -148,32 +181,43 @@ class Atelier:
         self.blanc, self.poll = blanc, poll
         self.equipe = d['equipe']
         self.couts = self.travail / 'openrouter.jsonl'
-        self._key = None
         self._secret_module = None
 
-    def cle(self):
-        if self._key is None:
-            for line in (Path.home() / 'Desktop/Deepinfra.env').read_text().splitlines():
-                k, sep, v = line.partition(':')
-                if sep and k.strip().lower() == 'openrouter':
-                    self._key = v.strip()
-                    break
-            if not self._key:
-                raise RuntimeError('Clé OpenRouter absente de Deepinfra.env')
-        return self._key
+    def cle_openrouter_legacy(self, modele):
+        url, cle = api_configuration('chat/completions', modele)
+        if url != 'https://openrouter.ai/api/v1/chat/completions':
+            raise RuntimeError('Cette intégration Lyria exige V7_API_BASE_URL=https://openrouter.ai/api/v1')
+        return cle
+
+    def chemin_cle(self, ident):
+        root = self.travail / 'cles'
+        choix = lire_json(root / 'etat.json', {}).get('choix', {}).get(ident, {})
+        fichier = Path(choix.get('fichier') or (root / (ident+'.png')))
+        if not fichier.is_file():
+            raise ValueError(f'Image clé absente : {fichier}')
+        return fichier
+
+    def empreinte_rendu(self, groupe, spec):
+        video = groupe == 'plans'
+        extra = ({'checkpoint': recette().PRISM, 'etapes': 8, 'decalage': [12, 3]}
+                 if video else {'negatif': recette().NEG})
+        if video:
+            extra['image_sha256'] = sha(self.chemin_cle(spec['cle']))
+        return signature({**spec, **extra})
 
     def cout(self, obj, modele, operation):
         usage = obj.get('usage') or {}
         journal(self.couts, {'t': time.time(), 'modele': modele, 'operation': operation,
                              'reponse_id': obj.get('id'), 'cost': usage.get('cost'), 'usage': usage})
 
-    def post(self, url, corps, timeout=300):
+    def post(self, chemin_api, corps, timeout=300):
         if self.blanc:
             raise RuntimeError('Appel réseau interdit en mode à blanc')
+        url, cle = api_configuration(chemin_api, corps.get('model'))
         if corps.get('model') == 'google/gemini-4-argon':
             corps = {**corps, 'provider': {'order': ['google-ai-studio/flex'], 'allow_fallbacks': False}}
         req = urllib.request.Request(url, data=json.dumps(corps).encode(),
-                                     headers={'Authorization': 'Bearer '+self.cle(), 'Content-Type': 'application/json'})
+                                     headers={'Authorization': 'Bearer '+cle, 'Content-Type': 'application/json'})
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 raw = resp.read()
@@ -190,7 +234,7 @@ class Atelier:
         return raw
 
     def demander(self, contenu, temperature=0.):
-        obj = json.loads(self.post('https://openrouter.ai/api/v1/chat/completions', {
+        obj = json.loads(self.post('chat/completions', {
             'model': 'google/gemini-4-argon', 'temperature': temperature,
             'response_format': {'type': 'json_object'}, 'messages': [{'role': 'user', 'content': contenu}]}))
         txt = obj['choices'][0]['message']['content']
@@ -248,13 +292,7 @@ class Atelier:
         def sauver():
             ecrire_json(state_file, state)
         def empreinte(spec):
-            extra = {'checkpoint': recette().PRISM, 'etapes': 8, 'decalage': [12, 3]} if video else {'negatif': recette().NEG}
-            if video:
-                key = self.travail / 'cles' / (spec['cle']+'.png')
-                if not key.exists():
-                    raise ValueError(f'Image clé absente : {key}')
-                extra['image_sha256'] = sha(key)
-            return signature({**spec, **extra})
+            return self.empreinte_rendu(groupe, spec)
         signatures = {s['id']: empreinte(s) for s in specs}
         def nom(spec, prise):
             return f'{spec["id"]}-{signatures[spec["id"]]}-g{spec["graine"]+prise*1000}'
@@ -270,8 +308,11 @@ class Atelier:
                 sauver()
             return ident, jobs[ident]
         def restants():
+            def fichier_choisi(spec):
+                choisi = choix.get(spec['id'], {})
+                return Path(choisi.get('fichier') or (root / (spec['id']+('.mp4' if video else '.png'))))
             return [s for s in specs if choix.get(s['id'], {}).get('signature') != signatures[s['id']]
-                    or not (root / (s['id']+('.mp4' if video else '.png'))).exists()]
+                    or not fichier_choisi(s).exists()]
         def utilise(fmt):
             return sum(j['unites'] for j in jobs.values() if j['etat'] != 'neuf' and j['format'] == fmt and not j.get('revision'))
         def utilise_revision():
@@ -298,7 +339,7 @@ class Atelier:
                 if '<Picture 1>' not in cfg['prompt']:
                     cfg['prompt'] = ('For the target video, at 0.00 seconds into the target video, <Picture 1> '
                                      '(from [Shot 1]) is fully referenced.\n\n') + cfg['prompt']
-                ref = moteur().envoyer_image(client.url, str(self.travail / 'cles' / (spec['cle']+'.png')))
+                ref = moteur().envoyer_image(client.url, str(self.chemin_cle(spec['cle'])))
                 g = moteur().graphe_h3(cfg, ref)
             else:
                 cfg = {**spec, 'nom': spec['id'], 'graine': job['graine'], 'negatif': recette().NEG,
@@ -349,11 +390,9 @@ class Atelier:
                         progres = True
                     elif premier['note'] >= 6.5 or (retry_id not in jobs) or len(candidats) == 2:
                         meilleur = max(candidats, key=lambda x: x['note'])
-                        dst = root / (spec['id']+('.mp4' if video else '.png'))
-                        tmp = dst.with_suffix(dst.suffix+'.part')
-                        shutil.copyfile(meilleur['fichier'], tmp)
-                        tmp.replace(dst)
-                        choix[spec['id']] = {'signature': signatures[spec['id']], 'fichier': str(dst),
+                        # La prise gagnante est déjà un artefact unique et conservé.
+                        # Ne pas la recopier sous un nom stable qui écraserait la version précédente.
+                        choix[spec['id']] = {'signature': signatures[spec['id']], 'fichier': str(meilleur['fichier']),
                                             'note': meilleur['note'], 'graine': meilleur['graine'],
                                             'relance_refusee_budget': premier['note'] < 6.5 and retry_id not in jobs}
                         sauver()
@@ -417,7 +456,9 @@ class Atelier:
                              patch.object(b, 'post', self.post), patch.dict(b.TEXTES, {'replique': spec['texte']}), \
                              patch.dict(b.JEU, {'replique': spec['direction']}):
                             produit = b.generer(spec['moteur'], 'replique')
-                            produit.replace(f)
+                        if f.exists():
+                            raise FileExistsError(f'Prise vocale déjà présente : {f}')
+                        produit.replace(f)
                 if self.blanc:
                     texte, oreille, com, genre = spec['texte'], {'langue_francaise': 8, 'energie': 8, 'caractere': 8,
                                                                'naturel': 8, 'cheap': 1, 'accent_quebecois': 8}, [], None
@@ -470,7 +511,7 @@ class Atelier:
                         if ancien:
                             raise RuntimeError(f'Lyria {spec["id"]} : soumission ambiguë ; vérifier OpenRouter avant de reprendre')
                         ecrire_json(etat_src, {'signature': signature(spec), 'etat': 'intention', 'modele': modele})
-                        with patch.object(legacy.C, 'cle', lambda nom: self.cle()):
+                        with patch.object(legacy.C, 'cle', lambda nom: self.cle_openrouter_legacy(modele)):
                             data, cout = legacy.lyria(spec['prompt'], modele)
                         temp = src.with_suffix('.part')
                         temp.write_bytes(data)
@@ -567,14 +608,25 @@ class Atelier:
     def monter(self, musique=None, langues=('fr',), formats=('16x9', '9x16'), brouillon=False, jobs=1):
         if self.blanc:
             self.preparer_factices()
-        m = substituer(self.d, self.base, self.travail, musique)
+        choix_plans = lire_json(self.travail / 'plans/etat.json', {}).get('choix', {})
+        for spec in self.d['plans']:
+            choix = choix_plans.get(spec['id'], {})
+            fichier = Path(choix.get('fichier', '')) if choix.get('fichier') else None
+            if self.blanc and (fichier is None or not fichier.is_file()):
+                fichier = self.travail / 'plans' / (spec['id']+'.mp4')
+                choix = {'signature': self.empreinte_rendu('plans', spec), 'fichier': str(fichier)}
+                choix_plans[spec['id']] = choix
+            if choix.get('signature') != self.empreinte_rendu('plans', spec) or fichier is None or not fichier.is_file():
+                raise ValueError(f'Plan {spec["id"]} absent ou obsolète : lancer plans avant monter')
+        m = substituer(self.d, self.base, self.travail, musique, choix_plans=choix_plans)
         mid = musique or self.d['montage'].get('musique', {}).get('fichier', 'sans-musique').removeprefix('musique:')
         path = self.travail / 'montages' / (mid+'.json')
         ecrire_json(path, m)
         outputs = []
         for lang in langues:
             for fmt in formats:
-                output = self.travail / 'films' / f'{self.equipe}-{mid}-{fmt}-{lang}{"-brouillon" if brouillon else ""}.mp4'
+                base_output = self.travail / 'films' / f'{self.equipe}-{mid}-{fmt}-{lang}{"-brouillon" if brouillon else ""}.mp4'
+                output = destination_libre(base_output, avec_rapport=True)
                 args = [sys.executable, '-B', V7 / 'monter_v6.py', path, '--format', fmt, '--langue', lang,
                         '--master', 'web', '--sortie', output, '--jobs', jobs]
                 if brouillon:
@@ -629,8 +681,10 @@ class Atelier:
 
     def planche(self):
         from PIL import Image, ImageDraw
-        out = self.travail / 'planches'
-        out.mkdir(parents=True, exist_ok=True)
+        racine = self.travail / 'planches'
+        racine.mkdir(parents=True, exist_ok=True)
+        out = racine / ('run-'+uuid.uuid4().hex)
+        out.mkdir(exist_ok=False)
         def assembler(cases, fichier):
             if not cases:
                 return
@@ -649,24 +703,28 @@ class Atelier:
         choix = lire_json(self.travail / 'plans/etat.json', {}).get('choix', {})
         cases = []
         for p in self.d['plans']:
-            f = self.travail / 'plans' / (p['id']+'.mp4')
+            fichier = choix.get(p['id'], {}).get('fichier')
+            f = Path(fichier) if fichier else self.travail / 'plans' / (p['id']+'.mp4')
             seconds = float(sonder(f)['format']['duration'])
             note = choix.get(p['id'], {}).get('note', 'doublure' if self.blanc else '?')
             for frac in (.15, .5, .85):
                 cases.append((image_frame(f, seconds*frac), f'{p["id"]} - {seconds*frac:.2f} s - note {note}'))
         assembler(cases, out / 'plans.jpg')
+        return out
 
     def telephone(self):
         outputs = []
         for f in sorted((self.travail / 'films').glob('*.mp4')):
-            dst = self.travail / 'telephone' / f.name
-            dst.parent.mkdir(parents=True, exist_ok=True)
+            base_dst = self.travail / 'telephone' / f.name
+            base_dst.parent.mkdir(parents=True, exist_ok=True)
             seconds = float(sonder(f)['format']['duration'])
             # Mo décimaux, marge pour conteneur/AAC. Sous 28 Mo même à 70 s.
             debit = min(3_800_000, int(27_300_000*8/seconds)-128_000)
             if debit < 50_000:
                 raise ValueError(f'Film trop long pour 28 Mo : {f.name}')
             for essai in range(3):
+                # Chaque débit produit son propre fichier : un essai trop lourd reste disponible.
+                dst = destination_libre(base_dst)
                 # Deux passes pour une taille contrôlée ; journaux sur le disque de données.
                 passe = dst.with_suffix('.pass')
                 common = ['-i', f, '-map', '0:v:0', '-c:v', 'libx264', '-preset', 'medium', '-b:v', str(debit),
@@ -684,24 +742,107 @@ class Atelier:
         return outputs
 
     def archiver(self):
-        files = sorted(self.travail.rglob('*.mp4'))
+        files = sorted(f for f in self.travail.rglob('*')
+                       if f.is_file() and f.suffix.lower() in MEDIA_ARCHIVE_EXTENSIONS)
         if self.blanc:
             plan = [{'source': str(f), 'destination': f'creative-v7/{self.equipe}/{f.relative_to(self.travail)}', 'sha256': sha(f)} for f in files]
             ecrire_json(self.travail / 'archive-a-blanc.json', plan)
             return plan
-        # SHA de déduplication *après* copie, inventaire sous flock distant pour les 4 équipes.
+        # Chaque essai est d'abord copié vers un staging unique dans le même
+        # répertoire distant, puis publié par lien dur exclusif. Le staging est
+        # conservé comme trace de l'essai.
         rows = []
+
+        def hash_distant(destination):
+            quoted = shlex.quote(destination)
+            commande_distante = f"if [ -f {quoted} ]; then sha256sum -- {quoted}; else printf 'absent\\n'; fi"
+            resultat = commande(['ssh', 'pc1', commande_distante]).decode().strip()
+            if resultat == 'absent':
+                return None
+            empreinte = resultat.split()[0] if resultat else ''
+            if len(empreinte) != 64 or any(c not in '0123456789abcdef' for c in empreinte.lower()):
+                raise RuntimeError(f'Empreinte distante invalide pour {destination}')
+            return empreinte.lower()
+
+        def variante(destination, empreinte, numero):
+            p = PurePosixPath(destination)
+            marqueur = f'-sha-{empreinte[:12]}' + (f'-{numero}' if numero > 1 else '')
+            return str(p.with_name(p.stem+marqueur+p.suffix))
+
         for f in files:
-            rel = f'creative-v7/{self.equipe}/{f.relative_to(self.travail)}'
-            dest = 'Bureau/Nexora-Livrables/TOUS-LES-FILMS/'+rel
-            commande(['ssh', 'pc1', 'mkdir -p '+shlex.quote(str(Path(dest).parent))])
-            commande(['rsync', '-a', '--protect-args', f, 'pc1:'+dest])
-            j = sonder(f)
-            st = next((s for s in j['streams'] if s.get('width')), {})
-            role = 'master' if 'films' in f.relative_to(self.travail).parts else 'rush' if 'plans' in f.relative_to(self.travail).parts else 'travail'
-            rows.append([rel, f.stat().st_size, round(float(j['format']['duration']), 2),
-                         f'{st.get("width", "")}x{st.get("height", "")}', time.strftime('%Y-%m-%d %H:%M', time.localtime(f.stat().st_mtime)),
-                         sha(f), f'Film V7 {self.d["titre"]}', 'V7', 'H3 / monter_v6.py', role, '', '', f'pc6:{f}', 1, ''])
+            rel = PurePosixPath('creative-v7') / self.equipe / PurePosixPath(f.relative_to(self.travail).as_posix())
+            rel = str(rel)
+            destination_base = 'Bureau/Nexora-Livrables/TOUS-LES-FILMS/'+rel
+            empreinte = sha(f)
+            destination = destination_base
+            numero_variante = 1
+            for _ in range(100):
+                distante = hash_distant(destination)
+                if distante == empreinte:
+                    break
+                if distante is not None:
+                    destination = variante(destination_base, empreinte, numero_variante)
+                    numero_variante += 1
+                    continue
+                parent = str(PurePosixPath(destination).parent)
+                commande(['ssh', 'pc1', 'mkdir -p '+shlex.quote(parent)])
+                stage = str(PurePosixPath(parent) / f'.{PurePosixPath(destination).name}.stage-{uuid.uuid4().hex}')
+                try:
+                    commande(['rsync', '-a', '--protect-args', '--ignore-existing', f, 'pc1:'+stage])
+                except RuntimeError as exc:
+                    raise RuntimeError(f'Échec rsync; staging conservé pour diagnostic : {stage}; {exc}') from exc
+                empreinte_stage = hash_distant(stage)
+                if empreinte_stage is None:
+                    raise RuntimeError(f'Staging distant absent après copie, conservé pour diagnostic : {stage}')
+                if empreinte_stage != empreinte:
+                    # Un nom de staging préexistant a gagné la course; on en
+                    # choisit un autre sans toucher au fichier distant.
+                    continue
+                publication = 'ln -T -- '+shlex.quote(stage)+' '+shlex.quote(destination)
+                try:
+                    commande(['ssh', 'pc1', publication])
+                except RuntimeError as exc:
+                    # Un autre écrivain peut avoir publié entre le contrôle et
+                    # ln. Le lien exclusif refuse le remplacement; on accepte
+                    # le même contenu ou retente sous une variante versionnée.
+                    distante = hash_distant(destination)
+                    if distante == empreinte:
+                        break
+                    if distante is not None:
+                        destination = variante(destination_base, empreinte, numero_variante)
+                        numero_variante += 1
+                        continue
+                    raise RuntimeError(f'Échec de publication; staging conservé pour diagnostic : {stage}; {exc}') from exc
+                distante = hash_distant(destination)
+                if distante == empreinte:
+                    break
+                if distante is not None:
+                    destination = variante(destination_base, empreinte, numero_variante)
+                    numero_variante += 1
+                    continue
+                raise RuntimeError(f'Archive distante absente après publication exclusive : {destination}; staging conservé : {stage}')
+            else:
+                raise RuntimeError(f'Impossible de trouver un nom d’archive libre pour {rel}')
+            rel_archive = destination.split('/TOUS-LES-FILMS/', 1)[1]
+            ext = f.suffix.lower()
+            if ext in IMAGE_ARCHIVE_EXTENSIONS:
+                if ext == '.svg':
+                    width, height = '', ''
+                else:
+                    from PIL import Image
+                    with Image.open(f) as image:
+                        width, height = image.size
+                duration, resolution = '', f'{width}x{height}'
+                role = 'infographie' if 'planches' in f.relative_to(self.travail).parts else 'image'
+            else:
+                j = sonder(f)
+                st = next((s for s in j['streams'] if s.get('width')), {})
+                duration = round(float(j['format']['duration']), 2)
+                resolution = f'{st.get("width", "")}x{st.get("height", "")}'
+                role = 'master' if 'films' in f.relative_to(self.travail).parts else 'rush' if 'plans' in f.relative_to(self.travail).parts else 'travail'
+            rows.append([rel_archive, f.stat().st_size, duration, resolution,
+                         time.strftime('%Y-%m-%d %H:%M', time.localtime(f.stat().st_mtime)), empreinte,
+                         f'Film V7 {self.d["titre"]}', 'V7', 'H3 / monter_v6.py', role, '', '', f'pc6:{f}', 1, ''])
         code = '''import csv,fcntl,json,sys
 from pathlib import Path
 p=Path.home()/"Bureau/Nexora-Livrables/TOUS-LES-FILMS/INVENTAIRE.csv"

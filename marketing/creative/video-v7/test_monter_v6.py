@@ -205,6 +205,83 @@ class MoteurTests(unittest.TestCase):
             self.assertEqual(len(rapport["medias_absents"]), 3)
             self.assertEqual(json.loads(film.with_suffix(".rendu.json").read_text())["medias_absents"], rapport["medias_absents"])
             self.assertEqual(rapport["images"], 6)
+            essais = rapport["essais_calibration"]
+            self.assertTrue(essais)
+            self.assertTrue(Path(rapport["essais_dir"]).is_dir())
+            self.assertTrue(Path(rapport["journal_calibrations"]).is_file())
+            self.assertEqual(len({essai["master_wav"] for essai in essais}), len(essais))
+            self.assertEqual(len({essai["film_aac"] for essai in essais}), len(essais))
+            for essai in essais:
+                self.assertEqual(essai["etat"], "termine")
+                self.assertTrue(Path(essai["master_wav"]).is_file())
+                self.assertTrue(Path(essai["film_aac"]).is_file())
+
+    def test_echec_calibration_garde_les_essais_et_le_rapport(self):
+        from concurrent.futures import Future
+        import uuid
+
+        class PoolFactice:
+            def __init__(self, max_workers):
+                self.max_workers = max_workers
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def submit(self, _fn, task):
+                cache = Path(task[-1])
+                cache.parent.mkdir(parents=True, exist_ok=True)
+                cache.write_bytes(b"segment factice")
+                future = Future()
+                future.set_result(str(cache))
+                return future
+
+        with tempfile.TemporaryDirectory(dir=v.CACHE) as d:
+            dossier = Path(d)
+            montage = self.montage_temp(dossier, id_essai=uuid.uuid4().hex,
+                segments=[{"type": "noir", "debut": 0, "duree": .25}])
+            film = dossier/"film.mp4"
+            args = v.parser().parse_args([str(montage), "--format", "16x9", "--langue", "fr",
+                "--sortie", str(film), "--tolerant", "--brouillon", "--jobs", "1"])
+
+            def fake_masteriser(_son, cible, _master, _marge):
+                Path(cible).write_bytes(b"wav factice")
+
+            def fake_mux(commande, **_kwargs):
+                Path(commande[-1]).write_bytes(b"aac factice")
+
+            mesures = {"n": 0}
+            def analyser(_fichier, _master):
+                mesures["n"] += 1
+                if mesures["n"] == 1:
+                    return {"input_tp": 0, "input_i": -14}
+                raise RuntimeError("échec de mesure factice")
+
+            with patch.object(v, "ProcessPoolExecutor", PoolFactice), \
+                 patch.object(v, "as_completed", side_effect=lambda futures: futures), \
+                 patch.object(v, "mixer", return_value=np.zeros((1, 2), dtype=np.float32)), \
+                 patch.object(v, "masteriser", side_effect=fake_masteriser), \
+                 patch.object(v, "ff", side_effect=fake_mux), \
+                 patch.object(v, "analyser_audio", side_effect=analyser):
+                with self.assertRaisesRegex(RuntimeError, "essais de calibration conservés"):
+                    v.construire(args)
+
+            rapport_path = film.with_suffix(".rendu.json")
+            self.assertFalse(film.exists())
+            self.assertTrue(rapport_path.is_file())
+            rapport = json.loads(rapport_path.read_text())
+            self.assertEqual(rapport["etat"], "echec")
+            self.assertTrue(Path(rapport["rapport_echec"]).is_file())
+            essais = rapport["essais_calibration"]
+            self.assertEqual([essai["etat"] for essai in essais], ["termine", "echec"])
+            self.assertEqual(len({essai["master_wav"] for essai in essais}), 2)
+            self.assertEqual(len({essai["film_aac"] for essai in essais}), 2)
+            for essai in essais:
+                self.assertTrue(Path(essai["master_wav"]).is_file())
+                self.assertTrue(Path(essai["film_aac"]).is_file())
+            self.assertTrue(Path(rapport["journal_calibrations"]).is_file())
 
     def test_boost_long_cles_sequentielles_centrees_deux_formats(self):
         folder = Path(self.m["segments"][1]["dossier"]).parent

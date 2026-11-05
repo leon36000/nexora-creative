@@ -7,8 +7,10 @@ import math
 import os
 from pathlib import Path
 import re
+import shutil
 import sys
 import tempfile
+from urllib.parse import urlsplit
 from unittest.mock import patch
 
 sys.dont_write_bytecode = True
@@ -80,6 +82,48 @@ def journal(f, objet):
         out.write(json.dumps(objet, ensure_ascii=False, allow_nan=False) + '\n')
         out.flush()
         os.fsync(out.fileno())
+
+
+def api_configuration(path, modele):
+    """Résout explicitement endpoint, modèle et clé sans charger de fichier secret."""
+    base = os.environ.get('V7_API_BASE_URL', '').strip().rstrip('/')
+    cle = os.environ.get('V7_API_KEY', '').strip()
+    if not base or not cle:
+        raise RuntimeError('Configuration API V7 absente : définir V7_API_BASE_URL et V7_API_KEY')
+    if not isinstance(modele, str) or not modele.strip():
+        raise RuntimeError('Modèle API V7 explicite requis')
+    parts = urlsplit(base)
+    if (parts.scheme not in ('https', 'http') or not parts.netloc or parts.username or parts.password
+            or parts.query or parts.fragment):
+        raise ValueError('V7_API_BASE_URL doit être une URL HTTP(S) sans identifiants, requête ni fragment')
+    if parts.scheme == 'http' and parts.hostname not in ('localhost', '127.0.0.1', '::1'):
+        raise ValueError('HTTP non chiffré est autorisé uniquement sur loopback')
+    chemin = str(path).strip().lstrip('/')
+    if not chemin or '?' in chemin or '#' in chemin:
+        raise ValueError('Chemin API V7 invalide')
+    return f'{base}/{chemin}', cle
+
+
+def ecrire_octets_exclusifs(f, contenu):
+    """Crée un média neuf sans remplacer un essai existant; garde un fichier partiel en échec."""
+    f = Path(f)
+    f.parent.mkdir(parents=True, exist_ok=True)
+    with f.open('xb') as out:
+        out.write(contenu)
+        out.flush()
+        os.fsync(out.fileno())
+    return f
+
+
+def copier_exclusif(source, destination):
+    """Copie en création exclusive, sans tronquer une ancienne sortie."""
+    source, destination = Path(source), Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with source.open('rb') as src, destination.open('xb') as dst:
+        shutil.copyfileobj(src, dst)
+        dst.flush()
+        os.fsync(dst.fileno())
+    return destination
 
 
 def lignes(f):
@@ -157,12 +201,14 @@ def parcourir(obj):
             yield from parcourir(v)
 
 
-def substituer(d, base, travail, musique=None, factices=None):
+def substituer(d, base, travail, musique=None, factices=None, choix_plans=None):
     m = copy.deepcopy(d['montage'])
     refs = {}
+    choix_plans = choix_plans or {}
     for p in d['plans']:
         prefix = 'plan_v' if p['format'] == '9:16' else 'plan'
-        refs[f'{prefix}:{p["id"]}'] = str(travail / 'plans' / f'{p["id"]}.mp4')
+        fichier = choix_plans.get(p['id'], {}).get('fichier') or (Path(travail) / 'plans' / f'{p["id"]}.mp4')
+        refs[f'{prefix}:{p["id"]}'] = str(fichier)
     refs.update({f'musique:{x["id"]}': str(travail / 'musique' / f'{x["id"]}.wav') for x in d['musiques']})
     if factices:
         refs.update(factices)
@@ -370,7 +416,7 @@ def validation_montage(d, base):
     polices, marque, boost et autres ressources restent strictement contrôlés.
     """
     v6 = montage_module()
-    with tempfile.TemporaryDirectory(prefix='validation-', dir=ICI) as tmp:
+    with tempfile.TemporaryDirectory(prefix='validation-') as tmp:
         root = Path(tmp)
         refs, durations = {}, {}
         for p in d['plans']:

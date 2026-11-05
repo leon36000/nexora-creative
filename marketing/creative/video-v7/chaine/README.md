@@ -117,8 +117,8 @@ le serveur a effacé l'historique doit être diagnostiqué manuellement.
 
 `journal.jsonl` par étape garde les prises, prompts, graines, notes, défauts et
 temps moteur. Les prises non retenues sont conservées sous `prises/`.
-`openrouter.jsonl` journalise les coûts renvoyés, jamais la clé. Celle-ci est
-lue seulement en mémoire dans `~/Desktop/Deepinfra.env` (`Openrouter: …`).
+`openrouter.jsonl` journalise les coûts renvoyés, jamais la clé. Configurer
+explicitement `V7_API_BASE_URL` et `V7_API_KEY` ; aucun fichier secret n'est lu.
 Tous les appels directs à Gemini 4 Argon imposent
 `provider.order=["google-ai-studio/flex"]`, `allow_fallbacks=false`, y compris
 l'oreille du banc. La chaîne ne bascule pas vers un autre fournisseur.

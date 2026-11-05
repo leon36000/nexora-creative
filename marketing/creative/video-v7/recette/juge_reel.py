@@ -2,7 +2,7 @@
 Deux usages :
   python3 juge_reel.py paire <A> <B>          compare deux médias, dans les deux ordres (A puis B, B puis A) ; image ou vidéo
   python3 juge_reel.py note <media> [seuil]   note absolue de réalisme 0-10 ; code de sortie 1 si < seuil (relance auto)
-Une vidéo est jugée sur 3 images (début, milieu, fin) assemblées. La clé est lue dans ~/Desktop/Deepinfra.env.
+Une vidéo est jugée sur 3 images (début, milieu, fin) assemblées. Configurer explicitement V7_API_BASE_URL et V7_API_KEY ; aucun fichier secret n'est lu.
 """
 import base64
 import io
@@ -13,6 +13,9 @@ import urllib.request
 from pathlib import Path
 
 from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'chaine'))
+from commun import api_configuration
 
 FF = str(Path.home() / "nexora-creative-data/engine/ffmpeg/ffmpeg-7.0.2-arm64-static/ffmpeg")
 MODELE = "google/gemini-4-argon"
@@ -28,12 +31,6 @@ PAIRE = ("Tu es superviseur des effets visuels d'un long métrage. Deux médias 
          "pour une prise de vues réelles (live action) tournée par une vraie caméra, et lequel fait le plus images de synthèse / jeu "
          "vidéo ? Ignore le sujet et le cadrage, juge seulement le réalisme photographique. Réponds en JSON : {\"plus_reel\": "
          "\"premier\"|\"second\", \"ecart\": 0-10, \"reel_premier\": 0-10, \"reel_second\": 0-10, \"raison\": \"une phrase\"}")
-
-
-def cle():
-    for l in open(Path.home() / "Desktop/Deepinfra.env"):
-        if ":" in l and l.split(":", 1)[0].strip().lower() == "openrouter":
-            return l.split(":", 1)[1].strip()
 
 
 def image_de(media, largeur=1024):
@@ -63,8 +60,9 @@ def demander(contenu, temperature=0.0):
     corps = {"model": MODELE, "temperature": temperature, "response_format": {"type": "json_object"},
              "provider": {"order": ["google-ai-studio/flex"], "allow_fallbacks": False},
              "messages": [{"role": "user", "content": contenu}]}
-    r = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=json.dumps(corps).encode(),
-                               headers={"Authorization": "Bearer " + cle(), "Content-Type": "application/json"})
+    url, cle = api_configuration("chat/completions", corps.get('model'))
+    r = urllib.request.Request(url, data=json.dumps(corps).encode(),
+                               headers={"Authorization": "Bearer " + cle, "Content-Type": "application/json"})
     with urllib.request.urlopen(r, timeout=240) as x:
         j = json.loads(x.read())
     t = j["choices"][0]["message"]["content"]

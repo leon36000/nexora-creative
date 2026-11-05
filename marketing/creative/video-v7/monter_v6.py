@@ -15,9 +15,9 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 import unicodedata
+import uuid
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import lru_cache
@@ -79,6 +79,30 @@ def ecriture(p):
         raise ValueError(f"Écriture limitée au dossier V6 et à V6_CACHE : {p}")
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
+
+
+def sortie_exclusive(sortie):
+    rapport = sortie.with_suffix('.rendu.json')
+    collisions = [str(p) for p in (sortie, rapport) if p.exists()]
+    if collisions:
+        raise FileExistsError('Sortie déjà présente; choisir un nouveau nom : '+', '.join(collisions))
+
+
+def copier_exclusif(source, destination):
+    """Publie en création exclusive; une interruption laisse l'essai partiel au même nom."""
+    source, destination = Path(source), Path(destination)
+    with source.open('rb') as src, destination.open('xb') as dst:
+        shutil.copyfileobj(src, dst)
+        dst.flush()
+        os.fsync(dst.fileno())
+    return destination
+
+
+def ecrire_exclusif(destination, contenu):
+    with Path(destination).open('x', encoding='utf-8') as dst:
+        dst.write(contenu)
+        dst.flush()
+        os.fsync(dst.fileno())
 
 
 def resoudre(obj, base, langue=None):
@@ -1382,6 +1406,7 @@ def construire(args):
     if args.jobs < 1:
         raise ValueError("--jobs doit être positif")
     sortie = ecriture(args.sortie)
+    sortie_exclusive(sortie)
     CACHE.mkdir(parents=True, exist_ok=True)
     segments_dir = CACHE / "segments"
     segments_dir.mkdir(exist_ok=True)
@@ -1403,24 +1428,39 @@ def construire(args):
             f = future.result()
             task = futures[future]
             print(f"  {task[5]['type']} terminé ({Path(f).stat().st_size/1e6:.1f} Mo)", flush=True)
-    with tempfile.TemporaryDirectory(prefix="travail-", dir=CACHE) as work:
-        work = Path(work)
-        liste = work / "segments.txt"
+    work = CACHE / 'essais' / f'{sortie.stem}-{uuid.uuid4().hex}'
+    work.mkdir(parents=True, exist_ok=False)
+    liste = work / 'segments.txt'
+    essais_path = work / 'calibrations.jsonl'
+    plafond = -1.5 if args.master == "web" else -1.
+    cible = -14 if args.master == "web" else -10
+    marge = .3
+    essais_calibration = []
+    loud = None
+    try:
         liste.write_text("".join("file '"+task[-1].replace("'", "'\\''")+"'\n" for task in tasks))
-        wav = work / "master.wav"
         son = mixer(m, args.langue, args.format, total, de, fin)
-        mux = work / "film.mp4"
-        plafond = -1.5 if args.master == "web" else -1.
-        cible = -14 if args.master == "web" else -10
-        marge = .3
-        for _ in range(4):
-            # Si l'AAC crée une crête, reprendre le mix original avec plus de
-            # marge, tout en conservant la cible LUFS. Une simple baisse de gain
-            # après AAC ferait perdre cette cible sur les masters réseaux.
+        for numero in range(1, 5):
+            # Chaque passe garde son WAV et son film pour comparer les calibrations
+            # et préserver les tentatives même si une passe suivante échoue.
+            wav = work / f'master-{numero:02d}.wav'
+            mux = work / f'film-{numero:02d}.mp4'
+            essai = {'calibration': numero, 'master_wav': str(wav), 'film_aac': str(mux),
+                     'marge_db': round(marge, 3), 'etat': 'en_cours'}
+            essais_calibration.append(essai)
+            with essais_path.open('a', encoding='utf-8') as journal:
+                journal.write(json.dumps(essai, ensure_ascii=False)+'\n')
+                journal.flush()
+                os.fsync(journal.fileno())
             masteriser(son, wav, args.master, marge)
             ff(["-f", "concat", "-safe", "0", "-i", liste, "-i", wav, "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy", "-c:a", "aac", "-b:a", "320k",
                 "-ar", SR, "-t", (fin-de)/IPS, "-movflags", "+faststart", "-metadata", f"language={args.langue}", mux])
             loud = analyser_audio(mux, args.master)
+            essai.update(etat='termine', loudness_aac=loud, plafond_dbTP=plafond, cible_lufs=cible)
+            with essais_path.open('a', encoding='utf-8') as journal:
+                journal.write(json.dumps(essai, ensure_ascii=False)+'\n')
+                journal.flush()
+                os.fsync(journal.fileno())
             if float(loud["input_tp"]) <= plafond:
                 break
             marge += float(loud["input_tp"])-plafond+.2
@@ -1428,14 +1468,40 @@ def construire(args):
             raise RuntimeError(f"Crête AAC hors plafond après calibration : {loud['input_tp']} dBTP")
         if math.isfinite(float(loud["input_i"])) and abs(float(loud["input_i"])-cible) > .25:
             raise RuntimeError(f"Loudness AAC hors cible : {loud['input_i']} LUFS (cible {cible})")
-        shutil.copyfile(mux, sortie)
+        copier_exclusif(mux, sortie)
+    except BaseException as exc:
+        for essai in essais_calibration:
+            if essai['etat'] == 'en_cours':
+                essai.update(etat='echec', erreur=f'{type(exc).__name__}: {exc}')
+        rapport_travail = work / 'rapport-echec.json'
+        rapport_echec = {'etat': 'echec', 'erreur': f'{type(exc).__name__}: {exc}', 'essais_dir': str(work),
+                         'journal_calibrations': str(essais_path), 'film': str(sortie),
+                         'rapport_echec': str(rapport_travail), 'essais_calibration': essais_calibration}
+        with essais_path.open('a', encoding='utf-8') as journal:
+            journal.write(json.dumps(rapport_echec, ensure_ascii=False)+'\n')
+            journal.flush()
+            os.fsync(journal.fileno())
+        ecrire_exclusif(rapport_travail, json.dumps(rapport_echec, ensure_ascii=False, indent=2)+'\n')
+        rapport_path = sortie.with_suffix('.rendu.json')
+        try:
+            ecrire_exclusif(rapport_path, json.dumps(rapport_echec, ensure_ascii=False, indent=2)+'\n')
+        except FileExistsError:
+            # Une sortie concurrente ne doit jamais être remplacée. Le journal
+            # de l'essai contient le statut et les chemins de conservation.
+            pass
+        if isinstance(exc, KeyboardInterrupt):
+            print(f"Essais de calibration conservés dans {work}; rapport : {rapport_travail}", file=sys.stderr, flush=True)
+            raise
+        raise RuntimeError(f"{exc}; essais de calibration conservés dans {work}; rapport d'échec : {rapport_travail}") from exc
     elapsed = time.perf_counter()-start
     rapport = {"film": str(sortie), "format": args.format, "langue": args.langue, "brouillon": args.brouillon, "master": args.master,
                "de": de/IPS, "a": fin/IPS, "duree": (fin-de)/IPS, "images": fin-de, "segments_rendus": len(faire), "segments_cache": len(tasks)-len(faire),
                "temps_rendu_s": round(elapsed, 3), "secondes_par_seconde_film": round(elapsed/((fin-de)/IPS), 3), "loudness_aac": loud, "marge_master_db": round(marge, 3),
                "commande": [sys.executable, *sys.argv], "cache_segments": [t[-1] for t in tasks],
+               "essais_dir": str(work), "journal_calibrations": str(essais_path),
+               "essais_calibration": essais_calibration,
                "tolerant": args.tolerant, "medias_absents": m["_medias_absents"]}
-    sortie.with_suffix(".rendu.json").write_text(json.dumps(rapport, ensure_ascii=False, indent=2)+"\n")
+    ecrire_exclusif(sortie.with_suffix('.rendu.json'), json.dumps(rapport, ensure_ascii=False, indent=2)+"\n")
     print(json.dumps({k: v for k, v in rapport.items() if k not in {"cache_segments", "commande"}}, ensure_ascii=False), flush=True)
     return rapport
 

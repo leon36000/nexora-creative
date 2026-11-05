@@ -1,6 +1,7 @@
 """Tests hors ligne : contrats réels du montage, moteurs et API doublés."""
 import copy
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -23,7 +24,9 @@ def essai():
 
 class BaseHorsLigne(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(dir=ICI, prefix='test-')
+        dossier_tmp = Path(os.environ.get('V7_TEST_TMPDIR', ICI))
+        dossier_tmp.mkdir(parents=True, exist_ok=True)
+        self.tmp = tempfile.TemporaryDirectory(dir=dossier_tmp, prefix='test-')
         self.root = Path(self.tmp.name)
         self.net = patch('urllib.request.urlopen', side_effect=AssertionError('Réseau interdit dans les tests'))
         self.net.start()
@@ -147,6 +150,9 @@ class ValidationTests(BaseHorsLigne):
         self.assertEqual(m['segments'][0]['fichier_vertical'], str(self.root/'plans/pv.mp4'))
         self.assertEqual(m['segments'][1]['sur_video']['fichier'], str(self.root/'plans/p01.mp4'))
         self.assertEqual(m['voix'][0]['fichier'], str(self.root/'voix/v01.wav'))
+        selection = {'p01': {'fichier': str(self.root/'plans/prises/p01-sig.mp4')}}
+        m_choisi = C.substituer(self.d, ESSAI.parent, self.root, choix_plans=selection)
+        self.assertEqual(m_choisi['segments'][0]['fichier'], selection['p01']['fichier'])
         self.assertEqual(avant, self.d)
         self.d['voix'][0]['moteur'] = 'h3-natif'
         self.assertFalse(C.substituer(self.d, ESSAI.parent, self.root)['voix'])
@@ -200,7 +206,7 @@ class ValidationTests(BaseHorsLigne):
     def test_secrets_et_cout(self):
         atelier = P.Atelier(self.d, ESSAI.parent, self.root, blanc=True)
         with self.assertRaisesRegex(RuntimeError, 'interdit'):
-            atelier.post('https://exemple', {})
+            atelier.post('chat/completions', {})
         atelier.cout({'id': 'gen-1', 'usage': {'cost': .02}}, 'modele', 'test')
         atelier.cout({'id': 'gen-1', 'usage': {'cost': .02}}, 'modele', 'test')
         self.assertEqual(atelier.bilan()['cout_openrouter_usd_connu'], .02)
@@ -208,7 +214,7 @@ class ValidationTests(BaseHorsLigne):
 
     def test_argon_flex_force_et_secret_hors_journal(self):
         atelier = P.Atelier(self.d, ESSAI.parent, self.root)
-        atelier._key = 'secret-test-ne-pas-journaliser'
+        cle_factice = 'secret-test-ne-pas-journaliser'
         class Response:
             headers = {}
             def __enter__(self):
@@ -217,12 +223,25 @@ class ValidationTests(BaseHorsLigne):
                 pass
             def read(self):
                 return json.dumps({'id': 'gen-2', 'usage': {'cost': .05}, 'choices': []}).encode()
-        with patch('urllib.request.urlopen', return_value=Response()) as call:
-            atelier.post('https://openrouter.ai/api/v1/chat/completions', {'model': 'google/gemini-4-argon'})
+        with patch.dict(os.environ, {'V7_API_BASE_URL': 'https://openrouter.ai/api/v1', 'V7_API_KEY': cle_factice}), \
+             patch('urllib.request.urlopen', return_value=Response()) as call:
+            atelier.post('chat/completions', {'model': 'google/gemini-4-argon'})
         corps = json.loads(call.call_args.args[0].data)
         self.assertEqual(corps['provider'], {'order': ['google-ai-studio/flex'], 'allow_fallbacks': False})
-        self.assertNotIn(atelier._key, atelier.couts.read_text())
+        self.assertNotIn(cle_factice, atelier.couts.read_text())
         self.assertEqual(C.lignes(atelier.couts)[0]['cost'], .05)
+
+    def test_api_configuration_explicite_et_transport_associe(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaisesRegex(RuntimeError, 'V7_API_BASE_URL et V7_API_KEY'):
+                C.api_configuration('chat/completions', 'provider/model')
+        with patch.dict(os.environ, {'V7_API_BASE_URL': 'https://api.deepinfra.com/v1/openai', 'V7_API_KEY': 'factice'}, clear=True):
+            url, cle = C.api_configuration('/chat/completions', 'provider/model')
+        self.assertEqual(url, 'https://api.deepinfra.com/v1/openai/chat/completions')
+        self.assertEqual(cle, 'factice')
+        with patch.dict(os.environ, {'V7_API_BASE_URL': 'https://api.deepinfra.com/v1/openai', 'V7_API_KEY': 'factice'}, clear=True):
+            with self.assertRaisesRegex(RuntimeError, 'Modèle API V7'):
+                C.api_configuration('chat/completions', '')
 
     def test_juge_triptyque_trois_images_et_api_note(self):
         from PIL import Image
@@ -290,14 +309,160 @@ class ValidationTests(BaseHorsLigne):
         self.assertEqual(composer.call_count, 1)
 
     def test_archivage_a_blanc_pas_de_ssh(self):
+        from PIL import Image
         f = self.root/'films/a.mp4'
         f.parent.mkdir()
         f.write_bytes(b'video')
+        planche = self.root/'planches/run-1/plans.jpg'
+        planche.parent.mkdir(parents=True)
+        Image.new('RGB', (8, 8), 'white').save(planche)
         atelier = P.Atelier(self.d, ESSAI.parent, self.root, blanc=True)
         with patch.object(P, 'commande', side_effect=AssertionError('aucun SSH')):
             plan = atelier.archiver()
-        self.assertEqual(plan[0]['destination'], 'creative-v7/essai/films/a.mp4')
-        self.assertEqual(len(plan[0]['sha256']), 64)
+        par_source = {row['source']: row for row in plan}
+        self.assertIn(str(f), par_source)
+        self.assertIn(str(planche), par_source)
+        self.assertEqual(par_source[str(f)]['destination'], 'creative-v7/essai/films/a.mp4')
+        self.assertEqual(len(par_source[str(planche)]['sha256']), 64)
+
+    def test_archivage_versionne_hash_distant_different_et_copie_infographie(self):
+        from PIL import Image
+        import shlex
+        films = self.root/'films'
+        planches = self.root/'planches/run-1'
+        films.mkdir()
+        planches.mkdir(parents=True)
+        film = films/'a.mp4'
+        film.write_bytes(b'video-neuve')
+        image = planches/'plans.jpg'
+        Image.new('RGB', (12, 8), 'white').save(image)
+        svg = planches/'diagramme.svg'
+        svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="4"></svg>')
+        base_video = 'Bureau/Nexora-Livrables/TOUS-LES-FILMS/creative-v7/essai/films/a.mp4'
+        base_image = 'Bureau/Nexora-Livrables/TOUS-LES-FILMS/creative-v7/essai/planches/run-1/plans.jpg'
+        distant = {base_video: 'a'*64, base_image: P.sha(image)}
+        rsync_destinations, inventory_rows, sonder_sources = [], [], []
+
+        def fake_commande(args, **kwargs):
+            if args[0] == 'rsync':
+                destination = args[-1].removeprefix('pc1:')
+                rsync_destinations.append(destination)
+                distant.setdefault(destination, P.sha(Path(args[-2])))
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('mkdir -p '):
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('if [ -f '):
+                cible = shlex.split(args[2].split('[ -f ', 1)[1].split(' ];', 1)[0])[0]
+                empreinte = distant.get(cible)
+                return b'absent\n' if empreinte is None else f'{empreinte}  {cible}\n'.encode()
+            if args[0] == 'ssh' and args[2].startswith('ln -T -- '):
+                _, _, _, stage, cible = shlex.split(args[2])
+                if cible in distant:
+                    raise RuntimeError('destination concurrente déjà présente')
+                distant[cible] = distant[stage]
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('python3 -c '):
+                inventory_rows.extend(json.loads(kwargs['input']))
+                return str(len(inventory_rows)).encode()
+            raise AssertionError(f'commande inattendue: {args[0]}')
+
+        atelier = P.Atelier(essai(), ESSAI.parent, self.root)
+        def fake_sonder(f):
+            sonder_sources.append(str(f))
+            return {'format': {'duration': '2'}, 'streams': [{'width': 1920, 'height': 1080}]}
+        with patch.object(P, 'commande', side_effect=fake_commande), \
+             patch.object(P, 'sonder', side_effect=fake_sonder):
+            result = atelier.archiver()
+        version = base_video.replace('.mp4', f'-sha-{P.sha(film)[:12]}.mp4')
+        self.assertIn(version, distant)
+        stage_paths = [path for path in rsync_destinations if '.stage-' in path]
+        self.assertEqual(len(stage_paths), 2)
+        self.assertEqual(distant[stage_paths[0]], P.sha(film))
+        self.assertNotIn(version, rsync_destinations)
+        self.assertEqual(distant[base_video], 'a'*64)
+        self.assertEqual(distant[version], P.sha(film))
+        self.assertNotIn(base_image, rsync_destinations)  # déjà présent avec le même SHA
+        self.assertNotIn(str(svg), sonder_sources)  # une image vectorielle n'a pas de durée ffprobe
+        svg_row = next(row for row in inventory_rows if row[0].endswith('diagramme.svg'))
+        self.assertEqual(svg_row[2:4], ['', 'x'])
+        self.assertEqual(result['copies'], 3)
+        self.assertEqual({row[9] for row in inventory_rows}, {'master', 'infographie'})
+
+    def test_archivage_lien_exclusif_preserve_collision_concurrente_et_staging(self):
+        import shlex
+        svg = self.root/'planches/run-1/diagramme.svg'
+        svg.parent.mkdir(parents=True)
+        svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="4"></svg>')
+        base = 'Bureau/Nexora-Livrables/TOUS-LES-FILMS/creative-v7/essai/planches/run-1/diagramme.svg'
+        local_hash = P.sha(svg)
+        distant, stages = {}, []
+        collision = {'faite': False}
+
+        def fake_commande(args, **kwargs):
+            if args[0] == 'rsync':
+                stage = args[-1].removeprefix('pc1:')
+                stages.append(stage)
+                distant.setdefault(stage, P.sha(Path(args[-2])))
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('mkdir -p '):
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('if [ -f '):
+                cible = shlex.split(args[2].split('[ -f ', 1)[1].split(' ];', 1)[0])[0]
+                empreinte = distant.get(cible)
+                return b'absent\n' if empreinte is None else f'{empreinte}  {cible}\n'.encode()
+            if args[0] == 'ssh' and args[2].startswith('ln -T -- '):
+                _, _, _, stage, cible = shlex.split(args[2])
+                if cible == base and not collision['faite']:
+                    distant[base] = 'f'*64
+                    collision['faite'] = True
+                    raise RuntimeError('collision concurrente')
+                if cible in distant:
+                    raise RuntimeError('destination déjà présente')
+                distant[cible] = distant[stage]
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('python3 -c '):
+                return b'1'
+            raise AssertionError(f'commande inattendue: {args[0]}')
+
+        atelier = P.Atelier(essai(), ESSAI.parent, self.root)
+        with patch.object(P, 'commande', side_effect=fake_commande):
+            atelier.archiver()
+        version = base.replace('.svg', f'-sha-{local_hash[:12]}.svg')
+        self.assertEqual(distant[base], 'f'*64)
+        self.assertEqual(distant[version], local_hash)
+        self.assertEqual(len(stages), 2)
+        self.assertTrue(all('.stage-' in stage and distant[stage] == local_hash for stage in stages))
+
+    def test_archivage_echec_publication_garde_le_staging(self):
+        import shlex
+        svg = self.root/'planches/run-1/diagramme.svg'
+        svg.parent.mkdir(parents=True)
+        svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="4"></svg>')
+        distant, stages = {}, []
+
+        def fake_commande(args, **kwargs):
+            if args[0] == 'rsync':
+                stage = args[-1].removeprefix('pc1:')
+                stages.append(stage)
+                distant[stage] = P.sha(Path(args[-2]))
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('mkdir -p '):
+                return b''
+            if args[0] == 'ssh' and args[2].startswith('if [ -f '):
+                cible = shlex.split(args[2].split('[ -f ', 1)[1].split(' ];', 1)[0])[0]
+                empreinte = distant.get(cible)
+                return b'absent\n' if empreinte is None else f'{empreinte}  {cible}\n'.encode()
+            if args[0] == 'ssh' and args[2].startswith('ln -T -- '):
+                raise RuntimeError('publication refusée')
+            raise AssertionError(f'commande inattendue: {args[0]}')
+
+        atelier = P.Atelier(essai(), ESSAI.parent, self.root)
+        with patch.object(P, 'commande', side_effect=fake_commande):
+            with self.assertRaisesRegex(RuntimeError, 'staging conservé pour diagnostic'):
+                atelier.archiver()
+        self.assertEqual(len(stages), 1)
+        self.assertEqual(distant[stages[0]], P.sha(svg))
+        self.assertFalse(any(path.endswith('/diagramme.svg') for path in distant))
 
 
 class FauxComfy:
@@ -339,8 +504,7 @@ class FauxComfy:
         if self.au_premier_resultat is None:
             self.au_premier_resultat = len(self.graphes)
         self.historique[pid] = self.en_cours.pop(pid, self.historique.get(pid))
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(b'doublure video')
+        C.ecrire_octets_exclusifs(destination, b'doublure video')
         return {'fichier': str(destination), 'secondesMoteur': 2.5}
 
 
@@ -365,6 +529,10 @@ class FileTests(BaseHorsLigne):
         self.assertEqual(self.fake.maximum, 6)
         self.assertEqual(self.fake.au_premier_resultat, 6)
         self.assertEqual(len(self.fake.etrangers), 30)
+        for choix in choix.values():
+            fichier = Path(choix['fichier'])
+            self.assertIn('prises', fichier.parts)
+            self.assertTrue(fichier.is_file())
         for g in self.fake.graphes:
             self.assertEqual(g['gen']['class_type'], 'MiniMaxH3ReferenceToVideo')
             self.assertEqual(g['sched']['inputs']['steps'], 8)
@@ -378,6 +546,16 @@ class FileTests(BaseHorsLigne):
         bilan = self.atelier.bilan()
         self.assertEqual(bilan['unites_h3']['16:9'], 9)
         self.assertEqual(bilan['secondes_gpu_connues'], 22.5)
+
+    def test_prise_gagnante_et_ancienne_version_sont_conservees(self):
+        self.setup_plans(1)
+        ancienne = self.lancer()['p00']['fichier']
+        contenu = Path(ancienne).read_bytes()
+        self.d['plans'][0]['prompt'] += ' version deux'
+        nouvelle = self.lancer()['p00']['fichier']
+        self.assertNotEqual(nouvelle, ancienne)
+        self.assertTrue(Path(nouvelle).is_file())
+        self.assertEqual(Path(ancienne).read_bytes(), contenu)
 
     def test_coupure_reponse_post_et_reprise(self):
         self.setup_plans(2)
@@ -462,6 +640,129 @@ class FileTests(BaseHorsLigne):
         self.assertEqual(len(fake.graphes), 2)
         self.assertEqual(fake.graphes[0]['enc']['inputs']['negative_prompt'], C.recette().NEG)
         self.assertEqual(fake.graphes[1]['k']['inputs']['seed'], 1101)
+
+
+class DestinationTests(unittest.TestCase):
+    def setUp(self):
+        dossier_tmp = Path(os.environ.get('V7_TEST_TMPDIR', ICI))
+        dossier_tmp.mkdir(parents=True, exist_ok=True)
+        self.tmp = tempfile.TemporaryDirectory(dir=dossier_tmp, prefix='dest-test-')
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_montage_refuse_sortie_ou_rapport_existant_avant_rendu(self):
+        v = C.montage_module()
+        v.CACHE.mkdir(parents=True, exist_ok=True)
+        for rapport_existant in (False, True):
+            with tempfile.TemporaryDirectory(dir=v.CACHE) as tmp:
+                sortie = Path(tmp) / 'film.mp4'
+                temoin = sortie.with_suffix('.rendu.json')
+                cible = temoin if rapport_existant else sortie
+                cible.write_bytes(b'ESSAI_A_CONSERVER')
+                args = v.parser().parse_args([str(Path(tmp)/'montage.json'), '--format', '16x9',
+                    '--langue', 'fr', '--sortie', str(sortie), '--jobs', '1', '--brouillon'])
+                with patch.object(v, 'charger', return_value=({'segments': [], '_medias_absents': []}, {}, 24, [])), \
+                     patch.object(v, 'mixer') as mixer:
+                    with self.assertRaises(FileExistsError):
+                        v.construire(args)
+                    mixer.assert_not_called()
+                self.assertEqual(cible.read_bytes(), b'ESSAI_A_CONSERVER')
+
+    def test_copie_exclusive_ne_remplace_pas_une_sortie(self):
+        v = C.montage_module()
+        source, cible = self.root/'source.mp4', self.root/'film.mp4'
+        source.write_bytes(b'NOUVEAU')
+        cible.write_bytes(b'ANCIEN')
+        with self.assertRaises(FileExistsError):
+            v.copier_exclusif(source, cible)
+        self.assertEqual(cible.read_bytes(), b'ANCIEN')
+
+    def test_reprise_comfy_ne_remplace_pas_une_prise_existante(self):
+        historique = {'pid': {'status': {'status_str': 'success', 'completed': True},
+                              'outputs': {'node': {'video': [{'filename': 'rendu.mp4'}]}}}}
+        def fake_http(url, *args, **kwargs):
+            return json.dumps(historique).encode() if '/history/' in url else b'NOUVELLE_PRISE'
+        client = P.Comfy('http://127.0.0.1:37288')
+        destination = self.root/'prises'/'prise.mp4'
+        destination.parent.mkdir(parents=True)
+        destination.write_bytes(b'ANCIENNE_PRISE')
+        with patch.object(P.moteur(), 'http', side_effect=fake_http):
+            premier = client.resultat('pid', destination)
+            reprise = client.resultat('pid', destination)
+        self.assertEqual(destination.read_bytes(), b'ANCIENNE_PRISE')
+        self.assertEqual(Path(premier['fichier']).read_bytes(), b'NOUVELLE_PRISE')
+        self.assertEqual(reprise['fichier'], premier['fichier'])
+
+    def test_monter_nomme_une_nouvelle_version_sans_ecraser(self):
+        d = essai()
+        atelier = P.Atelier(d, ESSAI.parent, self.root)
+        cles = self.root/'cles'
+        cles.mkdir()
+        for spec in d['cles']:
+            (cles/(spec['id']+'.png')).write_bytes(b'cle-factice')
+        choix = {}
+        plans = self.root/'plans'
+        plans.mkdir()
+        for spec in d['plans']:
+            fichier = plans/(spec['id']+'-prise.mp4')
+            fichier.write_bytes(b'prise-factice')
+            choix[spec['id']] = {'signature': atelier.empreinte_rendu('plans', spec), 'fichier': str(fichier)}
+        C.ecrire_json(plans/'etat.json', {'jobs': {}, 'choix': choix})
+
+        def fake_command(args, **kwargs):
+            sortie = Path(args[args.index('--sortie')+1])
+            sortie.parent.mkdir(parents=True, exist_ok=True)
+            sortie.write_bytes(b'film-factice')
+
+        with patch.object(atelier, 'preparer_factices'), patch.object(P, 'substituer', return_value={}), \
+             patch.object(P, 'commande', side_effect=fake_command), patch.object(P, 'binaire', return_value='ffmpeg-test'):
+            first = atelier.monter(langues=('fr',), formats=('16x9',))
+            first_bytes = first[0].read_bytes()
+            second = atelier.monter(langues=('fr',), formats=('16x9',))
+        self.assertNotEqual(first[0], second[0])
+        self.assertTrue(second[0].exists())
+        self.assertEqual(first[0].read_bytes(), first_bytes)
+
+    def test_telephone_conserve_essai_trop_lourd(self):
+        films = self.root/'films'
+        films.mkdir()
+        film = films/'master.mp4'
+        film.write_bytes(b'master-factice')
+        atelier = P.Atelier(essai(), ESSAI.parent, self.root)
+        def fake_ff(*args):
+            cible = Path(args[-1])
+            if cible.parent.name == 'telephone':
+                taille = 28_000_001 if cible.name == 'master.mp4' else 1
+                with cible.open('wb') as f:
+                    f.truncate(taille)
+        with patch.object(P, 'sonder', return_value={'format': {'duration': '10'}}), patch.object(P, 'ff', side_effect=fake_ff):
+            rendus = atelier.telephone()
+        echoue = self.root/'telephone/master.mp4'
+        self.assertEqual(echoue.stat().st_size, 28_000_001)
+        self.assertEqual(rendus[0].stat().st_size, 1)
+        self.assertNotEqual(rendus[0], echoue)
+
+    def test_planches_ecrites_dans_des_versions_uniques(self):
+        from PIL import Image
+        films = self.root/'films'
+        plans = self.root/'plans'
+        films.mkdir()
+        plans.mkdir()
+        (films/'master.mp4').write_bytes(b'master')
+        for spec in essai()['plans']:
+            (plans/(spec['id']+'.mp4')).write_bytes(b'plan')
+        atelier = P.Atelier(essai(), ESSAI.parent, self.root)
+        with patch.object(P, 'sonder', return_value={'format': {'duration': '1'}}), \
+             patch.object(P, 'image_frame', side_effect=lambda *args: Image.new('RGB', (16, 9), 'white')):
+            first = atelier.planche()
+            first_files = sorted(first.glob('*.jpg'))
+            old_bytes = {f.name: f.read_bytes() for f in first_files}
+            second = atelier.planche()
+        self.assertNotEqual(first, second)
+        self.assertTrue((second/'plans.jpg').is_file())
+        self.assertEqual({f.name: f.read_bytes() for f in first.glob('*.jpg')}, old_bytes)
 
 
 if __name__ == '__main__':

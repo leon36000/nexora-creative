@@ -7,7 +7,7 @@ Dépôt `/home/pc6/Desktop/NexoraCreative-film-v6` (branche `feat/film-v6-creati
 `../video-v3/moteur.py` (client ComfyUI : graphes Qwen-Image et H3 ; réutilise-le par import), `../video-v6/musique_v6.py` et
 `../video-v6/musique_music3_v6.py` (Lyria et Music3), `../../nexora/campagne-films/films-v3/outils/musique.py` (`grille()` : tempo,
 phase, énergie). Règles : aucun commit ; ne lance **aucun** rendu GPU ni appel payant pendant ton travail (tests avec des doublures
-`--a-blanc`) ; la clé OpenRouter se lit dans `~/Desktop/Deepinfra.env` (format « Openrouter: … ») et ne s'affiche jamais ; données
+   `--a-blanc`) ; configurer explicitement `V7_API_BASE_URL`, le modèle de chaque requête et `V7_API_KEY` sans lire de fichier secret ; données
 lourdes dans `~/nexora-creative-data/promo/v7-creative/` (lien vers un disque externe, beaucoup d'espace) ; réponds en français.
 
 ## Commandes à fournir (`python3 chaine/v7.py <commande> <equipe> …`, une équipe = `equipes/<equipe>/dossier.json`)
