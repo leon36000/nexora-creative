@@ -3,7 +3,7 @@
  * maillage, cartes PBR, GIF de la tournette et note du juge (quatre côtés). Les exports sont calculés par le serveur :
  * ils ne coûtent aucun crédit GPU.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { api, reliefCarteUrl, reliefExportUrl, reliefGifUrl, type FormatRelief, type JugeRelief, type RapportMaillage, type RapportRelief, type Take } from '../api';
 import { recreate } from '../Viewer';
 import { toast } from '../store';
@@ -34,6 +34,19 @@ export function ResumeMaillage({ r }: { r: RapportMaillage }) {
 export default function ReliefOutils({ take }: { take: Take }) {
   const [format, setFormat] = useState<FormatRelief>('glb');
   const [faces, setFaces] = useState(0);
+  // Chaque modèle possède ses propres résultats, même après un retour sur A.
+  // Les préférences d'export restent partagées entre les modèles.
+  return <ReliefOutilsModele key={take.id} take={take} format={format} setFormat={setFormat} faces={faces} setFaces={setFaces} />;
+}
+
+function ReliefOutilsModele({ take, format, setFormat, faces, setFaces }: {
+  take: Take; format: FormatRelief; setFormat: (format: FormatRelief) => void; faces: number; setFaces: (faces: number) => void;
+}) {
+  const vivant = useRef(false);
+  useLayoutEffect(() => {
+    vivant.current = true;
+    return () => { vivant.current = false; };
+  }, []);
   const [info, setInfo] = useState<RapportRelief | null>(null);
   const [cartes, setCartes] = useState<{ nom: string }[]>([]);
   const [juge, setJuge] = useState<JugeRelief | null>(null);
@@ -53,7 +66,14 @@ export default function ReliefOutils({ take }: { take: Take }) {
 
   async function juger() {
     setJugement(true);
-    try { setJuge(await api.reliefJuger(take.id)); } catch (e) { toast(e instanceof Error ? e.message : 'Le juge n’a pas répondu', true); } finally { setJugement(false); }
+    try {
+      const resultat = await api.reliefJuger(take.id);
+      if (vivant.current) setJuge(resultat);
+    } catch (e) {
+      if (vivant.current) toast(e instanceof Error ? e.message : 'Le juge n’a pas répondu', true);
+    } finally {
+      if (vivant.current) setJugement(false);
+    }
   }
   const affiche = faces && info?.decime ? info.decime : info?.rapport;
   return (
