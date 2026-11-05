@@ -50,6 +50,30 @@ def _int_or_none(value: Any) -> bool:
     return value is None or (isinstance(value, int) and not isinstance(value, bool))
 
 
+def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise EvidenceError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_nonstandard_json_constant(value: str) -> None:
+    raise EvidenceError(f"non-standard JSON constant: {value}")
+
+
+def _strict_json_loads(text: str) -> Any:
+    try:
+        return json.loads(
+            text,
+            object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonstandard_json_constant,
+        )
+    except json.JSONDecodeError as exc:
+        raise EvidenceError("invalid JSON") from exc
+
+
 def _canonical_bytes(record: dict[str, Any]) -> bytes:
     payload = {key: value for key, value in record.items() if key != "record_sha256"}
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -67,19 +91,21 @@ def _expected_seed_state(declared: int | None, used: int | None) -> str:
     return "known"
 
 
-def validate_record(record: Any) -> dict[str, Any]:
+def _validate_record_shape(record: Any) -> dict[str, Any]:
     if not isinstance(record, dict):
         raise EvidenceError("record must be an object")
     unknown = set(record) - RECORD_FIELDS
     if unknown:
         raise EvidenceError("unknown record fields: " + ", ".join(sorted(unknown)))
-    required = RECORD_FIELDS - {"record_sha256"}
-    missing = required - set(record)
+    missing = (RECORD_FIELDS - {"record_sha256"}) - set(record)
     if missing:
         raise EvidenceError("missing record fields: " + ", ".join(sorted(missing)))
     if record["schema"] != SCHEMA:
         raise EvidenceError("unsupported evidence schema; V2 registry accepts schema 2 only")
+    return record
 
+
+def _validate_identity(record: dict[str, Any]) -> tuple[str, str]:
     record_id = record["record_id"]
     match = RECORD_ID.fullmatch(record_id) if isinstance(record_id, str) else None
     if not match:
@@ -93,18 +119,23 @@ def validate_record(record: Any) -> dict[str, Any]:
         raise EvidenceError("team_role must not assert professor approval")
     if record["status"] != "codex_machine_observation_unjudged":
         raise EvidenceError("status must preserve unjudged machine-observation state")
+    return team, record_id
 
+
+def _validate_review_and_corpus_fields(record: dict[str, Any]) -> None:
+    if record["founder_review"] != {"status": "pending"}:
+        raise EvidenceError("founder_review must remain pending")
+    if record["memory_promotion"] != "none":
+        raise EvidenceError("evidence records cannot promote memory")
     brief_id = record["amd2_brief_id"]
     if brief_id is not None and (not isinstance(brief_id, str) or not re.fullmatch(r"AMD2-[0-9]{3}", brief_id)):
         raise EvidenceError("amd2_brief_id must be null or an AMD2-### id")
     corpus_sha = record["amd2_corpus_sha256"]
     if not isinstance(corpus_sha, str) or not SHA256.fullmatch(corpus_sha):
         raise EvidenceError("amd2_corpus_sha256 is invalid")
-    if record["founder_review"] != {"status": "pending"}:
-        raise EvidenceError("founder_review must remain pending")
-    if record["memory_promotion"] != "none":
-        raise EvidenceError("evidence records cannot promote memory")
 
+
+def _validate_v1_replacement(record: dict[str, Any], team: str, record_id: str) -> dict[str, Any]:
     replaced = record["replaces_v1_record"]
     if not isinstance(replaced, dict) or set(replaced) != {"record_id", "record_sha256", "registry_sha256"}:
         raise EvidenceError("replaces_v1_record has an invalid shape")
@@ -117,33 +148,35 @@ def validate_record(record: Any) -> dict[str, Any]:
         raise EvidenceError("replaces_v1_record.record_sha256 is invalid")
     if not isinstance(replaced["registry_sha256"], str) or not SHA256.fullmatch(replaced["registry_sha256"]):
         raise EvidenceError("replaces_v1_record.registry_sha256 is invalid")
+    return replaced
 
-    artifacts = record["artifacts"]
-    if not isinstance(artifacts, list) or not artifacts:
-        raise EvidenceError("artifacts must be a nonempty array")
-    artifact_paths: set[tuple[str, str]] = set()
-    for index, artifact in enumerate(artifacts):
-        if not isinstance(artifact, dict) or set(artifact) != ARTIFACT_FIELDS:
-            raise EvidenceError(f"artifacts[{index}] has an invalid shape")
-        if not isinstance(artifact["root"], str) or artifact["root"] not in {"storage", "repo", "creative_data"}:
-            raise EvidenceError(f"artifacts[{index}].root is invalid")
-        path = artifact["path"]
-        if not isinstance(path, str) or not path or "\\" in path:
-            raise EvidenceError(f"artifacts[{index}].path must be a canonical relative path")
-        posix = PurePosixPath(path)
-        if posix.is_absolute() or str(posix) != path or any(part in {".", ".."} for part in posix.parts):
-            raise EvidenceError(f"artifacts[{index}].path escapes its declared root")
-        if not isinstance(artifact["sha256"], str) or not SHA256.fullmatch(artifact["sha256"]):
-            raise EvidenceError(f"artifacts[{index}].sha256 is invalid")
-        size = artifact["size_bytes"]
-        if not isinstance(size, int) or isinstance(size, bool) or size < 0:
-            raise EvidenceError(f"artifacts[{index}].size_bytes is invalid")
-        if not _nonempty(artifact["kind"]):
-            raise EvidenceError(f"artifacts[{index}].kind is invalid")
-        key = (artifact["root"], path)
-        if key in artifact_paths:
-            raise EvidenceError(f"duplicate artifact path: {artifact['root']}:{path}")
-        artifact_paths.add(key)
+
+def _validate_artifact_path(artifact: dict[str, Any], index: int) -> None:
+    path = artifact["path"]
+    if not isinstance(path, str) or not path or "\\" in path:
+        raise EvidenceError(f"artifacts[{index}].path must be a canonical relative path")
+    posix = PurePosixPath(path)
+    if posix.is_absolute() or str(posix) != path or any(part in {".", ".."} for part in posix.parts):
+        raise EvidenceError(f"artifacts[{index}].path escapes its declared root")
+
+
+def _validate_artifact_shape(artifact: Any, index: int) -> None:
+    if not isinstance(artifact, dict) or set(artifact) != ARTIFACT_FIELDS:
+        raise EvidenceError(f"artifacts[{index}] has an invalid shape")
+    if not isinstance(artifact["root"], str) or artifact["root"] not in {"storage", "repo", "creative_data"}:
+        raise EvidenceError(f"artifacts[{index}].root is invalid")
+    _validate_artifact_path(artifact, index)
+    if not isinstance(artifact["sha256"], str) or not SHA256.fullmatch(artifact["sha256"]):
+        raise EvidenceError(f"artifacts[{index}].sha256 is invalid")
+    size = artifact["size_bytes"]
+    if not isinstance(size, int) or isinstance(size, bool) or size < 0:
+        raise EvidenceError(f"artifacts[{index}].size_bytes is invalid")
+    if not _nonempty(artifact["kind"]):
+        raise EvidenceError(f"artifacts[{index}].kind is invalid")
+
+
+def _validate_artifact_links(artifacts: list[dict[str, Any]], corpus_sha: str,
+                             replaced: dict[str, Any]) -> None:
     corpus_artifacts = [artifact for artifact in artifacts if artifact["kind"] == "amd2_corpus"]
     if (len(corpus_artifacts) != 1 or corpus_artifacts[0]["sha256"] != corpus_sha
             or corpus_artifacts[0]["root"] != "repo"
@@ -159,37 +192,57 @@ def validate_record(record: Any) -> dict[str, Any]:
             or not receipt_artifacts[0]["path"].endswith("archive-v1/pc1-v1-registry-receipt.json")):
         raise EvidenceError("one V1 archive verification receipt must be referenced")
 
-    seeds = record["seed_reconciliation"]
+
+def _validate_artifacts(artifacts: Any, corpus_sha: str,
+                        replaced: dict[str, Any]) -> None:
+    if not isinstance(artifacts, list) or not artifacts:
+        raise EvidenceError("artifacts must be a nonempty array")
+    artifact_paths: set[tuple[str, str]] = set()
+    for index, artifact in enumerate(artifacts):
+        _validate_artifact_shape(artifact, index)
+        key = (artifact["root"], artifact["path"])
+        if key in artifact_paths:
+            raise EvidenceError(f"duplicate artifact path: {artifact['root']}:{artifact['path']}")
+        artifact_paths.add(key)
+    _validate_artifact_links(artifacts, corpus_sha, replaced)
+
+
+def _validate_seed(seed: Any, index: int) -> tuple[str, str]:
+    if not isinstance(seed, dict) or set(seed) != SEED_FIELDS:
+        raise EvidenceError(f"seed_reconciliation[{index}] has an invalid shape")
+    if (not _nonempty(seed["plan_id"]) or seed["seed_kind"] != "keyframe"
+            or not _nonempty(seed["used_source"])):
+        raise EvidenceError(f"seed_reconciliation[{index}] is missing its source")
+    if not _int_or_none(seed["declared"]) or not _int_or_none(seed["used"]):
+        raise EvidenceError(f"seed_reconciliation[{index}] numeric seed values must be integer or null")
+    raw_text = seed["texte_brut"]
+    if raw_text is not None and not _nonempty(raw_text):
+        raise EvidenceError(f"seed_reconciliation[{index}].texte_brut must be nonempty or null")
+    if seed["used"] is not None and raw_text is not None:
+        raise EvidenceError(f"seed_reconciliation[{index}] cannot claim a typed value and raw text together")
+    if seed["state"] != _expected_seed_state(seed["declared"], seed["used"]):
+        raise EvidenceError(f"seed_reconciliation[{index}].state does not match typed values")
+    return seed["plan_id"], seed["seed_kind"]
+
+
+def _validate_seeds(seeds: Any) -> None:
     if not isinstance(seeds, list):
         raise EvidenceError("seed_reconciliation must be an array")
-    for index, seed in enumerate(seeds):
-        if not isinstance(seed, dict) or set(seed) != SEED_FIELDS:
-            raise EvidenceError(f"seed_reconciliation[{index}] has an invalid shape")
-        if (not _nonempty(seed["plan_id"]) or seed["seed_kind"] != "keyframe"
-                or not _nonempty(seed["used_source"])):
-            raise EvidenceError(f"seed_reconciliation[{index}] is missing its source")
-        if not _int_or_none(seed["declared"]) or not _int_or_none(seed["used"]):
-            raise EvidenceError(f"seed_reconciliation[{index}] numeric seed values must be integer or null")
-        raw_text = seed["texte_brut"]
-        if raw_text is not None and not _nonempty(raw_text):
-            raise EvidenceError(f"seed_reconciliation[{index}].texte_brut must be nonempty or null")
-        if seed["used"] is not None and raw_text is not None:
-            raise EvidenceError(f"seed_reconciliation[{index}] cannot claim a typed value and raw text together")
-        expected_state = _expected_seed_state(seed["declared"], seed["used"])
-        if seed["state"] != expected_state:
-            raise EvidenceError(f"seed_reconciliation[{index}].state does not match typed values")
-    seed_keys = [(seed["plan_id"], seed["seed_kind"]) for seed in seeds]
+    seed_keys = [_validate_seed(seed, index) for index, seed in enumerate(seeds)]
     if len(seed_keys) != len(set(seed_keys)):
         raise EvidenceError("seed_reconciliation has duplicate (plan_id, seed_kind) entries")
 
-    observations = record["observations"]
+
+def _validate_observations(observations: Any) -> None:
     if not isinstance(observations, list) or not observations:
         raise EvidenceError("observations must be a nonempty array")
     for index, observation in enumerate(observations):
         if (not isinstance(observation, dict) or set(observation) != {"authority", "text"}
                 or observation["authority"] != "codex_machine" or not _nonempty(observation["text"])):
             raise EvidenceError(f"observations[{index}] must be an explicit Codex machine observation")
-    lineage = record["lineage"]
+
+
+def _validate_lineage(lineage: Any, record_id: str) -> None:
     if not isinstance(lineage, list):
         raise EvidenceError("lineage must be an array")
     for item in lineage:
@@ -200,6 +253,16 @@ def validate_record(record: Any) -> dict[str, Any]:
     if record_id in lineage:
         raise EvidenceError("record cannot be its own lineage parent")
 
+
+def validate_record(record: Any) -> dict[str, Any]:
+    record = _validate_record_shape(record)
+    team, record_id = _validate_identity(record)
+    _validate_review_and_corpus_fields(record)
+    replaced = _validate_v1_replacement(record, team, record_id)
+    _validate_artifacts(record["artifacts"], record["amd2_corpus_sha256"], replaced)
+    _validate_seeds(record["seed_reconciliation"])
+    _validate_observations(record["observations"])
+    _validate_lineage(record["lineage"], record_id)
     declared_digest = record.get("record_sha256")
     actual_digest = record_digest(record)
     if declared_digest is not None and declared_digest != actual_digest:
@@ -273,6 +336,24 @@ def _verify_archived_v1_link(record: dict[str, Any], storage_root: Path) -> None
         raise EvidenceError("V1 archive receipt does not attest the referenced Storage and pc1 bytes")
 
 
+def _verify_amd2_brief_membership(record: dict[str, Any], repo_root: Path) -> None:
+    brief_id = record["amd2_brief_id"]
+    if brief_id is None:
+        return
+    corpus_path = repo_root / "app/server/nexora/bench/corpus-amd-v2/corpus.json"
+    try:
+        corpus = _strict_json_loads(corpus_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, EvidenceError) as exc:
+        raise EvidenceError("referenced AMD2 corpus cannot be read as strict JSON") from exc
+    if not isinstance(corpus, dict) or not isinstance(corpus.get("briefs"), list):
+        raise EvidenceError("referenced AMD2 corpus has an invalid structure")
+    briefs = corpus["briefs"]
+    if any(not isinstance(brief, dict) or not _nonempty(brief.get("id")) for brief in briefs):
+        raise EvidenceError("referenced AMD2 corpus has an invalid brief entry")
+    if brief_id not in {brief["id"] for brief in briefs}:
+        raise EvidenceError("amd2_brief_id is absent from the referenced AMD2 corpus")
+
+
 def verify_artifacts(record: dict[str, Any], storage_root: Path, repo_root: Path,
                      creative_data_root: Path | None = None) -> None:
     roots = {"storage": storage_root.resolve(strict=True), "repo": repo_root.resolve(strict=True)}
@@ -297,6 +378,7 @@ def verify_artifacts(record: dict[str, Any], storage_root: Path, repo_root: Path
         actual_sha, actual_size = _digest_file(resolved)
         if actual_sha != artifact["sha256"] or actual_size != artifact["size_bytes"]:
             raise EvidenceError(f"artifact hash/size mismatch: {artifact['root']}:{artifact['path']}")
+    _verify_amd2_brief_membership(record, roots["repo"])
     _verify_archived_v1_link(record, roots["storage"])
 
 
@@ -316,8 +398,8 @@ def _load_registry(fd: int) -> tuple[dict[str, dict[str, Any]], int]:
         if not line:
             raise EvidenceError(f"blank registry line at {line_no}")
         try:
-            item = validate_record(json.loads(line.decode("utf-8")))
-        except (UnicodeDecodeError, json.JSONDecodeError, EvidenceError) as exc:
+            item = validate_record(_strict_json_loads(line.decode("utf-8")))
+        except (UnicodeDecodeError, EvidenceError) as exc:
             raise EvidenceError(f"invalid V2 registry line {line_no}: {exc}") from exc
         record_id = item["record_id"]
         if record_id in records:
@@ -395,9 +477,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         with args.record.open("r", encoding="utf-8") as stream:
-            record = json.load(stream)
+            record = _strict_json_loads(stream.read())
         result, item = import_record(record, args.registry, args.storage_root, args.repo_root, args.creative_data_root)
-    except (OSError, json.JSONDecodeError, EvidenceError) as exc:
+    except (OSError, UnicodeDecodeError, EvidenceError) as exc:
         print(f"ERREUR: {exc}", file=sys.stderr)
         return 2
     print(json.dumps({"result": result, "record_id": item["record_id"], "record_sha256": item["record_sha256"], "verified_artifacts": len(item["artifacts"])}, ensure_ascii=False, sort_keys=True))

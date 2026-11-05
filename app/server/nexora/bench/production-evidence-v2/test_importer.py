@@ -34,7 +34,7 @@ def _artifact(root_name: str, path: str, content: bytes, kind: str) -> dict:
 def fixture_record(storage_root: Path, repo_root: Path) -> dict:
     media = b"synthetic evidence bytes"
     (storage_root / "fixture.mp4").write_bytes(media)
-    corpus = b"synthetic AMD corpus fixture"
+    corpus = json.dumps({"statut": "fixture", "briefs": [{"id": "AMD2-001"}]}).encode()
     corpus_path = repo_root / "app/server/nexora/bench/corpus-amd-v2/corpus.json"
     corpus_path.parent.mkdir(parents=True, exist_ok=True)
     corpus_path.write_bytes(corpus)
@@ -269,6 +269,41 @@ class TestImportEvidenceV2(unittest.TestCase):
             with self.assertRaisesRegex(importer.EvidenceError, "absent prior parent"):
                 importer._load_registry(stream.fileno())
 
+    def test_amd2_brief_id_must_exist_in_the_referenced_corpus(self):
+        record = fixture_record(self.storage, self.repo)
+        record["amd2_brief_id"] = "AMD2-001"
+        result, _ = importer.import_record(record, self.registry, self.storage, self.repo)
+        self.assertEqual(result, "imported")
+
+        absent = fixture_record(self.storage, self.repo)
+        absent["amd2_brief_id"] = "AMD2-999"
+        absent_registry = self.base / "absent-brief.jsonl"
+        with self.assertRaisesRegex(importer.EvidenceError, "absent from the referenced AMD2 corpus"):
+            importer.import_record(absent, absent_registry, self.storage, self.repo)
+        self.assertFalse(absent_registry.exists())
+
+    def test_null_amd2_brief_id_does_not_require_parsing_corpus(self):
+        record = fixture_record(self.storage, self.repo)
+        content = b"not a JSON corpus"
+        corpus_path = self.repo / "app/server/nexora/bench/corpus-amd-v2/corpus.json"
+        corpus_path.write_bytes(content)
+        artifact = next(item for item in record["artifacts"] if item["kind"] == "amd2_corpus")
+        artifact.update({"sha256": hashlib.sha256(content).hexdigest(), "size_bytes": len(content)})
+        record["amd2_corpus_sha256"] = artifact["sha256"]
+        importer.verify_artifacts(record, self.storage, self.repo)
+
+    def test_non_null_amd2_brief_id_requires_valid_referenced_corpus(self):
+        record = fixture_record(self.storage, self.repo)
+        record["amd2_brief_id"] = "AMD2-001"
+        content = b"not a JSON corpus"
+        corpus_path = self.repo / "app/server/nexora/bench/corpus-amd-v2/corpus.json"
+        corpus_path.write_bytes(content)
+        artifact = next(item for item in record["artifacts"] if item["kind"] == "amd2_corpus")
+        artifact.update({"sha256": hashlib.sha256(content).hexdigest(), "size_bytes": len(content)})
+        record["amd2_corpus_sha256"] = artifact["sha256"]
+        with self.assertRaisesRegex(importer.EvidenceError, "cannot be read as strict JSON"):
+            importer.verify_artifacts(record, self.storage, self.repo)
+
     def test_partial_append_failure_rolls_back_registry_bytes(self):
         record = fixture_record(self.storage, self.repo)
         real_write = importer.os.write
@@ -415,6 +450,27 @@ class TestImportEvidenceV2(unittest.TestCase):
             with self.assertRaisesRegex(importer.EvidenceError, "duplicate record_id"):
                 importer._load_registry(stream.fileno())
 
+    def test_registry_json_refuses_duplicate_keys_and_nonstandard_constants(self):
+        record = fixture_record(self.storage, self.repo)
+        encoded = json.dumps(record)
+        duplicate_cases = [
+            (encoded.replace('"team": "deepseek"', '"team": "deepseek", "team": "deepseek"', 1),
+             "duplicate JSON object key: team"),
+            (encoded.replace('"founder_review": {"status": "pending"}',
+                             '"founder_review": {"status": "pending", "status": "pending"}', 1),
+             "duplicate JSON object key: status"),
+        ]
+        nonstandard = encoded.replace('"amd2_brief_id": null', '"amd2_brief_id": NaN', 1)
+        cases = [(text + "\n", message) for text, message in duplicate_cases]
+        cases.append((nonstandard + "\n", "non-standard JSON constant: NaN"))
+        for content, message in cases:
+            with self.subTest(message=message):
+                registry = self.base / "strict.jsonl"
+                registry.write_text(content, encoding="utf-8")
+                with registry.open("rb") as stream:
+                    with self.assertRaisesRegex(importer.EvidenceError, message):
+                        importer._load_registry(stream.fileno())
+
     def test_artifact_roots_missing_files_and_non_regular_files_are_refused(self):
         record = fixture_record(self.storage, self.repo)
         record["artifacts"].append({
@@ -462,6 +518,39 @@ class TestImportEvidenceV2(unittest.TestCase):
             ])
         self.assertEqual(result, 2)
         self.assertIn("ERREUR", stderr.getvalue())
+
+    def test_cli_record_json_refuses_duplicate_keys_and_nonstandard_constants(self):
+        from contextlib import redirect_stderr
+        import io
+
+        record = fixture_record(self.storage, self.repo)
+        encoded = json.dumps(record)
+        nested_duplicate = encoded.replace(
+            '"founder_review": {"status": "pending"}',
+            '"founder_review": {"status": "pending", "status": "pending"}',
+            1,
+        )
+        cases = [
+            (encoded.replace('"team": "deepseek"', '"team": "deepseek", "team": "deepseek"', 1),
+             "duplicate JSON object key: team"),
+            (nested_duplicate, "duplicate JSON object key: status"),
+            (encoded.replace('"amd2_brief_id": null', '"amd2_brief_id": NaN', 1),
+             "non-standard JSON constant: NaN"),
+        ]
+        for content, message in cases:
+            with self.subTest(message=message):
+                record_path = self.base / "strict-record.json"
+                registry = self.base / "strict-record.jsonl"
+                record_path.write_text(content, encoding="utf-8")
+                stderr = io.StringIO()
+                with redirect_stderr(stderr):
+                    result = importer.main([
+                        str(record_path), "--registry", str(registry),
+                        "--storage-root", str(self.storage), "--repo-root", str(self.repo),
+                    ])
+                self.assertEqual(result, 2)
+                self.assertIn(message, stderr.getvalue())
+                self.assertFalse(registry.exists())
 
 
 if __name__ == "__main__":
