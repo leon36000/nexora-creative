@@ -83,6 +83,10 @@ export interface PhoneEvent {
   reason?: 'received' | 'expired' | 'cancelled' | 'abuse' | 'replaced';
 }
 
+export class EchecFilmPartiel extends Error {
+  constructor(message: string, public readonly filmId: number, public readonly prises: { plan: number; takeId: number }[], public readonly verificationRequise: boolean, public readonly conflit?: { filmId: number; plan: number; takeId: number }) { super(message); }
+}
+
 async function j<T>(url: string, init?: RequestInit): Promise<T> {
   // Only claim a JSON body when one exists — Fastify 400s an empty body sent
   // with a JSON content-type, which silently broke every body-less POST
@@ -100,6 +104,14 @@ async function j<T>(url: string, init?: RequestInit): Promise<T> {
   if (!r.ok) {
     const msg = (d && (d.error || d.message)) || `${r.status}`;
     console.error(`[openfield] ${init?.method || 'GET'} ${url} failed:`, msg);
+    const routeFilm = url === '/api/nexora/film/tourner' || /^\/api\/nexora\/film\/\d+\/refaire$/.test(url) || url === '/api/nexora/prolonger' || url === '/api/nexora/raccord';
+    if (routeFilm && Number.isSafeInteger(d?.filmId) && d.filmId > 0 && Array.isArray(d.prises)) {
+      const prises = d.prises.filter((p: any) => Number.isSafeInteger(p?.plan) && p.plan >= 0 && Number.isSafeInteger(p?.takeId) && p.takeId > 0);
+      const c = d.conflit;
+      const conflit = Number.isSafeInteger(c?.filmId) && c.filmId > 0 && Number.isSafeInteger(c?.plan) && c.plan >= 0 && Number.isSafeInteger(c?.takeId) && c.takeId > 0 ? { filmId: c.filmId, plan: c.plan, takeId: c.takeId } : undefined;
+      const verification = !!conflit || [d.attachementsEnAttente, d.reservationsEnAttente, d.marquageEnAttente].some((v) => Array.isArray(v) && v.length > 0);
+      if (prises.length || verification) throw new EchecFilmPartiel(msg, d.filmId, prises, verification, conflit);
+    }
     throw new Error(msg);
   }
   return d as T;
