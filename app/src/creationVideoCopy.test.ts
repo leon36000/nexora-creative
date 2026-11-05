@@ -17,9 +17,11 @@ describe('libellés du parcours vidéo Director', () => {
     expect(creationVideoCopy('en').ideaExamples[0]).toContain('An obsidian dragon');
     expect(creationVideoCopy('en')).toMatchObject({
       modelVideo: 'Video', modelMusic: 'Music', replyLanguage: 'Spoken language',
+      preparingKeyFrame: 'Preparing keyframe…',
       toastMusicMixReady: 'Your video with music is ready.',
       toast3dKeyframe: expect.stringContaining('3D view'),
     });
+    expect(creationVideoCopy('fr').preparingKeyFrame).toBe('Préparation du plan clé…');
   });
 
   it('remplace les erreurs réseau opaques par un message de parcours localisé', () => {

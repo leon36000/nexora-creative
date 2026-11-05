@@ -2,6 +2,7 @@
 import { Fragment, Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { api, downloadUrl, finishFileUrl, mediaUrl, posterUrl, subjectUrl, takeAsInput, turntableUrl, workflowUrl, type SeamMeasure, type Take } from './api';
 import { navigate } from './router';
+import { videoFromStillHref } from './viewerHandoff';
 import { ROUTE_3D } from './produit3d.js';
 import { getState, isImage, isModel, refreshTakes, setHandoff, settingsOf, toast, useStore } from './store';
 import type { ModelLook } from './ModelView';
@@ -13,16 +14,12 @@ import { effectById } from './effects';
 import { SaveToCast } from './pages/Cast';
 import { useCast } from './castStore';
 
-export async function animate(t: Take, loop = false) {
-  toast('Sending to Video...');
-  const token = await takeAsInput(t.id);
-  setHandoff({
-    refs: loop
-      ? [{ token, role: 'start', kind: 'image', name: `take ${t.id}` }, { token, role: 'end', kind: 'image', name: `take ${t.id}` }]
-      : [{ token, role: 'start', kind: 'image', name: `take ${t.id}` }],
-    prompt: settingsOf(t).userPrompt ?? settingsOf(t).prompt,
-  });
-  navigate(loop ? '/video?preset=static' : '/video');
+export function animate(t: Take) {
+  const s = settingsOf(t);
+  const href = videoFromStillHref(t.id, s.userPrompt ?? s.prompt);
+  if (!href) { toast('This image cannot be opened as video.', true); return; }
+  toast('Opening Video...');
+  navigate(href);
 }
 
 /** Hand a take to the Effects app as its clip or still. */
@@ -258,8 +255,7 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
         ) : (
         <div className="viewer-actions">
           {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`${ROUTE_3D}?take=${take.id}`); }} title="A textured 3D model of the subject, from this still"><Icon name="cube" size={14} />Make 3D</button>}
-          {image && <button type="button" className={`btn sm ${s.app === 'stage' ? '' : 'accent'}`} onClick={act(() => animate(take))}><Icon name="video" size={14} />Animate</button>}
-          {image && <button type="button" className="btn sm" onClick={act(() => animate(take, true))}><Icon name="loop" size={14} />Make a loop</button>}
+          {image && take.status === 'done' && <button type="button" className={`btn sm ${s.app === 'stage' ? '' : 'accent'}`} onClick={() => { onClose(); animate(take); }}><Icon name="video" size={14} />Animate</button>}
           {image && take.status === 'done' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/edit?take=${take.id}`); }} title="Edit, new angle, relight, expand and more"><Icon name="wand" size={14} />Edit...</button>}
           {take.kind !== 'upres' && s.app !== 'upscale' && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/upscale?take=${take.id}`); }}><Icon name="up" size={14} />Upscale</button>}
           {!image && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`/extend?take=${take.id}`); }}><Icon name="plus" size={14} />Extend</button>}
@@ -267,11 +263,6 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
           {image ? more.map((m) => (
             <button key={m.label} type="button" className="btn sm" onClick={m.run} title={m.title}><Icon name={m.icon} size={14} />{m.label}</button>
           )) : more.length > 0 && <MoreMenu items={more} />}
-          {image && <button type="button" className="btn sm" onClick={act(async () => {
-            const token = await takeAsInput(take.id);
-            setHandoff({ refs: [{ token, role: 'end', kind: 'image', name: `take ${take.id}` }] });
-            navigate('/video');
-          })} title="Use as the end frame of a new video"><Icon name="ref" size={14} />As end frame</button>}
           {image && take.status === 'done' && <button type="button" className={`btn sm ${casting ? 'on' : ''}`} onClick={() => setCasting(!casting)} title="Keep this face, prop or place and @mention it in any prompt"><Icon name="person" size={14} />Save to cast</button>}
           <button type="button" className="btn sm" onClick={act(() => recreate(take))}><Icon name="redo" size={14} />Recreate</button>
           <a className="btn sm" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download{s.alphaPath ? ' preview' : ''}</a>
