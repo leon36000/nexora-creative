@@ -9,6 +9,11 @@ describe('copy Mesh bilingue', () => {
     expect(meshCopy('en').requestFailure).toContain('Check the source');
   });
 
+  it('localise le libellé du modèle créé depuis plusieurs vues', () => {
+    expect(meshCopy('fr').modelFromViews(2)).toBe('Modèle depuis 2 vues');
+    expect(meshCopy('en').modelFromViews(2)).toBe('Model from 2 views');
+  });
+
   it('traduit les avertissements connus et masque les chaînes inconnues', () => {
     expect(avertissementMaillage('4 triangles dégénérés.', 'en')).toBe('4 degenerate triangles.');
     expect(avertissementMaillage('diagnostic technique arbitraire', 'en')).toBe(meshCopy('en').unknownWarning);

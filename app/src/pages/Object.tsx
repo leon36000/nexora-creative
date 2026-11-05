@@ -256,7 +256,7 @@ export default function ObjectPage() {
           </>
         ) : (
           <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source || (mode === 'vues' && !vueGauche && !vueDos && !vueDroite)} onClick={() => void (mode === 'vues' ? goVues() : go())}>
-            <span>{busy ?? (count > 1 ? `${PRODUIT_3D} · ${count}` : mode === 'vues' ? `${PRODUIT_3D} depuis ${1 + [vueGauche, vueDos, vueDroite].filter(Boolean).length} vues` : PRODUIT_3D)}</span>
+            <span>{busy ?? (mode === 'vues' ? c.modelFromViews(1 + [vueGauche, vueDos, vueDroite].filter(Boolean).length) : count > 1 ? `${PRODUIT_3D} · ${count}` : PRODUIT_3D)}</span>
             <span className="cost">{devisT?.credits != null ? `${devisT.credits * count} ${c.credits} · ` : ''}{est ? fmtSeconds(est * count) : devisT ? `≈ ${fmtSeconds(devisT.secondesEstimees * count)}` : 'TRELLIS.2'}</span>
           </button>
         )}
@@ -286,7 +286,7 @@ export default function ObjectPage() {
                 {takes.map((t) => (
                   <MediaCard key={t.id} take={t} langue={langue} onOpen={() => setSelected(t.id)} actions={<>
                     {t.status === 'done' && <a className="icon-btn" title={c.downloadGlb} href={downloadUrl(t.id)}><Icon name="download" size={14} /></a>}
-                    <button type="button" className="icon-btn" title={c.recreate} onClick={() => void recreate(t)}><Icon name="redo" size={14} /></button>
+                    <button type="button" className="icon-btn" title={c.recreate} onClick={() => void recreate(t, { langue })}><Icon name="redo" size={14} /></button>
                     <button type="button" className="icon-btn" title={c.delete} onClick={() => void remove(t)}><Icon name="trash" size={14} /></button>
                   </>} />
                 ))}
@@ -295,7 +295,7 @@ export default function ObjectPage() {
           )}
         </div>
       </section>
-      {viewing !== null && <Viewer takeId={viewing} onClose={() => setViewing(null)} onStep={() => {}} />}
+      {viewing !== null && <Viewer takeId={viewing} onClose={() => setViewing(null)} onStep={() => {}} langue={langue} />}
     </div>
   );
 }

@@ -137,7 +137,7 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
             <div style={{ fontSize: 15, fontWeight: 600 }}>{juge.note}/10 <span className="dim" style={{ fontWeight: 400, fontSize: 12 }}>· {juge.note >= 8 ? c.readyToUse : juge.note >= 6 ? c.usable : c.redo}</span></div>
             {juge.raison && <div className="dim" style={{ fontSize: 12 }}>{juge.raison}</div>}
             {juge.defauts.length > 0 && <div className="dim" style={{ fontSize: 12 }}>{juge.defauts.join(' · ')}</div>}
-            {juge.note < 6 && <button type="button" className="btn sm" onClick={() => void recreate(take)}><Icon name="redo" size={14} />{c.retryWithNewSeed}</button>}
+            {juge.note < 6 && <button type="button" className="btn sm" onClick={() => void recreate(take, { langue })}><Icon name="redo" size={14} />{c.retryWithNewSeed}</button>}
           </>
         ) : (
           <button type="button" className="btn sm" disabled={jugement} onClick={() => void juger()}><Icon name="sparkle" size={14} />{jugement ? c.judgeLoading : c.judgeFourSides}</button>
