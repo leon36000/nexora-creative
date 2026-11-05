@@ -37,15 +37,21 @@ function serviceNatifUnique(moteurs: MoteurDetourageDeclare[], natif?: ServiceDe
   return natif && !moteurs.some((m) => m.id === natif.id) ? natif : undefined;
 }
 
+function moteursSansCollision(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): MoteurDetourageDeclare[] {
+  return natif ? moteurs.filter((m) => m.id !== natif.id) : moteurs;
+}
+
 export function serviceRapide(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): ServiceDetourage | MoteurDetourageDeclare | undefined {
-  return serviceNatifUnique(moteurs, natif) ?? moteurPour(moteurs, 'rapide');
+  return serviceNatifUnique(moteurs, natif) ?? moteurPour(moteursSansCollision(moteurs, natif), 'rapide');
 }
 
 export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage): { detourage: Detourage; arreter: () => void } {
   const clients = new Map<string, ClientDetourage>();
   const clientDe = (id: string): ClientDetourage | null => {
-    const natif = serviceNatifUnique(deps.moteurs(), deps.serviceNatif?.());
-    const m = natif?.id === id ? natif : deps.moteurs().find((x) => x.id === id && x.detourageUrl);
+    const moteurs = deps.moteurs();
+    const natif = deps.serviceNatif?.();
+    if (natif?.id === id && !serviceNatifUnique(moteurs, natif)) return null;
+    const m = natif?.id === id ? natif : moteurs.find((x) => x.id === id && x.detourageUrl);
     if (!m?.detourageUrl) return null;
     const cle = `${id}@${m.detourageUrl}#${m.detourageJeton ?? ""}`; // en mémoire seulement
     let c = clients.get(cle);
@@ -55,7 +61,8 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   const detourage = new Detourage({
     registre: join(deps.dossierDonnees, 'detourage', 'registre.json'),
     moteur: (palier) => {
-      const m = palier === 'rapide' ? serviceRapide(deps.moteurs(), deps.serviceNatif?.()) : moteurPour(deps.moteurs(), palier);
+      const moteurs = deps.moteurs(), natif = deps.serviceNatif?.();
+      const m = palier === 'rapide' ? serviceRapide(moteurs, natif) : moteurPour(moteursSansCollision(moteurs, natif), palier);
       const c = m && clientDe(m.id);
       return m && c ? { id: m.id, client: c } : null;
     },
@@ -85,8 +92,9 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     mesures: t.mesures ?? null, sorties: t.sorties ?? null, params: t.params ?? null, moteur: t.moteurId,
   });
   const verifierMoteurRapide = (t: ReturnType<Detourage['obtenir']>) => {
-    const natif = serviceNatifUnique(deps.moteurs(), deps.serviceNatif?.());
-    const moteur = deps.moteurs().find((m) => m.id === t.moteurId);
+    const moteurs = deps.moteurs(), service = deps.serviceNatif?.();
+    const natif = serviceNatifUnique(moteurs, service);
+    const moteur = moteursSansCollision(moteurs, service).find((m) => m.id === t.moteurId);
     if (natif?.id !== t.moteurId && (!moteur || !moteurPour([moteur], 'rapide'))) {
       throw new ErreurDetourage('Le moteur rapide de ce travail n’est pas disponible.', 503);
     }
@@ -97,7 +105,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   app.get(`${P}/capacites`, async () => {
     const m = deps.moteurs();
     const rapide = serviceRapide(m, deps.serviceNatif?.());
-    const pro = moteurPour(m, 'pro');
+    const pro = moteurPour(moteursSansCollision(m, deps.serviceNatif?.()), 'pro');
     let sante: Record<string, unknown> | null = null;
     if (rapide) sante = await clientDe(rapide.id)?.sante().catch(() => null) ?? null;
     return {

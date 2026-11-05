@@ -23,6 +23,9 @@ describe('choix du moteur', () => {
     expect(serviceRapide([m('a', ['h3-max'], 'http://a')])).toBeUndefined();
     expect(serviceRapide([m('b', ['detourage-rapide'], 'http://b')])?.id).toBe('b');
     expect(serviceRapide([m('detourage-natif', ['h3-max'], 'http://dedie')], natif)).toBeUndefined();
+    for (const recette of ['detourage-rapide', 'detourage-pro', '*']) {
+      expect(serviceRapide([m('detourage-natif', [recette], 'http://dedie')], natif)).toBeUndefined();
+    }
   });
 });
 
@@ -93,6 +96,43 @@ describe('disponibilité du détourage pro', () => {
 });
 
 describe('santé du détourage rapide', () => {
+  it('bloque une collision même avec recettes rapides et conserve les travaux en suivi ou en reprise', async () => {
+    let appels = 0;
+    const faux = createServer((_req, res) => { appels++; res.end('{"ok":true}'); });
+    await new Promise<void>((r) => faux.listen(0, '127.0.0.1', r));
+    const port = (faux.address() as AddressInfo).port;
+    const dossierDonnees = mkdtempSync(join(tmpdir(), 'detourage-collision-'));
+    const suivi = 'd'.repeat(24), reprise = 'f'.repeat(24);
+    const ancien = {
+      id: suivi, organisation: 'local', utilisateur: 'local', nom: 'ancien', moteurId: 'detourage-natif',
+      creeLe: Date.now(), majLe: Date.now(), etat: 'en_cours', etape: 'calcul', progression: 40,
+      message: '', fichiers: { 'source.mp4': 1 }, source: { duree: 1, fps: 24 },
+      params: { source: 'source.mp4' }, credits: { reservationId: 'reserve-factice', credits: 3, etat: 'reservee' },
+    };
+    mkdirSync(join(dossierDonnees, 'detourage'), { recursive: true });
+    writeFileSync(join(dossierDonnees, 'detourage', 'registre.json'), JSON.stringify([ancien, { ...ancien, id: reprise, etat: 'interrompu' }]));
+    const app = Fastify();
+    const { arreter, detourage } = enregistrerDetourage(app, {
+      dossierDonnees,
+      moteurs: () => [{ id: 'detourage-natif', nom: 'Autre', recettes: ['detourage-rapide', 'detourage-pro', '*'], detourageUrl: `http://127.0.0.1:${port}` }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'Natif', detourageUrl: `http://127.0.0.1:${port}` }),
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const capacites = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(capacites.json().rapide).toMatchObject({ disponible: false, moteur: null });
+      expect(capacites.json().pro).toMatchObject({ disponible: false, moteur: null });
+      expect((await app.inject({ method: 'POST', url: '/api/nexora/detourage/travaux', payload: {} })).statusCode).toBe(503);
+      const suiviResult = await app.inject({ method: 'GET', url: `/api/nexora/detourage/travaux/${suivi}` });
+      expect(suiviResult.json()).toMatchObject({ etat: 'en_cours', progression: 40, moteur: 'detourage-natif' });
+      expect(detourage.obtenir('local', suivi).credits?.etat).toBe('reservee');
+      expect((await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${reprise}/reprendre` })).statusCode).toBe(503);
+      expect(detourage.obtenir('local', reprise).etat).toBe('interrompu');
+      expect(detourage.obtenir('local', reprise).credits?.etat).toBe('reservee');
+      expect(appels).toBe(0);
+    } finally { arreter(); await app.close(); await new Promise<void>((r) => faux.close(() => r())); }
+  });
+
   it('ne réaffecte pas un ancien travail principal au service natif', async () => {
     const dossierDonnees = mkdtempSync(join(tmpdir(), 'detourage-historique-'));
     const id = 'e'.repeat(24);
