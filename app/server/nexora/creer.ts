@@ -162,13 +162,11 @@ export function messageAncrageMax(langue: LangueClient | undefined): string {
 }
 
 /** Corps de rendu pour le moteur choisi. */
-export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVideo) {
+export function corpsRendu(d: DemandeCreer, promptH3: string, moteur: MoteurVideo, env: NodeJS.ProcessEnv = process.env) {
   const base = corpsRenduH3(d, promptH3);
   if (moteur === 'h3-fast') return base;
-  const m = reglagesH3Max();
-  // Une photo exige FL2VA : repli FastH3 plein format si le checkpoint cinéma est Ref2VA.
-  // Le nom de route h3-max reste le même ; un checkpoint FL2VA configuré est conservé avec ses étapes.
-  if (d.image && m.ref) return { ...base, ...TAILLES.max[d.format], videoModel: 'h3-max' as const };
+  if (d.image && ancrageMaxIndisponible(moteur, true, env)) throw new Error(messageAncrageMax(d.langueClient));
+  const m = reglagesH3Max(env);
   // Le moteur cinéma est toujours à pleine résolution.
   return { ...base, ...TAILLES.max[d.format], videoModel: 'h3-max' as const, checkpoint: m.checkpoint, steps: m.etapes, ...(m.ref ? { refMode: true } : {}) };
 }
