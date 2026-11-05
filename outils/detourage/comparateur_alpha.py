@@ -70,21 +70,7 @@ def _file_sha256(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
-def _sequence(path):
-    path = Path(path).resolve(strict=True)
-    if path.suffix.lower() == '.png':
-        return {'source': str(path), 'manifest_sha256': None, 'fps': None,
-                'frames': [(0, path)]}
-    raw = _read_bounded(path, MAX_MANIFEST_BYTES)
-    try:
-        manifest = json.loads(raw, object_pairs_hook=_json_unique,
-                              parse_constant=_json_no_constant)
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise ValueError(f'manifeste invalide : {path}') from error
-    if not isinstance(manifest, dict) or set(manifest) != {'fps', 'frames'}:
-        raise ValueError('manifeste : champs fps et frames requis')
-    rate = _fps(manifest['fps'])
-    entries = manifest['frames']
+def _frames(entries, path):
     if not isinstance(entries, list) or not entries:
         raise ValueError('manifestes : liste frames non vide requise')
     frames = []
@@ -100,6 +86,24 @@ def _sequence(path):
         if image.suffix.lower() != '.png':
             raise ValueError('chaque frame doit être un fichier PNG')
         frames.append((index, (path.parent / image).resolve(strict=True)))
+    return frames
+
+
+def _sequence(path):
+    path = Path(path).resolve(strict=True)
+    if path.suffix.lower() == '.png':
+        return {'source': str(path), 'manifest_sha256': None, 'fps': None,
+                'frames': [(0, path)]}
+    raw = _read_bounded(path, MAX_MANIFEST_BYTES)
+    try:
+        manifest = json.loads(raw, object_pairs_hook=_json_unique,
+                              parse_constant=_json_no_constant)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(f'manifeste invalide : {path}') from error
+    if not isinstance(manifest, dict) or set(manifest) != {'fps', 'frames'}:
+        raise ValueError('manifeste : champs fps et frames requis')
+    rate = _fps(manifest['fps'])
+    frames = _frames(manifest['frames'], path)
     return {'source': str(path), 'manifest_sha256': hashlib.sha256(raw).hexdigest(), 'fps': rate, 'frames': frames}
 
 
@@ -149,14 +153,7 @@ def _png_info(data):
     return width, height, depth, color
 
 
-def _alpha(path, ffmpeg):
-    data = _read_bounded(path, MAX_PNG_BYTES)
-    width, height, depth, color = _png_info(data)
-    formats = {0: ('gray', 'gray16le'), 4: ('ya8', 'ya16le'), 6: ('rgba', 'rgba64le')}
-    fmt = formats[color][depth == 16]
-    command = [str(ffmpeg), '-nostdin', '-v', 'error', '-xerror', '-protocol_whitelist', 'pipe',
-               '-f', 'image2pipe', '-c:v', 'png', '-i', 'pipe:0', '-frames:v', '1',
-               '-pix_fmt', fmt, '-f', 'rawvideo', 'pipe:1']
+def _decode(command, data, path):
     try:
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, bufsize=0,
@@ -178,6 +175,18 @@ def _alpha(path, ffmpeg):
             raise ValueError(f'décodage PNG impossible avec FFmpeg : {path} (code {process.returncode})')
     except (OSError, subprocess.SubprocessError) as error:
         raise ValueError(f'décodage PNG impossible avec FFmpeg : {path} ({type(error).__name__})') from error
+    return stdout
+
+
+def _alpha(path, ffmpeg):
+    data = _read_bounded(path, MAX_PNG_BYTES)
+    width, height, depth, color = _png_info(data)
+    formats = {0: ('gray', 'gray16le'), 4: ('ya8', 'ya16le'), 6: ('rgba', 'rgba64le')}
+    fmt = formats[color][depth == 16]
+    command = [str(ffmpeg), '-nostdin', '-v', 'error', '-xerror', '-protocol_whitelist', 'pipe',
+               '-f', 'image2pipe', '-c:v', 'png', '-i', 'pipe:0', '-frames:v', '1',
+               '-pix_fmt', fmt, '-f', 'rawvideo', 'pipe:1']
+    stdout = _decode(command, data, path)
     channels = {0: 1, 4: 2, 6: 4}[color]
     if len(stdout) != width * height * channels * (depth // 8):
         raise ValueError(f'décodage PNG incomplet : {path}')
