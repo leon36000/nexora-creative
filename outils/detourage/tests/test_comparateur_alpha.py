@@ -221,7 +221,7 @@ class ComparateurTests(unittest.TestCase):
         data['fps'] = '48/2'
         cand.write_text(json.dumps(data))
         self.assertEqual(C.comparer(ref, cand, FFMPEG)['fps'], '24/1')
-        for bad in ('0/1', '1/0', '24', 24, 'nan'):
+        for bad in ('0/1', '1/0', '24', 24, 'nan', '٢٤/١'):
             data['fps'] = bad
             cand.write_text(json.dumps(data))
             with self.subTest(fps=bad), self.assertRaises(ValueError):
