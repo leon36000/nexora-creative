@@ -158,14 +158,30 @@ def _alpha(path, ffmpeg):
                '-f', 'image2pipe', '-c:v', 'png', '-i', 'pipe:0', '-frames:v', '1',
                '-pix_fmt', fmt, '-f', 'rawvideo', 'pipe:1']
     try:
-        result = subprocess.run(command, input=data, capture_output=True, check=True, timeout=30,
-                                env={'PATH': '/usr/bin:/bin', 'LC_ALL': 'C'})
+        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, bufsize=0,
+                                   env={'PATH': '/usr/bin:/bin', 'LC_ALL': 'C'})
+        try:
+            stdout, _ = process.communicate(input=data, timeout=30)
+        except subprocess.TimeoutExpired as error:
+            try:
+                process.kill()
+                process.wait(timeout=5)
+            except (OSError, subprocess.TimeoutExpired) as stop_error:
+                raise ValueError(f'décodage FFmpeg expiré ; arrêt non confirmé ({type(stop_error).__name__})') from stop_error
+            raise ValueError('décodage FFmpeg expiré ; arrêt confirmé') from error
+        finally:
+            for stream in (process.stdin, process.stdout, process.stderr):
+                if stream is not None:
+                    stream.close()
+        if process.returncode:
+            raise ValueError(f'décodage PNG impossible avec FFmpeg : {path} (code {process.returncode})')
     except (OSError, subprocess.SubprocessError) as error:
         raise ValueError(f'décodage PNG impossible avec FFmpeg : {path} ({type(error).__name__})') from error
     channels = {0: 1, 4: 2, 6: 4}[color]
-    if len(result.stdout) != width * height * channels * (depth // 8):
+    if len(stdout) != width * height * channels * (depth // 8):
         raise ValueError(f'décodage PNG incomplet : {path}')
-    values = np.frombuffer(result.stdout, dtype='u1' if depth == 8 else '<u2').reshape(height, width, channels)
+    values = np.frombuffer(stdout, dtype='u1' if depth == 8 else '<u2').reshape(height, width, channels)
     alpha = values[:, :, channels - 1].astype(np.float64) / ((1 << depth) - 1)
     return alpha, {'fichier': str(path), 'sha256': hashlib.sha256(data).hexdigest(),
                    'largeur': width, 'hauteur': height, 'profondeur_bits': depth}

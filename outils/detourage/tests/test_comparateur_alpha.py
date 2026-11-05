@@ -5,11 +5,12 @@ import os
 import sys
 import struct
 import subprocess
+import time
 import zlib
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 from PIL import Image
@@ -144,13 +145,38 @@ class ComparateurTests(unittest.TestCase):
                 C.comparer(ref, cand, FFMPEG)
 
     def test_decoder_timeout_et_sortie_tronquee(self):
-        from subprocess import CompletedProcess, TimeoutExpired
         path = self.frame('ref', 0, [[1000]])
-        with patch.object(C.subprocess, 'run', side_effect=TimeoutExpired('ffmpeg', 30)):
-            with self.assertRaisesRegex(ValueError, 'FFmpeg'):
+        process = MagicMock()
+        process.communicate.side_effect = subprocess.TimeoutExpired('ffmpeg', 30)
+        with patch.object(C.subprocess, 'Popen', return_value=process):
+            with self.assertRaisesRegex(ValueError, 'arrêt confirmé'):
                 C._alpha(path, FFMPEG)
-        with patch.object(C.subprocess, 'run', return_value=CompletedProcess([], 0, stdout=b'')):
+        process.kill.assert_called_once()
+        process.wait.assert_called_once_with(timeout=5)
+        process = MagicMock(returncode=0)
+        process.communicate.return_value = (b'', b'')
+        with patch.object(C.subprocess, 'Popen', return_value=process):
             with self.assertRaisesRegex(ValueError, 'incomplet'):
+                C._alpha(path, FFMPEG)
+
+    def test_delai_borne_si_arret_refuse(self):
+        path = self.frame('ref', 0, [[1000]])
+        process = MagicMock()
+        def expiration(**_kwargs):
+            time.sleep(0.05)
+            raise subprocess.TimeoutExpired('ffmpeg', 30)
+        process.communicate.side_effect = expiration
+        process.kill.side_effect = PermissionError('signal refusé')
+        start = time.monotonic()
+        with patch.object(C.subprocess, 'Popen', return_value=process):
+            with self.assertRaisesRegex(ValueError, 'arrêt non confirmé.*PermissionError'):
+                C._alpha(path, FFMPEG)
+        self.assertLess(time.monotonic() - start, 1)
+        process.wait.assert_not_called()
+        process.kill.side_effect = None
+        process.wait.side_effect = subprocess.TimeoutExpired('ffmpeg', 5)
+        with patch.object(C.subprocess, 'Popen', return_value=process):
+            with self.assertRaisesRegex(ValueError, 'arrêt non confirmé.*TimeoutExpired'):
                 C._alpha(path, FFMPEG)
 
     def test_lectures_bornees(self):
