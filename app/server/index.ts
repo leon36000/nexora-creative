@@ -154,11 +154,19 @@ async function solderCreditsInterne() {
       console.error(`[nexora] crédits de la prise ${t.id} :`, e instanceof Error ? e.message : e);
     }
   }
-  for (const t of takes.filmsAvecReservationsEnAttente()) {
+  const reservationsFilm = new Map<number, Set<string>>();
+  for (const r of takes.reservationsFilmOrphelines()) {
+    const ids = reservationsFilm.get(r.filmId) ?? new Set<string>();
+    ids.add(r.reservationId);
+    reservationsFilm.set(r.filmId, ids);
+  }
+  for (const [filmId, ids] of reservationsFilm) {
+    const t = takes.get(filmId);
+    if (!t) continue;
     const s = JSON.parse(t.settings);
     const fac = facturationPour(t.organisation_id);
     if (!fac || !accesOrganisation(t.organisation_id)) continue;
-    const r = await libererReservationsFilmEchoue(s.storyboard, fac);
+    const r = await libererReservationsFilmEchoue(s.storyboard, fac, ids);
     if (r.liberees.length) takes.patchSettings(t.id, { storyboard: r.storyboard });
     if (r.enAttente.length) app.log.warn(`film ${t.id} : ${r.enAttente.length} réservation(s) de suite en attente de libération`);
   }

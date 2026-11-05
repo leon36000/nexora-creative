@@ -7,7 +7,7 @@ import { mkdirSync } from 'fs';
 import { join } from 'path';
 import { config } from './config.js';
 import { compteCourant } from './nexora/compte.js';
-import { selectionnerFilmsAvecReservationsEnAttente } from './nexora/filmReservations.js';
+import { selectionnerReservationsFilmOrphelines, type ReservationFilmOrpheline } from './nexora/filmReservations.js';
 
 mkdirSync(config.dataDir, { recursive: true });
 const db = new Database(join(config.dataDir, 'openfield.db'));
@@ -206,9 +206,9 @@ export const takes = {
       ? (db.prepare(`SELECT * FROM takes WHERE 1=1${w} ORDER BY id DESC LIMIT ?`).all(...a, limit) as Take[])
       : (db.prepare(`SELECT * FROM takes WHERE project_id=?${w} ORDER BY id DESC LIMIT ?`).all(projectId, ...a, limit) as Take[]);
   },
-  /** Failed films can retain reservations for suite plans that never became individual takes. */
-  filmsAvecReservationsEnAttente(): Take[] {
-    return selectionnerFilmsAvecReservationsEnAttente((sql) => db.prepare(sql).all() as Take[]);
+  /** Failed films can retain reservations for plans that never became individual takes. */
+  reservationsFilmOrphelines(): ReservationFilmOrpheline[] {
+    return selectionnerReservationsFilmOrphelines((sql) => db.prepare(sql).all() as ReservationFilmOrpheline[]);
   },
   /** Organisation propriétaire d'une prise, sans filtre (diffusion en direct, facturation). */
   organisationDe(id: number): string | undefined {

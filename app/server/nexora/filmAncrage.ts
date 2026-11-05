@@ -28,6 +28,7 @@ export function erreurAncrageMaxFilm(
 export async function libererReservationsFilmEchoue(
   storyboard: StoryboardAvecReservations,
   facturation: Pick<Facturation, 'liberer'> | null,
+  reservationsOrphelines: ReadonlySet<string>,
 ): Promise<{ storyboard: StoryboardAvecReservations; liberees: string[]; enAttente: string[] }> {
   const plans = storyboard.plans.map((plan) => ({ ...plan }));
   const liberees: string[] = [];
@@ -35,7 +36,7 @@ export async function libererReservationsFilmEchoue(
 
   for (const plan of plans) {
     const reservation = plan.reservation;
-    if (plan.take != null || reservation?.etat !== 'reservee') continue;
+    if (plan.take != null || reservation?.etat !== 'reservee' || !reservationsOrphelines.has(reservation.reservationId)) continue;
     if (!facturation) {
       enAttente.push(reservation.reservationId);
       continue;

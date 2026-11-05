@@ -57,12 +57,12 @@ it('conserve une réservation existante après échec de libération et la solde
     async liberer(id) { appels.push(id); if (echouer) throw new Error('site de crédits indisponible'); },
   };
 
-  const premiere = await libererReservationsFilmEchoue(sb, fac);
+  const premiere = await libererReservationsFilmEchoue(sb, fac, new Set(['reservation-suite-1']));
   expect(premiere.enAttente).toEqual(['reservation-suite-1']);
   expect(premiere.storyboard.plans[1].reservation?.etat).toBe('reservee');
 
   echouer = false;
-  const reprise = await libererReservationsFilmEchoue(premiere.storyboard, fac);
+  const reprise = await libererReservationsFilmEchoue(premiere.storyboard, fac, new Set(['reservation-suite-1']));
   expect(reprise.liberees).toEqual(['reservation-suite-1']);
   expect(reprise.storyboard.plans[1].reservation?.etat).toBe('liberee');
   expect(appels).toEqual(['reservation-suite-1', 'reservation-suite-1']);
@@ -80,10 +80,11 @@ it('rejoue sans effet une libération après crash avant la persistance de son �
     },
   };
 
-  const premierEssai = await libererReservationsFilmEchoue(sb, fac);
+  const idsOrphelins = new Set(['reservation-suite-rejeu']);
+  const premierEssai = await libererReservationsFilmEchoue(sb, fac, idsOrphelins);
   expect(premierEssai.liberees).toEqual(['reservation-suite-rejeu']);
   // Simule un arrêt après le succès distant, avant patchSettings du storyboard : on repart de l'état DB initial.
-  const apresRedemarrage = await libererReservationsFilmEchoue(sb, fac);
+  const apresRedemarrage = await libererReservationsFilmEchoue(sb, fac, idsOrphelins);
   expect(apresRedemarrage.liberees).toEqual(['reservation-suite-rejeu']);
   expect(apresRedemarrage.storyboard.plans[1].reservation?.etat).toBe('liberee');
   expect(appels).toBe(2);
@@ -95,7 +96,7 @@ it('ne tente pas de libérer la réservation déjà attachée à une prise lanc�
   sb.plans[1].take = 42;
   sb.plans[1].reservation = { reservationId: 'reservation-en-cours', credits: 65, etat: 'reservee' };
   const liberer = async () => { throw new Error('ne doit pas être appelé'); };
-  const resultat = await libererReservationsFilmEchoue(sb, { liberer });
+  const resultat = await libererReservationsFilmEchoue(sb, { liberer }, new Set(['reservation-en-cours']));
   expect(resultat.liberees).toEqual([]);
   expect(resultat.enAttente).toEqual([]);
   expect(resultat.storyboard.plans[1].reservation?.etat).toBe('reservee');
