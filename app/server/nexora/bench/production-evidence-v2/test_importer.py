@@ -16,7 +16,7 @@ REPO_ROOT = next(
     if (parent / "app/server/nexora/montage/memoires.ts").is_file()
 )
 spec = importlib.util.spec_from_file_location("production_evidence_v2_importer", HERE / "importer.py")
-assert spec is not None  # nosec - module local livré avec le test
+assert spec is not None
 assert spec.loader is not None
 importer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(importer)
