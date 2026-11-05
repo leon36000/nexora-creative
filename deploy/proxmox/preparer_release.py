@@ -114,6 +114,7 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
     config_user.touch(mode=0o600, exist_ok=False)
     config_global.touch(mode=0o600, exist_ok=False)
     env = {'PATH': '/usr/local/bin:/usr/bin:/bin', 'HOME': str(home.resolve()),
+           'CC': '/usr/bin/gcc', 'CXX': '/usr/bin/g++',
            'NPM_CONFIG_USERCONFIG': str(config_user.resolve()),
            'NPM_CONFIG_GLOBALCONFIG': str(config_global.resolve())}
     for component in ('app', 'mode-studio'):

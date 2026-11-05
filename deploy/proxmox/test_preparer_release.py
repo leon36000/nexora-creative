@@ -55,6 +55,8 @@ class Preparation(unittest.TestCase):
             self.assertEqual(global_config.read_bytes(), b'')
             self.assertEqual(user_config.parent, release / 'home-build')
             self.assertEqual(global_config.parent, release / 'home-build')
+            self.assertEqual(opts['env']['CC'], '/usr/bin/gcc')
+            self.assertEqual(opts['env']['CXX'], '/usr/bin/g++')
             self.assertNotIn('NODE_OPTIONS', opts['env'])
 
     def test_echec_build_ne_cree_pas_marqueur_ni_ne_touche_application(self):
