@@ -106,11 +106,13 @@ export default function Detourage() {
   }, []);
 
   const calculer = useCallback(async (pts: Pt[], boite?: number[] | null) => {
+    const imageDemandee = Math.round((video.current?.currentTime ?? 0) * fps);
     const b64 = capturer(); if (!b64 || (!pts.length && !boite)) { setMasque(null); return; }
     const mon = ++jeton.current;
     try {
       const r = await appel<{ masqueB64: string; aire: number; secondes: number }>('/apercu', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageB64: b64, points: pts, ...(boite ? { boite } : {}) }) });
-      if (mon === jeton.current) setMasque({ image: Math.round((video.current?.currentTime ?? 0) * fps), src: dateurMasque(r.masqueB64), aire: r.aire, s: r.secondes });
+      const imageActuelle = Math.round((video.current?.currentTime ?? 0) * fps);
+      if (mon === jeton.current && imageDemandee === imageActuelle) setMasque({ image: imageDemandee, src: dateurMasque(r.masqueB64), aire: r.aire, s: r.secondes });
     } catch (e) { if (mon === jeton.current) toast(e instanceof Error ? e.message : 'aperçu impossible', true); }
   }, [capturer, fps]);
 
@@ -130,7 +132,7 @@ export default function Detourage() {
     const b = { ...boites }; delete b[image]; setBoites(b);
     setTrouves(null); setMasque(null);
   }
-  useEffect(() => { setMasque(null); if (points.length || boites[image]) void calculer(points, boites[image]); /* image changée : recalcul */ // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { jeton.current++; setMasque(null); if (points.length || boites[image]) void calculer(points, boites[image]); /* image changée : recalcul */ // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image]);
 
   /** Sélection par un mot (en anglais) : SAM 3.1 renvoie les objets trouvés, à choisir d'un clic. */
