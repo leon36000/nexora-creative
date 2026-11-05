@@ -6,7 +6,8 @@ python3 -m coverage run --parallel-mode --branch marketing/creative/video-v7/cha
 python3 -m coverage run --parallel-mode --branch recherche/30-annexes/finish-banc/verifier_paquet.py > "$V7_CI_ROOT/finish-verification-couverture.log" 2>&1 || status=1
 python3 -m coverage run --parallel-mode --branch -m unittest discover -s marketing/creative/video-v7/chaine/tests -p test_finish_ci.py -v > "$V7_CI_ROOT/finish-tests.log" 2>&1 || status=1
 PYTHONPATH=marketing/creative/video-v7/chaine python3 -m coverage run --parallel-mode --branch -m unittest discover -s marketing/creative/video-v7/chaine/tests -p test_assemblage_portable.py -v > "$V7_CI_ROOT/assemblage-tests.log" 2>&1 || status=1
-cat "$V7_CI_ROOT/tests.log" "$V7_CI_ROOT/finish-verification-couverture.log" "$V7_CI_ROOT/finish-tests.log" "$V7_CI_ROOT/assemblage-tests.log"
+python3 -m coverage run --parallel-mode --branch -m unittest discover -s outils/detourage/tests -p test_comparateur_alpha.py -v > "$V7_CI_ROOT/matte-tests.log" 2>&1 || status=1
+cat "$V7_CI_ROOT/tests.log" "$V7_CI_ROOT/finish-verification-couverture.log" "$V7_CI_ROOT/finish-tests.log" "$V7_CI_ROOT/assemblage-tests.log" "$V7_CI_ROOT/matte-tests.log"
 python3 -m coverage combine --keep > "$V7_CI_ROOT/coverage-combine.log" 2>&1 || status=1
 python3 -m coverage xml -o "$V7_CI_ROOT/coverage.xml" > "$V7_CI_ROOT/coverage-xml.log" 2>&1 || status=1
 cat "$V7_CI_ROOT/coverage-combine.log" "$V7_CI_ROOT/coverage-xml.log"
@@ -14,7 +15,7 @@ if ! python3 - "$V7_CI_ROOT/coverage.xml" <<'PY'
 import sys
 import xml.etree.ElementTree as ET
 
-names = {'ci_tests.py', 'banc_finish.py', 'profondeur_10bits.py', 'execution_bornee.py', 'verifier_paquet.py', 'assemblage_portable.py'}
+names = {'ci_tests.py', 'banc_finish.py', 'profondeur_10bits.py', 'execution_bornee.py', 'verifier_paquet.py', 'assemblage_portable.py', 'comparateur_alpha.py'}
 found, covered, total = set(), 0, 0
 for item in ET.parse(sys.argv[1]).iter('class'):
     name = item.get('filename', '').rsplit('/', 1)[-1]
@@ -29,10 +30,10 @@ for item in ET.parse(sys.argv[1]).iter('class'):
             fraction = line.get('condition-coverage').split('(')[-1].rstrip(')').split('/')
             file_covered += int(fraction[0]); file_total += int(fraction[1])
     covered += file_covered; total += file_total
-    if name == 'assemblage_portable.py':
+    if name in {'assemblage_portable.py', 'comparateur_alpha.py'}:
         if not file_total or file_covered / file_total < .85:
-            raise ValueError('Couverture des branches du harnais inférieure à 85 %')
-        print(f'Branches du harnais : {file_covered}/{file_total} = {file_covered/file_total:.1%}')
+            raise ValueError(f'Couverture des branches insuffisante : {name}')
+        print(f'Branches {name} : {file_covered}/{file_total} = {file_covered/file_total:.1%}')
 if found != names or not total:
     raise ValueError('Fichiers ou branches de couverture manquants')
 print(f'Branches du code nouveau : {covered}/{total} = {covered/total:.1%}')
