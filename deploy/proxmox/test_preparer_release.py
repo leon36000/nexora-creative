@@ -47,7 +47,7 @@ class Preparation(unittest.TestCase):
         self.assertEqual((release / 'BUILD_OK').read_text().strip(), sha)
         self.assertEqual(json.loads((release / 'SOURCE_FILES.json').read_text()),
                          ['app/dist/index.html', 'app/package.json', 'mode-studio/dist/index.html'])
-        for _, opts in appels:
+        for cmd, opts in appels:
             user_config = Path(opts['env']['NPM_CONFIG_USERCONFIG'])
             global_config = Path(opts['env']['NPM_CONFIG_GLOBALCONFIG'])
             self.assertNotEqual(user_config, global_config)
@@ -58,6 +58,10 @@ class Preparation(unittest.TestCase):
             self.assertEqual(opts['env']['CC'], '/usr/bin/gcc')
             self.assertEqual(opts['env']['CXX'], '/usr/bin/g++')
             self.assertNotIn('NODE_OPTIONS', opts['env'])
+            if opts['cwd'].name == 'mode-studio' and cmd[1] == 'ci':
+                self.assertEqual(opts['env']['ONNXRUNTIME_NODE_INSTALL_CUDA'], 'skip')
+            else:
+                self.assertNotIn('ONNXRUNTIME_NODE_INSTALL_CUDA', opts['env'])
 
     def test_echec_build_ne_cree_pas_marqueur_ni_ne_touche_application(self):
         path, sha = self.archive()

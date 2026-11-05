@@ -119,7 +119,10 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
            'NPM_CONFIG_GLOBALCONFIG': str(config_global.resolve())}
     for component in ('app', 'mode-studio'):
         for cmd in (['npm', 'ci', '--no-audit', '--no-fund'], ['npm', 'run', 'build']):
-            runner(cmd, cwd=dossier / component, env=env, check=True)
+            npm_env = env
+            if component == 'mode-studio' and cmd[1] == 'ci':
+                npm_env = {**env, 'ONNXRUNTIME_NODE_INSTALL_CUDA': 'skip'}
+            runner(cmd, cwd=dossier / component, env=npm_env, check=True)
         if not (dossier / component / 'dist/index.html').is_file() or not (dossier / component / 'node_modules').is_dir():
             raise ValueError(f'build incomplet : {component}')
         dist = dossier / component / 'dist'
