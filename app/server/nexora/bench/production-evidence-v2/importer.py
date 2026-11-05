@@ -136,12 +136,14 @@ def _validate_identity(record: dict[str, Any]) -> tuple[str, str, str]:
     return team, record_id, family
 
 
-def _validate_review_and_corpus_fields(record: dict[str, Any]) -> None:
+def _validate_review_and_corpus_fields(record: dict[str, Any], family: str) -> None:
     if record["founder_review"] != {"status": "pending"}:
         raise EvidenceError("founder_review must remain pending")
     if record["memory_promotion"] != "none":
         raise EvidenceError("evidence records cannot promote memory")
     brief_id = record["amd2_brief_id"]
+    if family == "opsys" and brief_id is not None:
+        raise EvidenceError("OPSYS R1 records must keep amd2_brief_id null")
     if brief_id is not None and not (isinstance(brief_id, str) and AMD2_BRIEF_ID.fullmatch(brief_id)):
         raise EvidenceError("amd2_brief_id must be null or an AMD2-### id")
     corpus_sha = record["amd2_corpus_sha256"]
@@ -382,7 +384,7 @@ def _validate_lineage(lineage: Any, record_id: str, family: str) -> None:
 def validate_record(record: Any) -> dict[str, Any]:
     record = _validate_record_shape(record)
     team, record_id, family = _validate_identity(record)
-    _validate_review_and_corpus_fields(record)
+    _validate_review_and_corpus_fields(record, family)
     replaced = _validate_v1_replacement(record, team, record_id, family)
     _validate_artifacts(record["artifacts"], record["amd2_corpus_sha256"], replaced, team, family)
     _validate_seeds(record["seed_reconciliation"])
@@ -511,14 +513,20 @@ def _validate_opsys_pc1_receipt(receipt: Any) -> list[dict[str, Any]]:
     files = receipt.get("files")
     if not isinstance(files, list) or not files:
         raise EvidenceError("OPSYS pc1 archive receipt has no file hashes")
-    if receipt.get("assets") != len(files):
+    asset_count = receipt.get("assets")
+    if not isinstance(asset_count, int) or isinstance(asset_count, bool):
+        raise EvidenceError("OPSYS pc1 archive receipt asset count must be an integer")
+    if asset_count != len(files):
         raise EvidenceError("OPSYS pc1 archive receipt asset count is inconsistent")
     if any(not isinstance(item, dict) or not isinstance(item.get("sha256"), str)
            or not SHA256.fullmatch(item["sha256"])
            or not isinstance(item.get("size_bytes"), int) or isinstance(item.get("size_bytes"), bool)
            or item["size_bytes"] < 0 for item in files):
         raise EvidenceError("OPSYS pc1 archive receipt contains an invalid file entry")
-    if sum(item["size_bytes"] for item in files) != receipt.get("bytes"):
+    byte_count = receipt.get("bytes")
+    if not isinstance(byte_count, int) or isinstance(byte_count, bool):
+        raise EvidenceError("OPSYS pc1 archive receipt byte count must be an integer")
+    if sum(item["size_bytes"] for item in files) != byte_count:
         raise EvidenceError("OPSYS pc1 archive receipt byte count is inconsistent")
     return files
 

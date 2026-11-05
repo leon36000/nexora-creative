@@ -219,6 +219,40 @@ class TestImportEvidenceV2(unittest.TestCase):
         self.assertEqual(self.registry.read_bytes(), original)
         self.assertEqual(saved["record_sha256"], importer.record_digest(record))
 
+    def test_opsys_record_cannot_claim_an_existing_amd2_brief(self):
+        record = fixture_opsys_record(self.storage, self.repo)
+        real_corpus_path = (Path(__file__).resolve().parents[5]
+                            / "app/server/nexora/bench/corpus-amd-v2/corpus.json")
+        real_corpus = json.loads(real_corpus_path.read_text(encoding="utf-8"))
+        existing_id = real_corpus["briefs"][0]["id"]
+        self.assertTrue(importer.AMD2_BRIEF_ID.fullmatch(existing_id))
+        corpus_path = self.repo / "app/server/nexora/bench/corpus-amd-v2/corpus.json"
+        fixture_corpus = {"status": "fixture", "briefs": [{"id": existing_id}]}
+        corpus_bytes = json.dumps(fixture_corpus).encode()
+        corpus_path.write_bytes(corpus_bytes)
+        corpus_artifact = next(item for item in record["artifacts"] if item["kind"] == "amd2_corpus")
+        corpus_artifact.update({"sha256": hashlib.sha256(corpus_bytes).hexdigest(),
+                                "size_bytes": len(corpus_bytes)})
+        record["amd2_corpus_sha256"] = corpus_artifact["sha256"]
+        record["amd2_brief_id"] = existing_id
+        with self.assertRaisesRegex(importer.EvidenceError, "OPSYS R1 records must keep amd2_brief_id null"):
+            importer.validate_record(record)
+
+    def test_opsys_pc1_receipt_counts_reject_booleans(self):
+        receipt = {
+            "host": "pc1", "verified": True,
+            "infrastructure": "/run/media/pc1/Infrastructure/NexoraStudioWork/ArchivesNexora/fixture",
+            "assets": 1, "bytes": 1,
+            "files": [{"sha256": "a" * 64, "size_bytes": 1}],
+        }
+        self.assertEqual(importer._validate_opsys_pc1_receipt(receipt), receipt["files"])
+        for field, message in (("assets", "asset count must be an integer"),
+                               ("bytes", "byte count must be an integer")):
+            with self.subTest(field=field):
+                malformed = dict(receipt, **{field: True})
+                with self.assertRaisesRegex(importer.EvidenceError, message):
+                    importer._validate_opsys_pc1_receipt(malformed)
+
     def test_registry_reads_v7_migration_and_opsys_creation_without_mixing_lineage(self):
         v7 = fixture_record(self.storage, self.repo)
         importer.import_record(v7, self.registry, self.storage, self.repo)
