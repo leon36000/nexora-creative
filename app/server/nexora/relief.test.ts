@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Document, NodeIO } from '@gltf-transform/core';
 import { unzipSync } from 'fflate';
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { analyser, cartesPbr, cibleTriangles, cleArete, decimerGlb, exporter, lireGlb, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
 
 /** Sphère UV (étanche une fois les sommets soudés), avec une texture 1×1 PNG. */
@@ -125,6 +126,7 @@ describe('Nexora Mesh : exports', () => {
     const m = await lireGlb(await glbSphere(8));
     const stl = versStl(m);
     expect(stl.length).toBe(84 + 50 * (m.indices.length / 3));
+    expect(new TextDecoder().decode(stl.subarray(0, 80)).replace(/\0+$/, '')).toBe(NEXORA_PRODUCT_NAMES.mesh);
     expect(new DataView(stl.buffer).getUint32(80, true)).toBe(m.indices.length / 3);
     let max = -Infinity, min = Infinity;
     const dv = new DataView(stl.buffer);
@@ -138,11 +140,13 @@ describe('Nexora Mesh : exports', () => {
     expect(Object.keys(z).sort()).toEqual(['3D/3dmodel.model', '[Content_Types].xml', '_rels/.rels']);
     const xml = new TextDecoder().decode(z['3D/3dmodel.model']);
     expect(xml).toContain('unit="millimeter"');
+    expect(xml).toContain(`<metadata name="Application">${NEXORA_PRODUCT_NAMES.mesh}</metadata>`);
     expect((xml.match(/<triangle /g) ?? []).length).toBe(m.indices.length / 3);
   });
   it('OBJ : un zip avec .obj, .mtl et la texture', async () => {
     const z = unzipSync(await exporter(await glbSphere(8), 'obj', { nom: 'balle' }));
     expect(Object.keys(z).sort()).toEqual(['balle.mtl', 'balle.obj', 'balle.png']);
+    expect(new TextDecoder().decode(z['balle.obj'])).toContain(`# ${NEXORA_PRODUCT_NAMES.mesh} : balle`);
     expect(new TextDecoder().decode(z['balle.mtl'])).toContain('map_Kd balle.png');
   });
   it('USDZ : zip non compressé, chaque fichier aligné sur 64 octets, USDA lisible', async () => {

@@ -1,9 +1,11 @@
 /**
  * Nom du mode 3D de Nexora Creative : UN seul endroit. Le nom actuel est « Nexora Mesh » (ancien nom « Relief »,
- * ancré à l'origine sur l'app Object) ; pour rebaptiser le produit, il suffit de modifier PRODUIT_3D (et, si l'adresse
- * change, ROUTE_3D). L'interface, les outils MCP et les messages du serveur le lisent ici, en français et en anglais.
+ * ancré à l'origine sur l'app Object) ; son nom vient de la source centrale `shared/productNames.ts`. PRODUIT_3D reste
+ * l'alias consommé par l'interface, le serveur et les outils MCP ; ROUTE_3D garde l'adresse technique.
  */
-export const PRODUIT_3D = 'Nexora Mesh';
+import { NEXORA_PRODUCT_NAMES } from '../shared/productNames.js';
+
+export const PRODUIT_3D = NEXORA_PRODUCT_NAMES.mesh;
 /** Forme courte pour des noms de fichiers ou un shotName (jamais affichée telle quelle). */
 export const PRODUIT_3D_SLUG = 'mesh';
 /** Adresse du mode ; `/relief` (ancien nom) et `/object` (origine) restent des alias pour les anciens liens. */
