@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import stat
+import subprocess
 import sys
 import tempfile
 import threading
@@ -18,7 +19,7 @@ class Encoder(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix='test-encoder-')
         self.root = Path(self.tmp.name)
-        self.old = {k: getattr(ep, k) for k in ('FICHIER_JETON', 'RACINE', 'FFMPEG', 'FFPROBE', 'TAILLE_MAX', 'DELAI_S', 'H264_VALIDE', 'HEVC_VALIDE')}
+        self.old = {k: getattr(ep, k) for k in ('FICHIER_JETON', 'RACINE', 'FFMPEG', 'FFPROBE', 'TAILLE_MAX', 'PLAFOND_ESSAIS', 'DELAI_S', 'H264_VALIDE', 'HEVC_VALIDE')}
         ep.H264_VALIDE = ep.HEVC_VALIDE = True
         token = self.root/'jeton'
         token.write_text('jeton-test-encoder\n')
@@ -168,7 +169,7 @@ pathlib.Path(sys.argv[-1]).write_bytes(b'VIDEO-PARTIELLE')
 sys.exit(1)
 """))
         self.assertEqual(self.post(b'VIDEO-SOURCE').status_code,422)
-        dossiers = list(Path(ep.RACINE).iterdir())
+        dossiers = list(Path(ep.RACINE).glob('enc-*'))
         self.assertEqual(len(dossiers), 1)
         self.assertEqual((dossiers[0]/'entree-0').read_bytes(), b'VIDEO-SOURCE')
         self.assertEqual((dossiers[0]/'sortie.mp4').read_bytes(), b'VIDEO-PARTIELLE')
@@ -176,10 +177,92 @@ sys.exit(1)
         self.assertNotIn(b'jeton-test-encoder', b''.join(p.read_bytes() for p in dossiers[0].iterdir()))
         self.propre()
 
+    def test_quota_refuse_avant_reception_et_preserve_essais(self):
+        ep.TAILLE_MAX = 100
+        ep.PLAFOND_ESSAIS = '205'
+        root = Path(ep.RACINE)
+        root.mkdir()
+        ancien = root/'essai-existant.mp4'
+        ancien.write_bytes(b'123456')
+        self.assertEqual(self.post(b'nouveau').status_code, 507)
+        self.assertEqual(ancien.read_bytes(), b'123456')
+        self.assertEqual(list(root.glob('enc-*')), [])
+        self.propre()
+
+    def test_plafond_invalide_et_lien_refusent_admission(self):
+        root = Path(ep.RACINE)
+        root.mkdir()
+        ep.PLAFOND_ESSAIS = 'invalide'
+        self.assertEqual(self.post().status_code, 503)
+        ep.PLAFOND_ESSAIS = str(20 * 2**30)
+        (root/'lien').symlink_to(self.root/'absent')
+        self.assertEqual(self.post().status_code, 503)
+        self.assertEqual(list(root.glob('enc-*')), [])
+        self.propre()
+
+    def test_verrou_entre_processus_refuse_sans_nouvel_essai(self):
+        root = Path(ep.RACINE)
+        root.mkdir()
+        script = "import fcntl,os,sys; f=os.open(sys.argv[1],os.O_RDWR|os.O_CREAT,0o600); fcntl.flock(f,fcntl.LOCK_EX); print('ok',flush=True); sys.stdin.read(1)"
+        p = subprocess.Popen([sys.executable, '-c', script, str(root/'.encoder.lock')], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        try:
+            self.assertEqual(p.stdout.readline(), b'ok\n')
+            self.assertEqual(self.post().status_code, 429)
+            self.assertEqual(list(root.glob('enc-*')), [])
+        finally:
+            p.stdin.close()
+            p.wait(timeout=5)
+            p.stdout.close()
+        self.propre()
+
+    def test_limite_exacte_est_admise(self):
+        ep.TAILLE_MAX = 100
+        ep.PLAFOND_ESSAIS = '206'
+        root = Path(ep.RACINE)
+        root.mkdir()
+        (root/'ancien').write_bytes(b'123456')
+        fd = ep.admettre_essai()
+        os.close(fd)
+        self.assertEqual((root/'ancien').read_bytes(), b'123456')
+
+    def test_enfant_encodeur_herite_du_verrou(self):
+        marqueur = self.root/'demarre'
+        script = self.script('attente', "import pathlib,sys,time; pathlib.Path(sys.argv[1]).write_text('ok'); time.sleep(.3)")
+        async def verifier():
+            fd = ep.admettre_essai()
+            travail = asyncio.create_task(ep.programme([script, str(marqueur)], limite_fichier=100, verrou_fd=fd))
+            try:
+                for _ in range(100):
+                    if marqueur.exists():
+                        break
+                    await asyncio.sleep(.01)
+                self.assertTrue(marqueur.exists())
+                os.close(fd)
+                fd = None
+                with self.assertRaises(ep.HTTPException) as erreur:
+                    ep.admettre_essai()
+                self.assertEqual(erreur.exception.status_code, 429)
+                await travail
+                fd2 = ep.admettre_essai()
+                os.close(fd2)
+            finally:
+                if fd is not None:
+                    os.close(fd)
+                await travail
+        asyncio.run(verifier())
+
+    def test_limite_systeme_preserve_sortie_partielle(self):
+        fichier = self.root/'fragment.mp4'
+        ecrivain = self.script('ecrivain', "import pathlib,sys; pathlib.Path(sys.argv[1]).write_bytes(b'x'*100)")
+        with self.assertRaises(ep.HTTPException):
+            asyncio.run(ep.programme([ecrivain, str(fichier)], limite_fichier=32))
+        self.assertEqual(fichier.stat().st_size, 32)
+        self.assertEqual(fichier.read_bytes(), b'x'*32)
+
     def test_sortie_trop_grosse(self):
         ep.TAILLE_MAX=25  # options 2 + input24 <=26 : réduit après réception dans le faux ffmpeg via sortie ?
         # La limite compte les options et les fichiers ; entrée23+{}2=25, sortie29 >25.
-        self.assertEqual(self.post(b'V'*23).status_code,413)
+        self.assertEqual(self.post(b'V'*23).status_code,422)
         self.propre()
 
 

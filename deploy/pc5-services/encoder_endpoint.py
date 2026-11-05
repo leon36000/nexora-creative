@@ -5,11 +5,14 @@ seekables pour MP4 non fragmenté, sortie MP4 validée avant de commencer la ré
 Un seul travail (upload compris) par processus ; déployer avec UN worker uvicorn.
 """
 import asyncio
+import fcntl
 import hmac
 import json
 import math
 import os
 import shutil
+import stat
+import sys
 import tempfile
 import threading
 from pathlib import Path
@@ -27,9 +30,52 @@ GPU = os.environ.get('NEXORA_ENCODER_GPU', '0')  # index visible ; service audio
 H264_VALIDE = os.environ.get('NEXORA_ENCODER_H264_VALIDE') == '1'
 HEVC_VALIDE = os.environ.get('NEXORA_ENCODER_HEVC_VALIDE') == '1'
 TAILLE_MAX = 512 * 2**20
+# Limite logique des essais, pas quota de blocs du système de fichiers.
+PLAFOND_ESSAIS = os.environ.get('NEXORA_ENCODER_PLAFOND_ESSAIS', str(20 * 2**30))
 DUREE_MAX_S = 600
 DELAI_S = 180
 VERROU = threading.BoundedSemaphore(1)
+
+
+def taille_essais(racine):
+    """Compte prudemment tous les fichiers, sans suivre les liens ni ignorer une erreur."""
+    total = 0
+    a_visiter = [racine]
+    while a_visiter:
+        with os.scandir(a_visiter.pop()) as entries:
+            for entry in entries:
+                st = entry.stat(follow_symlinks=False)
+                if stat.S_ISDIR(st.st_mode):
+                    a_visiter.append(entry.path)
+                elif stat.S_ISREG(st.st_mode):
+                    total += st.st_size
+                else:
+                    raise OSError('type de fichier non pris en charge')
+    return total
+
+
+def admettre_essai():
+    """Sérialise les admissions des instances coopérantes jusqu'à la fin du travail."""
+    Path(RACINE).mkdir(parents=True, exist_ok=True, mode=0o700)
+    fd = os.open(Path(RACINE)/'.encoder.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise HTTPException(429, 'stockage occupe / storage busy')
+        try:
+            plafond = int(PLAFOND_ESSAIS)
+        except (ValueError, TypeError):
+            raise HTTPException(503, 'plafond invalide / invalid storage limit')
+        reserve = 2 * TAILLE_MAX
+        if plafond < reserve or taille_essais(RACINE) + reserve > plafond:
+            raise HTTPException(507, 'plafond des essais atteint / trial storage limit reached')
+        if shutil.disk_usage(RACINE).free < reserve + 256*2**20:
+            raise HTTPException(507, 'espace insuffisant / insufficient disk space')
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
 
 
 def verifier_jeton(authorization):
@@ -44,10 +90,13 @@ def verifier_jeton(authorization):
         raise HTTPException(401, 'jeton invalide / invalid token')
 
 
-async def programme(args, *, sortie=False):
+async def programme(args, *, sortie=False, limite_fichier=None, verrou_fd=None):
     """Pas de shell ; annulation et délai ne tuent que notre propre enfant."""
+    if limite_fichier is not None:
+        # La limite est installée avant exec : -fs de ffmpeg seul peut dépasser sa cible.
+        args = [sys.executable, '-c', 'import os,resource,sys; n=int(sys.argv[1]); resource.setrlimit(resource.RLIMIT_FSIZE,(n,n)); os.execvp(sys.argv[2],sys.argv[2:])', str(limite_fichier), *args]
     p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE if sortie else asyncio.subprocess.DEVNULL,
-                                             stderr=asyncio.subprocess.DEVNULL)
+                                             stderr=asyncio.subprocess.DEVNULL, pass_fds=(verrou_fd,) if verrou_fd is not None else ())
     try:
         async with asyncio.timeout(DELAI_S):
             if sortie:
@@ -267,12 +316,11 @@ def installer(app, verrou_gpu=None):
         if not VERROU.acquire(blocking=False):
             raise HTTPException(429, 'encodeur occupe / encoder busy')
         dossier = None
+        verrou_stockage = None
         reception = None
         rendu = False
         try:
-            Path(RACINE).mkdir(parents=True, exist_ok=True, mode=0o700)
-            if shutil.disk_usage(RACINE).free < 2*TAILLE_MAX + 256*2**20:
-                raise HTTPException(507, 'espace insuffisant / insufficient disk space')
+            verrou_stockage = admettre_essai()
             dossier = Path(tempfile.mkdtemp(prefix='enc-', dir=RACINE))
             typ, opts = parse_options_header(request.headers.get('content-type', ''))
             boundary = opts.get(b'boundary', b'')
@@ -306,7 +354,7 @@ def installer(app, verrou_gpu=None):
             if verrou_gpu is not None and not verrou_gpu.acquire(blocking=False):
                 raise HTTPException(429, 'gpu occupe / GPU busy')
             try:
-                await programme(args)
+                await programme(args, limite_fichier=TAILLE_MAX, verrou_fd=verrou_stockage)
             finally:
                 if verrou_gpu is not None:
                     verrou_gpu.release()
@@ -331,6 +379,7 @@ def installer(app, verrou_gpu=None):
                         while chunk := f.read(256*1024):
                             yield chunk
                 finally:
+                    os.close(verrou_stockage)
                     VERROU.release()
             response = StreamingResponse(flux(), media_type='video/mp4', headers={
                 'Content-Length': str(sortie.stat().st_size), 'X-Nexora-Encodeur': codec,
@@ -348,4 +397,6 @@ def installer(app, verrou_gpu=None):
             if reception:
                 reception.fermer()
             if not rendu:
+                if verrou_stockage is not None:
+                    os.close(verrou_stockage)
                 VERROU.release()
