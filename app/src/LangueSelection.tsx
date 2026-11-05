@@ -12,9 +12,9 @@ export function LangueSelection({ mode, langue, libelle, occupe, filmPartiel, ch
   const bloque = mode === 'film' && (occupe || filmPartiel);
   return <div className="st-bloc">
     <span className="st-etiq">{nom}</span>
-    <div className="st-seg" role="group" aria-label={nom}>
+    <fieldset className="st-seg" aria-label={nom}>
       <button type="button" className={langue === 'fr' ? 'on' : ''} aria-pressed={langue === 'fr'} disabled={bloque} onClick={() => choisir('fr')}>Français</button>
       <button type="button" className={langue === 'en' ? 'on' : ''} aria-pressed={langue === 'en'} disabled={bloque} onClick={() => choisir('en')}>English</button>
-    </div>
+    </fieldset>
   </div>;
 }
