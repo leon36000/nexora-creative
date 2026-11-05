@@ -15,10 +15,12 @@ import { controlerFichier } from './controle.js';
 import { choisirCandidat, jugerCandidats, plancheDataUrl } from './juge.js';
 import type { CreditsPrise } from './credits.js';
 import { resoudrePersonnages } from './personnagesCast.js';
-import { convertirEnPromptRef } from './personnages.js';
 import { argsAssemblage, argsAvecMusique, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
+import { encoderSurGpu } from './encodageGpu.js';
+import { dossierFilmUnique, sansEcrasement } from './filmSorties.js';
+import { erreurAncrageMaxFilm } from './filmAncrage.js';
 
 export interface DepsFilm {
   queueTakes: (b: any, count: number) => Promise<number[]>;
@@ -47,6 +49,8 @@ export async function tournerFilm(
   },
   llm: ClientLlm | null,
 ): Promise<number> {
+  const erreurAncrage = erreurAncrageMaxFilm(opts.moteur, sb);
+  if (erreurAncrage) throw new Error(erreurAncrage);
   const filmId = takes.create({
     project_id: opts.projectId ?? null,
     kind: 'video',
@@ -64,7 +68,7 @@ export async function tournerFilm(
     // Personnages @ : un plan qui cite @nom part en Ref2VA (moteur cinéma) avec les images du personnage.
     const persos = await Promise.all(sb.plans.map((p, i) => (p.suite || p.take || opts.moteur !== 'h3-max' ? null : resoudrePersonnages(intentionDuPlan(sb, i)))));
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p), ...dialoguesDe(p) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, ...dialoguesDe(p) }, llm))),
     );
     for (let i = 0; i < sb.plans.length; i++) {
       const p = sb.plans[i];
@@ -76,7 +80,7 @@ export async function tournerFilm(
       }
       const corps = {
         ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son, qualite: opts.qualite }, ecrit.prompt, opts.moteur),
-        ...(persos[i]?.sujets.length ? { prompt: convertirEnPromptRef(ecrit.prompt, persos[i]!.sujets), refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
+        ...(persos[i]?.sujets.length ? { refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
         app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: ecrit.source,
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
@@ -107,6 +111,9 @@ const dureePlan = (p: PlanFilm) => (p.duree === 10 ? 243 : 124) / 24;
 async function lancerSuite(film: Take, i: number, precedent: string) {
   const s = reglages(film);
   const sb = s.storyboard as Storyboard;
+  const moteur = s.moteur ?? 'h3-fast';
+  const erreurAncrage = erreurAncrageMaxFilm(moteur, sb);
+  if (erreurAncrage) throw new Error(erreurAncrage);
   const p = sb.plans[i] as PlanFilm & { reservation?: CreditsPrise };
   const dossier = join(config.outputDir, 'films', 'images');
   mkdirSync(dossier, { recursive: true });
@@ -135,10 +142,12 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
       : `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
     mode: fin ? 'fl2va' : 'i2va',
     dureeS: dureePlan(p),
+    moteur,
+    format: s.format,
     ...dialoguesDe(p),
   }, deps.llmPour(org));
   const corps = {
-    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite }, ecrit.prompt, s.moteur ?? 'h3-fast'),
+    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite, image: jeton }, ecrit.prompt, moteur),
     startImage: jeton,
     ...(fin ? { endImage: fin } : {}),
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
@@ -238,6 +247,9 @@ async function etape(filmId: number) {
     if (m?.status === 'done' && m.output_path && existsSync(m.output_path)) s.musique = m.output_path;
     takes.patchSettings(filmId, { musique: s.musique ?? null });
   }
+  const dossier = join(config.outputDir, 'films');
+  mkdirSync(dossier, { recursive: true });
+  const dossierRendu = dossierFilmUnique(dossier, filmId);
   const cartons = (Array.isArray(s.cartons) ? s.cartons : []) as Carton[];
   const durees = sb.plans.map((p) => Number((p as any).controle?.duree) || dureePlan(p));
   if (cartons.length) {
@@ -247,10 +259,10 @@ async function etape(filmId: number) {
       const debut: string[] = [], fin: string[] = [];
       for (const [k, c] of cartons.entries()) {
         const dureeS = c.position === 'debut' ? 2 : 2.5;
-        const base = join(config.outputDir, 'films', `film_${filmId}_carton${k}`);
+        const base = join(dossierRendu, `carton${k}`);
         mkdirSync(join(config.outputDir, 'films'), { recursive: true });
-        writeFileSync(`${base}.ass`, fichierAss(c.texte, { w, h, dureeS }));
-        await new Promise<void>((ok, ko) => execFile(config.ffmpegBin, argsCarton(`${base}.ass`, `${base}.mp4`, { w, h, dureeS, son: !!s.son, dossierPolices: dossierPolices() }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
+        writeFileSync(`${base}.ass`, fichierAss(c.texte, { w, h, dureeS }), { flag: 'wx' });
+        await new Promise<void>((ok, ko) => execFile(config.ffmpegBin, sansEcrasement(argsCarton(`${base}.ass`, `${base}.mp4`, { w, h, dureeS, son: !!s.son, dossierPolices: dossierPolices() })), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
           err ? ko(new Error(`carton : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()));
         (c.position === 'debut' ? debut : fin).push(`${base}.mp4`);
         (c.position === 'debut' ? durees.unshift.bind(durees) : durees.push.bind(durees))(dureeS);
@@ -261,17 +273,17 @@ async function etape(filmId: number) {
   }
   takes.patchSettings(filmId, { assemblage: 'en_cours' });
   pousser(filmId);
-  const dossier = join(config.outputDir, 'films');
-  mkdirSync(dossier, { recursive: true });
-  const sortie = join(dossier, `film_${filmId}_${Date.now()}.mp4`);
+  const sortie = join(dossierRendu, 'film.mp4');
   const t0 = Date.now();
-  await new Promise<void>((ok, ko) =>
-    execFile(config.ffmpegBin, argsAssemblage(fichiers, sortie, !!s.son, {
-      transition: s.transition === 'fondu' ? 'fondu' : 'coupe',
-      durees,
-      fondu: 0.5,
-      ...(Array.isArray(s.taille) && s.taille.length === 2 ? { taille: [Number(s.taille[0]), Number(s.taille[1])] as [number, number] } : {}),
-    }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
+  const assemblage = {
+    transition: s.transition === 'fondu' ? 'fondu' as const : 'coupe' as const,
+    durees, fondu: 0.5, son: !!s.son,
+  };
+  const taille = Array.isArray(s.taille) && s.taille.length === 2
+    ? [Number(s.taille[0]), Number(s.taille[1])] as [number, number] : undefined;
+  const gpu = await encoderSurGpu(fichiers, sortie, { codec: 'h264', profil: 'livraison', taille, assemblage });
+  if (!gpu) await new Promise<void>((ok, ko) =>
+    execFile(config.ffmpegBin, sansEcrasement(argsAssemblage(fichiers, sortie, !!s.son, { ...assemblage, taille })), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
       err ? ko(new Error(`ffmpeg : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
   );
   let final = sortie;
@@ -280,7 +292,7 @@ async function etape(filmId: number) {
     final = sortie.replace(/\.mp4$/, '_musique.mp4');
     const duree = durees.reduce((n, d) => n + d, 0) - (s.transition === 'fondu' ? 0.5 * (fichiers.length - 1) : 0);
     await new Promise<void>((ok, ko) =>
-      execFile(config.ffmpegBin, argsAvecMusique(sortie, s.musique, final, { dureeS: duree, sonDuFilm: !!s.son }), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
+      execFile(config.ffmpegBin, sansEcrasement(argsAvecMusique(sortie, s.musique, final, { dureeS: duree, sonDuFilm: !!s.son })), { maxBuffer: 1 << 24 }, (err, _o, stderr) =>
         err ? ko(new Error(`ffmpeg (musique) : ${String(stderr).split('\n').slice(-3).join(' ')}`)) : ok()),
     );
   }

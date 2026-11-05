@@ -12,6 +12,7 @@ import { settingsOf, toast, useStore } from '../store';
 import { setParams } from '../router';
 import { MediaCard } from '../ui';
 import { IcEtincelle, IcRond, Ratio } from './icons';
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 
 const EXEMPLES = [
   'Une pub de 20 s pour ma boulangerie de quartier, verticale, avec musique.',
@@ -107,7 +108,7 @@ export default function Producteur({ onOuvrirFilm, objectif }: { onOuvrirFilm: (
       <aside className="st-composer pr-chat" aria-label="Conversation avec le Producteur">
         <div className="pr-tete">
           <div>
-            <span className="st-etiq">Producteur IA</span>
+            <span className="st-etiq">{NEXORA_PRODUCT_NAMES.producer}</span>
             <strong>{session?.titre && session.titre !== 'Nouvelle production' ? session.titre : 'Nouvelle production'}</strong>
           </div>
           <div className="st-ligne">

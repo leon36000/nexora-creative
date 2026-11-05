@@ -164,6 +164,13 @@ export const H3_DISTILLED_CHECKPOINTS: Record<string, { family: 'fl2va' | 'ref2v
   '10Eros_Max_h3_8stepTURBO_beta7_SingularityV2_ref2va_int8HQ.safetensors': { family: 'ref2va', steps: 8, shiftVideo: 12, shiftAudio: 3, sampler: 'euler' },
 };
 
+/** Allow only FL2VA checkpoints explicitly registered by the graph, excluding FastH3. */
+export function checkpointMaxFL2VAExplicite(checkpoint: unknown): boolean {
+  if (typeof checkpoint !== 'string' || !checkpoint || checkpoint === 'fastvideo_fasth3_8step_v2_pruned_nvfp4.safetensors') return false;
+  const known = H3_DISTILLED_CHECKPOINTS[checkpoint];
+  return checkpoint === H3_MODELS.fl2va || (known?.family === 'fl2va');
+}
+
 /** Frame counts must sit on the model's 17k+5 grid (5, 22, ..., 124, ..., 362). */
 export function snapH3Length(frames: number): number {
   const k = Math.round((frames - 5) / 17);
@@ -180,7 +187,9 @@ function useShiftSrc(
 }
 
 export function buildH3Graph(p: H3Params): Record<string, unknown> {
-  const useRef = !!p.refImages?.length || !!p.refMode;
+  if (p.refImages?.length && (p.startImage || p.endImage)) throw new Error('H3: explicit references cannot be combined with first/last frame anchors');
+  // Une image d’ancrage est une contrainte temporelle, pas une référence d’apparence.
+  const useRef = !!p.refImages?.length || (!!p.refMode && !p.startImage && !p.endImage);
   const family = useRef ? 'ref2va' : 'fl2va';
   // Checkpoint override is honored only within the correct model family —
   // an fl2va file can't drive the ref graph and vice versa.
@@ -269,8 +278,7 @@ export function buildH3Graph(p: H3Params): Record<string, unknown> {
   if (useRef) {
     // Reference mode: each ref is its own dynamic dotted input slot
     // (ref_images.ref_image_N), per the official r2v template wiring.
-    // Nexora : une photo de départ sur un point de contrôle ref2va devient la première référence (première image du plan).
-    const refs = (p.refImages?.length ? p.refImages : p.startImage ? [p.startImage] : []).slice(0, 4);
+    const refs = (p.refImages ?? []).slice(0, 4);
     refs.forEach((name, i) => {
       g[`ref${i}`] = { class_type: 'LoadImage', inputs: { image: name } };
       genInputs[`ref_images.ref_image_${i}`] = [`ref${i}`, 0];

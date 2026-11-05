@@ -2,8 +2,9 @@
  * Nexora Mesh (mode 3D de Nexora Creative ; ex-Relief, ex-Object) : tout ce qui travaille sur le maillage d'un GLB, côté serveur et sans GPU.
  * Lecture du GLB, contrôle (étanchéité, arêtes non-variété, composantes, nombre de triangles), décimation à un nombre de
  * triangles voulu (meshoptimizer), exports OBJ (+ MTL + texture), STL binaire, 3MF et USDZ. Tout est pur et testé sans moteur.
- * Nom du produit : src/produit3d.ts. Rapport : recherche/18 ; mesures : recherche/21.
+ * Nom du produit : shared/productNames.ts. Rapport : recherche/18 ; mesures : recherche/21.
  */
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { crc32 } from 'node:zlib';
 import { Document, NodeIO, type Primitive, type Transform } from '@gltf-transform/core';
 import { simplify, weld } from '@gltf-transform/functions';
@@ -45,7 +46,7 @@ export interface RapportMaillage {
   etanche: boolean;
   /** Boîte englobante (largeur, hauteur, profondeur) dans l'unité du modèle. */
   taille: [number, number, number];
-  /** Volume (unité³) si le maillage est étanche, sinon null. */
+  /** Volume (unité³) si une composante fermée et orientée de façon cohérente a un volume calculable ; null sinon. */
   volume: number | null;
   avertissements: string[];
 }
@@ -111,13 +112,22 @@ function sommetsSoudes(m: Maillage): Uint32Array {
   return sortie;
 }
 
+/** Identifie une arête non orientée : a et b sont des indices Uint32 dans [0, nombreSommets). */
+export function cleArete(a: number, b: number, nombreSommets: number): number | bigint {
+  const bas = Math.min(a, b), haut = Math.max(a, b);
+  // Tant que nombreSommets² reste dans les entiers exacts, une clé numérique est rapide.
+  // Au-delà, deux indices Uint32 restent représentables sans perte dans une clé BigInt.
+  if (nombreSommets <= 94_906_265) return bas * nombreSommets + haut;
+  return (BigInt(bas) << 32n) | BigInt(haut);
+}
+
 export function analyser(m: Maillage): RapportMaillage {
   const soude = sommetsSoudes(m);
   const nTri = m.indices.length / 3;
-  const aretes = new Map<number, number>();
-  const cle = (a: number, b: number) => (a < b ? a * 4_294_967_296 + b : b * 4_294_967_296 + a);
+  const aretes = new Map<number | bigint, number>();
   // union-find sur les sommets soudés
   const nbSoudes = soude.reduce((x, y) => (y > x ? y : x), 0) + 1;
+  const cle = (a: number, b: number) => cleArete(a, b, nbSoudes);
   const p = new Int32Array(nbSoudes).map((_, i) => i);
   const racine = (x: number): number => { while (p[x] !== x) { p[x] = p[p[x]]; x = p[x]; } return x; };
   let degeneres = 0;
@@ -130,15 +140,24 @@ export function analyser(m: Maillage): RapportMaillage {
     const vx = m.positions[ic] - m.positions[ia], vy = m.positions[ic + 1] - m.positions[ia + 1], vz = m.positions[ic + 2] - m.positions[ia + 2];
     const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
     if (a === b || b === c || a === c || nx * nx + ny * ny + nz * nz < 1e-18) { degeneres++; continue; }
-    for (const [x, y] of [[a, b], [b, c], [c, a]] as const) { const k = cle(x, y); aretes.set(k, (aretes.get(k) ?? 0) + 1); }
+    for (const [x, y] of [[a, b], [b, c], [c, a]] as const) {
+      const k = cle(x, y), sens = x < y ? 1 : -1, precedent = aretes.get(k);
+      if (precedent === undefined) aretes.set(k, sens);
+      else if (Math.abs(precedent) === 1) aretes.set(k, precedent === -sens ? 2 : -2);
+      else if (Math.abs(precedent) === 2) aretes.set(k, 3);
+    }
     utilises[a] = utilises[b] = utilises[c] = 1;
     p[racine(a)] = racine(b); p[racine(b)] = racine(c);
     volume6 += m.positions[ia] * (m.positions[ib + 1] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic + 1])
       - m.positions[ia + 1] * (m.positions[ib] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic])
       + m.positions[ia + 2] * (m.positions[ib] * m.positions[ic + 1] - m.positions[ib + 1] * m.positions[ic]);
   }
-  let ouvertes = 0, nonVariete = 0;
-  for (const n of aretes.values()) { if (n === 1) ouvertes++; else if (n > 2) nonVariete++; }
+  let ouvertes = 0, nonVariete = 0, orientationIncoherente = false;
+  for (const etat of aretes.values()) {
+    if (Math.abs(etat) === 1) ouvertes++;
+    else if (Math.abs(etat) === 3) nonVariete++;
+    else if (etat === -2) orientationIncoherente = true;
+  }
   const racines = new Set<number>();
   for (let i = 0; i < nbSoudes; i++) if (utilises[i]) racines.add(racine(i));
   const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
@@ -149,12 +168,14 @@ export function analyser(m: Maillage): RapportMaillage {
   if (ouvertes > 0) avertissements.push(`${ouvertes} arêtes ouvertes : le modèle n’est pas étanche (impression 3D : à réparer).`);
   if (nonVariete > 0) avertissements.push(`${nonVariete} arêtes partagées par plus de deux faces (non-variété).`);
   if (degeneres > 0) avertissements.push(`${degeneres} triangles dégénérés.`);
+  if (etanche && orientationIncoherente) avertissements.push('Volume non calculé : orientation incohérente des faces.');
+  if (etanche && racines.size > 1) avertissements.push('Volume non calculé : plusieurs composantes fermées peuvent représenter des solides distincts ou des cavités imbriquées.');
   if (racines.size > 1) avertissements.push(`${racines.size} morceaux séparés (fragments flottants possibles).`);
   return {
     sommets: m.positions.length / 3, triangles: nTri, degeneres, aretesOuvertes: ouvertes, aretesNonVariete: nonVariete,
     composantes: racines.size, etanche,
     taille: nTri ? [max[0] - min[0], max[1] - min[1], max[2] - min[2]] : [0, 0, 0],
-    volume: etanche ? Math.abs(volume6) / 6 : null, avertissements,
+    volume: etanche && racines.size === 1 && !orientationIncoherente ? Math.abs(volume6) / 6 : null, avertissements,
   };
 }
 
@@ -235,7 +256,7 @@ export function zipAligne(fichiers: { nom: string; octets: Uint8Array }[]): Uint
 
 export function versObj(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   const nom = nomSur(opt.nom);
-  const lignes: string[] = [`# Nexora Mesh : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
+  const lignes: string[] = [`# ${NEXORA_PRODUCT_NAMES.mesh} : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
   const n = m.positions.length / 3;
   for (let i = 0; i < n; i++) lignes.push(`v ${f(m.positions[3 * i])} ${f(m.positions[3 * i + 1])} ${f(m.positions[3 * i + 2])}`);
   if (m.uvs) for (let i = 0; i < n; i++) lignes.push(`vt ${f(m.uvs[2 * i])} ${f(1 - m.uvs[2 * i + 1])}`);
@@ -258,7 +279,7 @@ export function versStl(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   const nTri = m.indices.length / 3;
   const tampon = new ArrayBuffer(84 + 50 * nTri);
   const vue = new DataView(tampon);
-  new Uint8Array(tampon).set(strToU8('Nexora Mesh'), 0);
+  new Uint8Array(tampon).set(strToU8(NEXORA_PRODUCT_NAMES.mesh), 0);
   vue.setUint32(80, nTri, true);
   let o = 84;
   for (let t = 0; t < nTri; t++) {
@@ -279,7 +300,7 @@ export function vers3mf(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   for (let i = 0; i < p.length; i += 3) sommets.push(`<vertex x="${f(p[i])}" y="${f(p[i + 1])}" z="${f(p[i + 2])}"/>`);
   const triangles: string[] = [];
   for (let t = 0; t < m.indices.length; t += 3) triangles.push(`<triangle v1="${m.indices[t]}" v2="${m.indices[t + 1]}" v3="${m.indices[t + 2]}"/>`);
-  const modele = `<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="fr-FR" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">${nomSur(opt.nom)}</metadata><metadata name="Application">Nexora Mesh</metadata><resources><object id="1" type="model"><mesh><vertices>${sommets.join('')}</vertices><triangles>${triangles.join('')}</triangles></mesh></object></resources><build><item objectid="1"/></build></model>`;
+  const modele = `<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="fr-FR" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">${nomSur(opt.nom)}</metadata><metadata name="Application">${NEXORA_PRODUCT_NAMES.mesh}</metadata><resources><object id="1" type="model"><mesh><vertices>${sommets.join('')}</vertices><triangles>${triangles.join('')}</triangles></mesh></object></resources><build><item objectid="1"/></build></model>`;
   return zipSync({
     '[Content_Types].xml': strToU8('<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>'),
     '_rels/.rels': strToU8('<?xml version="1.0" encoding="UTF-8"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>'),

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { Document, NodeIO } from '@gltf-transform/core';
 import { unzipSync } from 'fflate';
-import { analyser, cartesPbr, cibleTriangles, decimerGlb, exporter, lireGlb, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
+import { analyser, cartesPbr, cibleTriangles, cleArete, decimerGlb, exporter, lireGlb, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
 
 /** Sphère UV (étanche une fois les sommets soudés), avec une texture 1×1 PNG. */
 async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
@@ -30,6 +31,27 @@ async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
 }
 
 describe('Nexora Mesh : contrôle du maillage', () => {
+  it('distingue les arêtes des grands maillages et ignore leur orientation', () => {
+    const a = 2 ** 21, b = a + 3, n = a + 10;
+    expect(cleArete(a, b, n)).not.toBe(cleArete(a, b + 1, n));
+    expect(cleArete(a, b, n)).toBe(cleArete(b, a, n));
+    for (const limite of [94_906_265, 94_906_266, 2 ** 32]) {
+      expect(cleArete(limite - 3, limite - 2, limite)).not.toBe(cleArete(limite - 3, limite - 1, limite));
+      expect(cleArete(limite - 3, limite - 1, limite)).toBe(cleArete(limite - 1, limite - 3, limite));
+    }
+    const grand = 100_000_000;
+    expect(cleArete(grand - 3, grand - 2, grand)).not.toBe(cleArete(grand - 3, grand - 1, grand));
+    for (let taille = 2; taille <= 15; taille++) {
+      const cles = new Set<number | bigint>();
+      for (let x = 0; x < taille; x++) for (let y = x + 1; y < taille; y++) {
+        const cle = cleArete(x, y, taille);
+        expect(cle).toBe(cleArete(y, x, taille));
+        expect(cles.has(cle)).toBe(false);
+        cles.add(cle);
+      }
+      expect(cles.size).toBe(taille * (taille - 1) / 2);
+    }
+  });
   it('une sphère UV : un seul morceau, 2 de haut, triangles écrasés des pôles comptés', async () => {
     const m = await lireGlb(await glbSphere());
     const r = analyser(m);
@@ -50,6 +72,35 @@ describe('Nexora Mesh : contrôle du maillage', () => {
     expect(r.etanche).toBe(true);
     expect(r.volume).toBeCloseTo(1 / 6, 6);
     expect(r.composantes).toBe(1);
+  });
+  it('refuse le volume d’un tétraèdre fermé dont une face est inversée', () => {
+    const positions = Float32Array.from([2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3]);
+    const faces = [0, 2, 1, 0, 1, 3, 0, 3, 2, 1, 2, 3];
+    const propre = analyser({ positions, uvs: null, indices: Uint32Array.from(faces), couleur: null });
+    expect(propre.volume).toBeCloseTo(1 / 6, 6);
+    const indices = [...faces];
+    [indices[1], indices[2]] = [indices[2], indices[1]];
+    const r = analyser({ positions, uvs: null, indices: Uint32Array.from(indices), couleur: null });
+    expect(r.etanche).toBe(true);
+    expect(r.aretesOuvertes).toBe(0);
+    expect(r.aretesNonVariete).toBe(0);
+    expect(r.volume).toBeNull();
+    expect(r.avertissements).toContain('Volume non calculé : orientation incohérente des faces.');
+  });
+  it('ne donne pas un volume physique ambigu pour plusieurs coquilles fermées', () => {
+    const tetra = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]];
+    const faces = [0, 2, 1, 0, 1, 3, 0, 3, 2, 1, 2, 3];
+    const positions = Float32Array.from([...tetra.flat(), ...tetra.map(([x, y, z]) => [x + 3, y, z]).flat()]);
+    const indices = [...faces];
+    for (let i = 0; i < faces.length; i += 3) {
+      const [a, b, c] = faces.slice(i, i + 3);
+      indices.push(4 + a, 4 + c, 4 + b); // second tetrahedron orienté à l'inverse
+    }
+    const r = analyser({ positions, uvs: null, indices: Uint32Array.from(indices), couleur: null });
+    expect(r.etanche).toBe(true);
+    expect(r.composantes).toBe(2);
+    expect(r.volume).toBeNull();
+    expect(r.avertissements).toContain('Volume non calculé : plusieurs composantes fermées peuvent représenter des solides distincts ou des cavités imbriquées.');
   });
 });
 
@@ -75,6 +126,7 @@ describe('Nexora Mesh : exports', () => {
     const m = await lireGlb(await glbSphere(8));
     const stl = versStl(m);
     expect(stl.length).toBe(84 + 50 * (m.indices.length / 3));
+    expect(new TextDecoder().decode(stl.subarray(0, 80)).replace(/\0+$/, '')).toBe(NEXORA_PRODUCT_NAMES.mesh);
     expect(new DataView(stl.buffer).getUint32(80, true)).toBe(m.indices.length / 3);
     let max = -Infinity, min = Infinity;
     const dv = new DataView(stl.buffer);
@@ -88,11 +140,13 @@ describe('Nexora Mesh : exports', () => {
     expect(Object.keys(z).sort()).toEqual(['3D/3dmodel.model', '[Content_Types].xml', '_rels/.rels']);
     const xml = new TextDecoder().decode(z['3D/3dmodel.model']);
     expect(xml).toContain('unit="millimeter"');
+    expect(xml).toContain(`<metadata name="Application">${NEXORA_PRODUCT_NAMES.mesh}</metadata>`);
     expect((xml.match(/<triangle /g) ?? []).length).toBe(m.indices.length / 3);
   });
   it('OBJ : un zip avec .obj, .mtl et la texture', async () => {
     const z = unzipSync(await exporter(await glbSphere(8), 'obj', { nom: 'balle' }));
     expect(Object.keys(z).sort()).toEqual(['balle.mtl', 'balle.obj', 'balle.png']);
+    expect(new TextDecoder().decode(z['balle.obj'])).toContain(`# ${NEXORA_PRODUCT_NAMES.mesh} : balle`);
     expect(new TextDecoder().decode(z['balle.mtl'])).toContain('map_Kd balle.png');
   });
   it('USDZ : zip non compressé, chaque fichier aligné sur 64 octets, USDA lisible', async () => {

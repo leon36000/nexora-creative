@@ -73,6 +73,12 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     source: t.source ?? null, fichiers: t.fichiers, devis: t.devis ?? null, credits: t.credits ? { credits: t.credits.credits, etat: t.credits.etat } : null,
     mesures: t.mesures ?? null, sorties: t.sorties ?? null, params: t.params ?? null, moteur: t.moteurId,
   });
+  const verifierMoteurRapide = (t: ReturnType<Detourage['obtenir']>) => {
+    const moteur = deps.moteurs().find((m) => m.id === t.moteurId);
+    if (!moteur || !moteurPour([moteur], 'rapide')) {
+      throw new ErreurDetourage('Le moteur rapide de ce travail n’est pas disponible.', 503);
+    }
+  };
 
   const P = '/api/nexora/detourage';
 
@@ -83,10 +89,10 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     let sante: Record<string, unknown> | null = null;
     if (rapide) sante = await clientDe(rapide.id)?.sante().catch(() => null) ?? null;
     return {
-      rapide: { disponible: !!sante, moteur: rapide ? { id: rapide.id, nom: rapide.nom } : null, modeles: sante?.modeles ?? null,
+      rapide: { disponible: sante?.ok === true, moteur: rapide ? { id: rapide.id, nom: rapide.nom } : null, modeles: sante?.modeles ?? null,
         description: 'SAM 3.1 (sélection par clics, boîte ou mot, suivi) + ViTMatte (bords) + stabilisation par flux optique' },
-      pro: { disponible: !!pro, moteur: pro ? { id: pro.id, nom: pro.nom } : null,
-        description: 'LTX-2.5 Alpha-Gen (cheveux, fumée, verre) : poids installés sur pc3, pas encore branché à Creative' },
+      pro: { disponible: false, moteur: pro ? { id: pro.id, nom: pro.nom } : null,
+        description: 'Détourage avancé indisponible actuellement.' },
       limites: { secondesMax: SECONDES_MAX(), largeurMax: 3840, sourceOctetsMax: MAX_SOURCE },
       sorties: ['alpha PNG 16 bits', 'RGBA PNG 16 bits (avant-plan estimé)', 'EXR demi-flottant ZIP (premultiplié, linéaire)', 'EXR alpha', 'ProRes 4444', 'WebM VP9 alpha', 'matte', 'composite sur nouveau fond'],
       tarif: deps.nexora ? tarifDepuisEnv() : null,
@@ -126,6 +132,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
 
   app.post(`${P}/travaux`, async (req, reply) => garde(reply, async () => {
     const b = (req.body ?? {}) as { nom?: string; palier?: string };
+    if (b.palier === 'pro') throw new ErreurDetourage('Le détourage pro n’est pas encore disponible.', 503);
     const { org, user } = qui();
     return vue(detourage.creer(org, user, String(b.nom ?? ''), b.palier === 'pro' ? 'pro' : 'rapide'));
   }));
@@ -158,7 +165,8 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     const lu = ParamsSchema.safeParse(req.body);
     if (!lu.success) throw new ErreurDetourage(lu.error.issues.map((i) => `${i.path.join('.') || 'réglages'} : ${i.message}`).join(' ; '));
     const p = lu.data;
-    if (p.palier === 'pro') throw new ErreurDetourage('Le palier pro n’est pas disponible : les poids LTX-2.5 Alpha-Gen ne sont pas installés.', 503);
+    if (p.palier === 'pro') throw new ErreurDetourage('Le détourage pro n’est pas encore disponible.', 503);
+    verifierMoteurRapide(t);
     const src = t.source;
     const duree = Math.min(p.dureeS ?? Infinity, Math.max(0, (src?.duree ?? 5) - p.debutS));
     if (duree > SECONDES_MAX()) throw new ErreurDetourage(`Plage trop longue (${Math.round(duree)} s, ${SECONDES_MAX()} s au plus) : choisis une durée plus courte.`);
@@ -182,7 +190,11 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   }));
   app.post(`${P}/travaux/:id/reprendre`, async (req, reply) => garde(reply, async () => {
     const id = idDe(req, reply); if (!id) return;
-    return vue(await detourage.reprendre(qui().org, id));
+    const { org } = qui();
+    const travail = detourage.obtenir(org, id);
+    if (travail.params?.palier === 'pro') throw new ErreurDetourage('Le détourage pro n’est pas encore disponible.', 503);
+    verifierMoteurRapide(travail);
+    return vue(await detourage.reprendre(org, id));
   }));
   app.delete(`${P}/travaux/:id`, async (req, reply) => garde(reply, async () => {
     const id = idDe(req, reply); if (!id) return;
