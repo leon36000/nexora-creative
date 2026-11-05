@@ -301,15 +301,32 @@ class ProcessTests(unittest.TestCase):
             env = dict(os.environ, SA_PROXY_RUN='test-run', SA_PROXY_MODEL='eco-deepseek',
                        SA_PROXY_PORT='12345', SA_PROXY_TIMEOUT='5', SA_PROXY_AUDIT=str(audit),
                        SA_PROXY_LEDGER=str(ledger), SA_PROXY_BUDGET='0.10')
-            process = subprocess.Popen(['bash', '-c', 'exec 3<"$1"; exec "$2" "$3" "$4"',
-                                        '_', str(key), sys.executable, str(Path(proxy.__file__)), str(sock)],
+            observation = root/'observation.json'
+            bootstrap = root/'bootstrap.py'
+            bootstrap.write_text(
+                "import json, os, runpy, sys\n"
+                f"expected = {FAKE_KEY!r}\n"
+                "report = {\n"
+                " 'argv_propre': all(expected not in a for a in sys.argv),\n"
+                " 'environnement_propre': all(expected not in v for v in os.environ.values()),\n"
+                " 'fd_contient_cle_factice': os.pread(3, 4096, 0).decode() == expected,\n"
+                "}\n"
+                "with open(sys.argv[3], 'w') as output: json.dump(report, output)\n"
+                "sys.path.insert(0, os.path.dirname(sys.argv[1]))\n"
+                "sys.argv = [sys.argv[1], sys.argv[2]]\n"
+                "runpy.run_path(sys.argv[0], run_name='__main__')\n"
+            )
+            process = subprocess.Popen(['bash', '-c', 'exec 3<"$1"; exec "$2" "$3" "$4" "$5" "$6"',
+                                        '_', str(key), sys.executable, str(bootstrap), str(Path(proxy.__file__)),
+                                        str(sock), str(observation)],
                                        env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             try:
                 end = time.monotonic()+5
                 while not sock.exists() and process.poll() is None and time.monotonic()<end: time.sleep(0.05)
                 self.assertTrue(sock.exists())
-                self.assertNotIn(FAKE_KEY.encode(), Path(f'/proc/{process.pid}/environ').read_bytes())
-                self.assertNotIn(FAKE_KEY.encode(), Path(f'/proc/{process.pid}/cmdline').read_bytes())
+                self.assertEqual(json.loads(observation.read_text()), {
+                    'argv_propre': True, 'environnement_propre': True, 'fd_contient_cle_factice': True,
+                })
             finally:
                 (root / 'proxy-stop').write_text('arrêt fictif')
                 try:
