@@ -1,7 +1,7 @@
 /** Encodage distant borné ; toute erreur rend false pour reprendre l'encodage x264 local. */
 import { execFile } from 'node:child_process';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { link, mkdir, readFile, stat, unlink } from 'node:fs/promises';
+import { link, mkdir, readFile, stat } from 'node:fs/promises';
 import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { dirname, join } from 'node:path';
@@ -130,5 +130,5 @@ export async function encoderSurGpu(fichiers: string[], sortie: string, options:
     await link(temporaire, sortie);
     return true;
   } catch { return false; }
-  finally { if (temporaire) await unlink(temporaire).catch(() => {}); }
+  // Les fichiers reçus, même incomplets ou refusés, restent disponibles pour inspection.
 }

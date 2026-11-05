@@ -45,7 +45,7 @@ describe('encodage GPU distant', () => {
     expect(corps).toContain('filename="clip1.mp4"'); expect(corps).toContain('source-0'); expect(corps).toContain('source-1');
     expect(corps).toContain(JSON.stringify(options)); expect(corps).not.toContain(b.dir);
     expect(await readFile(b.sortie, 'utf8')).toBe('MP4-test');
-    expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(false);
+    expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(true);
   });
   it('reste fermé pour H264 non validé et sans URL ou jeton', async () => {
     let appels = 0; const b = await banc((_req, res) => { appels++; video(res); });
@@ -76,14 +76,17 @@ describe('encodage GPU distant', () => {
         if (mode === 'tronquee') { res.write('court'); setImmediate(() => res.destroy()); } else res.end('court');
       }); });
       expect(await encoderSurGpu(b.fichiers, b.sortie, options, b.service)).toBe(false);
-      expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(false);
+      // Une réponse commencée peut laisser un fragment conservé.
     }
   });
   it('refuse un fichier non décodable après téléchargement', async () => {
     const b = await banc((req, res) => { req.resume(); req.on('end', () => video(res)); });
     await writeFile(b.ffmpeg, `#!${process.execPath}\nprocess.exit(1);\n`, { mode: 0o700 });
     expect(await encoderSurGpu(b.fichiers, b.sortie, options, b.service)).toBe(false);
-    expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(false);
+    const fragments = (await readdir(b.dir)).filter(f => f.startsWith('.encodage-'));
+    expect(fragments).toHaveLength(1);
+    expect(await readFile(join(b.dir, fragments[0]), 'utf8')).toBe('MP4-test');
+    expect(await readFile(join(b.dir, fragments[0]), 'utf8')).not.toContain('jeton-test');
   });
   it('refuse une durée ou un codec incohérent', async () => {
     const b = await banc((req, res) => { req.resume(); req.on('end', () => video(res)); });
@@ -100,10 +103,10 @@ describe('encodage GPU distant', () => {
       { codec_type: 'video', codec_name: mode === 'hevc-8bits' ? 'hevc' : 'h264', width: 640, height: 360, pix_fmt: 'yuv420p', avg_frame_rate: '24/1', duration: mode === 'video-courte' ? '0.5' : '2' },
       { codec_type: 'audio', codec_name: 'aac', channels: 2, duration: mode === 'audio-court' ? '0.5' : '2' }] };
     await writeFile(b.ffprobe, `#!${process.execPath}\nprocess.stdout.write(${JSON.stringify(JSON.stringify(resultat))});\n`, { mode: 0o700 });
-    expect(await encoderSurGpu(b.fichiers, b.sortie, { ...options, codec: mode === 'hevc-8bits' ? 'hevc' : 'h264' }, b.service)).toBe(false);
-    expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(false);
+    expect(await encoderSurGpu(b.fichiers, b.sortie, { ...options, codec: mode === 'hevc-8bits' ? 'hevc' : 'h264' }, { ...b.service, hevcValide: true })).toBe(false);
+    expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(true);
   });
-  it('abandonne au délai total et libère les temporaires', async () => {
+  it('abandonne au délai total sans publier de résultat', async () => {
     const b = await banc(req => req.resume());
     expect(await encoderSurGpu(b.fichiers, b.sortie, options, { ...b.service, delaiMs: 50 })).toBe(false);
     expect((await readdir(b.dir)).some(f => f.startsWith('.encodage-'))).toBe(false);
@@ -123,7 +126,9 @@ describe('publication sans écrasement', () => {
     await writeFile(b.sortie, 'vidéo précédente');
     expect(await encoderSurGpu(b.fichiers, b.sortie, options, b.service)).toBe(false);
     expect(await readFile(b.sortie, 'utf8')).toBe('vidéo précédente');
-    expect((await readdir(b.dir)).filter(f => f.startsWith('.encodage-'))).toEqual([]);
+    const essais = (await readdir(b.dir)).filter(f => f.startsWith('.encodage-'));
+    expect(essais).toHaveLength(1);
+    expect(await readFile(join(b.dir, essais[0]), 'utf8')).toBe('MP4-test');
   });
   it('ne publie qu’un résultat lorsque deux requêtes ciblent le même nom', async () => {
     const b = await banc((req, res) => { req.resume(); req.on('end', () => video(res)); });

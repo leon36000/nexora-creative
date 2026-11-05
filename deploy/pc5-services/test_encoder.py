@@ -73,7 +73,6 @@ print(json.dumps({'format':{'duration':str(duration)},'streams':[v]}))
                            data={'options': json.dumps(options or {})}, headers=self.auth if auth else {})
 
     def propre(self):
-        self.assertEqual(list(Path(ep.RACINE).iterdir()), [])
         self.assertTrue(ep.VERROU.acquire(blocking=False))
         ep.VERROU.release()
 
@@ -160,6 +159,21 @@ pathlib.Path(args[-1]).write_bytes(b'ENCODE-HEVC8BIT')
     def test_delai_nettoie_enfant(self):
         ep.DELAI_S=.2
         self.assertEqual(self.post(b'DELAI').status_code,504)
+        self.propre()
+
+    def test_echec_preserve_entree_et_sortie_partielle_sans_jeton(self):
+        ep.FFMPEG = str(self.script('ffmpeg-partiel', """
+import pathlib,sys
+pathlib.Path(sys.argv[-1]).write_bytes(b'VIDEO-PARTIELLE')
+sys.exit(1)
+"""))
+        self.assertEqual(self.post(b'VIDEO-SOURCE').status_code,422)
+        dossiers = list(Path(ep.RACINE).iterdir())
+        self.assertEqual(len(dossiers), 1)
+        self.assertEqual((dossiers[0]/'entree-0').read_bytes(), b'VIDEO-SOURCE')
+        self.assertEqual((dossiers[0]/'sortie.mp4').read_bytes(), b'VIDEO-PARTIELLE')
+        self.assertEqual({p.name for p in dossiers[0].iterdir()}, {'entree-0', 'sortie.mp4'})
+        self.assertNotIn(b'jeton-test-encoder', b''.join(p.read_bytes() for p in dossiers[0].iterdir()))
         self.propre()
 
     def test_sortie_trop_grosse(self):

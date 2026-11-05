@@ -331,7 +331,6 @@ def installer(app, verrou_gpu=None):
                         while chunk := f.read(256*1024):
                             yield chunk
                 finally:
-                    shutil.rmtree(dossier)
                     VERROU.release()
             response = StreamingResponse(flux(), media_type='video/mp4', headers={
                 'Content-Length': str(sortie.stat().st_size), 'X-Nexora-Encodeur': codec,
@@ -349,6 +348,4 @@ def installer(app, verrou_gpu=None):
             if reception:
                 reception.fermer()
             if not rendu:
-                if dossier:
-                    shutil.rmtree(dossier)
                 VERROU.release()
