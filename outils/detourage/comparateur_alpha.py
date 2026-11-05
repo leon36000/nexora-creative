@@ -43,7 +43,7 @@ def _json_no_constant(value):
 
 
 def _fps(value):
-    if not isinstance(value, str) or not re.fullmatch(r'[0-9]+/[0-9]+', value):
+    if not isinstance(value, str) or not re.fullmatch(r'\d+/\d+', value, flags=re.ASCII):
         raise ValueError('cadence attendue sous forme de fraction positive, ex. 24/1')
     try:
         rate = Fraction(value)
@@ -196,7 +196,7 @@ def _alpha(path, ffmpeg):
                    'largeur': width, 'hauteur': height, 'profondeur_bits': depth}
 
 
-def comparer(reference, candidat, ffmpeg):
+def _preparer(reference, candidat, ffmpeg):
     if (Path(reference).suffix.lower() == '.png') != (Path(candidat).suffix.lower() == '.png'):
         raise ValueError('image fixe et séquence ne peuvent pas être comparées')
     try:
@@ -211,6 +211,11 @@ def comparer(reference, candidat, ffmpeg):
         raise ValueError('cadences incompatibles ou image fixe comparée à une séquence')
     if [i for i, _ in ref['frames']] != [i for i, _ in cand['frames']]:
         raise ValueError('nombre ou indices de frames différents')
+    return ffmpeg, decoder_sha, ref, cand
+
+
+def comparer(reference, candidat, ffmpeg):
+    ffmpeg, decoder_sha, ref, cand = _preparer(reference, candidat, ffmpeg)
     frames, transitions, provenance = [], [], {'reference': [], 'candidat': []}
     previous, shape = None, None
     for (index, rp), (_, cp) in zip(ref['frames'], cand['frames']):
