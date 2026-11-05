@@ -1112,7 +1112,7 @@ app.post('/api/nexora/film/plan', async (req, reply) => {
   const dureeCible = Math.max(10, Math.min(120, Number(b.duree) || 30));
   const verdict = await moderer(intention, llmCourant(), (m) => app.log.warn(m));
   if (!verdict.ok) return reply.code(422).send({ error: verdict.raison, categorie: verdict.categorie });
-  return planifierFilm({ intention: intention.slice(0, 4000), dureeCible }, llmCourant());
+  return planifierFilm({ intention: intention.slice(0, 4000), dureeCible, langue: b.langue === 'en' ? 'en' : 'fr' }, llmCourant());
 });
 
 /** Director, étape 2 : tourner le storyboard (éventuellement modifié par la personne) et l'assembler. */

@@ -47,3 +47,20 @@ it('sérialise deux connexions SQLite avant toute seconde insertion', () => {
   expect((b.prepare('SELECT COUNT(*) AS n FROM takes').get() as { n: number }).n).toBe(1);
   a.close(); b.close();
 });
+
+it('garde la clé des plans français historiques et distingue le dialogue anglais', () => {
+  const sb = lireStoryboard({ titre: 'test', plans: [{ resume: 'un', description: 'un', replique: 'hello' }] }, 5);
+  const base = { moteur: 'h3-fast', format: '16:9', son: true, intention: 'film' };
+  const sansLangue = { ...sb } as any; delete sansLangue.langue;
+  expect(clePlanFilm(sb, sb.plans[0], base)).toBe('a014f80502fe00a95be88330953760fea9c29143ee7d777f5c61407ee119497f');
+  expect(clePlanFilm(sb, sb.plans[0], base)).toBe(clePlanFilm({ ...sansLangue, langue: 'fr' }, sb.plans[0], base));
+  expect(clePlanFilm({ ...sb, langue: 'en' } as any, sb.plans[0], base)).not.toBe(clePlanFilm(sansLangue, sb.plans[0], base));
+  const db = new Database(':memory:');
+  db.exec('CREATE TABLE takes (id INTEGER PRIMARY KEY, organisation_id TEXT, status TEXT, settings TEXT)');
+  const historique = clePlanFilm(sansLangue, sb.plans[0], base);
+  db.prepare('INSERT INTO takes VALUES (?, ?, ?, ?)').run(1, 'org', 'queued', JSON.stringify({ nexoraClePlan: historique, nexoraFilm: 1, nexoraPlan: 0 }));
+  const creer = () => 99;
+  expect(() => creerPriseSiPlanLibre(db, 'org', clePlanFilm(sb, sb.plans[0], base), 2, creer)).toThrow();
+  expect(creerPriseSiPlanLibre(db, 'org', clePlanFilm({ ...sb, langue: 'en' }, sb.plans[0], base), 2, creer)).toBe(99);
+  db.close();
+});

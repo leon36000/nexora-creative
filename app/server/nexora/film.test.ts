@@ -159,3 +159,35 @@ describe('assemblage à une taille imposée (un brouillon remplace un plan)', ()
   });
 });
 
+
+it('porte la langue demandée dans le storyboard et les consignes de planification', async () => {
+  const messages: string[] = [];
+  const llm: ClientLlm = { completer: async (_role, m) => { messages.push(m.map((x) => x.content).join('\n')); return JSON.stringify(brut); } };
+  const en = await planifierFilm({ intention: 'A moving car', dureeCible: 20, langue: 'en' } as any, llm);
+  expect((en.storyboard as any).langue).toBe('en');
+  expect(messages[0]).toMatch(/English.*dialogue|dialogue.*English/i);
+  expect(messages[0]).toMatch(/description.*English/i);
+  const fr = await planifierFilm({ intention: 'Une voiture', dureeCible: 20, langue: 'fr' } as any, llm);
+  expect((fr.storyboard as any).langue).toBe('fr');
+  expect(messages[1]).toMatch(/French.*dialogue|dialogue.*French/i);
+  expect((await planifierFilm({ intention: 'a', dureeCible: 10 }, null)).storyboard).toHaveProperty('langue', 'fr');
+});
+
+it('la route film/plan transmet la langue à la planification', async () => {
+  const { readFileSync } = await import('node:fs');
+  const ts = (await import('typescript')).default;
+  const texte = readFileSync(new URL('../index.ts', import.meta.url), 'utf8');
+  const source = ts.createSourceFile('index.ts', texte, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  let route: import('typescript').ArrowFunction | undefined;
+  function cherche(n: import('typescript').Node) {
+    if (ts.isCallExpression(n) && n.arguments.length >= 2 && ts.isStringLiteral(n.arguments[0]) && n.arguments[0].text === '/api/nexora/film/plan' && ts.isArrowFunction(n.arguments[1])) route = n.arguments[1];
+    ts.forEachChild(n, cherche);
+  }
+  cherche(source);
+  if (!route) throw new Error('route introuvable');
+  const js = ts.transpileModule(`const handler = ${route.getText(source)};`, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }).outputText;
+  const handler = new Function('moderer', 'llmCourant', 'app', 'planifierFilm', `${js}; return handler;`)(async () => ({ ok: true }), () => null, { log: { warn: () => {} } }, planifierFilm);
+  const reply = { code: () => reply, send: (x: unknown) => x };
+  const resultat = await handler({ body: { intention: 'A car', duree: 10, langue: 'en' } }, reply);
+  expect(resultat.storyboard.langue).toBe('en');
+});

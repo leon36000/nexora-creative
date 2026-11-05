@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import ts from 'typescript';
 
-const memoire = vi.hoisted(() => ({ lignes: new Map<number, any>(), echecPatch: new Set<number>(), outputDir: '/non-utilise' }));
+const memoire = vi.hoisted(() => ({ lignes: new Map<number, any>(), echecPatch: new Set<number>(), reecritures: [] as any[], outputDir: '/non-utilise' }));
 vi.mock('../config.js', () => ({ config: { get outputDir() { return memoire.outputDir; }, ffmpegBin: 'ffmpeg-fictif' } }));
 vi.mock('node:child_process', () => ({ execFile: (_bin: unknown, _args: unknown, cb: (e: null, out: string, err: string) => void) => cb(null, '', '') }));
 vi.mock('../jobs.js', () => ({ takes: {
@@ -15,14 +15,14 @@ vi.mock('../jobs.js', () => ({ takes: {
   patchSettings: (id: number, patch: Record<string, unknown>) => { if (memoire.echecPatch.has(id)) throw new Error('écriture impossible'); const t = memoire.lignes.get(id); t.settings = JSON.stringify({ ...JSON.parse(t.settings), ...patch }); },
   fail: (id: number, error: string) => { Object.assign(memoire.lignes.get(id), { status: 'failed', error }); },
 } }));
-vi.mock('./reecritureH3.js', () => ({ reecrireH3: async () => ({ prompt: 'plan', source: 'repli' }) }));
+vi.mock('./reecritureH3.js', () => ({ reecrireH3: async (entree: any) => { memoire.reecritures.push(entree); return { prompt: 'plan', source: 'repli' }; } }));
 vi.mock('./personnagesCast.js', () => ({ resoudrePersonnages: vi.fn() }));
 vi.mock('./encodageGpu.js', () => ({ encoderSurGpu: vi.fn() }));
 import { avancerFilm, initFilms, marquerReservationFilmLiberee, tournerFilm } from './filmMoteur.js';
 import { lireStoryboard } from './film.js';
 import { EchecTournage, resultatEchecTournage, soumissionIndeterminee } from './filmEchec.js';
 
-beforeEach(() => { memoire.lignes.clear(); memoire.echecPatch.clear(); memoire.outputDir = '/non-utilise'; });
+beforeEach(() => { memoire.lignes.clear(); memoire.echecPatch.clear(); memoire.reecritures.length = 0; memoire.outputDir = '/non-utilise'; });
 
 it('rattache au bon plan les prises déjà lancées malgré un échec partiel de queue', async () => {
   const erreur = Object.assign(new Error('moteur indisponible'), { takeIds: [202] });
@@ -71,10 +71,12 @@ it('route film/tourner : ne libère que les réservations sans prise et rend les
   };
   const handler = new Function(...Object.keys(deps), `${js}; return handler;`)(...Object.values(deps));
   const reply = { code: vi.fn().mockReturnThis(), send: vi.fn((v) => v) };
-  const resultat = await handler({ body: { storyboard: { titre: 'test', plans: [
-    { resume: 'un', description: 'un' }, { resume: 'deux', description: 'deux' }, { resume: 'trois', description: 'trois' },
+  const resultat = await handler({ body: { storyboard: { langue: 'en', titre: 'test', plans: [
+    { resume: 'un', description: 'un', replique: 'Hello!' }, { resume: 'deux', description: 'deux' }, { resume: 'trois', description: 'trois' },
   ] } } }, reply);
   expect(resultat.error).toBe('moteur indisponible');
+  expect(memoire.reecritures[0].dialogues).toEqual([{ texte: 'Hello!', langue: 'English' }]);
+  expect(JSON.parse(memoire.lignes.get(1).settings).storyboard.langue).toBe('en');
   expect(liberees).toEqual(['r3']);
   expect(resultat.filmId).toBe(1);
   expect(resultat.prises).toEqual(expect.arrayContaining([expect.objectContaining({ plan: 0, takeId: 101 }), expect.objectContaining({ plan: 1, takeId: 202 })]));
@@ -227,7 +229,7 @@ it('une suite ambiguë conserve sa réservation sur la prise créée avant soumi
   writeFileSync(join(dossier, 'film_1_plan1_depart.png'), 'image synthétique');
   const precedent = join(memoire.outputDir, 'source-factice');
   writeFileSync(precedent, 'source synthétique');
-  const sb = lireStoryboard({ titre: 'test', plans: [{ resume: 'un', description: 'un' }, { resume: 'suite', description: 'suite', suite: true }] }, 10);
+  const sb = lireStoryboard({ langue: 'en', titre: 'test', plans: [{ resume: 'un', description: 'un' }, { resume: 'suite', description: 'suite', replique: 'Hello!', suite: true }] }, 10);
   sb.plans[0].take = 101;
   Object.assign(sb.plans[0], { controle: { ok: true, defauts: [] } });
   const reservation = { reservationId: 'suite', credits: 1, etat: 'reservee' };
@@ -246,6 +248,7 @@ it('une suite ambiguë conserve sa réservation sur la prise créée avant soumi
   expect(JSON.parse(memoire.lignes.get(102).settings).nexoraCredits).toEqual(reservation);
   await avancerFilm(1);
   expect(queueTakes).toHaveBeenCalledOnce();
+  expect(memoire.reecritures.at(-1).dialogues).toEqual([{ texte: 'Hello!', langue: 'English' }]);
 });
 
 it('une prise existante garde ses crédits ; le nouveau plan reçoit seulement sa nouvelle réservation', async () => {
@@ -460,4 +463,20 @@ it('ne lance pas l’image préalable si la création protégée du plan est ref
   const { queueAfter } = fileReelle(deps);
   expect(() => queueAfter({ nexoraFilm: 2, nexoraPlan: 0 }, 1, premier, null, (body: unknown) => body, true, undefined, 'cle')).toThrow('plan déjà en cours');
   expect(premier).not.toHaveBeenCalled();
+});
+
+
+it('transmet la langue du storyboard au réécrivain et conserve la réplique', async () => {
+  for (const [langue, etiquette, texte] of [['fr', 'French', 'Bonjour !'], ['en', 'English', 'Hello!']] as const) {
+    memoire.lignes.clear(); memoire.reecritures.length = 0;
+    const queueTakes = vi.fn(async (corps, _n, credits) => {
+      memoire.lignes.set(101, { id: 101, settings: JSON.stringify({ ...corps, nexoraCredits: credits[0] }) });
+      return [101];
+    });
+    initFilms({ queueTakes, broadcast: () => {}, televerser: async () => '', llmPour: () => null });
+    const sb = lireStoryboard({ langue, titre: 'Test', plans: [{ resume: 'one', description: 'A car moves', replique: texte }] }, 5);
+    await tournerFilm(sb, { format: '16:9', son: true, intention: 'test', moteur: 'h3-fast' }, null);
+    expect(memoire.reecritures[0].dialogues).toEqual([{ texte, langue: etiquette }]);
+    expect(JSON.parse(memoire.lignes.get(1).settings).storyboard.langue).toBe(langue);
+  }
 });

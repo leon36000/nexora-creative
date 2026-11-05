@@ -6,6 +6,7 @@ export function clePlanFilm(sb: Storyboard, plan: PlanFilm, contexte: { moteur: 
   // La graine aléatoire n'existe pas encore à ce stade ; aucune valeur éphémère n'est incluse.
   const contenu = [contexte.moteur, contexte.format, contexte.son, contexte.qualite ?? null, contexte.projectId ?? null, contexte.intention, contexte.references ?? [], contexte.ancre ?? null,
     sb.bible.style, sb.bible.personnages, sb.bible.lieux, plan.resume, plan.description, plan.camera, plan.duree, plan.replique ?? null, plan.suite === true];
+  if (sb.langue === 'en') contenu.push('langue:en');
   return createHash('sha256').update(JSON.stringify(contenu)).digest('hex');
 }
 

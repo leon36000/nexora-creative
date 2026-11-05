@@ -42,3 +42,16 @@ it('ne propose pas un conflit dont les identifiants sont invalides', async () =>
   const storyboard = { titre: 'test', bible: { style: '', personnages: [], lieux: [] }, plans: [], dureeTotale: 0 };
   await expect(api.nexoraFilmTourner({ storyboard, format: '16:9', son: false, intention: 'test' })).rejects.not.toBeInstanceOf(EchecFilmPartiel);
 });
+
+it('envoie la langue lors du découpage et conserve celle du storyboard pour le tournage', async () => {
+  const appels: { url: string; corps: any }[] = [];
+  const storyboard = { langue: 'en' as const, titre: 'test', bible: { style: '', personnages: [], lieux: [] }, plans: [{ resume: 'shot', description: 'A car', duree: 5 as const, camera: '', replique: 'Hello!' }], dureeTotale: 5 };
+  vi.stubGlobal('fetch', vi.fn(async (url: string, init: RequestInit) => {
+    appels.push({ url, corps: JSON.parse(String(init.body)) });
+    return new Response(JSON.stringify(url.endsWith('/plan') ? { storyboard, source: 'llm' } : { filmId: 1 }), { status: 200 });
+  }));
+  const plan = await api.nexoraFilmPlan({ intention: 'A car', duree: 10, langue: 'en' });
+  await api.nexoraFilmTourner({ storyboard: plan.storyboard, format: '16:9', son: true, intention: 'A car' });
+  expect(appels[0].corps.langue).toBe('en');
+  expect(appels[1].corps.storyboard).toEqual(storyboard);
+});
