@@ -28,7 +28,7 @@ nexora_v7_tests_cpu:
   script:
     - mkdir -p ".ci-v7/home-$CI_JOB_ID" ".ci-v7/cache-$CI_JOB_ID" ".ci-v7/tmp-$CI_JOB_ID" ".ci-v7/test-$CI_JOB_ID" ".ci-v7/coverage-$CI_JOB_ID"
     - 'if python3 -B recherche/30-annexes/finish-banc/verifier_paquet.py > .ci-v7/finish-verification.log 2>&1; then cat .ci-v7/finish-verification.log; else cat .ci-v7/finish-verification.log; exit 1; fi'
-    - apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+    - apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core git
     - python3 -m pip install --no-cache-dir numpy==2.2.6 Pillow==11.2.1 coverage==7.10.7
     - 'if env -i HOME="$CI_PROJECT_DIR/.ci-v7/home-$CI_JOB_ID" PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin V7_CI_ROOT="$CI_PROJECT_DIR/.ci-v7" TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" V7_TEST_TMPDIR="$CI_PROJECT_DIR/.ci-v7/test-$CI_JOB_ID" V6_CACHE="$CI_PROJECT_DIR/.ci-v7/cache-$CI_JOB_ID" V6_FFMPEG=/usr/bin/ffmpeg V6_FFPROBE=/usr/bin/ffprobe PYTHONDONTWRITEBYTECODE=1 COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage" COVERAGE_RCFILE="$CI_PROJECT_DIR/marketing/creative/video-v7/chaine/coverage-ci.ini" sh marketing/creative/video-v7/chaine/ci_coverage.sh > .ci-v7/job.log 2>&1; then cat .ci-v7/job.log; else cat .ci-v7/job.log; exit 1; fi'
   artifacts:

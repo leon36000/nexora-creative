@@ -7,7 +7,8 @@ python3 -m coverage run --parallel-mode --branch recherche/30-annexes/finish-ban
 python3 -m coverage run --parallel-mode --branch -m unittest discover -s marketing/creative/video-v7/chaine/tests -p test_finish_ci.py -v > "$V7_CI_ROOT/finish-tests.log" 2>&1 || status=1
 PYTHONPATH=marketing/creative/video-v7/chaine python3 -m coverage run --parallel-mode --branch -m unittest discover -s marketing/creative/video-v7/chaine/tests -p test_assemblage_portable.py -v > "$V7_CI_ROOT/assemblage-tests.log" 2>&1 || status=1
 python3 -m coverage run --parallel-mode --branch -m unittest discover -s outils/detourage/tests -p test_comparateur_alpha.py -v > "$V7_CI_ROOT/matte-tests.log" 2>&1 || status=1
-cat "$V7_CI_ROOT/tests.log" "$V7_CI_ROOT/finish-verification-couverture.log" "$V7_CI_ROOT/finish-tests.log" "$V7_CI_ROOT/assemblage-tests.log" "$V7_CI_ROOT/matte-tests.log"
+python3 -m coverage run --parallel-mode --branch -m unittest discover -s deploy/proxmox -p 'test_*release.py' -v > "$V7_CI_ROOT/release-tests.log" 2>&1 || status=1
+cat "$V7_CI_ROOT/tests.log" "$V7_CI_ROOT/finish-verification-couverture.log" "$V7_CI_ROOT/finish-tests.log" "$V7_CI_ROOT/assemblage-tests.log" "$V7_CI_ROOT/matte-tests.log" "$V7_CI_ROOT/release-tests.log"
 python3 -m coverage combine --keep > "$V7_CI_ROOT/coverage-combine.log" 2>&1 || status=1
 python3 -m coverage xml -o "$V7_CI_ROOT/coverage.xml" > "$V7_CI_ROOT/coverage-xml.log" 2>&1 || status=1
 cat "$V7_CI_ROOT/coverage-combine.log" "$V7_CI_ROOT/coverage-xml.log"
