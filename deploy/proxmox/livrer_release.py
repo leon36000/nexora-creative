@@ -93,6 +93,12 @@ def planifier(release, cible, sortie):
     T.verifier_ancetres(release / 'SOURCE_FILES.json')
     with (release / 'SOURCE_FILES.json').open(encoding='utf-8') as f:
         chemins = json.load(f)
+    T.verifier_ancetres(release / 'FICHIERS_SHA256.json')
+    with (release / 'FICHIERS_SHA256.json').open(encoding='utf-8') as f:
+        fichiers_sha = json.load(f)
+    if (not isinstance(chemins, list) or not isinstance(fichiers_sha, dict) or set(chemins) != set(fichiers_sha)
+            or any(T.digest(T.chemin(release, nom)) != sha for nom, sha in fichiers_sha.items())):
+        raise ValueError('fichiers modifiés depuis le build')
     T.verifier_ancetres(release / 'SOURCE_HASHES.json')
     with (release / 'SOURCE_HASHES.json').open(encoding='utf-8') as f:
         source_sha = json.load(f)

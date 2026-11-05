@@ -15,7 +15,7 @@ printf '%s\n' 'CANARI_SYNTHETIQUE=interdit' > "$CI_PROJECT_DIR/.ci-release/canar
 env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent PYTHONDONTWRITEBYTECODE=1 \
   python3 -B "$CI_PROJECT_DIR/deploy/proxmox/preparer_release.py" archive "$CI_PROJECT_DIR" "$CI_COMMIT_SHA" "$OUT/source.tar" > "$OUT/source.sha256"
 # Seuls les exécutables/libs de l'image publique sont copiés ; aucun montage du workspace ni du HOME.
-tar -C / --exclude='*/.env*' --exclude='*/.npmrc' -cf - usr bin lib lib64 | tar -C "$ROOT" -xf -
+tar -C / --exclude='*/.env*' --exclude='*/.npmrc' --exclude='usr/etc/npmrc' --exclude='usr/local/etc/npmrc' -cf - usr bin lib lib64 | tar -C "$ROOT" -xf -
 mkdir -p "$ROOT/etc/ssl" "$ROOT/dev" "$ROOT/tmp" "$ROOT/tools" "$ROOT/input" "$ROOT/work"
 cp -a /etc/ssl/certs "$ROOT/etc/ssl/"
 cp -L /etc/resolv.conf "$ROOT/etc/resolv.conf"
@@ -36,7 +36,7 @@ env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent \
   python3 -B - "$ROOT" "$SHA" "$CI_PROJECT_DIR/.ci-release/canari/.env" <<'PY'
 import os, subprocess, sys
 root, sha, canari = sys.argv[1:]
-cmd = ['chroot', '--userspec=65534:65534', '--groups=65534', root, '/usr/bin/env', '-i',
+cmd = ['/usr/sbin/chroot', '--userspec=65534:65534', '--groups=65534', root, '/usr/bin/env', '-i',
        'PATH=/usr/local/bin:/usr/bin:/bin', 'HOME=/work', 'PYTHONDONTWRITEBYTECODE=1',
        'NEXORA_RELEASE_SANDBOX=ci-chroot', '/usr/bin/python3', '-B']
 check = "import os,sys; assert os.geteuid()==65534 and os.getegid()==65534 and set(os.getgroups())<={65534}; assert not os.path.exists('/proc/self/environ'); assert not os.path.exists('/etc/nexora'); assert not os.path.exists('/root/.npmrc'); assert not os.path.exists(sys.argv[1])"
@@ -45,6 +45,23 @@ subprocess.run(cmd + ['/tools/preparer_release.py', 'construire', '/input/source
                check=True, close_fds=True, stdin=subprocess.DEVNULL)
 PY
 printf '%s\n' "$CI_COMMIT_SHA" > "$ROOT/work/release/CI_COMMIT_SHA"
-tar -C "$ROOT/work" -cf "$OUT/release.tar" release/app release/mode-studio/dist release/BUILD_OK release/SOURCE_FILES.json release/SOURCE_HASHES.json release/DEPENDANCES_SHA256 release/CI_COMMIT_SHA
+env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent PYTHONPATH="$CI_PROJECT_DIR/deploy/proxmox" \
+  python3 -B - "$ROOT/work/release" "$OUT/release.tar" <<'PY'
+import json, pathlib, sys, tarfile
+from transaction_release import chemin, digest, empreinte_dependances
+r, out = map(pathlib.Path, sys.argv[1:])
+files = json.loads((r / 'SOURCE_FILES.json').read_text())
+hashes = json.loads((r / 'FICHIERS_SHA256.json').read_text())
+if set(files) != set(hashes) or any(digest(chemin(r, p)) != h for p, h in hashes.items()):
+    raise SystemExit('fichiers modifiés après build')
+if empreinte_dependances(r / 'app/node_modules') != (r / 'DEPENDANCES_SHA256').read_text().strip():
+    raise SystemExit('dépendances modifiées après build')
+with tarfile.open(out, 'x') as t:
+    for name in sorted(files):
+        t.add(chemin(r, name), arcname='release/' + name, recursive=False)
+    t.add(r / 'app/node_modules', arcname='release/app/node_modules')
+    for name in ('BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'FICHIERS_SHA256.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
+        t.add(r / name, arcname='release/' + name, recursive=False)
+PY
 (cd "$OUT" && sha256sum release.tar > release.sha256)
 printf 'Release amd64 construite pour %s\n' "$CI_COMMIT_SHA"

@@ -57,6 +57,7 @@ class Livraison(unittest.TestCase):
     def test_plan_est_lisible_et_ne_modifie_pas_la_cible(self):
         (self.release / 'SOURCE_FILES.json').write_text(json.dumps(['app/server/code.ts']))
         (self.release / 'SOURCE_HASHES.json').write_text(json.dumps({'app/server/code.ts': T.digest(self.release / 'app/server/code.ts')}))
+        (self.release / 'FICHIERS_SHA256.json').write_text(json.dumps({'app/server/code.ts': T.digest(self.release / 'app/server/code.ts')}))
         plan = self.root / 'plan.json'
         L.planifier(self.release, self.cible, plan)
         objet = json.loads(plan.read_text())
@@ -66,7 +67,7 @@ class Livraison(unittest.TestCase):
         self.assertFalse(self.backup.exists())
         (self.release / 'app/server/code.ts').write_text('source modifiée')
         (self.root / 'refuse').mkdir()
-        with self.assertRaisesRegex(ValueError, 'sources modifiées'):
+        with self.assertRaisesRegex(ValueError, 'fichiers modifiés'):
             L.planifier(self.release, self.cible, self.root / 'refuse/plan.json')
 
     def test_sante_echouee_restaure_code_et_dependances(self):
@@ -145,6 +146,7 @@ class Livraison(unittest.TestCase):
     def test_cli_verifie_le_manifeste_avant_activation(self):
         (self.release / 'SOURCE_FILES.json').write_text(json.dumps(['app/server/code.ts']))
         (self.release / 'SOURCE_HASHES.json').write_text(json.dumps({'app/server/code.ts': T.digest(self.release / 'app/server/code.ts')}))
+        (self.release / 'FICHIERS_SHA256.json').write_text(json.dumps({'app/server/code.ts': T.digest(self.release / 'app/server/code.ts')}))
         plan = self.root / 'plan.json'
         L.main(['plan', str(self.release), str(self.cible), str(plan)])
         args = ['activer', str(self.release), str(self.cible), str(self.data), str(self.backup), str(plan)]

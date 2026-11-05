@@ -11,7 +11,7 @@ import sys
 import tarfile
 
 from transaction_release import empreinte_dependances
-from transaction_release import verifier_ancetres
+from transaction_release import chemin, verifier_ancetres
 
 
 def interdit(path):
@@ -68,14 +68,16 @@ def archive(repo, revision, sortie):
 
 def construire(archive_path, sha, dossier, runner=subprocess.run):
     if runner is subprocess.run and (os.environ.get('NEXORA_RELEASE_SANDBOX') != 'ci-chroot'
-                                      or os.geteuid() != 65534 or Path('/proc/self/environ').exists()
+                                      or os.getuid() != 65534 or os.geteuid() != 65534
+                                      or os.getgid() != 65534 or os.getegid() != 65534
+                                      or set(os.getgroups()) - {65534} or Path('/proc').exists()
                                       or Path('/etc/nexora').exists()):
         raise ValueError('construction autorisée seulement dans le chroot CI isolé')
     if Path(archive_path).name.startswith('.env') or Path(archive_path).name == '.npmrc':
         raise ValueError('archive à nom interdit')
     if not re.fullmatch('[0-9a-f]{64}', sha):
         raise ValueError('SHA-256 complet requis')
-    fichiers, source_sha = [], {}
+    fichiers, source_sha, toutes_sources = [], {}, {}
     with open(archive_path, 'rb') as f:
         if hashlib.file_digest(f, 'sha256').hexdigest() != sha:
             raise ValueError('archive altérée')
@@ -100,10 +102,11 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
                         while chunk := source.read(1024 * 1024):
                             out.write(chunk)
                     target.chmod(item.mode & 0o755)
+                    with target.open('rb') as contenu:
+                        toutes_sources[item.name] = hashlib.file_digest(contenu, 'sha256').hexdigest()
                     if code_app(item.name):
                         fichiers.append(item.name)
-                        with target.open('rb') as contenu:
-                            source_sha[item.name] = hashlib.file_digest(contenu, 'sha256').hexdigest()
+                        source_sha[item.name] = toutes_sources[item.name]
     home = dossier / 'home-build'
     home.mkdir(mode=0o700)
     env = {'PATH': '/usr/local/bin:/usr/bin:/bin', 'HOME': str(home.resolve()),
@@ -123,7 +126,7 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
                     fichiers.append(item.relative_to(dossier).as_posix())
                 elif not item.is_dir():
                     raise ValueError('artefact de build non ordinaire')
-    for nom, attendu in source_sha.items():
+    for nom, attendu in toutes_sources.items():
         with (dossier / nom).open('rb') as contenu:
             if hashlib.file_digest(contenu, 'sha256').hexdigest() != attendu:
                 raise ValueError('source Git modifiée pendant le build')
@@ -131,6 +134,12 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
         json.dump(sorted(fichiers), manifest)
     with open(dossier / 'SOURCE_HASHES.json', 'x', encoding='utf-8') as manifest:
         json.dump(source_sha, manifest, sort_keys=True)
+    empreintes = {}
+    for nom in fichiers:
+        with (dossier / nom).open('rb') as contenu:
+            empreintes[nom] = hashlib.file_digest(contenu, 'sha256').hexdigest()
+    with open(dossier / 'FICHIERS_SHA256.json', 'x', encoding='utf-8') as manifest:
+        json.dump(empreintes, manifest, sort_keys=True)
     with open(dossier / 'DEPENDANCES_SHA256', 'x', encoding='ascii') as f:
         f.write(empreinte_dependances(dossier / 'app/node_modules') + '\n')
     with open(dossier / 'BUILD_OK', 'x', encoding='utf-8') as marker:
@@ -151,7 +160,7 @@ def importer(archive_path, sha, revision, dossier):
             raise ValueError('artefact altéré')
         f.seek(0)
         dossier.mkdir(mode=0o700)
-        seen, marqueur = set(), None
+        seen, liens, fichiers_extraits, marqueur = set(), set(), set(), None
         with tarfile.open(fileobj=f, mode='r:') as tar:
             for item in tar:
                 p = PurePosixPath(item.name)
@@ -163,8 +172,12 @@ def importer(archive_path, sha, revision, dossier):
                 name = rel.as_posix()
                 if name in seen:
                     raise ValueError('entrée artefact dupliquée')
+                if any(name.startswith(lien + '/') for lien in liens):
+                    raise ValueError('extraction à travers un lien interdite')
                 seen.add(name)
-                meta = name in ('BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA')
+                meta = name in ('BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'FICHIERS_SHA256.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA')
+                if meta and (not item.isfile() or item.size > 16 * 1024 * 1024):
+                    raise ValueError('métadonnée d’artefact invalide')
                 dependance = name == 'app/node_modules' or name.startswith('app/node_modules/')
                 dep_interdite = dependance and any(x.startswith('.env') or x in ('.npmrc', '.git', 'secrets') for x in rel.parts)
                 studio_interdit = rel.parts[0] == 'mode-studio' and len(rel.parts) > 1 and rel.parts[1] != 'dist'
@@ -172,10 +185,13 @@ def importer(archive_path, sha, revision, dossier):
                     raise ValueError('contenu artefact interdit')
                 if item.issym():
                     cible = posixpath.normpath(posixpath.join(posixpath.dirname(name), item.linkname))
-                    if not name.startswith('app/node_modules/') or not cible.startswith('app/node_modules/'):
+                    if posixpath.isabs(item.linkname) or not name.startswith('app/node_modules/') or not cible.startswith('app/node_modules/'):
                         raise ValueError('lien artefact interdit')
+                    liens.add(name)
                 elif not (item.isdir() or item.isfile()):
                     raise ValueError('entrée artefact non ordinaire')
+                if item.isfile() and not meta and not dependance:
+                    fichiers_extraits.add(name)
                 if name == 'BUILD_OK':
                     source = tar.extractfile(item)
                     if source is None:
@@ -193,6 +209,25 @@ def importer(archive_path, sha, revision, dossier):
         deps = (dossier / 'DEPENDANCES_SHA256').read_text(encoding='ascii').strip()
         if deps != empreinte_dependances(dossier / 'app/node_modules'):
             raise ValueError('dépendances de l’artefact altérées')
+        with (dossier / 'SOURCE_FILES.json').open(encoding='utf-8') as f:
+            fichiers = json.load(f)
+        with (dossier / 'FICHIERS_SHA256.json').open(encoding='utf-8') as f:
+            empreintes = json.load(f)
+        if not isinstance(fichiers, list) or not isinstance(empreintes, dict) or set(fichiers) != set(empreintes) or set(fichiers) != fichiers_extraits:
+            raise ValueError('manifestes de fichiers incohérents')
+        if not {'app/dist/index.html', 'mode-studio/dist/index.html'} <= set(fichiers):
+            raise ValueError('artefact incomplet')
+        for nom, attendu in empreintes.items():
+            target = chemin(dossier, nom)
+            verifier_ancetres(target)
+            with target.open('rb') as contenu:
+                if hashlib.file_digest(contenu, 'sha256').hexdigest() != attendu:
+                    raise ValueError('fichier de l’artefact altéré')
+        with (dossier / 'SOURCE_HASHES.json').open(encoding='utf-8') as f:
+            sources = json.load(f)
+        if (not isinstance(sources, dict) or set(sources) != {nom for nom in fichiers if nom.startswith('app/') and not nom.startswith('app/dist/')}
+                or any(empreintes.get(nom) != sha for nom, sha in sources.items())):
+            raise ValueError('sources Git incohérentes')
         with (dossier / 'BUILD_OK').open('x', encoding='ascii') as marker:
             marker.write(marqueur)
 

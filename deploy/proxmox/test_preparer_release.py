@@ -64,6 +64,21 @@ class Preparation(unittest.TestCase):
         self.assertFalse((self.root / 'release/BUILD_OK').exists())
         self.assertEqual((cible / 'inconnu').read_text(), 'conservé')
 
+    def test_build_refuse_modification_source_studio(self):
+        path, sha = self.archive()
+        def fake(cmd, **opts):
+            if cmd[1] == 'ci':
+                (opts['cwd'] / 'node_modules').mkdir()
+            else:
+                (opts['cwd'] / 'dist').mkdir()
+                (opts['cwd'] / 'dist/index.html').write_text('fixture')
+                if opts['cwd'].name == 'mode-studio':
+                    (opts['cwd'] / 'package.json').write_text('{"change":true}')
+        release = self.root / 'release'
+        with self.assertRaisesRegex(ValueError, 'source Git modifiée'):
+            P.construire(path, sha, release, fake)
+        self.assertFalse((release / 'BUILD_OK').exists())
+
     def test_archive_secrete_ou_modifiee_refusee(self):
         path, sha = self.archive(('app/.env',))
         with self.assertRaises(ValueError):
@@ -114,6 +129,11 @@ class Preparation(unittest.TestCase):
         def fake(cmd, **opts):
             if cmd[1] == 'ci':
                 (opts['cwd'] / 'node_modules').mkdir()
+                if opts['cwd'].name == 'app':
+                    (opts['cwd'] / 'node_modules/pkg').mkdir()
+                    (opts['cwd'] / 'node_modules/pkg/index.js').write_text('fixture')
+                    (opts['cwd'] / 'node_modules/.bin').mkdir()
+                    (opts['cwd'] / 'node_modules/.bin/outil').symlink_to('../pkg/index.js')
             else:
                 (opts['cwd'] / 'dist').mkdir()
                 (opts['cwd'] / 'dist/index.html').write_text('fixture')
@@ -121,12 +141,13 @@ class Preparation(unittest.TestCase):
         (release / 'CI_COMMIT_SHA').write_text('a' * 40 + '\n')
         artefact = self.root / 'artefact.tar'
         with tarfile.open(artefact, 'w') as tar:
-            for item in ('app', 'mode-studio/dist', 'BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
+            for item in ('app', 'mode-studio/dist', 'BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'FICHIERS_SHA256.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
                 tar.add(release / item, arcname='release/' + item)
         with artefact.open('rb') as f:
             empreinte = hashlib.file_digest(f, 'sha256').hexdigest()
         P.importer(artefact, empreinte, 'a' * 40, self.root / 'importe')
         self.assertEqual((self.root / 'importe/BUILD_OK').read_text().strip(), sha)
+        self.assertEqual((self.root / 'importe/app/node_modules/.bin/outil').read_text(), 'fixture')
         with self.assertRaisesRegex(ValueError, 'SHA Git'):
             P.importer(artefact, empreinte, 'b' * 40, self.root / 'refuse')
         self.assertFalse((self.root / 'refuse/BUILD_OK').exists())
