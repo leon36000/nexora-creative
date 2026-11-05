@@ -56,6 +56,29 @@ describe('actions Viewer et routes Nexora actives', () => {
     expect(view(langue)).toContain(`>${label}<`);
   });
 
+  it.each([
+    ['fr', 'Texturé', 'Argile', 'Fil de fer', 'Apparence du modèle', 'Image source du modèle'],
+    ['en', 'Textured', 'Clay', 'Wireframe', 'Model appearance', 'Source image for the model'],
+  ] as const)('localise les commandes, le groupe et le titre de l’image source en %s', (langue, textured, clay, wire, group, subject) => {
+    fixture.take = { id: 42, kind: 'object', status: 'done', settings: '{}' };
+    const html = view(langue);
+    expect(html).toContain(`aria-label="${group}"`);
+    expect(html).toContain(`>${textured}<`);
+    expect(html).toContain(`>${clay}<`);
+    expect(html).toContain(`>${wire}<`);
+    expect(html).toContain(`title="${subject}"`);
+    expect(html).not.toContain('The subject as the model saw it');
+  });
+
+  it('conserve les libellés historiques du modèle sans langue', () => {
+    fixture.take = { id: 42, kind: 'object', status: 'done', settings: '{}' };
+    const html = view();
+    expect(html).toContain('>Textured<');
+    expect(html).toContain('>Clay<');
+    expect(html).toContain('>Wireframe<');
+    expect(html).toContain('title="The subject as the model saw it"');
+  });
+
   it('ne propose pas Animate tant que la prise image n’est pas terminée', () => {
     fixture.take = { id: 42, kind: 'still', status: 'queued', settings: '{}' };
     expect(view()).not.toContain('>Animate<');

@@ -399,19 +399,21 @@ function HdrFiles({ take }: { take: Take }) {
  * wire looks for judging the geometry, and the subject it was built from.
  */
 function ObjectStage({ take, look, onLook, langue }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void; langue?: LangueClient }) {
+  const c = langue ? meshCopy(langue) : null;
   return (
     <div className="object-stage">
-      <Suspense fallback={<img className="model-poster" src={posterUrl(take.id)} alt="" />}>
+      <Suspense fallback={<img className="model-poster" src={posterUrl(take.id)} alt={c?.modelLoading ?? ''} title={c?.modelLoading} />}>
         <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} langue={langue} />
       </Suspense>
-      <div className="object-looks" onClick={(e) => e.stopPropagation()}>
+      <div className="object-looks" role={c ? 'group' : undefined} aria-label={c?.modelLooks} onClick={(e) => e.stopPropagation()}>
         {(['lit', 'clay', 'wire'] as const).map((l) => (
-          <button key={l} type="button" className={`pill ${look === l ? 'active' : ''}`} onClick={() => onLook(l)}>
-            {l === 'lit' ? 'Textured' : l === 'clay' ? 'Clay' : 'Wireframe'}
+          <button key={l} type="button" className={`pill ${look === l ? 'active' : ''}`} aria-pressed={look === l} onClick={() => onLook(l)}>
+            {c ? c[l === 'lit' ? 'textured' : l === 'clay' ? 'clay' : 'wire'] : l === 'lit' ? 'Textured' : l === 'clay' ? 'Clay' : 'Wireframe'}
           </button>
         ))}
       </div>
-      <img className="object-subject" src={subjectUrl(take.id)} alt="" title="The subject as the model saw it" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+      <img className="object-subject" src={subjectUrl(take.id)} alt={c?.modelSubject ?? ''}
+        title={c?.modelSubject ?? 'The subject as the model saw it'} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
     </div>
   );
 }

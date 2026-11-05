@@ -52,15 +52,42 @@ export default function ObjectPage() {
   const [vueGauche, setVueGauche] = useState<Source | null>(null);
   const [vueDos, setVueDos] = useState<Source | null>(null);
   const [vueDroite, setVueDroite] = useState<Source | null>(null);
+  const [vuesMax, setVuesMax] = useState(2);
+  const [etatLimiteVues, setEtatLimiteVues] = useState<'loading' | 'ready' | 'unavailable' | 'unsupported'>('unavailable');
   const [intention, setIntention] = useState('');
   const [chaine, setChaine] = useState<ObjetTexteEtat | null>(null);
-  const [devisT, setDevisT] = useState<{ secondesEstimees: number; credits: number | null } | null>(null);
+  const [devisT, setDevisT] = useState<{ key: string; value: { secondesEstimees: number; credits: number | null } } | null>(null);
+  const devisKey = `${mode}:${mode === 'vues' ? 'draft' : quality}`;
+  const devisActuel = devisT?.key === devisKey ? devisT.value : null;
   const [chaineId, setChaineId] = useState<number | null>(null);
   useEffect(() => {
     let mort = false;
-    api.objetDevis({ qualite: mode === 'vues' ? 'draft' : quality, source: mode }).then((d) => { if (!mort) setDevisT(d); }).catch(() => {});
+    api.objetDevis({ qualite: mode === 'vues' ? 'draft' : quality, source: mode }).then((d) => { if (!mort) setDevisT({ key: devisKey, value: d }); }).catch(() => {});
     return () => { mort = true; };
-  }, [quality, mode]);
+  }, [devisKey]);
+  useEffect(() => {
+    if (mode !== 'vues') return;
+    let mort = false;
+    // The server clamps this setting to 2..4. Until it answers, keep the
+    // minimum contract so that a stale UI cannot submit more views than safe.
+    setVuesMax(2);
+    setEtatLimiteVues('loading');
+    void api.nexoraEtat().then((etat) => {
+      if (mort) return;
+      if (etat.objet3d?.multivue !== true) {
+        setEtatLimiteVues('unsupported');
+        return;
+      }
+      const max = etat.objet3d?.vuesMax;
+      if (typeof max === 'number' && Number.isFinite(max)) {
+        setVuesMax(Math.max(2, Math.min(4, Math.floor(max))));
+        setEtatLimiteVues('ready');
+      } else {
+        setEtatLimiteVues('unavailable');
+      }
+    }).catch(() => { if (!mort) setEtatLimiteVues('unavailable'); });
+    return () => { mort = true; };
+  }, [mode]);
   useEffect(() => {
     if (chaineId === null) return;
     let mort = false;
@@ -102,6 +129,12 @@ export default function ObjectPage() {
 
   const takes = useStore((s) => s.takes.filter((t) => inFeed(t) && isModel(t)));
   const est = useEstimate({ kind: 'object', quality });
+  const optionalViewsSelected = [vueGauche, vueDos, vueDroite].filter(Boolean).length;
+  const exceedsViewLimit = optionalViewsSelected + 1 > vuesMax;
+  const showEmptyOptionalSlots = optionalViewsSelected < vuesMax - 1;
+  const viewCount = 1 + optionalViewsSelected;
+  const takeMultiplier = mode === 'image' ? count : 1;
+  const displayedSeconds = mode === 'image' && est ? est * count : devisActuel ? devisActuel.secondesEstimees * takeMultiplier : null;
   const shown = takes.find((t) => t.id === selected) ?? takes.find((t) => t.status === 'done');
   useEffect(() => { setLook('lit'); }, [shown?.id]);
 
@@ -145,7 +178,7 @@ export default function ObjectPage() {
 
   /** Plusieurs vues du même objet : Pixal3D, brouillon, une prise (sur les GPU Turing qui portent ce modèle). */
   async function goVues() {
-    if (!source) return;
+    if (!source || (!vueGauche && !vueDos && !vueDroite) || exceedsViewLimit || etatLimiteVues === 'unsupported') return;
     setBusy(c.inProgress);
     try {
       const versSpec = (s: Source | null) => (s ? (s.takeId ? { sourceTake: s.takeId } : { image: s.token }) : undefined);
@@ -193,10 +226,14 @@ export default function ObjectPage() {
               title={mode === 'vues' ? c.addFrontView : c.addStill} sub={c.frontViewHint} />
             {mode === 'vues' && (
               <>
-                <SourceSlot label={c.leftView} value={vueGauche} onChange={setVueGauche} accept={['image']} langue={langue} title={`${c.addLeftView}${c.optional}`} sub={c.sameObjectLeft} />
-                <SourceSlot label={c.backView} value={vueDos} onChange={setVueDos} accept={['image']} langue={langue} title={`${c.addBackView}${c.optional}`} sub={c.sameObjectBack} />
-                <SourceSlot label={c.rightView} value={vueDroite} onChange={setVueDroite} accept={['image']} langue={langue} title={`${c.addRightView}${c.optional}`} sub={c.sameObjectRight} />
-                <div className="dim" style={{ fontSize: 12 }}>{c.multiViewInfo}</div>
+                {(vueGauche || showEmptyOptionalSlots) && <SourceSlot label={c.leftView} value={vueGauche} onChange={setVueGauche} accept={['image']} langue={langue} title={`${c.addLeftView}${c.optional}`} sub={c.sameObjectLeft} />}
+                {(vueDos || showEmptyOptionalSlots) && <SourceSlot label={c.backView} value={vueDos} onChange={setVueDos} accept={['image']} langue={langue} title={`${c.addBackView}${c.optional}`} sub={c.sameObjectBack} />}
+                {(vueDroite || showEmptyOptionalSlots) && <SourceSlot label={c.rightView} value={vueDroite} onChange={setVueDroite} accept={['image']} langue={langue} title={`${c.addRightView}${c.optional}`} sub={c.sameObjectRight} />}
+                <div className="dim" style={{ fontSize: 12 }}>{c.multiViewInfo(vuesMax)}</div>
+                {etatLimiteVues === 'loading' && <div className="dim" role="status">{c.viewLimitLoading}</div>}
+                {etatLimiteVues === 'unavailable' && <div className="dim" role="status">{c.viewLimitUnavailable(vuesMax)}</div>}
+                {etatLimiteVues === 'unsupported' && <div className="dim" role="alert">{c.multiViewUnavailable}</div>}
+                {exceedsViewLimit && <div className="dim" role="alert" style={{ color: 'var(--danger, #e5534b)' }}>{c.viewLimitExceeded(vuesMax)}</div>}
               </>
             )}
           </>
@@ -243,7 +280,7 @@ export default function ObjectPage() {
           </div>
         </div>}
 
-        {mode !== 'texte' && <div className="chip-row" style={{ alignItems: 'center' }}>
+        {mode === 'image' && <div className="chip-row" style={{ alignItems: 'center' }}>
           <Stepper value={count} min={1} max={4} onChange={setCount} fmt={(v) => `${v}/4`} labels={{ decrease: c.decreaseCount, increase: c.increaseCount }} />
           <span className="dim" style={{ fontSize: 12 }}>{c.eachTakeNewSeed}</span>
         </div>}
@@ -253,13 +290,13 @@ export default function ObjectPage() {
             {chaine && <EtapesTexte e={chaine} langue={langue} />}
             <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || enCours || intention.trim().length < 3} onClick={() => void creerDepuisTexte()}>
               <span>{busy ?? (enCours ? c.inProgress : c.create3d)}</span>
-              <span className="cost">{devisT ? `${devisT.credits !== null ? `${devisT.credits} ${c.credits} · ` : ''}≈ ${fmtSeconds(devisT.secondesEstimees)}` : 'TRELLIS.2'}</span>
+              <span className="cost">{devisActuel ? `${devisActuel.credits !== null ? `${devisActuel.credits} ${c.credits} · ` : ''}≈ ${fmtSeconds(devisActuel.secondesEstimees)}` : c.estimateUnavailable}</span>
             </button>
           </>
         ) : (
-          <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source || (mode === 'vues' && !vueGauche && !vueDos && !vueDroite)} onClick={() => void (mode === 'vues' ? goVues() : go())}>
-            <span>{busy ?? (mode === 'vues' ? c.modelFromViews(1 + [vueGauche, vueDos, vueDroite].filter(Boolean).length) : count > 1 ? `${PRODUIT_3D} · ${count}` : PRODUIT_3D)}</span>
-            <span className="cost">{devisT?.credits != null ? `${devisT.credits * count} ${c.credits} · ` : ''}{est ? fmtSeconds(est * count) : devisT ? `≈ ${fmtSeconds(devisT.secondesEstimees * count)}` : 'TRELLIS.2'}</span>
+          <button type="button" className="generate" style={{ marginTop: 'auto' }} disabled={!!busy || !source || (mode === 'vues' && ((!vueGauche && !vueDos && !vueDroite) || exceedsViewLimit || etatLimiteVues === 'unsupported'))} onClick={() => void (mode === 'vues' ? goVues() : go())}>
+            <span>{busy ?? (mode === 'vues' ? c.modelFromViews(viewCount) : count > 1 ? `${PRODUIT_3D} · ${count}` : PRODUIT_3D)}</span>
+            <span className="cost">{devisActuel?.credits != null ? `${devisActuel.credits * takeMultiplier} ${c.credits} · ` : ''}{displayedSeconds !== null ? `${mode === 'image' && est ? '' : '≈ '}${fmtSeconds(displayedSeconds)}` : c.estimateUnavailable}</span>
           </button>
         )}
       </aside>
