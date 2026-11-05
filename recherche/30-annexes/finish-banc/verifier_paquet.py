@@ -12,7 +12,7 @@ for line in (root / 'SHA256SUMS').read_text().splitlines():
     actual = hashlib.sha256((root / name).read_bytes()).hexdigest()
     if actual != expected:
         raise ValueError(f'Empreinte incorrecte : {name}')
-for name in ('banc_finish.py', 'profondeur_10bits.py', 'verifier_paquet.py'):
+for name in ('banc_finish.py', 'profondeur_10bits.py', 'execution_bornee.py', 'verifier_paquet.py'):
     ast.parse((root / name).read_text(), filename=name)
 summary = json.loads((root / 'synthese.json').read_text())
 for field, filename, expected_count in (

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Banc local séquentiel 12 profils NVENC vs x264, sans réseau ni écrasement."""
-import argparse, csv, hashlib, json, math, os, pathlib, platform, re, shlex, shutil, subprocess, sys, time
+import argparse, csv, hashlib, json, math, os, pathlib, platform, re, shutil, time
 from fractions import Fraction
+from execution_bornee import executer
 def duree(s):
  v=float(s)
  if not math.isfinite(v) or v<=0: raise argparse.ArgumentTypeError('--timeout doit être un nombre positif, fini, en secondes')
@@ -23,17 +24,7 @@ if hasattr(os,'sched_getaffinity'):
  cpus=sorted(os.sched_getaffinity(0))[:2]; os.sched_setaffinity(0,cpus)
 LOG=O/'commandes.log'
 def run(cmd,log=LOG):
- cmd=list(map(str,cmd)); t=time.monotonic()
- def ecrire(statut,out,err):
-  with log.open('a') as f: f.write('\n$ '+shlex.join(cmd)+'\ntimeout_s='+str(args.timeout)+'\n'+out+'\n'+err+'\n'+statut+' sec='+str(round(time.monotonic()-t,3))+'\n')
- try: x=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=args.timeout)
- except subprocess.TimeoutExpired as e:
-  part=lambda v:(v.decode('utf-8','replace') if isinstance(v,bytes) else (v or ''))
-  ecrire('status=timeout',part(e.stdout),part(e.stderr))
-  raise RuntimeError('Délai de '+str(args.timeout)+' s dépassé (sortie partielle journalisée) : '+shlex.join(cmd)) from e
- ecrire('status='+str(x.returncode),x.stdout,x.stderr)
- if x.returncode: raise RuntimeError('Commande en échec : '+shlex.join(cmd))
- return x.stdout,x.stderr,time.monotonic()-t
+ return executer(cmd,args.timeout,log)
 def digest(path):
  h=hashlib.sha256()
  with path.open('rb') as f:
