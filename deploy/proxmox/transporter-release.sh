@@ -15,7 +15,7 @@ DEPOT="$1"; REVISION="$2"; ARTEFACT="$3"; SHA_ARTEFACT="$4"; LOCAL="$5"; ID="$6"
 [ "$(sha256sum "$ARTEFACT" | cut -d ' ' -f 1)" = "$SHA_ARTEFACT" ] || { printf '%s\n' 'Empreinte artefact différente' >&2; exit 1; }
 env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent python3 -B - "$ARTEFACT" "$REVISION" <<'PY'
 import sys, tarfile
-with tarfile.open(sys.argv[1], 'r:') as t:
+with tarfile.open(sys.argv[1], 'r:*') as t:
     matches = [m for m in t if m.name == 'release/CI_COMMIT_SHA']
     if len(matches) != 1 or not matches[0].isfile() or matches[0].size > 64:
         raise SystemExit('reçu Git absent ou ambigu')

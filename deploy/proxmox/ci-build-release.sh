@@ -56,7 +56,7 @@ if set(files) != set(hashes) or any(digest(chemin(r, p)) != h for p, h in hashes
     raise SystemExit('fichiers modifiés après build')
 if empreinte_dependances(r / 'app/node_modules') != (r / 'DEPENDANCES_SHA256').read_text().strip():
     raise SystemExit('dépendances modifiées après build')
-with tarfile.open(out, 'x') as t:
+with tarfile.open(out, 'x:xz') as t:
     for name in sorted(files):
         t.add(chemin(r, name), arcname='release/' + name, recursive=False)
     t.add(r / 'app/node_modules', arcname='release/app/node_modules')
@@ -64,4 +64,5 @@ with tarfile.open(out, 'x') as t:
         t.add(r / name, arcname='release/' + name, recursive=False)
 PY
 (cd "$OUT" && sha256sum release.tar > release.sha256)
+wc -c "$OUT/release.tar"
 printf 'Release amd64 construite pour %s\n' "$CI_COMMIT_SHA"

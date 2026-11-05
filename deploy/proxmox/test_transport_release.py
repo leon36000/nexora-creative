@@ -36,7 +36,7 @@ class Transport(unittest.TestCase):
             git('commit', '-qm', 'fixture')
             sha = git('rev-parse', 'HEAD').decode().strip()
             artefact = base / 'artefact.tar'
-            with tarfile.open(artefact, 'w') as t:
+            with tarfile.open(artefact, 'w:xz') as t:
                 contenu = (sha + '\n').encode()
                 entree = tarfile.TarInfo('release/CI_COMMIT_SHA')
                 entree.size = len(contenu)

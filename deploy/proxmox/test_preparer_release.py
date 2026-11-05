@@ -152,7 +152,7 @@ class Preparation(unittest.TestCase):
         P.construire(source, sha, release, fake)
         (release / 'CI_COMMIT_SHA').write_text('a' * 40 + '\n')
         artefact = self.root / 'artefact.tar'
-        with tarfile.open(artefact, 'w') as tar:
+        with tarfile.open(artefact, 'w:xz') as tar:
             for item in ('app', 'mode-studio/dist', 'BUILD_OK', 'SOURCE_FILES.json', 'SOURCE_HASHES.json', 'FICHIERS_SHA256.json', 'DEPENDANCES_SHA256', 'CI_COMMIT_SHA'):
                 tar.add(release / item, arcname='release/' + item)
         with artefact.open('rb') as f:

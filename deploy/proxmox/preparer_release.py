@@ -84,7 +84,7 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
         f.seek(0)
         dossier = Path(dossier)
         dossier.mkdir(mode=0o700)  # exclusif : une release existante n'est jamais remplacée
-        with tarfile.open(fileobj=f, mode='r:') as tar:
+        with tarfile.open(fileobj=f, mode='r:*') as tar:
             for item in tar:
                 if interdit(item.name) or not (item.isdir() or item.isfile()):
                     raise ValueError('entrée d’archive interdite')
@@ -167,7 +167,7 @@ def importer(archive_path, sha, revision, dossier):
         f.seek(0)
         dossier.mkdir(mode=0o700)
         seen, liens, fichiers_extraits, marqueur = set(), set(), set(), None
-        with tarfile.open(fileobj=f, mode='r:') as tar:
+        with tarfile.open(fileobj=f, mode='r:*') as tar:
             for item in tar:
                 p = PurePosixPath(item.name)
                 if p.is_absolute() or not p.parts or p.parts[0] != 'release' or '..' in p.parts:
