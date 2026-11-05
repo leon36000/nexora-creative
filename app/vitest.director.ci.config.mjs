@@ -1,0 +1,40 @@
+const root = process.env.DIRECTOR_CI_ROOT;
+const cache = process.env.DIRECTOR_CI_CACHE;
+if (!root || !cache) throw new Error('DIRECTOR_CI_ROOT et DIRECTOR_CI_CACHE requis');
+export default {
+  root,
+  envFile: false,
+  envDir: false,
+  cacheDir: cache,
+  resolve: { alias: [
+    { find: /^vitest$/, replacement: `${root}/app/node_modules/vitest/dist/index.js` },
+    { find: /^@vitest\/coverage-v8$/, replacement: `${root}/app/node_modules/@vitest/coverage-v8/dist/index.js` },
+  ] },
+  test: {
+    pool: 'threads', maxWorkers: 1, minWorkers: 1,
+    include: [
+      'app/server/nexora/filmLancementPartiel.test.ts', 'app/server/nexora/filmClePlan.test.ts',
+      'app/server/nexora/filmTransactions.test.ts', 'app/server/nexora/reconciliationArrets.test.ts',
+      'app/server/nexora/filmReservations.test.ts', 'app/server/nexora/filmH3MaxSuite.test.ts',
+      'app/server/nexora/film.test.ts', 'app/server/nexora/filmSorties.test.ts',
+      'app/server/nexora/creer.test.ts', 'app/server/nexora/gardeNouveauRendu.test.ts',
+      'app/server/nexora/creationLanguage.test.ts', 'app/server/nexora/personnages.test.ts',
+      'app/server/nexora/credits.test.ts', 'app/src/filmErreurPartielle.test.ts',
+      'app/server/nexora/detourage/routes.test.ts',
+      'app/server/nexora/detourage/serviceNatif.test.ts',
+      'app/src/FilmPartielAlerte.test.tsx', 'app/src/LangueSelection.test.tsx',
+    ],
+    coverage: {
+      provider: 'v8', reporter: ['text', 'lcov', 'json-summary'],
+      reportsDirectory: `${root}/.ci-director/coverage`,
+      include: [
+        'app/server/index.ts', 'app/server/jobs.ts', 'app/server/engine.ts',
+        'app/server/nexora/film.ts', 'app/server/nexora/filmMoteur.ts', 'app/server/nexora/filmEchec.ts',
+        'app/server/nexora/filmClePlan.ts', 'app/server/nexora/reconciliationArrets.ts',
+        'app/server/nexora/personnagesCast.ts', 'app/src/api.ts', 'app/src/pages/Creer.tsx',
+        'app/server/nexora/detourage/routes.ts', 'app/server/nexora/detourage/identite.ts',
+        'app/src/filmPartielActions.ts', 'app/src/FilmPartielAlerte.tsx', 'app/src/LangueSelection.tsx', 'app/src/FilmPlans.tsx',
+      ],
+    },
+  },
+};

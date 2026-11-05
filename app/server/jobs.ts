@@ -8,6 +8,7 @@ import { join } from 'path';
 import { config } from './config.js';
 import { compteCourant } from './nexora/compte.js';
 import { selectionnerReservationsFilmOrphelines, type ReservationFilmOrpheline } from './nexora/filmReservations.js';
+import { creerPriseSiPlanLibre } from './nexora/filmClePlan.js';
 
 mkdirSync(config.dataDir, { recursive: true });
 const db = new Database(join(config.dataDir, 'openfield.db'));
@@ -145,6 +146,17 @@ export interface Take {
 }
 
 export const takes = {
+  createProtegee(row: { project_id: number | null; kind: string; shot_name: string; settings: any; parent_take_id?: number }, cle: string, transfererDepuis?: number): number {
+    return creerPriseSiPlanLibre<number>(db, orgEcrite(), cle, Number(row.settings.nexoraFilm), () => {
+      if (transfererDepuis !== undefined) {
+        const ancienne = takes.get(transfererDepuis);
+        const credits = ancienne?.settings === undefined ? null : JSON.parse(ancienne.settings).nexoraCredits;
+        if (credits?.etat !== 'reservee' || credits.reservationId !== row.settings.nexoraCredits?.reservationId) throw new Error('Réservation de reprise introuvable ou déjà transférée');
+        takes.patchSettings(transfererDepuis, { nexoraCredits: { ...credits, etat: 'transferee' } });
+      }
+      return takes.create(row);
+    });
+  },
   create(row: { project_id: number | null; kind: string; shot_name: string; settings: unknown; parent_take_id?: number }): number {
     const r = db
       .prepare('INSERT INTO takes (project_id, kind, shot_name, settings, parent_take_id, organisation_id) VALUES (?,?,?,?,?,?)')
@@ -157,13 +169,14 @@ export const takes = {
    * that late result must not relabel the take or bring it back to the Library.
    */
   setPrompt(id: number, promptId: string) {
-    db.prepare("UPDATE takes SET prompt_id=?, status=CASE WHEN status='stopped' THEN status ELSE 'rendering' END WHERE id=?").run(promptId, id);
+    db.prepare("UPDATE takes SET prompt_id=?, status=CASE WHEN status='stopped' THEN status ELSE 'rendering' END, settings=CASE WHEN status<>'stopped' AND json_extract(settings, '$.nexoraSoumission')='indeterminee' THEN json_set(settings, '$.nexoraSoumission', 'confirmee') ELSE settings END WHERE id=?").run(promptId, id);
   },
   finish(id: number, outputPath: string, renderSeconds?: number) {
     db.prepare("UPDATE takes SET status='done', output_path=?, render_seconds=? WHERE id=? AND status<>'stopped'").run(outputPath, renderSeconds ?? null, id);
   },
-  fail(id: number, error: string, stopped = false) {
-    db.prepare("UPDATE takes SET status=?, error=? WHERE id=? AND status<>'stopped'").run(stopped ? 'stopped' : 'failed', error.slice(0, 500), id);
+  fail(id: number, error: string, stopped = false, terminalConfirme = false) {
+    db.prepare("UPDATE takes SET status=?, error=?, settings=CASE WHEN ?=1 AND json_extract(settings, '$.nexoraSoumission')='confirmee' THEN json_set(settings, '$.nexoraSoumission', 'indeterminee') ELSE settings END WHERE id=? AND status<>'stopped'")
+      .run(stopped ? 'stopped' : 'failed', error.slice(0, 500), stopped && !terminalConfirme ? 1 : 0, id);
   },
   /** Replace a take's settings (a chained take learns its start frame late; the Director's scene cut keeps its shot list here). */
   setSettings(id: number, settings: unknown) {
@@ -209,6 +222,12 @@ export const takes = {
   /** Failed films can retain reservations for plans that never became individual takes. */
   reservationsFilmOrphelines(): ReservationFilmOrpheline[] {
     return selectionnerReservationsFilmOrphelines((sql) => db.prepare(sql).all() as ReservationFilmOrpheline[]);
+  },
+  arretsIndetermines(apres: number, limite: number): Take[] {
+    return db.prepare("SELECT * FROM takes WHERE id>? AND status='stopped' AND prompt_id IS NOT NULL AND json_valid(settings) AND json_extract(settings, '$.nexoraSoumission')='indeterminee' ORDER BY id LIMIT ?").all(apres, limite) as Take[];
+  },
+  confirmerArretTerminal(id: number, promptId: string): void {
+    db.prepare("UPDATE takes SET settings=json_set(settings, '$.nexoraSoumission', 'confirmee') WHERE id=? AND status='stopped' AND prompt_id=? AND json_extract(settings, '$.nexoraSoumission')='indeterminee'").run(id, promptId);
   },
   /** Organisation propriétaire d'une prise, sans filtre (diffusion en direct, facturation). */
   organisationDe(id: number): string | undefined {

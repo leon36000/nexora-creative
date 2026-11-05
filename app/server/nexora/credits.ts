@@ -67,13 +67,24 @@ export interface Facturation {
 }
 
 /** API de crédits du site, appelée avec la clé /v1 de l'organisation (la même que celle du LLM). */
-export function facturationSite(siteUrl: string, cle: () => string | undefined, f: typeof fetch = fetch): Facturation {
+export function facturationSite(
+  siteUrl: string,
+  cle: () => string | undefined,
+  f: typeof fetch = fetch,
+  jetonService: () => string | undefined = () => undefined,
+): Facturation {
   const poster = async (chemin: string, corps: unknown) => {
     const k = cle();
     if (!k) throw new Error('organisation sans accès Nexora : reconnecte-toi');
+    const service = jetonService();
+    if (!service || service.length < 32) throw new Error('service Creative sans authentification Nexora');
     return f(`${siteUrl}/api/creative/credits/${chemin}`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${k}` },
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${k}`,
+        'x-nexora-creative-service-token': service,
+      },
       body: JSON.stringify(corps),
       signal: AbortSignal.timeout(15_000),
     });

@@ -21,13 +21,14 @@ Afficher ou committer un secret ; saisir un mot de passe à sa place ; supprimer
 6. **Qualité** : 8/10 minimum, notes honnêtes (retire 1,5 à 3 points aux auto-notes), planches et mesures. Films : prises de vues réelles, jamais look « jeu vidéo », musique écrite pour le montage.
 7. **Honnêteté** : dis ce qui est fait, vérifié, non vérifié ; donne au fondateur les commandes à coller quand tu ne peux pas agir.
 
-## Priorités (dans cet ordre)
-1. Sauvegarde complète de GitLab (pc4) + test de restauration ; `garage-0` ; SonarQube.
-2. Pousser et fusionner tout le travail en attente (branches des worktrees du Bureau et de `Storage`).
-3. Films : Creative V7 ×4 et OPSYS ×4, jusqu'aux MP4 finaux (copies téléphone < 28 Mo).
-4. Nexora Mesh (3D) : rapport `recherche/29`, spec d'interface, renommage, plugin.
-5. Pods/conteneurs et préparation du formatage (`nexora-plateforme`).
-6. Backlog Creative triple A (`docs/backlog/creative-triple-a.md`, TA1 à TA25).
+## Priorités (dans cet ordre) : l'AMÉLIORATION DE NEXORA CREATIVE ET DE SES TECHNOLOGIES
+Les vidéos ne sont PAS la priorité : elles ne servent que de démonstrations, de tests de qualité et de matière d'apprentissage pour AMD, après la technologie.
+1. **Nexora Creative : peaufinage et optimisation maximums** (qualité du résultat, vitesse, coût, ergonomie triple A, bilingue FR/EN) : Nexora Director (prompts de tournage réel, dialecte par générateur, meilleur modèle de premier rang), Producer et Studio (montage), Finish (export, NVENC, agrandissement), Matte (détourage), Scribe (transcription GPU), Critic (tri des prises), Campaign.
+2. **Nexora Mesh (3D)** : comparatif et meilleure chaîne locale (Hunyuan3D-2.1, TRELLIS.2 et autres), `recherche/29`, `docs/backlog/nexora-mesh-interface.md`, espace de travail dédié, renommage dans le produit, plugin MCP.
+3. **Les technologies manquantes face aux concurrents** (TA1 à TA25 de `docs/backlog/creative-triple-a.md`) : **Nexora Sync (synchronisation labiale : MuseTalk puis LatentSync, aujourd'hui absente du code)**, Voice, Score, FX (Wan 2.2, rééclairage, trajectoires), Pika H3 Flex (mesure puis recette), édition de vidéo existante, « change seulement le plan 2 », trois formats, MCP public et API (Nexora Connect). Chacune suit `docs/PROCESSUS-TECHNOLOGIE.md`.
+4. **AMD v2** (mémoire du réalisateur et du harnais de montage, plusieurs professeurs, ≥ 50 briefs, juge étalonné) : corpus de 50 briefs fusionné (!59), reste à rejouer et promouvoir.
+5. Infrastructure : sauvegarde complète de GitLab (pc4) avec test de restauration, `garage-0`, pods/conteneurs et préparation du formatage (`nexora-plateforme`).
+6. Vidéos de démonstration et de marque (Nexora Mesh, OPSYS-AI, Nexora général, réception, surveillance, Smarthome, VPS) : seulement quand une technologie est prête à être montrée.
 
 ## ESSAIMS DE SOUS-AGENTS : OBLIGATOIRE (à appliquer à chaque session)
 Le fondateur exige que tu agisses en ORCHESTRATEUR à temps plein : tu décides, tu contrôles, tu intègres ; le travail mécanique ou parallélisable est fait par des essaims de sous-agents bon marché.

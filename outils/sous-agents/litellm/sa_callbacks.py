@@ -1,5 +1,6 @@
 """Journal JSONL des appels (comptes de jetons, coût, durée) — jamais les prompts ni les réponses."""
-import json, os, time
+import json, math, os, time
+from decimal import Decimal
 from litellm.integrations.custom_logger import CustomLogger
 
 LOG = os.environ.get("SA_LOG", "/app/state/usage.jsonl")
@@ -9,6 +10,28 @@ def _hdr(kwargs, name):
     md = (kwargs.get("litellm_params") or {}).get("metadata") or {}
     h = md.get("headers") or {}
     return h.get(name) or h.get(name.title())
+
+
+def _cost(kwargs):
+    # Missing, invalid and negative values are unknown; a declared zero remains zero.
+    value = kwargs.get("response_cost")
+    if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)):
+        return None
+    try:
+        result = float(value)
+        original = value if isinstance(value, Decimal) else Decimal(str(value))
+        if not math.isfinite(result) or result < 0 or Decimal(str(result)) != original:
+            return None
+    except (TypeError, ValueError, ArithmeticError):
+        return None
+    return result
+
+
+def _err(error):
+    # A provider's message or a dynamically created type name may contain a secret.
+    allowed = {"TimeoutError", "ConnectionError", "ValueError", "RuntimeError", "OSError", "PermissionError"}
+    name = type(error).__name__ if error is not None else "None"
+    return name if name in allowed or name == "None" else "AutreErreur"
 
 
 def _write(rec):
@@ -47,7 +70,7 @@ class SaLogger(CustomLogger):
             "ok": ok,
             "in": usage.get("in", 0),
             "out": usage.get("out", 0),
-            "cost": kwargs.get("response_cost") or 0,
+            "cost": _cost(kwargs),
             "sec": round((end - start).total_seconds(), 2),
         }
 
@@ -56,7 +79,7 @@ class SaLogger(CustomLogger):
 
     async def async_log_failure_event(self, kwargs, response_obj, start_time, end_time):
         r = self._rec(kwargs, None, start_time, end_time, False)
-        r["err"] = str(kwargs.get("exception"))[:160]
+        r["err"] = _err(kwargs.get("exception"))
         _write(r)
 
 

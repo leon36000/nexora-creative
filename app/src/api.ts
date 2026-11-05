@@ -83,6 +83,20 @@ export interface PhoneEvent {
   reason?: 'received' | 'expired' | 'cancelled' | 'abuse' | 'replaced';
 }
 
+export class EchecFilmPartiel extends Error {
+  constructor(message: string, public readonly filmId: number, public readonly prises: { plan: number; takeId: number }[], public readonly verificationRequise: boolean, public readonly conflit?: { filmId: number; plan: number; takeId: number }) { super(message); }
+}
+
+function erreurFilmPartiel(url: string, d: any, msg: string): EchecFilmPartiel | undefined {
+  const routeFilm = url === '/api/nexora/film/tourner' || /^\/api\/nexora\/film\/\d+\/refaire$/.test(url) || url === '/api/nexora/prolonger' || url === '/api/nexora/raccord';
+  if (!routeFilm || !Number.isSafeInteger(d?.filmId) || d.filmId <= 0 || !Array.isArray(d.prises)) return undefined;
+  const prises = d.prises.filter((p: any) => Number.isSafeInteger(p?.plan) && p.plan >= 0 && Number.isSafeInteger(p?.takeId) && p.takeId > 0);
+  const c = d.conflit;
+  const conflit = Number.isSafeInteger(c?.filmId) && c.filmId > 0 && Number.isSafeInteger(c?.plan) && c.plan >= 0 && Number.isSafeInteger(c?.takeId) && c.takeId > 0 ? { filmId: c.filmId, plan: c.plan, takeId: c.takeId } : undefined;
+  const verification = !!conflit || [d.attachementsEnAttente, d.reservationsEnAttente, d.marquageEnAttente].some((v) => Array.isArray(v) && v.length > 0);
+  return prises.length || verification ? new EchecFilmPartiel(msg, d.filmId, prises, verification, conflit) : undefined;
+}
+
 async function j<T>(url: string, init?: RequestInit): Promise<T> {
   // Only claim a JSON body when one exists — Fastify 400s an empty body sent
   // with a JSON content-type, which silently broke every body-less POST
@@ -100,6 +114,8 @@ async function j<T>(url: string, init?: RequestInit): Promise<T> {
   if (!r.ok) {
     const msg = (d && (d.error || d.message)) || `${r.status}`;
     console.error(`[openfield] ${init?.method || 'GET'} ${url} failed:`, msg);
+    const partiel = erreurFilmPartiel(url, d, msg);
+    if (partiel) throw partiel;
     throw new Error(msg);
   }
   return d as T;
@@ -111,8 +127,9 @@ export interface CreerReponse {
   takeIds: number[]; takeId: number; prompt: string; source: 'llm' | 'repli'; tentatives: number; moteur: 'h3-fast' | 'h3-max';
   comprehension?: Comprehension; usageRedaction?: { credits: number; usd: number; jetons: number; palier: string };
 }
-export interface PlanFilm { resume: string; description: string; duree: 5 | 10; camera: string; take?: number }
+export interface PlanFilm { resume: string; description: string; duree: 5 | 10; camera: string; suite?: boolean; replique?: string; take?: number }
 export interface Storyboard {
+  langue?: LangueClient;
   titre: string;
   bible: { style: string; personnages: { nom: string; description: string }[]; lieux: { nom: string; description: string }[] };
   plans: PlanFilm[];
@@ -222,7 +239,7 @@ export const api = {
   nexoraImageJeton: (id: number) => j<{ jeton: string }>(`/api/nexora/image/${id}/jeton`, { method: 'POST', body: '{}' }),
   nexoraDevis: (b: { format: string; duree: number; son: boolean; qualite: string; image?: string; langueClient?: LangueClient }) =>
     j<{ credits: number | null; secondesEstimees: number | null; moteur: string | null; erreur?: string; code?: string }>('/api/nexora/devis', { method: 'POST', body: JSON.stringify(b) }),
-  nexoraFilmPlan: (b: { intention: string; duree: number }) =>
+  nexoraFilmPlan: (b: { intention: string; duree: number; langue?: LangueClient }) =>
     j<{ storyboard: Storyboard; source: 'llm' | 'repli' }>('/api/nexora/film/plan', { method: 'POST', body: JSON.stringify(b) }),
   nexoraFilmRefaire: (filmId: number, b: { plan: number; description?: string; camera?: string }) =>
     j<{ filmId: number }>(`/api/nexora/film/${filmId}/refaire`, { method: 'POST', body: JSON.stringify(b) }),

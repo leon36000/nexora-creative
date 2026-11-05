@@ -1,0 +1,26 @@
+{
+  "equipe": "essai",
+  "titre": "Essai technique sans réseau",
+  "cles": [
+    {"id": "k01", "format": "16:9", "graine": 101, "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a Cooke 50mm lens. A muddy hillside in Scotland, two people in rain, practical fire, film grain."},
+    {"id": "k02", "format": "16:9", "graine": 102, "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an Arri 35mm lens. An industrial roof in Montreal, rain on wet steel, a person in foreground, sodium street lights."}
+  ],
+  "plans": [
+    {"id": "p01", "cle": "k01", "format": "16:9", "images": 124, "graine": 201, "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera, natural motion blur from a 180-degree shutter, slight focus breathing, film grain. A person runs across the muddy hill in the rain. No text, no logos.\n\noverall_soundscape: Rain and footsteps.\n\nnon_diegetic_music: N/A"},
+    {"id": "p02", "cle": "k02", "format": "16:9", "images": 124, "graine": 202, "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera on a real industrial roof in Montreal. A person turns in the rain, real weight and motion blur, film grain. No text, no logos.\n\noverall_soundscape: Rain and wind.\n\nnon_diegetic_music: N/A"}
+  ],
+  "voix": [{"id": "v01", "moteur": "gemini38-puck", "texte": "On y va !", "direction": "Une personne crie dans la pluie, attaque franche."}],
+  "temps_forts": [{"t": 1, "evenement": "premier impact"}, {"t": 5, "evenement": "coupe"}],
+  "musiques": [{"id": "m1", "moteur": "lyria-pro", "prompt": "Instrumental. 0-1 s: tense ticking. 1 s: drum impact. 1-5 s: driving percussion. 5 s: brass motif. 8-10 s: final hit and clean tail."}],
+  "montage": {
+    "marque": "marque-v7.json",
+    "duree": 10,
+    "bpm": 120,
+    "musique": {"fichier": "musique:m1", "calage": "auto", "gain_db": -7, "trous": [[4, 4.5]], "ducking_db": 7},
+    "voix": [{"id": "v01", "t": 2, "db": -3}],
+    "segments": [
+      {"type": "plan", "debut": 0, "duree": 5, "fichier": "plan:p01", "entree": 0, "son_db": -12, "etalonnage": "neutre"},
+      {"type": "plan", "debut": 5, "duree": 5, "fichier": "plan:p02", "entree": 0, "son_db": -12, "etalonnage": "neutre"}
+    ]
+  }
+}

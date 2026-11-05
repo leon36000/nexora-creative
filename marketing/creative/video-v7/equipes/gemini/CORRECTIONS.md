@@ -1,0 +1,2 @@
+- Technique (producteur) : la capture Mode Studio citée comme dossier (« captures/studio2 », avec des étapes inexistantes) remplacée par son image « studio2/0006-editeur.jpg » (le moteur attend un fichier).
+- Technique (producteur) : « montage.textes » pointé sur le textes.json de l'équipe (sans lui, ses textes à l'écran étaient introuvables).

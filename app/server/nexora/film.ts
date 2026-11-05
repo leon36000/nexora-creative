@@ -17,13 +17,14 @@ export interface PlanFilm {
   camera: string;
   /** Le plan prolonge directement le précédent : il part de sa dernière image (H3 en image vers vidéo). */
   suite?: boolean;
-  /** Réplique (français) dite dans ce plan, recopiée mot pour mot dans le prompt H3 : voix synchronisée à l'image. */
+  /** Réplique dite dans la langue du film, recopiée mot pour mot dans le prompt H3. */
   replique?: string;
   /** Prise de rendu de ce plan, une fois en file. */
   take?: number;
 }
 
 export interface Storyboard {
+  langue?: 'fr' | 'en';
   titre: string;
   bible: { style: string; personnages: { nom: string; description: string }[]; lieux: { nom: string; description: string }[] };
   plans: PlanFilm[];
@@ -39,8 +40,9 @@ const entites = (v: unknown) =>
     .filter((e) => e.nom || e.description)
     .slice(0, 8);
 
-export function lireStoryboard(o: unknown, dureeCible: number): Storyboard {
+export function lireStoryboard(o: unknown, dureeCible: number, langueForcee?: 'fr' | 'en'): Storyboard {
   const b = (o ?? {}) as Record<string, any>;
+  const langue = langueForcee ?? (b.langue === 'en' ? 'en' : 'fr');
   const plans: PlanFilm[] = (Array.isArray(b.plans) ? b.plans : [])
     .map((p: any) => ({
       resume: txt(p?.resume, 160),
@@ -60,7 +62,8 @@ export function lireStoryboard(o: unknown, dureeCible: number): Storyboard {
   }
   void dureeCible;
   return {
-    titre: txt(b.titre, 120) || 'Sans titre',
+    langue,
+    titre: txt(b.titre, 120) || (langue === 'en' ? 'Untitled' : 'Sans titre'),
     bible: { style: txt(b.bible?.style, 600), personnages: entites(b.bible?.personnages), lieux: entites(b.bible?.lieux) },
     plans,
     dureeTotale: plans.reduce((n, p) => n + p.duree, 0),
@@ -81,52 +84,55 @@ export function intentionDuPlan(s: Storyboard, i: number): string {
   return parties.filter(Boolean).join('\n');
 }
 
-function decoupageSimple(intention: string, dureeCible: number): Storyboard {
+function decoupageSimple(intention: string, dureeCible: number, langue: 'fr' | 'en'): Storyboard {
   const n = Math.max(1, Math.min(MAX_PLANS, Math.round(dureeCible / 5)));
   const cameras = ['wide establishing shot, slow push in', 'medium shot, arc shot at slow speed', 'close-up, static shot', 'low-angle tracking shot'];
   return lireStoryboard(
     {
+      langue,
       titre: intention.slice(0, 60),
       bible: { style: 'Live-action, cinematic', personnages: [], lieux: [] },
-      plans: Array.from({ length: n }, (_, i) => ({ resume: `Plan ${i + 1}`, description: intention, duree: 5, camera: cameras[i % cameras.length] })),
+      plans: Array.from({ length: n }, (_, i) => ({ resume: `${langue === 'en' ? 'Shot' : 'Plan'} ${i + 1}`, description: intention, duree: 5, camera: cameras[i % cameras.length] })),
     },
     dureeCible,
   );
 }
 
 const CONSIGNES = `You are the director of Nexora Creative, an AI film studio whose camera is the MiniMax H3 audio-video model.
-Turn the user's idea (often short, in French) into a storyboard for a film of about the requested duration.
+Turn the user's idea into a storyboard for a film of about the requested duration.
 Each shot is rendered separately by H3 as a 5 or 10 second clip, so:
 - write every shot description so it can be filmed on its own, in English, concrete and visual (subjects, action, light, materials, sound sources);
 - put everything that must stay identical across shots in the "bible" (style, characters with precise looks and clothes, places), and reuse the same names;
 - vary framing and camera (wide, medium, close-up, low angle, arc shot, tracking shot, push in, static) to tell the story like a real editor;
 - prefer 5 s shots; use 10 s only for a continuous action that needs it; the sum of durations should be close to the requested duration;
 - set "suite": true on a shot that continues the previous one with no jump in time or place (the same action goes on, e.g. a transformation that keeps unfolding): it will start from the last frame of the previous shot, which keeps subjects identical; use it for at most half of the shots and never on the first;
-- the "resume" of each shot is a short French phrase for the user interface.
-Answer only with JSON: {"titre": "...", "bible": {"style": "...", "personnages": [{"nom": "...", "description": "..."}], "lieux": [{"nom": "...", "description": "..."}]}, "plans": [{"resume": "...", "description": "...", "duree": 5, "camera": "...", "suite": false}]}`;
+- the "resume" and "titre" are in the requested film language; dialogue and requested on-screen text are in that same language. If a shot has dialogue, put it verbatim in "replique".
+Answer only with JSON: {"titre": "...", "bible": {"style": "...", "personnages": [{"nom": "...", "description": "..."}], "lieux": [{"nom": "...", "description": "..."}]}, "plans": [{"resume": "...", "description": "...", "duree": 5, "camera": "...", "suite": false, "replique": "..."}]}`;
 
 export async function planifierFilm(
-  d: { intention: string; dureeCible: number },
+  d: { intention: string; dureeCible: number; langue?: 'fr' | 'en' },
   llm: ClientLlm | null,
 ): Promise<{ storyboard: Storyboard; source: 'llm' | 'repli' }> {
+  const langue = d.langue === 'en' ? 'en' : 'fr';
   if (llm) {
     for (let essai = 0; essai < 2; essai++) {
       try {
         const brut = await llm.completer(
           'realisation',
           [
-            { role: 'system', content: avecCompetences('realisation', CONSIGNES) },
+            { role: 'system', content: avecCompetences('realisation', `${CONSIGNES}\nFilm language: ${langue === 'en' ? 'English' : 'French'}; dialogue and requested on-screen text must use ${langue === 'en' ? 'English' : 'French'}.`) },
             { role: 'user', content: JSON.stringify({ idee: d.intention, duree_cible_secondes: d.dureeCible }) },
           ],
           { json: true, temperature: 0.8 },
         );
-        return { storyboard: lireStoryboard(lireJson(brut), d.dureeCible), source: 'llm' };
+        const storyboard = lireStoryboard(lireJson(brut), d.dureeCible, langue);
+        return { storyboard, source: 'llm' };
       } catch {
         /* nouvel essai, puis repli */
       }
     }
   }
-  return { storyboard: decoupageSimple(d.intention, d.dureeCible), source: 'repli' };
+  return { storyboard: decoupageSimple(d.intention, d.dureeCible, langue), source: 'repli' };
 }
 
 export interface OptionsAssemblage {

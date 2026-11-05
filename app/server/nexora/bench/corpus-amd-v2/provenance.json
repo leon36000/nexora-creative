@@ -1,0 +1,1624 @@
+{
+  "version": "1",
+  "statut": "propositions non approuvées ; voix en attente ; aucune promotion de mémoire",
+  "corpus_fichier": "corpus.json",
+  "corpus_sha256": "b6dee60a75ea285b3bbb4a166b240e215659c9370d58ce10367f9585994c7fe7",
+  "partitions": "construction / validation / test, groupes campagne et assets disjoints",
+  "test": "briefs de test non transmis aux réviseurs de groupe Gemini et inchangés lors des corrections ciblées",
+  "verification": "Empreintes SHA-256 des sorties d’agents et des briefs canoniques ; les traces complètes restent conservées séparément sur Storage. Les empreintes ne valident pas le contenu créatif.",
+  "briefs": [
+    {
+      "id": "AMD2-001",
+      "campaign_id": "AMD2-C01",
+      "split": "construction",
+      "brief_sha256_canonique": "8b300d00b659dba10a6d5617288df7616f279e777e31558b4f8a1447bbdc4af6",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-01",
+          "run_id": "isole-20261104-212916-2441631-25765",
+          "sortie_sha256": "cfabe361d4bc7cec3ccd6070256583517d4fddf7341053fcb2c1955aad15902e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-001",
+          "run_id": "isole-20261104-213752-2455370-17583",
+          "sortie_sha256": "c64cbc99bc8c0a45e67be7bf83378bb0c2db22063179fd4e5835747c22e9d103"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-traduction-amd2-001",
+          "run_id": "isole-20261104-214708-2485046-14308",
+          "sortie_sha256": "416b219070042eedbdf81f8924f6d97afc2b90d65ff6165bd81cc0e638e746db"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c01",
+          "run_id": "isole-20261104-215815-2506121-2562",
+          "sortie_sha256": "1114b58f9a87b43260fa295dce8d8426c613535f4bbefa2a90da212c872cd187"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c01",
+          "run_id": "isole-20261104-220119-2512783-1186",
+          "sortie_sha256": "3bc7f79ec55cfd430eba23e52cac0cefbb1ece00553ff8fffcb9e67b77e89996"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-001",
+          "run_id": "isole-20261104-220458-2518284-13189",
+          "sortie_sha256": "046299af181822a80ce924de0ab46fb5d548dc55a8454fca1a8bbcfa904289cb"
+        }
+      ],
+      "intervention_humaine": "Ajustement manuel ciblé : fonctions Mesh prouvées ou prototype sans fausse démonstration."
+    },
+    {
+      "id": "AMD2-002",
+      "campaign_id": "AMD2-C01",
+      "split": "construction",
+      "brief_sha256_canonique": "6269c9fca02c7fcb6db3cab229f900b1d59806be11043d2aa4d8e0a93dc4d0b9",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-01",
+          "run_id": "isole-20261104-212916-2441631-25765",
+          "sortie_sha256": "cfabe361d4bc7cec3ccd6070256583517d4fddf7341053fcb2c1955aad15902e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-002",
+          "run_id": "isole-20261104-213752-2455389-22210",
+          "sortie_sha256": "24f70d52c815c468bb261929bb859a4555c042f90d883d883903228c4e27b630"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c01",
+          "run_id": "isole-20261104-215815-2506121-2562",
+          "sortie_sha256": "1114b58f9a87b43260fa295dce8d8426c613535f4bbefa2a90da212c872cd187"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c01",
+          "run_id": "isole-20261104-220119-2512783-1186",
+          "sortie_sha256": "3bc7f79ec55cfd430eba23e52cac0cefbb1ece00553ff8fffcb9e67b77e89996"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-002",
+          "run_id": "isole-20261104-220458-2518329-25399",
+          "sortie_sha256": "cb8a81edbffcc41dbad73605f2c082d0ab7aa8cb5a55d1247631f9b7bbcc08bf"
+        }
+      ],
+      "intervention_humaine": "Ajustement manuel ciblé : fonctions Mesh prouvées ou prototype sans fausse démonstration."
+    },
+    {
+      "id": "AMD2-003",
+      "campaign_id": "AMD2-C01",
+      "split": "construction",
+      "brief_sha256_canonique": "7d6fe1b2ea8950c439ccacff9f636d6a09b34141bffc4b54b34629d46f359e5c",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-01",
+          "run_id": "isole-20261104-212916-2441631-25765",
+          "sortie_sha256": "cfabe361d4bc7cec3ccd6070256583517d4fddf7341053fcb2c1955aad15902e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-003",
+          "run_id": "isole-20261104-213752-2455411-10222",
+          "sortie_sha256": "33a221d7908ec35b622a3a62f52ef2a5eb999070a3fc3fe189cc0684a64965b8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c01",
+          "run_id": "isole-20261104-215815-2506121-2562",
+          "sortie_sha256": "1114b58f9a87b43260fa295dce8d8426c613535f4bbefa2a90da212c872cd187"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c01",
+          "run_id": "isole-20261104-220119-2512783-1186",
+          "sortie_sha256": "3bc7f79ec55cfd430eba23e52cac0cefbb1ece00553ff8fffcb9e67b77e89996"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-003",
+          "run_id": "isole-20261104-220458-2518311-5015",
+          "sortie_sha256": "f51f848d59017fc3a052326de090a2ea0cc9592e1c4e76b59d7ea0c2417a6de3"
+        }
+      ],
+      "intervention_humaine": "Ajustement manuel ciblé : fonctions Mesh prouvées ou prototype sans fausse démonstration."
+    },
+    {
+      "id": "AMD2-004",
+      "campaign_id": "AMD2-C01",
+      "split": "construction",
+      "brief_sha256_canonique": "e193de4196f0951df929bc4a5441ffc1ed1e0318af8dcba0d0fa33a392c6b1ff",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-01",
+          "run_id": "isole-20261104-212916-2441631-25765",
+          "sortie_sha256": "cfabe361d4bc7cec3ccd6070256583517d4fddf7341053fcb2c1955aad15902e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-004",
+          "run_id": "isole-20261104-213752-2455423-23681",
+          "sortie_sha256": "9a7eca712c997b410987234761c4ef0611722b6c808144e14ec78b3dd3c28c65"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c01",
+          "run_id": "isole-20261104-215815-2506121-2562",
+          "sortie_sha256": "1114b58f9a87b43260fa295dce8d8426c613535f4bbefa2a90da212c872cd187"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c01",
+          "run_id": "isole-20261104-220119-2512783-1186",
+          "sortie_sha256": "3bc7f79ec55cfd430eba23e52cac0cefbb1ece00553ff8fffcb9e67b77e89996"
+        }
+      ],
+      "intervention_humaine": "Ajustement manuel ciblé : fonctions Mesh prouvées ou prototype sans fausse démonstration."
+    },
+    {
+      "id": "AMD2-005",
+      "campaign_id": "AMD2-C01",
+      "split": "construction",
+      "brief_sha256_canonique": "da84edf3b558eebaa0774077b081223cd2f9a073c0f8a3edfe4fd680f3576a0c",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-01",
+          "run_id": "isole-20261104-212916-2441631-25765",
+          "sortie_sha256": "cfabe361d4bc7cec3ccd6070256583517d4fddf7341053fcb2c1955aad15902e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-005",
+          "run_id": "isole-20261104-213752-2455365-13903",
+          "sortie_sha256": "206dfe407151934d8fb2021794f5ca3bc14ecf1f82f322e559adf72700bec5a2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c01",
+          "run_id": "isole-20261104-215815-2506121-2562",
+          "sortie_sha256": "1114b58f9a87b43260fa295dce8d8426c613535f4bbefa2a90da212c872cd187"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c01",
+          "run_id": "isole-20261104-220119-2512783-1186",
+          "sortie_sha256": "3bc7f79ec55cfd430eba23e52cac0cefbb1ece00553ff8fffcb9e67b77e89996"
+        }
+      ],
+      "intervention_humaine": "Ajustement manuel ciblé : fonctions Mesh prouvées ou prototype sans fausse démonstration."
+    },
+    {
+      "id": "AMD2-006",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "brief_sha256_canonique": "b27a2e248b010291e64418de8dba56c035216adfa40d07330750629a7ec45318",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-02",
+          "run_id": "isole-20261104-212916-2441636-281",
+          "sortie_sha256": "863d0c967bd3934618fff30b8e57f6c6aa465ad60790c789f3bad3626e1c4bd8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-006",
+          "run_id": "isole-20261104-213752-2455371-4316",
+          "sortie_sha256": "a3a8c4b8e1a9d81602936aa575b93410fb16e1a5314e9d52c7b28c705e62fabe"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c02",
+          "run_id": "isole-20261104-215815-2506162-13643",
+          "sortie_sha256": "cd09007ec0500eedb395f2da2a05888b2068134f9d6c7652af19282c53cec50a"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c02",
+          "run_id": "isole-20261104-220119-2512833-7141",
+          "sortie_sha256": "9b9850341d098b662a3895bf5fa7415d7937f24653a708f39c31a8c7689fc4fc"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-007",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "brief_sha256_canonique": "12a5e8bc3e2fdeda45390a32aa33e0bba14853a5f2d54e7a474365cbc28943e3",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-02",
+          "run_id": "isole-20261104-212916-2441636-281",
+          "sortie_sha256": "863d0c967bd3934618fff30b8e57f6c6aa465ad60790c789f3bad3626e1c4bd8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-007",
+          "run_id": "isole-20261104-213752-2455442-1424",
+          "sortie_sha256": "b337961c409198483beffd2c3177457047e59d5b7cb97c3f80a3a61785140076"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c02",
+          "run_id": "isole-20261104-215815-2506162-13643",
+          "sortie_sha256": "cd09007ec0500eedb395f2da2a05888b2068134f9d6c7652af19282c53cec50a"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c02",
+          "run_id": "isole-20261104-220119-2512833-7141",
+          "sortie_sha256": "9b9850341d098b662a3895bf5fa7415d7937f24653a708f39c31a8c7689fc4fc"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-008",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "brief_sha256_canonique": "f9f55809aad12193d10e91426822494f11fdeb5af3543611bb13721902582b14",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-02",
+          "run_id": "isole-20261104-212916-2441636-281",
+          "sortie_sha256": "863d0c967bd3934618fff30b8e57f6c6aa465ad60790c789f3bad3626e1c4bd8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-008",
+          "run_id": "isole-20261104-213752-2455401-27403",
+          "sortie_sha256": "6186c79e9bcd530e5dffb7e69fcc0002fade272ee2236d20796444e524b17e01"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c02",
+          "run_id": "isole-20261104-215815-2506162-13643",
+          "sortie_sha256": "cd09007ec0500eedb395f2da2a05888b2068134f9d6c7652af19282c53cec50a"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c02",
+          "run_id": "isole-20261104-220119-2512833-7141",
+          "sortie_sha256": "9b9850341d098b662a3895bf5fa7415d7937f24653a708f39c31a8c7689fc4fc"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-009",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "brief_sha256_canonique": "0f8e4ea04d0475e3f76815f5e86f999c20d9af2115f8f5bd0288279cadaa0511",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-02",
+          "run_id": "isole-20261104-212916-2441636-281",
+          "sortie_sha256": "863d0c967bd3934618fff30b8e57f6c6aa465ad60790c789f3bad3626e1c4bd8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-009",
+          "run_id": "isole-20261104-213802-2455891-25114",
+          "sortie_sha256": "e96dadd8aeae5468fc951eea94784ed0c7e090336b6e6ac65219ba031ddce5f9"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c02",
+          "run_id": "isole-20261104-215815-2506162-13643",
+          "sortie_sha256": "cd09007ec0500eedb395f2da2a05888b2068134f9d6c7652af19282c53cec50a"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c02",
+          "run_id": "isole-20261104-220119-2512833-7141",
+          "sortie_sha256": "9b9850341d098b662a3895bf5fa7415d7937f24653a708f39c31a8c7689fc4fc"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-010",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "brief_sha256_canonique": "e830d1aff7a25ce702598f5105819a970ed4a9cd700daa1495e632df7936ea76",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-02",
+          "run_id": "isole-20261104-212916-2441636-281",
+          "sortie_sha256": "863d0c967bd3934618fff30b8e57f6c6aa465ad60790c789f3bad3626e1c4bd8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-010",
+          "run_id": "isole-20261104-213803-2455920-212",
+          "sortie_sha256": "399a5decbe5ea9b02c0b4893b216c9effbd0868f550186f48eaec49b4bddb44a"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c02",
+          "run_id": "isole-20261104-215815-2506162-13643",
+          "sortie_sha256": "cd09007ec0500eedb395f2da2a05888b2068134f9d6c7652af19282c53cec50a"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c02",
+          "run_id": "isole-20261104-220119-2512833-7141",
+          "sortie_sha256": "9b9850341d098b662a3895bf5fa7415d7937f24653a708f39c31a8c7689fc4fc"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-010",
+          "run_id": "isole-20261104-220458-2518300-17338",
+          "sortie_sha256": "cfb6770dcab6cfd5b531ae200efe2b2d476d404edad9f2aaa982dccf8ebb7139"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-011",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "brief_sha256_canonique": "1cc5c205031f480ae8204b800bcfbcd8843ed499f2c5a330d021b954ef5ac7b0",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-03",
+          "run_id": "isole-20261104-212916-2441607-16309",
+          "sortie_sha256": "01f70d3f62a7b83acc7c8749de23d9bddcb6a81b6d3535ea7fcefb15d585d44c"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-011",
+          "run_id": "isole-20261104-213803-2455955-1239",
+          "sortie_sha256": "cc3161b1571ef2095acd42ab81f08701f2ce91cac29c16fd82df1862df0db40e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-traduction-amd2-011",
+          "run_id": "isole-20261104-214708-2485009-31397",
+          "sortie_sha256": "3714414ac45587c8ef06a160cab37ea38ce8ca5b6d86545bc0228699c880f8e1"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c03",
+          "run_id": "isole-20261104-215815-2506126-4973",
+          "sortie_sha256": "1965b26b67170775c7a49d440d39944c08aaed37afe83de1c6664ebed60fe9b9"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c03",
+          "run_id": "isole-20261104-220119-2512788-19861",
+          "sortie_sha256": "06a5c922963397be22d4b8bcdd52ee7b6e83bdd9ab338548b37f76d38c650f38"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-012",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "brief_sha256_canonique": "89283597608623fa1a2574340af507aff8727909da9bc8cc96d28f44ad309c00",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-03",
+          "run_id": "isole-20261104-212916-2441607-16309",
+          "sortie_sha256": "01f70d3f62a7b83acc7c8749de23d9bddcb6a81b6d3535ea7fcefb15d585d44c"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-012",
+          "run_id": "isole-20261104-213805-2456062-3337",
+          "sortie_sha256": "bd49f14197840381bd80aa3146f3577833f0bac7141bdc5a486af10c344ff21d"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c03",
+          "run_id": "isole-20261104-215815-2506126-4973",
+          "sortie_sha256": "1965b26b67170775c7a49d440d39944c08aaed37afe83de1c6664ebed60fe9b9"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c03",
+          "run_id": "isole-20261104-220119-2512788-19861",
+          "sortie_sha256": "06a5c922963397be22d4b8bcdd52ee7b6e83bdd9ab338548b37f76d38c650f38"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-012",
+          "run_id": "isole-20261104-220458-2518331-2910",
+          "sortie_sha256": "51bd503560b41ed32d0928b7813f1d268b4f430ff9e031022f6a3307ab481a3a"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-013",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "brief_sha256_canonique": "d15a10572db7ba3fc6d0af590865e810c6e4008fc22db8ff7621ed561871776c",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-03",
+          "run_id": "isole-20261104-212916-2441607-16309",
+          "sortie_sha256": "01f70d3f62a7b83acc7c8749de23d9bddcb6a81b6d3535ea7fcefb15d585d44c"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-013",
+          "run_id": "isole-20261104-213806-2456108-5468",
+          "sortie_sha256": "1666448ff9bf2b1a1a35b6a46fcd935d2459a5dfe17e147b2def658c18e605a8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c03",
+          "run_id": "isole-20261104-215815-2506126-4973",
+          "sortie_sha256": "1965b26b67170775c7a49d440d39944c08aaed37afe83de1c6664ebed60fe9b9"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c03",
+          "run_id": "isole-20261104-220119-2512788-19861",
+          "sortie_sha256": "06a5c922963397be22d4b8bcdd52ee7b6e83bdd9ab338548b37f76d38c650f38"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-014",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "brief_sha256_canonique": "308f0bf562642352b716490a883d055c0648880566c801e32bd3e81815eac9b3",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-03",
+          "run_id": "isole-20261104-212916-2441607-16309",
+          "sortie_sha256": "01f70d3f62a7b83acc7c8749de23d9bddcb6a81b6d3535ea7fcefb15d585d44c"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-014",
+          "run_id": "isole-20261104-213806-2456129-22320",
+          "sortie_sha256": "48ef49c0f3995ba7e27cfddda052ebc03e386f968b448ac80e9568fcd0e6a0b6"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c03",
+          "run_id": "isole-20261104-215815-2506126-4973",
+          "sortie_sha256": "1965b26b67170775c7a49d440d39944c08aaed37afe83de1c6664ebed60fe9b9"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c03",
+          "run_id": "isole-20261104-220119-2512788-19861",
+          "sortie_sha256": "06a5c922963397be22d4b8bcdd52ee7b6e83bdd9ab338548b37f76d38c650f38"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-014",
+          "run_id": "isole-20261104-220458-2518353-8429",
+          "sortie_sha256": "bbd0e601d561d78e4c7a482a45e0761599f20f8a03025844f142b76be88616a1"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-015",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "brief_sha256_canonique": "96c280e3ed2cd0e7520a94e32736b9b6661e25ab0ce449d5fc009370580485dd",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-03",
+          "run_id": "isole-20261104-212916-2441607-16309",
+          "sortie_sha256": "01f70d3f62a7b83acc7c8749de23d9bddcb6a81b6d3535ea7fcefb15d585d44c"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-015",
+          "run_id": "isole-20261104-213810-2456835-6678",
+          "sortie_sha256": "1c3d3d6c4583968016d0f94803f465c53a991047ac48462d28ff969b3b79bea7"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c03",
+          "run_id": "isole-20261104-215815-2506126-4973",
+          "sortie_sha256": "1965b26b67170775c7a49d440d39944c08aaed37afe83de1c6664ebed60fe9b9"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c03",
+          "run_id": "isole-20261104-220119-2512788-19861",
+          "sortie_sha256": "06a5c922963397be22d4b8bcdd52ee7b6e83bdd9ab338548b37f76d38c650f38"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-015",
+          "run_id": "isole-20261104-220458-2518382-14095",
+          "sortie_sha256": "b01c70762267b635edfd884c679f68036d80809ffdd48fbb72a299756becfc0d"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-016",
+      "campaign_id": "AMD2-C04",
+      "split": "construction",
+      "brief_sha256_canonique": "5caa3b4164ac5bc3380e9833e93c4e3200c4ace8b106bfab4de882a40f4ffe59",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-04",
+          "run_id": "isole-20261104-212916-2441609-2527",
+          "sortie_sha256": "8acf1fe609c3e5537b9d9ddf688359c4168ed33f5fb531e315ef830a46879eb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-016",
+          "run_id": "isole-20261104-213813-2456944-29107",
+          "sortie_sha256": "77b4d7e841d3305496ded8099edf356cfe5737ec5bdc2525e8d26bc2b6e8d4fd"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c04",
+          "run_id": "isole-20261104-215815-2506182-23554",
+          "sortie_sha256": "20cf945662751f7f2ca04dfcbd8c73b530bc45b9207f8a80fa867859dbc8b2cb"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c04",
+          "run_id": "isole-20261104-220119-2512785-20539",
+          "sortie_sha256": "4f8b108794c2ac788015568000f573ee8d5f4c2c34c8d91efcf37fdaf7ef9cac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-017",
+      "campaign_id": "AMD2-C04",
+      "split": "construction",
+      "brief_sha256_canonique": "bdb6d0a26e3da7c4040b397b503356bbd72cd5a9e160112db6424317d266c365",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-04",
+          "run_id": "isole-20261104-212916-2441609-2527",
+          "sortie_sha256": "8acf1fe609c3e5537b9d9ddf688359c4168ed33f5fb531e315ef830a46879eb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-017",
+          "run_id": "isole-20261104-213816-2457033-3800",
+          "sortie_sha256": "58171ac47ad3c5fd495b88c1d0f296050374435564af3ed54997f56b4956603f"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c04",
+          "run_id": "isole-20261104-215815-2506182-23554",
+          "sortie_sha256": "20cf945662751f7f2ca04dfcbd8c73b530bc45b9207f8a80fa867859dbc8b2cb"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c04",
+          "run_id": "isole-20261104-220119-2512785-20539",
+          "sortie_sha256": "4f8b108794c2ac788015568000f573ee8d5f4c2c34c8d91efcf37fdaf7ef9cac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-018",
+      "campaign_id": "AMD2-C04",
+      "split": "construction",
+      "brief_sha256_canonique": "8f7fa86c3d296e9f6d6ce9eaae0ecc6446f8ddc20e2c400e32ceaef94d763d82",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-04",
+          "run_id": "isole-20261104-212916-2441609-2527",
+          "sortie_sha256": "8acf1fe609c3e5537b9d9ddf688359c4168ed33f5fb531e315ef830a46879eb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-018",
+          "run_id": "isole-20261104-213820-2457182-24413",
+          "sortie_sha256": "ea825d2b0913f125699f2a1173ed9b2e94983cc7200938dacc7f22ddc6f968ad"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c04",
+          "run_id": "isole-20261104-215815-2506182-23554",
+          "sortie_sha256": "20cf945662751f7f2ca04dfcbd8c73b530bc45b9207f8a80fa867859dbc8b2cb"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c04",
+          "run_id": "isole-20261104-220119-2512785-20539",
+          "sortie_sha256": "4f8b108794c2ac788015568000f573ee8d5f4c2c34c8d91efcf37fdaf7ef9cac"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-018",
+          "run_id": "isole-20261104-220458-2518389-23102",
+          "sortie_sha256": "eef4a72c2983252926b8c243cf7353bd1819ef6e26ccc70cbcf11ecfad028fc8"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-019",
+      "campaign_id": "AMD2-C04",
+      "split": "construction",
+      "brief_sha256_canonique": "90411058794a6098a858cd5ad942a888b186d40055d77af26a4a207f28f76be5",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-04",
+          "run_id": "isole-20261104-212916-2441609-2527",
+          "sortie_sha256": "8acf1fe609c3e5537b9d9ddf688359c4168ed33f5fb531e315ef830a46879eb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-019",
+          "run_id": "isole-20261104-213820-2457215-3262",
+          "sortie_sha256": "4e002cf54403df0f5c29ecf8fce23d0f088e9e7e03ec69391dd4088c03c2b47b"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c04",
+          "run_id": "isole-20261104-215815-2506182-23554",
+          "sortie_sha256": "20cf945662751f7f2ca04dfcbd8c73b530bc45b9207f8a80fa867859dbc8b2cb"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c04",
+          "run_id": "isole-20261104-220119-2512785-20539",
+          "sortie_sha256": "4f8b108794c2ac788015568000f573ee8d5f4c2c34c8d91efcf37fdaf7ef9cac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-020",
+      "campaign_id": "AMD2-C04",
+      "split": "construction",
+      "brief_sha256_canonique": "6c79a592e2a1414947a2899988179351a7fc303a714c6136de6135324710cdf7",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-04",
+          "run_id": "isole-20261104-212916-2441609-2527",
+          "sortie_sha256": "8acf1fe609c3e5537b9d9ddf688359c4168ed33f5fb531e315ef830a46879eb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-020",
+          "run_id": "isole-20261104-213820-2457234-28472",
+          "sortie_sha256": "bb92102aaa9ec329e324a69644977aae64b21bc4d88bbe78fc98242b3ce74a2f"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c04",
+          "run_id": "isole-20261104-215815-2506182-23554",
+          "sortie_sha256": "20cf945662751f7f2ca04dfcbd8c73b530bc45b9207f8a80fa867859dbc8b2cb"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c04",
+          "run_id": "isole-20261104-220119-2512785-20539",
+          "sortie_sha256": "4f8b108794c2ac788015568000f573ee8d5f4c2c34c8d91efcf37fdaf7ef9cac"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-020",
+          "run_id": "isole-20261104-220504-2519285-6170",
+          "sortie_sha256": "f9250db6a2773015403471e15cb991d40cdd154f02ab2b0963adb5887cddc166"
+        }
+      ],
+      "intervention_humaine": "Ajustement manuel ciblé : fonctions Mesh prouvées ou prototype sans fausse démonstration."
+    },
+    {
+      "id": "AMD2-021",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "brief_sha256_canonique": "5c2e1ac293ea8c51764d6c690fff77968b72e4c23303f9020c42fdb88f8098fc",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-05",
+          "run_id": "isole-20261104-212916-2441610-11764",
+          "sortie_sha256": "0ffb61ac44a98f34a7b1a2b63192b76fce7c11750217d6c6b30eb2859b7abeb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-021",
+          "run_id": "isole-20261104-213821-2457252-25843",
+          "sortie_sha256": "11feba93b4f33658841361fb7accf53a87d89f7b9096b03f664ee2e3ec0926f8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-traduction-amd2-021",
+          "run_id": "isole-20261104-214708-2485012-1007",
+          "sortie_sha256": "25a8a6c643091a53c16562c01ef7a83cca8eaad17d3c59dcdf22d76440aaea90"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c05",
+          "run_id": "isole-20261104-215815-2506123-16071",
+          "sortie_sha256": "306036abf27d955effc60eb68fc4f86344ff67fa509c595d82fd30374476e9aa"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c05",
+          "run_id": "isole-20261104-220119-2512841-10823",
+          "sortie_sha256": "8ce7c2cd70ce5fbd0f758762cc5c16d4c1aef023ab56bf5f22018b98bcf14eb1"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-021",
+          "run_id": "isole-20261104-220511-2520366-32237",
+          "sortie_sha256": "b4edcb8a713b4cec9ef627a3c3a9b27305cf848ccabb115fe42302f3ca7e5e95"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-022",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "brief_sha256_canonique": "e1c16b23b9f4bd24ed0b07ffec5695008bdfa42afaca56b0753b2c7ed91de2e5",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-05",
+          "run_id": "isole-20261104-212916-2441610-11764",
+          "sortie_sha256": "0ffb61ac44a98f34a7b1a2b63192b76fce7c11750217d6c6b30eb2859b7abeb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-022",
+          "run_id": "isole-20261104-213821-2457319-32647",
+          "sortie_sha256": "d3d832e80870c96f1c7ce2e1a8d45d46d8b2a8362dc39eb504317770a34d938f"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c05",
+          "run_id": "isole-20261104-215815-2506123-16071",
+          "sortie_sha256": "306036abf27d955effc60eb68fc4f86344ff67fa509c595d82fd30374476e9aa"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c05",
+          "run_id": "isole-20261104-220119-2512841-10823",
+          "sortie_sha256": "8ce7c2cd70ce5fbd0f758762cc5c16d4c1aef023ab56bf5f22018b98bcf14eb1"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-023",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "brief_sha256_canonique": "62c26443b0696ed99f2bd47418896a2b91c5481f65c7dfeab2be25965a20e076",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-05",
+          "run_id": "isole-20261104-212916-2441610-11764",
+          "sortie_sha256": "0ffb61ac44a98f34a7b1a2b63192b76fce7c11750217d6c6b30eb2859b7abeb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-023",
+          "run_id": "isole-20261104-213825-2457511-9580",
+          "sortie_sha256": "c7486cc40b2c0ac1b6b3a48e8399960a4f787df6cda08172b907fb86eedfe79f"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c05",
+          "run_id": "isole-20261104-215815-2506123-16071",
+          "sortie_sha256": "306036abf27d955effc60eb68fc4f86344ff67fa509c595d82fd30374476e9aa"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c05",
+          "run_id": "isole-20261104-220119-2512841-10823",
+          "sortie_sha256": "8ce7c2cd70ce5fbd0f758762cc5c16d4c1aef023ab56bf5f22018b98bcf14eb1"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-023",
+          "run_id": "isole-20261104-220511-2520401-19567",
+          "sortie_sha256": "a5b89b0adf0a73dd478529f78163eb99393151111c57a568044038c69df716e8"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-024",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "brief_sha256_canonique": "0cf767c4313cffe5720c42a61b4fae14d276e8c62a36fafb0973560e2fcd0352",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-05",
+          "run_id": "isole-20261104-212916-2441610-11764",
+          "sortie_sha256": "0ffb61ac44a98f34a7b1a2b63192b76fce7c11750217d6c6b30eb2859b7abeb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-024",
+          "run_id": "isole-20261104-213827-2457568-7739",
+          "sortie_sha256": "3ca75db6c1f8fef04494b00d11e0729084851f659adb8ce098a69dd12b2254e7"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c05",
+          "run_id": "isole-20261104-215815-2506123-16071",
+          "sortie_sha256": "306036abf27d955effc60eb68fc4f86344ff67fa509c595d82fd30374476e9aa"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c05",
+          "run_id": "isole-20261104-220119-2512841-10823",
+          "sortie_sha256": "8ce7c2cd70ce5fbd0f758762cc5c16d4c1aef023ab56bf5f22018b98bcf14eb1"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-025",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "brief_sha256_canonique": "b553d6ee969d89909fc41349855bfe2867035c240af09143b89027fcee3d6b89",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-05",
+          "run_id": "isole-20261104-212916-2441610-11764",
+          "sortie_sha256": "0ffb61ac44a98f34a7b1a2b63192b76fce7c11750217d6c6b30eb2859b7abeb2"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-025",
+          "run_id": "isole-20261104-213829-2457689-7341",
+          "sortie_sha256": "e1c4ff7d3782aa404a6c76999a2bd7d459c4c3d19698785d0d1c6f6390fd617c"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c05",
+          "run_id": "isole-20261104-215815-2506123-16071",
+          "sortie_sha256": "306036abf27d955effc60eb68fc4f86344ff67fa509c595d82fd30374476e9aa"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c05",
+          "run_id": "isole-20261104-220119-2512841-10823",
+          "sortie_sha256": "8ce7c2cd70ce5fbd0f758762cc5c16d4c1aef023ab56bf5f22018b98bcf14eb1"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-025",
+          "run_id": "isole-20261104-220513-2520586-622",
+          "sortie_sha256": "b307da2e9f4294d5e61ad91294ff23b63eb26e61470e55b515ad8add931034e9"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-026",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "brief_sha256_canonique": "6eb600ff1545bf19099beaed8d7f26536ed18d60f3b746ea0ecba9b33af49d0a",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-06",
+          "run_id": "isole-20261104-212916-2441615-12062",
+          "sortie_sha256": "5178518547a416e77cd484c7bb46f84a345180511b6b17c07224c2a42c71327e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-026",
+          "run_id": "isole-20261104-213831-2458070-30905",
+          "sortie_sha256": "96d8653846cdfe212fcf29a053a3fe865a3388e968a48c68e8bf17d9f10109ec"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c06",
+          "run_id": "isole-20261104-215815-2506176-4497",
+          "sortie_sha256": "364cdb11bcf652d5045a325be46adb781939efe38690cce34c080f313205cfef"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c06",
+          "run_id": "isole-20261104-220119-2512858-17917",
+          "sortie_sha256": "978d2278c64288f9684c87e69c0c104d7c0ef71e76a8a04446df74028229fb4a"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-026",
+          "run_id": "isole-20261104-220527-2521163-4690",
+          "sortie_sha256": "98229d07bcc98a1a33a94e2653932f5aa1304057043c23507b634309a5fde50c"
+        }
+      ],
+      "intervention_humaine": "Ajustement manuel ciblé : fonctions Mesh prouvées ou prototype sans fausse démonstration."
+    },
+    {
+      "id": "AMD2-027",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "brief_sha256_canonique": "d97e51be0eab003a9b12bee575cd43e69448b9bf26433e9fd99a69f87bd36f7f",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-06",
+          "run_id": "isole-20261104-212916-2441615-12062",
+          "sortie_sha256": "5178518547a416e77cd484c7bb46f84a345180511b6b17c07224c2a42c71327e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-027",
+          "run_id": "isole-20261104-213831-2458088-22184",
+          "sortie_sha256": "aa3a6c1367d31a50eb3a2067cdfaa7b60bf97bb3464a5a00e0e2994ff71d68c1"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c06",
+          "run_id": "isole-20261104-215815-2506176-4497",
+          "sortie_sha256": "364cdb11bcf652d5045a325be46adb781939efe38690cce34c080f313205cfef"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c06",
+          "run_id": "isole-20261104-220119-2512858-17917",
+          "sortie_sha256": "978d2278c64288f9684c87e69c0c104d7c0ef71e76a8a04446df74028229fb4a"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-028",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "brief_sha256_canonique": "9f1b0c4c7de3683a9d382986d0730983b9ff259933a9a962d73ac25f5e4c873e",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-06",
+          "run_id": "isole-20261104-212916-2441615-12062",
+          "sortie_sha256": "5178518547a416e77cd484c7bb46f84a345180511b6b17c07224c2a42c71327e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-028",
+          "run_id": "isole-20261104-213832-2458221-3452",
+          "sortie_sha256": "5a942350e1d519deec4391435f0210cdb1e4cd3adbf3d70a8c09971acdbe1658"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c06",
+          "run_id": "isole-20261104-215815-2506176-4497",
+          "sortie_sha256": "364cdb11bcf652d5045a325be46adb781939efe38690cce34c080f313205cfef"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c06",
+          "run_id": "isole-20261104-220119-2512858-17917",
+          "sortie_sha256": "978d2278c64288f9684c87e69c0c104d7c0ef71e76a8a04446df74028229fb4a"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-028",
+          "run_id": "isole-20261104-220518-2520800-9018",
+          "sortie_sha256": "72c323d67a093d188413d4d4e2ad94e071a7caa0b248eb066bce8856ea5d694c"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-029",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "brief_sha256_canonique": "1f6dbe72e16592d36d38cedf682ba1e28ab3226a339282b49b4bb81068d1926b",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-06",
+          "run_id": "isole-20261104-212916-2441615-12062",
+          "sortie_sha256": "5178518547a416e77cd484c7bb46f84a345180511b6b17c07224c2a42c71327e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-029",
+          "run_id": "isole-20261104-213833-2458855-20837",
+          "sortie_sha256": "2eb3f5835bd341114ecab37e1ac14d7fc14358f1452debe082644577d9fe8c5e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c06",
+          "run_id": "isole-20261104-215815-2506176-4497",
+          "sortie_sha256": "364cdb11bcf652d5045a325be46adb781939efe38690cce34c080f313205cfef"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c06",
+          "run_id": "isole-20261104-220119-2512858-17917",
+          "sortie_sha256": "978d2278c64288f9684c87e69c0c104d7c0ef71e76a8a04446df74028229fb4a"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-cible-amd2-029",
+          "run_id": "isole-20261104-220537-2521509-16651",
+          "sortie_sha256": "66127e122366f3e98a3e2b6324f21179d934ea5f0636e663ee34dd2f1fa5cde7"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-030",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "brief_sha256_canonique": "85a84763a3fd9e018e60d2779a3837ea8e4180da50001a866d7a8938b2adcc92",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-06",
+          "run_id": "isole-20261104-212916-2441615-12062",
+          "sortie_sha256": "5178518547a416e77cd484c7bb46f84a345180511b6b17c07224c2a42c71327e"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-030",
+          "run_id": "isole-20261104-213834-2459031-7333",
+          "sortie_sha256": "d08e4f8215fc4975b2912ea38521b5ccd7656374cc7524d06d3c4121b8c21b92"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c06",
+          "run_id": "isole-20261104-215815-2506176-4497",
+          "sortie_sha256": "364cdb11bcf652d5045a325be46adb781939efe38690cce34c080f313205cfef"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c06",
+          "run_id": "isole-20261104-220119-2512858-17917",
+          "sortie_sha256": "978d2278c64288f9684c87e69c0c104d7c0ef71e76a8a04446df74028229fb4a"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-031",
+      "campaign_id": "AMD2-C07",
+      "split": "validation",
+      "brief_sha256_canonique": "0c6ca2f406f0311149881165b2267d8334eb0711ee4734cd2fe46f8c9bd6b71c",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-07",
+          "run_id": "isole-20261104-212916-2441690-26209",
+          "sortie_sha256": "1a53ab7055b810ebdf3b73870179a2227b0ec21bb7bb47400e191aad6aa04a22"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-031",
+          "run_id": "isole-20261104-213838-2459446-7900",
+          "sortie_sha256": "17e319287d588cd59cb2ab803d95caf35bdd4ee6a47570c6253879bc55fc548a"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-traduction-amd2-031",
+          "run_id": "isole-20261104-214708-2485047-5643",
+          "sortie_sha256": "c1653a35c0f355bb61b4b254e8a2bb800f435219f910a1a424e784b4654e59b9"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c07",
+          "run_id": "isole-20261104-215815-2506203-3261",
+          "sortie_sha256": "08cd569ae9e5e84a4034d653561a645e0f79fb143b2b2c77c545a7e7b90f8c07"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c07",
+          "run_id": "isole-20261104-220119-2512794-3565",
+          "sortie_sha256": "cbcb2325ee07703bddd9f766cc17538ace041c128b677cdde58e91887d95dd74"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-032",
+      "campaign_id": "AMD2-C07",
+      "split": "validation",
+      "brief_sha256_canonique": "338c4b7c260f26e82c3d81b4084bb321a3972b6d4bef3c9c9adf9f13609db567",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-07",
+          "run_id": "isole-20261104-212916-2441690-26209",
+          "sortie_sha256": "1a53ab7055b810ebdf3b73870179a2227b0ec21bb7bb47400e191aad6aa04a22"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-032",
+          "run_id": "isole-20261104-213838-2459582-28089",
+          "sortie_sha256": "cac05045d4d5903c789c4f89945b5c4a1dbae1133ce6da800ecd83b80a92cf79"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c07",
+          "run_id": "isole-20261104-215815-2506203-3261",
+          "sortie_sha256": "08cd569ae9e5e84a4034d653561a645e0f79fb143b2b2c77c545a7e7b90f8c07"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c07",
+          "run_id": "isole-20261104-220119-2512794-3565",
+          "sortie_sha256": "cbcb2325ee07703bddd9f766cc17538ace041c128b677cdde58e91887d95dd74"
+        },
+        {
+          "modele": "muse",
+          "tache": "amd2-cible-amd2-032",
+          "run_id": "isole-20261104-220540-2521641-23902",
+          "sortie_sha256": "8eeeb79cc217ea21cda97de1ffdb4add743ad33836cad77e604b499d60debc20"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-033",
+      "campaign_id": "AMD2-C07",
+      "split": "validation",
+      "brief_sha256_canonique": "dfa264f172f005af5b5cbd98f1435efd77a95b5c15840f5b7d93fc7d46fc56bd",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-07",
+          "run_id": "isole-20261104-212916-2441690-26209",
+          "sortie_sha256": "1a53ab7055b810ebdf3b73870179a2227b0ec21bb7bb47400e191aad6aa04a22"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-033",
+          "run_id": "isole-20261104-213840-2459998-24816",
+          "sortie_sha256": "023fcdfa4d28b05e0737f32f6c9aa0098fa1efc2c16371340e9eff7f1f8c0f81"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c07",
+          "run_id": "isole-20261104-215815-2506203-3261",
+          "sortie_sha256": "08cd569ae9e5e84a4034d653561a645e0f79fb143b2b2c77c545a7e7b90f8c07"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c07",
+          "run_id": "isole-20261104-220119-2512794-3565",
+          "sortie_sha256": "cbcb2325ee07703bddd9f766cc17538ace041c128b677cdde58e91887d95dd74"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-034",
+      "campaign_id": "AMD2-C07",
+      "split": "validation",
+      "brief_sha256_canonique": "6c8ccb042417ed4e38599f6d0c4eba740bf1a98fbc67ccb23fd296d3196491ff",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-07",
+          "run_id": "isole-20261104-212916-2441690-26209",
+          "sortie_sha256": "1a53ab7055b810ebdf3b73870179a2227b0ec21bb7bb47400e191aad6aa04a22"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-034",
+          "run_id": "isole-20261104-213844-2460420-8611",
+          "sortie_sha256": "09dc99354f48d0999fcfcfd63fc98cee9559ce98a43a4b76cb4bbe360c3683fa"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c07",
+          "run_id": "isole-20261104-215815-2506203-3261",
+          "sortie_sha256": "08cd569ae9e5e84a4034d653561a645e0f79fb143b2b2c77c545a7e7b90f8c07"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c07",
+          "run_id": "isole-20261104-220119-2512794-3565",
+          "sortie_sha256": "cbcb2325ee07703bddd9f766cc17538ace041c128b677cdde58e91887d95dd74"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-035",
+      "campaign_id": "AMD2-C07",
+      "split": "validation",
+      "brief_sha256_canonique": "7dd83b0221c9a70f157e87de2a1303991b1c57577e5e452a903dddd495f538e9",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-07",
+          "run_id": "isole-20261104-212916-2441690-26209",
+          "sortie_sha256": "1a53ab7055b810ebdf3b73870179a2227b0ec21bb7bb47400e191aad6aa04a22"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-035",
+          "run_id": "isole-20261104-213847-2460608-9831",
+          "sortie_sha256": "fd806dc96bb075cf620df41c873392fee479f060900e374b447bb7ca28390484"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c07",
+          "run_id": "isole-20261104-215815-2506203-3261",
+          "sortie_sha256": "08cd569ae9e5e84a4034d653561a645e0f79fb143b2b2c77c545a7e7b90f8c07"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c07",
+          "run_id": "isole-20261104-220119-2512794-3565",
+          "sortie_sha256": "cbcb2325ee07703bddd9f766cc17538ace041c128b677cdde58e91887d95dd74"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-036",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "brief_sha256_canonique": "430b586025e919233819092db4218bd3f5df6364519414f2ffe643a94dd0f9ba",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-08",
+          "run_id": "isole-20261104-212916-2441696-22571",
+          "sortie_sha256": "16cd2b1e41f5ec695b1a1f85a259a4e9466d2b4f0d6a6803a8ce9b9f9bdb4f65"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-036",
+          "run_id": "isole-20261104-213847-2460626-20207",
+          "sortie_sha256": "2371a86c567a40b8a6f52a9cda3708622a8fde063148d9e1ad24cd7a4e8a7df8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c08",
+          "run_id": "isole-20261104-215815-2506135-12215",
+          "sortie_sha256": "2ed88ac19396b107b95925a02744907c78aa4391e6c332fea36b1818c584d0e1"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c08",
+          "run_id": "isole-20261104-220119-2512869-29794",
+          "sortie_sha256": "7261cdf29dd6ddfe95a4c5fcfc1ef979ca887dbcd31f02bb6f2fcd24fb1fceac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-037",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "brief_sha256_canonique": "670aa377abd5074d4a45cdca099c58a102931feaecd29799c37df29b6414d32d",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-08",
+          "run_id": "isole-20261104-212916-2441696-22571",
+          "sortie_sha256": "16cd2b1e41f5ec695b1a1f85a259a4e9466d2b4f0d6a6803a8ce9b9f9bdb4f65"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-037",
+          "run_id": "isole-20261104-213849-2460724-24470",
+          "sortie_sha256": "245d0c7d1087bced51a597d857af811c9ec6ed3e1b8d749ad64be6d735c429d0"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c08",
+          "run_id": "isole-20261104-215815-2506135-12215",
+          "sortie_sha256": "2ed88ac19396b107b95925a02744907c78aa4391e6c332fea36b1818c584d0e1"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c08",
+          "run_id": "isole-20261104-220119-2512869-29794",
+          "sortie_sha256": "7261cdf29dd6ddfe95a4c5fcfc1ef979ca887dbcd31f02bb6f2fcd24fb1fceac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-038",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "brief_sha256_canonique": "82f76385927119b2bf28ee6c265672f9ae73710e63845fef1e281ebba8a69601",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-08",
+          "run_id": "isole-20261104-212916-2441696-22571",
+          "sortie_sha256": "16cd2b1e41f5ec695b1a1f85a259a4e9466d2b4f0d6a6803a8ce9b9f9bdb4f65"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-038",
+          "run_id": "isole-20261104-213849-2460760-18840",
+          "sortie_sha256": "6546ee838f18aa8cf1ba15de58c71ece820dbde0303b7c8815f50e436e8fd03f"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c08",
+          "run_id": "isole-20261104-215815-2506135-12215",
+          "sortie_sha256": "2ed88ac19396b107b95925a02744907c78aa4391e6c332fea36b1818c584d0e1"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c08",
+          "run_id": "isole-20261104-220119-2512869-29794",
+          "sortie_sha256": "7261cdf29dd6ddfe95a4c5fcfc1ef979ca887dbcd31f02bb6f2fcd24fb1fceac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-039",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "brief_sha256_canonique": "6325760d0789a96044c0b5473faa417925910da3e218ac2356a79c2ce0f3c125",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-08",
+          "run_id": "isole-20261104-212916-2441696-22571",
+          "sortie_sha256": "16cd2b1e41f5ec695b1a1f85a259a4e9466d2b4f0d6a6803a8ce9b9f9bdb4f65"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-039",
+          "run_id": "isole-20261104-213853-2460903-2638",
+          "sortie_sha256": "f87a3b0d33c1ccdb4829ac49962ffeb5c521df74b6851e8b4d6539c47320bce7"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c08",
+          "run_id": "isole-20261104-215815-2506135-12215",
+          "sortie_sha256": "2ed88ac19396b107b95925a02744907c78aa4391e6c332fea36b1818c584d0e1"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c08",
+          "run_id": "isole-20261104-220119-2512869-29794",
+          "sortie_sha256": "7261cdf29dd6ddfe95a4c5fcfc1ef979ca887dbcd31f02bb6f2fcd24fb1fceac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-040",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "brief_sha256_canonique": "cdacd10378a8af36d6934f4094f79d18d2af9960179f8eaef885e113a205db4b",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-08",
+          "run_id": "isole-20261104-212916-2441696-22571",
+          "sortie_sha256": "16cd2b1e41f5ec695b1a1f85a259a4e9466d2b4f0d6a6803a8ce9b9f9bdb4f65"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-040",
+          "run_id": "isole-20261104-213854-2460948-8751",
+          "sortie_sha256": "dcb1c941f5ec2816d8c0b5a7827d5515b1cb19d1fb11d4b89bf342a10e3119d1"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-revision-amd2-c08",
+          "run_id": "isole-20261104-215815-2506135-12215",
+          "sortie_sha256": "2ed88ac19396b107b95925a02744907c78aa4391e6c332fea36b1818c584d0e1"
+        },
+        {
+          "modele": "gemini",
+          "tache": "amd2-controle-amd2-c08",
+          "run_id": "isole-20261104-220119-2512869-29794",
+          "sortie_sha256": "7261cdf29dd6ddfe95a4c5fcfc1ef979ca887dbcd31f02bb6f2fcd24fb1fceac"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-041",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "brief_sha256_canonique": "52089d8108400d6eb643a4704e47be38a58979b46d53613b18cb64b91acd05ff",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-09",
+          "run_id": "isole-20261104-212944-2442391-13050",
+          "sortie_sha256": "ae03abbe2d64a4ca8aa210f603bed86ea688a6883640bfac889498220dfefc28"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-041",
+          "run_id": "isole-20261104-213858-2461048-11566",
+          "sortie_sha256": "6e1a670f88414fb74c85d814ce45e8e7a7f7840e4c6e6445467681225aa545b8"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-traduction-amd2-041",
+          "run_id": "isole-20261104-214708-2485013-5722",
+          "sortie_sha256": "b0361890dbc4cbac6c25e3626b8327e3a56b1443f5cdf26988560bdb4b9d88b0"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-042",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "brief_sha256_canonique": "3ae7e5a6dd47c6e7b62d186fd3d89918fab5b954790e2394e087f7fccc8765bf",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-09",
+          "run_id": "isole-20261104-212944-2442391-13050",
+          "sortie_sha256": "ae03abbe2d64a4ca8aa210f603bed86ea688a6883640bfac889498220dfefc28"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-042",
+          "run_id": "isole-20261104-213900-2461346-13114",
+          "sortie_sha256": "8bc8cacc05330dcdd147dbcbc6ff4f3f1db0e80940b829911fe6cff0c3cb06bb"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-043",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "brief_sha256_canonique": "1213955604a71c1833fd302e482e805b853b41e47f360468b51d4b63b1817fbd",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-09",
+          "run_id": "isole-20261104-212944-2442391-13050",
+          "sortie_sha256": "ae03abbe2d64a4ca8aa210f603bed86ea688a6883640bfac889498220dfefc28"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-043",
+          "run_id": "isole-20261104-213902-2461779-1194",
+          "sortie_sha256": "541901f7eb29215561cdfb3b3abdf450de9298336e02dd382333bfa32c8d8055"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-044",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "brief_sha256_canonique": "255f957ca3ecc96f767840eeafdf765fa2fb6fe0d8c57e0d8d61be8391c86fc9",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-09",
+          "run_id": "isole-20261104-212944-2442391-13050",
+          "sortie_sha256": "ae03abbe2d64a4ca8aa210f603bed86ea688a6883640bfac889498220dfefc28"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-044",
+          "run_id": "isole-20261104-213903-2461878-30853",
+          "sortie_sha256": "1a355c673b896cd85621165d9eeaea97f8df96918469239beea2b4d529c134af"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-045",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "brief_sha256_canonique": "1f891ea7c4ba52711faa0f5121d0f37d4f5a388f7467fffbac47b5c81d3e57df",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-09",
+          "run_id": "isole-20261104-212944-2442391-13050",
+          "sortie_sha256": "ae03abbe2d64a4ca8aa210f603bed86ea688a6883640bfac889498220dfefc28"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-045",
+          "run_id": "isole-20261104-213904-2461910-32614",
+          "sortie_sha256": "51470333e402cb1e3dfe7e3170b7ad5a306657997809fc865b69edc2d720ca74"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-046",
+      "campaign_id": "AMD2-C10",
+      "split": "test",
+      "brief_sha256_canonique": "2e92487233f9aaaf9cacaf0523a0ab702aef913292925411a902e6276be29f58",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-10",
+          "run_id": "isole-20261104-212952-2442568-32528",
+          "sortie_sha256": "914ce30286b85cee86814df7189b372f403402cb5cc10954d367d4eb89faec55"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-046",
+          "run_id": "isole-20261104-213904-2462221-8121",
+          "sortie_sha256": "3f46f6b3930318677f75ea7b2b594a7827e27acbf609ec256eb0ddc6565a383a"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-047",
+      "campaign_id": "AMD2-C10",
+      "split": "test",
+      "brief_sha256_canonique": "4acb8fd7984b3b1c43689829f448c467e2a5b6e65b2f74c76b2aee6efcf4abb1",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-10",
+          "run_id": "isole-20261104-212952-2442568-32528",
+          "sortie_sha256": "914ce30286b85cee86814df7189b372f403402cb5cc10954d367d4eb89faec55"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-047",
+          "run_id": "isole-20261104-213907-2462595-11322",
+          "sortie_sha256": "53f33eb004b40204731833cc0dcf6c8e15152ebbb6c32db9ab4bf253fc28fa40"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-048",
+      "campaign_id": "AMD2-C10",
+      "split": "test",
+      "brief_sha256_canonique": "20e557bede0351ee60974b5133ba2e9478a2bb6e30a7ed9da103baf1b7b023e2",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-10",
+          "run_id": "isole-20261104-212952-2442568-32528",
+          "sortie_sha256": "914ce30286b85cee86814df7189b372f403402cb5cc10954d367d4eb89faec55"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-048",
+          "run_id": "isole-20261104-213911-2462791-14294",
+          "sortie_sha256": "064979fb76bbdd626bb8175621e6926395beda290075403b5c8064cbdda3523a"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-049",
+      "campaign_id": "AMD2-C10",
+      "split": "test",
+      "brief_sha256_canonique": "cdbec1a16e3dafa2c1d69c254f6e3f956a0bb0bf86eed95395d816188480fa16",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-10",
+          "run_id": "isole-20261104-212952-2442568-32528",
+          "sortie_sha256": "914ce30286b85cee86814df7189b372f403402cb5cc10954d367d4eb89faec55"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-049",
+          "run_id": "isole-20261104-213914-2462903-24611",
+          "sortie_sha256": "ceeaea2e4095a0a72484ca554d089810500f0623671d955f950b2a76fe373dc3"
+        }
+      ]
+    },
+    {
+      "id": "AMD2-050",
+      "campaign_id": "AMD2-C10",
+      "split": "test",
+      "brief_sha256_canonique": "3b58516ebcc04d19f6b5557e8161723bbaf4b722da85f9f2ea50c04239bcf7de",
+      "etapes": [
+        {
+          "modele": "muse",
+          "tache": "amd2-muse-10",
+          "run_id": "isole-20261104-212952-2442568-32528",
+          "sortie_sha256": "914ce30286b85cee86814df7189b372f403402cb5cc10954d367d4eb89faec55"
+        },
+        {
+          "modele": "deepseek",
+          "tache": "amd2-correction-amd2-050",
+          "run_id": "isole-20261104-213914-2462934-5262",
+          "sortie_sha256": "ed549eb8689d3aa6f882e72dd01add71efdd59a9c8a42f4e3180d3a7c5ef831a"
+        }
+      ]
+    }
+  ]
+}
