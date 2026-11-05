@@ -10,6 +10,9 @@ import sys
 import unittest
 from unittest.mock import patch
 
+POLICE_DEJAVU_SANS = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+IMAGE_BOOST = '0032-boost.jpg'
+
 V7 = Path(__file__).resolve().parent.parent
 V6 = V7.parent / 'video-v6'
 # Validation AVANT toute création : jamais de fallback vers le HOME utilisateur.
@@ -33,7 +36,7 @@ CAPTURES.mkdir()
 CACHE.mkdir(parents=True, exist_ok=True)
 fonts = Path.home() / 'Desktop/NexoraSite/web/src/fonts'
 fonts.mkdir(parents=True, exist_ok=True)
-(fonts / 'geist-latin-wght-normal.woff2').symlink_to('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+(fonts / 'geist-latin-wght-normal.woff2').symlink_to(POLICE_DEJAVU_SANS)
 (fonts / 'jetbrains-mono-latin-wght-normal.woff2').symlink_to('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf')
 
 # Copie du contrat historique ; les chemins personnels sont remplacés par
@@ -41,7 +44,7 @@ fonts.mkdir(parents=True, exist_ok=True)
 for nom in ('monter_v6.py', 'effets_v6.py', 'sfx_v6.py'):
     shutil.copyfile(V7 / nom, FIXTURE / nom)
 marque = json.loads((V6 / 'marque-v6.json').read_text())
-marque['polices']['titre'] = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+marque['polices']['titre'] = POLICE_DEJAVU_SANS
 marque['polices']['mono'] = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 (FIXTURE / 'marque-v6.json').write_text(json.dumps(marque, ensure_ascii=False))
 
@@ -50,15 +53,15 @@ for i in range(17):
     image = Image.new('RGB', (1600, 900), (24 + i * 7, 48, 92))
     draw = ImageDraw.Draw(image)
     draw.rectangle((100, 296, 532, 765), fill=(32, 36, 48), outline='white', width=4)
-    font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 12)
+    font = ImageFont.truetype(POLICE_DEJAVU_SANS, 12)
     draw.text((105, 307), 'DRAGON ATTAQUE CHATEAU EN FLAMMES', fill=(100, 100, 100), font=font)
     draw.rectangle((110, 310, 220, 316), fill='white')
     draw.line((110, 326, 510, 326), fill=(255, 40, 20), width=5)
     name = f'{i:04d}-saisie.png'
     image.save(CAPTURES / name)
     journal.append({'t': i, 'etiquette': 'saisie', 'image': name})
-Image.new('RGB', (1600, 900), (80, 160, 220)).save(CAPTURES / '0032-boost.jpg')
-journal.append({'t': 18, 'etiquette': 'boost', 'image': '0032-boost.jpg'})
+Image.new('RGB', (1600, 900), (80, 160, 220)).save(CAPTURES / IMAGE_BOOST)
+journal.append({'t': 18, 'etiquette': 'boost', 'image': IMAGE_BOOST})
 (CAPTURES / 'journal.jsonl').write_text(''.join(json.dumps(row) + '\n' for row in journal))
 for folder, key in zip(('s01', 's02', 's03', 's04', 's08', 's10'), ('dragon', 'bataille spatiale', 'orage', 'monstre marin', 'petit chat', 'silence')):
     dest = FIXTURE / folder
@@ -89,7 +92,7 @@ def remplace(obj):
         if obj == prefix + 'musique/lyria-3.wav': return str(music)
         if obj == prefix + 'rushes/765.mp4': return str(rush)
         if obj == prefix + 'captures/boost/s01': return str(CAPTURES)
-        if obj == prefix + 'captures/boost/s01/0032-boost.jpg': return str(CAPTURES / '0032-boost.jpg')
+        if obj == prefix + 'captures/boost/s01/0032-boost.jpg': return str(CAPTURES / IMAGE_BOOST)
     return obj
 (FIXTURE / 'montage-essai.json').write_text(json.dumps(remplace(montage), ensure_ascii=False))
 
