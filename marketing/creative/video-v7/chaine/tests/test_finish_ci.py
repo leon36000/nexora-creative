@@ -1,5 +1,6 @@
 """Essais réels CPU Finish sur petits flux synthétiques, jamais sur GPU ni réseau."""
 import csv
+import hashlib
 import io
 import json
 import runpy
@@ -92,8 +93,22 @@ class FinishCI(unittest.TestCase):
 
     def test_main_et_garde_home(self):
         out = self.base / 'main'
-        self.lance('main', [BANC, self.medias, out, '--profils', 'h264-p4', '--profil-x264', 'main', '--ffmpeg', FF, '--ffprobe', FP])
+        self.lance('main', [BANC, self.medias, out, '--profils', 'h264-p4', '--profil-x264', 'main', '--correction-proportionnelle', '--ffmpeg', FF, '--ffprobe', FP])
         self.assertEqual(len(json.loads((out / 'mesures.json').read_text())), 3)
+        corrections = json.loads((out / 'corrections.json').read_text())
+        self.assertEqual(len(corrections), 3)
+        for row in corrections:
+            for version in ('initial', 'corrige'):
+                data = row[version]
+                self.assertEqual(hashlib.sha256((out / data['fichier']).read_bytes()).hexdigest(), data['sha256'])
+            self.assertGreater(row['corrige']['x264_bps'], 0)
+        self.lance('timeout-banc', [BANC, self.medias, self.base / 'timeout-banc', '--timeout', '0.000001', '--ffmpeg', FF, '--ffprobe', FP], False)
+        self.assertIn('status=timeout', (self.base / 'timeout-banc' / 'commandes.log').read_text())
+        self.lance('timeout-invalide', [BANC, self.medias, self.base / 'timeout-invalide', '--timeout', 'nan', '--ffmpeg', FF, '--ffprobe', FP], False)
+        self.lance('profils-repetes', [BANC, self.medias, self.base / 'profils-repetes', '--profils', 'h264-p4', 'h264-p4', '--ffmpeg', FF, '--ffprobe', FP], False)
+        self.assertFalse((self.base / 'profils-repetes').exists())
+        self.lance('timeout-10bits', [DIX, self.medias, out, '--timeout', '0.000001', '--ffmpeg', FF], False)
+        self.assertIn('status=timeout', (out / 'commandes-10bits.log').read_text())
         self.lance('main-10bits', [DIX, self.medias, out, '--ffmpeg', FF])
         env = dict(os.environ, HOME='/home/interdit')
         cmd = [sys.executable, '-m', 'coverage', 'run', '--parallel-mode', '--branch', str(REPO / 'marketing/creative/video-v7/chaine/ci_tests.py')]
