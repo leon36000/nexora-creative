@@ -65,6 +65,8 @@ def archive(repo, revision, sortie):
 
 
 def construire(archive_path, sha, dossier, runner=subprocess.run):
+    if Path(archive_path).name.startswith('.env') or Path(archive_path).name == '.npmrc':
+        raise ValueError('archive à nom interdit')
     if not re.fullmatch('[0-9a-f]{64}', sha):
         raise ValueError('SHA-256 complet requis')
     fichiers, source_sha = [], {}

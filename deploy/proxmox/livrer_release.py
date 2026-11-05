@@ -2,6 +2,7 @@
 """Maintenance Creative : manifeste revu, service unique et rollback contrôlé."""
 import json
 import os
+import stat
 from pathlib import Path
 import subprocess
 import sys
@@ -15,6 +16,23 @@ import transaction_release as T
 def service(action):
     subprocess.run(['systemctl', action, 'nexora-creative'], check=True,
                    env={'PATH': '/usr/sbin:/usr/bin:/sbin:/bin'})
+
+
+def service_actif():
+    result = subprocess.run(['systemctl', 'is-active', '--quiet', 'nexora-creative'], check=False,
+                            env={'PATH': '/usr/sbin:/usr/bin:/sbin:/bin'})
+    if result.returncode not in (0, 3):
+        raise ValueError('état du service indéterminé')
+    return result.returncode == 0
+
+
+def identite_base(data):
+    T.verifier_ancetres(data)
+    db = Path(data) / 'openfield.db'
+    if db.is_symlink() or not db.is_file():
+        raise ValueError('base de travaux introuvable')
+    st = db.stat()
+    return {'data': str(Path(data).resolve()), 'dev': st.st_dev, 'ino': st.st_ino}
 
 
 def attendre_sante(url, predicate):
@@ -68,6 +86,9 @@ def verifier_base_active(data):
 
 def planifier(release, cible, sortie):
     release, cible = Path(release), Path(cible)
+    if Path(sortie).name != 'plan.json':
+        raise ValueError('nom plan.json requis')
+    T.verifier_ancetres(Path(sortie).parent)
     T.verifier_build(release)
     T.verifier_ancetres(release / 'SOURCE_FILES.json')
     with (release / 'SOURCE_FILES.json').open(encoding='utf-8') as f:
@@ -98,6 +119,11 @@ def activer(release, cible, data, backup, actions, dependances, stopper=None, de
         T.verifier_travaux(data)
         actions = T.preparer(release, cible, backup, actions)
         dep = T.preparer_dependances(release, cible, backup, dependances)
+        with (backup / 'data-identite.json').open('x', encoding='utf-8') as f:
+            json.dump(identite_base(data), f)
+            f.flush()
+            os.fsync(f.fileno())
+        T.sync_dir(backup)
         stopper()
         modifie = False
         demarre = False
@@ -124,19 +150,27 @@ def activer(release, cible, data, backup, actions, dependances, stopper=None, de
             raise
 
 
-def retour(cible, data, backup, stopper=None, demarrer=None, identite=None, verifier=None):
+def retour(cible, data, backup, stopper=None, demarrer=None, identite=None, verifier=None, en_marche=None):
     """Retour explicite, seulement si toutes les écritures sont reconnues."""
     cible, data, backup = map(Path, (cible, data, backup))
     stopper = stopper or (lambda: service('stop'))
     demarrer = demarrer or (lambda: service('start'))
     identite = identite or verifier_base_active
     verifier = verifier or sante_creative
+    en_marche = en_marche or service_actif
     with T.verrou(cible / '.nexora-livraison.lock'):
-        identite(data)
+        T.verifier_ancetres(backup)
+        with (backup / 'data-identite.json').open(encoding='utf-8') as f:
+            if json.load(f) != identite_base(data):
+                raise ValueError('base différente de la livraison')
+        actif = en_marche()
+        if actif:
+            identite(data)
         T.verifier_travaux(data)
         T.verifier_rollback(cible, backup)
         T.verifier_rollback_dependances(cible, backup)
-        stopper()
+        if actif:
+            stopper()
         modifie = False
         try:
             T.verifier_travaux(data)
@@ -146,7 +180,7 @@ def retour(cible, data, backup, stopper=None, demarrer=None, identite=None, veri
             T.rollback_dependances(cible, backup)
             T.rollback(cible, backup)
         except BaseException:
-            if not modifie:
+            if not modifie and actif:
                 demarrer()
             raise
         demarrer()
@@ -163,8 +197,18 @@ def main(argv):
         return
     if len(argv) != 6 or argv[0] != 'activer':
         raise SystemExit('usage : livrer_release.py plan RELEASE CIBLE MANIFESTE | activer RELEASE CIBLE DATA BACKUP MANIFESTE | retour CIBLE DATA BACKUP')
-    with open(argv[5], encoding='utf-8') as f:
-        plan = json.load(f)
+    chemin_plan = Path(argv[5])
+    if chemin_plan.name != 'plan.json':
+        raise ValueError('nom plan.json requis')
+    T.verifier_ancetres(chemin_plan)
+    fd = os.open(chemin_plan, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, 'rb') as f:
+        if not stat.S_ISREG(os.fstat(f.fileno()).st_mode):
+            raise ValueError('manifeste ordinaire requis')
+        contenu = f.read(16 * 1024 * 1024 + 1)
+    if len(contenu) > 16 * 1024 * 1024:
+        raise ValueError('manifeste trop volumineux')
+    plan = json.loads(contenu)
     release, cible = Path(argv[1]), Path(argv[2])
     T.verifier_build(release)
     if (plan['release'] != str(release.resolve()) or plan['cible'] != str(cible.resolve())

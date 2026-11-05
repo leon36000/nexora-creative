@@ -193,3 +193,17 @@ class Transaction(unittest.TestCase):
         (data / 'detourage/registre.json').write_text(json.dumps([{'etat': 'en_cours'}]))
         with self.assertRaisesRegex(ValueError, 'détourage actifs'):
             T.verifier_travaux(data)
+
+    def test_sauvegarde_sqlite_wal_inclut_transactions_validees(self):
+        data = self.root / 'data-wal'
+        data.mkdir()
+        db = sqlite3.connect(data / 'openfield.db')
+        self.addCleanup(db.close)
+        db.execute('PRAGMA journal_mode=WAL')
+        db.execute('CREATE TABLE fixture (nombre INTEGER)')
+        db.execute('INSERT INTO fixture VALUES (42)')
+        db.commit()
+        self.backup.mkdir()
+        T.sauvegarder_base(data, self.backup)
+        with sqlite3.connect(self.backup / 'openfield-avant.db') as copie:
+            self.assertEqual(copie.execute('SELECT nombre FROM fixture').fetchone()[0], 42)

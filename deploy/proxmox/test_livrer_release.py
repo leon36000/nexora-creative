@@ -65,8 +65,9 @@ class Livraison(unittest.TestCase):
         self.assertEqual((self.cible / 'app/server/code.ts').read_text(), 'ancien')
         self.assertFalse(self.backup.exists())
         (self.release / 'app/server/code.ts').write_text('source modifiée')
+        (self.root / 'refuse').mkdir()
         with self.assertRaisesRegex(ValueError, 'sources modifiées'):
-            L.planifier(self.release, self.cible, self.root / 'plan-refuse.json')
+            L.planifier(self.release, self.cible, self.root / 'refuse/plan.json')
 
     def test_sante_echouee_restaure_code_et_dependances(self):
         with self.assertRaisesRegex(ValueError, 'santé'):
@@ -162,7 +163,7 @@ class Livraison(unittest.TestCase):
     def test_retour_explicite_restaure_les_versions(self):
         self.activer(True)
         L.retour(self.cible, self.data, self.backup, stopper=lambda: self.appels.append('stop'),
-                 demarrer=lambda: self.appels.append('start'), identite=lambda _data: None, verifier=lambda: True)
+                 demarrer=lambda: self.appels.append('start'), identite=lambda _data: None, verifier=lambda: True, en_marche=lambda: True)
         self.assertEqual(self.appels, ['stop', 'start', 'stop', 'start'])
         self.assertEqual((self.cible / 'app/server/code.ts').read_text(), 'ancien')
         self.assertEqual((self.cible / 'app/node_modules/code.js').read_text(), 'anciennes dépendances')
@@ -173,7 +174,7 @@ class Livraison(unittest.TestCase):
         (self.cible / 'app/server/code.ts').write_text('tiers')
         with self.assertRaisesRegex(ValueError, 'conflit'):
             L.retour(self.cible, self.data, self.backup, stopper=lambda: self.appels.append('stop'),
-                     demarrer=lambda: self.appels.append('start'), identite=lambda _data: None)
+                     demarrer=lambda: self.appels.append('start'), identite=lambda _data: None, en_marche=lambda: True)
         self.assertEqual(self.appels, ['stop', 'start'])
         self.assertEqual((self.cible / 'app/server/code.ts').read_text(), 'tiers')
 
@@ -181,7 +182,15 @@ class Livraison(unittest.TestCase):
         self.activer(True)
         with self.assertRaisesRegex(ValueError, 'indisponible après retour'):
             L.retour(self.cible, self.data, self.backup, stopper=lambda: self.appels.append('stop'),
-                     demarrer=lambda: self.appels.append('start'), identite=lambda _data: None, verifier=lambda: False)
+                     demarrer=lambda: self.appels.append('start'), identite=lambda _data: None, verifier=lambda: False, en_marche=lambda: True)
+        self.assertEqual((self.cible / 'app/server/code.ts').read_text(), 'ancien')
+
+    def test_retour_si_service_deja_arrete_utilise_identite_sauvee(self):
+        self.activer(True)
+        L.retour(self.cible, self.data, self.backup, stopper=lambda: self.appels.append('stop'),
+                 demarrer=lambda: self.appels.append('start'), identite=lambda _data: self.fail('FD service arrêté'),
+                 verifier=lambda: True, en_marche=lambda: False)
+        self.assertEqual(self.appels, ['stop', 'start', 'start'])
         self.assertEqual((self.cible / 'app/server/code.ts').read_text(), 'ancien')
 
 
