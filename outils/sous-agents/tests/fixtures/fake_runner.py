@@ -24,41 +24,7 @@ def locked_update(path: Path, update):
         fcntl.flock(stream, fcntl.LOCK_UN)
 
 
-def main():
-    args = sys.argv[1:]
-    if len(args) != 6 or args[0] != "-w":
-        return 2
-    _wait, alias, prompt_arg, work_arg, turns, budget = args
-    prompt = Path(prompt_arg)
-    name = prompt.name.rsplit(".", 1)[0]
-    directives = prompt.read_text(encoding="utf-8")
-
-    def match(pattern, default):
-        found = re.search(pattern, directives)
-        return found.group(1) if found else default
-
-    delay = float(match(r"DELAY=([0-9.]+)", "0.08"))
-    cost = match(r"COST=([0-9.]+)", "0.01")
-    mode = match(r"MODE=([A-Z_]+)", "OK")
-    rc = int(match(r"RC=(-?[0-9]+)", "0"))
-    counter = Path(os.environ["FAKE_COUNTER"])
-
-    def increment(obj):
-        obj["active"] = int(obj.get("active", 0)) + 1
-        obj["max_active"] = max(int(obj.get("max_active", 0)), obj["active"])
-        obj.setdefault("started", []).append(name)
-        return obj
-
-    locked_update(counter, increment)
-    out = Path(os.environ["SA_OUT"])
-    out.mkdir(parents=True, mode=0o700)
-    run_id = (f"{os.environ['SA_TAG']}-shared-fake" if mode == "DUPLICATE_RUN_ID"
-              else f"{os.environ['SA_TAG']}-{name}-fake")
-    (out / "meta.json").write_text(json.dumps({"run": run_id}), encoding="utf-8")
-    print(str(out), flush=True)
-    time.sleep(delay)
-
-    journal = Path(os.environ["SA_STATE"]) / "usage.jsonl"
+def write_journal(journal, mode, run_id, cost, alias):
     if mode == "CORRUPT":
         with journal.open("a", encoding="utf-8") as stream:
             stream.write('{"cost":\n')
@@ -95,6 +61,44 @@ def main():
             stream.flush()
             os.fsync(stream.fileno())
             fcntl.flock(stream, fcntl.LOCK_UN)
+
+
+def main():
+    args = sys.argv[1:]
+    if len(args) != 6 or args[0] != "-w":
+        return 2
+    _, alias, prompt_arg, _, _, _ = args
+    prompt = Path(prompt_arg)
+    name = prompt.name.rsplit(".", 1)[0]
+    directives = prompt.read_text(encoding="utf-8")
+
+    def match(pattern, default):
+        found = re.search(pattern, directives)
+        return found.group(1) if found else default
+
+    delay = float(match(r"DELAY=([0-9.]+)", "0.08"))
+    cost = match(r"COST=([0-9.]+)", "0.01")
+    mode = match(r"MODE=([A-Z_]+)", "OK")
+    rc = int(match(r"RC=(-?[0-9]+)", "0"))
+    counter = Path(os.environ["FAKE_COUNTER"])
+
+    def increment(obj):
+        obj["active"] = int(obj.get("active", 0)) + 1
+        obj["max_active"] = max(int(obj.get("max_active", 0)), obj["active"])
+        obj.setdefault("started", []).append(name)
+        return obj
+
+    locked_update(counter, increment)
+    out = Path(os.environ["SA_OUT"])
+    out.mkdir(parents=True, mode=0o700)
+    run_id = (f"{os.environ['SA_TAG']}-shared-fake" if mode == "DUPLICATE_RUN_ID"
+              else f"{os.environ['SA_TAG']}-{name}-fake")
+    (out / "meta.json").write_text(json.dumps({"run": run_id}), encoding="utf-8")
+    print(str(out), flush=True)
+    time.sleep(delay)
+
+    journal = Path(os.environ["SA_STATE"]) / "usage.jsonl"
+    write_journal(journal, mode, run_id, cost, alias)
 
     summary = "FAIL:fake" if mode == "FAIL_SUMMARY" else "OK:fake"
     print(f"{summary} {alias} {run_id} tours=1 cout=${cost} jetons=1in/1out/1req duree=0s dossier={out}", flush=True)

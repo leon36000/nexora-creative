@@ -14,6 +14,20 @@ import test_lot
 
 
 class LotDirectTests(unittest.TestCase):
+    def test_workdir_creation_error_blocks_other_tasks(self):
+        root = Path('/fictif')
+        failed = lot.Task('bad', root / 'bad.txt', root / 'bad', detail='a_creer')
+        other = lot.Task('ready', root / 'ready.txt', root / 'ready')
+        with patch.object(Path, 'mkdir', side_effect=PermissionError('fictif')):
+            result = lot.create_workdirs([failed, other], root)
+        self.assertEqual((result[0].status, result[0].detail), ('FAIL', 'creation_workdir_echec'))
+        self.assertEqual((result[1].status, result[1].detail), ('SKIP', 'creation_lot_incomplete'))
+
+    def test_run_suffix_digits_remain_ascii_only(self):
+        tag = 'lot-fake--p0123456789abcdef--c1٢'
+        self.assertEqual(lot.base_run_id(tag), tag)
+        self.assertEqual(lot.base_run_id('lot-fake--p0123456789abcdef--c12'), 'lot-fake')
+
     def setUp(self):
         self.fixture = test_lot.LotTests('runTest')
         self.fixture.setUp()

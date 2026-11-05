@@ -103,7 +103,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         key = ensure(Path(args.path))
-    except (OSError, UnicodeError, ValueError):
+    except (OSError, ValueError):
         print("clé maître absente, invalide ou non privée", file=sys.stderr)
         return 1
     # gateway.sh captures this on a pipe; it is never an argument or log line.

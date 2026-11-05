@@ -22,7 +22,7 @@ def _cost(kwargs):
         original = value if isinstance(value, Decimal) else Decimal(str(value))
         if not math.isfinite(result) or result < 0 or Decimal(str(result)) != original:
             return None
-    except (TypeError, ValueError, OverflowError, ArithmeticError):
+    except (TypeError, ValueError, ArithmeticError):
         return None
     return result
 

@@ -21,6 +21,12 @@ MAX_BODY = 16 * 1024 * 1024
 MAX_OUTPUT_TOKENS = 16000
 ALLOWED_PATHS = frozenset(('/v1/messages',))
 UNTRACKED_COUNT_PATH = '/v1/messages/count_tokens'
+FORBIDDEN_ROUTE = 'route interdite'
+BODY_READ_CHUNK = 65536
+STREAM_READ_CHUNK = 8192
+REDACTED = b'[redacted]'
+STREAMED_HEADERS = frozenset(('content-type', 'retry-after', 'request-id'))
+STREAMED_HEADER_PREFIXES = ('x-ratelimit-', 'anthropic-ratelimit-')
 
 
 def unique_object(pairs):
@@ -129,31 +135,36 @@ class Handler(BaseHTTPRequestHandler):
         self.close_connection = True
 
     def do_GET(self):
-        self.reject(403, 'route interdite')
+        self.reject(403, FORBIDDEN_ROUTE)
 
-    def do_POST(self):
+    def _check_route(self):
+        """Return the request length, or None after a rejection has been sent."""
         try:
             path = urlsplit(self.path)
         except ValueError:
             self.reject(400, 'route invalide')
-            return
+            return None
         if ((path.path not in ALLOWED_PATHS and path.path != UNTRACKED_COUNT_PATH)
                 or path.scheme or path.netloc or path.fragment or path.query not in ('', 'beta=true')):
-            self.reject(403, 'route interdite')
-            return
+            self.reject(403, FORBIDDEN_ROUTE)
+            return None
         if path.path == UNTRACKED_COUNT_PATH:
             self.reject(501, 'comptage de jetons indisponible sans suivi de coût fiable')
-            return
+            return None
         names = [name.lower() for name, _value in self.headers.raw_items()]
         lengths = self.headers.get_all('Content-Length') or []
         if (len(names) != len(set(names)) or len(lengths) != 1 or len(lengths[0]) > 9
                 or not lengths[0].isdigit() or self.headers.get('Transfer-Encoding')):
             self.reject(400, 'longueur invalide')
-            return
+            return None
         length = int(lengths[0])
         if length > MAX_BODY:
             self.reject(413, 'requête trop volumineuse')
-            return
+            return None
+        return length
+
+    def _read_body(self, length):
+        """Read exactly length bytes, or close the connection on error."""
         deadline = time.monotonic() + self.server.client_timeout
         parts = []
         remaining = length
@@ -163,7 +174,7 @@ class Handler(BaseHTTPRequestHandler):
                 if seconds <= 0:
                     raise TimeoutError
                 self.connection.settimeout(seconds)
-                chunk = self.rfile.read1(min(65536, remaining))
+                chunk = self.rfile.read1(min(BODY_READ_CHUNK, remaining))
                 if not chunk:
                     raise EOFError
                 parts.append(chunk)
@@ -171,11 +182,28 @@ class Handler(BaseHTTPRequestHandler):
             self.connection.settimeout(self.server.client_timeout)
         except (OSError, EOFError):
             self.close_connection = True
+            return None
+        return b''.join(parts)
+
+    def _forward_headers(self, length):
+        allowed = {'content-type', 'accept', 'anthropic-version', 'anthropic-beta', 'user-agent', 'x-app'}
+        headers = {key: value for key, value in self.headers.items()
+                   if key.lower() in allowed or key.lower().startswith('x-stainless-')}
+        headers.update({'Host': f'127.0.0.1:{self.server.port}', 'Content-Length': str(length),
+                        'Accept-Encoding': 'identity', 'x-api-key': self.server.key,
+                        'x-sa-run': self.server.run})
+        return headers
+
+    def do_POST(self):
+        length = self._check_route()
+        if length is None:
             return
-        body = b''.join(parts)
+        body = self._read_body(length)
+        if body is None:
+            return
         try:
             request = json.loads(body, object_pairs_hook=unique_object)
-        except (UnicodeError, ValueError, RecursionError):
+        except (ValueError, RecursionError):
             self.reject(400, 'requête invalide')
             return
         if len(body) != length or not isinstance(request, dict) or request.get('model') != self.server.model:
@@ -185,12 +213,7 @@ class Handler(BaseHTTPRequestHandler):
         if type(tokens) is not int or not 1 <= tokens <= MAX_OUTPUT_TOKENS:
             self.reject(400, 'limite de jetons invalide')
             return
-        allowed = {'content-type', 'accept', 'anthropic-version', 'anthropic-beta', 'user-agent', 'x-app'}
-        headers = {key: value for key, value in self.headers.items()
-                   if key.lower() in allowed or key.lower().startswith('x-stainless-')}
-        headers.update({'Host': f'127.0.0.1:{self.server.port}', 'Content-Length': str(length),
-                        'Accept-Encoding': 'identity', 'x-api-key': self.server.key,
-                        'x-sa-run': self.server.run})
+        headers = self._forward_headers(length)
         # Do not let an incomplete client body lock out valid requests.
         if not self.server._forward_lock.acquire(blocking=False):
             self.reject(429, 'un seul appel à la fois')
@@ -200,81 +223,119 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             self.server._forward_lock.release()
 
-    def dispatch(self, body, headers):
+    def _check_budget(self):
+        """Send a rejection and return False unless the budget allows a forward."""
         budget = self.server.budget_status()
-        if budget != 'ok':
-            self.reject(429 if budget == 'limite' else 503,
-                        'budget atteint' if budget == 'limite' else 'coût précédent inconnu')
+        if budget == 'ok':
+            return True
+        self.reject(429 if budget == 'limite' else 503,
+                    'budget atteint' if budget == 'limite' else 'coût précédent inconnu')
+        return False
+
+    def _open_upstream(self, body, headers):
+        """Return (connection, response), or None after a rejection has been sent."""
+        connection = http.client.HTTPConnection('127.0.0.1', self.server.port, timeout=self.server.timeout)
+        try:
+            connection.request('POST', self.path, body=body, headers=headers)
+            return connection, connection.getresponse()
+        except (OSError, http.client.HTTPException, ValueError):
+            connection.close()
+            self.reject(502, 'passerelle indisponible')
+            return None
+
+    def _check_upstream_response(self, response):
+        """Return whether the response is valid and its optional body length."""
+        encoding = response.getheader('Content-Encoding', 'identity').lower()
+        if encoding not in ('', 'identity'):
+            self.reject(502, 'réponse encodée non vérifiable')
+            return False, None
+        lengths = response.headers.get_all('Content-Length') or []
+        if len(lengths) > 1 or (lengths and not lengths[0].isdigit()):
+            self.reject(502, 'longueur amont invalide')
+            return False, None
+        return True, int(lengths[0]) if lengths else None
+
+    def _send_stream_headers(self, status, upstream_headers):
+        self.send_response(status)
+        for key, value in upstream_headers:
+            lower = key.lower()
+            if lower in STREAMED_HEADERS or lower.startswith(STREAMED_HEADER_PREFIXES):
+                self.send_header(key, value.replace(self.server.key, '[redacted]'))
+        # Only send the terminating chunk after a complete upstream response.
+        self.send_header('Transfer-Encoding', 'chunked')
+        self.send_header('Connection', 'close')
+        self.end_headers()
+        self.close_connection = True
+
+    def dispatch(self, body, headers):
+        if not self._check_budget():
             return
         try:
             headers['x-sa-run'] = self.server.record_attempt()
         except OSError:
             self.reject(503, 'journal indisponible')
             return
-        connection = http.client.HTTPConnection('127.0.0.1', self.server.port, timeout=self.server.timeout)
-        try:
-            connection.request('POST', self.path, body=body, headers=headers)
-            response = connection.getresponse()
-        except (OSError, http.client.HTTPException, ValueError):
-            connection.close()
-            self.reject(502, 'passerelle indisponible')
+        opened = self._open_upstream(body, headers)
+        if opened is None:
             return
+        connection, response = opened
         try:
-            encoding = response.getheader('Content-Encoding', 'identity').lower()
-            if encoding not in ('', 'identity'):
-                self.reject(502, 'réponse encodée non vérifiable')
-                return
-            lengths = response.headers.get_all('Content-Length') or []
-            if len(lengths) > 1 or (lengths and not lengths[0].isdigit()):
-                self.reject(502, 'longueur amont invalide')
-                return
-            expected = int(lengths[0]) if lengths else None
-            self.send_response(response.status)
-            for key, value in response.getheaders():
-                lower = key.lower()
-                if lower in {'content-type', 'retry-after', 'request-id'} or lower.startswith(('x-ratelimit-', 'anthropic-ratelimit-')):
-                    self.send_header(key, value.replace(self.server.key, '[redacted]'))
-            # Only send the terminating chunk after a complete upstream response.
-            self.send_header('Transfer-Encoding', 'chunked')
-            self.send_header('Connection', 'close')
-            self.end_headers()
-            self.close_connection = True
+            self._stream_response(response)
+        finally:
+            connection.close()
 
-            def emit(data):
-                if data:
-                    self.wfile.write(f'{len(data):x}\r\n'.encode() + data + b'\r\n')
-                    self.wfile.flush()
-
-            secret = self.server.key.encode()
-            pending = b''
-            received = 0
-            while True:
-                chunk = response.read1(8192)
-                if not chunk:
-                    break
-                received += len(chunk)
-                pending = (pending + chunk).replace(secret, b'[redacted]')
-                hold = min(len(secret) - 1, len(pending))
-                while hold and not pending.endswith(secret[:hold]):
-                    hold -= 1
-                ready = pending[:-hold] if hold else pending
-                pending = pending[-hold:] if hold else b''
-                emit(ready)
-            if expected is not None and received != expected:
+    def _stream_response(self, response):
+        try:
+            valid, expected = self._check_upstream_response(response)
+            if not valid:
+                return
+            self._send_stream_headers(response.status, response.getheaders())
+            received = self._stream_body(response, expected)
+            if received is None:
                 return  # Missing terminal chunk makes upstream truncation observable.
-            emit(pending)
             self.wfile.write(b'0\r\n\r\n')
             self.wfile.flush()
         except (OSError, http.client.HTTPException):
             pass  # Close without a terminal chunk if streaming fails.
-        finally:
-            connection.close()
+
+    def _emit(self, data):
+        if data:
+            self.wfile.write(f'{len(data):x}\r\n'.encode() + data + b'\r\n')
+            self.wfile.flush()
+
+    @staticmethod
+    def _unredacted_tail(pending, secret):
+        """Length of the pending suffix that may still begin the secret."""
+        hold = min(len(secret) - 1, len(pending))
+        while hold and not pending.endswith(secret[:hold]):
+            hold -= 1
+        return hold
+
+    def _stream_body(self, response, expected):
+        """Relay the redacted body; return bytes received, or None if truncated."""
+        secret = self.server.key.encode()
+        pending = b''
+        received = 0
+        while True:
+            chunk = response.read1(STREAM_READ_CHUNK)
+            if not chunk:
+                break
+            received += len(chunk)
+            pending = (pending + chunk).replace(secret, REDACTED)
+            hold = self._unredacted_tail(pending, secret)
+            ready = pending[:-hold] if hold else pending
+            pending = pending[-hold:] if hold else b''
+            self._emit(ready)
+        if expected is not None and received != expected:
+            return None
+        self._emit(pending)
+        return received
 
     def do_PUT(self):
-        self.reject(403, 'route interdite')
+        self.reject(403, FORBIDDEN_ROUTE)
 
     def do_DELETE(self):
-        self.reject(403, 'route interdite')
+        self.reject(403, FORBIDDEN_ROUTE)
 
 
 def main():
