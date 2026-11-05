@@ -18,7 +18,7 @@ nexora_sonar_developpement:
     - if: '$CI_COMMIT_BRANCH == "developpement"'
   script:
     - 'test "${SONAR_TOKEN:+present}" = present || { echo "SONAR_TOKEN absent"; exit 1; }'
-    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.exclusions=.ci-v7/** -Dsonar.python.coverage.reportPaths=.ci-v7/coverage.xml -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
+    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.tests=. '-Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.test.mjs,**/test_*.py,app/scripts/test-*.mjs,app/scripts/test-*.ts' '-Dsonar.test.exclusions=.ci-v7/**' -Dsonar.exclusions=.ci-v7/** -Dsonar.python.coverage.reportPaths=.ci-v7/coverage.xml -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
 
 nexora_v7_tests_cpu:
   stage: test
