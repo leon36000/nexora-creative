@@ -28,6 +28,7 @@ TEAM_NAMES = {"deepseek", "gemini", "muse", "opus"}
 V1_RECORD_ID = re.compile(r"^v7\.workcut\.(deepseek|gemini|muse|opus)\.(?:r1|r8c|r8d)$")
 RECORD_ID = re.compile(r"^v7\.workcut\.(deepseek|gemini|muse|opus)\.(?:r1|r8c|r8d)\.v2$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+AMD2_BRIEF_ID = re.compile(r"AMD2-\d{3}", re.ASCII)
 RECORD_FIELDS = {
     "schema", "record_id", "team", "edition", "team_role", "status",
     "amd2_brief_id", "amd2_corpus_sha256", "artifacts", "seed_reconciliation",
@@ -128,7 +129,7 @@ def _validate_review_and_corpus_fields(record: dict[str, Any]) -> None:
     if record["memory_promotion"] != "none":
         raise EvidenceError("evidence records cannot promote memory")
     brief_id = record["amd2_brief_id"]
-    if brief_id is not None and (not isinstance(brief_id, str) or not re.fullmatch(r"AMD2-[0-9]{3}", brief_id)):
+    if brief_id is not None and not (isinstance(brief_id, str) and AMD2_BRIEF_ID.fullmatch(brief_id)):
         raise EvidenceError("amd2_brief_id must be null or an AMD2-### id")
     corpus_sha = record["amd2_corpus_sha256"]
     if not isinstance(corpus_sha, str) or not SHA256.fullmatch(corpus_sha):
@@ -245,9 +246,9 @@ def _validate_observations(observations: Any) -> None:
 def _validate_lineage(lineage: Any, record_id: str) -> None:
     if not isinstance(lineage, list):
         raise EvidenceError("lineage must be an array")
-    for item in lineage:
-        if not isinstance(item, str) or not RECORD_ID.fullmatch(item):
-            raise EvidenceError("lineage may reference V2 records only")
+    invalid = [item for item in lineage if not isinstance(item, str) or not RECORD_ID.fullmatch(item)]
+    if invalid:
+        raise EvidenceError("lineage may reference V2 records only")
     if len(lineage) != len(set(lineage)):
         raise EvidenceError("lineage contains duplicate parent ids")
     if record_id in lineage:
@@ -280,15 +281,16 @@ def _digest_file(path: Path) -> tuple[str, int]:
     return digest.hexdigest(), size
 
 
-def _verify_archived_v1_link(record: dict[str, Any], storage_root: Path) -> None:
-    archive_ref = next(item for item in record["artifacts"] if item["kind"] == "archived_v1_registry")
-    receipt_ref = next(item for item in record["artifacts"] if item["kind"] == "archived_v1_pc1_receipt")
-    archive_path = storage_root / PurePosixPath(archive_ref["path"])
-    matches: list[dict[str, Any]] = []
+def _artifact_ref(record: dict[str, Any], kind: str) -> dict[str, Any]:
+    return next(item for item in record["artifacts"] if item["kind"] == kind)
+
+
+def _archived_v1_matches(path: Path, replaced_id: str) -> list[dict[str, Any]]:
     try:
-        data = archive_path.read_text(encoding="utf-8")
+        data = path.read_text(encoding="utf-8")
         if data and not data.endswith("\n"):
             raise EvidenceError("archived V1 JSONL ends with an incomplete row")
+        matches: list[dict[str, Any]] = []
         for line_no, line in enumerate(data.splitlines(), start=1):
             if not line:
                 raise EvidenceError(f"archived V1 JSONL has a blank row at {line_no}")
@@ -298,10 +300,16 @@ def _verify_archived_v1_link(record: dict[str, Any], storage_root: Path) -> None
                 raise EvidenceError(f"archived V1 JSONL has invalid JSON at row {line_no}") from exc
             if not isinstance(archived, dict):
                 raise EvidenceError(f"archived V1 JSONL row {line_no} is not an object")
-            if archived.get("record_id") == record["replaces_v1_record"]["record_id"]:
+            if archived.get("record_id") == replaced_id:
                 matches.append(archived)
     except (UnicodeDecodeError, OSError) as exc:
         raise EvidenceError("archived V1 registry cannot be read") from exc
+    return matches
+
+
+def _check_archived_v1_record(record: dict[str, Any], archive_path: Path) -> None:
+    replaced = record["replaces_v1_record"]
+    matches = _archived_v1_matches(archive_path, replaced["record_id"])
     if len(matches) != 1:
         raise EvidenceError("replaced V1 record id must occur exactly once in the immutable archive")
     archived = matches[0]
@@ -309,31 +317,47 @@ def _verify_archived_v1_link(record: dict[str, Any], storage_root: Path) -> None
     if (not isinstance(archived.get("record_sha256"), str)
             or not SHA256.fullmatch(archived["record_sha256"])
             or archived["record_sha256"] != actual_record_sha
-            or archived["record_sha256"] != record["replaces_v1_record"]["record_sha256"]):
+            or archived["record_sha256"] != replaced["record_sha256"]):
         raise EvidenceError("replaced V1 record digest does not match the archived row")
 
-    receipt_path = storage_root / PurePosixPath(receipt_ref["path"])
+
+def _receipt_bytes_attested(receipt: dict[str, Any], archive_ref: dict[str, Any],
+                            receipt_ref: dict[str, Any]) -> bool:
+    archive_path = PurePosixPath(archive_ref["path"])
+    expected_relative = (PurePosixPath("archive-v1") / archive_path.name).as_posix()
+    sizes = (receipt.get("storage_size_bytes"), receipt.get("pc1_size_bytes"))
+    if any(not isinstance(size, int) or isinstance(size, bool) for size in sizes):
+        return False
+    return (
+        receipt.get("schema") == "nexora-v7-registry-archive-receipt-v1"
+        and receipt.get("storage_sha256") == archive_ref["sha256"]
+        and receipt.get("pc1_sha256") == archive_ref["sha256"]
+        and sizes[0] == archive_ref["size_bytes"]
+        and sizes[1] == archive_ref["size_bytes"]
+        and receipt.get("storage_relative_path") == expected_relative
+        and PurePosixPath(receipt_ref["path"]).parent == archive_path.parent
+        and isinstance(receipt.get("pc1_path"), str)
+        and receipt["pc1_path"].startswith("/run/media/pc1/Infrastructure/")
+        and _nonempty(receipt.get("verified_at_utc"))
+        and _nonempty(receipt.get("verification"))
+    )
+
+
+def _check_v1_receipt(archive_ref: dict[str, Any], receipt_ref: dict[str, Any],
+                      receipt_path: Path) -> None:
     try:
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError, OSError) as exc:
         raise EvidenceError("V1 archive receipt is not readable JSON") from exc
-    if (not isinstance(receipt, dict)
-            or receipt.get("schema") != "nexora-v7-registry-archive-receipt-v1"
-            or receipt.get("storage_sha256") != archive_ref["sha256"]
-            or receipt.get("pc1_sha256") != archive_ref["sha256"]
-            or not isinstance(receipt.get("storage_size_bytes"), int)
-            or isinstance(receipt.get("storage_size_bytes"), bool)
-            or not isinstance(receipt.get("pc1_size_bytes"), int)
-            or isinstance(receipt.get("pc1_size_bytes"), bool)
-            or receipt.get("storage_size_bytes") != archive_ref["size_bytes"]
-            or receipt.get("pc1_size_bytes") != archive_ref["size_bytes"]
-            or receipt.get("storage_relative_path") != (PurePosixPath("archive-v1") / PurePosixPath(archive_ref["path"]).name).as_posix()
-            or PurePosixPath(receipt_ref["path"]).parent != PurePosixPath(archive_ref["path"]).parent
-            or not isinstance(receipt.get("pc1_path"), str)
-            or not receipt["pc1_path"].startswith("/run/media/pc1/Infrastructure/")
-            or not _nonempty(receipt.get("verified_at_utc"))
-            or not _nonempty(receipt.get("verification"))):
+    if not isinstance(receipt, dict) or not _receipt_bytes_attested(receipt, archive_ref, receipt_ref):
         raise EvidenceError("V1 archive receipt does not attest the referenced Storage and pc1 bytes")
+
+
+def _verify_archived_v1_link(record: dict[str, Any], storage_root: Path) -> None:
+    archive_ref = _artifact_ref(record, "archived_v1_registry")
+    receipt_ref = _artifact_ref(record, "archived_v1_pc1_receipt")
+    _check_archived_v1_record(record, storage_root / PurePosixPath(archive_ref["path"]))
+    _check_v1_receipt(archive_ref, receipt_ref, storage_root / PurePosixPath(receipt_ref["path"]))
 
 
 def _verify_amd2_brief_membership(record: dict[str, Any], repo_root: Path) -> None:
@@ -354,30 +378,40 @@ def _verify_amd2_brief_membership(record: dict[str, Any], repo_root: Path) -> No
         raise EvidenceError("amd2_brief_id is absent from the referenced AMD2 corpus")
 
 
+def _resolve_artifact(artifact: dict[str, Any], roots: dict[str, Path]) -> Path:
+    root_name, path = artifact["root"], artifact["path"]
+    if root_name not in roots:
+        raise EvidenceError(f"artifact root was not supplied: {root_name}")
+    root = roots[root_name]
+    relative = PurePosixPath(path)
+    component = root
+    for part in relative.parts:
+        component = component / part
+        if component.is_symlink():
+            raise EvidenceError(f"artifact path must not traverse a symlink: {root_name}:{path}")
+    try:
+        resolved = (root / relative).resolve(strict=True)
+    except OSError as exc:
+        raise EvidenceError(f"artifact is unavailable: {root_name}:{path}") from exc
+    if not resolved.is_relative_to(root) or not resolved.is_file():
+        raise EvidenceError(f"artifact is outside its root or not a regular file: {root_name}:{path}")
+    return resolved
+
+
+def _check_artifact(artifact: dict[str, Any], roots: dict[str, Path]) -> None:
+    resolved = _resolve_artifact(artifact, roots)
+    actual_sha, actual_size = _digest_file(resolved)
+    if actual_sha != artifact["sha256"] or actual_size != artifact["size_bytes"]:
+        raise EvidenceError(f"artifact hash/size mismatch: {artifact['root']}:{artifact['path']}")
+
+
 def verify_artifacts(record: dict[str, Any], storage_root: Path, repo_root: Path,
                      creative_data_root: Path | None = None) -> None:
     roots = {"storage": storage_root.resolve(strict=True), "repo": repo_root.resolve(strict=True)}
     if creative_data_root is not None:
         roots["creative_data"] = creative_data_root.resolve(strict=True)
     for artifact in record["artifacts"]:
-        if artifact["root"] not in roots:
-            raise EvidenceError(f"artifact root was not supplied: {artifact['root']}")
-        root = roots[artifact["root"]]
-        candidate = root / PurePosixPath(artifact["path"])
-        component = root
-        for part in PurePosixPath(artifact["path"]).parts:
-            component = component / part
-            if component.is_symlink():
-                raise EvidenceError(f"artifact path must not traverse a symlink: {artifact['root']}:{artifact['path']}")
-        try:
-            resolved = candidate.resolve(strict=True)
-        except (FileNotFoundError, OSError) as exc:
-            raise EvidenceError(f"artifact is unavailable: {artifact['root']}:{artifact['path']}") from exc
-        if not resolved.is_relative_to(root) or not resolved.is_file():
-            raise EvidenceError(f"artifact is outside its root or not a regular file: {artifact['root']}:{artifact['path']}")
-        actual_sha, actual_size = _digest_file(resolved)
-        if actual_sha != artifact["sha256"] or actual_size != artifact["size_bytes"]:
-            raise EvidenceError(f"artifact hash/size mismatch: {artifact['root']}:{artifact['path']}")
+        _check_artifact(artifact, roots)
     _verify_amd2_brief_membership(record, roots["repo"])
     _verify_archived_v1_link(record, roots["storage"])
 
@@ -411,21 +445,65 @@ def _load_registry(fd: int) -> tuple[dict[str, dict[str, Any]], int]:
     return records, len(data)
 
 
+def _resolve_registry_target(registry_path: Path, repo_root: Path) -> Path:
+    resolved = registry_path.resolve(strict=False)
+    if resolved.suffix != ".jsonl":
+        raise EvidenceError("active V2 registry path must end in .jsonl")
+    memory_dir = (repo_root.resolve(strict=True) / "app/server/nexora/memoire").resolve(strict=False)
+    if resolved.is_relative_to(memory_dir):
+        raise EvidenceError("production evidence cannot be written inside any runtime memory directory")
+    return resolved
+
+
+def _append_locked(fd: int, encoded: bytes, original_size: int) -> None:
+    view = memoryview(encoded)
+    try:
+        while view:
+            written = os.write(fd, view)
+            if written <= 0:
+                raise EvidenceError("append made no progress")
+            view = view[written:]
+        os.fsync(fd)
+    except BaseException:
+        os.ftruncate(fd, original_size)
+        os.fsync(fd)
+        raise
+
+
+def _append_record(fd: int, item: dict[str, Any], storage_root: Path, repo_root: Path,
+                   creative_data_root: Path | None) -> str:
+    existing, original_size = _load_registry(fd)
+    current = existing.get(item["record_id"])
+    if current is not None:
+        if current["record_sha256"] == item["record_sha256"]:
+            return "already_present"
+        raise EvidenceError(f"record_id conflict with different SHA-256: {item['record_id']}")
+    missing_parents = [record_id for record_id in item["lineage"] if record_id not in existing]
+    if missing_parents:
+        raise EvidenceError("lineage parent is absent from the V2 registry: " + ", ".join(missing_parents))
+    verify_artifacts(item, storage_root, repo_root, creative_data_root)
+    encoded = (json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+    _append_locked(fd, encoded, original_size)
+    return "imported"
+
+
+def _check_registry_preconditions(lineage: list[str], registry_path: Path,
+                                  repo_root: Path) -> Path:
+    # Ordre historique des erreurs : suffixe et dossier mémoire d'abord, puis
+    # parent lineage absent si le registre n'existe pas, puis dossier parent absent.
+    resolved = _resolve_registry_target(registry_path, repo_root)
+    if lineage and not resolved.exists():
+        raise EvidenceError("lineage parent is absent because the V2 registry does not exist")
+    if not resolved.parent.is_dir():
+        raise EvidenceError("V2 registry parent directory must already exist")
+    return resolved
+
+
 def import_record(record: Any, registry_path: Path, storage_root: Path, repo_root: Path,
                   creative_data_root: Path | None = None) -> tuple[str, dict[str, Any]]:
     item = validate_record(record)
     verify_artifacts(item, storage_root, repo_root, creative_data_root)
-    resolved_registry = registry_path.resolve(strict=False)
-    if resolved_registry.suffix != ".jsonl":
-        raise EvidenceError("active V2 registry path must end in .jsonl")
-    memory_dir = (repo_root.resolve(strict=True) / "app/server/nexora/memoire").resolve(strict=False)
-    if resolved_registry.is_relative_to(memory_dir):
-        raise EvidenceError("production evidence cannot be written inside any runtime memory directory")
-    if item["lineage"] and not resolved_registry.exists():
-        raise EvidenceError("lineage parent is absent because the V2 registry does not exist")
-    registry_path = resolved_registry
-    if not registry_path.parent.is_dir():
-        raise EvidenceError("V2 registry parent directory must already exist")
+    registry_path = _check_registry_preconditions(item["lineage"], registry_path, repo_root)
     flags = os.O_CREAT | os.O_RDWR | os.O_APPEND
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
@@ -436,30 +514,7 @@ def import_record(record: Any, registry_path: Path, storage_root: Path, repo_roo
         if not stat.S_ISREG(os.fstat(fd).st_mode):
             raise EvidenceError("registry path is not a regular file")
         fcntl.flock(fd, fcntl.LOCK_EX)
-        existing, original_size = _load_registry(fd)
-        current = existing.get(item["record_id"])
-        if current is not None:
-            if current["record_sha256"] == item["record_sha256"]:
-                return "already_present", item
-            raise EvidenceError(f"record_id conflict with different SHA-256: {item['record_id']}")
-        missing_parents = [record_id for record_id in item["lineage"] if record_id not in existing]
-        if missing_parents:
-            raise EvidenceError("lineage parent is absent from the V2 registry: " + ", ".join(missing_parents))
-        verify_artifacts(item, storage_root, repo_root, creative_data_root)
-        encoded = (json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
-        view = memoryview(encoded)
-        try:
-            while view:
-                written = os.write(fd, view)
-                if written <= 0:
-                    raise EvidenceError("append made no progress")
-                view = view[written:]
-            os.fsync(fd)
-        except BaseException:
-            os.ftruncate(fd, original_size)
-            os.fsync(fd)
-            raise
-        return "imported", item
+        return _append_record(fd, item, storage_root, repo_root, creative_data_root), item
     finally:
         try:
             fcntl.flock(fd, fcntl.LOCK_UN)
