@@ -1,0 +1,1357 @@
+{
+  "statut": "proposition non approuvée, en préparation",
+  "briefs": [
+    {
+      "asset_ids": [
+        "AMD2-C01-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C01",
+      "description_en": "A 15-second live-action workshop scene shows an input image and an authorised capture of its textured 3D result where available; a physical prop is separate and not evidence of printing from the model.",
+      "dialogue": "A source image becomes a textured 3D model that can be inspected and exported. The physical object is a separate practical prop.",
+      "duration_s": 15,
+      "family": "publicité produit",
+      "format": "16:9",
+      "hook_5s": "One image to textured 3D: inspect and export.",
+      "id": "AMD2-001",
+      "language": "en",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "The source image and textured 3D result or preparation card are visible",
+        "Inspection and export are communicated in English",
+        "The physical prop is clearly separate from product proof"
+      ],
+      "on_screen_text": "Textured 3D · Inspect · Export",
+      "real_world_direction": "One locked close-up in a real workshop. Show an authorised capture of the textured 3D result if available, otherwise a preparation card. A real prop may be handled but is not represented as a print generated from the model.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "Mesh fonctions 3D",
+      "voice_approval": "pending_founder",
+      "product_notes": "Only image-to-textured-3D, inspection and export are proven here. Live deformation and the function driving the digital mesh are not specified in the provided asset: In preparation, no fake interface shown."
+    },
+    {
+      "asset_ids": [
+        "AMD2-C01-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C01",
+      "description_en": "30-second live-action UGC at a real home desk. A creator shows an input image, an actual capture of a textured 3D result when available, and a practical object as a separate prop. Inspection and export are the focus; no slider or deformation interface is shown.",
+      "dialogue": "Here is the source image. This textured 3D model can be inspected and exported. The object in my hand is a practical prop, not proof of a physical print from this model.",
+      "duration_s": 30,
+      "family": "UGC",
+      "format": "16:9",
+      "hook_5s": "From one image to textured 3D: inspect and export.",
+      "id": "AMD2-002",
+      "language": "en",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "The source image and a textured 3D result or clearly labelled preparation card are visible",
+        "Inspection and export are identified without a simulated success screen",
+        "The physical prop is not presented as proof of a generated print"
+      ],
+      "on_screen_text": "Image to textured 3D · Inspect · Export",
+      "real_world_direction": "Real handheld UGC in daylight at a home desk. Show an authorised capture of the image-to-textured-3D result if available; otherwise use a clearly labelled preparation card. No simulated successful interface, slider, or mesh deformation.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "Mesh fonctions 3D",
+      "voice_approval": "pending_founder"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C01-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C01",
+      "description_en": "60-second live-action brand film in a workshop courtyard at dusk. A creator shows an input image and, where an authorised capture is available, a textured 3D result for inspection and export. A physical prop and projected image are staging, not evidence of a live product interaction.",
+      "dialogue": "Une image devient un modèle 3D texturé. On peut ensuite inspecter le résultat et l’exporter. Les accessoires de cette scène illustrent le concept.",
+      "duration_s": 60,
+      "family": "marque",
+      "format": "9:16",
+      "hook_5s": "D’une image à une 3D texturée : inspecter et exporter.",
+      "id": "AMD2-003",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "The source image and a textured 3D model or an En préparation card are visible",
+        "Inspection and export are communicated in French",
+        "Practical props and projection are not presented as proof of unverified functions"
+      ],
+      "on_screen_text": "Image vers 3D texturée · Inspection · Export",
+      "real_world_direction": "Film real people and practical objects on location in vertical 9:16 at dusk. Show only an authorised real capture of the 3D model if available, otherwise a card explicitly labelled En préparation. No cursor, remote-triggered deformation, fake successful interface or claim about physical printing.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "Mesh fonctions 3D",
+      "voice_approval": "pending_founder",
+      "unproven_functions": "Rejouabilité des choix et conservation de la trace de chaque choix : En préparation"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C01-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C01",
+      "description_en": "A 15-second live-action conversation in a real workshop: two makers discuss a source image and the resulting textured 3D model, inspection and export.",
+      "dialogue": "Maker A: Start with this image. Maker B: Here is the textured 3D model; inspect it and export it.",
+      "duration_s": 15,
+      "family": "fiction/dialogue",
+      "format": "9:16",
+      "hook_5s": "From one image to a textured 3D model.",
+      "id": "AMD2-004",
+      "language": "en",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "The source image is established in the first five seconds",
+        "Textured 3D, inspection and export are stated in English",
+        "No staged interface is represented as a successful live product"
+      ],
+      "on_screen_text": "Image to textured 3D · Inspect · Export",
+      "real_world_direction": "Film two actors with real workshop props. Use an authorised real capture when available; otherwise show an In preparation card. Do not simulate a successful product interface.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "Mesh fonctions 3D",
+      "voice_approval": "pending_founder"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C01-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C01",
+      "description_en": "A live-action technical demonstration at a real workbench follows a maker from a source image to inspection of an authorised textured 3D model and export.",
+      "dialogue": "Opératrice : Voici l’image de départ et le modèle 3D texturé. Je peux inspecter ses faces puis l’exporter.",
+      "duration_s": 30,
+      "family": "documentaire/interview",
+      "format": "16:9",
+      "hook_5s": "D’une image au modèle 3D texturé.",
+      "id": "AMD2-005",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "The source image is identified within five seconds",
+        "Inspection of the textured 3D model and export are identified in French",
+        "A preparation card is used if an authorised capture is unavailable"
+      ],
+      "on_screen_text": "Image vers 3D texturée · Inspection · Export",
+      "real_world_direction": "Film real hands, a workbench and an authorised capture of the textured 3D model if available; otherwise display a static En préparation card. Do not show simulated successful UI or unverified editing operations.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "Mesh fonctions 3D",
+      "voice_approval": "pending_founder"
+    },
+    {
+      "id": "AMD2-006",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "theme": "OPSYS remplace des départements ; styles nouveaux sans tableau de bord inachevé",
+      "family": "démonstration technique",
+      "format": "16:9",
+      "duration_s": 60,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C02-ASSET-01"
+      ],
+      "description_en": "60-second 16:9 technical demonstration shot live in a real office open space. From the first five seconds, the intent is explicit: an operator generates new styles directly instead of sending work between departments. The camera stays on finished style renders only and never shows an unfinished dashboard. The replacement of departments by OPSYS and any capability that is not visibly demonstrated on screen are labelled \"En préparation\".",
+      "hook_5s": "Le visuel partait d'un service à l'autre. Ici, je vous montre trois rendus finis côte à côte ; la génération directe, elle, est en préparation.",
+      "dialogue": "Opératrice : Avant, on envoyait le brief lundi et on recevait la maquette vendredi. Aujourd'hui, je vous montre trois rendus finis côte à côte, et on les compare ici. Collègue : Et générer les styles directement, remplacer les services par OPSYS ? Opératrice : Ça, c'est encore en préparation, on ne peut pas le montrer aujourd'hui. Ce qu'on montre, ce sont les rendus finis.",
+      "on_screen_text": "Trois rendus finis comparés côte à côte / On ne montre que les rendus finis / Génération directe et OPSYS : en préparation",
+      "real_world_direction": "Live shooting only, no stock, no reconstruction. Real office open space with practical daylight on a tripod facing the operator. The large monitor shows only finished style renders; any unfinished dashboard stays out of frame through camera position and operator blocking. Printed briefs and the wall board are physical props. Continuous takes with insert cuts on the screen and the prints. Three visibly distinct finished styles stay side by side on screen for at least ten seconds. No dashboard close-ups, no graphical overlays implying features that are not shown.",
+      "observation_criteria": [
+        "Within the first 5 seconds, the operator states on camera that three finished styles are compared directly on site, and labels direct generation and the replacement of departments by OPSYS as in preparation.",
+        "Three visibly distinct finished styles remain comparable side by side on the monitor for at least 10 seconds.",
+        "No unfinished dashboard appears at any point in the frame."
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-007",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "theme": "OPSYS remplace des départements ; styles nouveaux sans tableau de bord inachevé",
+      "family": "publicité produit",
+      "format": "9:16",
+      "duration_s": 15,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C02-ASSET-01"
+      ],
+      "description_en": "15-second 9:16 vertical product ad shot in a real kitchen in the morning. A user places three finished style cards next to the phone, illustrating the end of departmental hand-offs in the targeted result. Only finished results are shown. The product's ability to generate the styles in one gesture is not demonstrated by this brief and is marked as in preparation.",
+      "hook_5s": "Three new styles. No waiting on departments. (Generation: in preparation.)",
+      "dialogue": "Voiceover: Three new styles, right here. No departmental delay. The one-gesture generation is in preparation.",
+      "on_screen_text": "Three new styles / No departmental delay / One-gesture generation: In preparation",
+      "real_world_direction": "Shoot vertical handheld in a real kitchen with morning window light. Over-the-shoulder framing on the phone laid flat while the user places three finished style cards beside it; the cards are visible within the first 3 seconds, with the phone gesture shown as a staging simulation clearly labelled 'In preparation'. Quick cuts, no studio effects. Do not display any dashboard or partial screen, and do not imply that the gesture produces the styles.",
+      "observation_criteria": [
+        "The three finished style cards are visible within the first 3 seconds and the phone gesture is shown on camera as a labelled simulation ('In preparation')",
+        "Only finished images and physical cards are shown; no dashboard or unfinished screen appears",
+        "One-gesture generation is explicitly labelled 'In preparation' on screen"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-008",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "theme": "OPSYS remplace des départements ; styles nouveaux sans tableau de bord inachevé",
+      "family": "UGC",
+      "format": "9:16",
+      "duration_s": 30,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C02-ASSET-01"
+      ],
+      "description_en": "30-second 9:16 UGC-style selfie testimonial filmed handheld in a real bedroom with window light. The creator says that before, she emailed three departments to get new styles, and that direct generation in OPSYS, the replacement of departments, is still in preparation. She then flips the camera to show real printed before-and-after proofs laid on a wooden desk, with only finished exports visible, never an unfinished dashboard.",
+      "hook_5s": "Avant, je relançais trois bureaux pour un style. Le faire directement, c'est encore en préparation.",
+      "dialogue": "Créatrice : Avant, j'envoyais des mails à trois bureaux et j'attendais des allers-retours pour un seul style. Générer mes styles directement dans OPSYS, remplacer les départements, c'est encore en préparation, je ne peux pas vous le montrer. Ce que je peux vous montrer, ce sont trois propositions imprimées. Regardez : avant, des échanges interminables ; après, trois propositions imprimées.",
+      "on_screen_text": "Avant : trois bureaux, des allers-retours / Après : trois propositions imprimées / OPSYS et génération directe - En préparation",
+      "real_world_direction": "Real-world shoot: selfie camera, handheld, no tripod, in an authentic bedroom with natural window light. The creator speaks straight to camera for the hook within the first five seconds, then flips the phone to show real printed sheets laid on a wooden desk (before and after). Keep framing loose and vertical 9:16, natural sound, no studio lighting, no fake sets. Do not show any dashboard or interface, only printed proofs.",
+      "observation_criteria": [
+        "Within the first five seconds the creator states the clear intention and that direct generation in OPSYS, replacing departments, is in preparation",
+        "The before-after contrast is shown with real printed proofs laid on a wooden desk in a real room",
+        "No dashboard or unfinished interface appears on screen",
+        "Direct style generation in OPSYS is explicitly labelled 'En préparation' on screen"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-009",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "theme": "OPSYS remplace des départements ; styles nouveaux sans tableau de bord inachevé",
+      "family": "marque",
+      "format": "16:9",
+      "duration_s": 60,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C02-ASSET-01"
+      ],
+      "description_en": "60-second 16:9 brand film for OPSYS, shot live in a real craft workshop. A small team abandons separate work stations and creates new styles together around a single shared workbench as the targeted result; the camera stays on hands, materials, moodboards and finished prints. The replacement of departments by OPSYS is not demonstrated and is in preparation. No screens, no dashboard and no unfinished visuals anywhere in frame.",
+      "hook_5s": "What if departments became one workbench?",
+      "dialogue": "Narrator: One brief, one table, many hands. Member A: We used to wait for each department. Member B: Now we shape new styles together, here. Narrator: Finished work only, nothing half-built. The platform replacing departments, that's in preparation.",
+      "on_screen_text": "What if departments became one workbench? / One workbench / New styles, finished work / OPSYS: In preparation",
+      "real_world_direction": "Shoot live, cinematic 16:9, in a real workshop with practical warm lighting and natural sound; no set build, no stock footage, no screen interfaces or dashboards in frame. Open on a single wide static shot that establishes the one shared workbench within the first 5 seconds (hook legible on screen and in narration). Then slow dolly and close inserts on hands handling physical moodboards and at least three finished prints laid together on the bench. Cast reads as a small team, not actors in a corporate setting. Feature 'OPSYS' only as the campaign label on screen if it appears; do not claim that the platform is live or deployed. End on the bench with finished prints and the line 'New styles, finished work'; any unproven capability stays labelled 'In preparation'.",
+      "observation_criteria": [
+        "The shift from separate departments to one shared workbench is clear in the first 5 seconds",
+        "At least three finished physical style prints are handled and visible together on the bench",
+        "No screen interface, dashboard or unfinished visual appears in frame",
+        "All footage is live-action in a real workshop",
+        "The replacement of departments by OPSYS is explicitly labelled 'In preparation' in the narration and on screen"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-010",
+      "campaign_id": "AMD2-C02",
+      "split": "construction",
+      "theme": "OPSYS remplace des départements ; styles nouveaux sans tableau de bord inachevé",
+      "family": "fiction/dialogue",
+      "format": "16:9",
+      "duration_s": 15,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C02-ASSET-01"
+      ],
+      "description_en": "15-second, 16:9 fiction dialogue shot as live-action footage on a real cafe terrace. Two colleagues still handle departmental follow-up and discuss as an In preparation prototype the future target of choosing directly among three new styles laid out as prints on the table; no dashboard and no digital interface appears on screen. OPSYS replacement, layouts and finished dashboard are In preparation.",
+      "hook_5s": "Léa : Ils ont validé ? Karim : On relance encore, OPSYS est en préparation.",
+      "dialogue": "Léa : Alors, le service visuel a validé ? Karim : On doit encore relancer les trois services. (Il pose trois tirages sur la table.) L'idée en préparation avec OPSYS, ce serait : trois styles, tu choisis. Léa : Et le tableau de bord ? Karim : En préparation aussi. On verra quand ce sera fini.",
+      "on_screen_text": "Relances encore nécessaires / Trois styles à tester / OPSYS et tableau de bord : en préparation",
+      "real_world_direction": "Live-action shoot on a real cafe terrace in daylight with ambient sound. Static two-shot, then an insert cut on three prints laid on the table with a visible test choice gesture for the In preparation prototype. Natural, brisk acting paced to fill 15 seconds within a single dialogue scene; no digital interface or dashboard on screen.",
+      "observation_criteria": [
+        "The dialogue makes clear within 5 seconds that departmental follow-up is still needed and OPSYS replacement is In preparation",
+        "Three distinct prints are laid on the table and the test choice gesture is visible on camera"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "intention_5s": "Within the first 5 seconds the viewer understands that departmental follow-up is still needed and that direct choice between three offered styles via OPSYS is an In preparation prototype.",
+      "function_claims": {
+        "OPSYS": "En préparation",
+        "dashboard_replacement": "En préparation",
+        "style_acceptance_by_visual_department": "En préparation"
+      }
+    },
+    {
+      "id": "AMD2-011",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "theme": "Marque Nexora Creative, Code, RAG modulable",
+      "family": "documentaire/interview",
+      "format": "9:16",
+      "duration_s": 30,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C03-ASSET-01"
+      ],
+      "description_en": "Vertical real-footage documentary interview in a shared workshop. Seated at a real workbench under natural window light, one creator describes their own daily routine and names, in their own words, the activities they do each day. Cutaways are limited to the same room: hands, notebook and screen. No product demonstration, no on-camera proof of any tool, feature or module is claimed.",
+      "hook_5s": "Here in the workshop, this is how my working day is organised.",
+      "dialogue": "Question: How do you organise your day here? Answer: In the morning I focus on writing, in the afternoon on coding, and I consult a documentary source when I need one. It all happens at this workbench, in front of you. (No product demonstration is filmed; this is a testimony about a daily practice.)",
+      "on_screen_text": "Real workshop – Interview: organising a working day",
+      "real_world_direction": "Shoot on location in a real workshop with natural window light, handheld 9:16 camera, lavalier interview and in-room cutaways only, no stock footage. Keep it a talking-head testimony: no screen-recording, no UI close-ups, no staged demo. Cutaways of hands, notebook and screen must be passive shots of the same room in continuous light.",
+      "observation_criteria": [
+        "The speaker states the interview subject (a typical working day) visibly within the first 5 seconds",
+        "All cutaways show the same workbench, hands and screen with continuous light, with no product demo or UI recording",
+        "No on-screen title or spoken line asserts a tool, feature or module that is not visibly used on camera"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-012",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "theme": "Marque Nexora Creative, Code, RAG modulable",
+      "family": "démonstration technique",
+      "format": "9:16",
+      "duration_s": 60,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C03-ASSET-01"
+      ],
+      "description_en": "Real-footage vertical piece (9:16) filmed at a desk in a single room, over-shoulder framing. An operator, hands visible in frame, shows a Creative, Code and modular RAG concept in an honest prototype: the live RAG module swap is In preparation and is not demonstrated. The film does not claim a working swap, source update or live result; it presents the intent and the proof to come, with no simulated interface.",
+      "hook_5s": "One real desk, in one take: a modular RAG concept, In preparation.",
+      "dialogue": "This is my draft. The modular RAG swap isn't ready yet, so it's still in preparation. What you see here is where it should live: the same draft, with sources on the right. Once the swap works for real, I'll show it on a live screen, in one take.",
+      "on_screen_text": "Prototype – Creative, Code, modular RAG (swap: In preparation)",
+      "real_world_direction": "Film on a real desk in one room with over-shoulder 9:16 framing, capture the operator's hands and the room under a practical desk lamp, natural room light. Do not present any interface as a working product: no simulated screen, no overlay reconstruction, no faked module swap. The live RAG module swap must be shown as In preparation, not as a success.",
+      "observation_criteria": [
+        "The film clearly states that the live RAG module swap is In preparation and does not show it as a working success",
+        "No simulated or rebuilt interface appears that could be mistaken for a proven product feature",
+        "The draft shown is presented as a concept or intent, not as a live result",
+        "If a real live module swap is ever captured on take, the on-screen text and dialogue must be updated accordingly before publication"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-013",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "theme": "Marque Nexora Creative, Code, RAG modulable",
+      "family": "publicité produit",
+      "format": "16:9",
+      "duration_s": 15,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C03-ASSET-01"
+      ],
+      "description_en": "Horizontal real-footage product spot on a studio table. Hands place three paper cards labelled Creative, Code and modular RAG beside a laptop, then slide the cards together while a pre-built page is shown on the laptop screen, illustrating that the three ideas come together as one page.",
+      "hook_5s": "Trois briques sur la table, une page préparée à l'écran.",
+      "dialogue": "Création, code, module RAG : trois briques réunies sur une même table. La page préparée est affichée sur l'écran, à côté des cartes. Le geste sur les cartes ne déclenche rien sur l'écran : toute automatisation d'assemblage reste en préparation.",
+      "on_screen_text": "Sur une vraie table — Trois briques, une page déjà prête",
+      "real_world_direction": "Shoot on a real studio table in 16:9 with top-down and side angles, using practical paper cards and a real laptop. The page shown on the laptop screen is prepared before the take, not generated on camera; no animation overlay.",
+      "observation_criteria": [
+        "The three cards are placed and brought together by hand on the table within the first 5 seconds, readable as Creative, Code and modular RAG",
+        "The final page is legible on the real laptop screen in the same single shot as the cards; its presence is not caused by the card gesture. Automated page assembly triggered from the screen is not demonstrated and is not claimed — En préparation"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "unsupported_functions": "En préparation : automatisme d'assemblage de la page sur l'écran par le geste des cartes, et toute fonction produit non visible dans le plan."
+    },
+    {
+      "id": "AMD2-014",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "theme": "Marque Nexora Creative, Code, RAG modulable",
+      "family": "UGC",
+      "format": "16:9",
+      "duration_s": 30,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C03-ASSET-01"
+      ],
+      "description_en": "Real-footage, self-filmed UGC shot handheld in 16:9 at a home bedroom desk. A single person first speaks to camera at arm length, then turns the camera onto the desk, keeps it in one hand to frame the desk and screen, and performs the routine one-handed: writing a brief note, a small code edit, and showing a prototype RAG module setting control labelled In preparation, ending by holding the finished note up to the lens.",
+      "hook_5s": "My morning setup is just writing, coding and one RAG switch - In preparation prototype.",
+      "dialogue": "Hey, this is my real desk. I write a bit, I fix a bit of code, then I show a prototype RAG module setting for sources - still In preparation. Look, this is the note I wrote this morning, all done here.",
+      "on_screen_text": "My real desk - writing, code, one RAG switch - In preparation prototype",
+      "real_world_direction": "Self-shoot with a handheld 16:9 camera held at arm length in a real bedroom desk setting, use natural morning window light, keep every action on the same visible desk, keep the In preparation label visible when showing the prototype RAG setting, and keep crew, equipment and reflections out of frame.",
+      "observation_criteria": [
+        "Face-to-camera intended within the first 5 seconds, in a real bedroom at a desk",
+        "Writing, a code edit and showing a prototype RAG module control labelled In preparation are each performed one-handed on the same visible desk while the other hand holds the camera framing the desk and screen",
+        "Real-footage look: handheld arm-length framing, natural light, no visible crew"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "unsupported_functions": "En préparation : toute fonction RAG non visible à l'écran au moment du basculement, et toute automatisation non démontrée dans la prise. Le basculement du réglage RAG reste à confirmer sur la prise réelle ; à défaut, la mention « En préparation » doit figurer à l'écran."
+    },
+    {
+      "id": "AMD2-015",
+      "campaign_id": "AMD2-C03",
+      "split": "construction",
+      "theme": "Marque Nexora Creative, Code, RAG modulable",
+      "family": "marque",
+      "format": "9:16",
+      "duration_s": 60,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C03-ASSET-01"
+      ],
+      "description_en": "Vertical real-footage brand piece: a host opens the door of a real makerspace, greets two residents and walks the corridor with them. At table one, the resident writes text; further along, another codes at a screen; then the host gestures toward the modular RAG step, clearly labelled in preparation — no working in-place module swap interface is staged. The group closes around a shared board to review together.",
+      "hook_5s": "Poussez la porte, ici on crée, on code, on module — le reste arrive.",
+      "dialogue": "Bienvenue dans le lieu. Ici on écrit à cette table. Plus loin on code à cet écran. Là, on montre en préparation le geste de remplacer le module RAG pour vérifier une source — ce n'est pas encore disponible. On se retrouve autour du tableau pour relire ensemble. Le reste de ce que le site propose reste en préparation.",
+      "on_screen_text": "Lieu réel – Créer, coder, moduler ensemble (module RAG et le reste : En préparation)",
+      "real_world_direction": "Real location only, no staged set: shoot in an actual makerspace with available interior light, vertical 9:16 handheld Steadicam, walk-and-talk continuous coverage. Sequence each table action in a different real spot of the same space, record live greetings, and close on the group around the existing shared board. The modular RAG step is shown only by the host gesturing toward the setup and saying it is in preparation; do not stage any fake swap interface or fake success screen.",
+      "observation_criteria": [
+        "Host delivers the place-based invitation within the first 5 seconds while walking",
+        "Each table action occurs in a different real spot of the same location with the group board closing",
+        "Visible real-location material (door, tables, screen, shared board) filmed in an existing working makerspace rather than a studio-built set. No working module swap is shown: the RAG step is described as En préparation, with no fake interface displayed"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "intention": "Show a real makerspace where people write and code, and where the modular RAG step is honestly presented as in preparation, while making clear within five seconds that it is a welcome to a real place.",
+      "capabilities": [
+        "Creative is demonstrated only if the writing action is captured on camera",
+        "Code is demonstrated only if the coding on screen is captured on camera",
+        "Modular RAG is not demonstrated here — En préparation"
+      ]
+    },
+    {
+      "asset_ids": [
+        "AMD2-C04-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C04",
+      "description_en": "Real-life vertical fiction scene at the entrance of a small office one morning. A visitor walks up to a reception kiosk; the screen lights up and walks her through a check-in, and the host receives a notification. The scene is staged fiction filmed on location, not a demonstration of a functioning product.",
+      "dialogue": "Kiosque (personnage de fiction) : Bonjour ! Bienvenue. Quel est votre nom ? Visiteur : Lina, rendez-vous à neuf heures. Kiosque (personnage de fiction) : C'est noté, Lina. En préparation : je préviens votre hôte.",
+      "duration_s": 15,
+      "family": "fiction/dialogue",
+      "format": "9:16",
+      "hook_5s": "Bonjour ! Je vous accueille, on passe par le kiosque. (Scène de fiction — fonctions en préparation.)",
+      "id": "AMD2-016",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "First intention is visible within 5 seconds with the kiosk greeting and check-in starting",
+        "Check-in is fully shown on camera as staged fiction, with the host notification shown, without asserting that the kiosk function is proven"
+      ],
+      "on_screen_text": "Scène de fiction : accueil visiteur — En préparation",
+      "real_world_direction": "Shoot on location at a real office entrance in natural morning light, vertical 9:16 framing, one fixed camera plus one close-up on the kiosk screen, real actors, no studio effects. Fully staged scene with scripted dialogue; no claim that the kiosk works, no product performance shown or implied beyond the staged action.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "réception virtuelle",
+      "voice_approval": "pending_founder",
+      "function_status_note": "Toute fonction du kiosque (accueil automatique, enregistrement, notification à l'hôte) est une action scénarisée et non démontrée : En préparation."
+    },
+    {
+      "asset_ids": [
+        "AMD2-C04-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C04",
+      "description_en": "Staged documentary-style interview at a reception desk in an office after lunch, in available light. An office manager describes in a scripted interview the visitor check-in flow as it is being prepared, illustrated by two cutaways of a made-for-shooting setup — the entrance screen in the lobby and the host notification on her computer. The interview is not a demonstration of a functioning product and no unproven capability is presented as effective.",
+      "dialogue": "Interviewer: What will happen when a visitor arrives? Manager: In preparation: they will check in on the screen, I will get a message, and I will come to meet them. It is not live yet.",
+      "duration_s": 30,
+      "family": "documentaire/interview",
+      "format": "16:9",
+      "hook_5s": "How we are preparing visitor check-in — no live product yet.",
+      "id": "AMD2-017",
+      "language": "en",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "Interview answer names a concrete planned check-in step and a concrete planned host notification, explicitly marked as in preparation",
+        "Cutaway shows the entrance screen and the host side message in the same sequence, identified as a staged setup, not a live product",
+        "The interview is framed as a scripted fiction, without asserting that a working system already exists"
+      ],
+      "on_screen_text": "Visitor check-in — In preparation",
+      "real_world_direction": "Shoot a scripted documentary-style interview at the reception desk in available light, 16:9, real location, actors following a written script. Open on the hook line within the first five seconds, then let the manager answer. Add two cutaways in the same sequence: the lobby entrance screen and the computer notification, filmed with a staged setup. Keep ambient office sound; no claim that the flow works today, all unproven functions explicitly marked 'In preparation' on screen and in the dialogue.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "réception virtuelle",
+      "voice_approval": "pending_founder"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C04-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C04",
+      "description_en": "Staged fiction filmed at a lobby kiosk, 60 seconds, in a single continuous take with one handheld camera. A demonstrator (actor) walks through, in one continuous staged flow, language selection, visitor registration (name and reason for visit), badge printing and host notification. The scene is scripted, not a product demonstration; every capability is in preparation until real recorded footage proves the function.",
+      "dialogue": "Démonstrateur (fiction) : Étape une, je choisis la langue — en préparation. Étape deux, j'entre le nom et le motif — en préparation. Étape trois, le badge s'imprime — en préparation. Étape quatre, l'hôte est prévenu — en préparation.",
+      "duration_s": 60,
+      "family": "démonstration technique",
+      "format": "16:9",
+      "hook_5s": "Un visiteur, quatre étapes (fiction — En préparation) : la langue, la saisie, le badge, l'hôte prévenu.",
+      "id": "AMD2-018",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "Every step is filmed in order in one continuous take with a single handheld camera and no cut: language, registration, badge, notification",
+        "All steps — language, registration, badge printing and host notification — are shown as staged fiction with a mocked interface explicitly marked En préparation on screen and in the dialogue; they are only considered demonstrated once visible in real functional footage",
+        "No promise of performance, ranking or comparison is stated on screen or in voice-over"
+      ],
+      "on_screen_text": "Parcours visiteur (fiction) : langue, saisie, badge, notification — En préparation",
+      "real_world_direction": "Shoot on location in a real lobby in 16:9 with one handheld camera, one continuous take following the demonstrator, no cuts and no separate insert shots; use a clearly mocked interface labelled 'En préparation' on screen, do not present any screen, print or notification as a working product; capture only real ambient lobby sounds, no claim of functional screen or printer; staged fiction with an actor; all unproven functions remain marked 'En préparation' on screen.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "réception virtuelle",
+      "voice_approval": "pending_founder"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C04-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C04",
+      "description_en": "Staged fiction in vertical format contrasting a crowded manual sign-in desk with a kiosk check-in scene. Quick shots show a touch screen, a badge and a smile, ending on the cleared entrance. All kiosk functions are in preparation; the scene is fiction, not a product demonstration.",
+      "dialogue": "Voice (fiction): Paper list, waiting, calling around. Then: tap, badge, done — still in preparation.",
+      "duration_s": 15,
+      "family": "publicité produit",
+      "format": "9:16",
+      "hook_5s": "Waiting line, or a check-in in preparation? Watch.",
+      "id": "AMD2-019",
+      "language": "en",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "Contrast between the manual queue and the kiosk check-in scene is visible in the first 5 seconds",
+        "Final shot shows a person wearing a badge and the entrance cleared, with the check-in flow marked In preparation",
+        "No duration claim, statistic or performance promise appears on screen or in voice-over"
+      ],
+      "on_screen_text": "Tap, badge, done — In preparation",
+      "real_world_direction": "Shoot in a real reception with vertical framing. Quick handheld before-shots, then stable after-shots. Natural light, real props only, fast in-camera rhythm. Staged fiction; no unsupported claims on screen or in voice-over: no duration claims, no brand names, no statistics, no 'fastest/secure/compliant' statements, and no invented rankings; unproven functions marked 'In preparation'.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "réception virtuelle",
+      "voice_approval": "pending_founder",
+      "intention_5s": "Within five seconds show the crowded manual sign-in desk and then the start of a kiosk check-in scene (marked in preparation), so viewers instantly read 'manual waiting vs. a check-in flow being prepared'."
+    },
+    {
+      "asset_ids": [
+        "AMD2-C04-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C04",
+      "description_en": "Staged selfie-style UGC fiction in a real lobby. A visitor and employee act out a future reception workflow using a clearly labelled preparation card; no real registration or notification is claimed. One continuous take, no change of floor.",
+      "dialogue": "Salut ! Dans cette scène, la visiteuse mime son arrivée dans le hall. L’enregistrement et l’alerte visiteur sont en préparation. Je vais simplement l’accueillir ici.",
+      "duration_s": 30,
+      "family": "UGC",
+      "format": "9:16",
+      "hook_5s": "Voici le concept d’accueil visiteur — en préparation.",
+      "id": "AMD2-020",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "The visitor and employee remain in the same lobby in one continuous take",
+        "The concept is labelled En préparation in speech and visible text",
+        "No registration or notification is presented as a working product"
+      ],
+      "on_screen_text": "Accueil et alerte visiteur — En préparation",
+      "real_world_direction": "One continuous handheld selfie take in a real lobby with actors and available light; keep the visitor and employee on the same floor. Show a static En préparation card, no simulated successful registration or notification.",
+      "split": "construction",
+      "status": "En préparation",
+      "theme": "réception virtuelle",
+      "voice_approval": "pending_founder",
+      "notes_en": "Feature coverage (in-prep status): the virtual reception / visitor-alert flow is not demonstrated as functional; this brief is a staged shooting script with dialogue performed as fiction, and the screen shown must not claim an ability that is not proven. All unproven functions are explicitly marked 'En préparation'."
+    },
+    {
+      "id": "AMD2-021",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "theme": "caméra et sécurité",
+      "family": "marque",
+      "format": "16:9",
+      "duration_s": 60,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C05-ASSET-01"
+      ],
+      "description_en": "60-second brand film shot on location in a real family house at dusk: parents prepare to leave for the evening, an exterior security camera installed above the front entrance is clearly visible, the street grows calm, one parent holds a phone without showing a working live view (live entrance view: In preparation), warm interior lights turn on as they leave. Recording, live view and motion alert are not shown as working.",
+      "hook_5s": "The house is falling asleep, the camera is installed — recording, live view, motion alert: In preparation.",
+      "dialogue": "— Did you close the gate?\n— Yes. The camera at the entrance is installed (recording, live view, motion alert: In preparation); we’ll be able to get an alert once those features are available.\n— So we can leave with peace of mind.",
+      "on_screen_text": "A reassuring presence, day and night — recording, live view, motion alert: In preparation",
+      "real_world_direction": "Shoot on location in a real house exterior at blue hour. Use tripod wide shots framed in 16:9 and practical lighting only, no set build and no CGI. Keep the installed camera visible in frame during the opening wide shot. Actors perform a natural departure: car in the driveway, front door closing, a parent holds a phone without showing a working live view. The recording, live view and motion alert are not shown working: whenever they are mentioned in dialogue, the on-screen text carries the marking “In preparation”. Any product feature shown beyond what is physically installed is to be marked as In preparation.",
+      "observation_criteria": [
+        "Installed camera visible in exterior wide shot within first 5 seconds",
+        "Phone held in real take without showing a working live view for at least 3 seconds",
+        "No on-screen claim of working recording, live view or motion alert; recording, live view and motion alert are marked “In preparation” whenever mentioned"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-022",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "theme": "caméra et sécurité",
+      "family": "fiction/dialogue",
+      "format": "16:9",
+      "duration_s": 15,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C05-ASSET-01"
+      ],
+      "description_en": "15-second live-action fiction dialogue in daylight at a real residential front gate: one neighbour asks whether the other saw who stopped by the porch, and the other answers that a motion alert rang, they spoke through the entrance camera, and the courier left the parcel by the door (motion alert and two-way audio: in preparation). Two actors, handheld 16:9, mounted entrance camera visible in the background, natural ambient sound.",
+      "hook_5s": "Did you see who stopped at your porch?",
+      "dialogue": "— Did you see who stopped at your porch? — Yes, the motion alert will ring and I’ll speak through the camera — both in preparation — and the courier will leave the parcel by the door.",
+      "on_screen_text": "See, speak, secure the doorstep — motion alert and two-way audio: in preparation",
+      "real_world_direction": "Shoot on a real residential street in daylight, handheld 16:9, two actors at a metal gate, entrance camera mounted on a post visible in background, natural ambient sound, no visual effects.",
+      "observation_criteria": [
+        "Both actors and the mounted entrance camera are visible in the same real shot",
+        "The question and the full answer about the motion alert are delivered within the 15 seconds",
+        "Motion alert and two-way audio are never presented as working; both are marked “In preparation” in dialogue and on-screen text"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-023",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "theme": "caméra et sécurité",
+      "family": "documentaire/interview",
+      "format": "9:16",
+      "duration_s": 30,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C05-ASSET-01"
+      ],
+      "description_en": "30s vertical documentary interview filmed in a real courtyard with available light: a resident explains camera placement toward the alley entrance and points to the mounted camera, the shot following that gesture in a slow pan. No footage is shot or shown from the camera: what happens on screen while nobody is watching is only described as promised, and every such feature (notifications, recorded image viewing) is clearly labelled in preparation — nothing is demonstrated as working. Only actions actually performed on camera are described.",
+      "hook_5s": "Ici, on voit toute l'allée d'entrée.",
+      "dialogue": "— Pourquoi cette position ? — Parce qu'ici on voit toute l'allée d'entrée. La notification, quand quelqu'un passe le soir, et revoir l'image enregistrée : tout ça, c'est encore en préparation. Aujourd'hui, on a seulement posé la caméra.",
+      "on_screen_text": "Placée pour voir l'allée — notifications et relecture en préparation (prototype, non disponible)",
+      "real_world_direction": "Shoot vertical 9:16 in a real courtyard with natural available light; boom-up interview framing on the resident, then follow the resident pointing toward the alley entrance and the mounted camera in the same continuous pan (slow three-shot crew move, not a locked-off camera and not a cut). After the pan, hold on the resident as they gesture while talking about future features they cannot show yet. Do not film the phone screen, do not open an app, and do not display any notification or recorded-image interface: those features are in preparation, they must never appear as working, and a title card reading “En préparation” accompanies that part of the dialogue. No staged or generated footage.",
+      "observation_criteria": [
+        "Alley entrance and mounted camera shown in the same real vertical pan",
+        "No app, notification or recorded-image interface visible at any point; the phone screen is never shown",
+        "Notification feature and recorded-image viewing never presented as working; both marked “En préparation” in dialogue, on-screen text and title card"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-024",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "theme": "caméra et sécurité",
+      "family": "démonstration technique",
+      "format": "9:16",
+      "duration_s": 60,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C05-ASSET-01"
+      ],
+      "description_en": "60s vertical real-location shoot in a garden at night, filming the installed security camera and its light near a storage shed: a person walks through the detection path while a second person holds the phone in the same continuous take, so the viewer sees the phone screen (phone notifications: in preparation), the camera night view (in preparation) and the light on camera. Nothing is staged or composited.",
+      "hook_5s": "Watch the garden turn bright when someone walks in.",
+      "dialogue": "— Walking in now, three meters out. — Phone alerts and night view are in preparation; what you see is the camera’s own light.",
+      "on_screen_text": "Phone alerts and night view: in preparation — light on",
+      "real_world_direction": "Shoot vertical 9:16 on location at night in a real garden near a storage shed. One single continuous handheld take: one person walks the detection path while a second person walks alongside holding the phone toward the camera within the same shot; no tripod and no separate close-up inserts. Use only the installed camera and its own light, no added lighting, no screen-composite effects. Motion alert, night view in the app and phone notifications are marked “In preparation” on screen and must not be stated or implied to be working. If the light does not trigger visibly on camera, do not state or imply that it worked; end the shot at the point of observation.",
+      "observation_criteria": [
+        "Person entering the detection path and the held phone shown in the same continuous take",
+        "Camera light activation captured in the real garden without extra lighting",
+        "No claim of remote control or app function beyond what is visibly demonstrated",
+        "Phone alerts, night view and notifications never presented as working; marked “In preparation”"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "on_screen_function_note": {
+        "motion_alert": "En préparation",
+        "night_view": "En préparation",
+        "phone_notifications": "En préparation",
+        "remote_control": "En préparation"
+      }
+    },
+    {
+      "id": "AMD2-025",
+      "campaign_id": "AMD2-C05",
+      "split": "construction",
+      "theme": "caméra et sécurité",
+      "family": "publicité produit",
+      "format": "16:9",
+      "duration_s": 15,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C05-ASSET-01"
+      ],
+      "description_en": "Real 15s product spot at a real front door in morning light: a courier drops a parcel in the area covered by the fixed camera mounted at the entrance, and the owner in the hallway presents the interior-view and two-way-audio prototype concept as a staged simulation without presenting it as working (both prototypes: In preparation, not working).",
+      "hook_5s": "Colis déposé : la caméra fixe de l'entrée cadre le coursier.",
+      "dialogue": "— Votre colis est déposé devant la porte. — Merci, je le rentre tout de suite. [Prototype simulé : vue depuis l'intérieur et audio bidirectionnel, en préparation, non fonctionnels.]",
+      "on_screen_text": "Vue de l'entrée depuis l'intérieur et audio bidirectionnel — prototypes en préparation, non fonctionnels",
+      "real_world_direction": "Shoot on location at a real front door in morning light, 16:9; tripod exterior shot plus a hallway interior angle showing the fixed mounted entrance camera, the courier dropping the parcel inside its framed area, and the owner presenting the interior-view and two-way-audio prototype as a staged simulation. The camera does not move; no pan, tilt or tracking. Both interior viewing and two-way audio are prototypes marked \"En préparation\" on screen (In preparation) and never presented as working; do not show any working interface or assert performance features beyond what is shown on screen.",
+      "observation_criteria": [
+        "Parcel drop and fixed mounted entrance camera visible in the real exterior shot within the first 5 seconds",
+        "Courier's parcel visibly inside the frame the fixed entrance camera covers, readable within the first 5 seconds",
+        "No claim of motion tracking: the camera stays fixed",
+        "Interior view from inside and two-way audio never presented as working; both marked \"En préparation\" in dialogue and on-screen text, no working interface shown as product success"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-026",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "theme": "Smarthome installation et programmation IA",
+      "family": "UGC",
+      "format": "16:9",
+      "duration_s": 30,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C06-ASSET-01"
+      ],
+      "description_en": "Thirty-second live-action UGC concept in a real living room. A resident presents a smart-home installation and explains a planned evening routine using physical props and a preparation card; no app pairing, automation or successful test is claimed.",
+      "hook_5s": "Voici notre idée de routine maison — en préparation.",
+      "dialogue": "Je vous présente le module et son emplacement. L’appairage, la programmation et l’automatisation sont en préparation. Nous montrons ici le concept, sans prétendre que le test fonctionne déjà.",
+      "on_screen_text": "Appairage · programmation · automatisation — En préparation",
+      "real_world_direction": "Real live-action in a living room with natural daylight; creator introduces physical props, then uses clearly labelled preparation cards. Cuts and close-ups are allowed. Do not show a fake successful app interface, pairing, triggered automation or test result.",
+      "observation_criteria": [
+        "The opening identifies the proposed home routine within five seconds",
+        "Preparation status is visible and spoken for pairing and automation",
+        "No working app, pairing or automated outcome is implied by the physical props"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "dialogues": [
+        "01–04 s : Voici notre idée de routine maison — en préparation.",
+        "05–13 s : Présentation du module et de son emplacement.",
+        "14–21 s : Appairage et programmation — en préparation.",
+        "22–30 s : Présentation du concept, sans résultat automatisé revendiqué."
+      ],
+      "real_world_direction_en": "Real live-action in a living room with natural daylight; creator introduces physical props, then uses clearly labelled preparation cards. Cuts and close-ups are allowed. Do not show a fake successful app interface, pairing, triggered automation or test result."
+    },
+    {
+      "id": "AMD2-027",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "theme": "Smarthome installation et programmation IA",
+      "family": "marque",
+      "format": "9:16",
+      "duration_s": 60,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C06-ASSET-01"
+      ],
+      "description_en": "Vertical 9:16 brand film (60 s) in real live-action at dusk in the entry and kitchen of a family house: an installer mounts a gateway and two door sensors, then programs an arrival routine in the companion app, ending with a door-open test.",
+      "hook_5s": "Coming home should just work - here is the arrival routine, set up in minutes.",
+      "dialogue": "We start at the front door. The gateway goes here in the hallway. Two sensors go on the doors. Now in the app I create the arrival rule: door opens, entry light on. The app is meant to handle the light automation: that function is in preparation. Let's open the door and test it together, for real.",
+      "on_screen_text": "Live installation - Arrival routine - En préparation",
+      "real_world_direction": "Documentary-style live-action vertical shoot in a real house at dusk, practical lights only. Gimbal follow from the entry to the kitchen, over-the-shoulder shots of the real app interaction, installer working with screwdriver and adhesive mounts, closing on a single take of the door opening.",
+      "observation_criteria": [
+        "Gateway and door sensors physically installed on camera in one continuous view, no trick cut",
+        "Closing test: one continuous take of the door opening, with the entry light turning on shown in the same frame",
+        "Installer visibly uses the app to create the arrival rule"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "on_screen_text_en": "Live installation - Arrival routine - In preparation",
+      "pending": "Light and routine automation function is 'In preparation' - not demonstrated as working until the closing test is captured; any non-verified feature claim labeled 'In preparation'."
+    },
+    {
+      "id": "AMD2-028",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "theme": "Smarthome installation et programmation IA",
+      "family": "fiction/dialogue",
+      "format": "9:16",
+      "duration_s": 15,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C06-ASSET-01"
+      ],
+      "description_en": "Vertical 9:16 live-action fiction, 15 s, single take, shot in a real bedroom in the morning. Two flatmates, both on screen together in the same room: one complains it is too cold and too dark. The other opens a phone app and taps through a heating/lamp scheduling screen that is clearly labelled as an unfinished prototype, 'In preparation'. The app, heating and lamp behaviour are NOT verified features: they are shown only as a prototype in preparation. The radiator display and the bedside lamp are expected to show nothing; whatever they do is filmed as observed. Clear comic intent from the first second. No feature is claimed as working or validated.",
+      "hook_5s": "Il fait trop froid et trop sombre ici !",
+      "dialogue": "Colocataire A : Il fait trop froid et trop sombre ici ! Colocataire B : Attends, je prends l'appli. C'est le prototype chauffage et lumière, en préparation. Chambre, 19 degrés à 7h et lumière progressive. Je saisis… voilà, c'est noté. Colocataire A : Et ça marche ? Colocataire B : Non, c'est en préparation — on ne sait pas encore si le radiateur réagit.",
+      "on_screen_text": "Prototype chauffage et lumière — En préparation (programmation 19 degrés à 7h et lumière progressive non démontrées)",
+      "real_world_direction": "Real live-action, real bedroom, morning daylight through blinds, vertical 9:16, one continuous take, handheld near chest height, no visual effects. Both performers visible in the same frame with audible dialogue from the first second; comic intent readable immediately. Perform practical actions on a real phone: tap a scheduling screen that visibly carries the on-screen label 'En préparation'. Then gesture towards, or reach, the radiator display and the bedside lamp; do not stage a heating or lamp response that the equipment cannot actually show. If the display or lamp shows nothing, keep it as is: the prototype is in preparation, not a working product. No fake success state on the app screen.",
+      "observation_criteria": [
+        "Both performers visible together in the same real room with audible dialogue exchange",
+        "Programming gesture on a real phone screen is visible and the 'En préparation' prototype label is readable",
+        "Radiator display and lamp state are shown as filmed; any change is reported as observed, not assumed",
+        "hook line audible and action readable within the first five seconds",
+        "Neither dialogue nor on-screen text claims a working or validated heating/lamp feature"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-029",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "theme": "Smarthome installation et programmation IA",
+      "family": "documentaire/interview",
+      "format": "16:9",
+      "duration_s": 30,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C06-ASSET-01"
+      ],
+      "description_en": "Real live-action documentary interview in the living corner of an installer's workshop, against a real wall-mounted electrical panel. In 16:9 for 30 seconds: a tripod medium shoulder-height interview with natural work light, macro cutaways of hands securing and wiring a smart relay, a phone app screen where a rule is set, and a final live test of the light switching off.",
+      "hook_5s": "Most failures come from wiring, not software.",
+      "dialogue": "Most failures come from wiring, not software. I secure the relay here, check power, then I set the rule: if no motion for five seconds, lights off. You see: install first, program second, test live.",
+      "on_screen_text": "Installer interview | Wire, program, test | In preparation",
+      "real_world_direction": "Shoot real live-action documentary footage in an actual workshop with a real electrical panel wall. Use a tripod at medium shoulder-height for the interview, natural work light, no studio set; macro cutaways of hands securing and wiring the relay and creating the rule in the phone app; close with a live test of the light shutting off. All smart-home functions shown are in preparation (prototype, on-screen status \"In preparation\"); no other interface or feature is to be displayed as a working product, and no false interface may appear as a product success; do not claim a demonstrated capability, certification, ranking or product name beyond what the footage proves.",
+      "observation_criteria": [
+        "Hands shown securing and wiring the relay on a real panel",
+        "App rule screen and resulting light-off test both visible in the same take or adjacent cutaways"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-030",
+      "campaign_id": "AMD2-C06",
+      "split": "construction",
+      "theme": "Smarthome installation et programmation IA",
+      "family": "démonstration technique",
+      "format": "16:9",
+      "duration_s": 60,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C06-ASSET-01"
+      ],
+      "description_en": "Live-action technical demonstration on a real kitchen bench and a real entrance door: mounting a smart-home module, pairing it with the app, creating an automation routine and testing a door sensor that switches on a light and sends a notification. 16:9, 60s, locked-off tripod and macro shots with on-screen step labels.",
+      "hook_5s": "On fixe, on appaire, on programme, on teste : le fonctionnement réel, en quatre étapes.",
+      "dialogue": "Étape 1 : je fixe le module sur le banc de la cuisine. Étape 2 : je l'appaire dans l'appli — on voit l'écran. Étape 3 : je crée une routine, capteur de porte puis lumière. Étape 4 : j'ouvre la porte, la lumière s'allume et la notification arrive. En préparation : les fonctions non vérifiées à l'écran restent annoncées en préparation.",
+      "on_screen_text": "1 Fixer 2 Appairer 3 Programmer 4 Tester — En préparation",
+      "real_world_direction": "Real live-action technical bench shoot in a real kitchen and at a real entrance door, daylight plus a work lamp. Locked-off tripod for wide shots, macro lens for wiring and LED status, over-the-shoulder phone screen capture, and one continuous chronological shot demonstrating the door sensor triggering the light and the notification. Each numbered step must show a visible physical manipulation; no function is asserted beyond what the shot demonstrates.",
+      "observation_criteria": [
+        "The 5-second opening clearly states the demonstration intent",
+        "Each numbered step matches a visible physical manipulation",
+        "The sensor trigger test shows the door opening causing the light and the notification on screen",
+        "No unverified function is claimed; unproven functions are labelled En préparation"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C07-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C07",
+      "description_en": "15s vertical concept film (not a product proof) shot in a real small home office in Quebec in the morning, real hands and real screen, no added effects. Within the first 5 seconds a seated user opens a laptop showing a VPS control panel and presses an AI installation button, so the intent is clear immediately. The rest of the spot follows the installation screen and ends on the on-screen text marking the feature as in preparation.",
+      "dialogue": "Look: one click here, and the AI installation starts on the VPS. The AI feature is in preparation.",
+      "duration_s": 15,
+      "family": "publicité produit",
+      "format": "9:16",
+      "hook_5s": "A VPS in Quebec: installing AI — in preparation.",
+      "id": "AMD2-031",
+      "language": "en",
+      "observation_criteria": [
+        "Installation button visibly pressed by a real hand within the first 5 seconds on a real laptop",
+        "Installation progress legible on camera in 9:16 framing, with no claim of a ready AI workspace",
+        "No synthetic screen replacement or added visual effects on the screen; feature marked as in preparation"
+      ],
+      "on_screen_text": "VPS Quebec — AI installation — In preparation",
+      "real_world_direction": "Film in a real home office with natural morning light in vertical 9:16. Open on a tight shot of the laptop; a real hand presses the installation button within the first 5 seconds. Then hold on the real screen as the installation progresses and show the in-preparation state; do not stage a ready AI workspace. End on the user's reaction and the on-screen text. No added effects, no motion graphics over the screen.",
+      "split": "validation",
+      "status": "En préparation",
+      "theme": "VPS Québec installation IA en un clic",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "unproven_features": [
+        "One-click AI installation on a Quebec VPS: En préparation",
+        "Instant ready-to-use AI workspace after installation: En préparation",
+        "Hosting or data residency in Quebec: En préparation"
+      ]
+    },
+    {
+      "asset_ids": [
+        "AMD2-C07-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C07",
+      "description_en": "30-second vertical (9:16) UGC-style video filmed handheld as a selfie in a real bedroom with a desk. A single continuous take: a creator faces the camera, turns the phone to show a real laptop screen displaying a prototype mock of a hosting control panel clearly labelled In preparation on screen, taps the install button as a demo, waits, and shows the same mock screen afterward before turning back to camera. Natural room lighting, no cuts, no screen overlay. The screen is kept in frame around the tap and the wait; the face appears only at the start and end. No real install success is claimed; the VPS one-tap function is presented only as In preparation in voice, text and image.",
+      "dialogue": "Okay, I'm showing a prototype mock of my Québec VPS panel — In preparation — I'm just tapping install as a demo, one button... now we wait... this isn't live or finished, I'll show the next step once it's ready.",
+      "duration_s": 30,
+      "family": "UGC",
+      "format": "9:16",
+      "hook_5s": "I'm showing a prototype mock of this Québec VPS setup on my desk — In preparation — watch this demo step.",
+      "id": "AMD2-032",
+      "language": "en",
+      "observation_criteria": [
+        "The creator's desk and laptop are real and visible, with the demo install tap within the first 5 seconds",
+        "The same prototype mock screen labelled In preparation is shown before and after the tap with no jump cut or overlay",
+        "No AI capability or VPS install success is stated on screen or in speech as a finished product; undemonstrated function is labelled In preparation in voice, text and image"
+      ],
+      "on_screen_text": "One-tap VPS install prototype — In preparation",
+      "real_world_direction": "Shoot one continuous handheld selfie take in a real bedroom desk space in vertical 9:16, no jump cuts and no screen overlays. Open on the creator's face for the first 2 seconds, then swing the phone over the shoulder to the real laptop showing a prototype mock of the control panel with a visible In preparation label on screen. Keep the demo install tap inside the first 5 seconds; keep the same mock screen in frame before, during and after the tap and throughout the short wait. Do not cut back and forth: return to the creator's face only once, at the end, confirming only that this is a prototype demo, with the VPS one-tap function shown as In preparation. Use natural lighting only, a clean desk, no staged set. Do not present the mock interface as a real finished install.",
+      "split": "validation",
+      "status": "En préparation",
+      "theme": "VPS Québec installation IA en un clic",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "intention": "Show a real, unedited first-person prototype demo of tapping an install action on a mock hosted control panel and waiting, with no claim of real install success. Function not yet demonstrated in provided assets: Québec VPS one-tap install — In preparation, labelled consistently in voice, text and image.",
+      "compliance_note": "Quebec VPS hosting is treated as prototype mock context only; no unproven install success is asserted, and the function is labelled In preparation."
+    },
+    {
+      "asset_ids": [
+        "AMD2-C07-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C07",
+      "description_en": "60s horizontal concept brand film shot on location in a real Quebec coworking workshop and terrace. Three coworkers set up their laptops; one person shows an AI installation action on the clicked control panel of a Quebec VPS, the group watches the progress screen together, then shows what it sees on screen during a simple AI test (outcome not asserted; AI workspace still In preparation). Calm tone, real location and real hands, community atmosphere.",
+      "dialogue": "— On est prêts ? — Oui, je lance l'installation sur le VPS. — Un seul clic ? — Un seul. On suit la progression ensemble, puis on tente un premier test. — Ça avance devant nous. — L'installation est lancée, l'espace IA reste En préparation : on le confirmera ensuite.",
+      "duration_s": 60,
+      "family": "marque",
+      "format": "16:9",
+      "hook_5s": "Au Québec, un groupe lance une installation IA sur un VPS : on montre d'abord le clic, le reste reste à confirmer et l'espace IA est En préparation.",
+      "id": "AMD2-033",
+      "language": "fr",
+      "observation_criteria": [
+        "Real coworking setting visible in the first 5 seconds, with the install action shown on camera",
+        "Final 10 seconds show the group watching the progress or test on a real screen in 16:9, with the AI workspace stated as En préparation"
+      ],
+      "on_screen_text": "VPS Québec — installation IA en un clic — En préparation",
+      "real_world_direction": "Film on location in a real coworking space and terrace in 16:9 with tripod and slow lateral moves. Show real laptops, real hands and real group interaction. Place the install action within the first 5 seconds, then document the wait, the progress and one joint test. The hook must state the intent plainly in the first 5 seconds; no claim of a demonstrated feature beyond what is on screen, and the AI workspace is spoken and shown as En préparation.",
+      "split": "validation",
+      "status": "En préparation",
+      "theme": "VPS Québec installation IA en un clic",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C07-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C07",
+      "description_en": "15-second horizontal concept fiction dialogue in a real small office kitchen. Two colleagues, each with a coffee, discuss installing AI in preparation on a Quebec VPS. One taps once on a tablet; the other reacts as the installation screen appears, while the voice reminds that the feature is in preparation. Real interior, natural light, static two-shot then a close-up of the tablet.",
+      "dialogue": "— Are you still setting up servers by hand? — Not anymore. Quebec VPS. One tap and the AI install starts — it's in preparation. — Show me. — There. It's installing — in preparation.",
+      "duration_s": 15,
+      "family": "fiction/dialogue",
+      "format": "16:9",
+      "hook_5s": "One click and the AI sets itself up?",
+      "id": "AMD2-034",
+      "language": "en",
+      "observation_criteria": [
+        "Hook question and tablet tap both occur within the first 5 seconds",
+        "Both speakers and the tablet screen are clearly visible in horizontal framing",
+        "Any claim about the installation result is not stated as proven on screen unless actually shown; otherwise treated as En préparation"
+      ],
+      "on_screen_text": "One click — installation — In preparation",
+      "real_world_direction": "Shoot on location in a real office kitchen, 16:9, with available light and no studio setup. Open with a static two-shot; deliver the hook line in the first 5 seconds. Show a real finger tap on a real tablet in a close-up, and capture natural, unscripted reactions. Do not frame products, brands or features that are not provided in the asset; any unproven feature must be presented as 'En préparation'.",
+      "split": "validation",
+      "status": "En préparation",
+      "theme": "VPS Québec installation IA en un clic",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C07-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C07",
+      "description_en": "30-second vertical documentary-style concept interview in a real Quebec apartment workspace. One person sits at a desk and recounts, in their own words, trying an AI installation from the control panel of a VPS: they opened the panel, started the installation, watched the progress display, then checked whether the AI space was available for a first try, still in preparation. Intercut with real hands operating the laptop and close-ups of the panel and progress screen. On-screen title text only, with no graphics overlay on the laptop screen close-ups. Authentic tone, live location sound.",
+      "dialogue": "— Qu'est-ce que tu as fait exactement ? — J'ai ouvert le panneau du VPS et j'ai lance l'installation de l'IA. — Et apres ? — La progression s'est affichee ; l'espace IA reste En preparation pour un premier essai.",
+      "duration_s": 30,
+      "family": "documentaire/interview",
+      "format": "9:16",
+      "hook_5s": "J'ai lance une installation d'IA depuis mon VPS, je raconte ce que j'ai vu a l'ecran ; l'espace IA est En preparation.",
+      "id": "AMD2-035",
+      "language": "fr",
+      "observation_criteria": [
+        "Interview setup and install action both filmed in the same real Quebec apartment workspace",
+        "Close-up shows the panel and progress screen legibly, with no graphics overlay on the laptop screen",
+        "The participant's statement matches what is visibly shown on screen; the AI space is stated as En preparation"
+      ],
+      "on_screen_text": "Temoignage — installation d'IA depuis un VPS — En preparation",
+      "real_world_direction": "Film documentary style in a real apartment workspace in Quebec, vertical 9:16. Tripod medium shot for the interview, handheld close-ups for laptop operation. The speaker's first line must land within the first 5 seconds. Record live sound on location; no voice-over, no stock footage.",
+      "split": "validation",
+      "status": "En préparation",
+      "theme": "VPS Québec installation IA en un clic",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-036",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "theme": "Nexora Creative réalisation et création",
+      "family": "démonstration technique",
+      "format": "9:16",
+      "duration_s": 60,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C08-ASSET-01"
+      ],
+      "description_en": "60-second vertical live-action demonstration filmed in a real editing workroom. Within the first five seconds a creator states the intent: showing, on camera, how a short visual piece is assembled step by step from raw footage to final cut. Hands, desk tools and the editing screen are filmed in real conditions; ambient room sound, no animation.",
+      "hook_5s": "Je vais vous montrer, en direct, comment j'assemble cette création : des plans bruts au montage final.",
+      "dialogue": "Je pars de ces plans bruts. Je coupe ici, je règle la lumière sur ces images, puis j'ajuste le son. Je fais tout devant vous, caméra posée et écran visible.",
+      "on_screen_text": "Démonstration en direct : du plan brut au montage final",
+      "real_world_direction": "English only: real-world shoot in an actual editing workroom, lit by desk lamp and window daylight; no set dressing, no generated imagery. Vertical 9:16 framing with the camera set down on the desk on a fixed support, as stated in the French dialogue; one fixed wide shot plus close-ups obtained by moving hands and desk tools toward the lens, so no handheld camera is implied. Live action only, continuous unedited sequences preferred, ambient room sound, no voice-over claims beyond what is shown on screen; spoken dialogue, on-screen structure and aesthetic claims remain in French.",
+      "observation_criteria": [
+        "Intent stated on camera within the first 5 seconds",
+        "First assembly step visible on a real screen and real desk within the first 10 seconds",
+        "Hands and desk tools filmed in continuous live takes, no animation, for at least 30 seconds in total"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-037",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "theme": "Nexora Creative réalisation et création",
+      "family": "publicité produit",
+      "format": "16:9",
+      "duration_s": 15,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C08-ASSET-01"
+      ],
+      "description_en": "15-second horizontal 16:9 live-action product-style spot: a hand-drawn tabletop storyboard becomes a real tabletop set in front of the camera. Intent and subject readable within the first 5 seconds.",
+      "hook_5s": "A sketch becomes a real shoot: in fifteen seconds, this drawing turns into a tabletop set you can film.",
+      "dialogue": "This was a drawing on paper this morning. Now it is real: this table, this lamp, ready to film.",
+      "on_screen_text": "Drawn by hand. Filmed for real.",
+      "real_world_direction": "Live-action tabletop shoot in natural daylight, no CGI, no rendered product. Horizontal 16:9. Open on a side/top-down angle where a hand-drawn storyboard page already lies next to a partially built real tabletop set, both visible in the same frame from the first seconds; a hand then finishes placing the last real set pieces and the lamp in that same frame. No CGI transition replaces the drawing with a set: the drawing is a reference, the real set is physically built. Hold the finished tabletop setup in a real wide shot for at least 2 seconds before the end. Storyboard page and real set must both be visible together within the first 5 seconds.",
+      "observation_criteria": [
+        "Storyboard page and real set both visible within the first 5 seconds",
+        "Final tabletop setup shown in a held real wide shot of at least 2 seconds",
+        "Footage is live-action tabletop, not CGI or rendered product",
+        "Hook intent (drawing turning into a real filmable set) understood within 5 seconds of the opening"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-038",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "theme": "Nexora Creative réalisation et création",
+      "family": "UGC",
+      "format": "16:9",
+      "duration_s": 30,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C08-ASSET-01"
+      ],
+      "description_en": "30s horizontal UGC-style testimonial: a single creator talks straight to camera at home, holding up a real notebook and a work-in-progress creation she made, near a window with natural light. The creation itself and any skill or result are to be shown, not proven by this brief.",
+      "hook_5s": "Salut, aujourd'hui je vous montre en vrai ce que j'ai créé chez moi, avec ce carnet.",
+      "dialogue": "Salut, c'est ma création du jour. J'ai commencé par ce croquis, puis j'ai testé la lumière près de la fenêtre. C'est encore en cours, dites-moi ce que vous en pensez.",
+      "on_screen_text": "Ma création du jour, en vrai",
+      "real_world_direction": "Real-world home shoot, handheld selfie style, arm's-length framing. Horizontal 16:9, natural window light only, real notebook and real work corner on camera. A single creator speaks to camera; no studio lighting, no set dressing, no claims of professional results in French or English, and any skill or finished result is presented as \"En préparation\" if mentioned. For at least 3 seconds the creator brings the work-in-progress close to the lens so it fills the frame in a held close view, then pulls back to arm's-length framing.",
+      "observation_criteria": [
+        "Visage de la créatrice et carnet visibles ensemble dans le plan d'ouverture",
+        "Travail en cours montré en gros plan tenu pendant au moins 3 secondes",
+        "Aucune photo ou vidéo de résultat final affichée comme preuve de compétence"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-039",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "theme": "Nexora Creative réalisation et création",
+      "family": "marque",
+      "format": "9:16",
+      "duration_s": 60,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C08-ASSET-01"
+      ],
+      "description_en": "60 s vertical brand film shot as real live-action in a courtyard workshop: at least two people collaborate in real time to build one large visual piece, opening on the team already at work with the finished work shown in a wide vertical shot at the end. The piece is a concept, not proof of a finished product.",
+      "hook_5s": "We are making this together, right here, right now.",
+      "dialogue": "I bring the color here. You hold the frame there. Look, our idea is becoming real on this wall. This is how we create together.",
+      "on_screen_text": "Creating together, in real life. Nexora Creative features: In preparation.",
+      "real_world_direction": "Real-world outdoor shoot in a courtyard with available natural light. Vertical 9:16. Handheld and steady shots of real people's hands painting, carrying and assembling; ambient location sound, live action, no studio set, no staged set dressing. Open on people already working on the piece so the shared action reads within the first five seconds; close on the finished collective piece framed in a wide vertical shot.",
+      "observation_criteria": [
+        "At least two people visibly creating the piece together within the first 5 seconds",
+        "Finished collective piece shown in a real wide vertical shot at the end"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "intent_5s_en": "Within the first five seconds, the viewer must understand that a group is making one shared visual piece right now in a real courtyard."
+    },
+    {
+      "id": "AMD2-040",
+      "campaign_id": "AMD2-C08",
+      "split": "validation",
+      "theme": "Nexora Creative réalisation et création",
+      "family": "fiction/dialogue",
+      "format": "9:16",
+      "duration_s": 15,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C08-ASSET-01"
+      ],
+      "description_en": "A 15-second vertical (9:16) real-world fiction dialogue: two people in a real hallway of a creative workspace decide which take to shoot, settle on the available hallway light, and start filming right there. Two-shot and over-shoulder camera, handheld device in frame, real location sound. No AI generation, no staged set, no claim of a finished video deliverable beyond the filmed moment; any Nexora Creative feature mentioned is shown as a fictional concept marked \"En préparation\" on screen. Hook must land in the first five seconds: the first line is spoken while both people are already visible together in frame.",
+      "hook_5s": "On la tourne comment, cette scène ?",
+      "dialogue": "— On la tourne comment, cette scène ? — Comme ça, en vrai, avec la lumière du couloir. — Alors on y va, on filme maintenant.",
+      "on_screen_text": "Une idée, deux voix, une prise. Fonctions Nexora Creative : En préparation.",
+      "real_world_direction": "Real interior hallway, available light only, real location sound. Vertical 9:16, two-shot opening so both people are visible together from second 0 to 5; then over-shoulder onto a handheld device as they start filming. Natural performance, no scripted-looking poses, no added score, no text-to-video synthesis. The scene is a rehearsal lived in camera, not a claim of a final published film.",
+      "observation_criteria": [
+        "Les deux personnes visibles ensemble dans le même cadre réel dès les 5 premières secondes",
+        "Décision et geste de tournage accomplis en 15 secondes dans le même lieu",
+        "Éclairage naturel du couloir, aucun éclairage ajouté visible",
+        "Le dispositif de tournage tenu à la main est visible en fin de séquence"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "unproven_features_note": "Aucune délivrabilité finale (montage, diffusion, récompense) n'est affirmée. Toute fonction non démontrée doit être marquée « En préparation »."
+    },
+    {
+      "id": "AMD2-041",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "theme": "Nexora Code et RAG modulable",
+      "family": "documentaire/interview",
+      "format": "16:9",
+      "duration_s": 30,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C09-ASSET-01"
+      ],
+      "description_en": "Real-world on-location interview in a small software workshop, captured with an actual camera. A developer explains, within the first five seconds, how she chooses which retrieval sources an assistant may consult before coding. Handheld medium shots alternate with close-ups of a notebook and a screen under available daylight. The interface behavior shown on screen is not a demonstrated product feature: it is En préparation (in preparation) until proven.",
+      "hook_5s": "\"I choose what the assistant is allowed to consult before coding.\"",
+      "dialogue": "Voice off camera: How do you organize your sources for coding? Developer: In the morning I first check the local documentation, then I add the team notes as the day goes on, and I verify every suggestion on screen.",
+      "on_screen_text": "Choosing your sources before you code",
+      "real_world_direction": "Shoot on location in a real workshop with available daylight. Shoulder-mounted camera, 35mm lens, lapel microphone, no studio lighting, no stock footage, authentic workplace background. Interview is unscripted and spoken in French; no actor testifying to unverified product behavior.",
+      "observation_criteria": [
+        "Interviewee states her source-selection intent on camera within the first 5 seconds",
+        "Handheld medium shots alternate with close-ups of notebook and screen in natural daylight"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-042",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "theme": "Nexora Code et RAG modulable",
+      "family": "démonstration technique",
+      "format": "16:9",
+      "duration_s": 60,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C09-ASSET-01"
+      ],
+      "description_en": "Real filmed technical demonstration at a desk with two monitors, shot over the shoulder with a tripod camera. Within the first five seconds an engineer states the intent: show the same coding question with one retrieval module off, then on. He visibly toggles the module, asks the question, and shows both answers on the real screen. Live screen capture synchronized with the camera, no animation or mockup.",
+      "hook_5s": "Same coding question twice: I switch this retrieval module off, then on.",
+      "dialogue": "Okay, the retrieval module is off. I ask for a function and get a generic draft. Now I switch the module on, ask the same question again, and the answer references the local files shown on the left. I turn it off again to confirm the difference.",
+      "on_screen_text": "Same question, module off / module on",
+      "real_world_direction": "Film in a real office with an over-shoulder camera on a tripod and synchronized live screen capture. Use practical desk lighting and continuous uncut typing takes. Show the module toggle action clearly before and after the query. No animation, no mockup, no generated footage.",
+      "observation_criteria": [
+        "Real filmed footage of the module toggle action clearly visible before and after the code query",
+        "Both answers shown legibly on the real screen for at least 5 seconds each",
+        "Intent stated on camera within the first five seconds"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "notes_en": "In preparation: no confirmed evidence that the module toggle changes answer quality as described; any accuracy, performance or ranking claim is pending verification and must not be asserted."
+    },
+    {
+      "id": "AMD2-043",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "theme": "Nexora Code et RAG modulable",
+      "family": "publicité produit",
+      "format": "9:16",
+      "duration_s": 15,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C09-ASSET-01"
+      ],
+      "description_en": "Short vertical (9:16) product spot set in a real home kitchen in the morning. A person holds a phone, asks a coding question out loud, and the screen shows a concise answer alongside source-module selection controls. One fast, clear, single situation with an obvious product intention within the first five seconds.",
+      "hook_5s": "« Une question, un dossier activé, une réponse à vérifier. »",
+      "dialogue": "Je prépare ma journée, j'active un seul dossier, je pose ma question, et je contrôle ce qui s'affiche.",
+      "on_screen_text": "Régler, demander, vérifier",
+      "real_world_direction": "Shoot handheld vertical 9:16 in a real kitchen with natural morning window light. Use a real phone in hand, tight close-up on thumb interaction with the screen, shallow depth of field, no studio set, one continuous morning routine. State the product intention in voice within the first 5 seconds; show the thumb visibly selecting a source-module option on the real phone screen. No claim of capability that the filmed screen does not actually show.",
+      "observation_criteria": [
+        "Product intention stated in voice within first 5 seconds",
+        "Thumb visibly selects a source option on the real phone screen",
+        "Every on-screen capability shown is physically demonstrated on the real device"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "id": "AMD2-044",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "theme": "Nexora Code et RAG modulable",
+      "family": "UGC",
+      "format": "9:16",
+      "duration_s": 30,
+      "language": "en",
+      "asset_ids": [
+        "AMD2-C09-ASSET-01"
+      ],
+      "description_en": "Vertical 9:16 selfie-style creator video, about 30 seconds, shot on a phone in a real bedroom used as a home office. A young builder, speaking directly to camera, shows a laptop and describes his intended workflow: switching the set of sources a coding assistant can consult between two separate tasks. Real location, real device, informal tone. Product behavior is a proposed workflow described by the creator, not a demonstrated or verified capability.",
+      "hook_5s": "Here is how I switch my sources between two coding tasks!",
+      "dialogue": "Hey, so I plan to give task one only my notes folder, like this, I am picking it here. Task two would need the team docs, so I would swap the source set and ask again. Same setup, different sources, and I always read the answer myself.",
+      "on_screen_text": "My planned setup: one task, one source set",
+      "real_world_direction": "Self-shot on a phone front camera, handheld or on a small tripod in a real bedroom. No crew, natural lamp light, visible room background, authentic delivery with real laptop screen.",
+      "observation_criteria": [
+        "Creator looks at the lens and states the task-switch intent within the first 5 seconds",
+        "Spoken and on-screen wording matches the dialogue and text above, with no claim of a working feature"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none",
+      "real_world_direction_en": "Vertical 9:16, self-shot on a phone front camera, handheld or on a small tripod, in a real bedroom home office. No crew and no studio; natural lamp light, room background visible. Authentic, unscripted-sounding delivery. Laptop is real and visible in frame. Do not stage or imply any interface state, feature or result that has not been confirmed: anything not verified must be labelled \"En préparation\" (in preparation) on screen if referenced at all."
+    },
+    {
+      "id": "AMD2-045",
+      "campaign_id": "AMD2-C09",
+      "split": "test",
+      "theme": "Nexora Code et RAG modulable",
+      "family": "marque",
+      "format": "16:9",
+      "duration_s": 60,
+      "language": "fr",
+      "asset_ids": [
+        "AMD2-C09-ASSET-01"
+      ],
+      "description_en": "60-second brand film (16:9, French voice and on-screen text). Real dusk city rooftop: three people walk and talk, then gather around a real evening work table with papers and a laptop. The first 5 seconds show the real skyline under the French hook line, so the intent (choosing what to rely on, and being able to change it) is clear immediately. Calm voiceover, natural wind and city ambience, documentary handheld look. No product screen, UI, benchmark or ranking is shown; any mention of modular RAG or Nexora Code capability is labelled « En préparation » in French, on screen and in voiceover.",
+      "hook_5s": "« Construire prudemment, c'est d'abord choisir sur quoi s'appuyer. »",
+      "dialogue": "Voix : Que gardons-nous sous les yeux pour décider ? Collaboratrice : Seulement ce que nous avons choisi ensemble. Collaborateur : Et nous pouvons le changer demain. Voix : Avancer pas à pas, en regardant ce que l'on mobilise.",
+      "on_screen_text": "Choisir ses appuis, avancer pas à pas",
+      "real_world_direction": "Shoot at golden hour on a real city rooftop with tripod and gimbal. Ensemble cast of three non-actors, natural wind sound, live city ambience, available dusk light with a small reflector only, no green screen, no CG product UI. Opening 5 s: wide skyline shot under the hook line. Mid-section: 10+ s of the three people gathered around a real table with papers and a laptop with screen off or out of frame, so no unproven function is implied. Closing: walking discussion. Total cut approx. 60 s. Any reference to modular RAG or Nexora Code capability is presented in French as « En préparation », on screen and in voiceover.",
+      "observation_criteria": [
+        "Opening line about deliberate choice heard within first 5 seconds over a real skyline image",
+        "Three people visibly gathered around a real table with papers and laptop for at least 10 seconds",
+        "No UI, product demo, benchmark or ranking claim on screen or in voiceover; any capability mention carries the French label « En préparation »"
+      ],
+      "status": "En préparation",
+      "voice_approval": "pending_founder",
+      "memory_promotion": "none"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C10-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C10",
+      "description_en": "15-second staged dialogue fiction in 16:9, shot on location in a real small server room at night. Two technicians stand in front of a closed rack cabinet, never opening it, and talk about how physical racks and the AI software stack relate. The intent is clear within the first 5 seconds: the closed, cabled bay is only half the picture; scheduling of compute happens in software and remains to be validated. Original French dialogue, practical status lights and available room lighting, no performance or capability claim.",
+      "dialogue": "— Tu vois les voyants, porte fermée ? — Oui, brassage propre, grille dégagée. — Et côté logiciel, la file répartit le calcul. — Donc le physique porte, le logiciel orchestre. — Exact, on vérifie et on note.",
+      "duration_s": 15,
+      "family": "fiction/dialogue",
+      "format": "16:9",
+      "hook_5s": "Regarde la baie : tout est câblé, mais la répartition du calcul côté logiciel reste à valider.",
+      "id": "AMD2-046",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "First 5 seconds: closed rack cabinet and both speakers in frame, hook line audible",
+        "No rack panel is opened at any point; nothing suggests a live demonstration of software behavior",
+        "Closing on-screen text legible for at least 2 seconds with closed racks visible in the background",
+        "Any functional behavior not demonstrated on camera is explicitly labelled « En préparation » in the edit"
+      ],
+      "on_screen_text": "Baies fermées — logiciel d'orchestration : En préparation",
+      "real_world_direction": "Real live-action shoot in an actual technical room, closed rack cabinets only; no panel is opened and no live screen is used as proof. Fixed wide shot, then two cutaways on hands, cabling and status lights. Practical status lights and available room lighting only. Any functional behavior that is not demonstrated on camera is marked « En préparation » in the edit.",
+      "split": "test",
+      "status": "En préparation",
+      "theme": "infrastructure physique DGX et baies, et infrastructure IA logicielle",
+      "voice_approval": "pending_founder",
+      "notes": "Références de classement (catalogue d'actifs, niveau de campagne) non fournies : aucune n'est affirmée."
+    },
+    {
+      "asset_ids": [
+        "AMD2-C10-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C10",
+      "description_en": "Real live-action vertical documentary interview, 9:16, 30 seconds, filmed handheld on location in an operating data hall corridor in daytime with available light and natural room tone. An operations technician walks past closed bays at a safe distance without touching equipment and describes, in their own words, what they physically see — racks, cabling, airflow — and what they check on their software dashboard. No staged set, no music bed. Any system function not visibly demonstrated is labelled 'En préparation' on screen.",
+      "dialogue": "I walk this corridor every morning. The racks, the cabling, the airflow — that is the physical side. Behind that, the software stack queues and schedules our jobs. I check the lights here, then I check the dashboard. Both have to line up.",
+      "duration_s": 30,
+      "family": "documentaire/interview",
+      "format": "9:16",
+      "hook_5s": "These bays hold the compute — what decides how it runs is on my dashboard.",
+      "id": "AMD2-047",
+      "language": "en",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "Interviewee, closed bays and corridor depth visible in vertical frame within first 5 seconds",
+        "Ambient room tone preserved with intelligible speech and no added music bed",
+        "No claim of performance, uptime or benchmark figures in speech or on-screen text",
+        "Every non-demonstrated function shown or referenced is labelled 'En préparation'"
+      ],
+      "on_screen_text": "Racks and AI software stack — field check. Functions not shown on camera: En préparation.",
+      "real_world_direction": "Shoot as real live-action documentary on location in an operating data hall corridor during daytime; no built set, no actors directed to claim performance. Handheld vertical camera following the technician at a safe distance; closed bays only, no contact with equipment, no lit racks in frame. Available light and natural ambient sound only; no added music bed. Keep the technician, closed bays and corridor depth visible in the vertical frame within the first 5 seconds. Speech must be intelligible over room tone. Do not add performance, uptime, latency or benchmark statements; any function not visibly demonstrated on camera must be marked 'En préparation' in the edit.",
+      "split": "test",
+      "status": "En préparation",
+      "theme": "infrastructure physique DGX et baies, et infrastructure IA logicielle",
+      "voice_approval": "pending_founder"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C10-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C10",
+      "description_en": "60-second vertical 9:16 live-action technical demonstration filmed at a workbench beside a closed rack and a monitoring screen. The operator shows cable order, the airflow grille on the closed rack, and then dashboard navigation on screen, without claiming any performance or unverified function. Methodical real-world gestures; original French narration.",
+      "dialogue": "Je commence par le brassage : câbles attachés, grille d'aération dégagée, voyants visibles porte fermée. Ensuite, à l'écran, je montre uniquement la navigation dans le tableau de bord. Je ne lance aucun calcul réel et je ne présente aucune mesure. Toute fonction non démontrée ici reste en préparation.",
+      "duration_s": 60,
+      "family": "démonstration technique",
+      "format": "9:16",
+      "hook_5s": "On vérifie la baie, puis l'écran : le physique d'abord, le logiciel ensuite.",
+      "id": "AMD2-048",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "Close-up shows ordered cabling and a clear airflow grille on the closed rack with steady focus",
+        "Over-shoulder screen navigation visible step by step, with sensitive data blurred",
+        "No performance claim, measurement or ranking appears on screen or in narration"
+      ],
+      "on_screen_text": "Démonstration visuelle — aucune mesure, En préparation",
+      "real_world_direction": "Real live-action technical demo, tripod plus close-up inserts, rack kept closed, no live electrical intervention. Use real cables, the real airflow grille and real dashboard navigation filmed over the shoulder, with sensitive data blurred. Daylight-balanced practical lighting. No rendering, no simulated screens, no invented performance graphics.",
+      "split": "test",
+      "status": "En préparation",
+      "theme": "infrastructure physique DGX et baies, et infrastructure IA logicielle",
+      "voice_approval": "pending_founder",
+      "intent": "Montrer, sans revendiquer aucune performance ni fonctionnalité non mesurée, l'état matériel d'une baie fermée (câblage rangé, grille d'aération dégagée, voyants visibles) puis la navigation dans un tableau de bord logiciel."
+    },
+    {
+      "asset_ids": [
+        "AMD2-C10-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C10",
+      "description_en": "15-second 16:9 product-style spot, real live-action in an actual clean lab with two closed server bays in morning light. A slow lateral slider move reveals an orderly cable-routing window and a side screen showing a software queue view. Clear intent within the first five seconds; minimal original English lines; no performance claim and no claim of any function not shown on screen.",
+      "dialogue": "Closed bays. Cables routed cleanly. One side screen showing the software queue view.",
+      "duration_s": 15,
+      "family": "publicité produit",
+      "format": "16:9",
+      "hook_5s": "Two closed server bays, orderly cabling, and a software queue view on a side screen.",
+      "id": "AMD2-049",
+      "language": "en",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "Within the first 5 seconds the lateral move clearly shows the two closed bays and the side screen, in sharp focus",
+        "Final packshot holds the on-screen text legible for at least 2 seconds without glare",
+        "No feature is shown or stated unless visible on screen; anything else is labelled « En préparation »"
+      ],
+      "on_screen_text": "Closed server bays with orderly cabling and a software queue view. (Any feature not shown on screen: En preparation.)",
+      "real_world_direction": "Real live-action shoot in an actual lab; no 3D set and no rendered bays. Slider lateral move at walking pace along the two closed bays; closed bays remain closed throughout. Practical morning light plus soft fill, no hard glare on screens. The side screen shows only a generic software queue view with demo/test data. Any capability not shown on screen must be labelled « En préparation » on screen and in copy; no invented rankings, no crowd or client logos.",
+      "split": "test",
+      "status": "En préparation",
+      "theme": "infrastructure physique DGX et baies, et infrastructure IA logicielle",
+      "voice_approval": "pending_founder"
+    },
+    {
+      "asset_ids": [
+        "AMD2-C10-ASSET-01"
+      ],
+      "campaign_id": "AMD2-C10",
+      "description_en": "Real 30-second 16:9 live-action self-recorded clip (phone in landscape, handheld) at the entrance of a technical room. The operator stands at a safe distance from closed bays, phone held at arm's length, and speaks directly to the lens in French. In the first five seconds the face and the closed bays are visible together and the intention is clear: a plain personal walkthrough of the room and the software view on screen. Available light, room tone only, no music, no filters, no touching equipment, closed bays only. Every function that is not shown on camera is explicitly labelled 'En préparation'. No performance, capacity or benchmark claim.",
+      "dialogue": "Salut, je vous montre ma salle : baies fermées, câbles rangés, lumière discrète. Là, sur l'écran, la vue logicielle avec les files. Moi je vérifie le physique, le logiciel suit derrière. Voilà mon quotidien.",
+      "duration_s": 30,
+      "family": "UGC",
+      "format": "16:9",
+      "hook_5s": "Je vous montre ma salle : baies fermées et écran logiciel — En préparation.",
+      "id": "AMD2-050",
+      "language": "fr",
+      "memory_promotion": "none",
+      "observation_criteria": [
+        "Face and closed bays visible together in first 5 seconds in handheld selfie framing, with the spoken hook audible and intelligible",
+        "Speech remains intelligible with room tone and no added music or filter",
+        "On-screen text and captions in French, with any undemonstrated function marked 'En préparation'"
+      ],
+      "on_screen_text": "Ma salle en vrai — visuel seul, En préparation",
+      "real_world_direction": "Real live-action self-record on a phone in landscape, handheld or with a small grip, no tripod crew. Stay at the room entrance at a safe distance, closed bays only, no touching. Available light, direct speech to lens in French. Caption every function not demonstrated on camera as 'En préparation'; make no performance, capacity or ranking claim.",
+      "split": "test",
+      "status": "En préparation",
+      "theme": "infrastructure physique DGX et baies, et infrastructure IA logicielle",
+      "voice_approval": "pending_founder"
+    }
+  ]
+}
