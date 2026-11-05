@@ -103,6 +103,12 @@ export async function tournerFilm(
         attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
         return null;
       };
+      const conserverReservation = (id: number, settings: Record<string, any>, reservation: CreditsPrise | undefined) => {
+        if (typeof settings.nexoraCredits?.reservationId === 'string') reservationsConservees.add(settings.nexoraCredits.reservationId);
+        if (!reservation) return;
+        reservationsConservees.add(reservation.reservationId);
+        if (settings.nexoraCredits?.reservationId !== reservation.reservationId) attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation.reservationId });
+      };
       const rattacher = (ids: unknown[]) => {
         const valides: number[] = [];
         for (const [k, id] of ids.entries()) {
@@ -114,11 +120,7 @@ export async function tournerFilm(
           idsConnus.add(id);
           valides.push(id);
           prises.push({ plan: i, takeId: id });
-          if (typeof settings.nexoraCredits?.reservationId === 'string') reservationsConservees.add(settings.nexoraCredits.reservationId);
-          if (reservation) {
-            reservationsConservees.add(reservation.reservationId);
-            if (settings.nexoraCredits?.reservationId !== reservation.reservationId) attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation.reservationId });
-          }
+          conserverReservation(id, settings, reservation);
         }
         if (valides.length) majPlan(filmId, i, { take: valides[0], corps, clePlan, ...(valides.length > 1 ? { candidats: valides } : {}) });
         return valides.length;

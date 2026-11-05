@@ -2824,6 +2824,9 @@ async function queueTakes(b: any, count: number, creditsInternes?: (CreditsPrise
     }
     return { one, built };
   };
+  const suiviProtege = (i: number) => protegee
+    ? { nexoraSoumission: 'indeterminee', nexoraClePlan: clePlan, ...(creditsInternes?.[i] ? { nexoraCredits: creditsInternes[i] } : {}) }
+    : {};
   const creerEtSoumettre = async (one: any, built: Built, seed: number, i: number): Promise<void> => {
     let takeId: number;
     try {
@@ -2831,7 +2834,7 @@ async function queueTakes(b: any, count: number, creditsInternes?: (CreditsPrise
         project_id: b.projectId ?? (built.parent ? takes.get(built.parent)?.project_id ?? null : null),
         kind: built.kind,
         shot_name: String(built.settings?.shotName ?? one.shotName ?? 'shot'),
-        settings: { ...one, ...built.settings, seed, count: undefined, ...(protegee ? { nexoraSoumission: 'indeterminee', nexoraClePlan: clePlan, ...(creditsInternes?.[i] ? { nexoraCredits: creditsInternes[i] } : {}) } : {}) },
+        settings: { ...one, ...built.settings, seed, count: undefined, ...suiviProtege(i) },
         parent_take_id: built.parent,
       };
       takeId = protegee ? takes.createProtegee(row, clePlan!, transfererDepuis) : takes.create(row);
