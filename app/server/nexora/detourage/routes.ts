@@ -11,11 +11,13 @@ import { Detourage, ErreurDetourage } from './gestion.js';
 import { compteCourant } from '../compte.js';
 import { tarifDepuisEnv, type Facturation } from '../credits.js';
 
+export interface ServiceDetourage { id: string; nom: string; detourageUrl: string; detourageJeton?: string }
 export interface MoteurDetourageDeclare { id: string; nom: string; detourageUrl?: string; detourageJeton?: string; recettes: string[] }
 
 export interface DepsDetourage {
   dossierDonnees: string;
   moteurs: () => MoteurDetourageDeclare[];
+  serviceNatif?: () => ServiceDetourage | undefined;
   /** Facturation de l'organisation (null en poste local). */
   facturation: (organisation: string) => Facturation | null;
   /** Nexora actif (compte obligatoire) ou poste local. */
@@ -31,10 +33,19 @@ export function moteurPour(moteurs: MoteurDetourageDeclare[], palier: string): M
   return moteurs.find((m) => m.detourageUrl && (m.recettes.includes(`detourage-${palier}`) || (palier === 'rapide' && m.recettes.includes('*'))));
 }
 
+function serviceNatifUnique(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): ServiceDetourage | undefined {
+  return natif && !moteurs.some((m) => m.id === natif.id) ? natif : undefined;
+}
+
+export function serviceRapide(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): ServiceDetourage | MoteurDetourageDeclare | undefined {
+  return serviceNatifUnique(moteurs, natif) ?? moteurPour(moteurs, 'rapide');
+}
+
 export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage): { detourage: Detourage; arreter: () => void } {
   const clients = new Map<string, ClientDetourage>();
   const clientDe = (id: string): ClientDetourage | null => {
-    const m = deps.moteurs().find((x) => x.id === id && x.detourageUrl);
+    const natif = serviceNatifUnique(deps.moteurs(), deps.serviceNatif?.());
+    const m = natif?.id === id ? natif : deps.moteurs().find((x) => x.id === id && x.detourageUrl);
     if (!m?.detourageUrl) return null;
     const cle = `${id}@${m.detourageUrl}#${m.detourageJeton ?? ""}`; // en mémoire seulement
     let c = clients.get(cle);
@@ -44,7 +55,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   const detourage = new Detourage({
     registre: join(deps.dossierDonnees, 'detourage', 'registre.json'),
     moteur: (palier) => {
-      const m = moteurPour(deps.moteurs(), palier);
+      const m = palier === 'rapide' ? serviceRapide(deps.moteurs(), deps.serviceNatif?.()) : moteurPour(deps.moteurs(), palier);
       const c = m && clientDe(m.id);
       return m && c ? { id: m.id, client: c } : null;
     },
@@ -74,8 +85,9 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     mesures: t.mesures ?? null, sorties: t.sorties ?? null, params: t.params ?? null, moteur: t.moteurId,
   });
   const verifierMoteurRapide = (t: ReturnType<Detourage['obtenir']>) => {
+    const natif = serviceNatifUnique(deps.moteurs(), deps.serviceNatif?.());
     const moteur = deps.moteurs().find((m) => m.id === t.moteurId);
-    if (!moteur || !moteurPour([moteur], 'rapide')) {
+    if (natif?.id !== t.moteurId && (!moteur || !moteurPour([moteur], 'rapide'))) {
       throw new ErreurDetourage('Le moteur rapide de ce travail n’est pas disponible.', 503);
     }
   };
@@ -84,7 +96,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
 
   app.get(`${P}/capacites`, async () => {
     const m = deps.moteurs();
-    const rapide = moteurPour(m, 'rapide');
+    const rapide = serviceRapide(m, deps.serviceNatif?.());
     const pro = moteurPour(m, 'pro');
     let sante: Record<string, unknown> | null = null;
     if (rapide) sante = await clientDe(rapide.id)?.sante().catch(() => null) ?? null;
@@ -107,7 +119,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     if (points.some((p) => p.length !== 3 || p.slice(0, 2).some((v) => !(v >= 0 && v <= 1)) || ![0, 1].includes(p[2]))) throw new ErreurDetourage('Clics invalides.');
     const boite = Array.isArray(b.boite) && b.boite.length === 4 && b.boite.every((v) => Number(v) >= 0 && Number(v) <= 1) ? b.boite.map(Number) : null;
     if (!points.length && !boite) throw new ErreurDetourage('Clique sur le sujet.');
-    const m = moteurPour(deps.moteurs(), 'rapide');
+    const m = serviceRapide(deps.moteurs(), deps.serviceNatif?.());
     const c = m && clientDe(m.id);
     if (!c) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
     // Le moteur choisit SAM 3.1 : plus de variante à envoyer.
@@ -122,7 +134,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     if (!texte || texte.length > 120) throw new ErreurDetourage('Écris ce qu’il faut détourer, en anglais (ex. person).');
     const seuil = b.seuil === undefined || b.seuil === null ? 0.4 : Number(b.seuil);
     if (!(seuil >= 0.05 && seuil <= 0.95)) throw new ErreurDetourage('Seuil invalide (0,05 à 0,95).');
-    const m = moteurPour(deps.moteurs(), 'rapide');
+    const m = serviceRapide(deps.moteurs(), deps.serviceNatif?.());
     const c = m && clientDe(m.id);
     if (!c) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
     return c.texte({ imageB64: b.imageB64, texte, seuil });

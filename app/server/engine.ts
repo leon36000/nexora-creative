@@ -87,6 +87,12 @@ function lireMoteurs(): MoteurGpu[] {
 export const moteurs: MoteurGpu[] = lireMoteurs();
 const moteursEnv: MoteurGpu[] = moteurs.map((m) => ({ ...m }));
 
+/** Service natif configuré indépendamment des recettes et réglages Comfy. */
+export function serviceDetourageNatif() {
+  const { detourageUrl, detourageJeton } = moteursEnv[0];
+  return detourageUrl ? { id: 'detourage-natif', nom: 'Détourage natif', detourageUrl, detourageJeton } : undefined;
+}
+
 /**
  * Nexora : applique la liste de moteurs de l'administration du site (lue toutes les minutes). Le moteur « principal » de
  * l'environnement reste si le site ne définit pas le même identifiant. Un moteur dont l'adresse ou la clé change est

@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import Fastify from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { avecCompte } from '../compte.js';
-import { enregistrerDetourage, moteurPour } from './routes.js';
+import { enregistrerDetourage, moteurPour, serviceRapide } from './routes.js';
 
 describe('choix du moteur', () => {
   const m = (id: string, recettes: string[], detourageUrl?: string) => ({ id, nom: id, recettes, detourageUrl });
@@ -18,6 +18,11 @@ describe('choix du moteur', () => {
     expect(moteurPour([m('c', ['detourage-pro'], 'http://c')], 'pro')?.id).toBe('c');
     expect(moteurPour([m('a', ['*'])], 'rapide')).toBeUndefined();
     expect(moteurPour([m('a', ['h3-max'], 'http://a')], 'rapide')).toBeUndefined();
+    const natif = { id: 'detourage-natif', nom: 'Natif', detourageUrl: 'http://localhost:1234' };
+    expect(serviceRapide([m('a', ['h3-max'], 'http://a')], natif)).toBe(natif);
+    expect(serviceRapide([m('a', ['h3-max'], 'http://a')])).toBeUndefined();
+    expect(serviceRapide([m('b', ['detourage-rapide'], 'http://b')])?.id).toBe('b');
+    expect(serviceRapide([m('detourage-natif', ['h3-max'], 'http://dedie')], natif)).toBeUndefined();
   });
 });
 
@@ -88,6 +93,57 @@ describe('disponibilité du détourage pro', () => {
 });
 
 describe('santé du détourage rapide', () => {
+  it('ne réaffecte pas un ancien travail principal au service natif', async () => {
+    const dossierDonnees = mkdtempSync(join(tmpdir(), 'detourage-historique-'));
+    const id = 'e'.repeat(24);
+    mkdirSync(join(dossierDonnees, 'detourage'), { recursive: true });
+    writeFileSync(join(dossierDonnees, 'detourage', 'registre.json'), JSON.stringify([{
+      id, organisation: 'local', utilisateur: 'local', nom: 'ancien', moteurId: 'principal',
+      creeLe: Date.now(), majLe: Date.now(), etat: 'depose', etape: 'dépôt', progression: 0,
+      message: '', fichiers: { 'source.mp4': 1 }, source: { duree: 1, fps: 24 },
+    }]));
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees,
+      moteurs: () => [{ id: 'principal', nom: 'GB10', recettes: ['qwen21'] }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'Natif', detourageUrl: 'http://127.0.0.1:1' }),
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const lancement = await app.inject({ method: 'POST', url: `/api/nexora/detourage/travaux/${id}/lancer`,
+        payload: { invites: [{ image: 0, points: [[0.5, 0.5, 1]] }] } });
+      expect(lancement.statusCode).toBe(503);
+      const travail = await app.inject({ method: 'GET', url: `/api/nexora/detourage/travaux/${id}` });
+      expect(travail.json()).toMatchObject({ etat: 'depose', moteur: 'principal' });
+    } finally { arreter(); await app.close(); }
+  });
+
+  it('utilise le service natif même si les recettes Comfy excluent le détourage', async () => {
+    const recus: string[] = [];
+    const faux = createServer((req, res) => {
+      recus.push(`${req.method} ${req.url} ${req.headers.authorization}`);
+      res.setHeader('content-type', 'application/json');
+      res.end('{"ok":true,"modeles":{"sam":["SAM 3.1"]}}');
+    });
+    await new Promise<void>((r) => faux.listen(0, '127.0.0.1', r));
+    const port = (faux.address() as AddressInfo).port;
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-natif-')),
+      moteurs: () => [{ id: 'principal', nom: 'GB10', recettes: ['qwen21', 'music3'] }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'Détourage natif', detourageUrl: `http://127.0.0.1:${port}`, detourageJeton: 'jeton-factice' }),
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const result = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(result.json().rapide).toMatchObject({ disponible: true, moteur: { id: 'detourage-natif' } });
+      expect(result.json().pro.disponible).toBe(false);
+      expect(recus).toEqual(['GET /sante Bearer jeton-factice']);
+    } finally {
+      arreter(); await app.close(); await new Promise<void>((r) => faux.close(() => r()));
+    }
+  });
+
   it('distingue un moteur déclaré mais refusant la santé d’un moteur qui répond', async () => {
     let statut = 401;
     let corps: Record<string, unknown> = {};
@@ -161,7 +217,8 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     const port = (faux.address() as AddressInfo).port;
     enregistrerDetourage(app, {
       dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-routes-')),
-      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['*', 'detourage-pro'], detourageUrl: `http://127.0.0.1:${port}`, detourageJeton: JETON }],
+      moteurs: () => [{ id: 'principal', nom: 'GPU', recettes: ['qwen21', 'music3'] }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'Détourage natif', detourageUrl: `http://127.0.0.1:${port}`, detourageJeton: JETON }),
       facturation: () => null, nexora: false,
     });
     await app.ready();
