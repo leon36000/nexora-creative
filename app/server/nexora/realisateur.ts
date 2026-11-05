@@ -13,6 +13,11 @@
  */
 import { type ClientLlm, lireJson, type MessageLlm } from './llm.js';
 import { instructionH3, type ModeH3, validerPromptH3 } from './promptH3.js';
+import { convertirEnPromptRef, type SujetRef } from './personnages.js';
+import {
+  NEGATIF_LIVE_ACTION, REGLES_ACTION, REGLES_LIVE_ACTION, STYLE_LIVE_ACTION, STYLE_NEUTRE,
+  requiertPhotographie, verifierRecetteLiveAction, verifierVaisseauxOriginaux,
+} from './liveAction.js';
 
 export type Famille = 'pub' | 'produit' | 'film' | 'vfx' | 'cours' | 'social' | 'clip' | 'autre';
 export const FAMILLES: readonly Famille[] = ['pub', 'produit', 'film', 'vfx', 'cours', 'social', 'clip', 'autre'];
@@ -41,12 +46,12 @@ export interface PlanFiche {
 }
 
 export interface FicheRealisation {
-  /** Ce que le LLM a compris, en français, pour le client (une ou deux phrases). */
+  /** Ce que le LLM a compris, dans la langue du client, pour le client (une ou deux phrases). */
   compris: string;
   famille: Famille;
-  /** Choix faits sans demander (français, courts). */
+  /** Choix faits sans demander (langue du client, courts). */
   hypotheses: string[];
-  /** Style d'ouverture du guide H3 (« Live-action, cinematic, anamorphic 35mm film look »). */
+  /** Photographie : caméra, objectif nommé, pellicule ou capteur. */
   style: string;
   personnages: PersonnageFiche[];
   plans: PlanFiche[];
@@ -54,7 +59,7 @@ export interface FicheRealisation {
   musique: string;
   /** Textes à l'écran DEMANDÉS par le client, recopiés tels quels (sinon vide). */
   texteEcran: string[];
-  /** Trois autres directions possibles, en français, une ligne chacune. */
+  /** Trois autres directions possibles, dans la langue du client, une ligne chacune. */
   variantes: string[];
   /** Qui dit chaque réplique du client : { R1: 'P2' }. */
   locuteurs?: Record<string, string>;
@@ -63,6 +68,9 @@ export interface FicheRealisation {
 export interface EntreeRealisateur {
   intention: string;
   mode: ModeH3;
+  references?: { sujets: SujetRef[]; composition?: number };
+  /** Langue des explications au client ; sinon détectée par le LLM depuis la demande. */
+  langueClient?: 'fr' | 'en';
   dureeS: number;
   dialogues?: { texte: string; langue: string; locuteur?: string }[];
   consignes?: string[];
@@ -85,32 +93,33 @@ export interface ResultatRealisateur {
 // sa forme est appliquée par le code.
 
 const REGLES_FAMILLE: Record<Famille, string> = {
-  pub: 'AD: open on a hook in the first second; the offer or product is the hero, lit like a commercial (soft key + rim/back light, controlled reflections); show the human benefit (taste, relief, joy) on a real-looking face; slow-motion beauty beat; end on a calm, clean hero frame (no text, no logo: the code adds them later); always a music bed.',
+  pub: 'AD: open on a hook in the first second; the offer or product is the hero; show the human benefit (taste, relief, joy) on an expressive face or character consistent with the requested medium; add a beauty beat; end on a calm, clean hero frame (no text, no logo: the code adds them later); always a music bed.',
   produit: 'PRODUCT: the object never deforms, melts or changes design; exact materials (brushed gold, frosted glass, knit mesh), macro details, studio lighting with gradient backdrop and crisp specular highlights, slow controlled camera (arc, push in, turntable); one hero transformation at most; end on a centered hero frame; always a music bed; contrast that makes the object read (a white object on a darker gradient).',
   film: 'FILM: classic coverage (establishing, then medium, then close-up on the emotion); motivated practical light consistent across shots; characters keep the exact same look in every shot; the dramatic beat lands in the last shot; dialogue paced with pauses and reactions; music unless the scene asks for silence.',
-  vfx: 'VFX: sell the scale (tiny humans, buildings, birds, clouds for reference); real physics (fireballs expand then roll into black smoke, debris arcs and falls, shockwave ring of dust, heat haze, embers, glass shards); the effect lights the scene (orange fire light on faces, laser glow on hulls); camera reacts (shake on impact, slight lag); one hero element per shot, the rest as background action; blockbuster grade.',
-  cours: 'LESSON: clarity first; one idea per shot; for mechanisms and concepts a clean 3D CG or cutaway illustration style (a presenter on camera stays live-action) with readable color-coded parts (no labels or text unless the user asked); slow camera moves that reveal the mechanism step by step; calm, friendly tone; simple diegetic sounds.',
+  vfx: 'VFX: make scale legible (tiny humans, buildings, birds, clouds for reference); give effects a clear cause and consequence (fireballs expand then roll into black smoke, debris arcs and falls, shockwaves spread, glass shards travel); let the effect affect its surroundings; camera reacts (shake on impact, slight lag); one hero element per shot, the rest as background action; preserve the requested visual medium.',
+  cours: 'LESSON: clarity first; one idea per shot; for mechanisms and concepts use a clear cutaway or practical demonstration in the requested visual medium, with readable color-coded parts (no labels or text unless the user asked); slow camera moves that reveal the mechanism step by step; calm, friendly tone; simple diegetic sounds.',
   social: 'SOCIAL: vertical-first composition, subject centered and close; hook in the first second; punchy pace and a clear payoff; phone or handheld look when it suits (authentic), otherwise bold colorful light; humor lands on a reaction.',
   clip: 'MUSIC VIDEO: performance to camera, rhythmic camera moves synced to beats, strong stylized light (neon, haze, backlight), atmosphere particles (smoke, steam, snow); diegetic sound is the performance itself.',
-  autre: 'GENERAL: pick the most cinematic reading of the idea; one clear subject and action.',
+  autre: 'GENERAL: choose the clearest visual medium for the idea and the client’s stated style; one clear subject and action.',
 };
 
 function consignes(e: EntreeRealisateur): string {
   const fast = e.moteur !== 'h3-max';
   return [
-    'You are the director of Nexora Creative. Clients type a few careless words (typos, Quebec French slang, vague ideas). You turn them into a shooting plan',
+    'You are the director of Nexora Creative. Clients type a few careless words (typos, Quebec French slang or English, vague ideas). You turn them into a shooting plan',
     'for MiniMax H3, an audio+video model, so the video looks like a top-tier production. Never ask the client anything: choose strong defaults and list them.',
     '',
     'STEP 1 UNDERSTAND. Fix spelling; decode Quebec French (char = car, pis = and, ptit/ptite = small, chu = I am, dépanneur = convenience store, tuque = knit hat,',
     'cabane à sucre = maple sugar shack, tire = maple taffy on snow, cantine/casse-croûte = snack bar). Classify the request into one family:',
     'pub (ad for a business), produit (product shot), film (story), vfx (spectacle/special effects), cours (lesson), social (social media), clip (music video), autre.',
     'Keep EVERY subject, place, action and constraint the client named, exactly (a spaceship stays a spaceship; Montreal stays Montreal). Real landmarks are fine.',
-    'Protected characters, franchises and brands become generic equivalents that keep the look: lightsaber -> plasma-blade sword / glowing energy blade;',
+    'Protected characters, franchises and brands become generic equivalents that keep the look: lightsaber -> plasma-blade sword / energy blade;',
     'Jedi -> hooded knight in a brown robe; Sith -> masked warrior with a red energy blade; "like Starbucks" -> premium coffee-shop style, no logo. Never name real people.',
     '',
     'STEP 2 DIRECT. Every field except compris, hypotheses and variantes is in ENGLISH (the video model reads English), even when the client writes French.',
-    'Each shot is ONE flowing paragraph of cinematic prose (texte), 45 to 90 words, like a director briefing the crew, never a list of keywords. It covers, in this order:',
-    'the framing and lens as a noun phrase, the action told along time (start, peak, result), ONE camera move, the motivated light, the key materials or particles, the sounds synced to the action.',
+    'Each shot is ONE flowing paragraph of shooting prose (texte), 45 to 90 words, like a director briefing the crew, never a list of keywords. It covers, in this order:',
+    'the framing, the action told along time (start, peak, result), ONE camera move, light and color, key materials or particles, and sounds synced to the action.',
+    '- When the requested medium is photography, use the real camera, lens and light details in the conditional photo recipe below. For animation or illustration, describe the intended visual language instead of adding real camera hardware.',
     '- Shot 1 texte starts with its framing, e.g. "a low-angle wide shot on a 24mm lens frames ...". Shots 2+ texte starts with the noun phrase that follows "the camera cuts to", e.g. "a tight close-up of her hands, 85mm, as ...".',
     '- Characters: write [P1], [P2] at their first mention in each shot, then he/she/they; never "[P1]\'s" (write "the hand of [P1]"). The code writes their description.',
     '- A client line is spoken where you put its tag [R1] as its own sentence right after the speaker acts: the code writes "the teacher (S1) says: <d>...</d>" there, word for word.',
@@ -122,22 +131,27 @@ function consignes(e: EntreeRealisateur): string {
     `Shots: 5 s -> 1 shot (2 only for ads/social hooks); 10 s -> 2 or 3 shots; 15 s -> 3 or 4 shots. Each shot lasts at least 2.5 s; first shot starts at 0; the last shot starts at least 2.5 s before the end (e.g. 10 s: 0, 3.5, 7; 15 s: 0, 4, 8, 11.5).`,
     'A cut must bring new information (new angle, subject or moment); a simple reframing is a camera move, not a cut.',
     '',
-    'FAMILY RULES (apply the one you chose):',
+    REGLES_ACTION,
+    '',
+    REGLES_LIVE_ACTION,
+    '',
+    'FAMILY RULES (apply the one you chose while preserving the client’s requested medium):',
     ...FAMILLES.filter((f) => f !== 'autre').map((f) => `- ${REGLES_FAMILLE[f]}`),
     '',
     'H3 DIALECT:',
-    '- style: the overall style the guide expects (Live-action, cinematic / 3D CG / 2D-animated / claymation / vintage film...) plus a short look that fits the request (grade, film stock, era).',
+    '- style: preserve an explicitly requested visual medium or style. If none is named, choose one that fits the brief; only promotional ads and product films default to the conditional photographic recipe above.',
     '- NEVER put written words, signs, labels, subtitles, logos or numbers on screen unless the client quoted them; if quoted, copy them in texteEcran and show them once, in English double quotes, in the action.',
     '- H3 handles poorly: small legible text, close-ups of many faces in a crowd, intricate finger work, more than two speaking characters, too many subjects in one shot. Avoid them.',
     fast
       ? '- Engine: fast 832x480 draft engine. Favor bold, readable compositions (medium and close shots, strong silhouettes, high contrast), few simultaneous elements.'
-      : '- Engine: cinema 1344x768 engine. Rich detail and wide vistas are welcome.',
+      : '- Engine: cinema 1344x768 engine. Make the main subject easy to read within the chosen composition.',
     '- ambiance: 1 to 3 English sentences summarizing ambient and action sounds for the whole video (no dialogue). musique: 1 or 2 sentences about instruments, tempo and dynamics; "N/A" only if the client wants no music or the scene needs silence.',
     '- personnages: only characters who appear. court = stable short noun phrase (e.g. "the old detective in a grey trench coat"); apparence = age, face, hair, clothing, colors; voix only if they speak, in English (e.g. "a calm, clear mid-pitched female voice"), no accent unless the client asked.',
-    e.mode === 'i2va' ? '- The video starts from the client\'s photo: shot 1 must start from the picture (same subject, framing, clothes, colors) and develop the action from it.' : '',
+    e.mode === 'i2va' || e.mode === 'fl2va' ? '- The video starts from the client\'s photo: shot 1 must start from the picture (same subject, framing, clothes, colors) and develop the action from it.' : '',
     '',
-    'STEP 3 EXPLAIN. compris: one or two French sentences telling the client what you will make. hypotheses: the defaults you chose, in short French phrases',
-    '(time of day, style, format advice if relevant...). variantes: three other strong creative directions, French, one line each, meaningfully different.',
+    e.mode === 'fl2va' || e.mode === 'l2va' ? '- The last shot must end exactly at the supplied last image: describe a continuous physical transition, do not invent a cut after it.' : '',
+    e.mode === 'ref2va' ? '- References: keep the supplied subject names literally in shot text where they appear (do not replace their names with [P1]); preserve their identity, do not invent other reference assets. Composition references anchor framing, not identity.' : '',
+    'STEP 3 EXPLAIN. compris, hypotheses and variantes use the CLIENT LANGUAGE (French for Quebec French, English for English), following langue_client if supplied. compris: one or two sentences; hypotheses: short defaults; variantes: three distinct directions that preserve the requested medium. All technical fields remain English.',
     '',
     'Before answering, check silently each shot for contradictions (lens vs framing, camera, timing, physics, season, story order) and fix them.',
     'Answer with ONE JSON object and nothing else:',
@@ -152,7 +166,11 @@ function demande(e: EntreeRealisateur): string {
     client: e.intention,
     duree_secondes: Number(e.dureeS.toFixed(2)),
     format: e.format ?? '16:9',
-    depart_photo: e.mode === 'i2va',
+    mode: e.mode,
+    depart_photo: e.mode === 'i2va' || e.mode === 'fl2va',
+    arrivee_photo: e.mode === 'fl2va' || e.mode === 'l2va',
+    references: e.references,
+    langue_client: e.langueClient,
     repliques_client: (e.dialogues ?? []).map((d, i) => ({ tag: `R${i + 1}`, texte: d.texte, langue: d.langue })),
     consignes_interface: e.consignes ?? [],
   });
@@ -164,7 +182,7 @@ function demande(e: EntreeRealisateur): string {
 const chaine = (v: unknown, max = 900) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, max) : '');
 const liste = (v: unknown, n: number, max = 300) => (Array.isArray(v) ? v.map((x) => chaine(x, max)).filter(Boolean).slice(0, n) : []);
 
-export function lireFiche(brut: unknown): FicheRealisation {
+export function lireFiche(brut: unknown, demande?: Pick<EntreeRealisateur, 'intention' | 'consignes'>): FicheRealisation {
   const o = (brut ?? {}) as Record<string, unknown>;
   const famille = FAMILLES.includes(o.famille as Famille) ? (o.famille as Famille) : 'autre';
   const personnages = (Array.isArray(o.personnages) ? o.personnages : []).slice(0, 4).map((p: any, i: number) => ({
@@ -180,13 +198,14 @@ export function lireFiche(brut: unknown): FicheRealisation {
     texte: chaine(p?.texte, 1400) || ['cadrage', 'action', 'camera', 'lumiere', 'details', 'son'].map((k) => chaine(p?.[k], 600)).filter(Boolean).join('. '),
   }));
   return {
-    compris: chaine(o.compris, 400), famille, hypotheses: liste(o.hypotheses, 6, 160), style: chaine(o.style, 200) || 'Live-action, cinematic',
+    compris: chaine(o.compris, 400), famille, hypotheses: liste(o.hypotheses, 6, 160),
+    style: chaine(o.style, 600) || (requiertPhotographie(famille, demande?.intention ?? '', demande?.consignes) ? STYLE_LIVE_ACTION : STYLE_NEUTRE),
     ...(o.locuteurs && typeof o.locuteurs === 'object' ? { locuteurs: Object.fromEntries(Object.entries(o.locuteurs as Record<string, unknown>).filter(([k, v]) => /^R\d$/.test(k) && /^P\d$/.test(String(v))).map(([k, v]) => [k, String(v)])) } : {}),
     personnages, plans, ambiance: chaine(o.ambiance, 600), musique: chaine(o.musique, 400) || 'N/A', texteEcran: liste(o.texteEcran, 3, 120), variantes: liste(o.variantes, 3, 200),
   };
 }
 
-const MARQUES = /\b(lightsabers?|jedi|sith|star ?wars|darth|starbucks|marvel|avengers|nike|adidas|coca-?cola|pepsi|disney|pixar|pok[eé]mon|harry potter|batman|superman|spider-?man|iron ?man|transformers?|godzilla|tim hortons?|mcdonald'?s|iphone|samsung|stetson|rolex|ferrari|lego)\b/i;
+export const MARQUES = /\b(lightsabers?|jedi|sith|star ?wars|darth|starbucks|marvel|avengers|nike|adidas|coca-?cola|pepsi|disney|pixar|pok[eé]mon|harry potter|batman|superman|spider-?man|iron ?man|transformers?|godzilla|tim hortons?|mcdonald'?s|iphone|samsung|stetson|rolex|ferrari|lego)\b/i;
 
 /** Écarts de la fiche (en anglais : ils repartent au LLM pour réparation). */
 export function verifierFiche(f: FicheRealisation, e: EntreeRealisateur): string[] {
@@ -197,7 +216,7 @@ export function verifierFiche(f: FicheRealisation, e: EntreeRealisateur): string
   f.plans.forEach((p, i) => {
     if (!p.texte) err.push(`shot ${i + 1}: texte is empty`);
     const mots = p.texte.split(/\s+/).length;
-    if (mots > 180) err.push(`shot ${i + 1} has ${mots} words: keep each shot under 90 words, cut redundant adjectives`);
+    if (mots > 90) err.push(`shot ${i + 1} has ${mots} words: keep each shot under 90 words, cut redundant adjectives`);
     if (i === 0 && p.debut !== 0) err.push('shot 1 must start at 0');
     if (i > 0) {
       const avant = f.plans[i - 1].debut;
@@ -207,6 +226,11 @@ export function verifierFiche(f: FicheRealisation, e: EntreeRealisateur): string
     }
   });
   const tous = JSON.stringify(f);
+  if (e.mode === 'ref2va') {
+    for (const s of e.references?.sujets ?? []) {
+      if (!f.plans.some((p) => p.texte.toLowerCase().includes(s.nom.toLowerCase()))) err.push(`reference subject ${s.nom}: keep its literal name in the shots where it appears`);
+    }
+  }
   const ids = new Set(f.personnages.map((p) => p.id));
   for (const m of tous.matchAll(/\[(P\d)\]/g)) if (!ids.has(m[1])) { err.push(`[${m[1]}] is used but not defined in personnages`); break; }
   (e.dialogues ?? []).forEach((_, i) => {
@@ -215,10 +239,25 @@ export function verifierFiche(f: FicheRealisation, e: EntreeRealisateur): string
   });
   // Le client peut nommer une marque (« comme Starbucks mais pas Starbucks ») : le prompt, lui, n'en porte jamais.
   const anglais = versH3(f, e).replace(/<d>[\s\S]*?<\/d>/g, ' ');
+  const photo = requiertPhotographie(f.famille, e.intention, e.consignes);
+  err.push(...verifierRecetteLiveAction(anglais, e.intention, f.famille, e.consignes));
+  err.push(...verifierVaisseauxOriginaux(anglais, e.intention));
+  f.plans.forEach((p, i) => {
+    if (!/\b(close[- ]?up|medium|tight|fills?|half the frame|foreground|large in (?:the )?frame)\b/i.test(p.texte)) err.push(`shot ${i + 1}: keep the hero large and readable in frame`);
+    if (photo) {
+      if (!/\b\d{2,3}\s?mm\b/i.test(p.texte)) err.push(`shot ${i + 1}: name its focal length`);
+      if (!/\b(Cooke|Zeiss|Leica|Angenieux|Angénieux|Panavision|Canon|Nikkor|Sigma|Atlas)\b/i.test(p.texte)) err.push(`shot ${i + 1}: name its lens family`);
+      if (!/\b(sun(?:light)?|daylight|overcast|windows?|lamps?|lanterns?|fire|sodium|softbox|soft box|LED|studio light|key light|backlight|neon|candles?|torches?|light from|lit by)\b/i.test(p.texte)) err.push(`shot ${i + 1}: name a motivated practical light source`);
+      if (!/\b(metal|steel|alumin(?:i)?um|copper|gold|silver|glass|wood(?:en)?|leather|skin|fabric|cotton|silk|wool|flannel|fur|scales?|stone|brick|concrete|mud|wet|water|rain|snow|ice|steam|smoke|dust|rust|scratched|worn|paper|cardboard|ceramic|porcelain|cheese|syrup|taffy|sauce|knit|mesh|foam|sand|rubber|flesh|bark)\b/i.test(p.texte)) err.push(`shot ${i + 1}: describe tangible material or surface texture`);
+    }
+    const sujetsVisibles = p.texte.replace(/\[(P\d)\]/g, (_, id) => { const x = f.personnages.find((s) => s.id === id); return x ? `${x.court} ${x.apparence}` : ''; });
+    if (f.famille === 'vfx' && !/\b(people|human|crew|windows?|buildings?|doors?|person|soldiers?|crowd|cars?|trees?|figure|cockpit|dock|brick|castle|tower|knight|warrior|man|woman|boy|girl|child|human-sized|hands?|faces?)\b/i.test(sujetsVisibles)) err.push(`shot ${i + 1}: include a concrete scale cue`);
+    if (!/\b(then|as|while|before|after|initially|finally|start|end|first|until|during|at \d)\b/i.test(p.texte)) err.push(`shot ${i + 1}: describe action changing over time, keep movement precise`);
+  });
   const motsFr = anglais.match(/\b(le|la|les|des|du|de|une|et|au|aux|avec|sur|dans|puis|est|sous|vers|lumière|caméra|plan|gros|lent)\b/gi) ?? [];
   if (motsFr.length >= 5) err.push('shot fields, style, personnages, ambiance and musique must be written in English, not French');
   const marque = tous.replace(/"compris":"[^"]*"|"hypotheses":\[[^\]]*\]|"variantes":\[[^\]]*\]/g, '').match(MARQUES);
-  if (marque) err.push(`"${marque[0]}" is a brand or protected name: use a generic equivalent (e.g. glowing energy blade, hooded knight, premium coffee shop)`);
+  if (marque) err.push(`"${marque[0]}" is a brand or protected name: use a generic equivalent (e.g. energy blade, hooded knight, premium coffee shop)`);
   const cite = /["«“]/.test(e.intention);
   for (const t of f.texteEcran) if (!cite || !e.intention.toLowerCase().includes(t.toLowerCase())) err.push(`texteEcran "${t}" was not quoted by the client: remove it`);
   const description = f.plans.map((p) => p.texte).join(' ').replace(/\[R\d\]/g, '');
@@ -280,28 +319,33 @@ export function versH3(f: FicheRealisation, e: EntreeRealisateur): string {
   const plans = f.plans.map((p, i) => {
     const texte = minusculeInitiale(phrase(remplir(presenter(p.texte, f, vus), f, e, locuteurs)));
     const fin = /<\/d>$/.test(texte) ? '' : '.';
-    const corps = i === 0 ? `${f.style.replace(/[.\s]+$/, '')}, ${texte}${fin}` : `At ${horodatage(p.debut)}, the camera cuts to ${texte.replace(/^the camera cuts to\s+/i, '')}${fin}`;
+    const debutStyle = f.style.trim() ? `${f.style.replace(/[.\s]+$/, '')}, ` : '';
+    const corps = i === 0 ? `${debutStyle}${texte}${fin}` : `At ${horodatage(p.debut)}, the camera cuts to ${texte.replace(/^the camera cuts to\s+/i, '')}${fin}`;
     return `[Shot ${i + 1}] ${corps.replace(/\.\.$/, '.')}`;
   });
-  const consignes = e.consignes?.length ? ` ${e.consignes.map(phrase).join(' ')}` : '';
-  const corps = `integrated_multimodal_description: ${plans.join(' ')}${consignes}
+  // Les consignes de l'interface sont interprétées/traduites par le LLM, jamais recollées brutes en aval.
+  const exclusions = requiertPhotographie(f.famille, e.intention, e.consignes) ? ` ${NEGATIF_LIVE_ACTION}` : '';
+  const corps = `integrated_multimodal_description: ${plans.join(' ')}${exclusions}
 
 overall_soundscape: ${phrase(f.ambiance) || 'Natural ambient sound matching the scene.'}
 
 non_diegetic_music: ${/^n\/?a\.?$/i.test(f.musique.trim()) ? 'N/A' : phrase(f.musique)}`;
+  if (e.mode === 'ref2va') return convertirEnPromptRef(corps, e.references?.sujets ?? [], { composition: e.references?.composition, style: f.style });
   const instruction = instructionH3({ mode: e.mode, dureeS: e.dureeS, dernierPlan: f.plans.length });
   return instruction ? `${instruction}\n\n${corps}` : corps;
 }
 
 /** Même fiche, dialecte image (Qwen-Image) : un plan figé, pour le plan clé « image d'abord ». */
-export function versImage(f: FicheRealisation, plan = 0): string {
+export function versImage(f: FicheRealisation, plan = 0, intention = ''): string {
   const p = f.plans[plan] ?? f.plans[0];
   if (!p) return f.compris;
   const texte = p.texte.replace(/\[R\d\]/g, '').replace(/\[(P\d)\]('s)?/g, (_, id, poss) => {
     const x = f.personnages.find((y) => y.id === id);
     return x ? `${groupe(x)}${x.apparence ? ` (${x.apparence.replace(/[.\s]+$/, '')})` : ''}${poss ?? ''}` : 'the character';
   });
-  return [`${f.style.replace(/[.\s]+$/, '')}, a single still frame:`, phrase(texte), 'Frozen moment, no motion blur from camera moves. No text, no logo, no watermark.'].join(' ');
+  const style = f.style.trim() ? `${f.style.replace(/[.\s]+$/, '')}, ` : '';
+  const negative = requiertPhotographie(f.famille, [intention, f.style].filter(Boolean).join('\n')) ? ` ${NEGATIF_LIVE_ACTION}` : '';
+  return [`${style}a single still frame:`, phrase(texte), 'Frozen moment, no motion blur from camera moves. No text, no logo, no watermark.', negative].join(' ');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -330,20 +374,18 @@ export async function realiser(e: EntreeRealisateur, llm: ClientLlm, maxTentativ
     { role: 'system', content: consignes(e) },
     { role: 'user', content: demande(e) },
   ];
-  const ctx = { mode: e.mode, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
+  const ctx = { mode: e.mode, references: e.references, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
   let erreurs: string[] = [];
-  let derniere: ResultatRealisateur | null = null;
   const historique: string[][] = [];
   for (let tentatives = 1; tentatives <= maxTentatives; tentatives++) {
     let brut = '';
     try {
       brut = await llm.completer('redaction', messages, { json: true, temperature: 0.6, maxTokens: 3000 });
-      const fiche = lireFiche(lireJson(brut));
+      const fiche = lireFiche(lireJson(brut), e);
       erreurs = verifierFiche(fiche, e);
       const prompt = versH3(fiche, e);
       if (!erreurs.length) erreurs = validerPromptH3(prompt, ctx);
-      derniere = { prompt, fiche, tentatives, erreurs, historique };
-      if (!erreurs.length) return derniere;
+      if (!erreurs.length) return { prompt, fiche, tentatives, erreurs, historique };
     } catch (err) {
       erreurs = [`unusable answer: ${(err as Error).message}`];
     }
@@ -351,7 +393,6 @@ export async function realiser(e: EntreeRealisateur, llm: ClientLlm, maxTentativ
     messages.push({ role: 'assistant', content: brut || '(invalid)' });
     messages.push({ role: 'user', content: `Fix exactly these problems and answer again with the full JSON object:\n- ${erreurs.join('\n- ')}` });
   }
-  // Une fiche lisible dont le prompt passe le guide reste utilisable même si une règle de style n'est pas tenue.
-  if (derniere && derniere.fiche.plans.length && !validerPromptH3(derniere.prompt, ctx).length) return derniere;
+  // Une fiche encore invalide repart au chemin de secours ; aucune règle de photographie n'est ignorée.
   throw new Error(`réalisateur : ${erreurs.join(' ; ')}`);
 }

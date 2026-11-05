@@ -15,7 +15,6 @@ import { controlerFichier } from './controle.js';
 import { choisirCandidat, jugerCandidats, plancheDataUrl } from './juge.js';
 import type { CreditsPrise } from './credits.js';
 import { resoudrePersonnages } from './personnagesCast.js';
-import { convertirEnPromptRef } from './personnages.js';
 import { argsAssemblage, argsAvecMusique, intentionDuPlan, type PlanFilm, type Storyboard } from './film.js';
 import type { ClientLlm } from './llm.js';
 import { reecrireH3 } from './reecritureH3.js';
@@ -64,7 +63,7 @@ export async function tournerFilm(
     // Personnages @ : un plan qui cite @nom part en Ref2VA (moteur cinéma) avec les images du personnage.
     const persos = await Promise.all(sb.plans.map((p, i) => (p.suite || p.take || opts.moteur !== 'h3-max' ? null : resoudrePersonnages(intentionDuPlan(sb, i)))));
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: 't2va', dureeS: dureePlan(p), ...dialoguesDe(p) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, ...dialoguesDe(p) }, llm))),
     );
     for (let i = 0; i < sb.plans.length; i++) {
       const p = sb.plans[i];
@@ -76,7 +75,7 @@ export async function tournerFilm(
       }
       const corps = {
         ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son, qualite: opts.qualite }, ecrit.prompt, opts.moteur),
-        ...(persos[i]?.sujets.length ? { prompt: convertirEnPromptRef(ecrit.prompt, persos[i]!.sujets), refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
+        ...(persos[i]?.sujets.length ? { refImages: persos[i]!.jetons, personnages: persos[i]!.noms } : {}),
         app: 'nexora-film', userPrompt: p.resume, nexoraFilm: filmId, nexoraPlan: i, promptSource: ecrit.source,
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
@@ -135,10 +134,12 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
       : `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame, which is the last frame of the previous shot: continue the same action seamlessly from it.`,
     mode: fin ? 'fl2va' : 'i2va',
     dureeS: dureePlan(p),
+    moteur: s.moteur ?? 'h3-fast',
+    format: s.format,
     ...dialoguesDe(p),
   }, deps.llmPour(org));
   const corps = {
-    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite }, ecrit.prompt, s.moteur ?? 'h3-fast'),
+    ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite, image: jeton }, ecrit.prompt, s.moteur ?? 'h3-fast'),
     startImage: jeton,
     ...(fin ? { endImage: fin } : {}),
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,

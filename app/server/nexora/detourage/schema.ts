@@ -26,7 +26,7 @@ export const SortiesSchema = z.object({
 }).default({ png16: true, rgba16: true, exr: true, prores: true, webm: true, matte: true, apercu: true });
 
 export const ParamsSchema = z.object({
-  /** « rapide » : SAM 3.1 + ViTMatte (mesuré). « pro » : LTX-2.5 Alpha-Gen, non disponible tant que ses poids ne sont pas installés. */
+  /** « rapide » : SAM 3.1 + ViTMatte (mesuré). « pro » : LTX-2.5 Alpha-Gen, pas encore intégré à Creative. */
   palier: z.enum(['rapide', 'pro']).default('rapide'),
   /** « suivi » : aperçu du suivi seul (rapide), « complet » : matting, stabilisation et exports. */
   mode: z.enum(['suivi', 'complet']).default('complet'),

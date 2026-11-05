@@ -168,7 +168,7 @@ describe('cycle de vie d’un travail de détourage', () => {
   it('sans moteur pour le palier demandé, le message dit pourquoi', () => {
     const { d } = monter();
     expect(() => d.creer(A, 'u', 'x', 'pro')).toThrow(ErreurDetourage);
-    expect(() => d.creer(A, 'u', 'x', 'pro')).toThrow(/pas encore de moteur/);
+    expect(() => d.creer(A, 'u', 'x', 'pro')).toThrow(/pro.*pas encore disponible/);
     const sans = monter({ moteur: false });
     expect(() => sans.d.creer(A, 'u', 'x')).toThrow(/Aucun moteur/);
   });

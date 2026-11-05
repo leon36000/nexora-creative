@@ -104,7 +104,7 @@ try {
   context.setDefaultTimeout(8000);
   context.setDefaultNavigationTimeout(8000);
 
-  async function openPending(prompt) {
+  async function openPending(prompt, language = 'fr') {
     const gate = deferred();
     imageTokenGate = gate;
     const page = await context.newPage();
@@ -113,6 +113,7 @@ try {
     const conversionRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/nexora/image/42/jeton', { timeout: 8000 });
     const href = `${origin}/?mode=video&cle=42&intention=${encodeURIComponent(prompt)}`;
     await page.goto(href, { waitUntil: 'domcontentloaded' });
+    if (language === 'en') await page.getByRole('group', { name: 'Langue du réalisateur' }).getByRole('button', { name: 'English', exact: true }).click();
     try {
       await conversionRequest;
     } catch (error) {
@@ -129,21 +130,25 @@ try {
     const ctaText = await cta.innerText();
     if (!ctaDisabled) console.error(`CTA pendant la conversion: ${ctaText}; intention=${(await page.locator('textarea[aria-label="Description"]').inputValue()).length} caractères`);
     assert.equal(ctaDisabled, true, 'la création reste bloquée pendant la conversion');
-    assert.match(ctaText, /Préparation du plan clé/);
+    assert.match(ctaText, language === 'en' ? /Preparing keyframe/ : /Préparation du plan clé/);
     assert.equal(await page.locator('textarea[aria-label="Description"]').inputValue(), prompt);
-    return { page, gate, cta };
+    return {
+      page, gate, cta,
+      imageAlt: language === 'en' ? 'Starting image' : 'Image de départ',
+      readyText: language === 'en' ? 'The video starts from this image.' : 'La vidéo part de cette image.',
+    };
   }
 
-  for (const prompt of [
-    'Une tasse de café se pose sur la table au lever du jour.',
-    'A coffee cup lands on the table at sunrise.',
+  for (const [prompt, language] of [
+    ['Une tasse de café se pose sur la table au lever du jour.', 'fr'],
+    ['A coffee cup lands on the table at sunrise.', 'en'],
   ]) {
-    const { page, gate, cta } = await openPending(prompt);
+    const { page, gate, cta, readyText } = await openPending(prompt, language);
     gate.release();
-    await page.getByText('La vidéo part de cette image.', { exact: true }).waitFor();
+    await page.getByText(readyText, { exact: true }).waitFor();
     await page.waitForFunction(() => {
       const button = document.querySelector('button.st-go');
-      return button && !button.disabled && button.textContent?.trim() === 'Animer avec H3';
+      return button && !button.disabled && ['Animer avec H3', 'Animate with H3'].includes(button.textContent?.trim() ?? '');
     });
     const creationRequest = page.waitForRequest((request) => new URL(request.url()).pathname === '/api/nexora/creer');
     await cta.click();
@@ -151,18 +156,30 @@ try {
     const body = stats.createBodies.at(-1);
     assert.equal(body.intention, prompt, 'le prompt reste inchangé en français et en anglais');
     assert.equal(body.image, stillToken, 'la prise Viewer devient la première image H3');
+    assert.equal(body.langueClient, language, 'la langue choisie est transmise au réalisateur');
+    assert.equal(body.langueReplique, 'fr', 'la langue des répliques reste indépendante de la langue UI');
     await page.close();
   }
 
   {
-    const { page, gate } = await openPending('A still already selected as the key frame.');
+    const { page, gate, readyText, imageAlt } = await openPending('A still already selected as the key frame.');
     gate.release();
-    await page.getByText('La vidéo part de cette image.', { exact: true }).waitFor();
+    await page.getByText(readyText, { exact: true }).waitFor();
     const depart = page.getByRole('group', { name: 'Point de départ' });
     const keyFrame = depart.getByRole('button', { name: /Plan clé IA/ });
     await keyFrame.click();
-    assert.equal(await page.locator('img[alt="Image de départ"]').count(), 1,
+    assert.equal(await page.locator(`img[alt="${imageAlt}"]`).count(), 1,
       'recliquer sur le départ déjà actif conserve la prise image');
+    await page.close();
+  }
+
+  {
+    const { page, gate } = await openPending('A language change does not stale an image handoff.');
+    await page.getByRole('group', { name: 'Langue du réalisateur' }).getByRole('button', { name: 'English', exact: true }).click();
+    gate.release();
+    await page.getByText('The video starts from this image.', { exact: true }).waitFor();
+    assert.equal(await page.locator('img[alt="Starting image"]').count(), 1,
+      'le changement de langue préserve la conversion, qui ne dépend pas de la langue');
     await page.close();
   }
 
@@ -206,11 +223,11 @@ try {
     await page.close();
   }
 
-  assert.equal(stats.imageTokenRequests, 6);
+  assert.equal(stats.imageTokenRequests, 7);
   assert.equal(stats.uploadRequests, 1);
   assert.deepEqual(stats.externalRequests, [], 'aucune requête hors loopback');
   assert.deepEqual(stats.unknownApi, [], 'toutes les API utilisées sont simulées explicitement');
-  console.log('Parcours React FR/EN, conversion, sélection et annulations avec création simulée : 6 scénarios réussis; aucun service moteur appelé.');
+  console.log('Parcours React FR/EN, conversion, sélections, annulations et création simulée : 7 scénarios réussis; aucun service moteur appelé.');
 } finally {
   imageTokenGate?.release();
   await context?.close();
