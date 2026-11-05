@@ -1,0 +1,11 @@
+{
+ "_note": "SEUL endroit du nom, du logo et de la signature du film ultime OPSYS-AI (le nom et le logo vont changer). Modifier ce fichier puis relancer le montage (chaine/monter.py) : aucun nom ni logo n'est dans les images générées. « logo » = chemin d'un PNG transparent, ou null pour un logotype tracé en code. La voix hors champ ne prononce le nom qu'au plus une fois, dans une réplique isolée.",
+ "nom": "OPSYS-AI",
+ "logo": null,
+ "editeur": "par Nexora",
+ "signature": "Les ressources d'une grande entreprise. À *votre* taille.",
+ "mentions": "Film de vision. Certaines fonctions sont en préparation. Données fictives.",
+ "url": "",
+ "couleurs": {"encre": [8, 8, 10], "os": [246, 244, 238], "brume": [160, 160, 172], "signal": [255, 90, 31], "ion": [90, 170, 255]},
+ "polices": {"dossier": "~/Desktop/NexoraSite/web/src/fonts", "titre": "geist-latin-wght-normal.woff2", "mono": "jetbrains-mono-latin-wght-normal.woff2"}
+}
