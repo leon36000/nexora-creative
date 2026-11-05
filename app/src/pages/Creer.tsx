@@ -17,6 +17,7 @@ import Producteur from '../studio/Producteur';
 import { CAMERAS } from '../studio/apps';
 import { setParams, useRoute } from '../router';
 import { isCurrentVideoHandoff, readVideoStillHandoff } from '../viewerHandoff';
+import { resumeCorrespondAIntention } from '../creationSummary';
 import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/icons';
 import { cleDevisCreation, ControleDevis } from '../devisCreation';
 import { creationVideoCopy, erreurVisibleCreationVideo, nomCameraCreation } from '../creationVideoCopy';
@@ -69,6 +70,8 @@ export default function Creer() {
   modeRef.current = mode;
   const texteCourantCreation = () => creationVideoCopy(modeRef.current === 'video' ? langueClientRef.current : 'fr');
   const [intention, setIntention] = useState('');
+  const intentionRef = useRef(intention);
+  intentionRef.current = intention;
   const [format, setFormat] = useState<Format>('16:9');
   const [duree, setDuree] = useState<number>(5);
   const [dureeFilm, setDureeFilm] = useState<number>(30);
@@ -81,8 +84,16 @@ export default function Creer() {
   const [cle, setCleState] = useState<{ jeton: string; apercu: string } | null>(null);
   const [envoi, setEnvoi] = useState<null | 'creer' | 'plan' | 'film' | 'cle' | 'boost' | 'photo' | 'prise'>(null);
   const [boost, setBoost] = useState<string | null>(null);
-  const [compris, setCompris] = useState<(Comprehension & { credits?: number; prompt: string }) | null>(null);
+  const [compris, setCompris] = useState<(Comprehension & { credits?: number; prompt: string; intentionSource: string }) | null>(null);
   const [voirPrompt, setVoirPrompt] = useState(false);
+  function changerIntention(value: string) {
+    intentionRef.current = value;
+    setIntention(value);
+    if (compris && !resumeCorrespondAIntention(compris.intentionSource, value)) {
+      setCompris(null);
+      setVoirPrompt(false);
+    }
+  }
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
   const [etat, setEtat] = useState<EtatNexora | null>(null);
   const [vue, setVue] = useState<number | null>(null);
@@ -180,7 +191,7 @@ export default function Creer() {
     setParams({ jeton: null, intention: null });
     setCle({ jeton, apercu });
     setDepart('cle');
-    if (texte) setIntention(texte.slice(0, 4000));
+    if (texte) changerIntention(texte.slice(0, 4000));
     toast(texteCourantCreation().toast3dKeyframe);
   }, [params.get('jeton')]);
   // « Animer » depuis la Bibliothèque : /?mode=video&cle=<image> pose l'image comme plan clé.
@@ -191,7 +202,7 @@ export default function Creer() {
     if (handoffsImageEnCours.current.has(handoffKey)) return;
     handoffsImageEnCours.current.add(handoffKey);
     setParams({ cle: null, intention: null, handoff: null });
-    if (handoff.intention !== undefined) setIntention(handoff.intention);
+    if (handoff.intention !== undefined) changerIntention(handoff.intention);
     void animer(handoff.takeId, `${location.pathname}${location.search}`).finally(() => handoffsImageEnCours.current.delete(handoffKey));
   }, [mode, params.get('cle'), params.get('intention')]);
   const film = mode === 'film';
@@ -266,15 +277,18 @@ export default function Creer() {
 
   async function creerVideo() {
     if (envoi !== null) return;
+    const intentionRequete = intentionRef.current.trim();
     const versionLangue = versionLangueRef.current;
     const langueRequete = langueClientRef.current;
     setEnvoi('creer');
     try {
       const cam = CAMERAS.find((c) => c.id === camera);
-      const r = await api.nexoraCreer({ intention: intention.trim(), format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined, langueReplique, camera: cam?.texte, langueClient: langueRequete });
+      const r = await api.nexoraCreer({ intention: intentionRequete, format, duree: dureeClip as 5 | 10 | 15, son, qualite, image: cle?.jeton, musique, replique: son && replique.trim() ? replique.trim() : undefined, langueReplique, camera: cam?.texte, langueClient: langueRequete });
       const texteCourant = texteCourantCreation();
       toast(r.source === 'llm' ? texteCourant.toastStarted : texteCourant.toastFallbackStarted);
-      if (versionLangue === versionLangueRef.current) setCompris(r.comprehension ? { ...r.comprehension, credits: r.usageRedaction?.credits, prompt: r.prompt } : null);
+      if (versionLangue === versionLangueRef.current && resumeCorrespondAIntention(intentionRequete, intentionRef.current)) {
+        setCompris(r.comprehension ? { ...r.comprehension, credits: r.usageRedaction?.credits, prompt: r.prompt, intentionSource: intentionRequete } : null);
+      }
       setVoirPrompt(false);
       setCle(null);
     } catch (e) {
@@ -442,7 +456,7 @@ export default function Creer() {
           <div className="st-champ">
             <textarea
               value={intention}
-              onChange={(e) => setIntention(e.target.value)}
+              onChange={(e) => changerIntention(e.target.value)}
               onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && prete && !cleRequise) lancer(); }}
               placeholder={mode === 'video' ? texteVideo.placeholder : mode === 'image' ? 'Décris l’image : sujet, décor, lumière, ambiance…' : mode === 'film' ? 'Raconte ton film : une idée, des personnages, une ambiance…' : 'Décris ta scène : ce qu’on voit, ce qui bouge, la caméra…'}
               maxLength={4000}
@@ -461,13 +475,13 @@ export default function Creer() {
               <span className="st-etiq">{mode === 'video' ? texteVideo.boosted : 'Version boostée'}</span>
               <p>{boost}</p>
               <div className="st-ligne">
-                <button type="button" className="st-bouton primaire" onClick={() => { setIntention(boost); setBoost(null); }}>{mode === 'video' ? texteVideo.useBoost : 'Utiliser cette version'}</button>
+                <button type="button" className="st-bouton primaire" onClick={() => { changerIntention(boost); setBoost(null); }}>{mode === 'video' ? texteVideo.useBoost : 'Utiliser cette version'}</button>
                 <button type="button" className="st-bouton" onClick={() => setBoost(null)}>{mode === 'video' ? texteVideo.keepOriginal : 'Garder la mienne'}</button>
               </div>
             </div>
           )}
 
-          {compris && mode === 'video' && (
+          {compris && mode === 'video' && resumeCorrespondAIntention(compris.intentionSource, intention) && (
             <div className="st-suggestion st-compris" role="status" aria-live="polite">
               <span className="st-etiq">{texteVideo.understood}</span>
               <p>{compris.compris}</p>
@@ -478,7 +492,7 @@ export default function Creer() {
               {compris.variantes.length > 0 && (
                 <div className="st-compris-variantes">
                   <span className="st-etiq">{texteVideo.directions}</span>
-                  <div className="st-idees">{compris.variantes.map((v) => <button key={v} type="button" className="st-idee" title={texteVideo.useDirection} onClick={() => { setIntention(`${intention.trim()} — ${v}`); setCompris(null); }}>{v}</button>)}</div>
+                  <div className="st-idees">{compris.variantes.map((v) => <button key={v} type="button" className="st-idee" title={texteVideo.useDirection} onClick={() => { changerIntention(`${intention.trim()} — ${v}`); setCompris(null); }}>{v}</button>)}</div>
                 </div>
               )}
               <div className="st-ligne">
@@ -492,7 +506,7 @@ export default function Creer() {
 
           {(!intention || idees[mode]) && (
             <div className="st-idees" aria-label={mode === 'video' ? texteVideo.ideas : 'Idées'}>
-              {(idees[mode] ?? (mode === 'video' ? texteVideo.ideaExamples : IDEES[mode])).map((i) => <button key={i} type="button" className="st-idee" onClick={() => setIntention(i)}>{i.length > 72 ? `${i.slice(0, 70)}…` : i}</button>)}
+              {(idees[mode] ?? (mode === 'video' ? texteVideo.ideaExamples : IDEES[mode])).map((i) => <button key={i} type="button" className="st-idee" onClick={() => changerIntention(i)}>{i.length > 72 ? `${i.slice(0, 70)}…` : i}</button>)}
               <button type="button" className="st-idee" disabled={inspire} onClick={() => void inspirer()} style={{ borderColor: 'rgba(255,90,31,.45)', color: 'var(--accent-hi)' }}>{inspire ? texteVideo.searching : texteVideo.inspire}</button>
             </div>
           )}
