@@ -60,8 +60,9 @@ nexora_sous_agents_tests:
   script:
     - mkdir -p ".ci-sousagents/job-$CI_JOB_ID"
     - 'if apt-get update > ".ci-sousagents/job-$CI_JOB_ID/dependances.log" 2>&1 && apt-get install -y --no-install-recommends curl jq >> ".ci-sousagents/job-$CI_JOB_ID/dependances.log" 2>&1; then cat ".ci-sousagents/job-$CI_JOB_ID/dependances.log"; else cat ".ci-sousagents/job-$CI_JOB_ID/dependances.log"; exit 1; fi'
-    - python3 -m pip install --no-cache-dir coverage==7.10.7
-    - 'env -i HOME="$CI_PROJECT_DIR/.ci-sousagents/job-$CI_JOB_ID" PATH=/usr/local/bin:/usr/bin:/bin SA_CI_ROOT="$CI_PROJECT_DIR" SA_CI_RUN_ID="job-$CI_JOB_ID" bash outils/sous-agents/tests/ci_hors_ligne.sh'
+    - python3 -m venv ".ci-sousagents/job-$CI_JOB_ID/venv"
+    - '.ci-sousagents/job-$CI_JOB_ID/venv/bin/python -m pip install --no-cache-dir coverage==7.10.7'
+    - 'env -i HOME="$CI_PROJECT_DIR/.ci-sousagents/job-$CI_JOB_ID" PATH=/usr/local/bin:/usr/bin:/bin SA_CI_ROOT="$CI_PROJECT_DIR" SA_CI_RUN_ID="job-$CI_JOB_ID" SA_CI_PYTHON="$CI_PROJECT_DIR/.ci-sousagents/job-$CI_JOB_ID/venv/bin/python" bash outils/sous-agents/tests/ci_hors_ligne.sh'
   artifacts:
     when: always
     expire_in: 14 days

@@ -1,5 +1,7 @@
 import json
 import os
+import shlex
+import sys
 import shutil
 import subprocess
 import tempfile
@@ -94,7 +96,7 @@ else:
                         FAKE_IMAGE='ghcr.io/berriai/litellm@sha256:7294b90f868c5c38c99b83021c7ba46f9b439e95f8e32964c925c7d2563a03f7')
 
     def stub(self, name, source):
-        p = self.bin / name; p.write_text(source); p.chmod(0o755)
+        p = self.bin / name; p.write_text(source.replace("/usr/bin/python3", shlex.quote(sys.executable))); p.chmod(0o755)
 
     def call(self, *flags, env=None, timeout=15):
         return subprocess.run([str(SCRIPT), *flags, 'deepseek', str(self.prompt), str(self.work), '2', '0.1'],

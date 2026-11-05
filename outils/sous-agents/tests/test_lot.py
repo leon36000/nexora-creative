@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -257,7 +258,7 @@ class LotTests(unittest.TestCase):
             "LOT_BUDGET": "0.30",
             "LOT_RUN_BUDGET": "0.00000001",
             "FAKE_DOCKER_LOG": str(docker_log),
-            "PATH": f"{fake_bin}:/usr/bin:/bin",
+            "PATH": f"{fake_bin}:{Path(sys.executable).parent}:/usr/bin:/bin",
         })
         self.add_task("small", "MODE=OK\n")
         result = self.run_lot("1")
