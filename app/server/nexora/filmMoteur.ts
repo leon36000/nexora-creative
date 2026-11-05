@@ -290,14 +290,13 @@ async function relancerPlan(film: Take, sb: Storyboard, s: Record<string, any>, 
     return;
   }
   majPlan(filmId, i, { take: id, relances: relances + 1, panne: t.error ?? 'échec', attenteMoteur: undefined });
-  return;
 }
 
-async function reprendreQualite(film: Take, sb: Storyboard, s: Record<string, any>, p: PlanFilm, plan: PlanFilm & { corps?: Record<string, any>; reprises?: number }, i: number, t: Take, c: { defauts: string[] }): Promise<void> {
+async function reprendreQualite(film: Take, sb: Storyboard, s: Record<string, any>, plan: PlanFilm & { corps?: Record<string, any>; reprises?: number }, i: number, t: Take, c: { defauts: string[] }): Promise<void> {
   const filmId = film.id;
   // Hors requête (fin de rendu côté moteur) : la reprise doit naître dans l'organisation du film.
   const org = takes.organisationDe(filmId) ?? 'local';
-  const cle = typeof (p as any).clePlan === 'string' ? (p as any).clePlan : clePlanFilm(sb, p, { moteur: s.moteur ?? 'h3-fast', format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, references: plan.corps!.refImages });
+  const cle = typeof (plan as any).clePlan === 'string' ? (plan as any).clePlan : clePlanFilm(sb, plan, { moteur: s.moteur ?? 'h3-fast', format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, references: plan.corps!.refImages });
   let id: number;
   try {
     [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () =>
@@ -357,7 +356,7 @@ async function etape(filmId: number) {
       majPlan(filmId, i, { controle: plan.controle });
       // Correction automatique, budget d'une reprise par plan : même prompt, autre graine.
       if (!c.ok && (plan.reprises ?? 0) < 1 && plan.corps) {
-        await reprendreQualite(film, sb, s, p, plan, i, t, c);
+        await reprendreQualite(film, sb, s, plan, i, t, c);
         return;
       }
     }
