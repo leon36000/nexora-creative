@@ -8,6 +8,7 @@
 import { presetById, type AppDef } from '../catalog';
 
 import { PRODUIT_3D, ROUTE_3D } from '../produit3d.js';
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 export const CATEGORIES_NEXORA = [
   { id: 'all', label: 'Tout' },
   { id: 'create', label: 'Créer' },
@@ -17,8 +18,8 @@ export const CATEGORIES_NEXORA = [
 ] as const;
 
 export const APPS_NEXORA: AppDef[] = [
-  { id: 'producteur', name: 'Producteur IA', blurb: 'Un objectif en une phrase : l’IA découpe, chiffre, tourne, contrôle chaque plan et assemble.', route: '/', icon: 'sparkle', hue: 18, cat: 'create', badge: 'new', cover: 'golden', clip: '/apps/scene.mp4' },
-  { id: 'marketing', name: 'Marketing', blurb: 'Cartes, dépliants et accroche-portes sur ta marque : une phrase, trois propositions, PDF prêt pour l’imprimeur.', route: '/marketing', icon: 'grid', hue: 24, cat: 'create', badge: 'new', cover: 'static' },
+  { id: 'producteur', name: NEXORA_PRODUCT_NAMES.producer, blurb: 'Un objectif en une phrase : l’IA découpe, chiffre, tourne, contrôle chaque plan et assemble.', route: '/', icon: 'sparkle', hue: 18, cat: 'create', badge: 'new', cover: 'golden', clip: '/apps/scene.mp4' },
+  { id: 'marketing', name: NEXORA_PRODUCT_NAMES.campaign, blurb: 'Cartes, dépliants et accroche-portes sur ta marque : une phrase, trois propositions, PDF prêt pour l’imprimeur.', route: '/marketing', icon: 'grid', hue: 24, cat: 'create', badge: 'new', cover: 'static' },
   { id: 'video', name: 'Vidéo', blurb: 'Une phrase devient un plan MiniMax H3 avec son, avec ou sans image de départ.', route: '/?mode=video', icon: 'video', hue: 32, cat: 'create', badge: 'top', cover: 'embers', clip: '/apps/video.mp4' },
   { id: 'image', name: 'Image', blurb: 'Des images Qwen-Image d’une phrase ; anime celle que tu préfères en un clic.', route: '/?mode=image', icon: 'image', hue: 200, cat: 'create', cover: 'golden', clip: '/apps/image.mp4' },
   { id: 'film', name: 'Film', blurb: 'Une idée devient un storyboard relisible, tourné plan par plan et assemblé.', route: '/?mode=film', icon: 'film', hue: 18, cat: 'direct', cover: 'noir', clip: '/apps/director.mp4' },
@@ -35,7 +36,7 @@ export const APPS_NEXORA: AppDef[] = [
   { id: 'relight', name: 'Éclairage', blurb: 'Déplace la lumière et change sa couleur, une ambiance par résultat.', route: '/edit?app=relight', icon: 'light', hue: 38, cat: 'transform', cover: 'golden' },
   { id: 'expand', name: 'Agrandir le cadre', blurb: 'Passe à un autre format et peins ce qui était hors champ.', route: '/edit?app=expand', icon: 'aspect', hue: 220, cat: 'transform', cover: 'pull-back' },
   { id: 'cutout', name: 'Détourer', blurb: 'Sors le sujet d’une image ou d’un clip, sur fond transparent ou nouveau.', route: '/cutout', icon: 'cutout', hue: 120, cat: 'transform', cover: 'static' },
-  { id: 'detourage', name: 'Détourage pro', blurb: 'Isole un sujet dans une vidéo, cheveux et fourrure compris : alpha 16 bits, EXR, ProRes 4444, nouveau fond.', route: '/detourage', icon: 'cutout', hue: 150, cat: 'transform', badge: 'new', cover: 'static' },
+  { id: 'detourage', name: NEXORA_PRODUCT_NAMES.matte, blurb: 'Détoure un sujet vidéo avec SAM 3.1 et ViTMatte, ajuste son contour puis exporte sur transparence ou sur un nouveau fond.', route: '/detourage', icon: 'cutout', hue: 150, cat: 'transform', badge: 'new', cover: 'static' },
   { id: 'upscale', name: 'Netteté et taille', blurb: 'Rends une image ou un clip plus net et plus grand (Real-ESRGAN, SeedVR2).', route: '/upscale', icon: 'up', hue: 50, cat: 'finish', cover: 'rack-focus', clip: '/apps/upscale.mp4' },
   { id: 'object', name: PRODUIT_3D, blurb: 'Une image, plusieurs vues ou une phrase deviennent un modèle 3D texturé : à tourner, à exporter (GLB, OBJ, STL, 3MF, USDZ).', route: ROUTE_3D, icon: 'cube', hue: 30, cat: 'create', cover: 'turntable', clip: '/apps/object.mp4' },
 ];

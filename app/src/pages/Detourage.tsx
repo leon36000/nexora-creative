@@ -1,11 +1,12 @@
 /**
- * Détourage vidéo pro : importer une vidéo, cliquer le sujet (clics positifs et négatifs, sur plusieurs images),
+ * Matte : importer une vidéo, cliquer le sujet (clics positifs et négatifs, sur plusieurs images),
  * voir le masque en direct, choisir fond et exports, lancer un travail asynchrone (progression, annulation, reprise),
  * puis prévisualiser (damier, matte, nouveau fond) et télécharger (PNG 16 bits, EXR, ProRes 4444, WebM alpha).
  * Rapport et mesures : recherche/22-detourage-video-pro.md.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from '../store';
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 
 const P = '/api/nexora/detourage';
 type Pt = [number, number, 0 | 1];
@@ -210,8 +211,8 @@ export default function Detourage() {
   return (
     <div className="rail-layout" style={{ gridTemplateColumns: '380px 1fr' }}>
       <aside className="rail">
-        <div className="display" style={{ fontSize: 26 }}>Détourage pro</div>
-        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Isole une personne, un animal ou un objet dans une vidéo, avec stabilisation des contours. Sortie alpha 16 bits et EXR.</div>
+        <div className="display" style={{ fontSize: 26 }}>{NEXORA_PRODUCT_NAMES.matte}</div>
+        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Détourage vidéo avec SAM 3.1, ViTMatte et stabilisation des contours; exports alpha ou sur un nouveau fond.</div>
 
         {cap && !cap.rapide.disponible && <div className="rail-section" style={{ color: 'var(--bad)', fontSize: 12.5 }}>Aucun moteur de détourage en ligne. Lance le serveur de détourage sur la machine GPU (outils/detourage).</div>}
 
