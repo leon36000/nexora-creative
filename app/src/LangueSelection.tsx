@@ -7,7 +7,8 @@ type Props = Readonly<{
 
 export function LangueSelection({ mode, langue, libelle, occupe, filmPartiel, choisir }: Props) {
   if (mode !== 'video' && mode !== 'film') return null;
-  const nom = mode === 'film' ? 'Langue du film et des dialogues' : libelle;
+  const nomFilm = langue === 'en' ? 'Film and dialogue language' : 'Langue du film et des dialogues';
+  const nom = mode === 'film' ? nomFilm : libelle;
   const bloque = mode === 'film' && (occupe || filmPartiel);
   return <div className="st-bloc">
     <span className="st-etiq">{nom}</span>

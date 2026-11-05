@@ -18,6 +18,7 @@ it('sélectionne réellement la langue du film et interdit le changement durant 
   await act(async () => { boutons[1].click(); });
   expect(conteneur.querySelector('output')?.textContent).toBe('en');
   expect(boutons[1].getAttribute('aria-pressed')).toBe('true');
+  expect(conteneur.querySelector('[role=group]')?.getAttribute('aria-label')).toBe('Film and dialogue language');
   await act(async () => { root.render(<LangueSelection mode="film" langue="en" libelle="Langue" occupe filmPartiel={false} choisir={() => { throw new Error('clic interdit'); }} />); });
   expect([...conteneur.querySelectorAll('button')].every((b) => b.disabled)).toBe(true);
   await act(async () => { root.unmount(); });

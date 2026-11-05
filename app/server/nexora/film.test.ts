@@ -191,3 +191,10 @@ it('la route film/plan transmet la langue à la planification', async () => {
   const resultat = await handler({ body: { intention: 'A car', duree: 10, langue: 'en' } }, reply);
   expect(resultat.storyboard.langue).toBe('en');
 });
+
+it('normalise le titre absent du storyboard LLM dans la langue du film', async () => {
+  const llm: ClientLlm = { completer: async () => JSON.stringify({ plans: [{ description: 'A car moves', duree: 5 }] }) };
+  const resultat = await planifierFilm({ intention: 'A car', dureeCible: 10, langue: 'en' }, llm);
+  expect(resultat.source).toBe('llm');
+  expect(resultat.storyboard).toMatchObject({ langue: 'en', titre: 'Untitled' });
+});

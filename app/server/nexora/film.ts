@@ -40,8 +40,9 @@ const entites = (v: unknown) =>
     .filter((e) => e.nom || e.description)
     .slice(0, 8);
 
-export function lireStoryboard(o: unknown, dureeCible: number): Storyboard {
+export function lireStoryboard(o: unknown, dureeCible: number, langueForcee?: 'fr' | 'en'): Storyboard {
   const b = (o ?? {}) as Record<string, any>;
+  const langue = langueForcee ?? (b.langue === 'en' ? 'en' : 'fr');
   const plans: PlanFilm[] = (Array.isArray(b.plans) ? b.plans : [])
     .map((p: any) => ({
       resume: txt(p?.resume, 160),
@@ -61,8 +62,8 @@ export function lireStoryboard(o: unknown, dureeCible: number): Storyboard {
   }
   void dureeCible;
   return {
-    langue: b.langue === 'en' ? 'en' : 'fr',
-    titre: txt(b.titre, 120) || (b.langue === 'en' ? 'Untitled' : 'Sans titre'),
+    langue,
+    titre: txt(b.titre, 120) || (langue === 'en' ? 'Untitled' : 'Sans titre'),
     bible: { style: txt(b.bible?.style, 600), personnages: entites(b.bible?.personnages), lieux: entites(b.bible?.lieux) },
     plans,
     dureeTotale: plans.reduce((n, p) => n + p.duree, 0),
@@ -124,8 +125,7 @@ export async function planifierFilm(
           ],
           { json: true, temperature: 0.8 },
         );
-        const storyboard = lireStoryboard(lireJson(brut), d.dureeCible);
-        storyboard.langue = langue;
+        const storyboard = lireStoryboard(lireJson(brut), d.dureeCible, langue);
         return { storyboard, source: 'llm' };
       } catch {
         /* nouvel essai, puis repli */
