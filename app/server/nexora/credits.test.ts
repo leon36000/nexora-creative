@@ -33,17 +33,36 @@ describe('suite de la facturation d’une prise', () => {
 });
 
 describe('API de crédits du site Nexora', () => {
-  it('réserve, valide et libère avec la clé de l’organisation ; 402 devient un refus lisible', async () => {
-    const appels: { url: string; corps: any; auth: string | null }[] = [];
+  it('refuse d’appeler sans jeton de service configuré', async () => {
+    const appels: string[] = [];
+    const f = (async (url: string) => {
+      appels.push(url);
+      return new Response('{}');
+    }) as unknown as typeof fetch;
+    const fac = facturationSite('https://site.test', () => 'nxk_cle', f);
+    await expect(fac.reserver({ idempotence: 'k0', credits: 1, libelle: 'Image' }))
+      .rejects.toThrow('service Creative sans authentification Nexora');
+    expect(appels).toEqual([]);
+  });
+
+  it('réserve, valide et libère avec clé organisation et jeton de service ; 402 devient un refus lisible', async () => {
+    const appels: { url: string; corps: any; auth: string | null; service: string | null }[] = [];
+    const jetonService = 'service-token-for-creative-tests-0123456789';
     const f = (async (url: string, init: RequestInit) => {
       const corps = JSON.parse(String(init.body));
-      appels.push({ url, corps, auth: new Headers(init.headers).get('authorization') });
+      const headers = new Headers(init.headers);
+      appels.push({
+        url,
+        corps,
+        auth: headers.get('authorization'),
+        service: headers.get('x-nexora-creative-service-token'),
+      });
       if (url.endsWith('/reserve') && corps.credits > 1000) {
         return new Response(JSON.stringify({ error: { code: 'insufficient_quota', message: 'Il ne vous reste plus de crédits.' } }), { status: 402 });
       }
       return new Response(JSON.stringify(url.endsWith('/reserve') ? { reservationId: 'res-1', credits: corps.credits } : { ok: true }), { status: 200 });
     }) as unknown as typeof fetch;
-    const fac = facturationSite('https://site.test', () => 'nxk_cle', f);
+    const fac = facturationSite('https://site.test', () => 'nxk_cle', f, () => jetonService);
     expect(await fac.reserver({ idempotence: 'k1', credits: 43, libelle: 'Nexora Creative · vidéo' })).toEqual({ ok: true, reservationId: 'res-1', credits: 43 });
     expect(await fac.reserver({ idempotence: 'k2', credits: 5000, libelle: 'x' })).toEqual({ ok: false, message: 'Il ne vous reste plus de crédits.' });
     await fac.valider('res-1', 43);
@@ -53,11 +72,12 @@ describe('API de crédits du site Nexora', () => {
       'https://site.test/api/creative/credits/settle', 'https://site.test/api/creative/credits/release',
     ]);
     expect(appels.every((a) => a.auth === 'Bearer nxk_cle')).toBe(true);
+    expect(appels.every((a) => a.service === jetonService)).toBe(true);
     expect(appels[0].corps).toEqual({ idempotencyKey: 'k1', credits: 43, label: 'Nexora Creative · vidéo' });
   });
 });
 
-describe('Relief : devis des options', () => {
+describe('Nexora Mesh : devis des options', () => {
   it('plusieurs vues = temps mesuré sur les GPU Turing ; qualité > aperçu', async () => {
     const { secondesGpuEstimees } = await import('./credits.js');
     expect(secondesGpuEstimees({ kind: 'object', quality: 'draft', vues: { back: {} } })).toBe(200);

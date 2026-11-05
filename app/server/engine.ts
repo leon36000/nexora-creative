@@ -35,6 +35,8 @@ export interface MoteurGpu { id: string; nom: string; comfyUrl: string; baseUrl:
   secondes?: Record<string, number>;
   /** Serveur de détourage vidéo (outils/detourage/serveur.py) de cette machine ; les recettes « detourage-rapide » et « detourage-pro » le désignent. */
   detourageUrl?: string;
+  /** Jeton partagé du serveur de détourage (NEXORA_DETOURAGE_JETON pour le principal) ; jamais journalisé ni renvoyé. */
+  detourageJeton?: string;
   /** Clé d'un moteur cloud (jamais journalisée). */ cle?: string }
 
 /** Secondes par recette : un objet JSON (texte ou déjà lu) de nombres positifs ; le reste est ignoré. */
@@ -58,6 +60,7 @@ function lireMoteurs(): MoteurGpu[] {
     recettes: (process.env.NEXORA_MOTEUR_RECETTES || '*').split(',').map((r) => r.trim()).filter(Boolean),
     secondes: lireSecondes(process.env.NEXORA_MOTEUR_SECONDES),
     ...(process.env.NEXORA_DETOURAGE_URL?.trim() ? { detourageUrl: process.env.NEXORA_DETOURAGE_URL.trim().replace(/\/+$/, '') } : {}),
+    ...(process.env.NEXORA_DETOURAGE_JETON?.trim() ? { detourageJeton: process.env.NEXORA_DETOURAGE_JETON.trim() } : {}),
   };
   let autres: MoteurGpu[] = [];
   try {
@@ -70,6 +73,7 @@ function lireMoteurs(): MoteurGpu[] {
           recettes: Array.isArray(m.recettes) ? m.recettes.map(String) : ['*'],
           ...(lireSecondes(m.secondes) ? { secondes: lireSecondes(m.secondes) } : {}),
           ...(typeof m.detourageUrl === 'string' && /^https?:\/\//.test(m.detourageUrl) ? { detourageUrl: m.detourageUrl.replace(/\/+$/, '') } : {}),
+          ...(typeof m.detourageJeton === 'string' && m.detourageJeton.trim() ? { detourageJeton: m.detourageJeton.trim() } : {}),
         }));
     }
   } catch (e) {

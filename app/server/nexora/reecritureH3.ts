@@ -9,12 +9,19 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { type ClientLlm, lireJson, type MessageLlm } from './llm.js';
 import { instructionH3, type ModeH3, validerPromptH3 } from './promptH3.js';
-import { type FicheRealisation, realiser } from './realisateur.js';
+import { type FicheRealisation, realiser, MARQUES } from './realisateur.js';
+import { convertirEnPromptRef, type SujetRef } from './personnages.js';
+import {
+  NEGATIF_LIVE_ACTION, REGLES_ACTION, REGLES_LIVE_ACTION, STYLE_LIVE_ACTION, STYLE_NEUTRE,
+  estSpatial, nettoyerRepli, requiertPhotographie, verifierRecetteLiveAction, verifierVaisseauxOriginaux,
+} from './liveAction.js';
 
 export interface EntreeReecriture {
   /** Ce que la personne a écrit, tel quel. */
   intention: string;
   mode: ModeH3;
+  references?: { sujets: SujetRef[]; composition?: number };
+  langueClient?: 'fr' | 'en';
   dureeS: number;
   /** Répliques à faire dire, recopiées mot pour mot. */
   dialogues?: { texte: string; langue: string; locuteur?: string }[];
@@ -54,8 +61,11 @@ function consignesSysteme(): string {
     'keep every subject the user named exactly as named (a spaceship stays a spaceship, never an airship), and never add brands, franchises or trademarked characters.',
     'Answer with a JSON object {"prompt": "<the final prompt>"} and nothing else.',
     '',
-    '=== OFFICIAL GUIDE ===',
+    REGLES_ACTION,
+    REGLES_LIVE_ACTION,
+    '=== OFFICIAL GUIDE (preserve the user’s requested visual medium; apply the conditional photo recipe only where it says to) ===',
     guideOfficiel(),
+    'For REF2VA use the six full-reference sections: subject_definitions, summary, retention_analysis, detailed_description, overall_soundscape, non_diegetic_music. Define the supplied subjects and pictures consistently; keep photography style before [Shot 1].',
   ].join('\n');
 }
 
@@ -64,6 +74,7 @@ function demande(e: EntreeReecriture): string {
     {
       intention_utilisateur: e.intention,
       tache: e.mode.toUpperCase(),
+      references: e.references,
       duree_secondes: Number(e.dureeS.toFixed(2)),
       ligne_instruction_obligatoire: instructionH3({ mode: e.mode, dureeS: e.dureeS, dernierPlan: 1 }) || null,
       repliques_mot_pour_mot: e.dialogues ?? [],
@@ -76,15 +87,26 @@ function demande(e: EntreeReecriture): string {
 
 /** Prompt minimal, toujours conforme, utilisé quand le LLM est absent ou n'arrive pas à produire un prompt valide. */
 export function promptDeRepli(e: EntreeReecriture): string {
+  const photo = requiertPhotographie(undefined, e.intention, e.consignes);
   const repliques = (e.dialogues ?? [])
     .map((d, i) => ` A character (S${i + 1}) says: <d>[${d.langue}] ${d.texte.trim()}</d>`)
     .join('');
-  const consignes = e.consignes?.length ? ` ${e.consignes.join(' ')}` : '';
-  const corps = `integrated_multimodal_description: [Shot 1] Cinematic. ${e.intention.trim()}${consignes}${repliques}
+  const intention = nettoyerRepli(e.intention, photo);
+  const consignes = e.consignes?.length ? ` ${nettoyerRepli(e.consignes.join(' '), photo)}` : '';
+  const style = photo ? `${STYLE_LIVE_ACTION}. ` : '';
+  const recette = photo
+    ? `A medium shot on a 50mm lens keeps the main subject large in frame as the action begins, changes, then resolves. Daylight reveals the subject’s true material and surface texture; one deliberate camera move follows its continuous physical motion.`
+    : 'Preserve the requested visual medium and make the action unfold clearly over time.';
+  const espace = photo && estSpatial(e.intention)
+    ? ` Hard direct sunlight and deep black shadows define real space exposure. Spacecraft keep an original purpose-built design.${/\b(earth|terre)\b/i.test(e.intention) ? ' Real Earth retains its cloud systems and correct curved blue limb.' : ''}`
+    : '';
+  const negatif = photo ? ` ${NEGATIF_LIVE_ACTION}` : '';
+  const corps = `integrated_multimodal_description: [Shot 1] ${style}${intention}${consignes}${repliques} ${recette}${espace}${negatif}
 
 overall_soundscape: Natural ambient sound matching the scene.
 
 non_diegetic_music: N/A`;
+  if (e.mode === 'ref2va') return convertirEnPromptRef(corps, e.references?.sujets ?? [], { composition: e.references?.composition, style: photo ? STYLE_LIVE_ACTION : STYLE_NEUTRE });
   const instruction = instructionH3({ mode: e.mode, dureeS: e.dureeS, dernierPlan: 1 });
   return instruction ? `${instruction}\n\n${corps}` : corps;
 }
@@ -128,7 +150,7 @@ export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, max
 
 /** Réécrivain classique (avant le 04/11/2026) : guide officiel complet en consignes, deux réparations, repli. */
 export async function reecrireH3Classique(e: EntreeReecriture, llm: ClientLlm | null, maxTentatives = 3): Promise<ResultatReecriture> {
-  const ctx = { mode: e.mode, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
+  const ctx = { mode: e.mode, references: e.references, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
   let erreurs: string[] = ['aucun LLM configuré'];
   let tentatives = 0;
   if (llm) {
@@ -145,6 +167,9 @@ export async function reecrireH3Classique(e: EntreeReecriture, llm: ClientLlm | 
         erreurs = [
           ...validerPromptH3(prompt, ctx),
           ...remarquesParasites(prompt),
+          ...verifierRecetteLiveAction(prompt, e.intention, undefined, e.consignes),
+          ...verifierVaisseauxOriginaux(prompt, e.intention),
+          ...(prompt.replace(/<d>[\s\S]*?<\/d>/g, '').match(MARQUES) ? ['replace protected names with original generic equivalents'] : []),
           ...texteEcranNonDemande(prompt, e.intention).map((t) => `on-screen text "${t}" was not requested by the user: remove it`),
         ];
         messages.push({ role: 'assistant', content: brut });

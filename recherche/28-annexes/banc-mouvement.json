@@ -1,0 +1,102 @@
+{
+ "mouvement-rapide-gros-plan": {
+  "sam": "sam3.1",
+  "segments": 2,
+  "images": 25,
+  "occlusions": [
+   [
+    15,
+    24
+   ]
+  ],
+  "visibles": 15,
+  "coupures": [
+   15
+  ],
+  "plans_sans_clic": [
+   [
+    15,
+    24
+   ]
+  ],
+  "scintillement": {
+   "avant": 0.03004,
+   "apres": 0.01933,
+   "gain": 0.357,
+   "paires": 14
+  },
+  "controle": {
+   "alpha_png": {
+    "images": 25,
+    "bits": 16,
+    "type": "gris",
+    "alpha": "droit (non prémultiplié)"
+   },
+   "rgba_png": {
+    "images": 25,
+    "bits": 16,
+    "type": "RGBA",
+    "alpha": "droit (non prémultiplié), avant-plan estimé"
+   },
+   "exr": {
+    "images": 25,
+    "bits": [
+     16
+    ],
+    "canaux": [
+     "A",
+     "B",
+     "G",
+     "R"
+    ],
+    "alpha": "premultiplied",
+    "compression": "ZIP16",
+    "espace": "linéaire",
+    "couleur_inferieure_alpha": true
+   },
+   "detourage-prores4444.mov": {
+    "codec_name": "prores",
+    "width": 1280,
+    "height": 720,
+    "pix_fmt": "yuva444p12le",
+    "nb_frames": "25"
+   },
+   "detourage-alpha.webm": {
+    "codec_name": "vp9",
+    "width": 1280,
+    "height": 720,
+    "pix_fmt": "yuv420p"
+   }
+  },
+  "temps_etapes_s": {
+   "extraction": 0.27,
+   "suivi": 4.51,
+   "matting": 2.3,
+   "stabilisation_et_images": 5.87,
+   "encodage": 2.65
+  },
+  "temps_total_s": 15.7,
+  "ram_pic_go": 3.17,
+  "gpu": {
+   "appareil": "cuda",
+   "dtype": "float16",
+   "sam": [
+    "sam3.1"
+   ],
+   "matting": [
+    "vitmatte-base"
+   ],
+   "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+   "vram_pic_go": 2.32,
+   "memoire_gpu_libre_go": 5.6,
+   "memoire_gpu_totale_go": 8.2
+  },
+  "disque_travail_go": 0.009,
+  "disque_sorties_go": 0.039,
+  "mur_s": 16.0,
+  "vram_smi_pic_mo": 2738,
+  "etat": "termine",
+  "message": "terminé",
+  "id": "banc-lapin-pres-1793783054"
+ }
+}

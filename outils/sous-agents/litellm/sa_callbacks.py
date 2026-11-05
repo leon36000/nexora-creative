@@ -20,6 +20,14 @@ def _write(rec):
 
 
 class SaLogger(CustomLogger):
+    async def async_pre_call_hook(self, user_api_key_dict, cache, data, call_type):
+        # L'effort de raisonnement et le point de terminaison sont fixés par config.yaml (extra_body) : on retire ceux que
+        # le client (claude) ajoute, sinon OpenRouter reçoit deux valeurs contradictoires (reasoning_effort et reasoning.effort).
+        if isinstance(data, dict) and str(data.get("model", "")).startswith("eco-"):
+            for k in ("reasoning_effort", "reasoning", "thinking", "output_config"):
+                data.pop(k, None)
+        return data
+
     def _rec(self, kwargs, resp, start, end, ok):
         usage = {}
         try:

@@ -1,0 +1,50 @@
+# ComfyUI du palier pro (LTX-2.5 22B distilled nvfp4 + IC-LoRA Alpha-Gen) sur la RTX 5080 de pc3.
+# replicas: 0 par défaut : sous k8s la 5080 est attribuée en entier, donc le pro et le rapide (pod `detourage`) ne
+# tournent pas en même temps sur pc3 ; cible : rapide sur la V100, pro sur la 5080 (ou une carte de 32 Go).
+# Joint dans le groupe seulement (Service ClusterIP, pas de hostPort) ; graphes et pilotage : outils/detourage/pro/.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comfyui-pro
+  namespace: nexora
+  labels: {app: comfyui-pro, nexora.ai/produit: creative}
+spec:
+  replicas: 0
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: comfyui-pro}}
+  template:
+    metadata:
+      labels: {app: comfyui-pro}
+    spec:
+      nodeSelector: {kubernetes.io/hostname: pc3}
+      imagePullSecrets: [{name: registre-tirage}]
+      securityContext: {runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, fsGroup: 1000}
+      containers:
+        - name: comfyui
+          image: 127.0.0.1:5000/nexora/detourage-pro:__TAG__
+          args: [--reserve-vram, "0.6"]
+          ports: [{name: http, containerPort: 8188}]
+          resources:
+            requests: {cpu: "2", memory: 8Gi, nvidia.com/gpu: 1}
+            limits: {memory: 22Gi, nvidia.com/gpu: 1}
+          securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+          readinessProbe: {httpGet: {path: /system_stats, port: 8188}, periodSeconds: 10}
+          volumeMounts:
+            - {name: modeles, mountPath: /modeles, readOnly: true}
+            - {name: travail, mountPath: /opt/ComfyUI/output, subPath: output}
+            - {name: travail, mountPath: /opt/ComfyUI/input, subPath: input}
+            - {name: travail, mountPath: /opt/ComfyUI/temp, subPath: temp}
+            - {name: travail, mountPath: /opt/ComfyUI/user, subPath: user}
+      volumes:
+        - name: modeles
+          hostPath: {path: /home/pc3/nexora-detourage/modeles, type: Directory}
+        - name: travail
+          hostPath: {path: /home/pc3/nexora-detourage/k8s/travaux-pro, type: Directory}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: comfyui-pro, namespace: nexora, labels: {app: comfyui-pro}}
+spec:
+  type: ClusterIP
+  selector: {app: comfyui-pro}
+  ports: [{name: http, port: 8188, targetPort: 8188}]

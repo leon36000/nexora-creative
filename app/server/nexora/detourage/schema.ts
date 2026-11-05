@@ -26,7 +26,7 @@ export const SortiesSchema = z.object({
 }).default({ png16: true, rgba16: true, exr: true, prores: true, webm: true, matte: true, apercu: true });
 
 export const ParamsSchema = z.object({
-  /** « rapide » : SAM 2.1 + ViTMatte (mesuré). « pro » : LTX-2.5 Alpha-Gen, non disponible tant que ses poids ne sont pas installés. */
+  /** « rapide » : SAM 3.1 + ViTMatte (mesuré). « pro » : LTX-2.5 Alpha-Gen, pas encore intégré à Creative. */
   palier: z.enum(['rapide', 'pro']).default('rapide'),
   /** « suivi » : aperçu du suivi seul (rapide), « complet » : matting, stabilisation et exports. */
   mode: z.enum(['suivi', 'complet']).default('complet'),
@@ -36,8 +36,12 @@ export const ParamsSchema = z.object({
   largeurMax: z.number().int().min(256).max(3840).default(1920),
   segment: z.object({ taille: z.number().int().min(8).max(240).default(96), recouvrement: z.number().int().min(2).max(48).default(12) })
     .default({ taille: 96, recouvrement: 12 }).refine((s) => s.recouvrement < s.taille, { message: 'Le recouvrement doit être plus petit que le segment.' }),
-  sam: z.enum(['large', 'small']).default('large'),
-  matting: z.enum(['vitmatte-small', 'vitmatte-base', 'aucun']).default('vitmatte-small'),
+  /** SAM 3.1 seulement (SAM 2.1 est retiré) : la sélection se fait par clics, boîte ou mot. */
+  sam: z.enum(['sam3.1']).default('sam3.1'),
+  /** ViTMatte base + bande de 5 % : meilleur réglage mesuré sur vérité terrain (recherche/22 §9, fourrure et fumée). */
+  matting: z.enum(['vitmatte-small', 'vitmatte-base', 'aucun']).default('vitmatte-base'),
+  /** Largeur de la zone incertaine du trimap, en fraction du petit côté (0,015 = ancien réglage). */
+  bande: z.number().min(0.005).max(0.1).default(0.05),
   lissage: z.number().min(0).max(1.5).default(1),
   sorties: SortiesSchema,
   composite: FondSchema.nullable().default(null),
@@ -50,7 +54,7 @@ export function versParamsMoteur(p: ParamsDetourage): Record<string, unknown> {
   return {
     source: 'source.mp4', largeur_max: p.largeurMax, debut_s: p.debutS, duree_s: p.dureeS,
     invites: p.invites.map((i) => ({ image: i.image, points: i.points, boite: i.boite ?? null })),
-    segment: p.segment, sam: p.sam, matting: p.matting, lissage: p.lissage,
+    segment: p.segment, sam: p.sam, matting: p.matting, bande: p.bande, lissage: p.lissage,
     etapes: p.mode === 'suivi' ? ['suivi'] : ['suivi', 'matting', 'sorties'],
     sorties: p.sorties, composite: p.composite, conserver_travail: true,
   };

@@ -1,0 +1,9 @@
+# Poids montés en /modeles (volume) : arborescence officielle des dépôts Hugging Face, sous pro/<dépôt>/.
+detourage_pro:
+  base_path: /modeles/pro
+  diffusion_models: Lightricks/LTX-2.5/diffusion_models
+  text_encoders: Lightricks/LTX-2.5/text_encoders
+  vae: Lightricks/LTX-2.5/vae
+  loras: Lightricks/LTX-2.5-22b-IC-LoRA-Alpha-Gen
+  checkpoints: Comfy-Org/sam3.1/checkpoints
+  latent_upscale_models: Lightricks/LTX-2.5/latent_upscale_models

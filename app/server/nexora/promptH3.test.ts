@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { convertirEnPromptRef } from './personnages.js';
 import { instructionH3, validerPromptH3 } from './promptH3.js';
 
 const corps = `integrated_multimodal_description: [Shot 1] Live-action, cinematic, a wide shot frames a red car on a coastal road. The camera performs an arc shot at slow speed around the car. [Shot 2] At 00:03.500, the camera cuts to a close-up of the headlight as the woman (S1) says: <d>[French] On y va.</d>
@@ -53,5 +54,25 @@ describe('validateur de prompt H3 (guide officiel MiniMax)', () => {
   it('refuse un champ inventé hors du guide (ex. on_screen_text)', () => {
     const avec = corps.replace('non_diegetic_music: N/A', 'on_screen_text: At 00:04.200, golden text.\n\nnon_diegetic_music: N/A');
     expect(validerPromptH3(avec, { mode: 't2va', dureeS: 5.17 }).join(' ')).toMatch(/on_screen_text/);
+  });
+});
+
+
+describe('dialecte Ref2VA compilé, six sections et chronologie', () => {
+  const references = { sujets: [{ nom: 'Mara', apparence: 'red hair', images: 2 }], composition: 1 };
+  const ref = convertirEnPromptRef(corps.replace('a wide shot frames a red car', 'a wide shot frames Mara beside a red car'), references.sujets, { composition: 1, style: 'Live-action, cinematic' });
+  const ctx = { mode: 'ref2va' as const, dureeS: 5.17, dialogues: ['On y va.'], references };
+  it('valide les six champs, les étiquettes, les horodatages et la réplique exacte', () => {
+    expect(validerPromptH3(ref, ctx)).toEqual([]);
+    expect(ref).not.toContain('integrated_multimodal_description:');
+    expect(ref).toContain('<Picture 3>');
+    expect(instructionH3({ mode: 'ref2va', dureeS: 5.17, dernierPlan: 2 })).toBe('');
+  });
+  it('refuse une image inexistante, un ordre erroné, un plan hors durée ou un dialogue modifié', () => {
+    expect(validerPromptH3(ref.replaceAll('<Picture 3>', '<Picture 4>'), ctx).join(' ')).toMatch(/dépasse/);
+    expect(validerPromptH3(ref.replace('summary:', 'non_diegetic_music:'), ctx).join(' ')).toMatch(/summary/);
+    expect(validerPromptH3(ref.replace('00:03.500', '00:09.000'), ctx).join(' ')).toMatch(/durée/);
+    expect(validerPromptH3(ref.replace('On y va.', 'Allons-y.'), ctx).join(' ')).toMatch(/réplique/);
+    expect(validerPromptH3(ref.replace('retention_analysis:', 'invented:'), ctx).join(' ')).toMatch(/invented/);
   });
 });

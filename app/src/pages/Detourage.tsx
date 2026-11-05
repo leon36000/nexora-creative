@@ -1,11 +1,12 @@
 /**
- * Détourage vidéo pro : importer une vidéo, cliquer le sujet (clics positifs et négatifs, sur plusieurs images),
+ * Matte : importer une vidéo, cliquer le sujet (clics positifs et négatifs, sur plusieurs images),
  * voir le masque en direct, choisir fond et exports, lancer un travail asynchrone (progression, annulation, reprise),
  * puis prévisualiser (damier, matte, nouveau fond) et télécharger (PNG 16 bits, EXR, ProRes 4444, WebM alpha).
  * Rapport et mesures : recherche/22-detourage-video-pro.md.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from '../store';
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 
 const P = '/api/nexora/detourage';
 type Pt = [number, number, 0 | 1];
@@ -51,6 +52,9 @@ export default function Detourage() {
   const [fps, setFps] = useState(24);
   const [t, setT] = useState(0); // position (secondes)
   const [clics, setClics] = useState<Record<number, Pt[]>>({}); // image -> points
+  const [boites, setBoites] = useState<Record<number, number[]>>({}); // image -> boîte normalisée [x0, y0, x1, y1]
+  const [mot, setMot] = useState(''); // mot en anglais pour la sélection par texte (SAM 3.1)
+  const [trouves, setTrouves] = useState<{ image: number; secondes: number; objets: { masqueB64: string; score: number; boite: number[]; aire: number }[] } | null>(null);
   const [outil, setOutil] = useState<'ajouter' | 'retirer'>('ajouter');
   const [masque, setMasque] = useState<{ image: number; src: string; aire: number; s: number } | null>(null);
   const [occupe, setOccupe] = useState<string | null>(null);
@@ -83,7 +87,7 @@ export default function Detourage() {
       setOccupe('Création du travail…');
       const nouveau = await appel<Travail>('/travaux', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: f.name.replace(/\.[^.]+$/, '') }) });
       setUrlLocale(URL.createObjectURL(f));
-      setClics({}); setMasque(null); setPlage(null); setT(0);
+      setClics({}); setBoites({}); setTrouves(null); setMasque(null); setPlage(null); setT(0);
       setEnvoi(0);
       const r = await envoyer(`${P}/travaux/${nouveau.id}/source`, f, setEnvoi);
       setTravail(r); setEnvoi(null);
@@ -101,12 +105,14 @@ export default function Detourage() {
     return c.toDataURL('image/jpeg', 0.92).split(',')[1];
   }, []);
 
-  const calculer = useCallback(async (pts: Pt[]) => {
-    const b64 = capturer(); if (!b64 || !pts.length) { setMasque(null); return; }
+  const calculer = useCallback(async (pts: Pt[], boite?: number[] | null) => {
+    const imageDemandee = Math.round((video.current?.currentTime ?? 0) * fps);
+    const b64 = capturer(); if (!b64 || (!pts.length && !boite)) { setMasque(null); return; }
     const mon = ++jeton.current;
     try {
-      const r = await appel<{ masqueB64: string; aire: number; secondes: number }>('/apercu', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageB64: b64, points: pts }) });
-      if (mon === jeton.current) setMasque({ image: Math.round((video.current?.currentTime ?? 0) * fps), src: dateurMasque(r.masqueB64), aire: r.aire, s: r.secondes });
+      const r = await appel<{ masqueB64: string; aire: number; secondes: number }>('/apercu', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageB64: b64, points: pts, ...(boite ? { boite } : {}) }) });
+      const imageActuelle = Math.round((video.current?.currentTime ?? 0) * fps);
+      if (mon === jeton.current && imageDemandee === imageActuelle) setMasque({ image: imageDemandee, src: dateurMasque(r.masqueB64), aire: r.aire, s: r.secondes });
     } catch (e) { if (mon === jeton.current) toast(e instanceof Error ? e.message : 'aperçu impossible', true); }
   }, [capturer, fps]);
 
@@ -118,16 +124,45 @@ export default function Detourage() {
     const pts: Pt[] = [...points, [Math.min(1, Math.max(0, x)), Math.min(1, Math.max(0, y)), negatif ? 0 : 1]];
     setClics({ ...clics, [image]: pts });
     video.current?.pause();
-    void calculer(pts);
+    void calculer(pts, boites[image]);
   }
-  function annulerClic() { const pts = points.slice(0, -1); setClics({ ...clics, [image]: pts }); void calculer(pts); }
-  function effacer() { const c = { ...clics }; delete c[image]; setClics(c); setMasque(null); }
-  useEffect(() => { setMasque(null); if (points.length) void calculer(points); /* image changée : recalcul */ // eslint-disable-next-line react-hooks/exhaustive-deps
+  function annulerClic() { const pts = points.slice(0, -1); setClics({ ...clics, [image]: pts }); void calculer(pts, boites[image]); }
+  function effacer() {
+    const c = { ...clics }; delete c[image]; setClics(c);
+    const b = { ...boites }; delete b[image]; setBoites(b);
+    setTrouves(null); setMasque(null);
+  }
+  useEffect(() => { jeton.current++; setMasque(null); if (points.length || boites[image]) void calculer(points, boites[image]); /* image changée : recalcul */ // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image]);
+
+  /** Sélection par un mot (en anglais) : SAM 3.1 renvoie les objets trouvés, à choisir d'un clic. */
+  async function chercherTexte() {
+    const texte = mot.trim(); if (!texte || !travail || envoi !== null) return;
+    const b64 = capturer(); if (!b64) return;
+    const mon = ++jeton.current;
+    video.current?.pause();
+    try {
+      setOccupe('Recherche…');
+      const r = await appel<{ objets: { masqueB64: string; score: number; boite: number[]; aire: number }[]; secondes: number }>('/texte', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageB64: b64, texte }) });
+      if (mon !== jeton.current) return;
+      setTrouves({ image, secondes: r.secondes, objets: r.objets });
+      if (!r.objets.length) toast(`Rien trouvé pour « ${texte} » : essaie un autre mot ou clique le sujet.`, true);
+    } catch (e) { if (mon === jeton.current) toast(e instanceof Error ? e.message : 'recherche impossible', true); } finally { setOccupe(null); }
+  }
+
+  /** Un objet trouvé devient la graine de l'image courante : sa boîte, ses points éventuels, et son masque en aperçu. */
+  function choisirObjet(o: { masqueB64: string; score: number; boite: number[]; aire: number }) {
+    if (!Array.isArray(o.boite) || o.boite.length !== 4) return;
+    const boite = o.boite.map(Number);
+    setBoites({ ...boites, [image]: boite });
+    setTrouves(null);
+    setMasque({ image, src: dateurMasque(o.masqueB64), aire: o.aire, s: 0 });
+    jeton.current++; // un aperçu en cours ne doit pas écraser ce masque
+  }
 
   const nbClics = useMemo(() => Object.values(clics).reduce((n, p) => n + p.length, 0), [clics]);
   const debut = plage?.[0] ?? 0;
-  const imagesCles = Object.keys(clics).map(Number).filter((i) => (clics[i]?.length ?? 0) > 0);
+  const imagesCles = useMemo(() => [...new Set([...Object.keys(clics).map(Number).filter((i) => (clics[i]?.length ?? 0) > 0), ...Object.keys(boites).map(Number)])].sort((a, b) => a - b), [clics, boites]);
 
   async function deposerFond(f: File) {
     if (!travail) return;
@@ -140,7 +175,9 @@ export default function Detourage() {
 
   async function lancer() {
     if (!travail) return;
-    const invites = imagesCles.filter((i) => i >= Math.round(debut * fps)).map((i) => ({ image: i - Math.round(debut * fps), points: clics[i] }));
+    const invites = imagesCles.filter((i) => i >= Math.round(debut * fps)).map((i) => ({
+      image: i - Math.round(debut * fps), points: clics[i] ?? [], ...(boites[i] ? { boite: boites[i] } : {}),
+    }));
     if (!invites.length) { toast('Clique d’abord sur le sujet (dans la plage choisie)', true); return; }
     const composite = fond === 'couleur' ? { type: 'couleur', valeur: couleur } : fond === 'flou' ? { type: 'flou' } : fond === 'image' && fichierFond ? { type: /\.(mp4|mov|webm)$/.test(fichierFond) ? 'video' : 'image', fichier: fichierFond } : null;
     try {
@@ -154,7 +191,7 @@ export default function Detourage() {
   async function supprimer() {
     if (!travail || !confirm('Supprimer ce détourage et tous ses fichiers temporaires ?')) return;
     await appel(`/travaux/${travail.id}`, { method: 'DELETE' }).catch((e) => toast(e.message, true));
-    setTravail(null); setUrlLocale(null); setClics({}); setMasque(null); void appel<Travail[]>('/travaux').then(setRecents);
+    setTravail(null); setUrlLocale(null); setClics({}); setBoites({}); setTrouves(null); setMasque(null); void appel<Travail[]>('/travaux').then(setRecents);
   }
 
   const fini = travail?.etat === 'termine';
@@ -164,12 +201,20 @@ export default function Detourage() {
   const m = travail?.mesures;
   const lien = (nom: string) => `${P}/travaux/${travail!.id}/sorties/${nom}`;
   const vues = [['apercu-echecs.mp4', 'Damier'], ['matte.mp4', 'Matte'], ['composite.mp4', 'Nouveau fond'], ['suivi.mp4', 'Suivi']].filter(([n]) => fich[n]) as [typeof vue, string][];
+  /** Ligne d’aide sous l’image : masque calculé, objets trouvés par le mot, ou invitation à cliquer. */
+  const aideMasque = masque && masque.image === image
+    ? `Masque : ${(masque.aire * 100).toFixed(1)} % de l’image${masque.s ? `, calculé en ${masque.s.toFixed(2)} s` : ''}.`
+    : trouves && trouves.image === image && trouves.objets.length
+      ? `${trouves.objets.length} objet${trouves.objets.length > 1 ? 's' : ''} pour « ${mot.trim()} » (${trouves.secondes.toFixed(2)} s) : clique le bon rectangle.`
+      : trouves && trouves.image === image
+        ? `Rien trouvé pour « ${mot.trim()} » : essaie un autre mot ou clique le sujet.`
+        : 'Tape un mot puis « Chercher », ou clique sur le sujet, pour voir son masque.';
 
   return (
     <div className="rail-layout" style={{ gridTemplateColumns: '380px 1fr' }}>
       <aside className="rail">
-        <div className="display" style={{ fontSize: 26 }}>Détourage pro</div>
-        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Isole une personne, un animal ou un objet dans une vidéo : cheveux, fourrure, bords nets, sans scintillement. Sortie alpha 16 bits et EXR.</div>
+        <div className="display" style={{ fontSize: 26 }}>{NEXORA_PRODUCT_NAMES.matte}</div>
+        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Détoure un sujet dans une vidéo, puis garde la transparence ou choisis un nouveau fond.</div>
 
         {cap && !cap.rapide.disponible && <div className="rail-section" style={{ color: 'var(--bad)', fontSize: 12.5 }}>Aucun moteur de détourage en ligne. Lance le serveur de détourage sur la machine GPU (outils/detourage).</div>}
 
@@ -181,10 +226,15 @@ export default function Detourage() {
         </div>
 
         <div className="rail-section">
-          <div className="label">2 · Sujet {nbClics ? `(${nbClics} clic${nbClics > 1 ? 's' : ''}, ${imagesCles.length} image${imagesCles.length > 1 ? 's' : ''})` : ''}</div>
+          <div className="label">2 · Sujet {imagesCles.length ? `(${[nbClics ? `${nbClics} clic${nbClics > 1 ? 's' : ''}` : '', `${imagesCles.length} image${imagesCles.length > 1 ? 's' : ''} clé${imagesCles.length > 1 ? 's' : ''}`].filter(Boolean).join(', ')})` : ''}</div>
+          <label className="dim" style={{ fontSize: 12 }} htmlFor="mot-detourage">Désigner par un mot (en anglais)</label>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input id="mot-detourage" type="text" value={mot} placeholder="person, dog, red car…" onChange={(e) => setMot(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void chercherTexte(); }} style={{ flex: 1, minWidth: 0 }} disabled={!travail || envoi !== null} />
+            <button className="btn sm" onClick={() => void chercherTexte()} disabled={!mot.trim() || !!occupe || !travail || envoi !== null}>Chercher</button>
+          </div>
           <div className="seg"><button className={outil === 'ajouter' ? 'on' : ''} onClick={() => setOutil('ajouter')}>+ Ajouter</button><button className={outil === 'retirer' ? 'on' : ''} onClick={() => setOutil('retirer')}>− Retirer</button></div>
-          <div className="dim" style={{ fontSize: 12 }}>Clique le sujet ; Maj ou Alt + clic retire. Change d’image et ajoute un clic quand le sujet change de forme, passe derrière un objet ou ressort.</div>
-          <div style={{ display: 'flex', gap: 6 }}><button className="btn sm" onClick={annulerClic} disabled={!points.length}>Annuler le dernier</button><button className="btn sm" onClick={effacer} disabled={!points.length}>Effacer cette image</button></div>
+          <div className="dim" style={{ fontSize: 12 }}>Tape un mot (person, dog, red car…) puis « Chercher » : clique le rectangle du sujet trouvé. Sinon, clique le sujet ; Maj ou Alt + clic retire. Change d’image et ajoute un clic quand le sujet change de forme, passe derrière un objet ou ressort.</div>
+          <div style={{ display: 'flex', gap: 6 }}><button className="btn sm" onClick={annulerClic} disabled={!points.length}>Annuler le dernier</button><button className="btn sm" onClick={effacer} disabled={!points.length && !boites[image]}>Effacer cette image</button></div>
           {duree > 0 && <>
             <div className="label" style={{ marginTop: 6 }}>Plage traitée</div>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -216,7 +266,7 @@ export default function Detourage() {
         <div className="rail-section">
           {enCours
             ? <><progress value={travail!.progression} max={1} style={{ width: '100%' }} /><div className="dim" style={{ fontSize: 12.5 }}>{travail!.message || travail!.etape} · {Math.round(travail!.progression * 100)} %</div><button className="btn sm" onClick={() => action('annuler')}>Annuler</button></>
-            : <button className="btn sm accent" onClick={lancer} disabled={!travail || !nbClics || !!occupe || envoi !== null}>{occupe ?? (mode === 'suivi' ? 'Lancer l’aperçu du suivi' : 'Lancer le détourage')}</button>}
+            : <button className="btn sm accent" onClick={lancer} disabled={!travail || !imagesCles.length || !!occupe || envoi !== null}>{occupe ?? (mode === 'suivi' ? 'Lancer l’aperçu du suivi' : 'Lancer le détourage')}</button>}
           {travail && ['interrompu', 'erreur', 'annule'].includes(travail.etat) && <><div style={{ color: 'var(--bad)', fontSize: 12.5 }}>{travail.message}</div><button className="btn sm" onClick={() => action('reprendre')}>Reprendre (le calcul déjà fait est conservé)</button></>}
           {travail && !enCours && <button className="btn sm" onClick={supprimer}>Supprimer le travail et ses fichiers</button>}
         </div>
@@ -232,13 +282,20 @@ export default function Detourage() {
                 onLoadedMetadata={(e) => setDuree((e.target as HTMLVideoElement).duration)} onTimeUpdate={(e) => setT((e.target as HTMLVideoElement).currentTime)} />
               {masque && masque.image === image && <div aria-hidden style={{ position: 'absolute', inset: 0, background: '#ff3b5c', opacity: 0.5, pointerEvents: 'none', maskImage: `url(${masque.src})`, WebkitMaskImage: `url(${masque.src})`, maskMode: 'luminance', maskSize: '100% 100%', WebkitMaskSize: '100% 100%' } as React.CSSProperties} />}
               {points.map(([x, y, l], i) => <span key={i} style={{ position: 'absolute', left: `${x * 100}%`, top: `${y * 100}%`, width: 12, height: 12, margin: -6, borderRadius: 6, background: l ? '#35e08a' : '#ff4d5e', border: '2px solid #fff', pointerEvents: 'none' }} />)}
+              {boites[image] && <div aria-hidden style={{ position: 'absolute', left: `${boites[image][0] * 100}%`, top: `${boites[image][1] * 100}%`, width: `${(boites[image][2] - boites[image][0]) * 100}%`, height: `${(boites[image][3] - boites[image][1]) * 100}%`, border: '2px dashed #35e08a', borderRadius: 4, pointerEvents: 'none' }} />}
+              {trouves && trouves.image === image && trouves.objets.map((o, i) => (
+                <div key={i} title={`Choisir cet objet (score ${o.score.toFixed(2)})`} onClick={(e) => { e.stopPropagation(); choisirObjet(o); }}
+                  style={{ position: 'absolute', left: `${o.boite[0] * 100}%`, top: `${o.boite[1] * 100}%`, width: `${(o.boite[2] - o.boite[0]) * 100}%`, height: `${(o.boite[3] - o.boite[1]) * 100}%`, border: '2px solid #4da3ff', borderRadius: 4, background: 'rgba(77, 163, 255, 0.12)', cursor: 'pointer' }}>
+                  <span style={{ position: 'absolute', left: 0, top: -18, fontSize: 11, lineHeight: '16px', padding: '0 4px', borderRadius: 3, background: '#4da3ff', color: '#fff', whiteSpace: 'nowrap' }}>{mot.trim()} · {o.score.toFixed(2)}</span>
+                </div>
+              ))}
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               <button className="btn sm" onClick={() => (video.current?.paused ? video.current?.play() : video.current?.pause())}>Lecture / pause</button>
               <input type="range" min={0} max={duree || 1} step={1 / fps} value={t} onChange={(e) => { if (video.current) video.current.currentTime = Number(e.target.value); }} style={{ flex: 1 }} />
               <span className="dim" style={{ fontSize: 12 }}>image {image} · {t.toFixed(2)} s</span>
             </div>
-            <div className="dim" style={{ fontSize: 12 }}>{masque && masque.image === image ? `Masque : ${(masque.aire * 100).toFixed(1)} % de l’image, calculé en ${masque.s.toFixed(2)} s.` : 'Clique sur le sujet pour voir son masque.'} {imagesCles.length ? `Images avec clics : ${imagesCles.sort((a, b) => a - b).join(', ')}.` : ''}</div>
+            <div className="dim" style={{ fontSize: 12 }}>{aideMasque} {imagesCles.length ? `Images clés : ${imagesCles.join(', ')}.` : ''}</div>
           </>
         )}
         {fini && (

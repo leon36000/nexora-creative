@@ -91,7 +91,7 @@ export class Detourage {
 
   creer(org: string, utilisateur: string, nom: string, palier = 'rapide'): TravailDetourage {
     const m = this.o.moteur(palier);
-    if (!m) throw new ErreurDetourage(palier === 'pro' ? 'Le palier pro n’a pas encore de moteur (poids LTX-2.5 non installés).' : 'Aucun moteur de détourage en ligne.', 503);
+    if (!m) throw new ErreurDetourage(palier === 'pro' ? 'Le détourage pro n’est pas encore disponible.' : 'Aucun moteur de détourage en ligne.', 503);
     const t: TravailDetourage = {
       id: randomBytes(12).toString('hex'), organisation: org, utilisateur, nom: nom.slice(0, 120) || 'Sans titre', moteurId: m.id,
       creeLe: this.now(), majLe: this.now(), etat: 'depose', etape: 'dépôt', progression: 0, message: 'En attente de la vidéo', fichiers: {},

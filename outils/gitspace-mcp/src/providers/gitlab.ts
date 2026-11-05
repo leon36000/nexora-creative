@@ -136,7 +136,7 @@ export function createGitlabProvider(baseUrl: string, token: string): GitProvide
     },
     projectList: (a) => a.group
       ? page(`${G(a)}/projects`, a, { search: a.search, include_subgroups: true, archived: a.archived }, projShape)
-      : page("/projects", a, { search: a.search, membership: a.membership ?? true, owned: a.owned, archived: a.archived ?? false, order_by: a.order_by || "last_activity_at", simple: false }, projShape),
+      : page("/projects", a, { search: a.search, membership: a.membership ?? false, owned: a.owned, archived: a.archived ?? false, order_by: a.order_by || "last_activity_at", simple: false }, projShape),
     async projectGet(a) { return projShape(await get(P(a), { statistics: true })); },
     async projectUpdate(a) {
       const body = pick(a, ["name", "description", "visibility", "default_branch", "topics"]);

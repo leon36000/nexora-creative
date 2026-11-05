@@ -462,8 +462,8 @@ export const BUNDLES: Bundle[] = [
   },
   {
     id: 'trellis2',
-    label: 'Relief (image to 3D, TRELLIS.2)',
-    purpose: 'The Relief app (3D, formerly Object) and Make 3D on any still: TRELLIS.2 builds a textured mesh (GLB, PBR base color, metallic, roughness; High adds a baked normal map and AO) from one picture, through ComfyUI built-in nodes (pinned to 0.43.2 on the GB10). BiRefNet cuts the subject out first. int8 weights (convrot), about 9 GB; the bf16 variant (10.34 GB instead of 5.25 GB) works too with NEXORA_TRELLIS_MODELE.',
+    label: 'Nexora Mesh (image to 3D, TRELLIS.2)',
+    purpose: 'The Nexora Mesh app (3D, formerly Relief and Object) and Make 3D on any still: TRELLIS.2 builds a textured mesh (GLB, PBR base color, metallic, roughness; High adds a baked normal map and AO) from one picture, through ComfyUI built-in nodes (pinned to 0.43.2 on the GB10). BiRefNet cuts the subject out first. int8 weights (convrot), about 9 GB; the bf16 variant (10.34 GB instead of 5.25 GB) works too with NEXORA_TRELLIS_MODELE.',
     license: 'TRELLIS.2 (microsoft/TRELLIS.2-4B, repackaged by Comfy-Org/TRELLIS.2): MIT, the DiT and both VAEs. BiRefNet (ZhengPeng7/BiRefNet, repackaged by Comfy-Org/BiRefNet): MIT. The DINOv3 ViT-L image encoder (facebook/dinov3, repackaged in Comfy-Org/TRELLIS.2) is under the Meta DINOv3 License: royalty-free, commercial use allowed, with acceptable-use exclusions (military and ITAR uses, reverse engineering); the Comfy repo tags it MIT, but the upstream weights carry the DINOv3 License (and Meta gates its own repo behind a manual approval).',
     optional: true,
     files: [

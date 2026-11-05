@@ -28,6 +28,7 @@ import { APP_MAX_TIER, RENDER_TIERS, appTier, tierCapNote, tiersUpTo, type Rende
 import { CAMERA_MOVES, LENS_MAX, LENS_MIN, MAX_KEYS, MAX_PROPS, MODEL_PROP_SIZE, PROP_DEFAULTS, STAGE_SECONDS, cleanStageScene, stageFrames, stageSize, stageTier, type CameraKey, type StageProp, type Vec3 } from '../src/stage.ts';
 import { BASE, api, finishFileUrl, getTake, localPath, mediaUrl, posterImage, resolveInput, settingsOf, type Asset, type Take } from './client.ts';
 import { OBJECT_DETAIL } from '../src/catalog.ts';
+import { PRODUIT_3D } from '../src/produit3d.ts';
 import { enregistrerMontage } from './montage.ts';
 
 const server = new McpServer(
@@ -889,9 +890,9 @@ server.registerTool('upscale', {
 // ---------- image to 3D ----------
 
 server.registerTool('make_3d', {
-  title: 'Make 3D (Relief)',
+  title: `Make 3D (${PRODUIT_3D})`,
   description: [
-    'Relief app (3D, TRELLIS.2, local; the former Object app, /object stays as an alias): one still becomes a textured 3D model, saved as a GLB take (PBR base color, metallic, roughness; high also bakes a normal map and AO).',
+    `${PRODUIT_3D} app (3D, TRELLIS.2, local; formerly Relief, then Object; /mesh is the address, /relief and /object stay as aliases): one still becomes a textured 3D model, saved as a GLB take (PBR base color, metallic, roughness; high also bakes a normal map and AO).`,
     'BiRefNet cuts the subject out first unless remove_background is false (then the PNG\'s own transparency is used). Works best on one subject, whole in frame, on a plain background.',
     OBJECT_DETAIL.map((d) => `quality ${d.id === 'quality' ? 'high' : d.id}: ${d.note}`).join(' '),
     'The take\'s output_path is the .glb; get_take also returns glb_url (served as model/gltf-binary), a turntable mp4 and the isolated subject. The preview image is the first turntable frame.',
@@ -1007,7 +1008,7 @@ server.registerTool('stage_render', {
     prompt: z.string().min(1).describe('What the finished shot looks like, e.g. "A woman in a long coat in a rain-soaked night alley between a wooden crate and a concrete pillar, neon on wet stone."'),
     props: z.array(z.object({
       type: z.enum(['box', 'cylinder', 'figure', 'wall', 'sphere', 'model']),
-      model_take_id: z.number().int().positive().optional().describe('For type model: the take id of a finished make_3d (Object) take'),
+      model_take_id: z.number().int().positive().optional().describe('For type model: the take id of a finished make_3d (Nexora Mesh, ex-Relief) take'),
       pos: vec3.describe('[x, base height, z] in metres; footprint centre'),
       size: vec3.optional().describe('[width, height, depth] in metres. Defaults: box 1.2x1x1.2, cylinder 0.8x2.4x0.8, figure 0.5x1.8x0.3, wall 8x3x0.25, sphere 1x1x1'),
       rot: z.number().min(-360).max(360).default(0).describe('Turn around the vertical axis, degrees'),

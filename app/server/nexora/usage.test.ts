@@ -164,7 +164,7 @@ describe('devis, réservation, règlement', () => {
   });
 });
 
-describe('juge de Relief : coût et devis', () => {
+describe('juge de Nexora Mesh : coût et devis', () => {
   it('le coût suit les jetons et les prix réglables', async () => {
     const { coutJuge3dUsd, devisJuge3d } = await import('./usage.js');
     expect(coutJuge3dUsd({ entree: 1_000_000, sortie: 0 }, {})).toBeCloseTo(0.4, 6);
