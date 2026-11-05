@@ -7,6 +7,7 @@ import numpy as np
 from fastapi import FastAPI, File, Form, UploadFile
 from faster_whisper import WhisperModel
 
+from encoder_endpoint import installer as installer_encoder
 from transcrire_endpoint import installer
 
 app = FastAPI()
@@ -24,6 +25,7 @@ def charge(nom, construire):
 
 
 installer(app, charge, LOCK, LAST)
+installer_encoder(app, LOCK)
 
 
 @app.post("/stt")
