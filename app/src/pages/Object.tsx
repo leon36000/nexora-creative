@@ -64,7 +64,9 @@ export default function ObjectPage() {
   useEffect(() => {
     if (chaineId === null) return;
     let mort = false;
+    let minuterie: ReturnType<typeof setTimeout> | undefined;
     const tour = async () => {
+      if (mort) return;
       try {
         const e = await api.objetTexteEtat(chaineId);
         if (mort) return;
@@ -72,10 +74,10 @@ export default function ObjectPage() {
         if (e.etat === 'fini' && e.objet) { setSelected(e.objet); return; }
         if (e.etat === 'echec') { toast(c.requestFailure, true); return; }
       } catch { /* réessaie au prochain tour */ }
-      if (!mort) setTimeout(() => void tour(), 2500);
+      if (!mort) minuterie = setTimeout(() => void tour(), 2500);
     };
     void tour();
-    return () => { mort = true; };
+    return () => { mort = true; clearTimeout(minuterie); };
   }, [chaineId, c]);
 
   async function creerDepuisTexte() {
