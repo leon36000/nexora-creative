@@ -212,7 +212,7 @@ export default function Detourage() {
     <div className="rail-layout" style={{ gridTemplateColumns: '380px 1fr' }}>
       <aside className="rail">
         <div className="display" style={{ fontSize: 26 }}>{NEXORA_PRODUCT_NAMES.matte}</div>
-        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Détourage vidéo avec SAM 3.1, ViTMatte et stabilisation des contours; exports alpha ou sur un nouveau fond.</div>
+        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Détoure un sujet dans une vidéo, puis garde la transparence ou choisis un nouveau fond.</div>
 
         {cap && !cap.rapide.disponible && <div className="rail-section" style={{ color: 'var(--bad)', fontSize: 12.5 }}>Aucun moteur de détourage en ligne. Lance le serveur de détourage sur la machine GPU (outils/detourage).</div>}
 

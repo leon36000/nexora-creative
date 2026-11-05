@@ -7,7 +7,7 @@ import { APPS_NEXORA } from './studio/apps';
 describe('noms centraux des produits Nexora', () => {
   it('contient les quinze noms décidés', () => {
     expect(Object.values(NEXORA_PRODUCT_NAMES)).toEqual([
-      'Nexora Mesh', 'Matte', 'Director', 'Producer', 'Studio', 'Sync', 'Voice', 'Score', 'FX', 'Finish', 'Critic', 'Scribe', 'Campaign', 'Connect', 'Platform',
+      'Nexora Mesh', 'Nexora Matte', 'Nexora Director', 'Nexora Producer', 'Nexora Studio', 'Nexora Sync', 'Nexora Voice', 'Nexora Score', 'Nexora FX', 'Nexora Finish', 'Nexora Critic', 'Nexora Scribe', 'Nexora Campaign', 'Nexora Connect', 'Nexora Platform',
     ]);
   });
 
@@ -23,7 +23,9 @@ describe('noms centraux des produits Nexora', () => {
 
   it('ne présente pas le palier pro indisponible comme une fonction de Matte', () => {
     const matte = APPS_NEXORA.find((entry) => entry.id === 'detourage')!;
-    expect(matte.name).toBe('Matte');
+    expect(matte.name).toBe('Nexora Matte');
     expect(matte.blurb).not.toMatch(/\bpro\b|prores|16 bits|\bEXR\b/i);
+    expect(matte.blurb).not.toMatch(/SAM 3\.1|ViTMatte/i);
+    expect(matte.blurb).toBe('Détoure un sujet dans une vidéo, puis garde la transparence ou choisis un nouveau fond.');
   });
 });
