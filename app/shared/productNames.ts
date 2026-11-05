@@ -1,20 +1,22 @@
 /** Canonical names of Nexora products. Keep route and API identifiers separate. */
+export const NEXORA_BRAND = 'Nexora' as const;
+
 export const NEXORA_PRODUCT_NAMES = {
-  mesh: 'Nexora Mesh',
-  matte: 'Nexora Matte',
-  director: 'Nexora Director',
-  producer: 'Nexora Producer',
-  studio: 'Nexora Studio',
-  sync: 'Nexora Sync',
-  voice: 'Nexora Voice',
-  score: 'Nexora Score',
-  fx: 'Nexora FX',
-  finish: 'Nexora Finish',
-  critic: 'Nexora Critic',
-  scribe: 'Nexora Scribe',
-  campaign: 'Nexora Campaign',
-  connect: 'Nexora Connect',
-  platform: 'Nexora Platform',
+  mesh: `${NEXORA_BRAND} Mesh`,
+  matte: `${NEXORA_BRAND} Matte`,
+  director: `${NEXORA_BRAND} Director`,
+  producer: `${NEXORA_BRAND} Producer`,
+  studio: `${NEXORA_BRAND} Studio`,
+  sync: `${NEXORA_BRAND} Sync`,
+  voice: `${NEXORA_BRAND} Voice`,
+  score: `${NEXORA_BRAND} Score`,
+  fx: `${NEXORA_BRAND} FX`,
+  finish: `${NEXORA_BRAND} Finish`,
+  critic: `${NEXORA_BRAND} Critic`,
+  scribe: `${NEXORA_BRAND} Scribe`,
+  campaign: `${NEXORA_BRAND} Campaign`,
+  connect: `${NEXORA_BRAND} Connect`,
+  platform: `${NEXORA_BRAND} Platform`,
 } as const;
 
 export type NexoraProductKey = keyof typeof NEXORA_PRODUCT_NAMES;

@@ -2,8 +2,9 @@
  * Nexora Mesh (mode 3D de Nexora Creative ; ex-Relief, ex-Object) : tout ce qui travaille sur le maillage d'un GLB, côté serveur et sans GPU.
  * Lecture du GLB, contrôle (étanchéité, arêtes non-variété, composantes, nombre de triangles), décimation à un nombre de
  * triangles voulu (meshoptimizer), exports OBJ (+ MTL + texture), STL binaire, 3MF et USDZ. Tout est pur et testé sans moteur.
- * Nom du produit : src/produit3d.ts. Rapport : recherche/18 ; mesures : recherche/21.
+ * Nom du produit : shared/productNames.ts. Rapport : recherche/18 ; mesures : recherche/21.
  */
+import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { crc32 } from 'node:zlib';
 import { Document, NodeIO, type Primitive, type Transform } from '@gltf-transform/core';
 import { simplify, weld } from '@gltf-transform/functions';
@@ -255,7 +256,7 @@ export function zipAligne(fichiers: { nom: string; octets: Uint8Array }[]): Uint
 
 export function versObj(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   const nom = nomSur(opt.nom);
-  const lignes: string[] = [`# Nexora Mesh : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
+  const lignes: string[] = [`# ${NEXORA_PRODUCT_NAMES.mesh} : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
   const n = m.positions.length / 3;
   for (let i = 0; i < n; i++) lignes.push(`v ${f(m.positions[3 * i])} ${f(m.positions[3 * i + 1])} ${f(m.positions[3 * i + 2])}`);
   if (m.uvs) for (let i = 0; i < n; i++) lignes.push(`vt ${f(m.uvs[2 * i])} ${f(1 - m.uvs[2 * i + 1])}`);
@@ -278,7 +279,7 @@ export function versStl(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   const nTri = m.indices.length / 3;
   const tampon = new ArrayBuffer(84 + 50 * nTri);
   const vue = new DataView(tampon);
-  new Uint8Array(tampon).set(strToU8('Nexora Mesh'), 0);
+  new Uint8Array(tampon).set(strToU8(NEXORA_PRODUCT_NAMES.mesh), 0);
   vue.setUint32(80, nTri, true);
   let o = 84;
   for (let t = 0; t < nTri; t++) {
@@ -299,7 +300,7 @@ export function vers3mf(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   for (let i = 0; i < p.length; i += 3) sommets.push(`<vertex x="${f(p[i])}" y="${f(p[i + 1])}" z="${f(p[i + 2])}"/>`);
   const triangles: string[] = [];
   for (let t = 0; t < m.indices.length; t += 3) triangles.push(`<triangle v1="${m.indices[t]}" v2="${m.indices[t + 1]}" v3="${m.indices[t + 2]}"/>`);
-  const modele = `<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="fr-FR" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">${nomSur(opt.nom)}</metadata><metadata name="Application">Nexora Mesh</metadata><resources><object id="1" type="model"><mesh><vertices>${sommets.join('')}</vertices><triangles>${triangles.join('')}</triangles></mesh></object></resources><build><item objectid="1"/></build></model>`;
+  const modele = `<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="fr-FR" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">${nomSur(opt.nom)}</metadata><metadata name="Application">${NEXORA_PRODUCT_NAMES.mesh}</metadata><resources><object id="1" type="model"><mesh><vertices>${sommets.join('')}</vertices><triangles>${triangles.join('')}</triangles></mesh></object></resources><build><item objectid="1"/></build></model>`;
   return zipSync({
     '[Content_Types].xml': strToU8('<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>'),
     '_rels/.rels': strToU8('<?xml version="1.0" encoding="UTF-8"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>'),
