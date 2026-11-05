@@ -28,3 +28,14 @@ Afficher ou committer un secret ; saisir un mot de passe à sa place ; supprimer
 4. Nexora Mesh (3D) : rapport `recherche/29`, spec d'interface, renommage, plugin.
 5. Pods/conteneurs et préparation du formatage (`nexora-plateforme`).
 6. Backlog Creative triple A (`docs/backlog/creative-triple-a.md`, TA1 à TA25).
+
+## ESSAIMS DE SOUS-AGENTS : OBLIGATOIRE (à appliquer à chaque session)
+Le fondateur exige que tu agisses en ORCHESTRATEUR à temps plein : tu décides, tu contrôles, tu intègres ; le travail mécanique ou parallélisable est fait par des essaims de sous-agents bon marché.
+- **Activer** (une fois par session) : `cd "/home/pc6/Desktop/Nexora Creative" && outils/sous-agents/activer.sh` (démarre la passerelle LiteLLM 127.0.0.1:4410, teste les quatre alias, affiche le compteur de coût).
+- **Un agent** : `outils/sous-agents/sous-agent.sh [-w] <alias> <fichier-prompt> <dossier-de-travail> [max-tours=30] [budget-usd=0.50]` (sans `-w` il part en arrière-plan).
+- **Un essaim** : un fichier `NOM.txt` par tâche dans un dossier de prompts, puis `outils/sous-agents/lot.sh <alias> <dossier-prompts> <dossier-workdirs> 8` (parallélisme 8 ; chaque tâche a son propre dossier). Lance plusieurs essaims en parallèle sur des projets différents.
+- **Alias** : `deepseek` = DeepSeek V4.1 Flash 1017 effort max (code, tests, modifications en masse, extraction) ; `muse` = Muse Spark 1.3 Contributor effort max (lots massifs, lectures, résumés, brouillons de prompts, idées) ; `gemini` = Gemini 4 Argon Flex effort moyen (analyses, planification, revues) ; `gemini-eleve` = Argon Flex effort élevé (tâches difficiles, jugement, revue de code).
+- **Résultats et coût** : `~/.local/share/nexora-sous-agents/runs/<id>/` (`summary.txt`, `result.json`, `transcript.jsonl`) ; `outils/sous-agents/cout.sh --since AAAA-MM-JJ`.
+- **Contraintes** : bac à sable sans réseau, écriture seulement dans son dossier de travail ; donne-lui les textes et fichiers (dossier de travail, ou `SA_EXTRA_RO` pour des dossiers en lecture seule) ; jamais deux agents dans le même dossier ; ils n'ont ni SSH ni GitLab : c'est toi qui exécutes, pousses et intègres ; vérifie chaque livrable (ils inventent parfois des références).
+- **Tes propres sous-agents** : GPT-6.1 Terra effort élevé (ils orchestrent à leur tour des essaims avec ces mêmes commandes) ; GPT-6 Luna max pour le volume.
+- **Quotas** : au moins 200 appels de sous-agents par session et au moins 70 % du volume de production délégué. **Contrôle de fin de session** : relève `cout.sh` ; si le compte du jour est inférieur à 200 appels, ta session est insuffisante : relance un essaim avant de conclure, et donne les deux chiffres (début, fin) au fondateur.
