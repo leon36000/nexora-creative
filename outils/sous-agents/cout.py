@@ -117,19 +117,24 @@ def select_rows(rows, args, parsed):
     return rows, undated, unattributed
 
 
+def format_cost(alias, group, undated, unattributed):
+    known = money(group['cout_connu'])
+    amount = Decimal(group['cout_connu'])
+    shown = '<$0.00001' if Decimal(0) < amount < Decimal('0.00001') else f'≈${known}'
+    if not group['requetes']:
+        cost = 'aucune donnée de coût'
+    elif group['cout_total'] is None:
+        cost = f'coût déclaré {shown} + {group["couts_inconnus"]} coût(s) inconnu(s)'
+        if alias == 'TOTAL' and (undated or unattributed):
+            cost += f' + {undated + unattributed} entrée(s) non attribuable(s)'
+    else:
+        cost = shown
+    return cost
+
+
 def print_report(report, undated, unattributed):
     for alias, group in [*report['groupes'].items(), ('TOTAL', report['total'])]:
-        known = money(group['cout_connu'])
-        amount = Decimal(group['cout_connu'])
-        shown = '<$0.00001' if Decimal(0) < amount < Decimal('0.00001') else f'≈${known}'
-        if not group['requetes']:
-            cost = 'aucune donnée de coût'
-        elif group['cout_total'] is None:
-            cost = f'coût déclaré {shown} + {group["couts_inconnus"]} coût(s) inconnu(s)'
-            if alias == 'TOTAL' and (undated or unattributed):
-                cost += f' + {undated + unattributed} entrée(s) non attribuable(s)'
-        else:
-            cost = shown
+        cost = format_cost(alias, group, undated, unattributed)
         unknown = f' (+{group["statuts_inconnus"]} statut(s) inconnu(s))' if group['statuts_inconnus'] else ''
         print(f'{alias}\t{group["requetes"]} req\t{group["echecs"]} echecs{unknown}\t{group["in"] or "?"} in\t{group["out"] or "?"} out\t{cost}')
     if undated or unattributed:
