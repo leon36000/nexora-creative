@@ -127,7 +127,12 @@ if (configAuth) monterAuthentification(app, configAuth);
 /** Facturation des rendus : API du site avec la clé de l'organisation connectée ; aucune en poste local. */
 function facturationPour(org: string | null | undefined) {
   if (!configAuth || !org) return null;
-  return facturationSite(configAuth.siteUrl, () => accesOrganisation(org)?.key);
+  return facturationSite(
+    configAuth.siteUrl,
+    () => accesOrganisation(org)?.key,
+    fetch,
+    () => process.env.NEXORA_CREATIVE_SERVICE_TOKEN,
+  );
 }
 const facturationCourante = () => facturationPour(compteCourant()?.organisationId);
 /** Valide ou libère les crédits des prises terminées (appelé par la réconciliation, idempotent). */
