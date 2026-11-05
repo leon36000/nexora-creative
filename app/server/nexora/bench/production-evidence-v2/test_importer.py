@@ -16,7 +16,8 @@ REPO_ROOT = next(
     if (parent / "app/server/nexora/montage/memoires.ts").is_file()
 )
 spec = importlib.util.spec_from_file_location("production_evidence_v2_importer", HERE / "importer.py")
-assert spec is not None and spec.loader is not None
+assert spec is not None
+assert spec.loader is not None
 importer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(importer)
 
@@ -260,14 +261,19 @@ class TestImportEvidenceV2(unittest.TestCase):
         with self.assertRaisesRegex(importer.EvidenceError, "lineage parent is absent"):
             importer.import_record(record, self.registry, self.storage, self.repo)
         self.assertFalse(self.registry.exists())
+        with self.assertRaisesRegex(importer.EvidenceError, "lineage parent is absent"):
+            importer.import_record(record, self.base / "missing" / "registry.jsonl",
+                                   self.storage, self.repo)
+        self.assertFalse((self.base / "missing").exists())
 
     def test_registry_rejects_dangling_lineage_on_readback(self):
         record = fixture_record(self.storage, self.repo)
         record["lineage"] = ["v7.workcut.opus.r8c.v2"]
         self.registry.write_text(json.dumps(record) + "\n", encoding="utf-8")
         with self.registry.open("rb") as stream:
+            fd = stream.fileno()
             with self.assertRaisesRegex(importer.EvidenceError, "absent prior parent"):
-                importer._load_registry(stream.fileno())
+                importer._load_registry(fd)
 
     def test_amd2_brief_id_must_exist_in_the_referenced_corpus(self):
         record = fixture_record(self.storage, self.repo)
@@ -338,9 +344,10 @@ class TestImportEvidenceV2(unittest.TestCase):
         legacy = dict(record, schema="nexora-creative-v7-production-evidence-v1")
         legacy_registry = self.base / "legacy.jsonl"
         legacy_registry.write_text(json.dumps(legacy) + "\n", encoding="utf-8")
-        with legacy_registry.open("rb") as fd:
+        with legacy_registry.open("rb") as stream:
+            fd = stream.fileno()
             with self.assertRaisesRegex(importer.EvidenceError, "schema 2 only"):
-                importer._load_registry(fd.fileno())
+                importer._load_registry(fd)
 
         professor_dir = (REPO_ROOT / "app/server/nexora/memoire/professeur").resolve()
         self.assertFalse(importer.DEFAULT_REGISTRY.resolve().is_relative_to(professor_dir))
@@ -439,16 +446,18 @@ class TestImportEvidenceV2(unittest.TestCase):
                 registry = self.base / "broken.jsonl"
                 registry.write_bytes(content)
                 with registry.open("rb") as stream:
+                    fd = stream.fileno()
                     with self.assertRaisesRegex(importer.EvidenceError, message):
-                        importer._load_registry(stream.fileno())
+                        importer._load_registry(fd)
 
         record = fixture_record(self.storage, self.repo)
         encoded = json.dumps(record) + "\n"
         registry = self.base / "duplicate.jsonl"
         registry.write_text(encoded + encoded, encoding="utf-8")
         with registry.open("rb") as stream:
+            fd = stream.fileno()
             with self.assertRaisesRegex(importer.EvidenceError, "duplicate record_id"):
-                importer._load_registry(stream.fileno())
+                importer._load_registry(fd)
 
     def test_registry_json_refuses_duplicate_keys_and_nonstandard_constants(self):
         record = fixture_record(self.storage, self.repo)
@@ -468,8 +477,9 @@ class TestImportEvidenceV2(unittest.TestCase):
                 registry = self.base / "strict.jsonl"
                 registry.write_text(content, encoding="utf-8")
                 with registry.open("rb") as stream:
+                    fd = stream.fileno()
                     with self.assertRaisesRegex(importer.EvidenceError, message):
-                        importer._load_registry(stream.fileno())
+                        importer._load_registry(fd)
 
     def test_artifact_roots_missing_files_and_non_regular_files_are_refused(self):
         record = fixture_record(self.storage, self.repo)
