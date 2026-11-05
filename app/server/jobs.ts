@@ -151,7 +151,7 @@ export const takes = {
       if (transfererDepuis !== undefined) {
         const ancienne = takes.get(transfererDepuis);
         const credits = ancienne?.settings === undefined ? null : JSON.parse(ancienne.settings).nexoraCredits;
-        if (!credits || credits.etat !== 'reservee' || credits.reservationId !== row.settings.nexoraCredits?.reservationId) throw new Error('Réservation de reprise introuvable ou déjà transférée');
+        if (credits?.etat !== 'reservee' || credits.reservationId !== row.settings.nexoraCredits?.reservationId) throw new Error('Réservation de reprise introuvable ou déjà transférée');
         takes.patchSettings(transfererDepuis, { nexoraCredits: { ...credits, etat: 'transferee' } });
       }
       return takes.create(row);
