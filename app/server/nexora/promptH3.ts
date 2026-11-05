@@ -4,7 +4,9 @@
  * réparé avant tout appel GPU : une erreur de forme ne coûte jamais un rendu.
  */
 
-export type ModeH3 = 't2va' | 'i2va' | 'fl2va' | 'l2va';
+import { type SujetRef, validerPromptRef } from './personnages.js';
+
+export type ModeH3 = 't2va' | 'i2va' | 'fl2va' | 'l2va' | 'ref2va';
 
 export interface ContexteH3 {
   mode: ModeH3;
@@ -12,6 +14,7 @@ export interface ContexteH3 {
   dureeS: number;
   /** Répliques fournies par l'utilisateur, à recopier mot pour mot dans <d>…</d>. */
   dialogues?: string[];
+  references?: { sujets: SujetRef[]; composition?: number };
 }
 
 const CHAMPS = ['integrated_multimodal_description:', 'overall_soundscape:', 'non_diegetic_music:'] as const;
@@ -20,6 +23,7 @@ const CHAMPS = ['integrated_multimodal_description:', 'overall_soundscape:', 'no
 export function instructionH3(o: { mode: ModeH3; dureeS: number; dernierPlan: number }): string {
   const s = o.dureeS.toFixed(2);
   switch (o.mode) {
+    case 'ref2va':
     case 't2va':
       return '';
     case 'i2va':
@@ -36,21 +40,31 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
   const erreurs: string[] = [];
   const texte = prompt.replace(/\r\n/g, '\n').trim();
 
-  const positions = CHAMPS.map((c) => texte.indexOf(c));
-  CHAMPS.forEach((c, i) => {
+  const ref = ctx.mode === 'ref2va';
+  const champs: readonly string[] = ref ? ['subject_definitions:', 'summary:', 'retention_analysis:', 'detailed_description:', 'overall_soundscape:', 'non_diegetic_music:'] : CHAMPS;
+  const positions = champs.map((c) => texte.indexOf(c));
+  champs.forEach((c, i) => {
     if (positions[i] < 0) erreurs.push(`champ « ${c.slice(0, -1)} » absent`);
   });
-  if (positions.every((p) => p >= 0) && !(positions[0] < positions[1] && positions[1] < positions[2])) {
-    erreurs.push('les trois champs ne sont pas dans l’ordre description, ambiance sonore, musique');
+  if (positions.every((p) => p >= 0) && positions.some((p, i) => i > 0 && p <= positions[i - 1])) {
+    erreurs.push('champs dans le mauvais ordre : description, ambiance sonore, musique');
   }
   for (const m of texte.matchAll(/^([a-z][a-z_]+):/gm)) {
-    if (!CHAMPS.includes(`${m[1]}:` as (typeof CHAMPS)[number])) {
-      erreurs.push(`champ « ${m[1]} » inventé : le guide n’a que trois champs (le texte à l’écran va dans la description, entre guillemets)`);
+    if (!champs.includes(`${m[1]}:`)) {
+      erreurs.push(`champ « ${m[1]} » inventé : champ hors du dialecte sélectionné (le texte à l’écran va dans la description, entre guillemets)`);
     }
   }
 
-  const description =
-    positions[0] >= 0 ? texte.slice(positions[0], positions[1] > positions[0] ? positions[1] : undefined) : '';
+  const iDescription = ref ? 3 : 0;
+  const description = positions[iDescription] >= 0 ? texte.slice(positions[iDescription], positions[iDescription + 1] > positions[iDescription] ? positions[iDescription + 1] : undefined) : '';
+  if (ref) {
+    const sujets = ctx.references?.sujets ?? [];
+    const nbImages = sujets.reduce((n, s) => n + s.images, 0) + (ctx.references?.composition ?? 0);
+    erreurs.push(...validerPromptRef(texte, sujets.length, nbImages));
+    if (!texte.startsWith('subject_definitions:')) erreurs.push('en Ref2VA, commencer par subject_definitions:');
+    if (!/summary:\s*\[reference generation\]/.test(texte)) erreurs.push('summary doit commencer par [reference generation]');
+    if (!/detailed_description:\s*[^[]+\[Shot 1\]/.test(texte)) erreurs.push('le style doit précéder [Shot 1] en Ref2VA');
+  }
   const plans = [...description.matchAll(/\[Shot (\d+)\]\s*(At (\d{2}):(\d{2})\.(\d{3}),)?/g)];
   if (!plans.length) erreurs.push('aucun plan « [Shot 1] » dans la description');
   plans.forEach((m, i) => {
@@ -74,7 +88,7 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
     if (!premiereLigne.startsWith('integrated_multimodal_description: [Shot 1]')) {
       erreurs.push('en T2VA, le prompt commence directement par « integrated_multimodal_description: [Shot 1] »');
     }
-  } else {
+  } else if (!ref) {
     const attendue = instructionH3({ mode: ctx.mode, dureeS: ctx.dureeS, dernierPlan: Math.max(1, plans.length) });
     if (premiereLigne !== attendue) erreurs.push(`ligne d’instruction ${ctx.mode.toUpperCase()} absente ou inexacte ; attendue : ${attendue}`);
     else if ((texte.split('\n')[1] ?? 'x').trim() !== '') erreurs.push('une ligne vide doit suivre la ligne d’instruction');
