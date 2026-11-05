@@ -13,7 +13,7 @@ if ! python3 - "$V7_CI_ROOT/coverage.xml" <<'PY'
 import sys
 import xml.etree.ElementTree as ET
 
-names = {'ci_tests.py', 'banc_finish.py', 'profondeur_10bits.py', 'verifier_paquet.py'}
+names = {'ci_tests.py', 'banc_finish.py', 'profondeur_10bits.py', 'execution_bornee.py', 'verifier_paquet.py'}
 found, covered, total = set(), 0, 0
 for item in ET.parse(sys.argv[1]).iter('class'):
     name = item.get('filename', '').rsplit('/', 1)[-1]

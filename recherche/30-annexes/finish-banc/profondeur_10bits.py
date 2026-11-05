@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Mesures additionnelles 10 bits du banc Finish après validation des images."""
-import argparse, hashlib, json, os, pathlib, re, shlex, shutil, subprocess, time
+import argparse, hashlib, json, math, os, pathlib, re, shutil
+from execution_bornee import executer
+def duree(s):
+ v=float(s)
+ if not math.isfinite(v) or v<=0: raise argparse.ArgumentTypeError('--timeout doit être un nombre positif, fini, en secondes')
+ return v
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('medias',type=pathlib.Path)
 parser.add_argument('resultats',type=pathlib.Path)
 parser.add_argument('--ffmpeg',default=shutil.which('ffmpeg'),required=not shutil.which('ffmpeg'))
+parser.add_argument('--timeout',type=duree,default=3600.0,help='délai maximal par commande ffmpeg, en secondes (positif, fini)')
 args=parser.parse_args()
 M=args.medias.resolve(strict=True); O=args.resultats.resolve(strict=True)
 rows=json.loads((O/'mesures.json').read_text())
@@ -22,10 +28,8 @@ def digest(path):
 def metrics(src,dst):
  graph='[0:v]settb=AVTB,setpts=N/(24*TB),format=yuv420p10le,split=2[r1][r2];[1:v]settb=AVTB,setpts=N/(24*TB),format=yuv420p10le,split=2[d1][d2];[d1][r1]ssim[s];[d2][r2]psnr[p]'
  cmd=[FF,'-nostdin','-hide_banner','-loglevel','info','-threads','2','-i',str(src),'-threads','2','-i',str(dst),'-filter_complex_threads','2','-filter_complex',graph,'-map','[s]','-f','null','-','-map','[p]','-f','null','-']
- t=time.monotonic(); p=subprocess.run(cmd,capture_output=True,text=True)
- with (O/'commandes-10bits.log').open('a') as f: f.write('\n$ '+shlex.join(cmd)+'\n'+p.stderr+'\nstatus='+str(p.returncode)+' duree_s='+str(round(time.monotonic()-t,3))+'\n')
- if p.returncode: raise RuntimeError('FFmpeg : échec 10 bits')
- ss=re.findall(r'SSIM.*?All:([0-9.]+)',p.stderr); ps=re.findall(r'PSNR.*?average:([0-9.]+|inf)',p.stderr)
+ _,err,_=executer(cmd,args.timeout,O/'commandes-10bits.log')
+ ss=re.findall(r'SSIM.*?All:([0-9.]+)',err); ps=re.findall(r'PSNR.*?average:([0-9.]+|inf)',err)
  if not ss or not ps: raise ValueError('Métriques absentes')
  return float(ss[-1]),'inf' if ps[-1]=='inf' else float(ps[-1])
 for row in rows:

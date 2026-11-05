@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """Banc local séquentiel 12 profils NVENC vs x264, sans réseau ni écrasement."""
-import argparse, csv, hashlib, json, os, pathlib, platform, re, shlex, shutil, subprocess, sys, time
+import argparse, csv, hashlib, json, math, os, pathlib, platform, re, shutil, time
 from fractions import Fraction
+from execution_bornee import executer
+def duree(s):
+ v=float(s)
+ if not math.isfinite(v) or v<=0: raise argparse.ArgumentTypeError('--timeout doit être un nombre positif, fini, en secondes')
+ return v
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('medias',type=pathlib.Path,help='3 sources FFV1 et 12 sorties NVENC')
 parser.add_argument('sortie',type=pathlib.Path,help='nouveau dossier des résultats')
@@ -9,17 +14,17 @@ parser.add_argument('--profils',nargs='+',choices=['h264-p4','h264-p7','hevc10-p
 parser.add_argument('--profil-x264',choices=['main','high'],default='high')
 parser.add_argument('--ffmpeg',default=shutil.which('ffmpeg'),required=not shutil.which('ffmpeg'))
 parser.add_argument('--ffprobe',default=shutil.which('ffprobe'),required=not shutil.which('ffprobe'))
+parser.add_argument('--timeout',type=duree,default=3600.0,help='délai maximal par commande ffmpeg/ffprobe, en secondes (positif, fini)')
+parser.add_argument('--correction-proportionnelle',action='store_true',help='réencode une fois le x264 avec cible = round(cible_initiale * débit_NVENC / débit_x264_mesuré), sans rien écraser')
 args=parser.parse_args()
+if len(args.profils)!=len(set(args.profils)): parser.error('profils répétés interdits')
 M=args.medias.resolve(strict=True); O=args.sortie.resolve(); O.mkdir(parents=True,exist_ok=False)
 FF=args.ffmpeg; FP=args.ffprobe
 if hasattr(os,'sched_getaffinity'):
  cpus=sorted(os.sched_getaffinity(0))[:2]; os.sched_setaffinity(0,cpus)
 LOG=O/'commandes.log'
-def run(cmd):
- t=time.monotonic(); x=subprocess.run(list(map(str,cmd)),stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
- with LOG.open('a') as f: f.write('\n$ '+shlex.join(map(str,cmd))+'\n'+x.stdout+'\n'+x.stderr+'\nstatus='+str(x.returncode)+' sec='+str(round(time.monotonic()-t,3))+'\n')
- if x.returncode: raise RuntimeError('Commande en échec : '+shlex.join(map(str,cmd)))
- return x.stdout,x.stderr,time.monotonic()-t
+def run(cmd,log=LOG):
+ return executer(cmd,args.timeout,log)
 def digest(path):
  h=hashlib.sha256()
  with path.open('rb') as f:
@@ -54,10 +59,29 @@ for clip in ['action','bureau','espace']:
   nv=M/(clip+'-'+profile+'.mp4'); nm=probe(nv); meta[nv.name]=nm
   if (sm['stream']['width'],sm['stream']['height'])!=(nm['stream']['width'],nm['stream']['height']): raise ValueError('Dimensions incompatibles')
   dst=O/(clip+'-x264-'+profile+'.mp4'); passlog=O/(clip+'-'+profile+'-pass')
-  common=[FF,'-nostdin','-hide_banner','-loglevel','info','-threads','2','-i',src,'-map','0:v:0','-an','-c:v','libx264','-threads','2','-preset','medium','-pix_fmt','yuv420p','-profile:v',args.profil_x264,'-b:v',str(nm['video_bps']),'-passlogfile',passlog]
-  start=time.monotonic(); run(common+['-pass','1','-f','null','-']); run(common+['-pass','2','-movflags','+faststart','-n',dst]); seconds=time.monotonic()-start
+  def passe(cible,out,passprefix):
+   common=[FF,'-nostdin','-hide_banner','-loglevel','info','-threads','2','-i',src,'-map','0:v:0','-an','-c:v','libx264','-threads','2','-preset','medium','-pix_fmt','yuv420p','-profile:v',args.profil_x264,'-b:v',str(cible),'-passlogfile',passprefix]
+   start=time.monotonic(); run(common+['-pass','1','-f','null','-']); run(common+['-pass','2','-movflags','+faststart','-n',out]); return round(time.monotonic()-start,2)
+  seconds=passe(nm['video_bps'],dst,passlog)
   xm=probe(dst); meta[dst.name]=xm
   metric_nv=metric(src,nv,'NVENC'); metric_x=metric(src,dst,'x264')
-  row={'clip':clip,'profil_nvenc':profile,'source_sha256':sm['sha256'],'nvenc_sha256':nm['sha256'],'x264_sha256':xm['sha256'],'nvenc_bps':nm['video_bps'],'x264_bps':xm['video_bps'],'ecart_pct':round(100*(xm['video_bps']/nm['video_bps']-1),3),'ssim_nvenc':metric_nv['ssim'],'ssim_x264':metric_x['ssim'],'psnr_nvenc_db':metric_nv['psnr_db'],'psnr_x264_db':metric_x['psnr_db'],'x264_2passes_s':round(seconds,2),'images':288,'fps':24}
+  row={'clip':clip,'profil_nvenc':profile,'source_sha256':sm['sha256'],'nvenc_sha256':nm['sha256'],'x264_sha256':xm['sha256'],'nvenc_bps':nm['video_bps'],'x264_bps':xm['video_bps'],'ecart_pct':round(100*(xm['video_bps']/nm['video_bps']-1),3),'ssim_nvenc':metric_nv['ssim'],'ssim_x264':metric_x['ssim'],'psnr_nvenc_db':metric_nv['psnr_db'],'psnr_x264_db':metric_x['psnr_db'],'x264_2passes_s':seconds,'images':288,'fps':24}
   rows.append(row); save(rows); (O/'metadonnees.json').write_text(json.dumps(meta,indent=2)+'\n'); print(json.dumps(row),flush=True)
+  if args.correction_proportionnelle:
+   # Un unique réencodage : cible *ratio* débits mesurés (paquets). Médias initiaux, SHA et métriques ci-dessus conservés.
+   cible_corrigee=round(nm['video_bps']*nm['video_bps']/xm['video_bps'])
+   dst_c=O/(clip+'-x264-'+profile+'-corrige.mp4'); passlog_c=O/(clip+'-'+profile+'-corrige-pass'); LOG_C=O/'commandes-correction.log'
+   if dst_c.exists() or pathlib.Path(str(passlog_c)+'-0.log').exists(): raise FileExistsError('Sortie corrective déjà présente : '+dst_c.name)
+   common_c=[FF,'-nostdin','-hide_banner','-loglevel','info','-threads','2','-i',src,'-map','0:v:0','-an','-c:v','libx264','-threads','2','-preset','medium','-pix_fmt','yuv420p','-profile:v',args.profil_x264,'-b:v',str(cible_corrigee),'-passlogfile',passlog_c]
+   start=time.monotonic(); run(common_c+['-pass','1','-f','null','-'],LOG_C); run(common_c+['-pass','2','-movflags','+faststart','-n',dst_c],LOG_C); sec_c=round(time.monotonic()-start,2)
+   xc=probe(dst_c); meta[dst_c.name]=xc
+   metric_c=metric(src,dst_c,'x264-corrige')
+   trace={'clip':clip,'profil_nvenc':profile,'parametres':{'timeout_s':args.timeout,'option':'--correction-proportionnelle','preset':'medium','profil_x264':args.profil_x264,'pix_fmt':'yuv420p','formule':'round(cible_initiale * debit_NVENC / debit_x264_mesure)','debit_mesure':'paquets','type':'VBR 2 passes (x264 peut dévier de la cible)'},
+    'initial':{'fichier':dst.name,'sha256':xm['sha256'],'cible_bps':nm['video_bps'],'x264_bps':xm['video_bps'],'ecart_pct':row['ecart_pct'],'ssim':metric_x['ssim'],'psnr_db':metric_x['psnr_db'],'x264_2passes_s':seconds},
+    'corrige':{'fichier':dst_c.name,'sha256':xc['sha256'],'cible_bps':cible_corrigee,'x264_bps':xc['video_bps'],'ecart_pct':round(100*(xc['video_bps']/nm['video_bps']-1),3),'ssim':metric_c['ssim'],'psnr_db':metric_c['psnr_db'],'x264_2passes_s':sec_c},
+    'nvenc_bps':nm['video_bps']}
+   trace_c=O/'corrections.json'; existants=json.loads(trace_c.read_text()) if trace_c.exists() else []
+   existants.append(trace); trace_c.write_text(json.dumps(existants,indent=2,ensure_ascii=False,allow_nan=False)+'\n')
+   (O/'metadonnees.json').write_text(json.dumps(meta,indent=2)+'\n')
+   print(json.dumps(trace),flush=True)
 print('TERMINE',len(rows),flush=True)
