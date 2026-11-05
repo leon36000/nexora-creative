@@ -39,9 +39,9 @@ export default function ReliefOutils({ take }: { take: Take }) {
   return <ReliefOutilsModele key={take.id} take={take} format={format} setFormat={setFormat} faces={faces} setFaces={setFaces} />;
 }
 
-function ReliefOutilsModele({ take, format, setFormat, faces, setFaces }: {
+function ReliefOutilsModele({ take, format, setFormat, faces, setFaces }: Readonly<{
   take: Take; format: FormatRelief; setFormat: (format: FormatRelief) => void; faces: number; setFaces: (faces: number) => void;
-}) {
+}>) {
   const vivant = useRef(false);
   useLayoutEffect(() => {
     vivant.current = true;

@@ -71,7 +71,7 @@ createRoot(document.getElementById('root')).render(React.createElement(React.Str
     if (u.origin !== origin) { external.push(u.origin); return route.abort(); }
     if (!u.pathname.startsWith('/api/')) return route.continue();
     const json = (body) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
-    if (/\/rapport$/.test(u.pathname)) return json({ rapport: null, decime: null, juge: null });
+    if (u.pathname.endsWith('/rapport')) return json({ rapport: null, decime: null, juge: null });
     if (u.pathname === '/api/nexora/relief/101/cartes') return json({ cartes: [{ nom: 'alpha-A' }] });
     if (u.pathname === '/api/nexora/relief/202/cartes') { await waitB; return json({ cartes: [{ nom: 'beta-B' }] }); }
     if (u.pathname === '/api/nexora/relief/101/juger') {
