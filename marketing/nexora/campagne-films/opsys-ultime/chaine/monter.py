@@ -72,6 +72,31 @@ def valider_ts(plan):
         return {"ok": False, "erreurs": [{"regle": "tsx", "message": (r.stderr or r.stdout)[-400:]}]}
 
 
+class ValidationEditPlanRefusee(ValueError):
+    """Le rapport du validateur officiel ne permet pas le rendu."""
+
+
+def verifier_rapport_validation(rapport):
+    """Refuse un rapport invalide; rend explicite l'absence du validateur tsx."""
+    if rapport is None:
+        print("AVERTISSEMENT : EditPlan non validé (tsx absent); rendu poursuivi sans validation officielle.", file=sys.stderr)
+        return None
+    if not isinstance(rapport, dict) or rapport.get("ok") is not True:
+        erreurs = rapport.get("erreurs") if isinstance(rapport, dict) else None
+        details = []
+        if isinstance(erreurs, list):
+            for erreur in erreurs:
+                if isinstance(erreur, dict):
+                    details.append(f"{erreur.get('regle', '?')} : {erreur.get('message', '')}".strip())
+                else:
+                    details.append(str(erreur))
+        elif erreurs:
+            details.append(str(erreurs))
+        raison = " ; ".join(details) or "rapport absent ou mal formé (ok doit être strictement true)"
+        raise ValidationEditPlanRefusee(f"EditPlan refusé par le validateur officiel : {raison}. Rendu refusé.")
+    return rapport
+
+
 def ligne_de_temps(video):
     debuts, t = [], 0
     for i, c in enumerate(video):
@@ -507,7 +532,7 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     nom_sortie = f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
     chemin_defaut = T.TRAVAIL / equipe / "montage" / nom_sortie
     sortie = verifier_sortie_libre(sortie if sortie is not None else chemin_defaut)
-    rapport = valider_ts(ctx.plan)
+    rapport = verifier_rapport_validation(valider_ts(ctx.plan))
     out_dir = T.dossier_travail(equipe, "montage")
     tranches = creer_dossier_tranches(out_dir, equipe, version, brouillon)
     pas = 36
@@ -538,6 +563,6 @@ if __name__ == "__main__":
     o = a.parse_args()
     try:
         construire(o.equipe, o.version, o.brouillon, o.sortie, o.jobs)
-    except (PlansVideoManquants, FileExistsError) as e:
+    except (PlansVideoManquants, FileExistsError, ValidationEditPlanRefusee) as e:
         print(f"ERREUR : {e}", file=sys.stderr)
         raise SystemExit(2)

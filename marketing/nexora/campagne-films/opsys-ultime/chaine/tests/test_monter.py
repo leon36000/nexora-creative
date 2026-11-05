@@ -2,6 +2,8 @@
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr
+from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -57,6 +59,62 @@ class PlansVideoManquantsTests(unittest.TestCase):
             pool.assert_not_called()
             dossier_travail.assert_not_called()
             self.assertFalse(sortie.exists())
+
+
+class ValidationEditPlanTests(unittest.TestCase):
+    def assert_refused_before_writers(self, rapport):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            work = root / "work"
+            work.mkdir()
+            source = root / "p01-r1.mp4"
+            source.write_bytes(b"video")
+            sortie = root / "montage" / "film.mp4"
+            contexte = SimpleNamespace(vid={"p01": source}, plan={"video": [{}]}, total=36)
+            with (
+                patch.object(monter, "Contexte", return_value=contexte),
+                patch.object(monter, "valider_ts", return_value=rapport) as valider,
+                patch.object(monter, "creer_dossier_tranches") as creer_tranches,
+                patch.object(monter, "rendre_tranche") as rendre,
+                patch.object(monter, "ProcessPoolExecutor") as pool,
+                patch.object(monter, "mixer") as mixer,
+                patch.object(monter.subprocess, "run") as ffmpeg,
+                patch.object(monter.T, "TRAVAIL", work),
+                patch.object(monter.T, "dossier_travail") as dossier_travail,
+            ):
+                with self.assertRaisesRegex(ValueError, "Rendu refusé") as err:
+                    monter.construire("deepseek", "long", sortie=sortie, jobs=1)
+
+            self.assertIn("Rendu refusé", str(err.exception))
+            valider.assert_called_once()
+            for writer in (creer_tranches, rendre, pool, mixer, ffmpeg, dossier_travail):
+                writer.assert_not_called()
+            self.assertFalse(sortie.exists())
+            self.assertFalse((root / "work" / "journal-montage.jsonl").exists())
+
+    def test_false_malformed_and_non_boolean_success_reports_stop_before_writers(self):
+        rapports = (
+            {"ok": False, "erreurs": [{"regle": "test", "message": "plan invalide"}]},
+            {"erreurs": []},
+            {"ok": "true", "erreurs": []},
+            [True],
+        )
+        for rapport in rapports:
+            with self.subTest(rapport=rapport):
+                self.assert_refused_before_writers(rapport)
+
+    def test_none_is_explicit_and_remains_unvalidated(self):
+        stderr = StringIO()
+        with redirect_stderr(stderr):
+            rapport = monter.verifier_rapport_validation(None)
+
+        self.assertIsNone(rapport)
+        self.assertIn("tsx absent", stderr.getvalue())
+
+    def test_valid_report_is_returned_unchanged(self):
+        rapport = {"ok": True, "erreurs": [], "avertissements": []}
+
+        self.assertIs(rapport, monter.verifier_rapport_validation(rapport))
 
 
 
@@ -174,17 +232,71 @@ class ExportPreservationTests(unittest.TestCase):
                 patch.object(monter.T, "TRAVAIL", work),
                 patch.object(monter.T, "dossier_travail", return_value=out_dir),
             ):
-                result = monter.construire("deepseek", "long", brouillon=True, sortie=output, jobs=1)
+                warning = StringIO()
+                with redirect_stderr(warning):
+                    result = monter.construire("deepseek", "long", brouillon=True, sortie=output, jobs=1)
 
             tranches = Path(result["tranches"])
             self.assertRegex(tranches.name, r"^tranches-deepseek-long-brouillon-\d{8}-\d{6}-\d+$")
             self.assertTrue((tranches / "t000000.mp4").is_file())
             self.assertTrue((tranches / "mix.wav").is_file())
             self.assertTrue(output.is_file())
+            self.assertIsNone(result["validation"])
+            self.assertIn("tsx absent", warning.getvalue())
             self.assertEqual(1, len(commandes))
             self.assertIn("-n", commandes[0][0])
             self.assertNotIn("-y", commandes[0][0])
             self.assertTrue(commandes[0][1])
+
+    def test_render_accepts_and_records_a_successful_validation_report(self):
+        class FakePool:
+            def __init__(self, _jobs):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_exc):
+                return False
+
+            def map(self, _func, tasks):
+                tasks = list(tasks)
+                for task in tasks:
+                    Path(task[-1]).write_bytes(b"tranche")
+                return [None] * len(tasks)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            work = root / "work"
+            work.mkdir()
+            out_dir = root / "montage"
+            out_dir.mkdir()
+            source = root / "p01-r1.mp4"
+            source.write_bytes(b"source")
+            output = out_dir / "deepseek-long-brouillon.mp4"
+            report = {"ok": True, "erreurs": [], "avertissements": []}
+            ctx = SimpleNamespace(vid={"p01": source}, plan={"video": [{}]}, total=36)
+
+            def mixer_factice(_ctx, fichier):
+                Path(fichier).write_bytes(b"mix")
+
+            def ffmpeg_factice(commande, check):
+                Path(commande[-1]).write_bytes(b"export")
+                return SimpleNamespace(returncode=0)
+
+            with (
+                patch.object(monter, "Contexte", return_value=ctx),
+                patch.object(monter, "valider_ts", return_value=report),
+                patch.object(monter, "ProcessPoolExecutor", FakePool),
+                patch.object(monter, "mixer", side_effect=mixer_factice),
+                patch.object(monter.subprocess, "run", side_effect=ffmpeg_factice),
+                patch.object(monter.T, "TRAVAIL", work),
+                patch.object(monter.T, "dossier_travail", return_value=out_dir),
+            ):
+                result = monter.construire("deepseek", "long", brouillon=True, sortie=output, jobs=1)
+
+            self.assertTrue(output.is_file())
+            self.assertEqual(report, result["validation"])
 
 
 if __name__ == "__main__":
