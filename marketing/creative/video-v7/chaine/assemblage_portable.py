@@ -15,6 +15,7 @@ from pathlib import Path
 
 TEAM_RE = {'muse', 'opus', 'gemini', 'deepseek'}
 TEAM_STATUS = 'incomplete-review-draft'
+STATUS_FILE = 'status.json'
 LANGUAGES = ('fr', 'en')
 FORMATS = ('16x9', '9x16')
 HEX64_RE = re.compile(r'^[0-9a-fA-F]{64}$')
@@ -95,6 +96,19 @@ def portable_asset(root, relative, expected_sha):
     return resolved
 
 
+def _validate_crop(crop, where):
+    if not isinstance(crop, list) or not crop:
+        raise ValueError(f'{where}.crop_9x16: liste de clés attendue')
+    previous = -1.0
+    for key in crop:
+        if not isinstance(key, list) or len(key) != 4:
+            raise ValueError(f'{where}.crop_9x16: clés [t, x, y, zoom] attendues')
+        t, x, y, zoom = [require_number(v, f'{where}.crop_9x16') for v in key]
+        if t < 0 or t <= previous or not (0 <= x <= 1 and 0 <= y <= 1) or zoom <= 0:
+            raise ValueError(f'{where}.crop_9x16: clés invalides')
+        previous = t
+
+
 def _validate_segment(segment, index, team):
     where = f'segments[{index}]'
     if not isinstance(segment, dict):
@@ -113,24 +127,12 @@ def _validate_segment(segment, index, team):
     if 'grade' in segment and not isinstance(segment['grade'], str):
         raise ValueError(f'{where}.grade: chaîne attendue')
     if 'crop_9x16' in segment:
-        crop = segment['crop_9x16']
-        if not isinstance(crop, list) or not crop:
-            raise ValueError(f'{where}.crop_9x16: liste de clés attendue')
-        previous = -1.0
-        for key in crop:
-            if not isinstance(key, list) or len(key) != 4:
-                raise ValueError(f'{where}.crop_9x16: clés [t, x, y, zoom] attendues')
-            t, x, y, zoom = [require_number(v, f'{where}.crop_9x16') for v in key]
-            if t < 0 or t <= previous or not (0 <= x <= 1 and 0 <= y <= 1) or zoom <= 0:
-                raise ValueError(f'{where}.crop_9x16: clés invalides')
-            previous = t
+        _validate_crop(segment['crop_9x16'], where)
     if root == 'h3' and team not in Path(segment['source']).name:
         raise ValueError(f'{where}.source: le clip H3 doit nommer l\'équipe {team}')
 
 
-def load_team(manifest_path, team):
-    if team not in TEAM_RE:
-        raise ValueError(f'unknown team {team!r}; expected one of {sorted(TEAM_RE)}')
+def _load_manifest_doc(manifest_path):
     raw = Path(manifest_path).read_bytes()
     try:
         doc = json.loads(raw)
@@ -141,6 +143,10 @@ def load_team(manifest_path, team):
     schema = doc.get('schema')
     if not _is_number(schema) or schema != 1:
         raise ValueError('manifest: schema must be the number 1')
+    return raw, doc
+
+
+def _select_team_doc(doc, team):
     teams = doc.get('teams', {})
     if not isinstance(teams, dict):
         raise ValueError('manifest: teams must be an object')
@@ -149,7 +155,10 @@ def load_team(manifest_path, team):
         raise ValueError(f'manifest: team {team!r} absent or not an object')
     if selected.get('status') != TEAM_STATUS:
         raise ValueError(f'{team}: status must be {TEAM_STATUS!r}, got {selected.get("status")!r}')
-    duration = require_number(selected.get('duration_s'), f'{team}.duration_s', positive=True)
+    return selected
+
+
+def _check_team_optional_fields(selected, team):
     if 'language' in selected and selected['language'] not in LANGUAGES:
         raise ValueError(f'{team}.language: one of {LANGUAGES} expected, got {selected["language"]!r}')
     if 'format' in selected and selected['format'] not in FORMATS:
@@ -159,6 +168,9 @@ def load_team(manifest_path, team):
         raise ValueError(f'{team}.notes: list of strings expected')
     if 'overlays' in selected and not isinstance(selected['overlays'], list):
         raise ValueError(f'{team}.overlays: list expected')
+
+
+def _contiguity_cursor(selected, team):
     segments = selected.get('segments')
     if not isinstance(segments, list) or not segments:
         raise ValueError(f'{team}: segment list must be a non-empty list')
@@ -174,6 +186,17 @@ def load_team(manifest_path, team):
         if not math.isclose(seg_duration * 24, round(seg_duration * 24), abs_tol=1e-7):
             raise ValueError('segment duration is not on the 24 fps frame grid')
         cursor = start + seg_duration
+    return ordered, cursor
+
+
+def load_team(manifest_path, team):
+    if team not in TEAM_RE:
+        raise ValueError(f'unknown team {team!r}; expected one of {sorted(TEAM_RE)}')
+    raw, doc = _load_manifest_doc(manifest_path)
+    selected = _select_team_doc(doc, team)
+    duration = require_number(selected.get('duration_s'), f'{team}.duration_s', positive=True)
+    _check_team_optional_fields(selected, team)
+    ordered, cursor = _contiguity_cursor(selected, team)
     if not math.isclose(cursor, duration, abs_tol=1e-9):
         raise ValueError(f'segment total {cursor} differs from declared duration {duration}')
     return raw, doc, selected, ordered
@@ -241,6 +264,30 @@ def validate_with_engine(repo_root, montage_path, cache_dir, language, home):
     return engine
 
 
+def _render(args, run_id, cache_dir, run_dir, repo_root, engine, montage_path):
+    output = cache_dir / f'{args.team}-{run_id}.mp4'
+    if output.exists():
+        raise FileExistsError(f'refusing to overwrite {output}')
+    env = {'HOME': str(args.home.resolve()), 'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'V6_CACHE': str(cache_dir)}
+    if args.ffmpeg:
+        env['V6_FFMPEG'] = str(args.ffmpeg.resolve(strict=True))
+    if args.ffprobe:
+        env['V6_FFPROBE'] = str(args.ffprobe.resolve(strict=True))
+    command = [sys.executable, '-B', str(engine), str(montage_path), '--format', args.format,
+               '--langue', args.language, '--sortie', str(output), '--master', 'web', '--jobs', str(args.jobs), '--brouillon']
+    result = subprocess.run(command, cwd=repo_root, env=env, capture_output=True, text=True)
+    write_new(run_dir / 'render.stdout.txt', result.stdout.encode())
+    write_new(run_dir / 'render.stderr.txt', result.stderr.encode())
+    if result.returncode != 0 or not output.is_file():
+        status = {'status': 'render-failed-preserved', 'return_code': result.returncode,
+                  'output_path': str(output), 'run_dir': str(run_dir)}
+    else:
+        status = {'status': 'draft-rendered-preserved', 'return_code': 0,
+                  'output_path': str(output), 'output_bytes': output.stat().st_size,
+                  'output_sha256': sha_file(output), 'run_dir': str(run_dir)}
+    return status
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--manifest', required=True, type=Path, help='portable JSON manifest')
@@ -261,12 +308,13 @@ def main():
     if args.jobs < 1:
         raise ValueError('--jobs must be positive')
 
-    raw, document, team_doc, segments = load_team(args.manifest, args.team)
+    raw, _, team_doc, _ = load_team(args.manifest, args.team)
     language = args.language or team_doc.get('language', 'fr')
     format_name = args.format or team_doc.get('format', '16x9')
     if language not in LANGUAGES or format_name not in FORMATS:
         raise ValueError(f'language ({language!r}) or format ({format_name!r}) not supported')
     args.format = format_name
+    args.language = language
     repo_root = args.repo_root.resolve(strict=True)
     ui_root = args.ui_root.resolve(strict=True)
     h3_root = args.h3_root.resolve(strict=True)
@@ -311,42 +359,23 @@ def main():
                        'error': str(error), 'run_dir': str(run_dir)}
             encoded_failure = json.dumps(failure, ensure_ascii=False, indent=2).encode()
             write_new(run_dir / 'validation-error.json', encoded_failure)
-            write_new(run_dir / 'status.json', encoded_failure)
+            write_new(run_dir / STATUS_FILE, encoded_failure)
             raise
 
         status = {'status': 'validated-not-rendered', 'engine': str(engine), 'run_dir': str(run_dir)}
         if args.render:
             phase = 'render'
-            output = cache_dir / f'{args.team}-{run_id}.mp4'
-            if output.exists():
-                raise FileExistsError(f'refusing to overwrite {output}')
-            env = {'HOME': str(args.home.resolve()), 'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'V6_CACHE': str(cache_dir)}
-            if args.ffmpeg:
-                env['V6_FFMPEG'] = str(args.ffmpeg.resolve(strict=True))
-            if args.ffprobe:
-                env['V6_FFPROBE'] = str(args.ffprobe.resolve(strict=True))
-            command = [sys.executable, '-B', str(engine), str(montage_path), '--format', format_name,
-                       '--langue', language, '--sortie', str(output), '--master', 'web', '--jobs', str(args.jobs), '--brouillon']
-            result = subprocess.run(command, cwd=repo_root, env=env, capture_output=True, text=True)
-            write_new(run_dir / 'render.stdout.txt', result.stdout.encode())
-            write_new(run_dir / 'render.stderr.txt', result.stderr.encode())
-            if result.returncode != 0 or not output.is_file():
-                status = {'status': 'render-failed-preserved', 'return_code': result.returncode,
-                          'output_path': str(output), 'run_dir': str(run_dir)}
-            else:
-                status = {'status': 'draft-rendered-preserved', 'return_code': 0,
-                          'output_path': str(output), 'output_bytes': output.stat().st_size,
-                          'output_sha256': sha_file(output), 'run_dir': str(run_dir)}
-        write_new(run_dir / 'status.json', json.dumps(status, ensure_ascii=False, indent=2).encode())
+            status = _render(args, run_id, cache_dir, run_dir, repo_root, engine, montage_path)
+        write_new(run_dir / STATUS_FILE, json.dumps(status, ensure_ascii=False, indent=2).encode())
         print(json.dumps(status, ensure_ascii=False, indent=2))
         if status['status'] == 'render-failed-preserved':
             raise RuntimeError('render failed; details preserved in status.json')
     except Exception as error:
         # Le disque peut lui-même être inaccessible ; ne jamais écraser un statut déjà écrit.
-        if not (run_dir / 'status.json').exists():
+        if not (run_dir / STATUS_FILE).exists():
             failure = {'status': 'failed-preserved', 'phase': phase,
                        'error_type': type(error).__name__, 'error': str(error), 'run_dir': str(run_dir)}
-            write_new(run_dir / 'status.json', json.dumps(failure, ensure_ascii=False, indent=2).encode())
+            write_new(run_dir / STATUS_FILE, json.dumps(failure, ensure_ascii=False, indent=2).encode())
         raise
 
 

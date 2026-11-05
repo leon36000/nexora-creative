@@ -110,8 +110,9 @@ class ManifestValidation(unittest.TestCase):
             self.assert_rejected(doc, 'sha256')
 
     def test_team_names(self):
+        doc = base_manifest()
         with self.assertRaises(ValueError):
-            self.load(base_manifest(), team='other')
+            self.load(doc, team='other')
         doc = base_manifest()
         doc['teams']['muse']['status'] = 'reviewed'
         self.assert_rejected(doc, 'status')
