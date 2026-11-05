@@ -102,7 +102,7 @@ export function appliquerMoteurs(depuisSite: MoteurGpu[]): void {
     if (avant && (avant.baseUrl !== m.baseUrl || avant.cle !== m.cle)) { clients.delete(m.id); lecturesJobs.delete(m.id); }
   }
   for (const id of [...clients.keys()]) if (!prochain.some((m) => m.id === id)) clients.delete(id);
-  for (const id of [...lecturesJobs.keys()]) if (!prochain.some((m) => m.id === id)) lecturesJobs.delete(id);
+  for (const id of lecturesJobs.keys()) if (!prochain.some((m) => m.id === id)) lecturesJobs.delete(id);
   moteurs.splice(0, moteurs.length, ...prochain);
 }
 /** Les moteurs tels que l'environnement les définit (retour à la configuration du poste). */

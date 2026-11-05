@@ -4,6 +4,7 @@
  * ordinaire étiquetée `nexoraFilm` ; quand un plan se termine, `avancerFilm` regarde s'il peut assembler.
  */
 import { execFile } from 'node:child_process';
+import { randomInt } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { config } from '../config.js';
@@ -92,36 +93,23 @@ export async function tournerFilm(
       };
       const n = opts.candidats === 2 ? 2 : 1;
       const credits = [opts.reservations?.[i], opts.reservationsCandidats?.[i]].slice(0, n);
+      const lireSettings = (id: number, reservation: CreditsPrise | undefined): Record<string, any> | null => {
+        try {
+          const t = takes.get(id);
+          const settings = t ? JSON.parse(t.settings) : null;
+          if (settings && typeof settings === 'object') return settings;
+        } catch { /* La lecture impossible conserve la réservation. */ }
+        if (reservation) reservationsConservees.add(reservation.reservationId);
+        attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
+        return null;
+      };
       const rattacher = (ids: unknown[]) => {
         const valides: number[] = [];
         for (const [k, id] of ids.entries()) {
           if (k >= n || typeof id !== 'number' || !Number.isSafeInteger(id) || id <= 0 || idsConnus.has(id)) continue;
           const reservation = credits[k];
-          let t: Take | undefined;
-          try { t = takes.get(id); }
-          catch {
-            // La lecture est impossible : ne pas libérer une réservation potentiellement liée à une prise créée.
-            if (reservation) reservationsConservees.add(reservation.reservationId);
-            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
-            continue;
-          }
-          if (!t) {
-            if (reservation) reservationsConservees.add(reservation.reservationId);
-            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
-            continue;
-          }
-          let settings: Record<string, any>;
-          try { settings = JSON.parse(t.settings); }
-          catch {
-            if (reservation) reservationsConservees.add(reservation.reservationId);
-            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
-            continue;
-          }
-          if (!settings || typeof settings !== 'object') {
-            if (reservation) reservationsConservees.add(reservation.reservationId);
-            attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
-            continue;
-          }
+          const settings = lireSettings(id, reservation);
+          if (!settings) continue;
           if (settings.nexoraFilm !== filmId || settings.nexoraPlan !== i) continue;
           idsConnus.add(id);
           valides.push(id);
@@ -161,6 +149,31 @@ const dialoguesDe = (p: PlanFilm) => (p.replique ? { dialogues: [{ texte: p.repl
 /** Durée effective d'un plan sur la grille de H3 (5 s → 124 images, 10 s → 243). */
 const dureePlan = (p: PlanFilm) => (p.duree === 10 ? 243 : 124) / 24;
 
+function rattacherSuitePartielle(e: unknown, filmId: number, i: number, corps: Record<string, unknown>, cle: string): boolean {
+  const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
+  const candidat = Array.isArray(partiels) ? partiels[0] : undefined;
+  if (typeof candidat !== 'number' || !Number.isSafeInteger(candidat) || candidat <= 0) return false;
+  const t = takes.get(candidat);
+  const settings = t ? reglages(t) : null;
+  if (settings?.nexoraFilm !== filmId || settings?.nexoraPlan !== i) return false;
+  majPlan(filmId, i, { take: candidat, corps, clePlan: cle, attente: undefined, attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
+  return true;
+}
+
+async function imageArriveeSuite(filmId: number, i: number, sb: Storyboard, dossier: string): Promise<{ fin?: string; suivant?: number }> {
+  const p = sb.plans[i] as PlanFilm & { raccord?: boolean };
+  const suivant = p.raccord ? sb.plans[i + 1]?.take : undefined;
+  const fichierSuivant = suivant ? takes.get(suivant)?.output_path : undefined;
+  if (!fichierSuivant || !existsSync(fichierSuivant)) return { suivant };
+  const imageFin = join(dossier, `film_${filmId}_plan${i}_arrivee.png`);
+  await new Promise<void>((ok, ko) =>
+    execFile(config.ffmpegBin, ['-y', '-i', fichierSuivant, '-frames:v', '1', '-update', '1', imageFin], (err, _o, stderr) =>
+      err ? ko(new Error(`première image du plan ${i + 2} : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()),
+  );
+  const fin = await deps.televerser(`nexora_film_${filmId}_plan${i}_fin.png`, readFileSync(imageFin), 'image/png');
+  return { fin, suivant };
+}
+
 /**
  * Plan enchaîné : la dernière image du plan précédent devient sa première image (H3 en image vers vidéo, I2VA), ce qui
  * garde sujets, lieu et lumière identiques d'un plan à l'autre. Tourne hors requête, dans l'organisation du film.
@@ -182,17 +195,7 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
   const jeton = await deps.televerser(`nexora_film_${film.id}_plan${i}.png`, readFileSync(image), 'image/png');
   const org = takes.organisationDe(film.id) ?? 'local';
   // Raccord : le plan va aussi vers la première image du plan suivant (H3 première + dernière image, FL2VA).
-  let fin: string | undefined;
-  const suivant = (p as PlanFilm & { raccord?: boolean }).raccord ? sb.plans[i + 1]?.take : undefined;
-  const fichierSuivant = suivant ? takes.get(suivant)?.output_path : undefined;
-  if (fichierSuivant && existsSync(fichierSuivant)) {
-    const imageFin = join(dossier, `film_${film.id}_plan${i}_arrivee.png`);
-    await new Promise<void>((ok, ko) =>
-      execFile(config.ffmpegBin, ['-y', '-i', fichierSuivant, '-frames:v', '1', '-update', '1', imageFin], (err, _o, stderr) =>
-        err ? ko(new Error(`première image du plan ${i + 2} : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()),
-    );
-    fin = await deps.televerser(`nexora_film_${film.id}_plan${i}_fin.png`, readFileSync(imageFin), 'image/png');
-  }
+  const { fin, suivant } = await imageArriveeSuite(film.id, i, sb, dossier);
   const ecrit = await reecrireH3({
     intention: fin
       ? `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame and ends exactly on the provided last frame: one continuous move that links them.`
@@ -214,16 +217,7 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
   let id: number;
   try { [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes(corps, 1, [p.reservation], cle)); }
   catch (e) {
-    const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
-    const candidat = Array.isArray(partiels) ? partiels[0] : undefined;
-    if (typeof candidat === 'number' && Number.isSafeInteger(candidat) && candidat > 0) {
-      const t = takes.get(candidat);
-      const settings = t ? reglages(t) : null;
-      if (settings?.nexoraFilm === film.id && settings?.nexoraPlan === i) {
-        majPlan(film.id, i, { take: candidat, corps, clePlan: cle, attente: undefined, attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
-        return;
-      }
-    }
+    if (rattacherSuitePartielle(e, film.id, i, corps, cle)) return;
     throw e;
   }
   majPlan(film.id, i, { take: id, corps, clePlan: cle, attente: undefined });
@@ -336,7 +330,7 @@ async function etape(filmId: number) {
         let id: number;
         try {
           [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () =>
-            deps.queueTakes({ ...plan.corps!, seed: Math.floor(Math.random() * 1e9) }, 1, [undefined], cle));
+            deps.queueTakes({ ...plan.corps!, seed: randomInt(1e9) }, 1, [undefined], cle));
         } catch (e) {
           const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
           const candidat = Array.isArray(partiels) ? partiels[0] : undefined;

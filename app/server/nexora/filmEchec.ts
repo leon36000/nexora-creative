@@ -12,8 +12,10 @@ export class EchecTournage extends Error {
   }
 }
 
-/** Libère une seule fois les réservations non associées à une prise lancée. */
-export async function resultatEchecTournage(e: unknown, reservations: CreditsPrise[], fac: Pick<Facturation, 'liberer'> | null, marquerLiberee?: (filmId: number, reservationId: string) => void) {
+async function libererReservations(
+  e: unknown, reservations: CreditsPrise[], fac: Pick<Facturation, 'liberer'> | null,
+  marquerLiberee?: (filmId: number, reservationId: string) => void,
+) {
   const conservees = new Set(e instanceof EchecTournage ? e.reservationsConservees : []);
   const dejaVues = new Set<string>();
   const enAttente: string[] = [];
@@ -27,6 +29,12 @@ export async function resultatEchecTournage(e: unknown, reservations: CreditsPri
     try { if (e instanceof EchecTournage) marquerLiberee?.(e.filmId, r.reservationId); }
     catch { marquageEnAttente.push(r.reservationId); }
   }
+  return { enAttente, marquageEnAttente };
+}
+
+/** Libère une seule fois les réservations non associées à une prise lancée. */
+export async function resultatEchecTournage(e: unknown, reservations: CreditsPrise[], fac: Pick<Facturation, 'liberer'> | null, marquerLiberee?: (filmId: number, reservationId: string) => void) {
+  const { enAttente, marquageEnAttente } = await libererReservations(e, reservations, fac, marquerLiberee);
   return {
     error: e instanceof Error ? e.message : 'tournage impossible',
     ...(e instanceof EchecTournage ? { filmId: e.filmId, prises: e.prises } : {}),
