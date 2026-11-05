@@ -226,7 +226,7 @@ export default function Viewer({ takeId, onClose, onStep, langue }: { takeId: nu
       <Spill src={posterUrl(take.id)} key={take.id} />
       <div className="viewer-stage" onClick={(e) => e.stopPropagation()}>
         {object && take.status === 'done'
-          ? <ObjectStage take={take} look={look} onLook={setLook} />
+          ? <ObjectStage take={take} look={look} onLook={setLook} langue={langue} />
           : image
           ? <img src={mediaUrl(take.id)} alt="" className={s.app === 'cutout' && s.background === 'transparent' ? 'checker' : undefined} />
           : <video src={mediaUrl(take.id)} controls autoPlay muted loop playsInline />}
@@ -398,11 +398,11 @@ function HdrFiles({ take }: { take: Take }) {
  * An Object take in the Viewer: the GLB to grab and turn, with the clay and
  * wire looks for judging the geometry, and the subject it was built from.
  */
-function ObjectStage({ take, look, onLook }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void }) {
+function ObjectStage({ take, look, onLook, langue }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void; langue?: LangueClient }) {
   return (
     <div className="object-stage">
       <Suspense fallback={<img className="model-poster" src={posterUrl(take.id)} alt="" />}>
-        <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} />
+        <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} langue={langue} />
       </Suspense>
       <div className="object-looks" onClick={(e) => e.stopPropagation()}>
         {(['lit', 'clay', 'wire'] as const).map((l) => (

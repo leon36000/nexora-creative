@@ -9,16 +9,26 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import type { LangueClient } from '../shared/creationLanguage';
+import { meshCopy } from './meshCopy';
 
 export type ModelLook = 'lit' | 'clay' | 'wire';
 
-export default function ModelView({ src, poster, look = 'lit', spin = true, className, style }: {
+const MESSAGE_MODELE_INDISPONIBLE_EN = 'This browser could not show the model. Download the GLB to open it elsewhere.';
+
+export function ModelViewUnavailable({ langue }: { langue?: LangueClient }) {
+  const message = langue ? meshCopy(langue).modelViewerUnavailable : MESSAGE_MODELE_INDISPONIBLE_EN;
+  return <span className="badge model-note">{message}</span>;
+}
+
+export default function ModelView({ src, poster, look = 'lit', spin = true, className, style, langue }: {
   src: string;
   poster?: string;
   look?: ModelLook;
   spin?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  langue?: LangueClient;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -163,7 +173,7 @@ export default function ModelView({ src, poster, look = 'lit', spin = true, clas
       <div ref={host} className="model-canvas" />
       {state !== 'ready' && poster && <img className="model-poster" src={poster} alt="" />}
       {state === 'loading' && <span className="badge model-note">Loading the model...</span>}
-      {state === 'error' && <span className="badge model-note">This browser could not show the model. Download the GLB to open it elsewhere.</span>}
+      {state === 'error' && <ModelViewUnavailable langue={langue} />}
       {stats && <span className="model-stats mono">{stats.tris.toLocaleString()} triangles</span>}
     </div>
   );

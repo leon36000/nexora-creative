@@ -328,7 +328,7 @@ function ObjectFocus({ take, look, onLook, onOpen, langue }: { take: Take; look:
     <>
     <div className="object-focus" ref={vue}>
       <Suspense fallback={<div className="model-view"><img className="model-poster" src={posterUrl(take.id)} alt="" /></div>}>
-        <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} />
+        <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} langue={langue} />
       </Suspense>
       <div className="object-side">
         <div className="label">{c.from}</div>
