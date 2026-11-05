@@ -109,8 +109,13 @@ def construire(archive_path, sha, dossier, runner=subprocess.run):
                         source_sha[item.name] = toutes_sources[item.name]
     home = dossier / 'home-build'
     home.mkdir(mode=0o700)
+    config_user = home / 'npm-user-config'
+    config_global = home / 'npm-global-config'
+    config_user.touch(mode=0o600, exist_ok=False)
+    config_global.touch(mode=0o600, exist_ok=False)
     env = {'PATH': '/usr/local/bin:/usr/bin:/bin', 'HOME': str(home.resolve()),
-           'NPM_CONFIG_USERCONFIG': '/dev/null', 'NPM_CONFIG_GLOBALCONFIG': '/dev/null'}
+           'NPM_CONFIG_USERCONFIG': str(config_user.resolve()),
+           'NPM_CONFIG_GLOBALCONFIG': str(config_global.resolve())}
     for component in ('app', 'mode-studio'):
         for cmd in (['npm', 'ci', '--no-audit', '--no-fund'], ['npm', 'run', 'build']):
             runner(cmd, cwd=dossier / component, env=env, check=True)

@@ -48,8 +48,13 @@ class Preparation(unittest.TestCase):
         self.assertEqual(json.loads((release / 'SOURCE_FILES.json').read_text()),
                          ['app/dist/index.html', 'app/package.json', 'mode-studio/dist/index.html'])
         for _, opts in appels:
-            self.assertEqual(opts['env']['NPM_CONFIG_USERCONFIG'], '/dev/null')
-            self.assertEqual(opts['env']['NPM_CONFIG_GLOBALCONFIG'], '/dev/null')
+            user_config = Path(opts['env']['NPM_CONFIG_USERCONFIG'])
+            global_config = Path(opts['env']['NPM_CONFIG_GLOBALCONFIG'])
+            self.assertNotEqual(user_config, global_config)
+            self.assertEqual(user_config.read_bytes(), b'')
+            self.assertEqual(global_config.read_bytes(), b'')
+            self.assertEqual(user_config.parent, release / 'home-build')
+            self.assertEqual(global_config.parent, release / 'home-build')
             self.assertNotIn('NODE_OPTIONS', opts['env'])
 
     def test_echec_build_ne_cree_pas_marqueur_ni_ne_touche_application(self):
