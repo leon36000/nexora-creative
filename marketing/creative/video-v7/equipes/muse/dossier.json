@@ -1,0 +1,1293 @@
+{
+ "bpm": 120,
+ "cles": [
+  {
+   "format": "16:9",
+   "graine": 101,
+   "id": "k01",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an old Cooke 400mm telephoto lens from 300 metres away, compressed perspective, heat shimmer; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, dusk on a rainy Scottish hillside: a huge dragon with scarred, mud-caked leathery hide clings to a real ruined stone keep and breathes a jet of real fire onto wet battlements; fire lights drizzle and wet stone, thick black smoke drifts across heavy overcast clouds, a man in a yellow raincoat and two soldiers in muddy cloaks stand in silhouette in long grass in foreground for scale."
+  },
+  {
+   "format": "16:9",
+   "graine": 102,
+   "id": "k02",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld Arri Alexa 35 with a 24mm Panavision lens, dirt and rain drops on the lens; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, night on a real castle rampart in Wales in rain, soldier point of view: belly and wings of an enormous dragon pass few metres overhead, wet hide lit from below by burning torches and fires, sparks and embers fly, torn banner whips in wind, a man in a yellow raincoat ducks in foreground for scale."
+  },
+  {
+   "format": "16:9",
+   "graine": 103,
+   "id": "k03",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld Arri Alexa Mini with a 32mm lens, rain and sea spray on the lens; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, night storm on deck of a real trawler in the North Atlantic off Iceland: a colossal sea monster with scarred wet hide rises from black waves beside the boat, lit by deck floodlights and lightning flashes, rain and spray, rusted railings and wet oilskins, three crew in orange oilskins cling to railing in foreground for scale."
+  },
+  {
+   "format": "16:9",
+   "graine": 104,
+   "id": "k04",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an Arri Alexa 35 with a Cooke S7 75mm lens, dust on the lens; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, dusk on a real desert road in Morocco: a dark station wagon stopped sideways with real fire from the engine, black smoke and dust, cracked asphalt and dry bushes, a man in a yellow raincoat filming with a phone in foreground right for scale, mountains far."
+  },
+  {
+   "format": "16:9",
+   "graine": 105,
+   "id": "k05",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a motion-control camera with a 35mm lens; the warships are large detailed physical miniature models with weathered paint, panel lines and scorch marks, lit by a single hard key light like 1980s practical model photography; natural exposure, visible film grain, slight halation around bright sources, low Earth orbit seen from a real spacecraft window: two battered grey warships pass close, hard unfiltered sunlight from one side and pitch-black shadows, real cloud-covered Earth below, small burst of debris and vented gas, plain dark vacuum."
+  },
+  {
+   "format": "16:9",
+   "graine": 106,
+   "id": "k06",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an Arri Alexa 65 with a 50mm lens, shot like aerial footage from a chase helicopter, high-altitude haze; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, above a real cloud layer at sunset over the Alps: an enormous dragon grips the scarred steel hull of a grey cargo airship and breathes fire onto plating; rivets, rust streaks, buckled panels, fire lights hull, real sunlight and haze, small crew figures on gondola for scale."
+  },
+  {
+   "format": "16:9",
+   "graine": 107,
+   "id": "k07",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a Panavision 600mm wildlife telephoto lens, shot like a BBC nature documentary; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, sunrise over real misty mountain valleys in Patagonia: a line of nine dragons flies through layers of morning mist, backlit by low sun, heavy haze, the closest dragon large in right third with scarred hide and wide wings beating, real pine forests below."
+  },
+  {
+   "format": "16:9",
+   "graine": 108,
+   "id": "k08",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld Arri Alexa Mini with a 32mm lens, rain on the lens; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, night heavy rain on a real industrial rooftop in Rotterdam: two stunt performers in soaked dark work jackets cross two orange plasma blades; the blades are the only light, practical orange light on wet skin and rain drops, steam where rain hits blades, sodium street lights blurred far below, puddles, a man in yellow raincoat watches from doorway background for scale."
+  },
+  {
+   "format": "16:9",
+   "graine": 109,
+   "id": "k09",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld Arri Alexa 35 with a 27mm Panavision Primo lens, embers and ash in air; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, night in a real old town square in Lisbon during a fire: a crowd of forty extras in wet coats runs toward camera away from a burning facade, practical fire and smoke, wet cobblestones reflecting flames, a man in a yellow raincoat centre foreground running and looking back for scale."
+  },
+  {
+   "format": "16:9",
+   "graine": 110,
+   "id": "k10",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an old Cooke 400mm telephoto lens from a cliff, rain streaks and salt spray on the lens; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, night storm at a real lighthouse in Brittany: a giant wave crashes over a rock platform, white spray, the beam sweeps through rain, a keeper in a yellow raincoat clings to railing in foreground for scale, wet granite and foam."
+  },
+  {
+   "format": "16:9",
+   "graine": 111,
+   "id": "k11",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with an Arri Alexa 65 with a 50mm lens from a chase helicopter, dust and heat haze; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, midday in a real red canyon in Utah: a dusty pickup truck speeds on a dirt track, a low dragon flies just behind over rocks, dust cloud, hard sun, scrub, the driver visible through windshield for scale."
+  },
+  {
+   "format": "16:9",
+   "graine": 112,
+   "id": "k12",
+   "prompt": "Production still from a live-action feature film, photographed on location on 35mm film (Kodak Vision3 500T) with a handheld Arri Alexa Mini with a 40mm Panavision lens close to the ground, ash and heat shimmer; natural exposure, visible film grain, slight halation around bright sources, soft lens imperfections, dusk on a real volcanic rock field in Iceland: a small ginger cat stands on black rock, chest puffed, spitting a jet of real fire from a practical gas effect, firelight from fissures behind, moss and rain drops, a human hand with a yellow sleeve in foreground left for scale."
+  }
+ ],
+ "equipe": "muse",
+ "montage": {
+  "bpm": 120,
+  "dossiers_voix": {
+   "en": "voix/en",
+   "fr": "voix/fr"
+  },
+  "marque": "marque-v7.json",
+  "musique": {
+   "coupes": [],
+   "ducking_db": 7,
+   "entree": 0,
+   "fichier": "musique:m1",
+   "gain_db": -7,
+   "trous": [
+    [
+     10.5,
+     11.5
+    ],
+    [
+     22.5,
+     23.5
+    ],
+    [
+     30.0,
+     31.0
+    ],
+    [
+     49.0,
+     50.0
+    ]
+   ]
+  },
+  "phase": 0,
+  "segments": [
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      1.0,
+      0.52,
+      0.48,
+      1.1
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.55,
+      0.45,
+      1
+     ],
+     [
+      1.0,
+      0.53,
+      0.47,
+      1.05
+     ]
+    ],
+    "debut": 0.0,
+    "duree": 1.0,
+    "entree": 0.8,
+    "etalonnage": "nuit_feu",
+    "fichier": "plan:p01",
+    "flash": [
+     [
+      0.6,
+      "os",
+      0.12
+     ]
+    ],
+    "secousses": [
+     [
+      0.6,
+      22,
+      0.4
+     ]
+    ],
+    "son_db": -6,
+    "type": "plan"
+   },
+   {
+    "clavier_db": -18,
+    "debut": 1.0,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s01",
+    "duree": 2.0,
+    "etapes": [
+     "vide",
+     "saisie",
+     "saisie-fin",
+     "survol"
+    ],
+    "type": "saisie",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     296,
+     532,
+     474
+    ]
+   },
+   {
+    "debut": 3.0,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s01",
+    "duree": 1.0,
+    "termes_cles": [
+     "dragon",
+     "château",
+     "feu",
+     "flammes",
+     "rugissement"
+    ],
+    "type": "boost",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     490,
+     532,
+     765
+    ]
+   },
+   {
+    "debut": 4.0,
+    "duree": 0.5,
+    "style": "claque",
+    "texte_id": "tourne",
+    "type": "titre"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.5,
+      0.53,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.45,
+      1
+     ],
+     [
+      2.5,
+      0.52,
+      0.47,
+      1.08
+     ]
+    ],
+    "debut": 4.5,
+    "duree": 2.5,
+    "entree": 0.5,
+    "etalonnage": "nuit_feu",
+    "fichier": "plan:p02",
+    "son_db": -6,
+    "textes": [
+     {
+      "duree": 1.5,
+      "position": "bas",
+      "style": "legende",
+      "t": 0.2,
+      "texte_id": "ch_video"
+     }
+    ],
+    "type": "plan"
+   },
+   {
+    "clavier_db": -18,
+    "debut": 7.0,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s04",
+    "duree": 2.0,
+    "etapes": [
+     "vide",
+     "saisie",
+     "saisie-fin",
+     "survol"
+    ],
+    "type": "saisie",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     296,
+     532,
+     474
+    ]
+   },
+   {
+    "debut": 9.0,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s04",
+    "duree": 1.0,
+    "termes_cles": [
+     "monstre",
+     "océan",
+     "tempête",
+     "éclairs",
+     "flots"
+    ],
+    "type": "boost",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     490,
+     532,
+     765
+    ]
+   },
+   {
+    "debut": 10.0,
+    "duree": 0.5,
+    "style": "claque",
+    "texte_id": "plus_fou",
+    "type": "titre"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.5,
+      0.52,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.52,
+      0.45,
+      1
+     ],
+     [
+      2.5,
+      0.5,
+      0.47,
+      1.08
+     ]
+    ],
+    "debut": 10.5,
+    "duree": 2.5,
+    "entree": 0.5,
+    "etalonnage": "orage",
+    "fichier": "plan:p03",
+    "son_db": -5,
+    "textes": [
+     {
+      "duree": 1.2,
+      "position": "haut",
+      "style": "legende",
+      "t": 0.2,
+      "texte_id": "mer"
+     }
+    ],
+    "type": "plan"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.0,
+      0.52,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.55,
+      0.45,
+      1
+     ],
+     [
+      2.0,
+      0.53,
+      0.47,
+      1.05
+     ]
+    ],
+    "debut": 13.0,
+    "duree": 2.0,
+    "entree": 0.3,
+    "etalonnage": "neutre",
+    "fichier": "plan:p04",
+    "son_db": -6,
+    "type": "plan"
+   },
+   {
+    "couches": [
+     {
+      "entree": 0.5,
+      "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/detourage-src/duel-795.mp4",
+      "texte_id": "brut"
+     },
+     {
+      "entree": 0.5,
+      "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/detourage/sorties/matte.mp4",
+      "texte_id": "masque"
+     },
+     {
+      "entree": 0.5,
+      "fichier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/detourage/sorties/composite.mp4",
+      "texte_id": "final"
+     }
+    ],
+    "debut": 15.0,
+    "duree": 2.0,
+    "type": "avant_apres"
+   },
+   {
+    "debut": 17.0,
+    "duree": 1.5,
+    "media": {
+     "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/relief"
+    },
+    "texte_id": "ch_relief",
+    "type": "chapitre"
+   },
+   {
+    "clavier_db": -18,
+    "debut": 18.5,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s07",
+    "duree": 2.0,
+    "etapes": [
+     "vide",
+     "saisie",
+     "saisie-fin",
+     "survol"
+    ],
+    "type": "saisie",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     296,
+     532,
+     474
+    ]
+   },
+   {
+    "debut": 20.5,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/s07",
+    "duree": 1.0,
+    "termes_cles": [
+     "dragon",
+     "croiseur",
+     "orbite",
+     "feu",
+     "planète"
+    ],
+    "type": "boost",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     490,
+     532,
+     765
+    ]
+   },
+   {
+    "debut": 21.5,
+    "duree": 0.5,
+    "style": "claque",
+    "texte_id": "plus_grand",
+    "type": "titre"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.5,
+      0.52,
+      0.48,
+      1.06
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.5,
+      0.52,
+      0.5,
+      1.05
+     ]
+    ],
+    "debut": 22.0,
+    "duree": 2.5,
+    "entree": 0.5,
+    "etalonnage": "espace",
+    "fichier": "plan:p05",
+    "son_db": -8,
+    "textes": [
+     {
+      "duree": 1.2,
+      "position": "bas",
+      "style": "legende",
+      "t": 0.2,
+      "texte_id": "ch_image"
+     }
+    ],
+    "type": "plan"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.5,
+      0.53,
+      0.48,
+      1.07
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.55,
+      0.45,
+      1
+     ],
+     [
+      2.5,
+      0.53,
+      0.47,
+      1.06
+     ]
+    ],
+    "debut": 24.5,
+    "duree": 2.5,
+    "entree": 0.5,
+    "etalonnage": "neutre",
+    "fichier": "plan:p06",
+    "son_db": -6,
+    "type": "plan"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      3.0,
+      0.52,
+      0.48,
+      1.06
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.6,
+      0.5,
+      1
+     ],
+     [
+      3.0,
+      0.58,
+      0.48,
+      1.06
+     ]
+    ],
+    "debut": 27.0,
+    "duree": 3.0,
+    "entree": 0.5,
+    "etalonnage": "aube",
+    "fichier": "plan:p07",
+    "son_db": -8,
+    "textes": [
+     {
+      "duree": 1.5,
+      "position": "haut",
+      "style": "legende",
+      "t": 0.3,
+      "texte_id": "ciel"
+     }
+    ],
+    "type": "plan"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.5,
+      0.52,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.45,
+      1
+     ],
+     [
+      2.5,
+      0.52,
+      0.47,
+      1.06
+     ]
+    ],
+    "debut": 30.0,
+    "duree": 2.5,
+    "entree": 0.5,
+    "etalonnage": "orage",
+    "fichier": "plan:p08",
+    "son_db": -5,
+    "type": "plan"
+   },
+   {
+    "debut": 32.5,
+    "duree": 1.5,
+    "media": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/studio2/0006-editeur.jpg",
+    "texte_id": "ch_studio",
+    "type": "chapitre"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      2.0,
+      0.52,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.45,
+      1
+     ],
+     [
+      2.0,
+      0.52,
+      0.47,
+      1.06
+     ]
+    ],
+    "debut": 34.0,
+    "duree": 2.0,
+    "entree": 0.5,
+    "etalonnage": "nuit_feu",
+    "fichier": "plan:p09",
+    "son_db": -5,
+    "textes": [
+     {
+      "duree": 1.2,
+      "position": "bas",
+      "style": "legende",
+      "t": 0.2,
+      "texte_id": "ch_voix"
+     }
+    ],
+    "type": "plan"
+   },
+   {
+    "debut": 36.0,
+    "duree": 4.0,
+    "rushes": [
+     {
+      "entree": 0.8,
+      "fichier": "plan:p01"
+     },
+     {
+      "entree": 0.5,
+      "fichier": "plan:p03"
+     },
+     {
+      "entree": 0.5,
+      "fichier": "plan:p05"
+     },
+     {
+      "entree": 0.8,
+      "fichier": "plan:p06"
+     },
+     {
+      "entree": 0.5,
+      "fichier": "plan:p08"
+     },
+     {
+      "entree": 0.3,
+      "fichier": "plan:p04"
+     },
+     {
+      "entree": 1.0,
+      "fichier": "plan:p07"
+     },
+     {
+      "entree": 0.5,
+      "fichier": "plan:p10"
+     }
+    ],
+    "textes": [
+     {
+      "duree": 2.0,
+      "position": "haut",
+      "style": "legende",
+      "t": 0.2,
+      "texte_id": "mur"
+     }
+    ],
+    "type": "mosaique"
+   },
+   {
+    "clavier_db": -18,
+    "debut": 40.0,
+    "dossier": "/home/pc6/nexora-creative-data/promo/v6-creative/captures/boost/tout",
+    "duree": 1.0,
+    "type": "saisie",
+    "viewport": [
+     1600,
+     900
+    ],
+    "zone": [
+     100,
+     296,
+     532,
+     474
+    ]
+   },
+   {
+    "debut": 41.0,
+    "duree": 0.5,
+    "style": "claque",
+    "texte_id": "tout",
+    "type": "titre"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      1.5,
+      0.52,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.45,
+      1
+     ],
+     [
+      1.5,
+      0.52,
+      0.47,
+      1.06
+     ]
+    ],
+    "debut": 41.5,
+    "duree": 1.5,
+    "entree": 0.5,
+    "etalonnage": "orage",
+    "fichier": "plan:p10",
+    "son_db": -6,
+    "type": "plan"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      1.5,
+      0.53,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.45,
+      1
+     ],
+     [
+      1.5,
+      0.52,
+      0.47,
+      1.06
+     ]
+    ],
+    "debut": 43.0,
+    "duree": 1.5,
+    "entree": 0.5,
+    "etalonnage": "neutre",
+    "fichier": "plan:p11",
+    "son_db": -6,
+    "type": "plan"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      1.5,
+      0.52,
+      0.48,
+      1.1
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.55,
+      0.45,
+      1
+     ],
+     [
+      1.5,
+      0.53,
+      0.47,
+      1.05
+     ]
+    ],
+    "debut": 44.5,
+    "duree": 1.5,
+    "entree": 2.0,
+    "etalonnage": "nuit_feu",
+    "fichier": "plan:p01",
+    "son_db": -6,
+    "type": "plan"
+   },
+   {
+    "debut": 46.0,
+    "duree": 3.0,
+    "type": "carton"
+   },
+   {
+    "cadrage": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      5.0,
+      0.52,
+      0.48,
+      1.08
+     ]
+    ],
+    "cadrage_v": [
+     [
+      0,
+      0.5,
+      0.5,
+      1
+     ],
+     [
+      5.0,
+      0.52,
+      0.48,
+      1.06
+     ]
+    ],
+    "debut": 49.0,
+    "duree": 5.0,
+    "entree": 0.2,
+    "etalonnage": "neutre",
+    "fichier": "plan:p12",
+    "son_db": -5,
+    "textes": [
+     {
+      "duree": 2.0,
+      "position": "bas",
+      "style": "legende",
+      "t": 0.3,
+      "texte_id": "lui_aussi"
+     }
+    ],
+    "type": "plan"
+   },
+   {
+    "debut": 54.0,
+    "duree": 2.0,
+    "texte_id": "bonus",
+    "type": "noir"
+   }
+  ],
+  "sfx": [
+   {
+    "db": -10,
+    "duree": 0.5,
+    "t": 0.0,
+    "type": "impact"
+   },
+   {
+    "db": -14,
+    "duree": 0.8,
+    "t": 3.0,
+    "type": "riser"
+   },
+   {
+    "db": -14,
+    "duree": 0.3,
+    "t": 4.5,
+    "type": "whoosh"
+   },
+   {
+    "db": -10,
+    "duree": 1.0,
+    "t": 10.5,
+    "type": "boom"
+   },
+   {
+    "db": -9,
+    "duree": 1.2,
+    "t": 13.0,
+    "type": "explosion"
+   },
+   {
+    "db": -12,
+    "duree": 1.0,
+    "t": 22.0,
+    "type": "sub"
+   },
+   {
+    "db": -11,
+    "t": 24.5,
+    "type": "impact"
+   },
+   {
+    "db": -10,
+    "t": 30.0,
+    "type": "impact"
+   },
+   {
+    "db": -10,
+    "t": 41.0,
+    "type": "impact"
+   },
+   {
+    "db": -14,
+    "duree": 0.3,
+    "t": 44.5,
+    "type": "whoosh"
+   }
+  ],
+  "voix": [
+   {
+    "db": 0,
+    "id": "v01",
+    "langues": [
+     "fr"
+    ],
+    "t": 34.2
+   },
+   {
+    "db": 0,
+    "id": "v02",
+    "langues": [
+     "fr"
+    ],
+    "t": 50.5
+   }
+  ],
+  "textes": "textes.json"
+ },
+ "musiques": [
+  {
+   "id": "m1",
+   "moteur": "lyria-pro",
+   "prompt": "120 BPM hybrid orchestral action cue, 60 seconds, built for picture cuts. Signature 3-note brass motif: G3 - Eb3 - G4, hammered, memorable. [0.0-4.0] Cold open: taiko hits, brass stabs, fast strings, huge impacts on 0.0 and 4.0. [4.0-10.5] Driving drums, low brass ostinato, rising violins, riser into 10.0 hit. [10.5-15.0] Low boom, sub drop, taiko groove, choir shouts. [15.0-18.5] Breakdown, ticking percussion, harp pulses. [18.5-22.0] Build: snare roll, brass climb, full stop with 0.5s true silence at 21.5-22.0 before impact. [22.0-30.0] Largest section: deep drums, anthem brass on motif, choir, crashes on 24.5 and 27.0, pull back 27.0-30.0 to strings and air. [30.0-36.0] Massive hit at 30.0 then drums, low synth bass, motif doubled. [36.0-41.5] Short hits on every 0.5s for wall, playful. [41.5-46.0] Fast runs, whooshes, final hit 46.0 then stripped piano on motif. [46.0-56.0] Quiet piano motif, low strings, warm end, tiny hit at 54.0, ring out."
+  },
+  {
+   "id": "m2",
+   "moteur": "lyria-pro",
+   "prompt": "120 BPM dark electronic tension cue, 60 seconds, built for picture cuts. Signature 3-note low motif: G2 - Eb2 - G3 on cellos and synth bass, memorable. [0.0-4.0] Deep taiko, filtered noise, impacts 0.0 and 4.0. [4.0-10.5] Pulse synth 120 BPM, low strings ostinato, riser to 10.0. [10.5-15.0] Sub booms, metallic hits, sparse drums. [15.0-18.5] Minimal ticks and piano fragments. [18.5-22.0] Rising pulse, drum fill, 0.5s true silence 21.5-22.0. [22.0-30.0] Wide low section: huge drums, low brass motif, airy pads, drops on 24.5 and 27.0, thin 27.0-30.0. [30.0-36.0] Hard hit 30.0, distorted bass, driving pulse. [36.0-41.5] Short stabs each 0.5s. [41.5-46.0] Fast arps, risers, hit 46.0. [46.0-56.0] Solo piano motif, deep pad, quiet close, small hit 54.0."
+  },
+  {
+   "id": "m3",
+   "moteur": "lyria-pro",
+   "prompt": "120 BPM drums and piano minimal action cue, 60 seconds, built for picture cuts. Signature 3-note piano motif: G4 - Eb4 - G5, bright and memorable. [0.0-4.0] Solo drums and piano stabs, hits 0.0 and 4.0. [4.0-10.5] Light groove, piano ostinato, build to 10.0. [10.5-15.0] Low toms, piano left hand motif. [15.0-18.5] Break, brushes and felt piano. [18.5-22.0] Crescendo roll, stop, 0.5s true silence 21.5-22.0. [22.0-30.0] Open drums, brass-like piano chords on motif, accents 24.5 and 27.0, soft 27.0-30.0. [30.0-36.0] Big hit 30.0, full drums, joyful motif. [36.0-41.5] Bouncy hits each 0.5s for image wall. [41.5-46.0] Quick fills, hit 46.0. [46.0-56.0] Intimate piano motif alone, warm strings, gentle hit 54.0, end."
+  }
+ ],
+ "plans": [
+  {
+   "cle": "k01",
+   "format": "16:9",
+   "graine": 201,
+   "id": "p01",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, long-lens camera on a tripod with a slight pan, compressed telephoto perspective, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon arches its neck and breathes a long jet of fire onto the battlements, burning debris falls, smoke rolls in the wind, the man in the yellow raincoat in the foreground flinches and raises his arm. The camera pans slightly to follow the flames. No text, no logos.\n\noverall_soundscape: Roaring fire, crackling burning timber, heavy rain, a deep animal growl in the distance, wind.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k02",
+   "format": "16:9",
+   "graine": 202,
+   "id": "p02",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera operator running along the wall, strong shake, the frame shudders as the creature passes, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon sweeps low over the rampart from right to left, the downdraft whips rain and embers into the lens, the camera ducks and recovers, fires burn on the wall. A soldier shouts <d>[French] Baissez-vous ! </d> No text, no logos.\n\noverall_soundscape: Deafening wingbeats, gusting wind, rain, crackling fires, men shouting in the distance.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k03",
+   "format": "16:9",
+   "graine": 203,
+   "id": "p03",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera operator braced against a cabin door, real shake, water hits the lens, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The sea monster rises and crashes against the hull, tons of water fall on the deck, the boat rolls, the crew slip and hold the rail. The camera holds then tilts up. No text, no logos.\n\noverall_soundscape: Howling storm, crashing waves, metal groan, rain, deep animal bellow, men shouting.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k04",
+   "format": "16:9",
+   "graine": 204,
+   "id": "p04",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, long-lens camera on a tripod with a slow push in, heat shimmer, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The car bursts, doors and glass fly, a fireball rises then collapses, dust and debris roll outward, the man in the foreground steps back. No text, no logos.\n\noverall_soundscape: Dull detonation, tearing metal, shattering glass, fire roar, desert wind.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k05",
+   "format": "16:9",
+   "graine": 205,
+   "id": "p05",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, motion-control camera gliding forward between the hulls, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The camera glides forward between two hulls as a small burst throws metal debris and white vented gas across the frame, hard sunlight flickers across plating. No text, no logos.\n\noverall_soundscape: Muffled metallic groans through the hull, dull distant impact, hiss of venting gas, near silence.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k06",
+   "format": "16:9",
+   "graine": 206,
+   "id": "p06",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, aerial camera from a chase helicopter, slight vibration, the frame drifts with the wind, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The dragon tears at the hull and breathes fire, metal plates buckle and fall away tumbling into the clouds, smoke streams backwards in the wind. No text, no logos.\n\noverall_soundscape: Roaring wind, dragon roar, tearing metal, deep engine drone, fire.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k07",
+   "format": "16:9",
+   "graine": 207,
+   "id": "p07",
+   "images": 175,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, wildlife camera on a gimbal tracking the flock, long-lens compression with gentle drift, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The flock flies slowly across the valley through mist, wings beating unevenly like real birds, the closest dragon banks and releases a small puff of smoke, the sun rises behind. No text, no logos.\n\noverall_soundscape: Wind over mountains, distant cries of the creatures, faint wingbeats.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k08",
+   "format": "16:9",
+   "graine": 208,
+   "id": "p08",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld camera operator circling the fighters with real shake, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The fighters clash twice, sparks and steam burst at each impact, one fighter is pushed back and slips on the wet roof, rain pours, the camera circles closer. A fighter shouts <d>[French] Tiens bon ! </d> No text, no logos.\n\noverall_soundscape: Heavy rain, electric hum and crackle of the blades, heavy impacts, boots on wet metal, breathing.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k09",
+   "format": "16:9",
+   "graine": 209,
+   "id": "p09",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, handheld operator retreating before the crowd with strong shake and slight focus breathing, natural motion blur from a 180-degree shutter, real physics and weight, practical fire, smoke and debris, film grain. The crowd sprints past the camera, the man in the yellow raincoat stumbles then runs, burning timber falls behind, ash flies. He shouts <d>[French] Par la ! Courez ! </d> No text, no logos.\n\noverall_soundscape: Crowd panic, footsteps on cobblestones, fire roar, collapsing timber, rain.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k10",
+   "format": "16:9",
+   "graine": 210,
+   "id": "p10",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, tripod long-lens camera locked off with slight shake in the wind, water drops on the lens, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. A wave explodes on the rocks and sprays over the platform, the keeper ducks, the beam passes, rain lashes. No text, no logos.\n\noverall_soundscape: Deafening surf, howling wind, rain, distant foghorn.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k11",
+   "format": "16:9",
+   "graine": 211,
+   "id": "p11",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, chase helicopter camera tracking sideways with vibration and fast lateral move, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The truck skids in a turn, the dragon swoops low scattering dust and stones, the camera tracks and banks. No text, no logos.\n\noverall_soundscape: Engine roar, tires on gravel, wind, wingbeats, dragon cry.\n\nnon_diegetic_music: N/A"
+  },
+  {
+   "cle": "k12",
+   "format": "16:9",
+   "graine": 212,
+   "id": "p12",
+   "images": 124,
+   "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced.\n\nintegrated_multimodal_description: [Shot 1] Live-action footage shot on 35mm film, low handheld camera pushing in slowly with slight shake, natural motion blur from a 180-degree shutter, slight focus breathing, real physics and weight, practical fire, smoke and debris, film grain. The cat inhales then spits a long jet of flames skyward, shakes its head, embers fall, the camera pushes in. A woman laughs off camera <d>[French] Encore ! Bravo ! </d> No text, no logos.\n\noverall_soundscape: Wind, cat hiss then fire whoosh, crackling fissures, woman laughing.\n\nnon_diegetic_music: N/A"
+  }
+ ],
+ "temps_forts": [
+  {
+   "evenement": "impact ouverture dragon feu",
+   "t": 0.0
+  },
+  {
+   "evenement": "frappe clavier saisie s01",
+   "t": 1.0
+  },
+  {
+   "evenement": "explosion boost s01 + flash blanc",
+   "t": 3.0
+  },
+  {
+   "evenement": "claque CA TOURNE + hit",
+   "t": 4.0
+  },
+  {
+   "evenement": "entree survol rempart whoosh",
+   "t": 4.5
+  },
+  {
+   "evenement": "frappe clavier s04",
+   "t": 7.0
+  },
+  {
+   "evenement": "explosion boost s04",
+   "t": 9.0
+  },
+  {
+   "evenement": "claque PLUS FOU + hit",
+   "t": 10.0
+  },
+  {
+   "evenement": "surgissement monstre boom + trou natif",
+   "t": 10.5
+  },
+  {
+   "evenement": "explosion voiture",
+   "t": 13.0
+  },
+  {
+   "evenement": "balayage detourage",
+   "t": 15.0
+  },
+  {
+   "evenement": "chapitre relief",
+   "t": 17.0
+  },
+  {
+   "evenement": "frappe clavier s07",
+   "t": 18.5
+  },
+  {
+   "evenement": "explosion boost s07",
+   "t": 20.5
+  },
+  {
+   "evenement": "claque PLUS GRAND + silence",
+   "t": 21.5
+  },
+  {
+   "evenement": "entree espace sub + reprise",
+   "t": 22.0
+  },
+  {
+   "evenement": "impact dragon dirigeable",
+   "t": 24.5
+  },
+  {
+   "evenement": "motif doux flotte aube respiration",
+   "t": 27.0
+  },
+  {
+   "evenement": "climax duel + trou pluie",
+   "t": 30.0
+  },
+  {
+   "evenement": "chapitre studio",
+   "t": 32.5
+  },
+  {
+   "evenement": "foule + voix v01",
+   "t": 34.0
+  },
+  {
+   "evenement": "mosaique hit 1",
+   "t": 36.0
+  },
+  {
+   "evenement": "mosaique hit 2",
+   "t": 36.5
+  },
+  {
+   "evenement": "mosaique hit 3",
+   "t": 37.0
+  },
+  {
+   "evenement": "mosaique hit 4",
+   "t": 37.5
+  },
+  {
+   "evenement": "saisie tout clavier",
+   "t": 40.0
+  },
+  {
+   "evenement": "claque TOUT + hit",
+   "t": 41.0
+  },
+  {
+   "evenement": "boom phare",
+   "t": 41.5
+  },
+  {
+   "evenement": "whoosh canyon",
+   "t": 43.0
+  },
+  {
+   "evenement": "rappel dragon",
+   "t": 44.5
+  },
+  {
+   "evenement": "carton motif piano seul",
+   "t": 46.0
+  },
+  {
+   "evenement": "bonus chat trou natif",
+   "t": 49.0
+  },
+  {
+   "evenement": "voix v02",
+   "t": 50.5
+  },
+  {
+   "evenement": "noir final sub",
+   "t": 54.0
+  },
+  {
+   "evenement": "fin",
+   "t": 56.0
+  }
+ ],
+ "titre": "Tape petit. Vois grand.",
+ "voix": [
+  {
+   "direction": "Homme 30 ans, cire jaune, essouffle, mi-rire mi-panique, proche micro, naturel, pas de narration lisse. Personnage dans l'image.",
+   "id": "v01",
+   "moteur": "gemini38-puck",
+   "texte": "Attends… c'est moi qui ai tapé ça ?"
+  },
+  {
+   "direction": "Jeune femme amusee, legere, complice, parle au chat hors-champ, naturel, pas de voix pub.",
+   "id": "v02",
+   "moteur": "gemini38-fenrir",
+   "texte": "Oh ! Lui aussi, il veut jouer."
+  }
+ ]
+}
