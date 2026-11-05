@@ -314,6 +314,155 @@ class TestImportEvidenceV2(unittest.TestCase):
         self.assertIn("filter((f) => f.endsWith('.json'))", loader)
         self.assertEqual(importer.DEFAULT_REGISTRY.suffix, ".jsonl")
 
+    def test_schema_rejects_malformed_records_and_artifacts(self):
+        def check(change, message):
+            record = fixture_record(self.storage, self.repo)
+            change(record)
+            with self.assertRaisesRegex(importer.EvidenceError, message):
+                importer.validate_record(record)
+
+        cases = [
+            (lambda r: r.update(extra_field=True), "unknown record fields"),
+            (lambda r: r.pop("edition"), "missing record fields"),
+            (lambda r: r.update(record_id=[]), "invalid V2 record_id"),
+            (lambda r: r.update(team="muse"), "team and record_id do not agree"),
+            (lambda r: r.update(edition="  "), "edition must be nonempty"),
+            (lambda r: r.update(team_role="professor"), "must not assert professor approval"),
+            (lambda r: r.update(status="approved"), "must preserve unjudged"),
+            (lambda r: r.update(amd2_brief_id="AMD2-bad"), "amd2_brief_id must be null"),
+            (lambda r: r.update(amd2_corpus_sha256="bad"), "amd2_corpus_sha256 is invalid"),
+            (lambda r: r.update(replaces_v1_record=[]), "replaces_v1_record has an invalid shape"),
+            (lambda r: r["replaces_v1_record"].update(record_id="v7.workcut.muse.r1"), "matching archived V1"),
+            (lambda r: r["replaces_v1_record"].update(record_sha256="bad"), "record_sha256 is invalid"),
+            (lambda r: r["artifacts"].remove(next(a for a in r["artifacts"] if a["kind"] == "amd2_corpus")), "one canonical AMD2 corpus artifact"),
+            (lambda r: r.update(artifacts=[]), "artifacts must be a nonempty array"),
+            (lambda r: r["artifacts"].__setitem__(0, None), "has an invalid shape"),
+            (lambda r: r["artifacts"][0].update(root="outside"), "root is invalid"),
+            (lambda r: r["artifacts"][0].update(path="bad\\path"), "canonical relative path"),
+            (lambda r: r["artifacts"][0].update(path="/absolute"), "escapes its declared root"),
+            (lambda r: r["artifacts"][0].update(path="a/../b"), "escapes its declared root"),
+            (lambda r: r["artifacts"][0].update(sha256="bad"), "sha256 is invalid"),
+            (lambda r: r["artifacts"][0].update(size_bytes=True), "size_bytes is invalid"),
+            (lambda r: r["artifacts"][0].update(kind=" "), "kind is invalid"),
+            (lambda r: r["artifacts"].append(dict(r["artifacts"][0])), "duplicate artifact path"),
+            (lambda r: next(a for a in r["artifacts"] if a["kind"] == "amd2_corpus").update(path="other/corpus.json"), "canonical AMD2 corpus artifact"),
+            (lambda r: next(a for a in r["artifacts"] if a["kind"] == "archived_v1_registry").update(sha256="b" * 64), "recorded SHA-256"),
+            (lambda r: r["artifacts"].remove(next(a for a in r["artifacts"] if a["kind"] == "archived_v1_pc1_receipt")), "verification receipt"),
+            (lambda r: r.update(seed_reconciliation=None), "seed_reconciliation must be an array"),
+            (lambda r: r["seed_reconciliation"].__setitem__(0, {}), "invalid shape"),
+            (lambda r: r["seed_reconciliation"][0].update(plan_id=""), "missing its source"),
+            (lambda r: r["seed_reconciliation"][0].update(used_source=""), "missing its source"),
+            (lambda r: r["seed_reconciliation"][0].update(seed_kind="video"), "missing its source"),
+            (lambda r: r["seed_reconciliation"][0].update(declared=True), "must be integer or null"),
+            (lambda r: r["seed_reconciliation"][0].update(used=True), "must be integer or null"),
+            (lambda r: r["seed_reconciliation"][0].update(texte_brut=""), "must be nonempty or null"),
+            (lambda r: r["seed_reconciliation"][0].update(used=101, texte_brut="101"), "typed value and raw text"),
+            (lambda r: r["seed_reconciliation"][0].update(state="known"), "state does not match"),
+            (lambda r: r.update(observations=None), "observations must be a nonempty array"),
+            (lambda r: r.update(observations=[]), "observations must be a nonempty array"),
+            (lambda r: r["observations"].__setitem__(0, {"authority": "founder", "text": "approved"}), "Codex machine observation"),
+            (lambda r: r.update(lineage=None), "lineage must be an array"),
+            (lambda r: r.update(lineage=["legacy-id"]), "V2 records only"),
+            (lambda r: r.update(lineage=[r["record_id"]]), "own lineage parent"),
+            (lambda r: r.update(record_sha256="0" * 64), "canonical record content"),
+        ]
+        for change, message in cases:
+            with self.subTest(message=message):
+                check(change, message)
+
+    def test_non_object_record_and_archive_format_errors(self):
+        with self.assertRaisesRegex(importer.EvidenceError, "must be an object"):
+            importer.validate_record(None)
+
+        record = fixture_record(self.storage, self.repo)
+        archive = self.storage / "archive-v1/v7-workcuts-v1.jsonl"
+        original = archive.read_bytes()
+        for content, message in [
+            (original[:-1], "incomplete row"),
+            (b"\n" + original, "blank row"),
+            (b"not-json\n", "invalid JSON"),
+            (b"[]\n", "not an object"),
+            (b"{}\n", "occur exactly once"),
+        ]:
+            with self.subTest(message=message):
+                archive.write_bytes(content)
+                item = next(a for a in record["artifacts"] if a["kind"] == "archived_v1_registry")
+                item.update({"sha256": hashlib.sha256(content).hexdigest(), "size_bytes": len(content)})
+                record["replaces_v1_record"]["registry_sha256"] = item["sha256"]
+                with self.assertRaisesRegex(importer.EvidenceError, message):
+                    importer.verify_artifacts(record, self.storage, self.repo)
+        archive.write_bytes(original)
+
+    def test_registry_read_refuses_incomplete_blank_invalid_and_duplicate_lines(self):
+        cases = [
+            (b'{"unfinished":true}', "incomplete JSONL"),
+            (b"\n", "blank registry line"),
+            (b"not-json\n", "invalid V2 registry line"),
+        ]
+        for content, message in cases:
+            with self.subTest(message=message):
+                registry = self.base / "broken.jsonl"
+                registry.write_bytes(content)
+                with registry.open("rb") as stream:
+                    with self.assertRaisesRegex(importer.EvidenceError, message):
+                        importer._load_registry(stream.fileno())
+
+        record = fixture_record(self.storage, self.repo)
+        encoded = json.dumps(record) + "\n"
+        registry = self.base / "duplicate.jsonl"
+        registry.write_text(encoded + encoded, encoding="utf-8")
+        with registry.open("rb") as stream:
+            with self.assertRaisesRegex(importer.EvidenceError, "duplicate record_id"):
+                importer._load_registry(stream.fileno())
+
+    def test_artifact_roots_missing_files_and_non_regular_files_are_refused(self):
+        record = fixture_record(self.storage, self.repo)
+        record["artifacts"].append({
+            "root": "creative_data", "path": "fixture.bin", "sha256": "a" * 64,
+            "size_bytes": 0, "kind": "creative-test",
+        })
+        with self.assertRaisesRegex(importer.EvidenceError, "root was not supplied"):
+            importer.verify_artifacts(record, self.storage, self.repo)
+
+        record = fixture_record(self.storage, self.repo)
+        record["artifacts"][0]["path"] = "missing.mp4"
+        with self.assertRaisesRegex(importer.EvidenceError, "artifact is unavailable"):
+            importer.verify_artifacts(record, self.storage, self.repo)
+
+        record = fixture_record(self.storage, self.repo)
+        directory = self.storage / "directory.bin"
+        directory.mkdir()
+        record["artifacts"][0].update({"path": "directory.bin", "sha256": hashlib.sha256(b"").hexdigest(), "size_bytes": 0})
+        with self.assertRaisesRegex(importer.EvidenceError, "not a regular file"):
+            importer.verify_artifacts(record, self.storage, self.repo)
+
+    def test_cli_import_success_and_invalid_json_error(self):
+        from contextlib import redirect_stderr, redirect_stdout
+        import io
+
+        record = fixture_record(self.storage, self.repo)
+        record_path = self.base / "record.json"
+        record_path.write_text(json.dumps(record), encoding="utf-8")
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            result = importer.main([
+                str(record_path), "--registry", str(self.registry),
+                "--storage-root", str(self.storage), "--repo-root", str(self.repo),
+            ])
+        self.assertEqual(result, 0)
+        self.assertEqual(json.loads(stdout.getvalue())["result"], "imported")
+
+        invalid_path = self.base / "invalid.json"
+        invalid_path.write_text("{broken", encoding="utf-8")
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            result = importer.main([
+                str(invalid_path), "--registry", str(self.base / "invalid-cli.jsonl"),
+                "--storage-root", str(self.storage), "--repo-root", str(self.repo),
+            ])
+        self.assertEqual(result, 2)
+        self.assertIn("ERREUR", stderr.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
