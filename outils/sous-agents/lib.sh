@@ -9,16 +9,13 @@ SA_IMAGE="ghcr.io/berriai/litellm@sha256:7294b90f868c5c38c99b83021c7ba46f9b439e9
 SA_CONTAINER="nexora-sa-litellm"
 mkdir -p "$SA_HOME" "$SA_STATE/runs"; chmod 700 "$SA_HOME"
 
-sa_master_key() {  # crée la clé maître (0600) si absente et l'affiche sur stdout (usage interne uniquement)
-  if [ ! -s "$SA_HOME/master.key" ]; then
-    ( umask 077; printf 'sk-sa-%s' "$(openssl rand -hex 24)" > "$SA_HOME/master.key" )
-  fi
-  cat "$SA_HOME/master.key"
+sa_master_key() {  # clé validée/créée par Python; sortie capturée en interne par gateway.sh
+  python3 "$SA_DIR/master_key.py" --path "$SA_HOME/master.key"
 }
 sa_extract() {  # sa_extract <Nom> : valeur de « Nom: valeur » dans le fichier des clés
   awk -F': *' -v n="$1" '$1==n {print $2; exit}' "$SA_KEYFILE" | tr -d '\r\n '
 }
-sa_up() { curl -s -m 3 -o /dev/null -w '%{http_code}' "$SA_URL/health/liveliness" 2>/dev/null | grep -q '^200$'; }
+sa_up() { curl --noproxy '*' -s -m 3 -o /dev/null -w '%{http_code}' "$SA_URL/health/liveliness" 2>/dev/null | grep -q '^200$'; }
 sa_alias() {  # deepseek|muse|gemini -> alias
   case "$1" in deepseek|eco-deepseek) echo eco-deepseek;; muse|eco-muse) echo eco-muse;; gemini|eco-gemini) echo eco-gemini;; gemini-eleve|eco-gemini-eleve) echo eco-gemini-eleve;; *) return 1;; esac
 }
