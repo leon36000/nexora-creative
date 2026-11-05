@@ -180,8 +180,17 @@ def attendre(s, comfy, pid, t0):
         data = http(f"{comfy}/view?{q}", timeout=600)
         sortie = Path(s["sortie"]).expanduser()
         sortie.mkdir(parents=True, exist_ok=True)
-        local = sortie / f"{s['nom']}{Path(f['filename']).suffix}"
-        local.write_bytes(data)
+        extension = Path(f["filename"]).suffix
+        index = 1
+        while True:
+            nom = f"{s['nom']}{extension}" if index == 1 else f"{s['nom']}-{index}{extension}"
+            local = sortie / nom
+            try:
+                with local.open("xb") as fichier:
+                    fichier.write(data)
+                break
+            except FileExistsError:
+                index += 1
         moteur = None
         if ts.get("execution_start") and ts.get("execution_success"):
             moteur = round((ts["execution_success"] - ts["execution_start"]) / 1000, 1)

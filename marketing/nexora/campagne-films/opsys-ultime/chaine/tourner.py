@@ -182,8 +182,14 @@ def musique(equipe, n=None):
 
 # ------------------------------------------------------------------------------------------------------------- plans
 def derniere_image(video, sortie):
-    subprocess.run([FF, "-v", "error", "-y", "-sseof", "-0.08", "-i", str(video), "-frames:v", "1", "-update", "1", str(sortie)], check=True)
-    return sortie
+    sortie = Path(sortie)
+    cible = sortie
+    index = 2
+    while cible.exists() or cible.is_symlink():
+        cible = sortie.with_name(f"{sortie.stem}-{index}{sortie.suffix}")
+        index += 1
+    subprocess.run([FF, "-v", "error", "-n", "-sseof", "-0.08", "-i", str(video), "-frames:v", "1", "-update", "1", str(cible)], check=True)
+    return cible
 
 
 def spec_plan(equipe, D, p, prise=1, format_=None):

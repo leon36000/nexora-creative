@@ -139,12 +139,42 @@ def verifier_sources_video(equipe, version, sources):
     return manquants
 
 
+def verifier_fichier_libre(cible, type_artefact):
+    """Refuse de remplacer un artefact déjà présent, y compris un lien symbolique cassé."""
+    cible = Path(cible)
+    if cible.exists() or cible.is_symlink():
+        raise FileExistsError(f"Refus d'écraser {type_artefact} existant : {cible}")
+    return cible
+
+
 def verifier_sortie_libre(sortie):
-    """Refuse de remplacer un export déjà présent, y compris un lien symbolique cassé."""
-    sortie = Path(sortie)
-    if sortie.exists() or sortie.is_symlink():
-        raise FileExistsError(f"Refus d'écraser l'export existant : {sortie}")
-    return sortie
+    """Refuse de remplacer un export déjà présent."""
+    return verifier_fichier_libre(sortie, "l'export")
+
+
+def chemin_libre(cible):
+    """Retourne le premier nom libre en gardant intact tout artefact déjà présent."""
+    cible = Path(cible)
+    if not cible.exists() and not cible.is_symlink():
+        return cible
+    for n in range(2, 100_000):
+        candidat = cible.with_name(f"{cible.stem}-{n}{cible.suffix}")
+        if not candidat.exists() and not candidat.is_symlink():
+            return candidat
+    raise FileExistsError(f"Aucun nom libre trouvé près de : {cible}")
+
+
+def reserver_chemin_libre(cible):
+    """Réserve atomiquement un artefact de travail avant qu'un writer permissif l'ouvre."""
+    while True:
+        candidat = chemin_libre(cible)
+        try:
+            with candidat.open("xb"):
+                pass
+            return candidat
+        except FileExistsError:
+            # Un autre processus a pris ce nom entre la recherche et la réservation.
+            continue
 
 
 def creer_dossier_tranches(out_dir, equipe, version, brouillon):
@@ -321,12 +351,13 @@ def textes_plan(ctx):
 
 def rendre_tranche(args):
     equipe, version, brouillon, a, b, sortie = args
+    sortie = verifier_fichier_libre(sortie, "la tranche")
     ctx = contexte((equipe, version, brouillon))
     W, H = ctx.W, ctx.H
     video = ctx.plan["video"]
     rec_v = ctx.annexe.get("recadrage_v") or {}
     incs = sorted(textes_plan(ctx) + list(ctx.annexe.get("incrustations", [])), key=lambda s: 1 if s["type"] in ("flash", "glitch") else 0)
-    enc = subprocess.Popen([FF, "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
+    enc = subprocess.Popen([FF, "-v", "error", "-n", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                             "-c:v", "libx264", "-preset", "ultrafast" if brouillon else "medium", "-crf", "24" if brouillon else "13",
                             "-pix_fmt", "yuv420p", str(sortie)], stdin=subprocess.PIPE)
     for g in range(a, b):
@@ -400,6 +431,7 @@ def poser(piste, son, t, db=0.0, fondu=0.0):
 
 
 def mixer(ctx, sortie_wav):
+    sortie_wav = verifier_fichier_libre(sortie_wav, "le mix audio")
     P = ctx.plan
     A = P.get("audio", {})
     dur = ctx.total / FPS
@@ -453,7 +485,7 @@ def mixer(ctx, sortie_wav):
             print("bruitage", x, e, file=sys.stderr)
     piste = piste[: int(dur * SR)]
     piste /= max(1.0, float(np.abs(piste).max()) / 0.98)
-    brut = sortie_wav.with_suffix(".brut.wav")
+    brut = reserver_chemin_libre(sortie_wav.with_suffix(".brut.wav"))
     sfx_v3.ecrire(piste, str(brut))
     cible = A.get("cible_lufs", -14)
     tp = A.get("crete_db", -1.5) - 0.5
@@ -461,11 +493,10 @@ def mixer(ctx, sortie_wav):
                        capture_output=True)
     e = r.stderr.decode()
     j = json.loads(e[e.rfind("{"): e.rfind("}") + 1])
-    subprocess.run([FF, "-v", "error", "-y", "-i", str(brut), "-af",
+    subprocess.run([FF, "-v", "error", "-n", "-i", str(brut), "-af",
                     f"loudnorm=I={cible}:TP={tp}:LRA=11:measured_I={j['input_i']}:measured_TP={j['input_tp']}:measured_LRA={j['input_lra']}:"
                     f"measured_thresh={j['input_thresh']}:offset={j['target_offset']}:linear=true,alimiter=limit=0.72:level=false:asc=1",
                     "-ar", str(SR), str(sortie_wav)], check=True)
-    brut.unlink()
 
 
 # ----------------------------------------------------------------------------------------------------------------- tout
