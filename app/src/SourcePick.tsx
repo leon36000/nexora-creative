@@ -13,6 +13,54 @@ import type { LangueClient } from '../shared/creationLanguage';
 
 export type SourceKind = 'video' | 'image' | 'audio';
 
+type CopieChargement = { invalid: (accept: SourceKind[]) => string; tooLarge: string; uploadFailed: string };
+type CopieSource = {
+  loading: string;
+  remove: string;
+  takes: string;
+  useTake: (id: number) => string;
+  takeFailure: string;
+};
+
+const COPIES_CHARGEMENT: Record<LangueClient, CopieChargement> = {
+  fr: {
+    invalid: (accept) => `Dépose un fichier ${accept.join(' ou ')}.`,
+    tooLarge: 'Ce fichier dépasse 45 Mo. Réduis sa taille, puis réessaie.',
+    uploadFailed: 'Impossible de charger ce fichier. Réessaie.',
+  },
+  en: {
+    invalid: (accept) => `Drop ${accept.join(' or ')}`,
+    tooLarge: 'That file is over 45 MB. Trim it first.',
+    uploadFailed: 'Could not upload this file. Try again.',
+  },
+};
+
+const COPIES_SOURCE: Record<LangueClient, CopieSource> = {
+  fr: { loading: 'Chargement…', remove: 'Retirer la source', takes: 'Tes prises', useTake: (id) => `Utiliser la prise ${id}`, takeFailure: 'Impossible de charger cette prise. Réessaie.' },
+  en: { loading: 'Loading...', remove: 'Remove source', takes: 'Your takes', useTake: (id) => `Use take ${id}`, takeFailure: 'Could not load this take. Try again.' },
+};
+
+const COPIES_SOURCE_HISTORIQUE: CopieSource = {
+  loading: 'Loading...', remove: 'remove', takes: 'your takes', useTake: (id) => `Use take ${id}`, takeFailure: 'Could not load this take. Try again.',
+};
+
+function copieChargement(langue?: LangueClient): CopieChargement {
+  if (langue === 'fr') return COPIES_CHARGEMENT.fr;
+  return COPIES_CHARGEMENT.en;
+}
+
+function copieSource(langue?: LangueClient): CopieSource {
+  if (langue === 'fr') return COPIES_SOURCE.fr;
+  if (langue === 'en') return COPIES_SOURCE.en;
+  return COPIES_SOURCE_HISTORIQUE;
+}
+
+function messageEchec(langue: LangueClient | undefined, erreur: unknown, copieLocalisee: string, repli: string): string {
+  if (langue) return copieLocalisee;
+  if (erreur instanceof Error) return erreur.message;
+  return repli;
+}
+
 export interface Source {
   token: string;
   kind: SourceKind;
@@ -75,13 +123,11 @@ export function fileKind(f: File): SourceKind | null {
 
 /** Upload a dropped or picked file as a source, if it is one of `accept`. Toasts and returns null otherwise. */
 export async function loadFile(f: File, accept: SourceKind[], langue?: LangueClient): Promise<Source | null> {
-  const copy = langue === 'fr'
-    ? { invalid: `Dépose un fichier ${accept.join(' ou ')}.`, tooLarge: 'Ce fichier dépasse 45 Mo. Réduis sa taille, puis réessaie.', uploadFailed: 'Impossible de charger ce fichier. Réessaie.' }
-    : { invalid: `Drop ${accept.join(' or ')}`, tooLarge: 'That file is over 45 MB. Trim it first.', uploadFailed: 'Could not upload this file. Try again.' };
+  const copy = copieChargement(langue);
   const kind = fileKind(f);
-  if (!kind || !accept.includes(kind)) { toast(copy.invalid, true); return null; }
+  if (!kind || !accept.includes(kind)) { toast(copy.invalid(accept), true); return null; }
   if (f.size > 45e6) { toast(copy.tooLarge, true); return null; }
-  try { return await sourceFromFile(f, kind); } catch (e) { toast(langue ? copy.uploadFailed : e instanceof Error ? e.message : 'upload failed', true); return null; }
+  try { return await sourceFromFile(f, kind); } catch (e) { toast(messageEchec(langue, e, copy.uploadFailed, 'upload failed'), true); return null; }
 }
 
 /** Load ?take=<id> once into a source, then drop the param. */
@@ -114,15 +160,11 @@ export function SourceSlot(p: {
   const [busy, setBusy] = useState(false);
   const takes = useStore((s) => s.takes.filter((t) => t.status === 'done' && t.output_path && !isModel(t) && (p.accept.includes(isImage(t) ? 'image' : 'video'))).slice(0, 8));
   const v = p.value;
-  const copy = p.langue === 'fr'
-    ? { loading: 'Chargement…', remove: 'Retirer la source', takes: 'Tes prises', useTake: (id: number) => `Utiliser la prise ${id}`, takeFailure: 'Impossible de charger cette prise. Réessaie.' }
-    : p.langue === 'en'
-      ? { loading: 'Loading...', remove: 'Remove source', takes: 'Your takes', useTake: (id: number) => `Use take ${id}`, takeFailure: 'Could not load this take. Try again.' }
-      : { loading: 'Loading...', remove: 'remove', takes: 'your takes', useTake: (id: number) => `Use take ${id}`, takeFailure: 'Could not load this take. Try again.' };
+  const copy = copieSource(p.langue);
 
   const take = async (t: Take) => {
     setBusy(true);
-    try { p.onChange(await sourceFromTake(t)); } catch (e) { toast(p.langue ? copy.takeFailure : e instanceof Error ? e.message : 'failed', true); } finally { setBusy(false); }
+    try { p.onChange(await sourceFromTake(t)); } catch (e) { toast(messageEchec(p.langue, e, copy.takeFailure, 'failed'), true); } finally { setBusy(false); }
   };
   const file = async (f: File) => {
     setBusy(true);

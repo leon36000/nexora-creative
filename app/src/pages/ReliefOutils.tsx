@@ -10,6 +10,33 @@ import { avertissementMaillage, meshCopy, meshNumber } from '../meshCopy';
 const FORMATS: FormatRelief[] = ['glb', 'obj', 'stl', '3mf', 'usdz'];
 const FACES = [0, 100_000, 50_000, 20_000, 10_000, 5_000] as const;
 const NOMS_FORMAT: Record<FormatRelief, string> = { glb: 'GLB', obj: 'OBJ', stl: 'STL', '3mf': '3MF', usdz: 'USDZ' };
+type CopieMesh = ReturnType<typeof meshCopy>;
+
+function aideFormat(format: FormatRelief, c: CopieMesh): string {
+  const aides = {
+    glb: c.helpGlb,
+    obj: c.helpObj,
+    stl: c.helpStl,
+    '3mf': c.help3mf,
+    usdz: c.helpUsdz,
+  } satisfies Record<FormatRelief, string>;
+  return aides[format];
+}
+
+function resumeTopologie(r: RapportMaillage, orientationIncoherente: boolean, langue: LangueClient, c: CopieMesh): string {
+  if (r.etanche) {
+    if (orientationIncoherente) return c.summaryInconsistent;
+    return c.summaryClosed;
+  }
+  if (r.aretesOuvertes > 0) return c.summaryOpen(meshNumber(r.aretesOuvertes, langue));
+  return c.summaryNotWatertight;
+}
+
+function libelleJuge(note: number, c: CopieMesh): string {
+  if (note >= 8) return c.readyToUse;
+  if (note >= 6) return c.usable;
+  return c.redo;
+}
 
 function nomFaces(v: number, langue: LangueClient): string {
   if (v === 0) return langue === 'fr' ? 'Plein' : 'Full model';
@@ -19,9 +46,7 @@ function nomFaces(v: number, langue: LangueClient): string {
 export function ResumeMaillage({ r, langue = 'fr' }: { r: RapportMaillage; langue?: LangueClient }) {
   const c = meshCopy(langue);
   const orientationIncoherente = r.avertissements.includes('Volume non calculé : orientation incohérente des faces.');
-  const summary = r.etanche
-    ? orientationIncoherente ? c.summaryInconsistent : c.summaryClosed
-    : r.aretesOuvertes > 0 ? c.summaryOpen(meshNumber(r.aretesOuvertes, langue)) : c.summaryNotWatertight;
+  const summary = resumeTopologie(r, orientationIncoherente, langue, c);
   return (
     <div className="dim" style={{ fontSize: 12, lineHeight: 1.5 }}>
       <div>{meshNumber(r.triangles, langue)} triangles · {meshNumber(r.sommets, langue)} {c.vertices} · {c.summaryComponents(meshNumber(r.composantes, langue), r.composantes > 1)}</div>
@@ -99,7 +124,7 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
         <div className="seg" role="group" aria-label={c.exportFormat}>
           {FORMATS.map((f) => <button key={f} type="button" className={format === f ? 'on' : ''} onClick={() => setFormat(f)}>{NOMS_FORMAT[f]}</button>)}
         </div>
-        <div className="dim" style={{ fontSize: 12 }}>{format === 'glb' ? c.helpGlb : format === 'obj' ? c.helpObj : format === 'stl' ? c.helpStl : format === '3mf' ? c.help3mf : c.helpUsdz}</div>
+        <div className="dim" style={{ fontSize: 12 }}>{aideFormat(format, c)}</div>
         <div className="label" style={{ textTransform: 'none', letterSpacing: 0 }}>{c.numberOfFaces}</div>
         <div className="seg" role="group" aria-label={c.numberOfFaces}>
           {FACES.map((v) => <button key={v} type="button" className={faces === v ? 'on' : ''} onClick={() => setFaces(v)}>{nomFaces(v, langue)}</button>)}
@@ -134,7 +159,7 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
         <div className="label">{c.qualityCheck}</div>
         {juge ? (
           <>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>{juge.note}/10 <span className="dim" style={{ fontWeight: 400, fontSize: 12 }}>· {juge.note >= 8 ? c.readyToUse : juge.note >= 6 ? c.usable : c.redo}</span></div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>{juge.note}/10 <span className="dim" style={{ fontWeight: 400, fontSize: 12 }}>· {libelleJuge(juge.note, c)}</span></div>
             {juge.raison && <div className="dim" style={{ fontSize: 12 }}>{juge.raison}</div>}
             {juge.defauts.length > 0 && <div className="dim" style={{ fontSize: 12 }}>{juge.defauts.join(' · ')}</div>}
             {juge.note < 6 && <button type="button" className="btn sm" onClick={() => void recreate(take, { langue })}><Icon name="redo" size={14} />{c.retryWithNewSeed}</button>}
