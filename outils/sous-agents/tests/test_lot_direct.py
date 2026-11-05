@@ -15,6 +15,20 @@ import test_lot
 
 
 class LotDirectTests(unittest.TestCase):
+    def test_completed_tasks_are_all_reaped_from_snapshot(self):
+        process = SimpleNamespace(returncode=0, poll=lambda: 0)
+        first = lot.Task('first', Path('/fictif/first.txt'), Path('/fictif/first'), process=process, run_id='lot-first')
+        second = lot.Task('second', Path('/fictif/second.txt'), Path('/fictif/second'), process=process, run_id='lot-second')
+        state = lot.SupervisorState(tasks=[first, second], pending=[], active=[first, second],
+                                    run_owners={}, duplicate_run_ids=set())
+        journal = lot.Ledger(True, 0, {'lot-first': 0, 'lot-second': 0})
+        baseline = lot.LedgerBaseline(raw=b'', unattributed_rows=0)
+        with patch.object(lot, 'register_run_id', return_value=''), patch.object(lot, 'read_ledger', return_value=journal), patch.object(lot, 'finish_task') as finish:
+            changed = lot.reap_finished(state, 'lot', Path('/fictif/journal'), baseline, 1, state.tasks)
+        self.assertTrue(changed)
+        self.assertEqual(state.active, [])
+        self.assertEqual(finish.call_count, 2)
+
     def test_cost_report_write_error_is_classified_as_127(self):
         config = SimpleNamespace(sa_dir=Path('/fictif'))
         report = SimpleNamespace(stdout='donnée fictive', returncode=0)
