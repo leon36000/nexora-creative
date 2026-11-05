@@ -95,9 +95,17 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.upstream.received, [])
 
     def test_count_tokens_is_explicitly_disabled_before_audit_or_upstream(self):
-        code, body = self.send(path='/v1/messages/count_tokens?beta=true', body='not-json')
-        self.assertEqual(code, 501)
-        self.assertIn('suivi de coût fiable', json.loads(body)['error'])
+        c = UnixHTTP(self.sockpath)
+        try:
+            c.putrequest('POST', '/v1/messages/count_tokens?beta=true')
+            c.putheader('Content-Type', 'application/json')
+            c.putheader('Content-Length', '8')
+            c.endheaders()
+            response = c.getresponse()
+            self.assertEqual(response.status, 501)
+            self.assertIn('suivi de coût fiable', json.loads(response.read())['error'])
+        finally:
+            c.close()
         audit = Path(self.tmp.name) / 'audit.jsonl'
         self.assertEqual(audit.read_text(), '')
         self.assertEqual(self.server._sequence, 0)
