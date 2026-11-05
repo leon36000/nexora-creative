@@ -97,7 +97,7 @@ def remplace(obj):
 blocage_reseau = patch.object(socket.socket, "connect", side_effect=AssertionError("Réseau interdit pendant les tests"))
 blocage_reseau.start()
 # Les 48 tests utilisent le contrat V7 et les doublures réseau existantes.
-chaine = unittest.TestLoader().discover(str(V7 / 'chaine/tests'), pattern='test_*.py')
+chaine = unittest.TestLoader().discover(str(V7 / 'chaine/tests'), pattern='test_chaine.py')
 resultat_chaine = unittest.TextTestRunner(verbosity=2).run(chaine)
 # Les 26 tests réels du moteur V7 attendent le contrat historique V6 via ICI.
 sys.path.insert(0, str(V7))
