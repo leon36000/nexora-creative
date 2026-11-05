@@ -23,10 +23,13 @@ from typing import Any
 
 
 SCHEMA = "nexora-creative-v7-production-evidence-v2"
+OPSYS_SCHEMA = "nexora-opsys-production-evidence-v2"
+V2_SCHEMAS = {SCHEMA, OPSYS_SCHEMA}
 DEFAULT_REGISTRY = Path(__file__).with_name("v7-workcuts-v2.jsonl")
 TEAM_NAMES = {"deepseek", "gemini", "muse", "opus"}
 V1_RECORD_ID = re.compile(r"^v7\.workcut\.(deepseek|gemini|muse|opus)\.(?:r1|r8c|r8d)$")
 RECORD_ID = re.compile(r"^v7\.workcut\.(deepseek|gemini|muse|opus)\.(?:r1|r8c|r8d)\.v2$")
+OPSYS_RECORD_ID = re.compile(r"^opsys\.workcut\.(deepseek|gemini|muse|opus)\.r1\.v2$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 AMD2_BRIEF_ID = re.compile(r"AMD2-\d{3}", re.ASCII)
 RECORD_FIELDS = {
@@ -101,14 +104,20 @@ def _validate_record_shape(record: Any) -> dict[str, Any]:
     missing = (RECORD_FIELDS - {"record_sha256"}) - set(record)
     if missing:
         raise EvidenceError("missing record fields: " + ", ".join(sorted(missing)))
-    if record["schema"] != SCHEMA:
+    if not isinstance(record["schema"], str) or record["schema"] not in V2_SCHEMAS:
         raise EvidenceError("unsupported evidence schema; V2 registry accepts schema 2 only")
     return record
 
 
-def _validate_identity(record: dict[str, Any]) -> tuple[str, str]:
+def _record_family(record: dict[str, Any]) -> str:
+    return "opsys" if record["schema"] == OPSYS_SCHEMA else "v7"
+
+
+def _validate_identity(record: dict[str, Any]) -> tuple[str, str, str]:
+    family = _record_family(record)
     record_id = record["record_id"]
-    match = RECORD_ID.fullmatch(record_id) if isinstance(record_id, str) else None
+    pattern = OPSYS_RECORD_ID if family == "opsys" else RECORD_ID
+    match = pattern.fullmatch(record_id) if isinstance(record_id, str) else None
     if not match:
         raise EvidenceError("invalid V2 record_id")
     team = record["team"]
@@ -116,11 +125,15 @@ def _validate_identity(record: dict[str, Any]) -> tuple[str, str]:
         raise EvidenceError("team and record_id do not agree")
     if not _nonempty(record["edition"]):
         raise EvidenceError("edition must be nonempty")
+    if family == "opsys":
+        expected_edition = "R1g" if team == "muse" else "R1"
+        if record["edition"] != expected_edition:
+            raise EvidenceError(f"OPSYS {team} edition must preserve effective revision {expected_edition}")
     if record["team_role"] != "independent_team_not_confirmed_professor":
         raise EvidenceError("team_role must not assert professor approval")
     if record["status"] != "codex_machine_observation_unjudged":
         raise EvidenceError("status must preserve unjudged machine-observation state")
-    return team, record_id
+    return team, record_id, family
 
 
 def _validate_review_and_corpus_fields(record: dict[str, Any]) -> None:
@@ -136,8 +149,15 @@ def _validate_review_and_corpus_fields(record: dict[str, Any]) -> None:
         raise EvidenceError("amd2_corpus_sha256 is invalid")
 
 
-def _validate_v1_replacement(record: dict[str, Any], team: str, record_id: str) -> dict[str, Any]:
+def _validate_v1_replacement(record: dict[str, Any], team: str, record_id: str,
+                             family: str) -> dict[str, Any] | None:
     replaced = record["replaces_v1_record"]
+    if family == "opsys":
+        if replaced is not None:
+            raise EvidenceError("OPSYS R1 is a native creation and must not claim a V1 replacement")
+        return None
+    if replaced is None:
+        raise EvidenceError("V7 workcut must link its matching archived V1 record")
     if not isinstance(replaced, dict) or set(replaced) != {"record_id", "record_sha256", "registry_sha256"}:
         raise EvidenceError("replaces_v1_record has an invalid shape")
     replaced_id = replaced["record_id"]
@@ -176,8 +196,8 @@ def _validate_artifact_shape(artifact: Any, index: int) -> None:
         raise EvidenceError(f"artifacts[{index}].kind is invalid")
 
 
-def _validate_artifact_links(artifacts: list[dict[str, Any]], corpus_sha: str,
-                             replaced: dict[str, Any]) -> None:
+def _validate_v7_artifact_links(artifacts: list[dict[str, Any]], corpus_sha: str,
+                                replaced: dict[str, Any]) -> None:
     corpus_artifacts = [artifact for artifact in artifacts if artifact["kind"] == "amd2_corpus"]
     if (len(corpus_artifacts) != 1 or corpus_artifacts[0]["sha256"] != corpus_sha
             or corpus_artifacts[0]["root"] != "repo"
@@ -194,8 +214,105 @@ def _validate_artifact_links(artifacts: list[dict[str, Any]], corpus_sha: str,
         raise EvidenceError("one V1 archive verification receipt must be referenced")
 
 
+OPSYS_REQUIRED_ARTIFACT_KINDS = {
+    "amd2_corpus", "opsys_shared_brief", "opsys_editplan", "opsys_annexe",
+    "opsys_team_source_manifest", "opsys_source_video", "opsys_master_video",
+    "opsys_review_contact_sheet", "opsys_trajectory", "opsys_postflight",
+    "opsys_pc1_archive_manifest", "opsys_pc1_archive_receipt",
+}
+OPSYS_ALLOWED_ARTIFACT_KINDS = OPSYS_REQUIRED_ARTIFACT_KINDS | {
+    "opsys_team_brief_actual", "opsys_team_source_document", "opsys_source_audio",
+    "opsys_phone_derivative", "opsys_review_frame", "opsys_validation",
+    "opsys_team_receipts", "opsys_machine_observations",
+}
+OPSYS_SINGLETON_ARTIFACT_KINDS = OPSYS_REQUIRED_ARTIFACT_KINDS - {
+    "amd2_corpus", "opsys_source_video", "opsys_pc1_archive_manifest", "opsys_pc1_archive_receipt",
+}
+
+
+def _validate_opsys_artifact_kinds(kinds: list[str]) -> None:
+    if set(kinds) - OPSYS_ALLOWED_ARTIFACT_KINDS:
+        raise EvidenceError("OPSYS artifact kind is not allowed")
+    missing = OPSYS_REQUIRED_ARTIFACT_KINDS - set(kinds)
+    if missing:
+        raise EvidenceError("OPSYS required proof is missing: " + ", ".join(sorted(missing)))
+
+
+def _validate_opsys_singletons(kinds: list[str]) -> None:
+    for kind in OPSYS_SINGLETON_ARTIFACT_KINDS:
+        if kinds.count(kind) != 1:
+            raise EvidenceError(f"OPSYS evidence requires exactly one {kind}")
+
+
+def _validate_opsys_corpus_artifact(artifacts: list[dict[str, Any]], corpus_sha: str) -> None:
+    corpus_artifacts = [item for item in artifacts if item["kind"] == "amd2_corpus"]
+    if (len(corpus_artifacts) != 1 or corpus_artifacts[0]["sha256"] != corpus_sha
+            or corpus_artifacts[0]["root"] != "repo"
+            or corpus_artifacts[0]["path"] != "app/server/nexora/bench/corpus-amd-v2/corpus.json"):
+        raise EvidenceError("one canonical AMD2 corpus artifact is required as context")
+
+
+def _validate_opsys_artifact_roots(artifacts: list[dict[str, Any]]) -> None:
+    for artifact in artifacts:
+        if artifact["kind"] == "amd2_corpus":
+            continue
+        if (artifact["kind"] in {"opsys_shared_brief", "opsys_team_brief_actual",
+                                  "opsys_team_source_document"}
+                and artifact["root"] == "creative_data"):
+            continue
+        if artifact["root"] != "storage":
+            raise EvidenceError(f"OPSYS {artifact['kind']} evidence must be stored under the workcut run")
+
+
+def _validate_opsys_video_formats(artifacts: list[dict[str, Any]]) -> None:
+    masters = [item for item in artifacts if item["kind"] == "opsys_master_video"]
+    if len(masters) != 1 or not masters[0]["path"].lower().endswith(".mp4"):
+        raise EvidenceError("OPSYS evidence requires exactly one master MP4")
+    video_kinds = {"opsys_source_video", "opsys_phone_derivative"}
+    if any(item["root"] != "storage" or not item["path"].lower().endswith(".mp4")
+           for item in artifacts if item["kind"] in video_kinds):
+        raise EvidenceError("OPSYS source and phone video evidence must be Storage MP4 files")
+    image_suffixes = (".jpg", ".jpeg", ".png", ".webp")
+    if any(item["root"] != "storage" or not item["path"].lower().endswith(image_suffixes)
+           for item in artifacts if item["kind"] == "opsys_review_contact_sheet"):
+        raise EvidenceError("OPSYS review contact sheet must be a Storage image")
+
+
+def _validate_opsys_team_paths(artifacts: list[dict[str, Any]], team: str) -> None:
+    team_kinds = {"opsys_source_video", "opsys_master_video", "opsys_team_source_manifest"}
+    if any(item["root"] != "storage" or f"opsys-{team}-" not in item["path"]
+           for item in artifacts if item["kind"] in team_kinds):
+        raise EvidenceError("OPSYS source/master must remain in the named team's workcut evidence")
+
+
+def _validate_opsys_archive_pair_paths(artifacts: list[dict[str, Any]]) -> None:
+    manifest_paths = [PurePosixPath(item["path"]) for item in artifacts
+                      if item["kind"] == "opsys_pc1_archive_manifest"]
+    receipt_paths = [PurePosixPath(item["path"]) for item in artifacts
+                     if item["kind"] == "opsys_pc1_archive_receipt"]
+    manifest_dirs = {path.parent for path in manifest_paths}
+    receipt_dirs = {path.parent for path in receipt_paths}
+    if (not manifest_dirs or manifest_dirs != receipt_dirs
+            or len(manifest_paths) != len(manifest_dirs) or len(receipt_paths) != len(receipt_dirs)):
+        raise EvidenceError("each OPSYS pc1 archive manifest must have one receipt in the same directory")
+
+
+def _validate_opsys_artifact_links(artifacts: list[dict[str, Any]], corpus_sha: str,
+                                   team: str) -> None:
+    kinds = [artifact["kind"] for artifact in artifacts]
+    _validate_opsys_artifact_kinds(kinds)
+    _validate_opsys_singletons(kinds)
+    _validate_opsys_corpus_artifact(artifacts, corpus_sha)
+    _validate_opsys_artifact_roots(artifacts)
+    _validate_opsys_video_formats(artifacts)
+    _validate_opsys_team_paths(artifacts, team)
+    _validate_opsys_archive_pair_paths(artifacts)
+    if {"archived_v1_registry", "archived_v1_pc1_receipt"}.intersection(kinds):
+        raise EvidenceError("OPSYS native creation must not claim a V1 archive link")
+
+
 def _validate_artifacts(artifacts: Any, corpus_sha: str,
-                        replaced: dict[str, Any]) -> None:
+                        replaced: dict[str, Any] | None, team: str, family: str) -> None:
     if not isinstance(artifacts, list) or not artifacts:
         raise EvidenceError("artifacts must be a nonempty array")
     artifact_paths: set[tuple[str, str]] = set()
@@ -205,7 +322,12 @@ def _validate_artifacts(artifacts: Any, corpus_sha: str,
         if key in artifact_paths:
             raise EvidenceError(f"duplicate artifact path: {artifact['root']}:{artifact['path']}")
         artifact_paths.add(key)
-    _validate_artifact_links(artifacts, corpus_sha, replaced)
+    if family == "opsys":
+        _validate_opsys_artifact_links(artifacts, corpus_sha, team)
+    else:
+        if replaced is None:
+            raise EvidenceError("V7 workcut must link its matching archived V1 record")
+        _validate_v7_artifact_links(artifacts, corpus_sha, replaced)
 
 
 def _validate_seed(seed: Any, index: int) -> tuple[str, str]:
@@ -243,9 +365,11 @@ def _validate_observations(observations: Any) -> None:
             raise EvidenceError(f"observations[{index}] must be an explicit Codex machine observation")
 
 
-def _validate_lineage(lineage: Any, record_id: str) -> None:
+def _validate_lineage(lineage: Any, record_id: str, family: str) -> None:
     if not isinstance(lineage, list):
         raise EvidenceError("lineage must be an array")
+    if family == "opsys" and lineage:
+        raise EvidenceError("OPSYS R1 native creation cannot claim predecessor lineage")
     invalid = [item for item in lineage if not isinstance(item, str) or not RECORD_ID.fullmatch(item)]
     if invalid:
         raise EvidenceError("lineage may reference V2 records only")
@@ -257,13 +381,13 @@ def _validate_lineage(lineage: Any, record_id: str) -> None:
 
 def validate_record(record: Any) -> dict[str, Any]:
     record = _validate_record_shape(record)
-    team, record_id = _validate_identity(record)
+    team, record_id, family = _validate_identity(record)
     _validate_review_and_corpus_fields(record)
-    replaced = _validate_v1_replacement(record, team, record_id)
-    _validate_artifacts(record["artifacts"], record["amd2_corpus_sha256"], replaced)
+    replaced = _validate_v1_replacement(record, team, record_id, family)
+    _validate_artifacts(record["artifacts"], record["amd2_corpus_sha256"], replaced, team, family)
     _validate_seeds(record["seed_reconciliation"])
     _validate_observations(record["observations"])
-    _validate_lineage(record["lineage"], record_id)
+    _validate_lineage(record["lineage"], record_id, family)
     declared_digest = record.get("record_sha256")
     actual_digest = record_digest(record)
     if declared_digest is not None and declared_digest != actual_digest:
@@ -360,6 +484,95 @@ def _verify_archived_v1_link(record: dict[str, Any], storage_root: Path) -> None
     _check_v1_receipt(archive_ref, receipt_ref, storage_root / PurePosixPath(receipt_ref["path"]))
 
 
+def _opsys_archive_pairs(record: dict[str, Any]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    manifests = {PurePosixPath(item["path"]).parent: item for item in record["artifacts"]
+                 if item["kind"] == "opsys_pc1_archive_manifest"}
+    receipts = {PurePosixPath(item["path"]).parent: item for item in record["artifacts"]
+                if item["kind"] == "opsys_pc1_archive_receipt"}
+    if not manifests or manifests.keys() != receipts.keys():
+        raise EvidenceError("OPSYS pc1 archive manifests and receipts must be paired")
+    return [(manifests[parent], receipts[parent]) for parent in sorted(manifests, key=str)]
+
+
+def _read_strict_json(path: Path, message: str) -> Any:
+    try:
+        return _strict_json_loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, EvidenceError) as exc:
+        raise EvidenceError(message) from exc
+
+
+def _validate_opsys_pc1_receipt(receipt: Any) -> list[dict[str, Any]]:
+    if not isinstance(receipt, dict) or receipt.get("host") != "pc1" or receipt.get("verified") is not True:
+        raise EvidenceError("OPSYS pc1 archive receipt is not verified")
+    infrastructure = receipt.get("infrastructure")
+    if not isinstance(infrastructure, str) or not infrastructure.startswith(
+            "/run/media/pc1/Infrastructure/NexoraStudioWork/ArchivesNexora/"):
+        raise EvidenceError("OPSYS pc1 archive receipt has an unexpected Infrastructure path")
+    files = receipt.get("files")
+    if not isinstance(files, list) or not files:
+        raise EvidenceError("OPSYS pc1 archive receipt has no file hashes")
+    if receipt.get("assets") != len(files):
+        raise EvidenceError("OPSYS pc1 archive receipt asset count is inconsistent")
+    if any(not isinstance(item, dict) or not isinstance(item.get("sha256"), str)
+           or not SHA256.fullmatch(item["sha256"])
+           or not isinstance(item.get("size_bytes"), int) or isinstance(item.get("size_bytes"), bool)
+           or item["size_bytes"] < 0 for item in files):
+        raise EvidenceError("OPSYS pc1 archive receipt contains an invalid file entry")
+    if sum(item["size_bytes"] for item in files) != receipt.get("bytes"):
+        raise EvidenceError("OPSYS pc1 archive receipt byte count is inconsistent")
+    return files
+
+
+def _manifest_contains_artifact(manifest: dict[str, Any], artifact: dict[str, Any],
+                                absolute_path: str) -> bool:
+    assets = manifest.get("assets")
+    if not isinstance(assets, list):
+        return False
+    return any(
+        isinstance(item, dict)
+        and item.get("sha256") == artifact["sha256"]
+        and item.get("size_bytes") == artifact["size_bytes"]
+        and isinstance(item.get("sources"), list)
+        and absolute_path in item["sources"]
+        for item in assets
+    )
+
+
+def _verify_opsys_archive_artifacts(record: dict[str, Any], storage_root: Path) -> None:
+    pairs = _opsys_archive_pairs(record)
+    parsed_pairs: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
+    for manifest_ref, receipt_ref in pairs:
+        manifest_path = storage_root / PurePosixPath(manifest_ref["path"])
+        receipt_path = storage_root / PurePosixPath(receipt_ref["path"])
+        manifest = _read_strict_json(manifest_path, "OPSYS pc1 archive manifest is unreadable strict JSON")
+        receipt = _read_strict_json(receipt_path, "OPSYS pc1 archive receipt is unreadable strict JSON")
+        if not isinstance(manifest, dict) or manifest.get("team") != record["team"]:
+            raise EvidenceError("OPSYS pc1 archive manifest team does not match the record")
+        if not _nonempty(manifest.get("status")) or "unjudged" not in manifest["status"].lower():
+            raise EvidenceError("OPSYS pc1 archive manifest must preserve unjudged status")
+        parsed_pairs.append((manifest, _validate_opsys_pc1_receipt(receipt)))
+    _require_storage_artifacts_archived(record, storage_root, parsed_pairs)
+
+
+def _require_storage_artifacts_archived(
+    record: dict[str, Any], storage_root: Path,
+    archive_pairs: list[tuple[dict[str, Any], list[dict[str, Any]]]],
+) -> None:
+    archive_kinds = {"opsys_pc1_archive_manifest", "opsys_pc1_archive_receipt"}
+    evidence = [item for item in record["artifacts"]
+                if item["root"] == "storage" and item["kind"] not in archive_kinds]
+    for artifact in evidence:
+        source_path = str(_resolve_artifact(artifact, {"storage": storage_root}))
+        archived = any(
+            _manifest_contains_artifact(manifest, artifact, source_path)
+            and any(item["sha256"] == artifact["sha256"]
+                    and item["size_bytes"] == artifact["size_bytes"] for item in receipt_files)
+            for manifest, receipt_files in archive_pairs
+        )
+        if not archived:
+            raise EvidenceError(f"OPSYS artifact is not attested by a pc1 archive manifest/receipt: {artifact['path']}")
+
+
 def _verify_amd2_brief_membership(record: dict[str, Any], repo_root: Path) -> None:
     brief_id = record["amd2_brief_id"]
     if brief_id is None:
@@ -413,7 +626,10 @@ def verify_artifacts(record: dict[str, Any], storage_root: Path, repo_root: Path
     for artifact in record["artifacts"]:
         _check_artifact(artifact, roots)
     _verify_amd2_brief_membership(record, roots["repo"])
-    _verify_archived_v1_link(record, roots["storage"])
+    if _record_family(record) == "opsys":
+        _verify_opsys_archive_artifacts(record, roots["storage"])
+    else:
+        _verify_archived_v1_link(record, roots["storage"])
 
 
 def _load_registry(fd: int) -> tuple[dict[str, dict[str, Any]], int]:
