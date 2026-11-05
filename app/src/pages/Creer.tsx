@@ -7,8 +7,8 @@
  * propose un découpage relisible, tourne chaque plan et assemble.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, mediaUrl, posterUrl, uploadFile, type Comprehension, type EtatNexora, type Storyboard } from '../api';
-import { inFeed, isImage, isModel, settingsOf, toast, useStore } from '../store';
+import { api, EchecFilmPartiel, mediaUrl, posterUrl, uploadFile, type Comprehension, type EtatNexora, type Storyboard } from '../api';
+import { getState, inFeed, isImage, isModel, refreshTakes, settingsOf, toast, useStore } from '../store';
 import { MediaCard } from '../ui';
 import Viewer from '../Viewer';
 import FilmPlans from '../FilmPlans';
@@ -22,6 +22,8 @@ import { IcEtincelle, IcFilm, IcImage, IcRond, IcVideo, Ratio } from '../studio/
 import { cleDevisCreation, ControleDevis } from '../devisCreation';
 import { creationVideoCopy, erreurVisibleCreationVideo, nomCameraCreation } from '../creationVideoCopy';
 import type { LangueClient } from '../../shared/creationLanguage';
+import { FilmPartielAlerte } from '../FilmPartielAlerte';
+import { LangueSelection } from '../LangueSelection';
 
 type Mode = 'producteur' | 'video' | 'image' | 'film';
 const MODES: Mode[] = ['producteur', 'video', 'image', 'film'];
@@ -95,6 +97,7 @@ export default function Creer() {
     }
   }
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+  const [filmPartiel, setFilmPartiel] = useState<EchecFilmPartiel | null>(null);
   const [etat, setEtat] = useState<EtatNexora | null>(null);
   const [vue, setVue] = useState<number | null>(null);
   const [filmOuvert, setFilmOuvert] = useState<number | null>(null);
@@ -112,6 +115,7 @@ export default function Creer() {
   const dernierMode = useRef(mode);
   const versionLangueRef = useRef(0);
   const requeteIdeesRef = useRef(0);
+  const requetePlanRef = useRef(0);
   const requeteBoostRef = useRef(0);
 
   const controleDevis = useRef(new ControleDevis());
@@ -226,8 +230,10 @@ export default function Creer() {
     langueClientRef.current = langue;
     versionLangueRef.current++;
     requeteIdeesRef.current++;
+    requetePlanRef.current++;
     requeteBoostRef.current++;
     setLangueClient(langue);
+    if (mode === 'film') setStoryboard(null);
     setIdees((x) => ({ ...x, video: undefined }));
     setBoost(null);
     setCompris(null);
@@ -317,16 +323,34 @@ export default function Creer() {
   }
 
   async function proposerDecoupage() {
+    const versionLangue = versionLangueRef.current;
+    const requete = ++requetePlanRef.current;
     setEnvoi('plan');
     try {
-      const r = await api.nexoraFilmPlan({ intention: intention.trim(), duree: dureeFilm });
+      const r = await api.nexoraFilmPlan({ intention: intention.trim(), duree: dureeFilm, langue: langueClient });
+      if (requete !== requetePlanRef.current || versionLangue !== versionLangueRef.current || modeRef.current !== 'film') return;
       setStoryboard(r.storyboard);
       if (r.source === 'repli') toast('L’IA n’a pas répondu : découpage simple proposé.', true);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Le découpage a échoué.', true);
+      if (requete === requetePlanRef.current && versionLangue === versionLangueRef.current && modeRef.current === 'film') toast(e instanceof Error ? e.message : 'Le découpage a échoué.', true);
     } finally {
-      setEnvoi(null);
+      if (requete === requetePlanRef.current) setEnvoi(null);
     }
+  }
+
+  function traiterEchecTournage(e: unknown) {
+    if (!(e instanceof EchecFilmPartiel)) {
+      toast(e instanceof Error ? e.message : 'Le tournage a échoué.', true);
+      return;
+    }
+    setFilmPartiel(e);
+    const ids = e.prises.map((p) => '#' + p.takeId).join(', ');
+    let prises = '';
+    if (ids) prises = (langueClient === 'en' ? ', shots ' : ', prises ') + ids;
+    const detail = langueClient === 'en'
+      ? `Film #${e.filmId}${prises}: check their status before retrying.`
+      : `Film n° ${e.filmId}${prises} : vérifie leur état avant de réessayer.`;
+    toast(`${e.message} ${detail}`, true);
   }
 
   async function tournerFilm() {
@@ -337,7 +361,7 @@ export default function Creer() {
       toast(`Tournage lancé : ${storyboard.plans.length} plans. Le film s’assemble tout seul à la fin.`);
       setStoryboard(null);
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Le tournage a échoué.', true);
+      traiterEchecTournage(e);
     } finally {
       setEnvoi(null);
     }
@@ -433,7 +457,7 @@ export default function Creer() {
             ? v === 'producteur' ? texteVideo.tabProducer : v === 'video' ? texteVideo.tabVideo : v === 'image' ? texteVideo.tabImage : texteVideo.tabFilm
             : label;
           return (
-          <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { setMode(v); setStoryboard(null); setBoost(null); }}>
+          <button key={v} type="button" role="tab" aria-selected={mode === v} className={`st-mode ${mode === v ? 'on' : ''} ${v === 'producteur' ? 'st-mode-agent' : ''}`} onClick={() => { requetePlanRef.current++; setEnvoi((x) => x === 'plan' ? null : x); setMode(v); setStoryboard(null); setBoost(null); }}>
             <Ic />{modeLabel}
           </button>
         );})}
@@ -445,15 +469,7 @@ export default function Creer() {
       <div className="st-grid">
         <aside className="st-composer" aria-label={langueActive === 'en' ? texteVideo.composer : 'Composeur'}>
 
-          {mode === 'video' && (
-            <div className="st-bloc">
-              <span className="st-etiq">{texteVideo.language}</span>
-              <div className="st-seg" role="group" aria-label={texteVideo.language}>
-                <button type="button" className={langueClient === 'fr' ? 'on' : ''} aria-pressed={langueClient === 'fr'} onClick={() => choisirLangueClient('fr')}>Français</button>
-                <button type="button" className={langueClient === 'en' ? 'on' : ''} aria-pressed={langueClient === 'en'} onClick={() => choisirLangueClient('en')}>English</button>
-              </div>
-            </div>
-          )}
+          <LangueSelection mode={mode} langue={langueClient} libelle={texteVideo.language} occupe={occupe} filmPartiel={!!filmPartiel} choisir={choisirLangueClient} />
 
           <div className="st-champ">
             <textarea
@@ -654,10 +670,14 @@ export default function Creer() {
                   <p className="nx-sous" style={{ margin: 0 }}>{storyboard.plans.length} plans · {storyboard.dureeTotale} s · tournage ≈ {minutesFilm} min. Retouche ce qui ne te plaît pas, puis lance.</p>
                 </div>
                 <div className="st-ligne">
-                  <button type="button" className="st-bouton" onClick={() => setStoryboard(null)}>Annuler</button>
-                  <button type="button" className="st-bouton primaire" disabled={occupe} onClick={() => void tournerFilm()}>{envoi === 'film' ? 'Lancement…' : 'Tourner le film'}</button>
+                  <button type="button" className="st-bouton" disabled={!!filmPartiel} onClick={() => setStoryboard(null)}>Annuler</button>
+                  <button type="button" className="st-bouton primaire" disabled={occupe || !!filmPartiel} onClick={() => void tournerFilm()}>{envoi === 'film' ? 'Lancement…' : 'Tourner le film'}</button>
                 </div>
               </div>
+              {filmPartiel && <FilmPartielAlerte erreur={filmPartiel} langue={langueClient} rafraichir={refreshTakes}
+                existe={(id) => getState().takes.some((t) => t.id === id)} ouvrirFilm={setFilmOuvert} ouvrirPrise={setVue}
+                indisponible={() => toast(langueClient === 'en' ? 'This item is not available. Try refreshing later.' : 'Cet élément est indisponible. Réessaie plus tard.', true)}
+                nouveauFilm={() => { setFilmPartiel(null); setStoryboard(null); changerIntention(''); }} />}
               <details className="nx-bible">
                 <summary>Bible de continuité (style, personnages, lieux)</summary>
                 <p><strong>Style :</strong> {storyboard.bible.style}</p>

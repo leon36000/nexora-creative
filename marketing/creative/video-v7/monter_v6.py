@@ -1293,6 +1293,11 @@ def charger(fichier, langue, tolerant=False):
             for f in {s["fichier"], s.get("fichier_vertical", s["fichier"])}:
                 if f in s.get("_absents", {}).values():
                     continue
+                # Lecteur.image répète déjà les images fixes pendant toute la durée
+                # du segment ; leur durée ffprobe n'est pas celle d'un rush vidéo.
+                if Path(f).suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
+                    capture(f)  # Vérifie que l'image est réellement décodable.
+                    continue
                 d = duree_media(f)
                 if s.get("inverse") and "entree" not in s:
                     s["entree"] = d-1/IPS

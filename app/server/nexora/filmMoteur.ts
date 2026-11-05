@@ -4,6 +4,7 @@
  * ordinaire étiquetée `nexoraFilm` ; quand un plan se termine, `avancerFilm` regarde s'il peut assembler.
  */
 import { execFile } from 'node:child_process';
+import { randomInt } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { config } from '../config.js';
@@ -21,9 +22,11 @@ import { reecrireH3 } from './reecritureH3.js';
 import { encoderSurGpu } from './encodageGpu.js';
 import { dossierFilmUnique, sansEcrasement } from './filmSorties.js';
 import { erreurAncrageMaxFilm } from './filmAncrage.js';
+import { EchecTournage, soumissionIndeterminee, type AttachementEnAttente, type PriseLancee } from './filmEchec.js';
+import { clePlanFilm } from './filmClePlan.js';
 
 export interface DepsFilm {
-  queueTakes: (b: any, count: number) => Promise<number[]>;
+  queueTakes: (b: any, count: number, credits?: (CreditsPrise | undefined)[], clePlan?: string, transfererDepuis?: number) => Promise<number[]>;
   broadcast: (msg: unknown) => void;
   /** Téléverse une image d'entrée au moteur (dernière image d'un plan) ; rend son jeton. */
   televerser: (nom: string, data: Buffer, type: string) => Promise<string>;
@@ -39,7 +42,7 @@ const pousser = (id: number) => deps.broadcast({ type: 'take', take: takes.get(i
 export async function tournerFilm(
   sb: Storyboard,
   opts: {
-    format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: CreditsPrise[]; qualite?: 'rapide' | 'max';
+    format: DemandeCreer['format']; son: boolean; intention: string; projectId?: number | null; moteur: MoteurVideo; reservations?: (CreditsPrise | undefined)[]; qualite?: 'rapide' | 'max';
     /** 2 : deux prises par plan indépendant, le juge visuel garde la meilleure (juge.ts). */
     candidats?: 1 | 2;
     /** Réservations de la seconde prise de chaque plan (même index que les plans). */
@@ -62,21 +65,24 @@ export async function tournerFilm(
     },
   });
   pousser(filmId);
+  const prises: PriseLancee[] = [];
+  const reservationsConservees = new Set<string>();
+  const attachementsEnAttente: AttachementEnAttente[] = [];
+  const idsConnus = new Set<number>();
   try {
     // Les prompts des plans indépendants s'écrivent en parallèle, puis leurs rendus partent dans l'ordre. Un plan
     // « suite » attend la fin du précédent : il partira de sa dernière image (voir lancerSuite).
     // Personnages @ : un plan qui cite @nom part en Ref2VA (moteur cinéma) avec les images du personnage.
     const persos = await Promise.all(sb.plans.map((p, i) => (p.suite || p.take || opts.moteur !== 'h3-max' ? null : resoudrePersonnages(intentionDuPlan(sb, i)))));
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, ...dialoguesDe(p) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, ...dialoguesDe(p, sb) }, llm))),
     );
-    for (let i = 0; i < sb.plans.length; i++) {
-      const p = sb.plans[i];
+    const lancerPlan = async (p: PlanFilm, i: number): Promise<void> => {
       const ecrit = prompts[i];
-      if (p.take) continue; // version refaite d'un film : ce plan garde sa prise
+      if (p.take) return; // version refaite d'un film : ce plan garde sa prise
       if (!ecrit) {
         majPlan(filmId, i, { attente: 'image_precedente', reservation: opts.reservations?.[i] });
-        continue;
+        return;
       }
       const corps = {
         ...corpsRendu({ intention: p.resume, format: opts.format, duree: p.duree, son: opts.son, qualite: opts.qualite }, ecrit.prompt, opts.moteur),
@@ -85,24 +91,98 @@ export async function tournerFilm(
         shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: opts.projectId ?? undefined,
       };
       const n = opts.candidats === 2 ? 2 : 1;
-      const ids = await deps.queueTakes(corps, n);
-      if (opts.reservations?.[i]) takes.patchSettings(ids[0], { nexoraCredits: opts.reservations[i] });
-      if (ids[1] && opts.reservationsCandidats?.[i]) takes.patchSettings(ids[1], { nexoraCredits: opts.reservationsCandidats[i] });
-      majPlan(filmId, i, { take: ids[0], corps, ...(ids.length > 1 ? { candidats: ids } : {}) });
-    }
+      const credits = [opts.reservations?.[i], opts.reservationsCandidats?.[i]].slice(0, n);
+      const lireSettings = (id: number, reservation: CreditsPrise | undefined): Record<string, any> | null => {
+        try {
+          const t = takes.get(id);
+          const settings = t ? JSON.parse(t.settings) : null;
+          if (settings && typeof settings === 'object') return settings;
+        } catch { /* La lecture impossible conserve la réservation. */ }
+        if (reservation) reservationsConservees.add(reservation.reservationId);
+        attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation?.reservationId });
+        return null;
+      };
+      const conserverReservation = (id: number, settings: Record<string, any>, reservation: CreditsPrise | undefined) => {
+        if (typeof settings.nexoraCredits?.reservationId === 'string') reservationsConservees.add(settings.nexoraCredits.reservationId);
+        if (!reservation) return;
+        reservationsConservees.add(reservation.reservationId);
+        if (settings.nexoraCredits?.reservationId !== reservation.reservationId) attachementsEnAttente.push({ plan: i, takeId: id, reservationId: reservation.reservationId });
+      };
+      const rattacher = (ids: unknown[]) => {
+        const valides: number[] = [];
+        for (const [k, id] of ids.entries()) {
+          if (k >= n || typeof id !== 'number' || !Number.isSafeInteger(id) || id <= 0 || idsConnus.has(id)) continue;
+          const reservation = credits[k];
+          const settings = lireSettings(id, reservation);
+          if (!settings) continue;
+          if (settings.nexoraFilm !== filmId || settings.nexoraPlan !== i) continue;
+          idsConnus.add(id);
+          valides.push(id);
+          prises.push({ plan: i, takeId: id });
+          conserverReservation(id, settings, reservation);
+        }
+        if (valides.length) majPlan(filmId, i, { take: valides[0], corps, clePlan, ...(valides.length > 1 ? { candidats: valides } : {}) });
+        return valides.length;
+      };
+      let ids: number[];
+      const clePlan = clePlanFilm(sb, p, { moteur: opts.moteur, format: opts.format, son: opts.son, qualite: opts.qualite, projectId: opts.projectId, intention: opts.intention, references: persos[i]?.fichiers });
+      try { ids = await deps.queueTakes(corps, n, credits, clePlan); }
+      catch (e) {
+        const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
+        if (Array.isArray(partiels)) { try { rattacher(partiels); } catch { /* Conserver l'erreur initiale. */ } }
+        throw e;
+      }
+      if (rattacher(ids) !== n || attachementsEnAttente.length) throw new Error('Prises ou réservations de tournage non confirmées');
+    };
+    for (let i = 0; i < sb.plans.length; i++) await lancerPlan(sb.plans[i], i);
   } catch (e) {
-    takes.fail(filmId, `Les plans n'ont pas pu partir au tournage : ${e instanceof Error ? e.message : e}`);
-    pousser(filmId);
-    throw e;
+    try {
+      takes.fail(filmId, `Les plans n'ont pas pu partir au tournage : ${e instanceof Error ? e.message : e}`);
+      pousser(filmId);
+    } catch { /* Ne pas perdre l'erreur primaire ni les réservations déjà associées. */ }
+    throw new EchecTournage(e, filmId, prises, [...reservationsConservees], attachementsEnAttente);
   }
   return filmId;
 }
 
 /** Réplique d'un plan pour le réécrivain H3 (voix française synchronisée). */
-const dialoguesDe = (p: PlanFilm) => (p.replique ? { dialogues: [{ texte: p.replique, langue: 'French' }] } : {});
+const dialoguesDe = (p: PlanFilm, sb: Storyboard) => (p.replique ? { dialogues: [{ texte: p.replique, langue: sb.langue === 'en' ? 'English' : 'French' }] } : {});
 
 /** Durée effective d'un plan sur la grille de H3 (5 s → 124 images, 10 s → 243). */
 const dureePlan = (p: PlanFilm) => (p.duree === 10 ? 243 : 124) / 24;
+
+function identifiantPartiel(e: unknown): number | undefined {
+  const partiels = e && typeof e === 'object' && 'takeIds' in e ? (e as { takeIds?: unknown }).takeIds : undefined;
+  const candidat = Array.isArray(partiels) ? partiels[0] : undefined;
+  return typeof candidat === 'number' && Number.isSafeInteger(candidat) && candidat > 0 ? candidat : undefined;
+}
+
+function priseDuPlan(id: number, filmId: number, i: number): boolean {
+  const prise = takes.get(id);
+  const settings = prise ? reglages(prise) : null;
+  return settings?.nexoraFilm === filmId && settings?.nexoraPlan === i;
+}
+
+function rattacherSuitePartielle(e: unknown, filmId: number, i: number, corps: Record<string, unknown>, cle: string): boolean {
+  const candidat = identifiantPartiel(e);
+  if (candidat === undefined || !priseDuPlan(candidat, filmId, i)) return false;
+  majPlan(filmId, i, { take: candidat, corps, clePlan: cle, attente: undefined, attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
+  return true;
+}
+
+async function imageArriveeSuite(filmId: number, i: number, sb: Storyboard, dossier: string): Promise<{ fin?: string; suivant?: number }> {
+  const p = sb.plans[i] as PlanFilm & { raccord?: boolean };
+  const suivant = p.raccord ? sb.plans[i + 1]?.take : undefined;
+  const fichierSuivant = suivant ? takes.get(suivant)?.output_path : undefined;
+  if (!fichierSuivant || !existsSync(fichierSuivant)) return { suivant };
+  const imageFin = join(dossier, `film_${filmId}_plan${i}_arrivee.png`);
+  await new Promise<void>((ok, ko) =>
+    execFile(config.ffmpegBin, ['-y', '-i', fichierSuivant, '-frames:v', '1', '-update', '1', imageFin], (err, _o, stderr) =>
+      err ? ko(new Error(`première image du plan ${i + 2} : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()),
+  );
+  const fin = await deps.televerser(`nexora_film_${filmId}_plan${i}_fin.png`, readFileSync(imageFin), 'image/png');
+  return { fin, suivant };
+}
 
 /**
  * Plan enchaîné : la dernière image du plan précédent devient sa première image (H3 en image vers vidéo, I2VA), ce qui
@@ -125,17 +205,7 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
   const jeton = await deps.televerser(`nexora_film_${film.id}_plan${i}.png`, readFileSync(image), 'image/png');
   const org = takes.organisationDe(film.id) ?? 'local';
   // Raccord : le plan va aussi vers la première image du plan suivant (H3 première + dernière image, FL2VA).
-  let fin: string | undefined;
-  const suivant = (p as PlanFilm & { raccord?: boolean }).raccord ? sb.plans[i + 1]?.take : undefined;
-  const fichierSuivant = suivant ? takes.get(suivant)?.output_path : undefined;
-  if (fichierSuivant && existsSync(fichierSuivant)) {
-    const imageFin = join(dossier, `film_${film.id}_plan${i}_arrivee.png`);
-    await new Promise<void>((ok, ko) =>
-      execFile(config.ffmpegBin, ['-y', '-i', fichierSuivant, '-frames:v', '1', '-update', '1', imageFin], (err, _o, stderr) =>
-        err ? ko(new Error(`première image du plan ${i + 2} : ${String(stderr).split('\n').slice(-2).join(' ')}`)) : ok()),
-    );
-    fin = await deps.televerser(`nexora_film_${film.id}_plan${i}_fin.png`, readFileSync(imageFin), 'image/png');
-  }
+  const { fin, suivant } = await imageArriveeSuite(film.id, i, sb, dossier);
   const ecrit = await reecrireH3({
     intention: fin
       ? `${intentionDuPlan(sb, i)}\nThe video starts exactly from the provided first frame and ends exactly on the provided last frame: one continuous move that links them.`
@@ -144,7 +214,7 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
     dureeS: dureePlan(p),
     moteur,
     format: s.format,
-    ...dialoguesDe(p),
+    ...dialoguesDe(p, sb),
   }, deps.llmPour(org));
   const corps = {
     ...corpsRendu({ intention: p.resume, format: s.format, duree: p.duree, son: !!s.son, qualite: s.qualite, image: jeton }, ecrit.prompt, moteur),
@@ -153,9 +223,14 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
     app: 'nexora-film', userPrompt: p.resume, nexoraFilm: film.id, nexoraPlan: i, promptSource: ecrit.source,
     shotName: `${sb.titre.slice(0, 28)}_plan${i + 1}`, projectId: film.project_id ?? undefined,
   };
-  const [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes(corps, 1));
-  if (p.reservation) takes.patchSettings(id, { nexoraCredits: p.reservation });
-  majPlan(film.id, i, { take: id, corps, attente: undefined });
+  const cle = clePlanFilm(sb, p, { moteur, format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, ancre: sb.plans[i - 1]?.take, references: suivant ? [String(suivant)] : [] });
+  let id: number;
+  try { [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes(corps, 1, [p.reservation], cle)); }
+  catch (e) {
+    if (rattacherSuitePartielle(e, film.id, i, corps, cle)) return;
+    throw e;
+  }
+  majPlan(film.id, i, { take: id, corps, clePlan: cle, attente: undefined });
 }
 
 function majPlan(filmId: number, i: number, patch: Record<string, unknown>) {
@@ -163,6 +238,21 @@ function majPlan(filmId: number, i: number, patch: Record<string, unknown>) {
   s.storyboard.plans[i] = { ...s.storyboard.plans[i], ...patch };
   takes.setSettings(filmId, s);
   pousser(filmId);
+}
+
+export function marquerReservationFilmLiberee(filmId: number, reservationId: string): void {
+  const film = takes.get(filmId);
+  if (!film) return;
+  const s = reglages(film);
+  let modifie = false;
+  for (const plan of (s.storyboard as Storyboard).plans) {
+    const p = plan as PlanFilm & { reservation?: CreditsPrise };
+    if (p.reservation?.reservationId === reservationId && p.reservation.etat === 'reservee') {
+      p.reservation = { ...p.reservation, etat: 'liberee' };
+      modifie = true;
+    }
+  }
+  if (modifie) takes.setSettings(filmId, s);
 }
 
 const verrous = new Map<number, Promise<void>>();
@@ -175,6 +265,51 @@ export function avancerFilm(filmId: number): Promise<void> {
   });
   verrous.set(filmId, suite);
   return suite;
+}
+
+async function relancerPlan(film: Take, sb: Storyboard, s: Record<string, any>, p: PlanFilm, i: number, t: Take, relances: number): Promise<void> {
+  const filmId = film.id;
+  const org = takes.organisationDe(filmId) ?? 'local';
+  const credits = reglages(t).nexoraCredits as CreditsPrise | undefined;
+  const cle = typeof (p as any).clePlan === 'string' ? (p as any).clePlan : clePlanFilm(sb, p, { moteur: s.moteur ?? 'h3-fast', format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, references: (p as any).corps?.refImages });
+  let id: number;
+  try {
+    [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes({ ...(p as any).corps }, 1, [credits], cle, credits ? t.id : undefined));
+  } catch (e) {
+    const candidat = identifiantPartiel(e);
+    if (candidat !== undefined) {
+      if (priseDuPlan(candidat, filmId, i)) {
+        majPlan(filmId, i, { take: candidat, relances: relances + 1, panne: t.error ?? 'échec', attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
+        return;
+      }
+      // Un ID transmis mais illisible ne prouve pas l'absence de soumission : ne pas relancer ni libérer.
+      throw e;
+    }
+    // Moteur encore à terre : le plan attend ; la réconciliation (toutes les 20 s) refait cette étape.
+    majPlan(filmId, i, { attenteMoteur: e instanceof Error ? e.message : 'moteur indisponible' });
+    return;
+  }
+  majPlan(filmId, i, { take: id, relances: relances + 1, panne: t.error ?? 'échec', attenteMoteur: undefined });
+}
+
+async function reprendreQualite(film: Take, sb: Storyboard, s: Record<string, any>, plan: PlanFilm & { corps?: Record<string, any>; reprises?: number }, i: number, t: Take, c: { defauts: string[] }): Promise<void> {
+  const filmId = film.id;
+  // Hors requête (fin de rendu côté moteur) : la reprise doit naître dans l'organisation du film.
+  const org = takes.organisationDe(filmId) ?? 'local';
+  const cle = typeof (plan as any).clePlan === 'string' ? (plan as any).clePlan : clePlanFilm(sb, plan, { moteur: s.moteur ?? 'h3-fast', format: s.format, son: !!s.son, qualite: s.qualite, projectId: film.project_id, intention: s.prompt, references: plan.corps!.refImages });
+  let id: number;
+  try {
+    [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () =>
+      deps.queueTakes({ ...plan.corps!, seed: randomInt(1e9) }, 1, [undefined], cle));
+  } catch (e) {
+    const candidat = identifiantPartiel(e);
+    if (candidat !== undefined && priseDuPlan(candidat, filmId, i)) {
+      majPlan(filmId, i, { take: candidat, reprises: (plan.reprises ?? 0) + 1, controle: undefined, controleRefuse: { take: t.id, defauts: c.defauts }, attenteMoteur: e instanceof Error ? e.message : 'soumission indéterminée' });
+      return;
+    }
+    throw e;
+  }
+  majPlan(filmId, i, { take: id, reprises: (plan.reprises ?? 0) + 1, controle: undefined, controleRefuse: { take: t.id, defauts: c.defauts } });
 }
 
 async function etape(filmId: number) {
@@ -191,8 +326,10 @@ async function etape(filmId: number) {
     }
     const t = takes.get(p.take);
     if (!t) throw new Error(`Plan ${i + 1} : sa prise a été supprimée`);
+    if (soumissionIndeterminee(reglages(t))) return;
     // Deux candidats : on attend les deux, le contrôle qualité puis le juge visuel choisissent la prise du plan.
     const cands = (p as any).candidats as number[] | undefined;
+    if (cands?.some((id) => { const candidat = takes.get(id); return candidat && soumissionIndeterminee(reglages(candidat)); })) return;
     if (cands?.length === 2 && !(p as any).jugement) {
       const prises = cands.map((id) => takes.get(id));
       if (prises.some((x) => !x || x.status === 'queued' || x.status === 'rendering')) return;
@@ -203,18 +340,7 @@ async function etape(filmId: number) {
     // Panne du moteur pendant un plan : on le relance (même prompt, même graine) jusqu'à 2 fois avant d'abandonner le film.
     const relances = Number((p as any).relances ?? 0);
     if (t.status === 'failed' && (p as any).corps && relances < 2) {
-      const org = takes.organisationDe(filmId) ?? 'local';
-      let id: number;
-      try {
-        [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () => deps.queueTakes({ ...(p as any).corps }, 1));
-      } catch (e) {
-        // Moteur encore à terre : le plan attend ; la réconciliation (toutes les 20 s) refait cette étape.
-        majPlan(filmId, i, { attenteMoteur: e instanceof Error ? e.message : 'moteur indisponible' });
-        return;
-      }
-      const credits = JSON.parse(t.settings).nexoraCredits;
-      if (credits) takes.patchSettings(id, { nexoraCredits: credits }), takes.patchSettings(t.id, { nexoraCredits: { ...credits, etat: 'transferee' } });
-      majPlan(filmId, i, { take: id, relances: relances + 1, panne: t.error ?? 'échec', attenteMoteur: undefined });
+      await relancerPlan(film, sb, s, p, i, t, relances);
       return;
     }
     if (t.status === 'failed' || t.status === 'stopped') throw new Error(`Plan ${i + 1} : ${t.status}${t.error ? ` (${t.error})` : ''}`);
@@ -230,11 +356,7 @@ async function etape(filmId: number) {
       majPlan(filmId, i, { controle: plan.controle });
       // Correction automatique, budget d'une reprise par plan : même prompt, autre graine.
       if (!c.ok && (plan.reprises ?? 0) < 1 && plan.corps) {
-        // Hors requête (fin de rendu côté moteur) : la reprise doit naître dans l'organisation du film.
-        const org = takes.organisationDe(filmId) ?? 'local';
-        const [id] = await avecCompte({ organisationId: org, utilisateurId: 'nexora-director', territoire: null }, () =>
-          deps.queueTakes({ ...plan.corps!, seed: Math.floor(Math.random() * 1e9) }, 1));
-        majPlan(filmId, i, { take: id, reprises: (plan.reprises ?? 0) + 1, controle: undefined, controleRefuse: { take: t.id, defauts: c.defauts } });
+        await reprendreQualite(film, sb, s, plan, i, t, c);
         return;
       }
     }

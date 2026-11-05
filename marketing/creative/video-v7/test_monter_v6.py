@@ -38,6 +38,32 @@ class MoteurTests(unittest.TestCase):
         f.write_text(json.dumps(m))
         return f
 
+    def test_images_fixes_et_video_restent_valides(self):
+        image = str(v.ICI / 's01' / '0032-boost.jpg')
+        rush = self.m['segments'][3]['fichier']
+        with tempfile.TemporaryDirectory(dir=v.CACHE) as d:
+            segments = [
+                {'type': 'plan', 'fichier': image, 'debut': 0, 'duree': 1.25},
+                {'type': 'plan', 'fichier': image, 'debut': 1.25, 'duree': 1.25},
+                {'type': 'plan', 'fichier': rush, 'debut': 2.5, 'duree': .5},
+            ]
+            f = self.montage_temp(d, segments=segments)
+            m, _, n, _ = v.charger(f, 'fr')
+            self.assertEqual(n, 72)
+            self.assertEqual([s['duree'] for s in m['segments']], [1.25, 1.25, .5])
+            segments[2]['duree'] = 999
+            f = self.montage_temp(d, segments=segments)
+            with self.assertRaisesRegex(ValueError, 'Plan hors rush'):
+                v.charger(f, 'fr')
+            segments[2]['duree'] = .5
+            segments[2]['vitesse'] = 0
+            f = self.montage_temp(d, segments=segments)
+            with self.assertRaisesRegex(ValueError, 'Vitesse strictement positive'):
+                v.charger(f, 'fr')
+            with patch.object(v, 'capture', side_effect=OSError('image illisible')):
+                with self.assertRaisesRegex(OSError, 'image illisible'):
+                    v.charger(f, 'fr')
+
     def test_sources_localisees_recursives_et_repli(self):
         with tempfile.TemporaryDirectory(dir=v.CACHE) as d:
             base = Path(d)

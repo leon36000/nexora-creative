@@ -16,6 +16,8 @@ export interface PersonnagesResolus {
   sujets: SujetRef[];
   /** Jetons d'entrée du moteur, dans l'ordre des <Picture N>. */
   jetons: string[];
+  /** Identifiants de fichiers durables, indépendants d'un jeton de téléversement renouvelé. */
+  fichiers: string[];
   noms: string[];
 }
 
@@ -26,12 +28,14 @@ export async function resoudrePersonnages(texte: string): Promise<PersonnagesRes
   if (!membres.length) return null;
   const sujets: SujetRef[] = [];
   const jetons: string[] = [];
+  const fichiers: string[] = [];
   for (const m of membres) {
     const refs = (await liveRefs(m)).slice(0, IMAGES_PAR_PERSONNAGE);
     if (!refs.length) continue;
     sujets.push({ nom: m.name, apparence: m.notes.trim(), images: refs.length });
     jetons.push(...refs.map((r) => r.token));
+    fichiers.push(...refs.map((r) => r.file));
   }
-  if (!sujets.length) return { texteClair: plainText(texte, tous), sujets: [], jetons: [], noms: [] };
-  return { texteClair: plainText(texte, tous), sujets, jetons, noms: sujets.map((s) => s.nom) };
+  if (!sujets.length) return { texteClair: plainText(texte, tous), sujets: [], jetons: [], fichiers: [], noms: [] };
+  return { texteClair: plainText(texte, tous), sujets, jetons, fichiers, noms: sujets.map((s) => s.nom) };
 }

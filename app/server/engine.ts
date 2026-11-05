@@ -11,11 +11,14 @@
  *  'finished' { jobId }   (terminal state reached; call result())
  */
 import { Comfy, type Job } from '@comfyorg/sdk';
+import { ID_DETOURAGE_NATIF } from './nexora/detourage/identite.js';
+import { ComfyLow } from '@comfyorg/sdk/low';
 import { EventEmitter } from 'events';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { config } from './config.js';
+import { statutTerminalConfirme } from './nexora/reconciliationArrets.js';
 
 // 'expired': the proxy lost the job (e.g. ComfyUI restarted under it).
 const TERMINAL = new Set(['succeeded', 'failed', 'canceled', 'cancelled', 'expired']);
@@ -85,6 +88,12 @@ function lireMoteurs(): MoteurGpu[] {
 export const moteurs: MoteurGpu[] = lireMoteurs();
 const moteursEnv: MoteurGpu[] = moteurs.map((m) => ({ ...m }));
 
+/** Service natif configuré indépendamment des recettes et réglages Comfy. */
+export function serviceDetourageNatif() {
+  const { detourageUrl, detourageJeton } = moteursEnv[0];
+  return detourageUrl ? { id: ID_DETOURAGE_NATIF, nom: 'Détourage natif', detourageUrl, detourageJeton } : undefined;
+}
+
 /**
  * Nexora : applique la liste de moteurs de l'administration du site (lue toutes les minutes). Le moteur « principal » de
  * l'environnement reste si le site ne définit pas le même identifiant. Un moteur dont l'adresse ou la clé change est
@@ -97,9 +106,10 @@ export function appliquerMoteurs(depuisSite: MoteurGpu[]): void {
   prochain.sort((a, b) => (a.id === 'principal' ? -1 : b.id === 'principal' ? 1 : 0));
   for (const m of prochain) {
     const avant = moteurs.find((x) => x.id === m.id);
-    if (avant && (avant.baseUrl !== m.baseUrl || avant.cle !== m.cle)) clients.delete(m.id);
+    if (avant && (avant.baseUrl !== m.baseUrl || avant.cle !== m.cle)) { clients.delete(m.id); lecturesJobs.delete(m.id); }
   }
   for (const id of [...clients.keys()]) if (!prochain.some((m) => m.id === id)) clients.delete(id);
+  for (const id of lecturesJobs.keys()) if (!prochain.some((m) => m.id === id)) lecturesJobs.delete(id);
   moteurs.splice(0, moteurs.length, ...prochain);
 }
 /** Les moteurs tels que l'environnement les définit (retour à la configuration du poste). */
@@ -107,6 +117,7 @@ export const retablirMoteursEnv = () => appliquerMoteurs([]);
 const moteurParId = (id: string | undefined) => moteurs.find((m) => m.id === id) ?? moteurs[0];
 
 const clients = new Map<string, Comfy>();
+const lecturesJobs = new Map<string, ComfyLow>();
 function sdk(moteur = 'principal'): Comfy {
   let c = clients.get(moteur);
   if (!c) {
@@ -315,6 +326,20 @@ export interface JobResult {
   /** Side outputs a builder names (an object's 'turntable' and 'subject'), by node id. */
   extras?: { nodeId: string; name: string; contentType: string; data: Buffer }[];
   renderSeconds?: number;
+}
+
+/** Statut seul : ne télécharge aucun média et ne déduit pas la fin d'un job perdu. */
+export async function etatTerminalConfirme(jobId: string): Promise<boolean> {
+  const moteurId = jobMoteur.get(jobId);
+  const moteur = moteurs.find((m) => m.id === moteurId);
+  if (!moteur) return false;
+  let lecteur = lecturesJobs.get(moteur.id);
+  if (!lecteur) {
+    lecteur = new ComfyLow(moteur.baseUrl, moteur.cle || config.comfyApiKey || undefined);
+    lecturesJobs.set(moteur.id, lecteur);
+  }
+  const job = await lecteur.getJob(jobId, { signal: AbortSignal.timeout(4000) });
+  return statutTerminalConfirme(job.status);
 }
 
 /** Node ids whose outputs ride along with the main one (see server/graphs/trellis.ts). */
