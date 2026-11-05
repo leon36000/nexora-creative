@@ -282,61 +282,72 @@ def main():
     run_id = uuid.uuid4().hex
     run_dir = output_root / f'{args.team}-{stamp}-{run_id}'
     run_dir.mkdir(exist_ok=False)
-    cache_dir = run_dir / 'cache'
-    cache_dir.mkdir(exist_ok=False)
-
-    montage, sources = compile_montage(team_doc, args.team, args, ui_root, h3_root, brand_file)
-    montage_bytes = (json.dumps(montage, ensure_ascii=False, indent=2) + '\n').encode()
-    montage_path = run_dir / 'montage.json'
-    write_new(montage_path, montage_bytes)
-    provenance = {
-        'created_utc': datetime.now(timezone.utc).isoformat(), 'team': args.team,
-        'status': team_doc['status'], 'language': language, 'format': format_name,
-        'fps': 24, 'duration_s': team_doc['duration_s'],
-        'manifest_sha256': sha_bytes(raw), 'montage_sha256': sha_bytes(montage_bytes),
-        'brand_sha256': sha_file(brand_file),
-        'engine_sha256': sha_file(repo_root / 'marketing/creative/video-v7/monter_v6.py'), 'sources': sources,
-        'notes': team_doc.get('notes', []), 'voice': 'none', 'music': 'none',
-        'human_judgment': 'not performed', 'causal_link_ui_to_h3': 'unverified',
-        'render_requested': bool(args.render), 'run_id': run_id,
-    }
-    write_new(run_dir / 'provenance.json', json.dumps(provenance, ensure_ascii=False, indent=2).encode())
+    phase = 'preparation'
     try:
-        engine = validate_with_engine(repo_root, montage_path, cache_dir, language, args.home.resolve())
-    except Exception as error:
-        failure = {'status': 'validation-failed-preserved', 'error_type': type(error).__name__,
-                   'error': str(error), 'run_dir': str(run_dir)}
-        encoded_failure = json.dumps(failure, ensure_ascii=False, indent=2).encode()
-        write_new(run_dir / 'validation-error.json', encoded_failure)
-        write_new(run_dir / 'status.json', encoded_failure)
-        raise
+        cache_dir = run_dir / 'cache'
+        cache_dir.mkdir(exist_ok=False)
 
-    status = {'status': 'validated-not-rendered', 'engine': str(engine), 'run_dir': str(run_dir)}
-    if args.render:
-        output = cache_dir / f'{args.team}-{run_id}.mp4'
-        if output.exists():
-            raise FileExistsError(f'refusing to overwrite {output}')
-        env = {'HOME': str(args.home.resolve()), 'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'V6_CACHE': str(cache_dir)}
-        if args.ffmpeg:
-            env['V6_FFMPEG'] = str(args.ffmpeg.resolve(strict=True))
-        if args.ffprobe:
-            env['V6_FFPROBE'] = str(args.ffprobe.resolve(strict=True))
-        command = [sys.executable, '-B', str(engine), str(montage_path), '--format', format_name,
-                   '--langue', language, '--sortie', str(output), '--master', 'web', '--jobs', str(args.jobs), '--brouillon']
-        result = subprocess.run(command, cwd=repo_root, env=env, capture_output=True, text=True)
-        write_new(run_dir / 'render.stdout.txt', result.stdout.encode())
-        write_new(run_dir / 'render.stderr.txt', result.stderr.encode())
-        if result.returncode != 0 or not output.is_file():
-            status = {'status': 'render-failed-preserved', 'return_code': result.returncode,
-                      'output_path': str(output), 'run_dir': str(run_dir)}
-        else:
-            status = {'status': 'draft-rendered-preserved', 'return_code': 0,
-                      'output_path': str(output), 'output_bytes': output.stat().st_size,
-                      'output_sha256': sha_file(output), 'run_dir': str(run_dir)}
-    write_new(run_dir / 'status.json', json.dumps(status, ensure_ascii=False, indent=2).encode())
-    print(json.dumps(status, ensure_ascii=False, indent=2))
-    if status['status'] == 'render-failed-preserved':
-        raise RuntimeError('render failed; details preserved in status.json')
+        montage, sources = compile_montage(team_doc, args.team, args, ui_root, h3_root, brand_file)
+        montage_bytes = (json.dumps(montage, ensure_ascii=False, indent=2) + '\n').encode()
+        montage_path = run_dir / 'montage.json'
+        write_new(montage_path, montage_bytes)
+        provenance = {
+            'created_utc': datetime.now(timezone.utc).isoformat(), 'team': args.team,
+            'status': team_doc['status'], 'language': language, 'format': format_name,
+            'fps': 24, 'duration_s': team_doc['duration_s'],
+            'manifest_sha256': sha_bytes(raw), 'montage_sha256': sha_bytes(montage_bytes),
+            'brand_sha256': sha_file(brand_file),
+            'engine_sha256': sha_file(repo_root / 'marketing/creative/video-v7/monter_v6.py'), 'sources': sources,
+            'notes': team_doc.get('notes', []), 'voice': 'none', 'music': 'none',
+            'human_judgment': 'not performed', 'causal_link_ui_to_h3': 'unverified',
+            'render_requested': bool(args.render), 'run_id': run_id,
+        }
+        write_new(run_dir / 'provenance.json', json.dumps(provenance, ensure_ascii=False, indent=2).encode())
+        phase = 'validation'
+        try:
+            engine = validate_with_engine(repo_root, montage_path, cache_dir, language, args.home.resolve())
+        except Exception as error:
+            failure = {'status': 'validation-failed-preserved', 'error_type': type(error).__name__,
+                       'error': str(error), 'run_dir': str(run_dir)}
+            encoded_failure = json.dumps(failure, ensure_ascii=False, indent=2).encode()
+            write_new(run_dir / 'validation-error.json', encoded_failure)
+            write_new(run_dir / 'status.json', encoded_failure)
+            raise
+
+        status = {'status': 'validated-not-rendered', 'engine': str(engine), 'run_dir': str(run_dir)}
+        if args.render:
+            phase = 'render'
+            output = cache_dir / f'{args.team}-{run_id}.mp4'
+            if output.exists():
+                raise FileExistsError(f'refusing to overwrite {output}')
+            env = {'HOME': str(args.home.resolve()), 'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'V6_CACHE': str(cache_dir)}
+            if args.ffmpeg:
+                env['V6_FFMPEG'] = str(args.ffmpeg.resolve(strict=True))
+            if args.ffprobe:
+                env['V6_FFPROBE'] = str(args.ffprobe.resolve(strict=True))
+            command = [sys.executable, '-B', str(engine), str(montage_path), '--format', format_name,
+                       '--langue', language, '--sortie', str(output), '--master', 'web', '--jobs', str(args.jobs), '--brouillon']
+            result = subprocess.run(command, cwd=repo_root, env=env, capture_output=True, text=True)
+            write_new(run_dir / 'render.stdout.txt', result.stdout.encode())
+            write_new(run_dir / 'render.stderr.txt', result.stderr.encode())
+            if result.returncode != 0 or not output.is_file():
+                status = {'status': 'render-failed-preserved', 'return_code': result.returncode,
+                          'output_path': str(output), 'run_dir': str(run_dir)}
+            else:
+                status = {'status': 'draft-rendered-preserved', 'return_code': 0,
+                          'output_path': str(output), 'output_bytes': output.stat().st_size,
+                          'output_sha256': sha_file(output), 'run_dir': str(run_dir)}
+        write_new(run_dir / 'status.json', json.dumps(status, ensure_ascii=False, indent=2).encode())
+        print(json.dumps(status, ensure_ascii=False, indent=2))
+        if status['status'] == 'render-failed-preserved':
+            raise RuntimeError('render failed; details preserved in status.json')
+    except Exception as error:
+        # Le disque peut lui-même être inaccessible ; ne jamais écraser un statut déjà écrit.
+        if not (run_dir / 'status.json').exists():
+            failure = {'status': 'failed-preserved', 'phase': phase,
+                       'error_type': type(error).__name__, 'error': str(error), 'run_dir': str(run_dir)}
+            write_new(run_dir / 'status.json', json.dumps(failure, ensure_ascii=False, indent=2).encode())
+        raise
 
 
 if __name__ == '__main__':

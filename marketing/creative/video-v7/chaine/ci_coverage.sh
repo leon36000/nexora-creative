@@ -14,7 +14,7 @@ if ! python3 - "$V7_CI_ROOT/coverage.xml" <<'PY'
 import sys
 import xml.etree.ElementTree as ET
 
-names = {'ci_tests.py', 'banc_finish.py', 'profondeur_10bits.py', 'execution_bornee.py', 'verifier_paquet.py'}
+names = {'ci_tests.py', 'banc_finish.py', 'profondeur_10bits.py', 'execution_bornee.py', 'verifier_paquet.py', 'assemblage_portable.py'}
 found, covered, total = set(), 0, 0
 for item in ET.parse(sys.argv[1]).iter('class'):
     name = item.get('filename', '').rsplit('/', 1)[-1]
@@ -23,10 +23,16 @@ for item in ET.parse(sys.argv[1]).iter('class'):
     if name in found:
         raise ValueError('Fichier de couverture ambigu : ' + name)
     found.add(name)
+    file_covered, file_total = 0, 0
     for line in item.iter('line'):
         if line.get('branch') == 'true':
             fraction = line.get('condition-coverage').split('(')[-1].rstrip(')').split('/')
-            covered += int(fraction[0]); total += int(fraction[1])
+            file_covered += int(fraction[0]); file_total += int(fraction[1])
+    covered += file_covered; total += file_total
+    if name == 'assemblage_portable.py':
+        if not file_total or file_covered / file_total < .85:
+            raise ValueError('Couverture des branches du harnais inférieure à 85 %')
+        print(f'Branches du harnais : {file_covered}/{file_total} = {file_covered/file_total:.1%}')
 if found != names or not total:
     raise ValueError('Fichiers ou branches de couverture manquants')
 print(f'Branches du code nouveau : {covered}/{total} = {covered/total:.1%}')

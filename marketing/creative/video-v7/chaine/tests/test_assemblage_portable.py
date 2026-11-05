@@ -147,6 +147,23 @@ class ManifestValidation(unittest.TestCase):
         doc = self.mutate(lambda d: d['teams']['muse']['segments'][0].__setitem__('source', 'ui/./a.bin'))
         self.assert_rejected(doc, 'source')
 
+    def test_rejects_malformed_additional_fields(self):
+        for field, value in [('grade', 42), ('crop_9x16', [[0, .5, .5]]),
+                             ('crop_9x16', [[0, 2, .5, 1]]),
+                             ('source', 'other-team.bin')]:
+            doc = base_manifest()
+            index = 1 if field == 'source' else 0
+            doc['teams']['muse']['segments'][index][field] = value
+            self.assert_rejected(doc, field)
+        for field, value in [('notes', 'not a list'), ('overlays', {})]:
+            doc = self.mutate(lambda d: d['teams']['muse'].__setitem__(field, value))
+            self.assert_rejected(doc, field)
+        self.assert_rejected(self.mutate(lambda d: d.__setitem__('teams', [])), 'teams')
+        self.assert_rejected(self.mutate(lambda d: d['teams'].pop('muse')), 'absent')
+        doc = base_manifest()
+        doc['teams']['muse']['segments'][0]['duration_s'] = .3
+        self.assert_rejected(doc, 'frame grid')
+
     def test_source_root(self):
         self.assert_rejected(self.mutate(lambda d: d['teams']['muse']['segments'][0].__setitem__('source_root', 'x')),
                              'source_root')
@@ -246,6 +263,22 @@ class LocalAssembly(unittest.TestCase):
         self.assertEqual(provenance['human_judgment'], 'not performed')
         self.assertEqual(status['status'], 'validated-not-rendered')
 
+    def test_vertical_crop_is_included(self):
+        doc = json.loads(self.manifest.read_text())
+        doc['teams']['muse']['segments'][1]['crop_9x16'] = [[0, .5, .5, 1]]
+        self.manifest.write_text(json.dumps(doc))
+        with patch.object(sys, 'argv', self.args + ['--format', '9x16']), \
+             patch.object(ap, 'validate_with_engine', return_value=self.root / 'engine.py'):
+            ap.main()
+        run = next((self.root / 'out').iterdir())
+        montage = json.loads((run / 'montage.json').read_text())
+        self.assertEqual(montage['segments'][0]['cadrage_v'], [[0, .5, .5, 1]])
+
+    def test_validate_with_engine_success(self):
+        engine = self.root / 'marketing/creative/video-v7/monter_v6.py'
+        engine.write_text('def charger(*a, **k):\n    return None\n')
+        self.assertEqual(ap.validate_with_engine(self.root, self.manifest, self.root, 'fr', self.root), engine)
+
     def test_validation_failure_is_preserved(self):
         with patch.object(sys, 'argv', self.args), patch.object(ap, 'validate_with_engine', side_effect=ValueError('invalid')):
             with self.assertRaises(ValueError):
@@ -265,6 +298,27 @@ class LocalAssembly(unittest.TestCase):
         self.assertEqual(os.environ.get('HOME'), previous_home)
         self.assertEqual(os.environ.get('V6_CACHE'), previous_cache)
         self.assertEqual(sys.dont_write_bytecode, previous_bytecode)
+
+    def test_bad_asset_records_preparation_failure(self):
+        doc = json.loads(self.manifest.read_text())
+        doc['teams']['muse']['segments'][0]['sha256'] = '0' * 64
+        self.manifest.write_text(json.dumps(doc))
+        with patch.object(sys, 'argv', self.args):
+            with self.assertRaisesRegex(ValueError, 'SHA mismatch'):
+                ap.main()
+        run = next((self.root / 'out').iterdir())
+        status = json.loads((run / 'status.json').read_text())
+        self.assertEqual((status['status'], status['phase']), ('failed-preserved', 'preparation'))
+
+    def test_executable_failure_records_render_phase(self):
+        with patch.object(sys, 'argv', self.args + ['--render']), \
+             patch.object(ap, 'validate_with_engine', return_value=self.root / 'engine.py'), \
+             patch.object(ap.subprocess, 'run', side_effect=FileNotFoundError('interpreter absent')):
+            with self.assertRaises(FileNotFoundError):
+                ap.main()
+        run = next((self.root / 'out').iterdir())
+        status = json.loads((run / 'status.json').read_text())
+        self.assertEqual((status['status'], status['phase']), ('failed-preserved', 'render'))
 
     def test_failed_render_is_not_reported_as_success(self):
         response = subprocess.CompletedProcess([], 1, stdout='', stderr='failure')
