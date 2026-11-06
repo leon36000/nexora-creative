@@ -1,6 +1,7 @@
 """Contrats V7, validation et substitution ; aucune connexion à l'import."""
 import contextlib
 import copy
+import hashlib
 import importlib.util
 import json
 import math
@@ -201,7 +202,45 @@ def parcourir(obj):
             yield from parcourir(v)
 
 
-def substituer(d, base, travail, musique=None, factices=None, choix_plans=None):
+def chemin_voix_film(travail, spec, doublure=False):
+    """Cache distinct lié au modèle, au timbre explicite et à la signature de la réplique."""
+    b = banc()
+    candidat = b.CANDIDATS.get(spec.get('moteur'))
+    if not candidat or candidat[0] != b.MODELE_FILM or not isinstance(candidat[1], str) or not IDENTIFIANT.fullmatch(candidat[1]):
+        raise ValueError('Les voix du film exigent un candidat ElevenLabs v4 explicite.')
+    if not isinstance(spec.get('id'), str) or not IDENTIFIANT.fullmatch(spec['id']):
+        raise ValueError('Identifiant de voix invalide.')
+    if spec.get('langue') not in ('fr', 'en'):
+        raise ValueError('Langue de voix explicite requise : fr ou en.')
+    vitesse = spec.get('vitesse', 1)
+    if isinstance(vitesse, bool) or not isinstance(vitesse, (int, float)) or not math.isfinite(vitesse) or vitesse != 1:
+        raise ValueError('ElevenLabs v4 : vitesse numérique non neutre non prise en charge.')
+    objet = {**spec, '_modele_film': b.MODELE_FILM, '_voix_id': candidat[1],
+             '_options_audio': candidat[2], '_format_audio': candidat[3], '_doublure': doublure}
+    token = hashlib.sha256(json.dumps(objet, sort_keys=True).encode()).hexdigest()[:16]
+    return Path(travail) / 'voix' / 'eleven4' / candidat[1] / token / f"{spec['id']}.wav"
+
+
+def verifier_cache_voix_film(fichier, doublure=False):
+    """Refuse un cache présent sans reçu lié au bon mode et aux octets audio."""
+    fichier = Path(fichier)
+    meta = fichier.with_suffix('.json')
+    if not any((fichier.exists(), fichier.is_symlink(), meta.exists(), meta.is_symlink())):
+        return
+    if fichier.is_symlink() or meta.is_symlink() or not fichier.is_file() or not meta.is_file():
+        raise ValueError('Cache de voix incomplet ou non régulier.')
+    recu = lire_json(meta, {})
+    origine = 'factice' if doublure else 'modele_demande_non_atteste'
+    digest = hashlib.sha256()
+    with fichier.open('rb') as audio:
+        for bloc in iter(lambda: audio.read(1024 * 1024), b''):
+            digest.update(bloc)
+    if (recu.get('signature') != fichier.parent.name or recu.get('origine') != origine
+            or recu.get('modele_demande') != banc().MODELE_FILM or recu.get('sha256') != digest.hexdigest()):
+        raise ValueError('Cache de voix incompatible ou non attesté.')
+
+
+def substituer(d, base, travail, musique=None, factices=None, choix_plans=None, doublure=False):
     m = copy.deepcopy(d['montage'])
     refs = {}
     choix_plans = choix_plans or {}
@@ -262,12 +301,17 @@ def substituer(d, base, travail, musique=None, factices=None, choix_plans=None):
             m['bpm'] = g['bpm']
             m['phase'] = (g['phase_s'] - mu.get('entree', 0)) % g['temps_s']
     voix = {v['id']: v for v in d['voix']}
-    for parent in ([m['voix']] if isinstance(m.get('voix'), list) else (m.get('voix') or {}).values()):
-        parent[:] = [v for v in parent if voix.get(v.get('id'), {}).get('moteur') != 'h3-natif']
+    groupes = [(None, m['voix'])] if isinstance(m.get('voix'), list) else list((m.get('voix') or {}).items())
+    for langue, parent in groupes:
         for v in parent:
-            v.setdefault('fichier', str(travail / 'voix' / f'{v["id"]}.wav'))
+            if factices is None and langue in ('fr', 'en') and voix[v['id']].get('langue') != langue:
+                raise ValueError(f"Langue incohérente pour la voix {v['id']} : {langue} attendue.")
             if factices and f'voix:{v["id"]}' in factices:
                 v['fichier'] = factices[f'voix:{v["id"]}']
+            else:
+                fichier = chemin_voix_film(travail, voix[v['id']], doublure)
+                verifier_cache_voix_film(fichier, doublure)
+                v['fichier'] = str(fichier)
     # Les polices et le logo restent relatifs au JSON de marque, chargé par V6.
     return m
 
