@@ -1,0 +1,73 @@
+{
+  "type": "trajectoire technique candidate, pas mémoire promue",
+  "schema": "preuve-correction-v1 (proposition locale ; distinct de TrajectoireProfesseur)",
+  "objectif": "Préserver la chaîne observée entrée → rendu → défaut → correction → comparaison",
+  "classification": "ESSAI TECHNIQUE NON APPROUVÉ",
+  "langue_demande": "fr-CA (métadonnée d’entrée, pas validation linguistique humaine)",
+  "voix": "candidate 3146, non choisie ; aucune préférence ou note humaine",
+  "origine_equipe": "non attestée ; clip interne de revue",
+  "prompt": "non récupéré dans les preuves ; ne pas inventer",
+  "limites": [
+    "Aucun score esthétique ou jugement des lèvres",
+    "Aucun entraînement ou promotion de mémoire",
+    "Pas une trajectoire professeur validée, pas un élément du banc de 50 briefs",
+    "Le clip comporte un graphique numérique généré incohérent vers 6 s, hors extrait"
+  ],
+  "id": "20261106T013131Z-fr-951ab3d5987f",
+  "etat": "controle_av_durees_reussi_seulement",
+  "archive_pc1": "/run/media/pc1/Infrastructure/NexoraStudioWork/Essais-techniques/codex-sync-fr-corrige-20261106-f8cc80e331",
+  "entrees": {
+    "video": {
+      "relatif_run": "inputs/p21-r1-fr.mp4",
+      "sha256": "18fc4f883e1d4ae91f465cc3ed0e0475e83c9cb55c7698f30ed47c47190473cf",
+      "octets": 3964381
+    },
+    "audio_original": {
+      "relatif_run": "inputs/voice-fr-source.mp3",
+      "sha256": "7d8d592f82dd881232497f5d6f727dc3db6f91735bb19a6a519333b962331a3b",
+      "octets": 13704
+    },
+    "audio_features_pcm16k": {
+      "relatif_run": "inputs/voice-fr-model.wav",
+      "sha256": "a2853c9fc31119edac63d5b5f2948e576dd6e5f7171920fc1641aca1659822c4",
+      "octets": 87014
+    }
+  },
+  "sortie": {
+    "relatif_run": "results/v15/p21-r1-fr_voice-fr-source.mp4",
+    "sha256": "5feb813df84ba7689eb0a6f91ea7b35aa8edff5c5da309a99ef251da173c33ff",
+    "octets": 421191
+  },
+  "preuve": {
+    "relatif_run": "analysis-002/av-validation-v2.json",
+    "sha256": "b99f7d803db6debedeab091e3460d03b5ed3b568789ce7a18246f6e8ee61b4ef",
+    "octets": 1701
+  },
+  "revision": {
+    "action": "Préparation PCM mono s16le 16 kHz avant extraction features depuis le même MP3.",
+    "run_initial": "20261106T010405Z-fr-ec4b1dbdfed7"
+  },
+  "comparaison": {
+    "meme_video_sha": "18fc4f883e1d4ae91f465cc3ed0e0475e83c9cb55c7698f30ed47c47190473cf",
+    "meme_audio_sha": "7d8d592f82dd881232497f5d6f727dc3db6f91735bb19a6a519333b962331a3b",
+    "images_avant": 27,
+    "video_avant_s": 1.125,
+    "images_apres": 65,
+    "fps_apres": "24",
+    "video_apres_s": 2.708334,
+    "pcm_reference_s": 2.716734693877551,
+    "audio_sortie_decode_s": 2.7399546485260773,
+    "ecart_debut_s": 0.0,
+    "controle_durees": true,
+    "portee": "durées et départs des flux uniquement ; aucune évaluation de synchronisation labiale"
+  },
+  "preuve_duree_audio_rendu_commun": {
+    "echantillons": 60416,
+    "frequence_hz": 22050,
+    "calcul": "60416 / 22050",
+    "secondes": 2.7399546485260773,
+    "interpretation": "durée de l’audio rendu décodé en PCM ; distincte de la durée de flux AAC ffprobe",
+    "preuve_pc1": "/run/media/pc1/Infrastructure/NexoraStudioWork/Essais-techniques/codex-sync-fr-corrige-20261106-f8cc80e331/20261106T013131Z-fr-951ab3d5987f/analysis-002/av-validation-v2.json",
+    "preuve_sha256": "b99f7d803db6debedeab091e3460d03b5ed3b568789ce7a18246f6e8ee61b4ef"
+  }
+}

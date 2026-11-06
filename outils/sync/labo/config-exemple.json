@@ -1,0 +1,18 @@
+{
+  "root": "/example/run-root",
+  "source": "/example/source-pinned",
+  "weights": "/example/weights",
+  "python": "/example/venv/bin/python",
+  "ffmpeg": "/example/bin/ffmpeg",
+  "ffprobe": "/example/bin/ffprobe",
+  "ffmpeg_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "ffprobe_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "gpu_name": "Example GPU",
+  "gpu_min_free_mib": 12288,
+  "gpu_process": null,
+  "inputs": {
+    "video": {"path": "/example/inputs/video.mp4", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 1},
+    "fr": {"path": "/example/inputs/audio.wav", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 1, "language": "fr"}
+  },
+  "padding_codec_seconds": 0.08
+}
