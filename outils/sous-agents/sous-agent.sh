@@ -412,7 +412,7 @@ runner() {
   local ETAT_CLIENT="confirme" ETAT_RELAIS="confirme"
   [ "$CLIENT_NON_CONFIRME" = 1 ] && ETAT_CLIENT="non_confirme"
   [ "$RELAIS_NON_CONFIRME" = 1 ] && ETAT_RELAIS="non_confirme"
-  printf '%s %s %s tours=%s cout=%s cout_exact=%s jetons=%s duree=%ss arret_client=%s arret_relais=%s dossier=%s\n' \
+  printf '%s %s %s num_turns_client=%s cout=%s cout_exact=%s source_cout=estimation_passerelle jetons=%s duree=%ss arret_client=%s arret_relais=%s dossier=%s\n' \
     "$ST" "$ALIAS" "$RUN" "$TURNS_USED" "$COUT" "$COUT_EXACT" "$TOK" "$((SECONDS-t0))" "$ETAT_CLIENT" "$ETAT_RELAIS" "$OUT" > "$OUT/summary.txt"
   touch "$OUT/done"
 }

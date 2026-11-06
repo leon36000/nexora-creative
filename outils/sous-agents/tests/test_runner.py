@@ -88,7 +88,7 @@ if os.environ.get('FAKE_EXIT_125') == '1': sys.exit(125)
 if os.environ.get('FAKE_BAD_RESULT') == '1':
     print(json.dumps({'type':'result','subtype':'test'}))
 else:
-    print(json.dumps({'type':'result','is_error':os.environ.get('FAKE_RESULT_FAIL') == '1','subtype':'test','num_turns':1}))
+    print(json.dumps({'type':'result','is_error':os.environ.get('FAKE_RESULT_FAIL') == '1','subtype':'test','num_turns':int(os.environ.get('FAKE_NUM_TURNS','1'))}))
 ''')
         self.env = dict(os.environ, SA_HOME=str(self.home), SA_STATE=str(self.state),
                         PATH=str(self.bin) + os.pathsep + os.environ['PATH'], SA_TIMEOUT='15', FAKE_WORK=str(self.work),
@@ -218,6 +218,14 @@ else:
         self.assertNotEqual(r.returncode, 0)
         self.assertIn('arret_client=confirme', r.stdout)
         self.assertNotIn('arret_client=non_confirme', r.stdout)
+
+    def test_summary_identifies_client_counter_and_gateway_cost(self):
+        r = self.call('-w', env=dict(self.env, FAKE_NUM_TURNS='18'))
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn('num_turns_client=18', r.stdout)
+        self.assertIn('source_cout=estimation_passerelle', r.stdout)
+        self.assertIn('1req', r.stdout)
+        self.assertNotIn(' tours=', r.stdout)
 
     def test_failure_result_returns_nonzero(self):
         r = self.call('-w', env=dict(self.env, FAKE_RESULT_FAIL='1'))
