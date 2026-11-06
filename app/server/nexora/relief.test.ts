@@ -5,7 +5,9 @@ import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
-import { analyser, cartesPbr, cibleTriangles, cleArete, compatibiliteObj, decimerGlb, exporter, lireGlb, nomCacheExport, repondreObjIncompatible, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { Mesh, Material } from 'three';
+import { analyser, cartesPbr, cibleTriangles, cleArete, compatibiliteObj, decimerGlb, exporter, lireGlb, maillageDuDocument, nomCacheExport, repondreObjIncompatible, versObj, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
 
 /** Sphère UV (étanche une fois les sommets soudés), avec une texture 1×1 PNG. */
 async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
@@ -43,6 +45,128 @@ async function glbMaillage(positions: Float32Array, indices: Uint32Array): Promi
   doc.createScene().addChild(doc.createNode().setMesh(doc.createMesh().addPrimitive(prim)));
   return new NodeIO().writeBinary(doc);
 }
+
+async function glbNormales(options: { normale?: number[]; echelle?: [number, number, number]; indices?: boolean; uv?: boolean; taille?: number } = {}): Promise<Uint8Array> {
+  const doc = new Document(), buf = doc.createBuffer();
+  const p = doc.createPrimitive().setAttribute('POSITION', doc.createAccessor().setType('VEC3')
+    .setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf));
+  if (options.normale) p.setAttribute('NORMAL', doc.createAccessor().setType('VEC3')
+    .setArray(Float32Array.from(Array(options.taille ?? 3).fill(options.normale).flat())).setBuffer(buf));
+  if (options.uv) p.setAttribute('TEXCOORD_0', doc.createAccessor().setType('VEC2')
+    .setArray(new Float32Array([0, 0, 1, 0, 0, 1])).setBuffer(buf));
+  if (options.indices) p.setIndices(doc.createAccessor().setType('SCALAR').setArray(new Uint16Array([0, 1, 2])).setBuffer(buf));
+  doc.createScene().addChild(doc.createNode().setScale(options.echelle ?? [1, 1, 1]).setMesh(doc.createMesh().addPrimitive(p)));
+  return new NodeIO().writeBinary(doc);
+}
+
+describe('OBJ : normales et orientation', () => {
+  for (const reflet of [false, true]) it(`combine rotation enfant et échelle parent, reflet=${reflet}`, async () => {
+    const doc = new Document(), buf = doc.createBuffer();
+    const n = 1 / Math.sqrt(3);
+    const p = doc.createPrimitive()
+      .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, -1, 0, 1, 0, -1])).setBuffer(buf))
+      .setAttribute('NORMAL', doc.createAccessor().setType('VEC3').setArray(new Float32Array([n, n, n, n, n, n, n, n, n])).setBuffer(buf))
+      .setIndices(doc.createAccessor().setType('SCALAR').setArray(new Uint16Array([0, 1, 2])).setBuffer(buf));
+    const child = doc.createNode().setTranslation([1, 2, 3]).setRotation([0, 0, Math.SQRT1_2, Math.SQRT1_2]).setMesh(doc.createMesh().addPrimitive(p));
+    doc.createScene().addChild(doc.createNode().setTranslation([4, 5, 6]).setScale([reflet ? -2 : 2, 3, 4]).addChild(child));
+    const obj = new TextDecoder().decode(unzipSync(await exporter(await new NodeIO().writeBinary(doc), 'obj'))['relief.obj']);
+    const normale = obj.split('\n').find((ligne) => ligne.startsWith('vn '))!.split(' ').slice(1).map(Number);
+    const attendu = [reflet ? 6 : -6, 4, 3].map((x) => x / Math.sqrt(61));
+    normale.forEach((x, i) => expect(x).toBeCloseTo(attendu[i], 5));
+    const sommets = obj.split('\n').filter((ligne) => ligne.startsWith('v ')).map((ligne) => ligne.split(' ').slice(1).map(Number));
+    const face = obj.split('\n').find((ligne) => ligne.startsWith('f '))!.split(' ').slice(1).map((s) => Number(s.split('/')[0]) - 1);
+    const [a, b, c] = face.map((i) => sommets[i]);
+    const u = b.map((x, i) => x - a[i]), v = c.map((x, i) => x - a[i]);
+    expect(u.reduce((s, x, i) => s + x * normale[i], 0)).toBeCloseTo(0, 5);
+    expect(v.reduce((s, x, i) => s + x * normale[i], 0)).toBeCloseTo(0, 5);
+    const cross = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    expect(cross.reduce((s, x, i) => s + x * normale[i], 0)).toBeGreaterThan(0);
+  });
+  it('conserve les normales uniquement sur les primitives qui en possèdent', async () => {
+    const doc = new Document(), buf = doc.createBuffer(), mesh = doc.createMesh();
+    for (const avec of [false, true]) {
+      const p = doc.createPrimitive().setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf));
+      if (avec) p.setAttribute('NORMAL', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1])).setBuffer(buf));
+      mesh.addPrimitive(p);
+    }
+    doc.createScene().addChild(doc.createNode().setMesh(mesh));
+    const obj = new TextDecoder().decode(unzipSync(await exporter(await new NodeIO().writeBinary(doc), 'obj'))['relief.obj']);
+    expect(obj.match(/^vn /gm)).toHaveLength(3);
+    expect(obj).toContain('usemtl matiere_0\ns off\nf 1 2 3');
+    expect(obj).toContain('f 4//1 5//2 6//3');
+  });
+  it('OBJLoader conserve le lissage par matériau pour normale, absence, normale', async () => {
+    const doc = new Document(), buf = doc.createBuffer(), mesh = doc.createMesh();
+    for (const avec of [true, false, true]) {
+      const p = doc.createPrimitive().setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf));
+      if (avec) p.setAttribute('NORMAL', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1])).setBuffer(buf));
+      mesh.addPrimitive(p);
+    }
+    doc.createScene().addChild(doc.createNode().setMesh(mesh));
+    const obj = new TextDecoder().decode(unzipSync(await exporter(await new NodeIO().writeBinary(doc), 'obj'))['relief.obj']);
+    const materials: Material[] = [];
+    new OBJLoader().parse(obj).traverse((child) => {
+      if (child instanceof Mesh) materials.push(...(Array.isArray(child.material) ? child.material : [child.material]));
+    });
+    expect(materials.map((m) => (m as Material & { flatShading: boolean }).flatShading)).toEqual([false, true, false]);
+  });
+  it('refuse un accessoire de normales dont le type est incorrect', () => {
+    const doc = new Document(), buf = doc.createBuffer();
+    const p = doc.createPrimitive()
+      .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf))
+      .setAttribute('NORMAL', doc.createAccessor().setType('VEC2').setArray(new Float32Array(6)).setBuffer(buf));
+    doc.createScene().addChild(doc.createNode().setMesh(doc.createMesh().addPrimitive(p)));
+    expect(() => versObj(maillageDuDocument(doc))).toThrow(/Normales OBJ/);
+  });
+  for (const uv of [false, true]) for (const normale of [false, true]) {
+    it(`écrit les faces uv=${uv}, normales=${normale}`, async () => {
+      const glb = await glbNormales({ uv, normale: normale ? [0, 0, 1] : undefined });
+      const obj = new TextDecoder().decode(unzipSync(await exporter(glb, 'obj'))['relief.obj']);
+      expect(obj.match(/^vn /gm)?.length ?? 0).toBe(normale ? 3 : 0);
+      expect(obj).toContain(normale ? (uv ? 'f 1/1/1 2/2/2 3/3/3' : 'f 1//1 2//2 3//3') : (uv ? 'f 1/1 2/2 3/3' : 'f 1 2 3'));
+      if (!normale) expect(obj).toContain('s off');
+    });
+  }
+  it('transforme les normales en inverse transposée pour une échelle non uniforme', async () => {
+    const obj = new TextDecoder().decode(unzipSync(await exporter(await glbNormales({ normale: [1, 1, 0], echelle: [2, 1, 1] }), 'obj'))['relief.obj']);
+    const [, x, y, z] = obj.match(/^vn ([^ ]+) ([^ ]+) ([^\n]+)/m)!;
+    expect(Number(x)).toBeCloseTo(1 / Math.sqrt(5), 5); expect(Number(y)).toBeCloseTo(2 / Math.sqrt(5), 5); expect(Number(z)).toBe(0);
+  });
+  for (const indices of [false, true]) it(`inverse le winding réfléchi, indexé=${indices}`, async () => {
+    const obj = new TextDecoder().decode(unzipSync(await exporter(await glbNormales({ normale: [0, 0, 1], echelle: [-1, 1, 1], indices }), 'obj'))['relief.obj']);
+    expect(obj).toContain('f 1//1 3//3 2//2');
+  });
+  it('complète les coins nuls avec les normales de faces opposées, sans modifier les autres', async () => {
+    const doc = new Document(), buf = doc.createBuffer();
+    const p = doc.createPrimitive()
+      .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf))
+      .setAttribute('NORMAL', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 0, 0, 1, 0, 0, 1])).setBuffer(buf))
+      .setIndices(doc.createAccessor().setType('SCALAR').setArray(new Uint16Array([0, 1, 2, 0, 2, 1])).setBuffer(buf));
+    doc.createScene().addChild(doc.createNode().setMesh(doc.createMesh().addPrimitive(p)));
+    const obj = new TextDecoder().decode(unzipSync(await exporter(await new NodeIO().writeBinary(doc), 'obj'))['relief.obj']);
+    expect(obj).toContain('# 2 normales de coin calculées');
+    expect(obj).toContain('vn 0 0 1\nvn 0 0 -1');
+    expect(obj).toContain('f 1//3 2//1 3//2');
+    expect(obj).toContain('f 1//4 3//2 2//1');
+  });
+  it('refuse une normale nulle incidente à une face dégénérée sans la supprimer', async () => {
+    const doc = new Document(), buf = doc.createBuffer();
+    const p = doc.createPrimitive()
+      .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 2, 0, 0])).setBuffer(buf))
+      .setAttribute('NORMAL', doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 0, 0, 1, 0, 0, 1])).setBuffer(buf));
+    doc.createScene().addChild(doc.createNode().setMesh(doc.createMesh().addPrimitive(p)));
+    const glb = await new NodeIO().writeBinary(doc);
+    expect(compatibiliteObj(glb, await lireGlb(glb)).compatible).toBe(false);
+    await expect(exporter(glb, 'obj')).rejects.toMatchObject({ code: 'OBJ_UNSUPPORTED' });
+  });
+  for (const options of [{ normale: [NaN, 0, 1] }, { normale: [0, 0, 1], taille: 2 }, { normale: [0, 0, 1], echelle: [0, 1, 1] as [number, number, number] }]) {
+    it('refuse les normales ou la matrice invalides', async () => {
+      const glb = await glbNormales(options);
+      expect(compatibiliteObj(glb, await lireGlb(glb)).compatible).toBe(false);
+      await expect(exporter(glb, 'obj')).rejects.toMatchObject({ code: 'OBJ_UNSUPPORTED' });
+    });
+  }
+});
 
 /** Deux primitives glTF avec couleurs différentes et une texture : aucune ressource externe. */
 async function glbDeuxMatieres(options: { sansUv?: boolean; uvNaN?: boolean; jpeg?: boolean; blend?: boolean; deuxTextures?: boolean; grille?: boolean } = {}): Promise<Uint8Array> {

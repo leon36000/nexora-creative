@@ -11,6 +11,7 @@ import { Document, NodeIO, type Primitive, type Transform } from '@gltf-transfor
 import { simplify, weld } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { zipSync, strToU8 } from 'fflate';
+import { Matrix3, Matrix4, Vector3 } from 'three';
 
 export const CODE_OBJ_INCOMPATIBLE = 'OBJ_UNSUPPORTED' as const;
 
@@ -20,7 +21,7 @@ export class ObjIncompatible extends Error {
 
 /** Réponse stable pour les clients qui téléchargent directement sans passer par l'interface. */
 export function repondreObjIncompatible(reply: FastifyReply) {
-  return reply.code(400).send({ code: CODE_OBJ_INCOMPATIBLE, error: 'Export OBJ incompatible avec les textures ou les coordonnées UV de ce modèle. Utilisez le GLB.' });
+  return reply.code(400).send({ code: CODE_OBJ_INCOMPATIBLE, error: 'Export OBJ incompatible avec les textures, les coordonnées UV ou les normales de ce modèle. Utilisez le GLB.' });
 }
 
 export type FormatRelief = 'glb' | 'obj' | 'stl' | '3mf' | 'usdz';
@@ -46,10 +47,13 @@ export interface Maillage {
   /** Données OBJ par primitive ; absentes pour les maillages construits directement. */
   partiesObj?: PartieObj[];
   uvsObj?: Float32Array;
+  normalesObj?: Float32Array;
+  indicesObj?: Uint32Array;
+  normalesCoinsObj?: Map<number, [number, number, number]>;
 }
 
 interface PartieObj {
-  debut: number; fin: number; aUv: boolean;
+  debut: number; fin: number; base: number; sommets: number; aUv: boolean; aNormale: boolean;
   facteur: readonly number[]; alphaMode: string;
   texture: { octets: Uint8Array; mime: string } | null;
   erreur: string | null;
@@ -88,6 +92,9 @@ export function maillageDuDocument(doc: Document): Maillage {
   const uv: number[] = [];
   const idx: number[] = [];
   const uvObj: number[] = [];
+  const normalesObj: number[] = [];
+  const indicesObj: number[] = [];
+  const normalesCoinsObj = new Map<number, [number, number, number]>();
   const partiesObj: PartieObj[] = [];
   let aUv = true;
   let couleur: Maillage['couleur'] = null;
@@ -95,6 +102,9 @@ export function maillageDuDocument(doc: Document): Maillage {
   const noeuds = racine.listNodes().filter((n) => n.getMesh());
   for (const n of noeuds) {
     const m = n.getWorldMatrix();
+    const matrice = new Matrix4().fromArray(m);
+    const determinant = matrice.determinant();
+    const matriceNormale = new Matrix3().getNormalMatrix(matrice);
     for (const p of n.getMesh()!.listPrimitives() as Primitive[]) {
       if (p.getMode() !== 4) continue; // triangles seulement
       const P = p.getAttribute('POSITION');
@@ -126,19 +136,53 @@ export function maillageDuDocument(doc: Document): Maillage {
       const I = p.getIndices();
       if (I) { for (let i = 0; i < I.getCount(); i++) idx.push(base + I.getScalar(i)); }
       else { for (let i = 0; i < P.getCount(); i++) idx.push(base + i); }
+      for (let i = debut; i < idx.length; i += 3) {
+        if (determinant < 0) indicesObj.push(idx[i], idx[i + 2], idx[i + 1]);
+        else indicesObj.push(idx[i], idx[i + 1], idx[i + 2]);
+      }
       const image = tex?.getImage();
       const mime = tex?.getMimeType() || '';
       let erreur: string | null = null;
-      if (!uvFinies) erreur = 'Coordonnées UV OBJ non finies.';
+      const N = p.getAttribute('NORMAL');
+      const aNormale = !!N && N.getType() === 'VEC3' && N.getArray() instanceof Float32Array && N.getCount() === P.getCount();
+      if (N && (!aNormale || !Number.isFinite(determinant) || determinant === 0)) erreur = 'Normales OBJ ou transformation invalides.';
+      const normale = [0, 0, 0];
+      const v = new Vector3();
+      let normalesNulles = false;
+      for (let i = 0; i < P.getCount(); i++) {
+        if (!aNormale || erreur) { normalesObj.push(0, 0, 0); continue; }
+        N!.getElement(i, normale);
+        if (normale.every((x) => x === 0)) { normalesObj.push(0, 0, 0); normalesNulles = true; continue; }
+        v.set(normale[0], normale[1], normale[2]).applyMatrix3(matriceNormale);
+        if (![v.x, v.y, v.z, v.lengthSq()].every(Number.isFinite) || v.lengthSq() === 0) erreur = 'Normale OBJ non finie ou nulle.';
+        v.normalize();
+        normalesObj.push(v.x, v.y, v.z);
+      }
+      if (normalesNulles && !erreur) {
+        const a = new Vector3(), b = new Vector3(), c = new Vector3(), face = new Vector3();
+        for (let t = debut; t < idx.length; t += 3) {
+          const coins = indicesObj.slice(t, t + 3);
+          const manque = coins.map((s) => normalesObj[3 * s] === 0 && normalesObj[3 * s + 1] === 0 && normalesObj[3 * s + 2] === 0);
+          if (!manque.some(Boolean)) continue;
+          a.fromArray(pos, 3 * coins[0]); b.fromArray(pos, 3 * coins[1]); c.fromArray(pos, 3 * coins[2]);
+          face.subVectors(b, a).cross(c.sub(a));
+          if (![face.x, face.y, face.z, face.lengthSq()].every(Number.isFinite) || face.lengthSq() === 0) {
+            erreur = 'Normale nulle sur une face OBJ dégénérée.'; break;
+          }
+          face.normalize();
+          for (let coin = 0; coin < 3; coin++) if (manque[coin]) normalesCoinsObj.set(t + coin, [face.x, face.y, face.z]);
+        }
+      }
+      if (!erreur && !uvFinies) erreur = 'Coordonnées UV OBJ non finies.';
       else if (tex && (!image || !uvValides)) erreur = 'Texture de base sans image ou coordonnées UV utilisables.';
       else if (tex && mime !== 'image/png' && mime !== 'image/jpeg') erreur = 'Texture OBJ : seuls PNG et JPEG sont pris en charge.';
       else if (info && info.listExtensions().length) erreur = 'Transformation de texture OBJ non prise en charge.';
-      partiesObj.push({ debut, fin: idx.length, aUv: uvValides, facteur: mat?.getBaseColorFactor() ?? [1, 1, 1, 1],
+      partiesObj.push({ debut, fin: idx.length, base, sommets: P.getCount(), aUv: uvValides, aNormale, facteur: mat?.getBaseColorFactor() ?? [1, 1, 1, 1],
         alphaMode: mat?.getAlphaMode() ?? 'OPAQUE', texture: image ? { octets: image, mime } : null, erreur });
       if (!couleur && image) couleur = { octets: image, mime: mime || 'image/png' };
     }
   }
-  return { positions: Float32Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj) };
+  return { positions: Float32Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj), normalesObj: Float32Array.from(normalesObj), indicesObj: Uint32Array.from(indicesObj), normalesCoinsObj };
 }
 
 // ---------- contrôle ----------
@@ -320,7 +364,7 @@ export function versObj(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   const n = m.positions.length / 3;
   for (let i = 0; i < n; i++) lignes.push(`v ${f(m.positions[3 * i])} ${f(m.positions[3 * i + 1])} ${f(m.positions[3 * i + 2])}`);
   if (m.uvs) for (let i = 0; i < n; i++) lignes.push(`vt ${f(m.uvs[2 * i])} ${f(1 - m.uvs[2 * i + 1])}`);
-  lignes.push('usemtl matiere');
+  lignes.push('usemtl matiere', 's off');
   for (let t = 0; t < m.indices.length; t += 3) {
     const [a, b, c] = [m.indices[t] + 1, m.indices[t + 1] + 1, m.indices[t + 2] + 1];
     lignes.push(m.uvs ? `f ${a}/${a} ${b}/${b} ${c}/${c}` : `f ${a} ${b} ${c}`);
@@ -343,6 +387,21 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
     const uv = m.uvsObj!;
     for (let i = 0; i < n; i++) lignes.push(`vt ${f(uv[2 * i])} ${f(1 - uv[2 * i + 1])}`);
   }
+  const indexNormales = new Map<number, number>();
+  const indexNormalesCoins = new Map<number, number>();
+  const normales = m.normalesObj!;
+  for (const partie of parties) if (partie.aNormale && !partie.erreur) {
+    for (let i = partie.base; i < partie.base + partie.sommets; i++) {
+      if (normales[3 * i] === 0 && normales[3 * i + 1] === 0 && normales[3 * i + 2] === 0) continue;
+      indexNormales.set(i + 1, indexNormales.size + 1);
+      lignes.push(`vn ${f(normales[3 * i])} ${f(normales[3 * i + 1])} ${f(normales[3 * i + 2])}`);
+    }
+  }
+  for (const [coin, normale] of m.normalesCoinsObj ?? []) {
+    indexNormalesCoins.set(coin, indexNormales.size + indexNormalesCoins.size + 1);
+    lignes.push(`vn ${normale.map(f).join(' ')}`);
+  }
+  if (indexNormalesCoins.size) lignes.push(`# ${indexNormalesCoins.size} normales de coin calculées depuis les faces pour remplacer des normales nulles`);
   const fichiers: Record<string, Uint8Array> = {};
   const definitions: string[] = [];
   for (let i = 0; i < parties.length; i++) {
@@ -350,9 +409,15 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
     if (partie.erreur) throw new ObjIncompatible(partie.erreur);
     const mat = parties.length === 1 ? 'matiere' : `matiere_${i}`;
     lignes.push(`usemtl ${mat}`);
+    lignes.push(partie.aNormale ? 's 1' : 's off');
     for (let t = partie.debut; t < partie.fin; t += 3) {
-      const [a, b, c] = [m.indices[t] + 1, m.indices[t + 1] + 1, m.indices[t + 2] + 1];
-      lignes.push(partie.aUv ? `f ${a}/${a} ${b}/${b} ${c}/${c}` : `f ${a} ${b} ${c}`);
+      const idx = m.indicesObj!;
+      const sommets = [idx[t] + 1, idx[t + 1] + 1, idx[t + 2] + 1];
+      const face = sommets.map((s, coin) => {
+        const normale = indexNormales.get(s) ?? indexNormalesCoins.get(t + coin);
+        return partie.aNormale ? (partie.aUv ? `${s}/${s}/${normale}` : `${s}//${normale}`) : (partie.aUv ? `${s}/${s}` : `${s}`);
+      });
+      lignes.push(`f ${face.join(' ')}`);
     }
     let map = '';
     if (partie.texture) {
@@ -370,7 +435,7 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
 
 /** Anciennes versions de cache conservées ; les ZIP OBJ sont recalculés pour les matériaux par primitive. */
 export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
-  return `export-${format}${format === 'obj' ? '-matieres-v2' : ''}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
+  return `export-${format}${format === 'obj' ? '-normales-v3' : ''}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
 }
 
 /** STL binaire, en millimètres, Z vers le haut, posé sur le plateau. */
