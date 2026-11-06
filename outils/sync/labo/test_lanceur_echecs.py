@@ -251,6 +251,43 @@ class EchecsLanceur(unittest.TestCase):
         self.assertEqual(result['execution_stage'], 'model_start_attempted')
         self.assertIn('may have started', result['human_status'])
 
+    def test_prepare_refuse_entrees_avant_toute_sonde(self):
+        for kind in ('video', 'fr'):
+            for problem in ('symlink', 'altered'):
+                with self.subTest(kind=kind, problem=problem):
+                    cfg = self.fixture.config()
+                    path = self.fixture.root / f'input-{kind}-{problem}'
+                    original = Path(cfg['inputs'][kind]['path'])
+                    if problem == 'symlink':
+                        path.symlink_to(original)
+                    else:
+                        shutil.copyfile(original, path)
+                        with path.open('ab') as out:
+                            out.write(b'modification')
+                    cfg['inputs'][kind]['path'] = str(path)
+                    self.fixture.charger(cfg)
+                    before = set(self.fixture.root.rglob('*'))
+                    with patch.object(m, 'verify_static_assets', return_value={}), \
+                         patch.object(m, 'probe') as probe, patch.object(m.subprocess, 'run') as child:
+                        with self.assertRaises(RuntimeError):
+                            m.prepare('fr')
+                        probe.assert_not_called()
+                        child.assert_not_called()
+                    self.assertEqual(set(self.fixture.root.rglob('*')), before)
+                    self.assertTrue(path.is_symlink() if problem == 'symlink' else path.is_file())
+
+    def test_configuration_refuse_doublons_racine_et_inputs(self):
+        text = json.dumps(self.fixture.config())
+        for label, mutated in (
+            ('root', text.replace('"gpu_name":', '"gpu_name": "autre", "gpu_name":', 1)),
+            ('inputs', text.replace('"video":', '"video": {}, "video":', 1)),
+        ):
+            with self.subTest(label=label):
+                path = self.fixture.root / f'doublon-{label}.json'
+                path.write_text(mutated)
+                with self.assertRaisesRegex(ValueError, 'JSON dupliquée'):
+                    m.configurer(path)
+
     def test_configuration_rejouee_differe(self):
         name, run, _ = self.preparer()
         cfg = self.fixture.config(); cfg['padding_codec_seconds'] = .09

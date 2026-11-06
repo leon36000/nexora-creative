@@ -40,6 +40,15 @@ PADDING_CODEC = 0.08
 TEAM_SOURCE_SCOPE = 'Shared technical bench; source attribution not inferred; no human approval'
 
 
+def _objet_json_sans_doublon(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"Clé JSON dupliquée : {key}")
+        result[key] = value
+    return result
+
+
 def configurer(path: Path) -> None:
     """Charge uniquement la configuration JSON du banc, sans accès à .env ou secrets."""
     global CONFIG_SHA, CONFIG_BYTES, ROOT, SOURCE, WEIGHTS, RUNS, TORCH_HOME, HF_HOME, TMPDIR, VENV_PYTHON
@@ -48,7 +57,7 @@ def configurer(path: Path) -> None:
     raw = path.read_bytes()
     if len(raw) > 65536:
         raise ValueError('Configuration trop volumineuse')
-    cfg = json.loads(raw)
+    cfg = json.loads(raw, object_pairs_hook=_objet_json_sans_doublon)
     keys = {'root', 'source', 'weights', 'python', 'ffmpeg', 'ffprobe', 'ffmpeg_sha256',
             'ffprobe_sha256', 'gpu_name', 'gpu_min_free_mib', 'gpu_process', 'inputs', 'padding_codec_seconds'}
     if not isinstance(cfg, dict) or set(cfg) != keys:
@@ -153,11 +162,15 @@ def append_event(path: Path, event: dict[str, Any]) -> None:
         os.fsync(stream.fileno())
 
 
-def copy_exclusive(source: Path, target: Path, expected_sha: str, expected_bytes: int) -> dict[str, Any]:
+def verifier_entree(source: Path, expected_sha: str, expected_bytes: int) -> None:
     if source.is_symlink() or not source.is_file():
         raise RuntimeError(f"input is not a regular file: {source}")
     if source.stat().st_size != expected_bytes or sha256_file(source) != expected_sha:
         raise RuntimeError(f"input integrity check failed: {source}")
+
+
+def copy_exclusive(source: Path, target: Path, expected_sha: str, expected_bytes: int) -> dict[str, Any]:
+    verifier_entree(source, expected_sha, expected_bytes)
     fd = os.open(target, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     h = hashlib.sha256()
     count = 0
@@ -405,6 +418,8 @@ def prepare(language: str) -> Path:
     assets = verify_static_assets()
     video_info = EXPECTED_INPUTS["video"]
     voice_info = EXPECTED_INPUTS[language]
+    for item in (video_info, voice_info):
+        verifier_entree(item["path"], item["sha256"], item["bytes"])
     video_probe = probe(video_info["path"])
     audio_probe = probe(voice_info["path"])
     run_id = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ") + f"-{language}-{uuid.uuid4().hex[:12]}"
