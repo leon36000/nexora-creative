@@ -1,4 +1,5 @@
 import http.client
+import io
 import importlib.util
 import json
 import os
@@ -224,16 +225,60 @@ class Tests(unittest.TestCase):
         self.assertLess(elapsed, 1.5)
         self.assertEqual(len(self.upstream.received), 1)
 
-    def test_failed_connection_is_recorded_as_attempt_not_confirmed_delivery(self):
-        # An unused local port refuses connections; this does not prove upstream receipt.
+    def test_refused_preconnection_has_no_attempt_and_next_request_can_run(self):
         sock = socket.socket(); sock.bind(('127.0.0.1', 0)); port = sock.getsockname()[1]; sock.close()
         self.server.port = port
-        self.assertEqual(self.send()[0], 502)
-        log = (Path(self.tmp.name)/'audit.jsonl').read_text()
-        records = [json.loads(line) for line in log.splitlines()]
-        self.assertEqual(len(records), 1); self.assertEqual(records[0]['sequence'], 1)
-        self.assertRegex(records[0]['call'], r'^lot-test-run--p[0-9a-f]{16}--c1$')
+        trace = io.StringIO()
+        with patch.object(proxy.sys, 'stderr', trace):
+            self.assertEqual(self.send()[0], 502)
+        event = json.loads(trace.getvalue())
+        self.assertEqual(event['phase'], 'connexion')
+        self.assertIsInstance(event['errno'], int)
+        self.assertNotIn(FAKE_KEY, trace.getvalue())
+        self.assertEqual((Path(self.tmp.name) / 'audit.jsonl').read_text(), '')
+        self.server.port = self.upstream.server_port
+        self.assertEqual(self.send()[0], 200)
+        records = [json.loads(line) for line in (Path(self.tmp.name) / 'audit.jsonl').read_text().splitlines()]
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]['sequence'], 1)
+        self.assertEqual(len(self.upstream.received), 1)
+
+    def test_failure_after_connect_stays_unknown_and_blocks(self):
+        audit_path = Path(self.tmp.name) / 'audit.jsonl'
+        audit_observed_at_send = []
+        class ConnectedButFailed:
+            def connect(self): pass
+            def request(self, *_args, **_kwargs):
+                audit_observed_at_send.append(audit_path.read_text())
+                raise OSError(32, FAKE_KEY)
+            def close(self): pass
+        trace = io.StringIO()
+        with patch.object(proxy.http.client, 'HTTPConnection', return_value=ConnectedButFailed()), patch.object(proxy.sys, 'stderr', trace):
+            self.assertEqual(self.send()[0], 502)
+        self.assertEqual(json.loads(trace.getvalue()), {'evenement': 'proxy_erreur', 'phase': 'envoi_ou_reponse', 'errno': 32})
+        self.assertNotIn(FAKE_KEY, trace.getvalue())
+        self.assertEqual(len(audit_observed_at_send), 1)
+        self.assertEqual(len(audit_observed_at_send[0].splitlines()), 1)
+        self.assertEqual(len(audit_path.read_text().splitlines()), 1)
+        self.assertEqual(self.send()[0], 503)
+        self.assertEqual(len(self.upstream.received), 0)
+
+    def test_upstream_502_is_traced_and_unlogged_call_remains_unknown(self):
+        self.upstream.status = 502
+        self.upstream.no_log = True
+        trace = io.StringIO()
+        with patch.object(proxy.sys, 'stderr', trace):
+            self.assertEqual(self.send()[0], 502)
+        self.assertEqual(json.loads(trace.getvalue()), {'evenement': 'proxy_erreur', 'phase': 'reponse_amont_502', 'errno': None})
+        self.assertEqual(self.send()[0], 503)
+        self.assertEqual(len(self.upstream.received), 1)
+
+    def test_audit_failure_after_connect_sends_no_http_request(self):
+        with patch.object(self.server, 'record_attempt', side_effect=OSError('synthetic')):
+            self.assertEqual(self.send()[0], 503)
         self.assertEqual(self.upstream.received, [])
+        self.assertEqual((Path(self.tmp.name) / 'audit.jsonl').read_text(), '')
+        self.assertEqual(self.send()[0], 200)
 
     def test_second_concurrent_request_is_not_forwarded(self):
         self.upstream.chunks = [b'data:a\n\n', b'data:b\n\n']; self.upstream.pause_after_first = 0.8

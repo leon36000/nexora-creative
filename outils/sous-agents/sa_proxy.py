@@ -17,6 +17,17 @@ from urllib.parse import urlsplit
 
 from cost_snapshot import snapshot_wait as cost_snapshot_wait
 
+def trace_erreur(phase, erreur=None):
+    """Ne conserve que la phase et un errno numérique, sans message ni données HTTP."""
+    numero = getattr(erreur, 'errno', None)
+    if type(numero) is not int or not 0 <= numero <= 4095:
+        numero = None
+    try:
+        print(json.dumps({'evenement': 'proxy_erreur', 'phase': phase, 'errno': numero}), file=sys.stderr, flush=True)
+    except OSError:
+        pass
+
+
 MAX_BODY = 16 * 1024 * 1024
 MAX_OUTPUT_TOKENS = 16000
 ALLOWED_PATHS = frozenset(('/v1/messages',))
@@ -206,29 +217,44 @@ class Handler(BaseHTTPRequestHandler):
             self.reject(429 if budget == 'limite' else 503,
                         'budget atteint' if budget == 'limite' else 'coût précédent inconnu')
             return
+        connection = http.client.HTTPConnection('127.0.0.1', self.server.port, timeout=self.server.timeout)
         try:
+            # Une connexion refusée avant tout envoi HTTP ne peut pas avoir atteint le fournisseur.
+            connection.connect()
+        except (OSError, http.client.HTTPException, ValueError) as exc:
+            trace_erreur('connexion', exc)
+            connection.close()
+            self.reject(502, 'passerelle indisponible')
+            return
+        try:
+            # Dès que l'envoi est possible, conserver toute issue ambiguë dans l'audit.
             headers['x-sa-run'] = self.server.record_attempt()
         except OSError:
+            connection.close()
             self.reject(503, 'journal indisponible')
             return
-        connection = http.client.HTTPConnection('127.0.0.1', self.server.port, timeout=self.server.timeout)
         try:
             connection.request('POST', self.path, body=body, headers=headers)
             response = connection.getresponse()
-        except (OSError, http.client.HTTPException, ValueError):
+        except (OSError, http.client.HTTPException, ValueError) as exc:
+            trace_erreur('envoi_ou_reponse', exc)
             connection.close()
             self.reject(502, 'passerelle indisponible')
             return
         try:
             encoding = response.getheader('Content-Encoding', 'identity').lower()
             if encoding not in ('', 'identity'):
+                trace_erreur('reponse_invalide')
                 self.reject(502, 'réponse encodée non vérifiable')
                 return
             lengths = response.headers.get_all('Content-Length') or []
             if len(lengths) > 1 or (lengths and not lengths[0].isdigit()):
+                trace_erreur('reponse_invalide')
                 self.reject(502, 'longueur amont invalide')
                 return
             expected = int(lengths[0]) if lengths else None
+            if response.status == 502:
+                trace_erreur('reponse_amont_502')
             self.send_response(response.status)
             for key, value in response.getheaders():
                 lower = key.lower()
