@@ -133,6 +133,7 @@ export function clientPalier(palier: Palier, o: OptionsClientPalier = {}): Clien
           role, palier, modele: a.modele, endpoint: repli && a.repli ? a.repli.endpoint : a.endpoint, usage: u,
           coutUsd: u.coutFournisseurUsd ?? liste, source: u.coutFournisseurUsd !== null ? 'fournisseur' : 'tarif', ms: Date.now() - t0, repli,
         });
+        if (j.choices?.[0]?.finish_reason === 'length') throw new ErreurLlm('réponse tronquée (jetons de sortie épuisés)');
         return j;
       }
       const statut = r?.status ?? 0;
@@ -155,7 +156,7 @@ export function clientPalier(palier: Palier, o: OptionsClientPalier = {}): Clien
       });
       const c = j.choices?.[0];
       const texte = c?.message?.content;
-      if (typeof texte !== 'string' || !texte.trim()) throw new ErreurLlm(c?.finish_reason === 'length' ? 'réponse tronquée (jetons de sortie épuisés)' : 'réponse LLM vide');
+      if (typeof texte !== 'string' || !texte.trim()) throw new ErreurLlm('réponse LLM vide');
       return texte;
     },
     async completerAvecOutils(role, messages, outils: DefinitionOutil[], options = {}) {

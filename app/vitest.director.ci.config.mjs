@@ -21,6 +21,7 @@ export default {
       'app/server/nexora/promptH3.test.ts', 'app/server/nexora/reecritureH3.test.ts', 'app/server/nexora/realisateur.test.ts',
       'app/server/nexora/creer.test.ts', 'app/server/nexora/gardeNouveauRendu.test.ts',
       'app/server/nexora/creationLanguage.test.ts', 'app/server/nexora/personnages.test.ts',
+      'app/server/nexora/usage.test.ts', 'app/server/nexora/troncature.test.ts',
       'app/server/nexora/credits.test.ts', 'app/src/filmErreurPartielle.test.ts',
       'app/server/nexora/detourage/routes.test.ts',
       'app/server/nexora/detourage/serviceNatif.test.ts',
@@ -31,6 +32,7 @@ export default {
       reportsDirectory: `${root}/.ci-director/coverage`,
       include: [
         'app/server/index.ts', 'app/server/jobs.ts', 'app/server/engine.ts',
+        'app/server/nexora/niveaux.ts',
         'app/server/nexora/film.ts', 'app/server/nexora/filmMoteur.ts', 'app/server/nexora/filmEchec.ts',
         'app/server/nexora/promptH3.ts', 'app/server/nexora/reecritureH3.ts', 'app/server/nexora/realisateur.ts',
         'app/server/nexora/filmClePlan.ts', 'app/server/nexora/reconciliationArrets.ts',
