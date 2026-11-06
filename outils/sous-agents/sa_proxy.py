@@ -48,7 +48,7 @@ class Server(socketserver.ThreadingMixIn, socketserver.UnixStreamServer):
 
     def __init__(self, path, handler, *, key, run, model, port, timeout, audit_path, ledger_path, budget,
                  client_timeout=30, max_workers=4, ledger_wait=3):
-        self.key, self.run, self.model, self.port, self.timeout = key, run, model, port, timeout
+        self.key, self.run, self.model, self.port, self.upstream_timeout = key, run, model, port, timeout
         self.client_timeout, self.audit_path, self.ledger_path = client_timeout, audit_path, ledger_path
         self.budget, self.ledger_wait = budget, ledger_wait
         self._slots = threading.BoundedSemaphore(max_workers)
@@ -217,7 +217,7 @@ class Handler(BaseHTTPRequestHandler):
             self.reject(429 if budget == 'limite' else 503,
                         'budget atteint' if budget == 'limite' else 'coût précédent inconnu')
             return
-        connection = http.client.HTTPConnection('127.0.0.1', self.server.port, timeout=self.server.timeout)
+        connection = http.client.HTTPConnection('127.0.0.1', self.server.port, timeout=self.server.upstream_timeout)
         try:
             # Une connexion refusée avant tout envoi HTTP ne peut pas avoir atteint le fournisseur.
             connection.connect()

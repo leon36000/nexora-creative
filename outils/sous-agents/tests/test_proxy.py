@@ -32,6 +32,7 @@ class Upstream(BaseHTTPRequestHandler):
                                      'auth': self.headers.get('Authorization'), 'run': self.headers.get('x-sa-run'),
                                      'proxy_auth': self.headers.get('Proxy-Authorization'), 'rewrite': self.headers.get('X-Original-URL'),
                                      'payload': json.loads(payload)})
+        if getattr(self.server, 'pause_avant_entetes', 0): time.sleep(self.server.pause_avant_entetes)
         self.send_response(self.server.status)
         self.send_header('Content-Type', 'text/event-stream')
         if self.server.content_length is not None: self.send_header('Content-Length', str(self.server.content_length))
@@ -279,6 +280,24 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.upstream.received, [])
         self.assertEqual((Path(self.tmp.name) / 'audit.jsonl').read_text(), '')
         self.assertEqual(self.send()[0], 200)
+
+    def test_poll_court_ne_raccourcit_pas_le_timeout_amont(self):
+        # main() utilise ce délai pour handle_request ; il ne doit pas piloter HTTP.
+        self.server.timeout = 0.2
+        self.upstream.pause_avant_entetes = 0.6
+        debut = time.monotonic()
+        self.assertEqual(self.send()[0], 200)
+        self.assertGreaterEqual(time.monotonic() - debut, 0.5)
+        self.assertEqual(len(self.upstream.received), 1)
+
+    def test_timeout_amont_configure_reste_effectif(self):
+        self.server.timeout = 1.0
+        self.server.upstream_timeout = 0.2
+        self.upstream.pause_avant_entetes = 0.6
+        debut = time.monotonic()
+        self.assertEqual(self.send()[0], 502)
+        self.assertLess(time.monotonic() - debut, 3.0)
+        self.assertEqual(len((Path(self.tmp.name) / 'audit.jsonl').read_text().splitlines()), 1)
 
     def test_second_concurrent_request_is_not_forwarded(self):
         self.upstream.chunks = [b'data:a\n\n', b'data:b\n\n']; self.upstream.pause_after_first = 0.8
