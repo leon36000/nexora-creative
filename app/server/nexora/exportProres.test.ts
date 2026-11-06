@@ -86,3 +86,28 @@ it('refuse durée tronquée, mauvais profil et audio non PCM', async () => {
   expect(() => verifierRapports(source,{...bon,streams:[{...bon.streams[0],profile:'LT'},bon.streams[1]]})).toThrow();
   expect(() => verifierRapports(source,{...bon,streams:[bon.streams[0],{codec_type:'audio',codec_name:'aac'}]})).toThrow();
 });
+
+it('contrôle la durée des flux vidéo sans imposer le nombre de frames VFR', async () => {
+  const { verifierChronologies } = await import('./exportProres.js');
+  const source = { images: 48, debut: 0, fin: 2, derniereDuree: 1 / 24 };
+  expect(() => verifierChronologies(source, { images: 12, debut: 0, fin: 0.5, derniereDuree: 1 / 24 })).toThrow();
+  expect(() => verifierChronologies(source, { images: 47, debut: 0, fin: 2, derniereDuree: 1 / 24 })).not.toThrow();
+  expect(() => verifierChronologies(source, { images: 0, debut: 0, fin: 2, derniereDuree: 1 / 24 })).toThrow();
+  expect(() => verifierChronologies({ images: 4, debut: 0, fin: 2, derniereDuree: 1.6 }, { images: 3, debut: 0, fin: 1.3, derniereDuree: 0.1 })).toThrow();
+  for (const invalid of [ { ...source, derniereDuree: NaN }, { ...source, images: -1 }, { ...source, images: NaN }, { ...source, debut: Infinity }, { ...source, derniereDuree: 0 } ]) {
+    expect(() => verifierChronologies(source, invalid)).toThrow();
+    expect(() => verifierChronologies(invalid, source)).toThrow();
+  }
+  expect(() => verifierChronologies({ ...source, debut: -2, fin: 0 }, source)).not.toThrow();
+});
+
+it('lit les horodatages par clé et refuse une durée finale absente', async () => {
+  const { verifierProres } = await import('./exportProres.js');
+  const b = base(); const sonde = join(b.root, 'fausse-sonde');
+  const entete = JSON.stringify({format:{duration:'2'},streams:[{codec_type:'video',codec_name:'prores',profile:'HQ',pix_fmt:'yuv422p10le',width:160,height:90}]});
+  const script = (fin: string) => `#!/usr/bin/env node\nif (process.argv.includes('json')) console.log(${JSON.stringify(entete)}); else { console.log('duration_time=1|best_effort_timestamp_time=0|'); console.log('pkt_duration_time=${fin}|best_effort_timestamp_time=1|'); }\n`;
+  writeFileSync(sonde, script('1'), {mode:0o755});
+  await expect(verifierProres('sortie', 'source', sonde)).resolves.toBeUndefined();
+  writeFileSync(sonde, script('N/A'));
+  await expect(verifierProres('sortie', 'source', sonde)).rejects.toThrow('dernière image non vérifiable');
+});

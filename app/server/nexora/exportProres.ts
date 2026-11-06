@@ -56,16 +56,64 @@ export function creerExportProres(encoder: Encoder, valider: Valider) {
 type Flux = { codec_type?: string; codec_name?: string; profile?: string; pix_fmt?: string; width?: number; height?: number };
 type Rapport = { format?: { duration?: string }; streams?: Flux[] };
 
-/** Contrôle les métadonnées, sans prétendre décoder chaque image. */
+type Chronologie = { images: number; debut: number; fin: number; derniereDuree: number };
+
+/** Sonde les images décodées en flux : mémoire bornée, sans dépendre de stream.duration. */
+async function chronologieVideo(fichier: string, ffprobe: string, delaiMs: number): Promise<Chronologie> {
+  let reste = '', images = 0, debut = NaN, precedent = NaN, derniereDuree = NaN;
+  const nombre = (v: string | undefined) => { const n = v?.trim(); return n && /^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(n) ? Number(n) : NaN; };
+  const ligne = (texte: string) => {
+    if (!texte.trim()) return;
+    const champs = new Map(texte.split('|').filter(Boolean).map((champ) => { const i = champ.indexOf('='); return [champ.slice(0, i), champ.slice(i + 1)]; }));
+    const date = nombre(champs.get('best_effort_timestamp_time'));
+    const duree = [nombre(champs.get('duration_time')), nombre(champs.get('pkt_duration_time'))].find((n) => Number.isFinite(n) && n > 0) ?? NaN;
+    if (!Number.isFinite(date) || (images && date < precedent)) throw new Error('Dates vidéo invalides.');
+    if (!images) debut = date;
+    precedent = date; derniereDuree = duree; images++;
+  };
+  const recevoir = (bloc: Buffer) => {
+    reste += bloc.toString('utf8');
+    let fin: number;
+    while ((fin = reste.indexOf('\n')) >= 0) { ligne(reste.slice(0, fin)); reste = reste.slice(fin + 1); }
+    if (reste.length > 4096) throw new Error('Ligne vidéo excessive.');
+  };
+  await executerBorne(ffprobe, ['-v', 'error', '-select_streams', 'v:0', '-show_frames',
+    '-show_entries', 'frame=best_effort_timestamp_time,pkt_duration_time,duration_time:frame_side_data=', '-of', 'compact=p=0:nk=0', fichier], delaiMs, recevoir);
+  if (reste) ligne(reste);
+  // Sans durée de dernière image, ne pas présenter une extrapolation comme une mesure.
+  if (!images || !Number.isFinite(derniereDuree) || derniereDuree <= 0) throw new Error('Durée de la dernière image non vérifiable.');
+  return { images, debut, fin: precedent + derniereDuree, derniereDuree };
+}
+
+/** Compare les durées décodées, pas les cadences ou nombres de frames d'une source VFR normalisée. */
+export function verifierChronologies(source: Chronologie, sortie: Chronologie): void {
+  const valide = (c: Chronologie) => Number.isSafeInteger(c.images) && c.images > 0 &&
+    Number.isFinite(c.debut) && Number.isFinite(c.fin) && c.fin > c.debut &&
+    Number.isFinite(c.derniereDuree) && c.derniereDuree > 0;
+  if (!valide(source) || !valide(sortie)) throw new Error('Chronologie vidéo invalide ou non vérifiable.');
+  const dureeSource = source.fin - source.debut, dureeSortie = sortie.fin - sortie.debut;
+  const tolerance = Math.min(0.25, Math.max(0.05, source.derniereDuree / 2, sortie.derniereDuree / 2));
+  if (!source.images || !sortie.images || !Number.isFinite(dureeSource) || dureeSource <= 0 ||
+      !Number.isFinite(dureeSortie) || dureeSortie <= 0 || Math.abs(dureeSortie - dureeSource) > tolerance) {
+    throw new Error('Le contrôle temporel du flux vidéo ProRes a échoué.');
+  }
+}
+
+/** Contrôle les métadonnées et le temps des images décodées, sans juger leur contenu visuel. */
 export async function verifierProres(provisoire: string, source: string, ffprobe: string): Promise<void> {
+  const echeance = performance.now() + 60_000;
+  const tempsRestant = () => { const restant = echeance - performance.now(); if (restant <= 0) throw new Error('Délai de contrôle ProRes dépassé.'); return restant; };
   const lire = async (fichier: string): Promise<Rapport> => {
     const stdout = await executerBorne(ffprobe,
-      ['-v', 'error', '-show_entries', 'format=duration:stream=codec_type,codec_name,profile,pix_fmt,width,height', '-of', 'json', fichier], 60_000);
+      ['-v', 'error', '-show_entries', 'format=duration:stream=codec_type,codec_name,profile,pix_fmt,width,height', '-of', 'json', fichier], tempsRestant());
     return JSON.parse(stdout) as Rapport;
   };
   const entree = await lire(source);
   const sortie = await lire(provisoire);
   verifierRapports(entree, sortie);
+  const sourceVideo = await chronologieVideo(source, ffprobe, tempsRestant());
+  const sortieVideo = await chronologieVideo(provisoire, ffprobe, tempsRestant());
+  verifierChronologies(sourceVideo, sortieVideo);
 }
 
 export function verifierRapports(entree: Rapport, sortie: Rapport): void {
