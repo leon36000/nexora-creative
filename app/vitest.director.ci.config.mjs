@@ -21,7 +21,7 @@ export default {
       'app/server/nexora/promptH3.test.ts', 'app/server/nexora/reecritureH3.test.ts', 'app/server/nexora/realisateur.test.ts',
       'app/server/nexora/creer.test.ts', 'app/server/nexora/gardeNouveauRendu.test.ts',
       'app/server/nexora/creationLanguage.test.ts', 'app/server/nexora/personnages.test.ts',
-      'app/server/nexora/usage.test.ts', 'app/server/nexora/troncature.test.ts',
+      'app/server/nexora/usage.test.ts', 'app/server/nexora/troncature.test.ts', 'app/server/nexora/niveaux-effort.test.ts',
       'app/server/nexora/credits.test.ts', 'app/src/filmErreurPartielle.test.ts',
       'app/server/nexora/detourage/routes.test.ts',
       'app/server/nexora/detourage/serviceNatif.test.ts',
