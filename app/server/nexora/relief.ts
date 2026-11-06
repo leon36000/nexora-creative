@@ -6,10 +6,22 @@
  */
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { crc32 } from 'node:zlib';
+import type { FastifyReply } from 'fastify';
 import { Document, NodeIO, type Primitive, type Transform } from '@gltf-transform/core';
 import { simplify, weld } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { zipSync, strToU8 } from 'fflate';
+
+export const CODE_OBJ_INCOMPATIBLE = 'OBJ_UNSUPPORTED' as const;
+
+export class ObjIncompatible extends Error {
+  readonly code = CODE_OBJ_INCOMPATIBLE;
+}
+
+/** Réponse stable pour les clients qui téléchargent directement sans passer par l'interface. */
+export function repondreObjIncompatible(reply: FastifyReply) {
+  return reply.code(400).send({ code: CODE_OBJ_INCOMPATIBLE, error: 'Export OBJ incompatible avec les textures ou les coordonnées UV de ce modèle. Utilisez le GLB.' });
+}
 
 export type FormatRelief = 'glb' | 'obj' | 'stl' | '3mf' | 'usdz';
 export const FORMATS_RELIEF: readonly FormatRelief[] = ['glb', 'obj', 'stl', '3mf', 'usdz'];
@@ -31,6 +43,16 @@ export interface Maillage {
   indices: Uint32Array;
   /** Image de la couleur de base (PNG ou JPEG) et son type. */
   couleur: { octets: Uint8Array; mime: string } | null;
+  /** Données OBJ par primitive ; absentes pour les maillages construits directement. */
+  partiesObj?: PartieObj[];
+  uvsObj?: Float32Array;
+}
+
+interface PartieObj {
+  debut: number; fin: number; aUv: boolean;
+  facteur: readonly number[]; alphaMode: string;
+  texture: { octets: Uint8Array; mime: string } | null;
+  erreur: string | null;
 }
 
 export interface RapportMaillage {
@@ -65,6 +87,8 @@ export function maillageDuDocument(doc: Document): Maillage {
   const pos: number[] = [];
   const uv: number[] = [];
   const idx: number[] = [];
+  const uvObj: number[] = [];
+  const partiesObj: PartieObj[] = [];
   let aUv = true;
   let couleur: Maillage['couleur'] = null;
   const racine = doc.getRoot();
@@ -86,14 +110,35 @@ export function maillageDuDocument(doc: Document): Maillage {
         const u = [0, 0];
         for (let i = 0; i < U.getCount(); i++) { U.getElement(i, u); uv.push(u[0], u[1]); }
       } else { aUv = false; for (let i = 0; i < P.getCount(); i++) uv.push(0, 0); }
+      const mat = p.getMaterial();
+      const tex = mat?.getBaseColorTexture();
+      const info = mat?.getBaseColorTextureInfo();
+      const uvPourObj = p.getAttribute(`TEXCOORD_${tex ? info?.getTexCoord() ?? 0 : 0}`);
+      const uvValides = !!uvPourObj && uvPourObj.getCount() === P.getCount();
+      const coord = [0, 0];
+      let uvFinies = true;
+      for (let i = 0; i < P.getCount(); i++) {
+        if (uvValides) uvPourObj!.getElement(i, coord);
+        if (uvValides && (!Number.isFinite(coord[0]) || !Number.isFinite(coord[1]))) uvFinies = false;
+        uvObj.push(uvValides ? coord[0] : 0, uvValides ? coord[1] : 0);
+      }
+      const debut = idx.length;
       const I = p.getIndices();
       if (I) { for (let i = 0; i < I.getCount(); i++) idx.push(base + I.getScalar(i)); }
       else { for (let i = 0; i < P.getCount(); i++) idx.push(base + i); }
-      const tex = p.getMaterial()?.getBaseColorTexture();
-      if (!couleur && tex?.getImage()) couleur = { octets: tex.getImage()!, mime: tex.getMimeType() || 'image/png' };
+      const image = tex?.getImage();
+      const mime = tex?.getMimeType() || '';
+      let erreur: string | null = null;
+      if (!uvFinies) erreur = 'Coordonnées UV OBJ non finies.';
+      else if (tex && (!image || !uvValides)) erreur = 'Texture de base sans image ou coordonnées UV utilisables.';
+      else if (tex && mime !== 'image/png' && mime !== 'image/jpeg') erreur = 'Texture OBJ : seuls PNG et JPEG sont pris en charge.';
+      else if (info && info.listExtensions().length) erreur = 'Transformation de texture OBJ non prise en charge.';
+      partiesObj.push({ debut, fin: idx.length, aUv: uvValides, facteur: mat?.getBaseColorFactor() ?? [1, 1, 1, 1],
+        alphaMode: mat?.getAlphaMode() ?? 'OPAQUE', texture: image ? { octets: image, mime } : null, erreur });
+      if (!couleur && image) couleur = { octets: image, mime: mime || 'image/png' };
     }
   }
-  return { positions: Float32Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur };
+  return { positions: Float32Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj) };
 }
 
 // ---------- contrôle ----------
@@ -270,6 +315,7 @@ export function zipAligne(fichiers: { nom: string; octets: Uint8Array }[]): Uint
 
 export function versObj(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   const nom = nomSur(opt.nom);
+  if (m.partiesObj) return versObjAvecMatieres(m, nom);
   const lignes: string[] = [`# ${NEXORA_PRODUCT_NAMES.mesh} : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
   const n = m.positions.length / 3;
   for (let i = 0; i < n; i++) lignes.push(`v ${f(m.positions[3 * i])} ${f(m.positions[3 * i + 1])} ${f(m.positions[3 * i + 2])}`);
@@ -285,6 +331,46 @@ export function versObj(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   fichiers[`${nom}.mtl`] = strToU8(`newmtl matiere\nKa 1 1 1\nKd 1 1 1\nKs 0 0 0\nd 1\nillum 1\n${m.couleur ? `map_Kd ${nom}.${ext}\n` : ''}`);
   if (m.couleur) fichiers[`${nom}.${ext}`] = m.couleur.octets;
   return zipSync(fichiers, { level: 0 });
+}
+
+/** OBJ/MTL : une affectation de matériau par primitive, sans prétention d'export PBR complet. */
+function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
+  const parties = m.partiesObj!;
+  const lignes = [`# ${NEXORA_PRODUCT_NAMES.mesh} : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
+  const n = m.positions.length / 3;
+  for (let i = 0; i < n; i++) lignes.push(`v ${f(m.positions[3 * i])} ${f(m.positions[3 * i + 1])} ${f(m.positions[3 * i + 2])}`);
+  if (parties.some((p) => p.aUv)) {
+    const uv = m.uvsObj!;
+    for (let i = 0; i < n; i++) lignes.push(`vt ${f(uv[2 * i])} ${f(1 - uv[2 * i + 1])}`);
+  }
+  const fichiers: Record<string, Uint8Array> = {};
+  const definitions: string[] = [];
+  for (let i = 0; i < parties.length; i++) {
+    const partie = parties[i];
+    if (partie.erreur) throw new ObjIncompatible(partie.erreur);
+    const mat = parties.length === 1 ? 'matiere' : `matiere_${i}`;
+    lignes.push(`usemtl ${mat}`);
+    for (let t = partie.debut; t < partie.fin; t += 3) {
+      const [a, b, c] = [m.indices[t] + 1, m.indices[t + 1] + 1, m.indices[t + 2] + 1];
+      lignes.push(partie.aUv ? `f ${a}/${a} ${b}/${b} ${c}/${c}` : `f ${a} ${b} ${c}`);
+    }
+    let map = '';
+    if (partie.texture) {
+      const fichier = `${nom}${parties.length === 1 ? '' : `_${i}`}.${extensionImage(partie.texture.mime)}`;
+      fichiers[fichier] = partie.texture.octets;
+      map = `map_Kd ${fichier}\n`;
+    }
+    const alpha = partie.alphaMode === 'BLEND' ? partie.facteur[3] : 1;
+    definitions.push(`newmtl ${mat}\nKa 1 1 1\nKd ${partie.facteur.slice(0, 3).map(f).join(' ')}\nKs 0 0 0\nd ${f(alpha)}\nillum 1\n${map}`);
+  }
+  fichiers[`${nom}.obj`] = strToU8(lignes.join('\n') + '\n');
+  fichiers[`${nom}.mtl`] = strToU8(definitions.join(''));
+  return zipSync(fichiers, { level: 0 });
+}
+
+/** Anciennes versions de cache conservées ; les ZIP OBJ sont recalculés pour les matériaux par primitive. */
+export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
+  return `export-${format}${format === 'obj' ? '-matieres-v2' : ''}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
 }
 
 /** STL binaire, en millimètres, Z vers le haut, posé sur le plateau. */
@@ -386,7 +472,37 @@ def Xform "${nom}" (kind = "component")
 }
 
 /** Le fichier du format voulu, depuis un GLB (décimé d'abord si `cible` est donné). */
+/** L'export OBJ ne sait pas appliquer KHR_texture_transform ; le refuser avant toute décimation. */
+function refuserTransformationTextureObj(glb: Uint8Array): void {
+  if (glb.byteLength < 20) throw new Error('GLB invalide.');
+  const vue = new DataView(glb.buffer, glb.byteOffset, glb.byteLength);
+  const longueur = vue.getUint32(12, true);
+  if (vue.getUint32(0, true) !== 0x46546c67 || vue.getUint32(16, true) !== 0x4e4f534a || longueur > glb.byteLength - 20) {
+    throw new Error('GLB invalide.');
+  }
+  const json = JSON.parse(new TextDecoder().decode(glb.subarray(20, 20 + longueur))) as {
+    materials?: { pbrMetallicRoughness?: { baseColorTexture?: { extensions?: Record<string, unknown> } } }[];
+  };
+  if (json.materials?.some((m) => m.pbrMetallicRoughness?.baseColorTexture?.extensions?.KHR_texture_transform != null)) {
+    throw new ObjIncompatible('Transformation de texture OBJ non prise en charge.');
+  }
+}
+
+/** Compatibilité avant téléchargement ; aucun export ni génération GPU n'est lancé. */
+export function compatibiliteObj(glb: Uint8Array, m: Maillage): { compatible: boolean; code: typeof CODE_OBJ_INCOMPATIBLE | null } {
+  try {
+    refuserTransformationTextureObj(glb);
+    const erreur = m.partiesObj?.find((partie) => partie.erreur)?.erreur;
+    if (erreur) throw new ObjIncompatible(erreur);
+    return { compatible: true, code: null };
+  } catch (error) {
+    if (error instanceof ObjIncompatible) return { compatible: false, code: CODE_OBJ_INCOMPATIBLE };
+    throw error;
+  }
+}
+
 export async function exporter(glb: Uint8Array, format: FormatRelief, opt: OptionsExport & { cible?: number | null } = {}): Promise<Uint8Array> {
+  if (format === 'obj') refuserTransformationTextureObj(glb);
   const source = opt.cible ? await decimerGlb(glb, opt.cible) : glb;
   if (format === 'glb') return source;
   const m = await lireGlb(source);

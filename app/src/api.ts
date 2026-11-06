@@ -146,7 +146,7 @@ export interface RapportMaillage {
   etanche: boolean; taille: [number, number, number]; volume: number | null; avertissements: string[];
 }
 export interface JugeRelief { note: number; defauts: string[]; raison: string; modele: string | null; jetons: number; credits: number; relancer?: boolean }
-export interface RapportRelief { rapport: RapportMaillage; decime: RapportMaillage | null; cible: number | null; formats: FormatRelief[]; extensions: Record<FormatRelief, string>; tailleMm: number; credits: number; juge: JugeRelief | null }
+export interface RapportRelief { compatibiliteObj?: { compatible: boolean; code: 'OBJ_UNSUPPORTED' | null }; rapport: RapportMaillage; decime: RapportMaillage | null; cible: number | null; formats: FormatRelief[]; extensions: Record<FormatRelief, string>; tailleMm: number; credits: number; juge: JugeRelief | null }
 export interface MoteurGpu { id: string; nom: string; recettes: string[]; enLigne: boolean; enCours: number }
 
 /** Agent Producteur (server/nexora/agent.ts). */

@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import Fastify from 'fastify';
 import { Document, NodeIO } from '@gltf-transform/core';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
-import { analyser, cartesPbr, cibleTriangles, cleArete, decimerGlb, exporter, lireGlb, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
+import { analyser, cartesPbr, cibleTriangles, cleArete, compatibiliteObj, decimerGlb, exporter, lireGlb, nomCacheExport, repondreObjIncompatible, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
 
 /** Sphère UV (étanche une fois les sommets soudés), avec une texture 1×1 PNG. */
 async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
@@ -38,6 +41,46 @@ async function glbMaillage(positions: Float32Array, indices: Uint32Array): Promi
     .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(positions).setBuffer(buf))
     .setIndices(doc.createAccessor().setType('SCALAR').setArray(indices).setBuffer(buf));
   doc.createScene().addChild(doc.createNode().setMesh(doc.createMesh().addPrimitive(prim)));
+  return new NodeIO().writeBinary(doc);
+}
+
+/** Deux primitives glTF avec couleurs différentes et une texture : aucune ressource externe. */
+async function glbDeuxMatieres(options: { sansUv?: boolean; uvNaN?: boolean; jpeg?: boolean; blend?: boolean; deuxTextures?: boolean; grille?: boolean } = {}): Promise<Uint8Array> {
+  const doc = new Document();
+  const buf = doc.createBuffer();
+  const png = Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'));
+  const jpeg = Uint8Array.from(Buffer.from('/9j/4AAQSkZJRgABAgAAAQABAAD//gAPTGF2YzYxLjMuMTAwAP/bAEMACAQEBAQEBQUFBQUFBgYGBgYGBgYGBgYGBgcHBwgICAcHBwYGBwcICAgICQkJCAgICAkJCgoKDAwLCw4ODhERFP/EAEwAAQEAAAAAAAAAAAAAAAAAAAAHAQEBAAAAAAAAAAAAAAAAAAAFBxABAAAAAAAAAAAAAAAAAAAAABEBAAAAAAAAAAAAAAAAAAAAAP/AABEIABAAEAMBIgACEQADEQD/2gAMAwEAAhEDEQA/AI4Av4t//9k=', 'base64'));
+  const tex = doc.createTexture('texture').setImage(options.jpeg ? jpeg : png).setMimeType(options.jpeg ? 'image/jpeg' : 'image/png');
+  const mats = [doc.createMaterial('rouge').setBaseColorFactor([1, 0, 0, .2]),
+    doc.createMaterial('bleu').setBaseColorFactor([0, 0, 1, 1]).setBaseColorTexture(tex)];
+  if (options.deuxTextures) mats[0].setBaseColorTexture(doc.createTexture('premiere').setImage(png).setMimeType('image/png'));
+  if (options.blend) mats[1].setAlphaMode('BLEND').setBaseColorFactor([0, 0, 1, .5]);
+  mats[1].getBaseColorTextureInfo()!.setTexCoord(1);
+  const mesh = doc.createMesh();
+  for (let i = 0; i < 2; i++) {
+    const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
+    if (options.grille) {
+      const n = 30;
+      for (let y = 0; y <= n; y++) for (let x = 0; x <= n; x++) {
+        positions.push(i * 2 + x / n, y / n, 0); uvs.push(x / n, y / n);
+      }
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        const a = y * (n + 1) + x, b = a + n + 1;
+        indices.push(a, a + 1, b, a + 1, b + 1, b);
+      }
+    } else {
+      positions.push(i * 2, 0, 0, i * 2 + 1, 0, 0, i * 2, 1, 0);
+      uvs.push(0, 0, 1, 0, 0, options.uvNaN ? Number.NaN : 1);
+      indices.push(0, 1, 2);
+    }
+    const p = doc.createPrimitive().setMaterial(mats[i])
+      .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(Float32Array.from(positions)).setBuffer(buf))
+      .setIndices(doc.createAccessor().setType('SCALAR').setArray(Uint16Array.from(indices)).setBuffer(buf));
+    if (i === 0 && options.deuxTextures) p.setAttribute('TEXCOORD_0', doc.createAccessor().setType('VEC2').setArray(Float32Array.from(uvs)).setBuffer(buf));
+    if (i === 1 && !options.sansUv) p.setAttribute('TEXCOORD_1', doc.createAccessor().setType('VEC2').setArray(Float32Array.from(uvs)).setBuffer(buf));
+    mesh.addPrimitive(p);
+  }
+  doc.createScene().addChild(doc.createNode().setMesh(mesh));
   return new NodeIO().writeBinary(doc);
 }
 
@@ -187,6 +230,117 @@ describe('Nexora Mesh : exports', () => {
     expect(Object.keys(z).sort()).toEqual(['balle.mtl', 'balle.obj', 'balle.png']);
     expect(new TextDecoder().decode(z['balle.obj'])).toContain(`# ${NEXORA_PRODUCT_NAMES.mesh} : balle`);
     expect(new TextDecoder().decode(z['balle.mtl'])).toContain('map_Kd balle.png');
+  });
+  it('OBJ conserve séparément les matières de deux primitives GLB', async () => {
+    const zip = unzipSync(await exporter(await glbDeuxMatieres(), 'obj', { nom: 'deux' }));
+    const obj = new TextDecoder().decode(zip['deux.obj']);
+    const mtl = new TextDecoder().decode(zip['deux.mtl']);
+    expect(obj).toMatch(/usemtl matiere_0[\s\S]*f 1 2 3[\s\S]*usemtl matiere_1[\s\S]*f 4\/4 5\/5 6\/6/);
+    expect(mtl).toMatch(/newmtl matiere_0[\s\S]*Kd 1 0 0/);
+    expect(mtl).toMatch(/newmtl matiere_1[\s\S]*Kd 0 0 1[\s\S]*map_Kd deux_1\.png/);
+    expect(Array.from(zip['deux_1.png'])).toEqual(Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')));
+    expect(mtl).toMatch(/newmtl matiere_0[\s\S]*?d 1\n/); // alpha ignoré en mode OPAQUE
+    expect(obj).toContain('vt 0 1\nvt 1 1\nvt 0 0'); // même convention V que l'ancien export
+
+  });
+  it('OBJ préserve JPEG et alpha BLEND et refuse une texture sans UV utilisables', async () => {
+    const glb = await glbDeuxMatieres({ jpeg: true, blend: true });
+    const document = await new NodeIO().readBinary(glb);
+    const image = document.getRoot().listMaterials()[1].getBaseColorTexture()!.getImage()!;
+    const zip = unzipSync(await exporter(glb, 'obj', { nom: 'jpeg' }));
+    const mtl = new TextDecoder().decode(zip['jpeg.mtl']);
+    expect(mtl).toMatch(/newmtl matiere_1[\s\S]*d 0\.5[\s\S]*map_Kd jpeg_1\.jpg/);
+    expect(Array.from(zip['jpeg_1.jpg'])).toEqual(Array.from(image));
+    const sansUv = await glbDeuxMatieres({ sansUv: true });
+    expect(compatibiliteObj(sansUv, await lireGlb(sansUv))).toEqual({ compatible: false, code: 'OBJ_UNSUPPORTED' });
+    expect(compatibiliteObj(glb, await lireGlb(glb))).toEqual({ compatible: true, code: null });
+    await expect(exporter(sansUv, 'obj')).rejects.toThrow(/coordonnées UV utilisables/);
+    await expect(exporter(await glbDeuxMatieres({ uvNaN: true }), 'obj')).rejects.toThrow(/UV OBJ non finies/);
+  });
+  it('OBJ conserve deux images distinctes sans chemins fournis par le nom', async () => {
+    const glb = await glbDeuxMatieres({ deuxTextures: true, jpeg: true });
+    const document = await new NodeIO().readBinary(glb);
+    const images = document.getRoot().listMaterials().map((mat) => mat.getBaseColorTexture()!.getImage()!);
+    const zip = unzipSync(await exporter(glb, 'obj', { nom: '../../deux' }));
+    const files = Object.keys(zip);
+    expect(files).toHaveLength(4);
+    expect(files.every((name) => !name.includes('/') && !name.includes('..'))).toBe(true);
+    const png = files.find((name) => name.endsWith('_0.png'))!;
+    const jpg = files.find((name) => name.endsWith('_1.jpg'))!;
+    expect(Array.from(zip[png])).toEqual(Array.from(images[0]));
+    expect(Array.from(zip[jpg])).toEqual(Array.from(images[1]));
+    const mtl = new TextDecoder().decode(zip[files.find((name) => name.endsWith('.mtl'))!]);
+    expect(mtl).toContain(`map_Kd ${png}`);
+    expect(mtl).toContain(`map_Kd ${jpg}`);
+  });
+  it('décime réellement deux primitives puis exporte leurs matières et UV valides', async () => {
+    const glb = await glbDeuxMatieres({ deuxTextures: true, jpeg: true, grille: true });
+    const avant = analyser(await lireGlb(glb)).triangles;
+    expect(avant).toBe(3600);
+    const original = await new NodeIO().readBinary(glb);
+    const images = original.getRoot().listMaterials().map((mat) => mat.getBaseColorTexture()!.getImage()!);
+    const zip = unzipSync(await exporter(glb, 'obj', { nom: 'reduit', cible: 500 }));
+    const obj = new TextDecoder().decode(zip['reduit.obj']);
+    const mtl = new TextDecoder().decode(zip['reduit.mtl']);
+    const lignes = obj.split('\n');
+    const nbVertices = lignes.filter((l) => l.startsWith('v ')).length;
+    const nbUV = lignes.filter((l) => l.startsWith('vt ')).length;
+    const faces = lignes.filter((l) => l.startsWith('f '));
+    expect(faces.length).toBeLessThan(avant);
+    expect(faces.length).toBeGreaterThan(0);
+    expect(obj).toMatch(/usemtl matiere_0[\s\S]*f [\s\S]*usemtl matiere_1[\s\S]*f /);
+    expect(mtl).toContain('map_Kd reduit_0.png');
+    expect(mtl).toContain('map_Kd reduit_1.jpg');
+    expect(Array.from(zip['reduit_0.png'])).toEqual(Array.from(images[0]));
+    expect(Array.from(zip['reduit_1.jpg'])).toEqual(Array.from(images[1]));
+    for (const face of faces) for (const vertex of face.slice(2).split(' ')) {
+      const [v, uv] = vertex.split('/').map(Number);
+      expect(v).toBeGreaterThan(0); expect(v).toBeLessThanOrEqual(nbVertices);
+      expect(uv).toBeGreaterThan(0); expect(uv).toBeLessThanOrEqual(nbUV);
+    }
+  });
+  it('OBJ refuse une transformation de texture explicite même si décimation demandée', async () => {
+    const original = await glbDeuxMatieres();
+    const view = new DataView(original.buffer, original.byteOffset, original.byteLength);
+    const jsonLength = view.getUint32(12, true);
+    const description = JSON.parse(new TextDecoder().decode(original.subarray(20, 20 + jsonLength)));
+    description.materials[1].pbrMetallicRoughness.baseColorTexture.extensions = { KHR_texture_transform: { offset: [.2, .3] } };
+    description.extensionsUsed = ['KHR_texture_transform'];
+    const data = new TextEncoder().encode(JSON.stringify(description));
+    const size = Math.ceil(data.length / 4) * 4;
+    const tail = original.subarray(20 + jsonLength);
+    const output = new Uint8Array(20 + size + tail.length);
+    const header = new DataView(output.buffer);
+    output.set(original.subarray(0, 20));
+    header.setUint32(8, output.length, true);
+    header.setUint32(12, size, true);
+    output.fill(0x20, 20, 20 + size);
+    output.set(data, 20);
+    output.set(tail, 20 + size);
+    expect(compatibiliteObj(output, await lireGlb(original))).toEqual({ compatible: false, code: 'OBJ_UNSUPPORTED' });
+    await expect(exporter(output, 'obj', { cible: 500 })).rejects.toThrow(/Transformation de texture OBJ/);
+  });
+  it('le refus HTTP OBJ expose un code stable et le statut 400', async () => {
+    const app = Fastify();
+    app.get('/obj', (_request, reply) => repondreObjIncompatible(reply));
+    const response = await app.inject({ method: 'GET', url: '/obj' });
+    expect(response.statusCode).toBe(400);
+    expect(response.json().code).toBe('OBJ_UNSUPPORTED');
+    expect(response.json().error).toContain('GLB');
+    await app.close();
+  });
+  it('le nouveau cache OBJ ignore un ancien fichier tout en le conservant', () => {
+    const base = process.env.DIRECTOR_CI_CACHE;
+    if (!base) throw new Error('DIRECTOR_CI_CACHE requis pour conserver la fixture');
+    const dir = mkdtempSync(join(base, 'obj-cache-fixture-'));
+    const ancien = join(dir, 'export-obj-plein-100.zip');
+    const nouveau = join(dir, nomCacheExport('obj', null, 100));
+    writeFileSync(ancien, 'ancien', { flag: 'wx' });
+    expect(existsSync(nouveau)).toBe(false);
+    writeFileSync(nouveau, 'nouveau', { flag: 'wx' });
+    expect(readFileSync(ancien, 'utf8')).toBe('ancien');
+    expect(readFileSync(nouveau, 'utf8')).toBe('nouveau');
+    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-plein-100.stl');
   });
   it('USDZ : zip non compressé, chaque fichier aligné sur 64 octets, USDA lisible', async () => {
     const octets = versUsdz(await lireGlb(await glbSphere(8)), { nom: 'balle' });

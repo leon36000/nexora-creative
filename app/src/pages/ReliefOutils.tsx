@@ -66,6 +66,16 @@ export function EtatAnalyseMaillage({ rapport, loading, failed, langue = 'fr' }:
   return null;
 }
 
+export function LienExportMesh({ format, url, takeId, compatibilite, rapportRecu, rapportEchoue, langue }: {
+  format: FormatRelief; url: string; takeId: number; compatibilite: RapportRelief['compatibiliteObj']; rapportRecu: boolean; rapportEchoue: boolean; langue: LangueClient;
+}) {
+  const c = meshCopy(langue);
+  if (rapportEchoue) return <span className="btn sm accent" aria-disabled="true">{c.exportUnavailable}</span>;
+  if (format === 'obj' && !compatibilite && !rapportRecu) return <span role="status">{c.objChecking}</span>;
+  if (format === 'obj' && (!compatibilite || !compatibilite.compatible)) return <div role="alert">{compatibilite ? c.objUnsupported : c.objUnknown} <a href={reliefExportUrl(takeId, 'glb')} download>{c.downloadOriginalGlb}</a></div>;
+  return <a className="btn sm accent" href={url} download><Icon name="download" size={14} />{c.export} {NOMS_FORMAT[format]}</a>;
+}
+
 export default function ReliefOutils({ take, langue }: { take: Take; langue: LangueClient }) {
   const [format, setFormat] = useState<FormatRelief>('glb');
   const [faces, setFaces] = useState(0);
@@ -130,9 +140,7 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
           {FACES.map((v) => <button key={v} type="button" className={faces === v ? 'on' : ''} onClick={() => setFaces(v)}>{nomFaces(v, langue)}</button>)}
         </div>
         <EtatAnalyseMaillage rapport={affiche ?? null} loading={!info && !erreurRapport} failed={erreurRapport} langue={langue} />
-        {erreurRapport
-          ? <span className="btn sm accent" aria-disabled="true"><Icon name="download" size={14} />{c.exportUnavailable}</span>
-          : <a className="btn sm accent" href={urlExport} download><Icon name="download" size={14} />{c.export} {NOMS_FORMAT[format]}</a>}
+        <LienExportMesh format={format} url={urlExport} takeId={take.id} compatibilite={info?.compatibiliteObj} rapportRecu={info !== null} rapportEchoue={erreurRapport} langue={langue} />
         <div className="dim" style={{ fontSize: 11.5 }}>{c.serverNoCredits}</div>
       </div>
 

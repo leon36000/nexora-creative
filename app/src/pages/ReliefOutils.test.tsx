@@ -5,7 +5,7 @@ import type { RapportMaillage } from '../api';
 vi.mock('../Viewer', () => ({ recreate: vi.fn() }));
 vi.mock('../store', () => ({ toast: vi.fn() }));
 vi.mock('../ui', () => ({ Icon: () => null }));
-import { EtatAnalyseMaillage, ResumeMaillage } from './ReliefOutils';
+import { EtatAnalyseMaillage, LienExportMesh, ResumeMaillage } from './ReliefOutils';
 
 const base: RapportMaillage = {
   sommets: 4, triangles: 4, degeneres: 0, aretesOuvertes: 0, aretesNonVariete: 0,
@@ -45,5 +45,39 @@ describe('rapport du maillage', () => {
     const html = renderToStaticMarkup(<EtatAnalyseMaillage rapport={null} loading failed={false} langue="en" />);
     expect(html).toContain('Analyzing the mesh');
     expect(html).toContain('role="status"');
+  });
+});
+
+
+describe('compatibilité de téléchargement OBJ', () => {
+  it.each([
+    ['fr', 'Télécharger le GLB original'],
+    ['en', 'Download the original GLB'],
+  ] as const)('désactive le téléchargement incompatible en %s tout en gardant GLB', (langue, message) => {
+    const incompatibilite = { compatible: false, code: 'OBJ_UNSUPPORTED' as const };
+    const obj = renderToStaticMarkup(<LienExportMesh format="obj" url="/obj?faces=500" takeId={42} compatibilite={incompatibilite} rapportRecu rapportEchoue={false} langue={langue} />);
+    expect(obj).toContain(message);
+    expect(obj).toContain('href="/api/nexora/relief/42/export?format=glb"');
+    expect(obj).not.toContain('faces=500');
+    expect(obj).not.toContain('format=obj');
+    const glb = renderToStaticMarkup(<LienExportMesh format="glb" url="/glb" takeId={42} compatibilite={incompatibilite} rapportRecu rapportEchoue={false} langue={langue} />);
+    expect(glb).toContain('href="/glb"');
+  });
+  it.each([
+    ['fr', 'Compatibilité OBJ non vérifiée', 'Télécharger le GLB original'],
+    ['en', 'OBJ compatibility could not be verified', 'Download the original GLB'],
+  ] as const)('annonce une compatibilité absente après réception du rapport en %s', (langue, message, conseil) => {
+    const html = renderToStaticMarkup(<LienExportMesh format="obj" url="/obj?faces=500" takeId={42} compatibilite={undefined} rapportRecu rapportEchoue={false} langue={langue} />);
+    expect(html).toContain(message);
+    expect(html).toContain(conseil);
+    expect(html).toContain('href="/api/nexora/relief/42/export?format=glb"');
+    expect(html).not.toContain('faces=500');
+    expect(html).not.toContain('format=obj');
+    expect(html).not.toContain('role="status"');
+  });
+  it('attend un rapport pour OBJ et autorise un objet compatible', () => {
+    const props = { format: 'obj' as const, url: '/obj', takeId: 42, rapportRecu: false, rapportEchoue: false, langue: 'en' as const };
+    expect(renderToStaticMarkup(<LienExportMesh {...props} compatibilite={undefined} />)).not.toContain('href=');
+    expect(renderToStaticMarkup(<LienExportMesh {...props} compatibilite={{ compatible: true, code: null }} />)).toContain('href="/obj"');
   });
 });
