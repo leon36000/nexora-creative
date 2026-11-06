@@ -682,7 +682,8 @@ def reap_finished(state: SupervisorState, lot_id: str, ledger_path: Path,
                   tasks: list[Task]) -> bool:
     """Collect completed processes; return whether any task changed state."""
     changed = False
-    for task in list(state.active):
+    # Iterate a snapshot because completed tasks are removed from active.
+    for task in state.active.copy():
         process = task.process
         if process is None or process.poll() is None:
             continue
