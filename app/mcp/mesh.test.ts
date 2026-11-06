@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createServer, type Server } from 'node:http';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
@@ -25,7 +26,7 @@ describe('MCP rapport Mesh via HTTP', () => {
     await new Promise<void>((resolve) => serveur.listen(0, '127.0.0.1', resolve));
     const adresse = serveur.address();
     if (!adresse || typeof adresse === 'string') throw new Error('Serveur factice indisponible');
-    const transport = new StdioClientTransport({ command: process.execPath, args: ['--import', 'tsx', fileURLToPath(new URL('./server.ts', import.meta.url))], env: { PATH: process.env.PATH ?? '', OPENFIELD_URL: `http://127.0.0.1:${adresse.port}` }, stderr: 'pipe' });
+    const transport = new StdioClientTransport({ command: process.execPath, args: ['--import', createRequire(import.meta.url).resolve('tsx'), fileURLToPath(new URL('./server.ts', import.meta.url))], env: { PATH: process.env.PATH ?? '', OPENFIELD_URL: `http://127.0.0.1:${adresse.port}` }, stderr: 'pipe' });
     client = new Client({ name: 'mesh-test', version: '1' });
     await client.connect(transport);
   });

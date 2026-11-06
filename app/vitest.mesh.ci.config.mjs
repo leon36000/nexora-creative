@@ -24,6 +24,7 @@ export default {
     maxWorkers: 1,
     minWorkers: 1,
     include: [
+      'app/mcp/mesh.test.ts', 'app/mcp/mesh-init.test.ts',
       'app/src/ModelView.test.tsx',
       'app/src/SourcePick.test.tsx',
       'app/src/ViewerActions.test.tsx',
@@ -43,6 +44,7 @@ export default {
       reporter: ['text', 'lcov', 'json-summary'],
       reportsDirectory: coverage,
       include: [
+        'app/mcp/server.ts', 'app/mcp/client.ts',
         'app/src/ModelView.tsx',
         'app/src/SourcePick.tsx',
         'app/src/Viewer.tsx',
