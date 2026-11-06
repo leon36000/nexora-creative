@@ -14,5 +14,6 @@
     "video": {"path": "/example/inputs/video.mp4", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 1},
     "fr": {"path": "/example/inputs/audio.wav", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 1, "language": "fr"}
   },
-  "padding_codec_seconds": 0.08
+  "padding_codec_seconds": 0.08,
+  "fps": 24
 }

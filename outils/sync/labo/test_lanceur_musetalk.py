@@ -44,6 +44,31 @@ class BancMuseTalk(unittest.TestCase):
         lanceur.configurer(path)
         return path
 
+    def test_cadence_25_est_transmise_et_validee_pour_mp4(self):
+        video25 = self.root / 'cadence25.mp4'
+        subprocess.run([str(self.ffmpeg), '-nostdin', '-n', '-v', 'error', '-f', 'lavfi', '-i',
+                        'color=c=blue:s=64x64:r=25:d=2.72', '-i', str(self.audio), '-c:v', 'libx264',
+                        '-pix_fmt', 'yuv420p', '-c:a', 'aac', str(video25)], check=True, timeout=30)
+        cfg = self.config()
+        cfg['fps'] = 25
+        cfg['inputs']['video'] = {'path': str(video25), 'bytes': video25.stat().st_size,
+                                  'sha256': lanceur.sha256_file(video25)}
+        self.charger(cfg)
+        self.assertEqual(lanceur.construire_commande(self.root)[lanceur.construire_commande(self.root).index('--fps') + 1], '25')
+        self.assertTrue(lanceur.verifier_rendu_av(self.audio, video25)['valide'])
+        lanceur.verifier_cadence_video(lanceur.probe(video25))
+        with self.assertRaisesRegex(ValueError, 'Cadence vidéo incompatible'):
+            lanceur.verifier_cadence_video(lanceur.probe(self.correct))
+        self.charger(self.config())
+        lanceur.verifier_cadence_video(lanceur.probe(self.correct))
+        self.assertEqual(lanceur.construire_commande(self.root)[lanceur.construire_commande(self.root).index('--fps') + 1], '24')
+        with self.assertRaisesRegex(ValueError, 'Cadence vidéo incompatible'):
+            lanceur.verifier_cadence_video(lanceur.probe(video25))
+        cfg['fps'] = True
+        with self.assertRaises(ValueError):
+            self.charger(cfg)
+
+
     def test_identites_et_refus_gpu(self):
         cfg = self.config()
         cfg['gpu_process'] = {'pid': 123, 'uid': '1000', 'start_ticks': '45', 'exe': '/usr/bin/python3', 'max_used_mib': 5}

@@ -37,6 +37,7 @@ EXPECTED_INPUTS = {}
 EXPECTED_MEDIA_HASHES = {}
 CUDA_ALLOCATOR_FRACTION = 0.60
 PADDING_CODEC = 0.08
+FPS_CIBLE = 24
 TEAM_SOURCE_SCOPE = 'Shared technical bench; source attribution not inferred; no human approval'
 
 
@@ -53,14 +54,14 @@ def configurer(path: Path) -> None:
     """Charge uniquement la configuration JSON du banc, sans accès à .env ou secrets."""
     global CONFIG_SHA, CONFIG_BYTES, ROOT, SOURCE, WEIGHTS, RUNS, TORCH_HOME, HF_HOME, TMPDIR, VENV_PYTHON
     global FFMPEG, FFPROBE, FFMPEG_DIR, EXPECTED_GPU_NAME, MIN_FREE_GPU_MIB
-    global AUTHORIZED_EXISTING_GPU_PROCESS, EXPECTED_INPUTS, EXPECTED_MEDIA_HASHES, PADDING_CODEC
+    global AUTHORIZED_EXISTING_GPU_PROCESS, EXPECTED_INPUTS, EXPECTED_MEDIA_HASHES, PADDING_CODEC, FPS_CIBLE
     raw = path.read_bytes()
     if len(raw) > 65536:
         raise ValueError('Configuration trop volumineuse')
     cfg = json.loads(raw, object_pairs_hook=_objet_json_sans_doublon)
     keys = {'root', 'source', 'weights', 'python', 'ffmpeg', 'ffprobe', 'ffmpeg_sha256',
             'ffprobe_sha256', 'gpu_name', 'gpu_min_free_mib', 'gpu_process', 'inputs', 'padding_codec_seconds'}
-    if not isinstance(cfg, dict) or set(cfg) != keys:
+    if not isinstance(cfg, dict) or not keys <= set(cfg) or set(cfg) - keys - {'fps'}:
         raise ValueError('Champs de configuration invalides')
     def chemin(value):
         if not isinstance(value, str) or not Path(value).is_absolute() or '\x00' in value:
@@ -70,6 +71,9 @@ def configurer(path: Path) -> None:
         if not isinstance(value, str) or len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
             raise ValueError('Empreinte SHA-256 invalide')
         return value
+    fps = cfg.get('fps', 24)
+    if type(fps) is not int or fps not in (24, 25):
+        raise ValueError('Cadence attendue : 24 ou 25 images/s')
     root, source, weights = map(chemin, (cfg['root'], cfg['source'], cfg['weights']))
     python, ffmpeg, ffprobe = map(chemin, (cfg['python'], cfg['ffmpeg'], cfg['ffprobe']))
     hashes = {'ffmpeg': empreinte(cfg['ffmpeg_sha256']), 'ffprobe': empreinte(cfg['ffprobe_sha256'])}
@@ -105,7 +109,7 @@ def configurer(path: Path) -> None:
     VENV_PYTHON, FFMPEG, FFPROBE, FFMPEG_DIR = python, ffmpeg, ffprobe, ffmpeg.parent
     EXPECTED_MEDIA_HASHES = hashes
     EXPECTED_GPU_NAME, MIN_FREE_GPU_MIB, AUTHORIZED_EXISTING_GPU_PROCESS = name, minimum, process
-    EXPECTED_INPUTS, PADDING_CODEC = checked, float(padding)
+    EXPECTED_INPUTS, PADDING_CODEC, FPS_CIBLE = checked, float(padding), fps
 
 
 EXPECTED_SOURCE = {
@@ -304,6 +308,14 @@ def make_preserving_runner(source: Path) -> bytes:
     )
     text = replace_once(
         text,
+        "                fps = get_video_fps(video_path)\n",
+        "                fps = get_video_fps(video_path)\n"
+        "                if abs(fps - args.fps) > 0.001:\n"
+        "                    raise ValueError('source FPS differs from requested FPS')\n",
+        "source video cadence",
+    )
+    text = replace_once(
+        text,
         '            cmd_img2video = f"ffmpeg -y -v warning -r {fps} -f image2 -i {result_img_save_path}/%08d.png -vcodec libx264 -vf format=yuv420p -crf 18 {temp_vid_path}"\n'
         '            print("Video generation command:", cmd_img2video)\n'
         "            os.system(cmd_img2video)",
@@ -385,7 +397,7 @@ def probe(path: Path) -> dict[str, Any]:
     completed = subprocess.run(
         [
             str(FFPROBE), "-v", "error", "-show_entries",
-            "format=duration,size:stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate,channels",
+            "format=duration,size:stream=codec_type,codec_name,width,height,r_frame_rate,avg_frame_rate,sample_rate,channels",
             "-of", "json", str(path),
         ],
         check=True,
@@ -394,6 +406,20 @@ def probe(path: Path) -> dict[str, Any]:
         timeout=30,
     )
     return json.loads(completed.stdout)
+
+
+def verifier_cadence_video(video_probe: dict[str, Any]) -> None:
+    """Refuse une cadence déclarée différente ; ne certifie pas seule un flux CFR."""
+    from fractions import Fraction
+    streams = [s for s in video_probe.get('streams', []) if s.get('codec_type') == 'video']
+    if len(streams) != 1:
+        raise ValueError('Un seul flux vidéo attendu')
+    try:
+        cadences = (Fraction(streams[0]['r_frame_rate']), Fraction(streams[0]['avg_frame_rate']))
+    except (KeyError, TypeError, ValueError, ZeroDivisionError) as exc:
+        raise ValueError('Cadence vidéo illisible') from exc
+    if any(rate != FPS_CIBLE for rate in cadences):
+        raise ValueError('Cadence vidéo incompatible avec la cadence déclarée')
 
 
 def construire_commande(run_dir: Path) -> list[str]:
@@ -406,7 +432,7 @@ def construire_commande(run_dir: Path) -> list[str]:
         "--unet_config", str(SOURCE / "models/musetalkV15/musetalk.json"),
         "--whisper_dir", str(SOURCE / "models/whisper"),
         "--vae_type", "sd-vae", "--version", "v15", "--gpu_id", "0",
-        "--fps", "24", "--batch_size", "2", "--extra_margin", "10",
+        "--fps", str(FPS_CIBLE), "--batch_size", "2", "--extra_margin", "10",
         "--parsing_mode", "jaw", "--left_cheek_width", "90",
         "--right_cheek_width", "90", "--saved_coord", "--use_float16",
     ]
@@ -421,6 +447,7 @@ def prepare(language: str) -> Path:
     for item in (video_info, voice_info):
         verifier_entree(item["path"], item["sha256"], item["bytes"])
     video_probe = probe(video_info["path"])
+    verifier_cadence_video(video_probe)
     audio_probe = probe(voice_info["path"])
     run_id = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ") + f"-{language}-{uuid.uuid4().hex[:12]}"
     RUNS.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -501,7 +528,7 @@ def prepare(language: str) -> Path:
         "safe_runner_diff_sha256": sha256_file(diff_path),
         "config_sha256": sha256_file(config_path),
         "render_parameters": {
-            "fps": 24,
+            "fps": FPS_CIBLE,
             "batch_size": 2,
             "precision": "upstream --use_float16 enabled for the technical baseline; no quality claim",
             "pytorch_cuda_allocator_fraction": CUDA_ALLOCATOR_FRACTION,
@@ -653,6 +680,7 @@ def run_preflight(run_dir: Path, persist: bool) -> dict[str, Any]:
     assets = verify_static_assets()
     snapshot = gpu_snapshot()
     video_probe = probe(EXPECTED_INPUTS["video"]["path"])
+    verifier_cadence_video(video_probe)
     result = {
         "checked_utc": utc_now(),
         "static_assets_ok": True,
@@ -675,7 +703,7 @@ def verifier_rendu_av(reference: Path, rendu: Path) -> dict[str, Any]:
         raise RuntimeError("AV validator unavailable")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.valider(reference, rendu, FFMPEG, FFPROBE, PADDING_CODEC, cadence_cible="24")
+    return module.valider(reference, rendu, FFMPEG, FFPROBE, PADDING_CODEC, cadence_cible=str(FPS_CIBLE))
 
 
 def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> int:
