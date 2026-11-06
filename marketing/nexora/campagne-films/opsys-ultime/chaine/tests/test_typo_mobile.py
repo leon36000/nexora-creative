@@ -53,6 +53,52 @@ class TypoMobileTests(unittest.TestCase):
                     self.assertGreaterEqual(bounds[1], int(size[1] * 0.04) - 1)
                     self.assertLessEqual(bounds[3], int(size[1] * 0.96) + 1)
 
+    def test_editplan_subtitles_honor_size_and_preserve_french_and_english(self):
+        for text in ('Soumission en brouillon.\nApprobation humaine avant envoi.',
+                     'Draft estimate.\nHuman approval before sending.'):
+            with self.subTest(text=text):
+                plan = {'textes': [{'texte': text, 'style': 'sous-titre', 'position': 'bas', 'taille_pct': 5, 'debut_f': 0, 'duree_f': 72}]}
+                ctx = SimpleNamespace(typo=self.typo, plan=plan)
+                spec = monter.textes_plan(ctx)[0]
+                self.assertEqual(spec['type'], 'sous-titre')
+                self.assertEqual(spec['texte'], text)
+                bg = Image.new('RGB', (540, 960))
+                result = monter.poser_typo(ctx, bg, spec, 1.0)
+                bounds = ImageChops.difference(result, bg).getbbox()
+                self.assertIsNotNone(bounds)
+                self.assertGreaterEqual(bounds[3] - bounds[1], 45)
+                self.assertGreaterEqual(bounds[0], 0.08 * 540 - 1)
+                self.assertLessEqual(bounds[2], 0.92 * 540 + 1)
+                self.assertLessEqual(bounds[3], 0.96 * 960 + 1)
+
+    def test_subtitles_wrap_without_losing_words_and_stay_inside_frame(self):
+        for size in ((540, 960), (960, 540)):
+            for text in ('Intervention après acceptation du devis et approbation humaine.',
+                         'Extraordinary construction coordination before sending.',
+                         'Première ligne accentuée.\nSecond line remains intact.'):
+                with self.subTest(size=size, text=text):
+                    w, h = size
+                    police, rendu, _, _ = monter.mesurer_sous_titre(self.typo, text, w, h, 5)
+                    self.assertEqual(rendu.split(), text.split())
+                    self.assertGreaterEqual(police.size, int(h * .05 * .7))
+                    ctx = SimpleNamespace(typo=self.typo)
+                    spec = {'type':'sous-titre','texte':text,'taille_pct':5,'zone':'bas','duree_f':72}
+                    bg = Image.new('RGB', size)
+                    bounds = ImageChops.difference(monter.poser_typo(ctx, bg, spec, 1.0), bg).getbbox()
+                    self.assertGreaterEqual(bounds[0], int(w * (.08 if h > w else .06)) - 1)
+                    self.assertLessEqual(bounds[2], w - int(w * (.08 if h > w else .06)) + 1)
+                    self.assertGreaterEqual(bounds[1], int(h * .04))
+                    self.assertLessEqual(bounds[3], int(h * .96))
+
+    def test_subtitle_word_that_cannot_fit_is_refused_before_encoding(self):
+        ctx = SimpleNamespace(W=540, H=960, plan={'video': [], 'textes': [
+            {'texte':'W' * 200, 'style':'sous-titre','position':'bas','taille_pct':5,'debut_f':0,'duree_f':72}]},
+            annexe={'incrustations': []}, typo=self.typo)
+        with patch.object(monter, 'contexte', return_value=ctx), patch.object(monter.subprocess, 'Popen') as encoder:
+            with self.assertRaisesRegex(ValueError, 'Sous-titre trop long'):
+                monter.rendre_tranche(('opus', 'long', True, 0, 1, '/tmp/never-created.mp4'))
+        encoder.assert_not_called()
+
     def test_impossible_text_refused_before_ffmpeg_starts(self):
         spec = {'type': 'etiquette', 'texte': 'W' * 500, 'position': 'haut-gauche', 'debut_f': 0, 'duree_f': 72}
         ctx = SimpleNamespace(W=480, H=270, plan={'video': [], 'textes': []}, annexe={'incrustations': [spec]}, typo=self.typo)

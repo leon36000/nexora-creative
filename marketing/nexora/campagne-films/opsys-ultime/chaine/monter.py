@@ -44,7 +44,7 @@ REGLAGES = {"exposition": 1.0, "teinte_ombres": [-0.006, 0.0, 0.012], "teinte_ha
             "contraste": 1.06, "noir": 0.008, "seuil_halo": 0.86, "halo": 0.22, "seuil_reflet": 0.985, "reflet": 0.25,
             "vignette": 0.25, "grain": 0.03}
 MARQUE = json.loads((RACINE / "marque-opsys.json").read_text())
-TYPO_TYPES = {"titre", "impact", "pile", "surtitre", "etiquette"}
+TYPO_TYPES = {"titre", "impact", "pile", "surtitre", "etiquette", "sous-titre"}
 
 
 # ------------------------------------------------------------------------------------------------------------ préparation
@@ -346,11 +346,57 @@ def mesurer_typo_cadre(typo, texte, type_, W, H, echelle, mx, y):
     return meilleur
 
 
+@lru_cache(maxsize=512)
+def mesurer_sous_titre(typo, texte, W, H, taille_pct):
+    """Replie les mots en zone sûre sans descendre sous 70 % de la taille demandée."""
+    marge = (0.08 if H > W else 0.06) * W
+    cible = max(6, round(H * taille_pct / 100))
+    minimum = max(6, math.ceil(cible * 0.7))
+    dessin = ImageDraw.Draw(Image.new('RGB', (1, 1)))
+    for taille in range(cible, minimum - 1, -1):
+        police = typo.police('mono', taille, 'Medium')
+        lignes = []
+        for paragraphe in texte.split('\n'):
+            ligne = ''
+            for mot in paragraphe.split(' '):
+                essai = (ligne + ' ' if ligne else '') + mot
+                if dessin.textlength(essai, font=police) <= W - 2 * marge:
+                    ligne = essai
+                elif ligne and dessin.textlength(mot, font=police) <= W - 2 * marge:
+                    lignes.append(ligne)
+                    ligne = mot
+                else:
+                    break
+            else:
+                lignes.append(ligne)
+                continue
+            break
+        else:
+            rendu = '\n'.join(lignes)
+            espacement = max(1, round(taille * 0.18))
+            boite = dessin.multiline_textbbox((0, 0), rendu, font=police, spacing=espacement, stroke_width=1)
+            if boite[2] - boite[0] <= W - 2 * marge and boite[3] - boite[1] <= H * 0.30:
+                return police, rendu, espacement, boite
+    raise ValueError('Sous-titre trop long pour le cadre sûr à une taille lisible')
+
+
 def poser_typo(ctx, im, spec, u):
     t = spec["type"]
     d = spec["duree_f"] / FPS
     W, H = im.size
     v = H > W
+    if t == "sous-titre":
+        police, texte, espacement, boite = mesurer_sous_titre(ctx.typo, spec["texte"], W, H, spec["taille_pct"])
+        largeur, hauteur = boite[2] - boite[0], boite[3] - boite[1]
+        x = (W - largeur) / 2 - boite[0]
+        zone = spec.get("zone", "bas")
+        haut = H * 0.105 if zone == "haut" else ((H - hauteur) / 2 if zone == "centre" else H * 0.85 - hauteur)
+        y = haut - boite[1]
+        calque = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        alpha = int(255 * ease_out(u / 0.3) * min(1.0, max(0.0, (d - u) / 0.22)))
+        ImageDraw.Draw(calque).multiline_text((x, y), texte, font=police, spacing=espacement, align="center",
+                                              fill=(255, 255, 255, alpha), stroke_width=1, stroke_fill=(0, 0, 0, alpha))
+        return Image.alpha_composite(im.convert("RGBA"), calque).convert("RGB")
     if t in ("titre", "impact", "pile"):
         txt = spec.get("texte") or "|".join(spec.get("lignes", []))
         zone = spec.get("zone") or {"impact": "centre", "pile": "colonne"}.get(t, "bas")
@@ -386,9 +432,9 @@ def textes_plan(ctx):
     """Textes de l'EditPlan → incrustations typographiques équivalentes."""
     out = []
     for t in ctx.plan.get("textes", []):
-        style = {"titre": "titre", "sous-titre": "surtitre", "carton": "impact", "bas": "titre"}.get(t.get("style", "titre"), "titre")
+        style = {"titre": "titre", "sous-titre": "sous-titre", "carton": "impact", "bas": "titre"}.get(t.get("style", "titre"), "titre")
         zone = {"haut": "haut", "centre": "centre", "bas": "bas"}.get(t.get("position", "bas"), "bas")
-        out.append({"type": style, "texte": t["texte"].replace("\n", "|"), "debut_f": t["debut_f"], "duree_f": t["duree_f"], "zone": zone,
+        out.append({"type": style, "texte": t["texte"] if style == "sous-titre" else t["texte"].replace("\n", "|"), "taille_pct": t.get("taille_pct", 6), "debut_f": t["debut_f"], "duree_f": t["duree_f"], "zone": zone,
                     "position": "haut-gauche" if zone == "haut" else "bas-gauche", "echelle": t.get("taille_pct", 6) / 6})
     return out
 
@@ -397,7 +443,7 @@ def verifier_typo_cadre(ctx, incs, W, H):
     """Refuse avant l'encodeur les mentions qui ne rentrent pas dans le cadre sûr."""
     fond = Image.new('RGB', (W, H))
     for spec in incs:
-        if spec.get('type') in ('surtitre', 'etiquette'):
+        if spec.get('type') in ('surtitre', 'etiquette', 'sous-titre'):
             poser_typo(ctx, fond, spec, 0.5)
 
 
