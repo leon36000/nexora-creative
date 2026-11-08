@@ -167,6 +167,28 @@ describe('escalade', () => {
     expect(r.runs.map((x) => x.palier)).toEqual(['eco']);
     expect(r.final.montage.source).toBe('repli');
   });
+  it('propage le plafond au premier appel sans essayer un palier supérieur', async () => {
+    const appels: Record<string, number> = { eco: 0, equilibre: 0, expert: 0 };
+    const plafond = new ErreurPlafondLlm('plafond');
+    const client = (p: keyof typeof appels): ClientLlm => ({ async completer() { appels[p]++; throw plafond; } });
+    await expect(escalader(clients({ eco: client('eco'), equilibre: client('equilibre'), expert: client('expert') }), 'eco', B, { reparations: 0 }))
+      .rejects.toBe(plafond);
+    expect(appels).toEqual({ eco: 1, equilibre: 0, expert: 0 });
+  });
+  it('refuse un ordre vide avant tout appel', async () => {
+    const appels: Record<string, number> = { eco: 0, equilibre: 0, expert: 0 };
+    const client = (p: keyof typeof appels): ClientLlm => ({ async completer() { appels[p]++; return tournageOk(); } });
+    const cs = clients({ eco: client('eco'), equilibre: client('equilibre'), expert: client('expert') });
+    await expect(escalader(cs, 'eco', B, { ordre: [], reparations: 0 })).rejects.toBeInstanceOf(RangeError);
+    expect(appels).toEqual({ eco: 0, equilibre: 0, expert: 0 });
+  });
+  it('refuse un ordre sans le palier de départ avant tout appel', async () => {
+    const appels: Record<string, number> = { eco: 0, equilibre: 0, expert: 0 };
+    const client = (p: keyof typeof appels): ClientLlm => ({ async completer() { appels[p]++; return tournageOk(); } });
+    const cs = clients({ eco: client('eco'), equilibre: client('equilibre'), expert: client('expert') });
+    await expect(escalader(cs, 'eco', B, { ordre: ['equilibre'], reparations: 0 })).rejects.toBeInstanceOf(RangeError);
+    expect(appels).toEqual({ eco: 0, equilibre: 0, expert: 0 });
+  });
   it('répare avec les violations et réussit au second appel', async () => {
     let n = 0;
     const llm: ClientLlm = { async completer(_r, m) { n++; if (n === 1) return tournageOk(); if (n === 2) return mauvais(); expect(m[m.length - 1].content).toMatch(/schema/); return bon(); } };
