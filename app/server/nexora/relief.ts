@@ -12,6 +12,7 @@ import { simplify, weld } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { zipSync, strToU8 } from 'fflate';
 import { Matrix3, Matrix4, Vector3 } from 'three';
+import { exporterUsdz, verifierGlbUsdz } from './usdz.js';
 
 export const CODE_OBJ_INCOMPATIBLE = 'OBJ_UNSUPPORTED' as const;
 
@@ -436,7 +437,7 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
 
 /** Les anciennes versions restent en place ; les exports corrigés utilisent un nouveau cache. */
 export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
-  const version = format === 'obj' ? '-normales-v3' : format === 'glb' ? '' : '-orientation-v2';
+  const version = format === 'obj' ? '-normales-v3' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v2';
   return `export-${format}${version}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
 }
 
@@ -475,69 +476,6 @@ export function vers3mf(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   }, { level: 6 });
 }
 
-/** USDZ (Apple : Quick Look, Vision Pro) : un USDA et la texture, zip non compressé aligné sur 64 octets. */
-export function versUsdz(m: Maillage, opt: OptionsExport = {}): Uint8Array {
-  const nom = nomSur(opt.nom);
-  const n = m.positions.length / 3;
-  const pts: string[] = [];
-  for (let i = 0; i < n; i++) pts.push(`(${f(m.positions[3 * i])}, ${f(m.positions[3 * i + 1])}, ${f(m.positions[3 * i + 2])})`);
-  const nbFaces = m.indices.length / 3;
-  const ext = m.couleur ? extensionImage(m.couleur.mime) : 'png';
-  const st = m.uvs ? Array.from({ length: n }, (_, i) => `(${f(m.uvs![2 * i])}, ${f(m.uvs![2 * i + 1])})`) : [];
-  const usda = `#usda 1.0
-(
-    defaultPrim = "${nom}"
-    metersPerUnit = 1
-    upAxis = "Y"
-)
-
-def Xform "${nom}" (kind = "component")
-{
-    def Mesh "maillage"
-    {
-        int[] faceVertexCounts = [${Array(nbFaces).fill(3).join(', ')}]
-        int[] faceVertexIndices = [${Array.from(m.indices).join(', ')}]
-        point3f[] points = [${pts.join(', ')}]
-        uniform token subdivisionScheme = "none"
-        ${m.uvs ? `texCoord2f[] primvars:st = [${st.join(', ')}] (interpolation = "vertex")` : ''}
-        rel material:binding = </${nom}/Materiaux/matiere>
-    }
-    def Scope "Materiaux"
-    {
-        def Material "matiere"
-        {
-            token outputs:surface.connect = </${nom}/Materiaux/matiere/surface.outputs:surface>
-            def Shader "surface"
-            {
-                uniform token info:id = "UsdPreviewSurface"
-                ${m.couleur ? `color3f inputs:diffuseColor.connect = </${nom}/Materiaux/matiere/texture.outputs:rgb>` : 'color3f inputs:diffuseColor = (0.8, 0.8, 0.8)'}
-                float inputs:roughness = 0.7
-                float inputs:metallic = 0
-                token outputs:surface
-            }
-            ${m.couleur ? `def Shader "texture"
-            {
-                uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @couleur.${ext}@
-                float2 inputs:st.connect = </${nom}/Materiaux/matiere/coord.outputs:result>
-                token inputs:sourceColorSpace = "sRGB"
-                float3 outputs:rgb
-            }
-            def Shader "coord"
-            {
-                uniform token info:id = "UsdPrimvarReader_float2"
-                token inputs:varname = "st"
-                float2 outputs:result
-            }` : ''}
-        }
-    }
-}
-`;
-  const fichiers: { nom: string; octets: Uint8Array }[] = [{ nom: `${nom}.usda`, octets: strToU8(usda) }];
-  if (m.couleur) fichiers.push({ nom: `couleur.${ext}`, octets: m.couleur.octets });
-  return zipAligne(fichiers);
-}
-
 /** Le fichier du format voulu, depuis un GLB (décimé d'abord si `cible` est donné). */
 /** L'export OBJ ne sait pas appliquer KHR_texture_transform ; le refuser avant toute décimation. */
 function refuserTransformationTextureObj(glb: Uint8Array): void {
@@ -570,13 +508,14 @@ export function compatibiliteObj(glb: Uint8Array, m: Maillage): { compatible: bo
 
 export async function exporter(glb: Uint8Array, format: FormatRelief, opt: OptionsExport & { cible?: number | null } = {}): Promise<Uint8Array> {
   if (format === 'obj') refuserTransformationTextureObj(glb);
+  if (format === 'usdz') verifierGlbUsdz(glb);
   const source = opt.cible ? await decimerGlb(glb, opt.cible) : glb;
   if (format === 'glb') return source;
+  if (format === 'usdz') return exporterUsdz(source, opt.nom);
   const m = await lireGlb(source);
   if (format === 'obj') return versObj(m, opt);
   if (format === 'stl') return versStl(m, opt);
-  if (format === '3mf') return vers3mf(m, opt);
-  return versUsdz(m, opt);
+  return vers3mf(m, opt);
 }
 
 /** Cartes PBR d'un GLB (couleur, métal/rugosité, normales, occlusion, émission) : octets des images présentes. */

@@ -7,7 +7,7 @@ import { unzipSync } from 'fflate';
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { Mesh, Material } from 'three';
-import { analyser, cartesPbr, cibleTriangles, cleArete, compatibiliteObj, decimerGlb, exporter, lireGlb, maillageDuDocument, nomCacheExport, repondreObjIncompatible, versObj, versStl, versUsdz, vers3mf, zipAligne, type Maillage } from './relief.js';
+import { analyser, cartesPbr, cibleTriangles, cleArete, compatibiliteObj, decimerGlb, exporter, lireGlb, maillageDuDocument, nomCacheExport, repondreObjIncompatible, versObj, versStl, vers3mf, zipAligne, type Maillage } from './relief.js';
 
 /** Sphère UV (étanche une fois les sommets soudés), avec une texture 1×1 PNG. */
 async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
@@ -482,11 +482,11 @@ describe('Nexora Mesh : exports', () => {
     expect(readFileSync(nouveau, 'utf8')).toBe('nouveau');
     expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v2-plein-100.stl');
     expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v2-plein-100.3mf');
-    expect(nomCacheExport('usdz', null, 100)).toBe('export-usdz-orientation-v2-plein-100.usdz');
+    expect(nomCacheExport('usdz', null, 100)).toBe('export-usdz-matieres-v3-plein-100.usdz');
     expect(nomCacheExport('glb', null, 100)).toBe('export-glb-plein-100.glb');
   });
   it('USDZ : zip non compressé, chaque fichier aligné sur 64 octets, USDA lisible', async () => {
-    const octets = versUsdz(await lireGlb(await glbSphere(8)), { nom: 'balle' });
+    const octets = await exporter(await glbSphere(8), 'usdz', { nom: 'balle' });
     const dv = new DataView(octets.buffer, octets.byteOffset);
     let o = 0, n = 0;
     while (dv.getUint32(o, true) === 0x04034b50) {
@@ -498,7 +498,7 @@ describe('Nexora Mesh : exports', () => {
     expect(n).toBe(2);
     const z = unzipSync(octets);
     expect(new TextDecoder().decode(z['balle.usda'])).toMatch(/^#usda 1\.0/);
-    expect(Object.keys(z)).toContain('couleur.png');
+    expect(Object.keys(z)).toContain('texture_0_base.png');
   });
   it('zipAligne : le contenu se relit à l’identique', () => {
     const z = unzipSync(zipAligne([{ nom: 'a.txt', octets: new TextEncoder().encode('bonjour') }, { nom: 'b.bin', octets: Uint8Array.from([1, 2, 3]) }]));

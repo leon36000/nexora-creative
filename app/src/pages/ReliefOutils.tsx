@@ -73,7 +73,40 @@ export function LienExportMesh({ format, url, takeId, compatibilite, rapportRecu
   if (rapportEchoue) return <span className="btn sm accent" aria-disabled="true">{c.exportUnavailable}</span>;
   if (format === 'obj' && !compatibilite && !rapportRecu) return <span role="status">{c.objChecking}</span>;
   if (format === 'obj' && (!compatibilite || !compatibilite.compatible)) return <div role="alert">{compatibilite ? c.objUnsupported : c.objUnknown} <a href={reliefExportUrl(takeId, 'glb')} download>{c.downloadOriginalGlb}</a></div>;
+  if (format === 'usdz') return <TelechargementUsdz url={url} takeId={takeId} langue={langue} />;
   return <a className="btn sm accent" href={url} download><Icon name="download" size={14} />{c.export} {NOMS_FORMAT[format]}</a>;
+}
+
+/** Un HEAD prépare le cache et permet de montrer un refus avant le téléchargement natif. */
+export function TelechargementUsdz({ url, takeId, langue }: { url: string; takeId: number; langue: LangueClient }) {
+  const c = meshCopy(langue);
+  const [etat, setEtat] = useState<'pret' | 'chargement' | 'incompatible' | 'erreur'>('pret');
+  const controle = useRef<AbortController | null>(null);
+  useEffect(() => { setEtat('pret'); return () => { controle.current?.abort(); }; }, [url]);
+  async function lancer(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    if (etat === 'chargement') return;
+    setEtat('chargement');
+    const requete = new AbortController();
+    controle.current = requete;
+    try {
+      const reponse = await fetch(url, { method: 'HEAD', signal: requete.signal });
+      if (requete.signal.aborted) return;
+      if (reponse.status === 400) { setEtat('incompatible'); return; }
+      const type = reponse.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase();
+      if (!reponse.ok || type !== 'model/vnd.usdz+zip') { setEtat('erreur'); return; }
+      setEtat('pret');
+      const lien = document.createElement('a');
+      lien.href = url; lien.download = '';
+      document.body.appendChild(lien); lien.click(); lien.remove();
+    } catch { if (!requete.signal.aborted) setEtat('erreur'); }
+  }
+  return <>
+    <a className="btn sm accent" href={url} download onClick={lancer} aria-disabled={etat === 'chargement'}><Icon name="download" size={14} />{c.export} USDZ</a>
+    {etat === 'chargement' && <span role="status">{c.usdzChecking}</span>}
+    {etat === 'incompatible' && <div role="alert">{c.usdzUnsupported} <a href={reliefExportUrl(takeId, 'glb')} download>{c.downloadOriginalGlb}</a></div>}
+    {etat === 'erreur' && <div role="alert">{c.usdzFailure}</div>}
+  </>;
 }
 
 export default function ReliefOutils({ take, langue }: { take: Take; langue: LangueClient }) {

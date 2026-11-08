@@ -92,6 +92,7 @@ import { jugeDisponible } from './nexora/juge.js';
 import { MESURES_OBJET_PC5, recetteMultivue } from './nexora/objet3d.js';
 import { PRODUIT_3D } from '../src/produit3d.js';
 import { analyser, cartesPbr, cibleTriangles, compatibiliteObj, decimerGlb, EXTENSION_RELIEF, exporter, nomCacheExport, ObjIncompatible, repondreObjIncompatible, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief, type Maillage } from './nexora/relief.js';
+import { UsdzIncompatible } from './nexora/usdz.js';
 import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, meilleurePriseNotee, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
 import {
   CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles, storeRef,
@@ -2052,6 +2053,7 @@ app.get('/api/nexora/relief/:take/export', async (req, reply) => {
       writeFileSync(fichier, sortie);
     } catch (error) {
       if (error instanceof ObjIncompatible) return repondreObjIncompatible(reply);
+      if (error instanceof UsdzIncompatible) return reply.code(400).send({ code: error.code, error: 'Export USDZ incompatible avec ce modèle. Utilisez le GLB. / USDZ export does not support this model. Use GLB.' });
       throw error;
     }
   }
