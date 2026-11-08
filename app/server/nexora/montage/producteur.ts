@@ -33,6 +33,15 @@ export interface VueMetriques {
   plans: number; dureeS: number; dureeMoyennePlanS: number; coupesParMinute: number; bpm: number | null; credits: number;
 }
 
+/** Sources mesurées d'un brief, utilisées par le validateur du plan et le rendu. */
+export function inventaireDuBrief(brief: Brief): Record<string, { duree_s: number }> {
+  return Object.fromEntries([
+    ...brief.clips.map((c) => [c.id, { duree_s: c.duree_s }] as const),
+    ...(brief.musique ? [[brief.musique.id, { duree_s: brief.musique.duree_s }] as const] : []),
+    ...(brief.voix ? [[brief.voix.id, { duree_s: brief.voix.duree_s }] as const] : []),
+  ]);
+}
+
 /** Brief d'un film tourné : les plans sont les clips (ids = ids de prises), la bande originale est la musique. */
 export function briefDuFilm(o: {
   clips: { id: string; analyse: AnalyseMedia }[]; musique?: { id: string; analyse: AnalyseMedia };
@@ -76,14 +85,7 @@ export async function ameliorerMontage(etat: EtatMontageFilm, llm: ClientLlm | n
   const c = await critiquer(etat.plan, etat.brief);
   if (!c.metriques.porte || !c.ecarts.length || c.composite >= 0.97) return inchange('Le montage passe déjà toutes les mesures : rien à corriger.');
   if (!llm) return inchange('Aucun LLM branché : le montage automatique reste tel quel.');
-  const ctx = {
-    inventaire: Object.fromEntries([
-      ...etat.brief.clips.map((x) => [x.id, { duree_s: x.duree_s }] as const),
-      ...(etat.brief.musique ? [[etat.brief.musique.id, { duree_s: etat.brief.musique.duree_s }] as const] : []),
-      ...(etat.brief.voix ? [[etat.brief.voix.id, { duree_s: etat.brief.voix.duree_s }] as const] : []),
-    ]),
-    duree_cible_s: etat.brief.duree_cible_s,
-  };
+  const ctx = { inventaire: inventaireDuBrief(etat.brief), duree_cible_s: etat.brief.duree_cible_s };
   try {
     const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
       { role: 'system', content: avecCompetences('monteur', 'Tu es le monteur de Nexora Creative. Tu réponds uniquement par du JSON.') },

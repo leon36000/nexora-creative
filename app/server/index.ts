@@ -88,7 +88,7 @@ import { aplatir, estimerProjet, intentionDuPlanProjet, ordreAssemblage, prochai
 import { decoupeFiche, promptFiche, referencesAvecComposition } from './nexora/personnages.js';
 import { dureeTotaleS } from './nexora/montage/editplan.js';
 import { rendreEditPlan } from './nexora/montage/rendu.js';
-import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
+import { ameliorerMontage, briefDuFilm, inventaireDuBrief, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
 import type { DepsAgent } from './nexora/agent.js';
 import { ajusterProposition, depassement, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
@@ -1416,8 +1416,7 @@ async function rendreApercuMontage(etat: EtatMontageFilm, id: string) {
     if (!t?.output_path || !existsSync(t.output_path)) throw new Error(`média ${src} introuvable`);
     return t.output_path;
   };
-  const sources = Object.fromEntries(etat.brief.clips.map((c) => [c.id, { duree_s: c.duree_s }]));
-  if (etat.brief.musique) sources[etat.brief.musique.id] = { duree_s: etat.brief.musique.duree_s };
+  const sources = inventaireDuBrief(etat.brief);
   const sortie = join(dossierMontages(), `${id}.mp4`);
   const r = await rendreEditPlan(etat.plan, chemin, sortie, { apercu: true, ffmpeg: config.ffmpegBin, ctx: { inventaire: sources, duree_cible_s: etat.brief.duree_cible_s } });
   if (!r.ok) throw new Error(`plan invalide : ${r.erreurs.slice(0, 2).join(' ; ')}`);
