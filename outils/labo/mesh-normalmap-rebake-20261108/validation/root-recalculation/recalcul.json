@@ -1,0 +1,22 @@
+{
+  "scope": "Recalcul root des PNG, canaux RGB encod\u00e9s8bits ; pas de rendu GPU ni de norme angulaire g\u00e9n\u00e9rale. Masque simple union des pixels diff\u00e9rents du fond coin sup\u00e9rieur gauche.",
+  "shape": [
+    480,
+    640,
+    3
+  ],
+  "sha256": {
+    "fixture.png": "eb50016490d23d29ec9793490f077020033143419d7861875348d921b63adea7",
+    "fixture_mikk.png": "225342d6e88552542370e774d95337f16ead6c84a602dc16384301281bb2ed45"
+  },
+  "changed_pixels": 5917,
+  "max_channel_difference_8bit": 1,
+  "mae_rgb_encoded_entire_8bit": 0.019261067708333333,
+  "foreground_union_pixels": 16510,
+  "mae_rgb_encoded_foreground_union_8bit": 0.35838885523924896,
+  "background_rgb_8bit": [
+    48,
+    48,
+    48
+  ]
+}
