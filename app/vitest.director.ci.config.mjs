@@ -23,7 +23,7 @@ export default {
       'app/server/nexora/creationLanguage.test.ts', 'app/server/nexora/personnages.test.ts',
       'app/server/nexora/usage.test.ts', 'app/server/nexora/troncature.test.ts', 'app/server/nexora/niveaux-effort.test.ts',
       'app/server/nexora/credits.test.ts', 'app/src/filmErreurPartielle.test.ts',
-      'app/server/nexora/montage/film.test.ts', 'app/server/nexora/usage.test.ts',
+      'app/server/nexora/montage/film.test.ts',
       'app/server/nexora/detourage/routes.test.ts',
       'app/server/nexora/detourage/serviceNatif.test.ts',
       'app/server/nexora/bench/appariementAmd2.test.ts',
