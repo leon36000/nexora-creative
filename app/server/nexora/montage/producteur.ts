@@ -77,7 +77,11 @@ export async function ameliorerMontage(etat: EtatMontageFilm, llm: ClientLlm | n
   if (!c.metriques.porte || !c.ecarts.length || c.composite >= 0.97) return inchange('Le montage passe déjà toutes les mesures : rien à corriger.');
   if (!llm) return inchange('Aucun LLM branché : le montage automatique reste tel quel.');
   const ctx = {
-    inventaire: Object.fromEntries([...etat.brief.clips.map((x) => [x.id, { duree_s: x.duree_s }] as const), ...(etat.brief.musique ? [[etat.brief.musique.id, { duree_s: etat.brief.musique.duree_s }] as const] : [])]),
+    inventaire: Object.fromEntries([
+      ...etat.brief.clips.map((x) => [x.id, { duree_s: x.duree_s }] as const),
+      ...(etat.brief.musique ? [[etat.brief.musique.id, { duree_s: etat.brief.musique.duree_s }] as const] : []),
+      ...(etat.brief.voix ? [[etat.brief.voix.id, { duree_s: etat.brief.voix.duree_s }] as const] : []),
+    ]),
     duree_cible_s: etat.brief.duree_cible_s,
   };
   try {
