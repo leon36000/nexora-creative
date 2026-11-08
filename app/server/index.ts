@@ -94,7 +94,7 @@ import { ajusterProposition, depassement, devisProduction, nouvelleSession, plan
 import { jugeDisponible } from './nexora/juge.js';
 import { MESURES_OBJET_PC5, recetteMultivue } from './nexora/objet3d.js';
 import { PRODUIT_3D } from '../src/produit3d.js';
-import { analyser, cartesPbr, cibleTriangles, compatibiliteObj, decimerGlb, EXTENSION_RELIEF, exporter, nomCacheExport, ObjIncompatible, repondreObjIncompatible, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief, type Maillage } from './nexora/relief.js';
+import { analyser, cartesPbr, cibleTriangles, compatibiliteObj, decimerGlb, EXTENSION_RELIEF, exporter, nomCacheExport, nomCacheRapport, ObjIncompatible, repondreObjIncompatible, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief, type Maillage } from './nexora/relief.js';
 import { UsdzIncompatible } from './nexora/usdz.js';
 import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, meilleurePriseNotee, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
 import {
@@ -2021,7 +2021,7 @@ app.get('/api/nexora/relief/:take/rapport', async (req, reply) => {
   let maillagePlein: Maillage | null = null;
   const chargerPlein = async () => maillagePlein ??= await lireGlb(octets);
   const lire = async (cible: number | null) => {
-    const fichier = join(dir, `rapport-${cible ?? 'plein'}.json`);
+    const fichier = join(dir, nomCacheRapport(cible));
     if (existsSync(fichier)) return JSON.parse(readFileSync(fichier, 'utf8'));
     const r = await unSeulCalcul(fichier, async () => analyser(cible ? await lireGlb(await decimerGlb(octets, cible)) : await chargerPlein()));
     writeFileSync(fichier, JSON.stringify(r));

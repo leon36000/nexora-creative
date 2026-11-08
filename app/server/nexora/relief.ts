@@ -39,7 +39,7 @@ export const FACES_MAX = 2_000_000;
 export const TAILLE_MM_DEFAUT = 100;
 
 export interface Maillage {
-  positions: Float32Array;
+  positions: Float32Array | Float64Array;
   /** Coordonnées de texture (2 par sommet) ; null si le modèle n'en a pas. */
   uvs: Float32Array | null;
   indices: Uint32Array;
@@ -184,7 +184,7 @@ export function maillageDuDocument(doc: Document): Maillage {
       if (!couleur && image) couleur = { octets: image, mime: mime || 'image/png' };
     }
   }
-  return { positions: Float32Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj), normalesObj: Float32Array.from(normalesObj), indicesObj: Uint32Array.from(indicesObj), normalesCoinsObj };
+  return { positions: Float64Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj), normalesObj: Float32Array.from(normalesObj), indicesObj: Uint32Array.from(indicesObj), normalesCoinsObj };
 }
 
 // ---------- contrôle ----------
@@ -238,6 +238,7 @@ export function analyser(m: Maillage): RapportMaillage {
   let degeneres = 0;
   const utilises = new Uint8Array(nbSoudes);
   let volume6 = 0;
+  let ancrage: [number, number, number] | null = null;
   for (let t = 0; t < nTri; t++) {
     const a = soude[m.indices[3 * t]], b = soude[m.indices[3 * t + 1]], c = soude[m.indices[3 * t + 2]];
     const ia = m.indices[3 * t] * 3, ib = m.indices[3 * t + 1] * 3, ic = m.indices[3 * t + 2] * 3;
@@ -253,9 +254,11 @@ export function analyser(m: Maillage): RapportMaillage {
     }
     utilises[a] = utilises[b] = utilises[c] = 1;
     p[racine(a)] = racine(b); p[racine(b)] = racine(c);
-    volume6 += m.positions[ia] * (m.positions[ib + 1] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic + 1])
-      - m.positions[ia + 1] * (m.positions[ib] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic])
-      + m.positions[ia + 2] * (m.positions[ib] * m.positions[ic + 1] - m.positions[ib + 1] * m.positions[ic]);
+    ancrage ??= [m.positions[ia], m.positions[ia + 1], m.positions[ia + 2]];
+    const ax = m.positions[ia] - ancrage[0], ay = m.positions[ia + 1] - ancrage[1], az = m.positions[ia + 2] - ancrage[2];
+    const bx = m.positions[ib] - ancrage[0], by = m.positions[ib + 1] - ancrage[1], bz = m.positions[ib + 2] - ancrage[2];
+    const cx = m.positions[ic] - ancrage[0], cy = m.positions[ic + 1] - ancrage[1], cz = m.positions[ic + 2] - ancrage[2];
+    volume6 += ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx);
   }
   let ouvertes = 0, nonVariete = 0, orientationIncoherente = false;
   for (const etat of aretes.values()) {
@@ -437,8 +440,13 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
 
 /** Les anciennes versions restent en place ; les exports corrigés utilisent un nouveau cache. */
 export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
-  const version = format === 'obj' ? '-normales-v3' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v2';
+  const version = format === 'obj' ? '-normales-v4' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v3';
   return `export-${format}${version}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
+}
+
+/** Sépare les rapports calculés après conservation de la précision des coordonnées monde. */
+export function nomCacheRapport(cible: number | null): string {
+  return `rapport-monde64-v1-${cible ?? 'plein'}.json`;
 }
 
 /** STL binaire, en millimètres, Z vers le haut, posé sur le plateau. */
