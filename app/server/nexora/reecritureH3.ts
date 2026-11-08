@@ -150,7 +150,7 @@ export async function reecrireH3(e: EntreeReecriture, llm: ClientLlm | null, max
 
 /** Réécrivain classique (avant le 04/11/2026) : guide officiel complet en consignes, deux réparations, repli. */
 export async function reecrireH3Classique(e: EntreeReecriture, llm: ClientLlm | null, maxTentatives = 3): Promise<ResultatReecriture> {
-  const ctx = { mode: e.mode, references: e.references, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte) };
+  const ctx = { mode: e.mode, references: e.references, dureeS: e.dureeS, dialogues: e.dialogues?.map((d) => d.texte), dialoguesAvecLangue: e.dialogues };
   let erreurs: string[] = ['aucun LLM configuré'];
   let tentatives = 0;
   if (llm) {
