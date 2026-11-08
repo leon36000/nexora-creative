@@ -114,6 +114,7 @@ nexora_director_tests_cpu:
       - .ci-director/*.log
       - .ci-director/coverage/
       - .ci-director/coverage-mesh/
+      - .ci-director/coverage-storm-frame/
 
 nexora_sous_agents_tests:
   stage: test
