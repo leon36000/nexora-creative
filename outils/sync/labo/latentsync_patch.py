@@ -98,8 +98,16 @@ def adapter(nom: str, source: bytes) -> bytes:
                      'read_video(video_path, change_fps=False, use_decord=False)')
         texte = _une(texte, '        audio_samples = read_audio(audio_path)\n',
                      '        audio_samples = read_audio(audio_path)\n'
+                     '        echantillons_pcm = audio_samples.numel()\n'
+                     '        if type(echantillons_pcm) is not int or echantillons_pcm <= 0:\n'
+                     '            raise ValueError("PCM positif requis")\n'
+                     '        if type(video_fps) is not int or video_fps != 25 or type(audio_sample_rate) is not int or audio_sample_rate != 16000:\n'
+                     '            raise ValueError("Calendrier local requis : 25 i/s et PCM 16 kHz")\n'
                      '        if audio_samples.numel() * video_fps > len(whisper_chunks) * audio_sample_rate:\n'
-                     '            raise ValueError("Conditionnement trop court pour conserver tout le PCM")\n')
+                     '            raise ValueError("Conditionnement trop court pour conserver tout le PCM")\n'
+                     '        images_pcm = (echantillons_pcm * video_fps + audio_sample_rate - 1) // audio_sample_rate\n'
+                     '        print(f"NEXORA_PCM samples={echantillons_pcm} rate={audio_sample_rate} fps={video_fps} features={len(whisper_feature)} chunks={len(whisper_chunks)} frames={images_pcm}", flush=True)\n'
+                     '        whisper_chunks = whisper_chunks[:images_pcm]\n')
         texte = _une(texte,
                      '        audio_samples_remain_length = int(synced_video_frames.shape[0] / video_fps * audio_sample_rate)\n'
                      '        audio_samples = audio_samples[:audio_samples_remain_length].cpu().numpy()',
