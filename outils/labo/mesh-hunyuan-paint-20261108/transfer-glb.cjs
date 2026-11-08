@@ -25,7 +25,7 @@ function primitive(doc){
  const attrs={};for(const semantic of p.listSemantics()){if(semantic!=='NORMAL'){attrs[semantic]=Array.from(p.getAttribute(semantic).getArray());}}
  return {positions:position.getArray(),normals:normal.getArray(),indices:indices.getArray(),matrix:nodes[0].getWorldMatrix(),accessor:normal,attrs};
 }
-function imageHashes(doc){return doc.getRoot().listTextures().map(t=>{const b=t.getImage();if(!b)throw new Error('external or missing image unsupported');return hash(b)});}
+function imageHashes(doc){return doc.getRoot().listTextures().map(t=>{const b=t.getImage();if(!b){throw new Error('external or missing image unsupported');}return hash(b)});}
 async function absent(file){try{await fs.lstat(file);throw new Error('output exists: '+file)}catch(e){if(e.code!=='ENOENT')throw e}}
 async function main(){
  const [sourcePath,targetPath,outputPath,reportPath,...extra]=process.argv.slice(2);
