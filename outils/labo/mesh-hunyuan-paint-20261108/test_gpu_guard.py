@@ -39,12 +39,12 @@ class GuardTests(unittest.TestCase):
         self.assertLess(time.monotonic()-start,1);self.assertEqual(result["status"],"non_verifie")
         self.assertEqual(result["error"],"OSError")
     def test_persistent_foreign_process_is_reported_not_signalled(self):
-        child=subprocess.Popen([sys.executable,"-c","import time;time.sleep(10)"])
+        child=subprocess.Popen([sys.executable,"-c","import sys;sys.stdin.read()"],stdin=subprocess.PIPE)
         try:
             start=time.monotonic();result=gpu_guard.check_release(lambda:True,lambda:{child.pid})
             self.assertLess(time.monotonic()-start,1);self.assertEqual(result["status"],"non_verifie")
             self.assertEqual(result["foreign_pids"],[child.pid]);self.assertIsNone(child.poll())
-        finally:child.terminate();child.wait(timeout=2)
+        finally:child.stdin.close();child.wait(timeout=2)
     def test_clear_requires_both_proofs(self):
         self.assertEqual(gpu_guard.check_release(lambda:True,lambda:set())["status"],"verifie")
 
