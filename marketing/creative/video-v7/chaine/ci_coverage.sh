@@ -10,7 +10,13 @@ python3 -m coverage run --parallel-mode --branch -m unittest discover -s marketi
 python3 -m coverage run --parallel-mode --branch -m unittest discover -s outils/detourage/tests -p test_comparateur_alpha.py -v > "$V7_CI_ROOT/matte-tests.log" 2>&1 || status=1
 python3 -m coverage run --parallel-mode --branch -m unittest discover -s app/server/nexora/bench/production-evidence-v2 -p test_importer.py -v > "$V7_CI_ROOT/production-evidence-v2-tests.log" 2>&1 || status=1
 python3 -m coverage run --parallel-mode --branch -m unittest discover -s app/server/nexora/bench/corpus-amd-v2 -p 'test_*.py' -v > "$V7_CI_ROOT/amd2-tests.log" 2>&1 || status=1
-python3 -m coverage run --parallel-mode --branch -m unittest discover -s app/server/nexora/bench/sync-rnd -p 'test_*.py' -v > "$V7_CI_ROOT/sync-rnd-tests.log" 2>&1 || status=1
+# Les tests SyncRnd exigent une racine R&D distincte du dépôt.
+sync_rnd_tmp="$(mktemp -d /tmp/nexora-sync-rnd.XXXXXX)" || exit 1
+TMPDIR="$sync_rnd_tmp" python3 -m coverage run --parallel-mode --branch -m unittest discover -s app/server/nexora/bench/sync-rnd -p 'test_*.py' -v > "$V7_CI_ROOT/sync-rnd-tests.log" 2>&1 || status=1
+if [ -n "$(find "$sync_rnd_tmp" -mindepth 1 -print -quit)" ]; then
+    sync_rnd_restes="$(mktemp -d "$V7_CI_ROOT/sync-rnd-restes.XXXXXX")" || exit 1
+    cp -a "$sync_rnd_tmp"/. "$sync_rnd_restes"/ || status=1
+fi
 python3 -m coverage run --parallel-mode --branch -m unittest discover -s marketing/nexora/campagne-films/opsys-ultime/chaine/tests -p 'test_*.py' -v > "$V7_CI_ROOT/opsys-tests.log" 2>&1 || status=1
 cat "$V7_CI_ROOT/tests.log" "$V7_CI_ROOT/finish-verification-couverture.log" "$V7_CI_ROOT/finish-tests.log" "$V7_CI_ROOT/assemblage-tests.log" "$V7_CI_ROOT/politique-voix-tests.log" "$V7_CI_ROOT/matte-tests.log" "$V7_CI_ROOT/production-evidence-v2-tests.log" "$V7_CI_ROOT/opsys-tests.log" "$V7_CI_ROOT/amd2-tests.log" "$V7_CI_ROOT/sync-rnd-tests.log"
 python3 - "$V7_CI_ROOT/opsys-tests.log" <<'PY' || status=1

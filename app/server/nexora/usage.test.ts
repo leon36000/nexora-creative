@@ -50,13 +50,13 @@ describe('mesure des appels', () => {
     await c.completer('monteur', [{ role: 'user', content: 'x' }]);
     expect(livre.lignes()[0]).toMatchObject({ coutUsd: 0.8, source: 'tarif' });
   });
-  it('envoie le routage Flex et coupe le raisonnement de Flash', async () => {
+  it('envoie le routage Flex et demande le raisonnement maximal Flash', async () => {
     const corps: any[] = [];
     const f = (async (_u: string, init: any) => { corps.push(JSON.parse(init.body)); return reponse({ prompt_tokens: 1, completion_tokens: 1 }); }) as any;
     await clientPalier('expert', { env: { NEXORA_LLM_CLE_OPENROUTER: 'k' } as any, f }).completer('monteur', [{ role: 'user', content: 'x' }]);
     await clientPalier('eco', { env: { NEXORA_LLM_CLE_DEEPINFRA: 'k' } as any, f }).completer('monteur', [{ role: 'user', content: 'x' }]);
     expect(corps[0].provider).toEqual({ order: ['google-ai-studio/flex'], allow_fallbacks: false });
-    expect(corps[1].reasoning_effort).toBe('none');
+    expect(corps[1].reasoning_effort).toBe(100);
     expect(corps[1].model).toBe('deepseek-ai/DeepSeek-V4.1-Flash-1017');
   });
   it('refuse sans clé', async () => {
