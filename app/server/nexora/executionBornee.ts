@@ -13,9 +13,9 @@ export function executerBorne(bin: string, args: string[], delaiMs: number, rece
       if (err) reject(err); else resolve(sortie ?? '');
     };
     const arreter = (raison: string) => {
-      try { enfant.kill('SIGKILL'); } catch { /* arrêt non confirmé */ }
-      enfant.stdout.destroy(); enfant.unref();
       finir(new Error(`${raison} ; arrêt de l’enfant non confirmé.`));
+      try { enfant.kill('SIGKILL'); } catch { /* l'erreur utile est déjà conservée */ }
+      enfant.stdout.destroy(); enfant.unref();
     };
     const minuterie = setTimeout(() => arreter('Délai dépassé'), delaiMs);
     enfant.stdout.on('data', (bloc: Buffer) => {

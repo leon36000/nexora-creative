@@ -8,8 +8,8 @@ it('conserve la sortie et signale un code non nul', async () => {
 
 it('borne l’attente et ne prétend pas certifier l’arrêt', async () => {
   const debut = Date.now();
-  await expect(executerBorne(process.execPath, ['-e', 'setTimeout(()=>{},4000)'], 50)).rejects.toThrow('arrêt de l’enfant non confirmé');
-  expect(Date.now() - debut).toBeLessThan(3000);
+  await expect(executerBorne(process.execPath, ['-e', 'setTimeout(()=>{},300)'], 20)).rejects.toThrow('arrêt de l’enfant non confirmé');
+  expect(Date.now() - debut).toBeLessThan(1000);
 });
 
 it('traite un flux long par blocs et refuse une erreur du consommateur', async () => {

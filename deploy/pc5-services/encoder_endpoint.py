@@ -34,6 +34,7 @@ TAILLE_MAX = 512 * 2**20
 PLAFOND_ESSAIS = os.environ.get('NEXORA_ENCODER_PLAFOND_ESSAIS', str(20 * 2**30))
 DUREE_MAX_S = 600
 DELAI_S = 180
+DELAI_ARRET_S = 1.0
 VERROU = threading.BoundedSemaphore(1)
 
 
@@ -110,9 +111,26 @@ async def programme(args, *, sortie=False, limite_fichier=None, verrou_fd=None):
                 raise HTTPException(422, 'media illisible ou encodeur indisponible / invalid media or encoder unavailable')
             return data
     finally:
-        if p.returncode is None:
-            p.kill()
-            await p.wait()
+        try:
+            if p.returncode is None:
+                try:
+                    p.kill()
+                except ProcessLookupError:
+                    # L'enfant est déjà sorti; on attend uniquement sa réconciliation bornée.
+                    pass
+                except OSError as exc:
+                    # Le processus peut encore tourner et conserve verrou_fd via pass_fds.
+                    raise HTTPException(503, 'arrêt non confirmé / stop unconfirmed') from exc
+                try:
+                    await asyncio.wait_for(p.wait(), timeout=DELAI_ARRET_S)
+                except TimeoutError as exc:
+                    raise HTTPException(503, 'arrêt non confirmé / stop unconfirmed') from exc
+        finally:
+            if sortie:
+                # Ferme seulement le lecteur du parent; le transport du processus peut retenter kill.
+                pipe = p._transport.get_pipe_transport(1)
+                if pipe is not None:
+                    pipe.close()
 
 
 async def sonder(path):

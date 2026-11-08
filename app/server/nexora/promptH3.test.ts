@@ -40,6 +40,14 @@ describe('validateur de prompt H3 (guide officiel MiniMax)', () => {
     expect(e.join(' ')).toMatch(/On y va\./);
   });
 
+  it('refuse aussi une ouverture sans langue après une réplique conforme', () => {
+    const erreurs = validerPromptH3(`${corps} <d>sans langue`, {
+      mode: 't2va', dureeS: 5.17,
+      dialoguesAvecLangue: [{ texte: 'On y va.', langue: 'French' }],
+    });
+    expect(erreurs).toContain('balises de réplique mal formées');
+  });
+
   it('exige la ligne d’instruction exacte en I2VA et FL2VA', () => {
     const i2va = `${instructionH3({ mode: 'i2va', dureeS: 5.17, dernierPlan: 2 })}\n\n${corps}`;
     expect(validerPromptH3(i2va, { mode: 'i2va', dureeS: 5.17 })).toEqual([]);
