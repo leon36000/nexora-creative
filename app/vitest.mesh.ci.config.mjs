@@ -24,7 +24,7 @@ export default {
     maxWorkers: 1,
     minWorkers: 1,
     include: [
-      'app/mcp/mesh.test.ts', 'app/mcp/mesh-init.test.ts',
+      'app/mcp/mesh.test.ts', 'app/mcp/mesh-init.test.ts', 'app/mcp/mesh-multivue.test.ts',
       'app/src/ModelView.test.tsx',
       'app/src/SourcePick.test.tsx',
       'app/src/SourcePickRace.contract.test.tsx',

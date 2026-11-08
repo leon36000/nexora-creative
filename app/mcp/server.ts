@@ -934,14 +934,35 @@ server.registerTool('make_3d', {
   ].join(' '),
   inputSchema: {
     image: inputRef('The still to turn into a model (png, jpg or webp)'),
+    views: z.object({
+      left: inputRef('Left view of the same object').optional(),
+      back: inputRef('Back view of the same object').optional(),
+      right: inputRef('Right view of the same object').optional(),
+    }).strict().optional().describe('Additional views; multi-view uses draft quality and one take.'),
     quality: z.enum(['draft', 'high']).default('draft').describe('draft to check the shape, high for the keeper'),
     remove_background: z.boolean().default(true).describe('Cut the subject out with BiRefNet first'),
     count,
   },
   annotations: GPU,
 }, safe(async (a) => {
+  let views: Partial<Record<'left' | 'back' | 'right', SourceRef>> | undefined;
+  const sides = (['left', 'back', 'right'] as const).filter(side => a.views?.[side]);
+  if (a.views) {
+    if (!sides.length || a.quality !== 'draft' || a.count !== 1) throw new Error('Multi-view needs at least one additional view, draft quality and one take.');
+    let etat: { objet3d?: { multivue?: unknown; vuesMax?: unknown } } | null | undefined;
+    let etatCharge = false;
+    try { etat = await api.nexora('etat'); etatCharge = true; } catch { /* Conservative two-view fallback. */ }
+    if (etatCharge && etat?.objet3d?.multivue !== true) throw new Error(`${PRODUIT_3D}: multi-view is unavailable.`);
+    const max = etat?.objet3d?.vuesMax;
+    const limit = typeof max === 'number' && Number.isFinite(max) ? Math.max(2, Math.min(4, Math.floor(max))) : 2;
+    if (sides.length + 1 > limit) throw new Error(`${PRODUIT_3D}: multi-view accepts at most ${limit} views.`);
+  }
   const src = sourceRef(await resolveInput(a.image, 'image'), 'image');
-  return queue(wire(objectBody({ source: src, quality: a.quality === 'high' ? 'quality' : 'draft', cutout: a.remove_background, count: a.count })), { quality: a.quality });
+  if (a.views) {
+    views = {};
+    for (const side of sides) views[side] = sourceRef(await resolveInput(a.views[side]!, 'image'), 'image');
+  }
+  return queue(wire(objectBody({ source: src, quality: a.quality === 'high' ? 'quality' : 'draft', cutout: a.remove_background, count: a.count, views })), { quality: a.quality });
 }));
 
 // ---------- cast ----------
