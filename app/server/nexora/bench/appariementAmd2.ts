@@ -18,7 +18,7 @@ interface Preparation {
 /** Le protocole est épinglé par un SHA fourni indépendamment des observations. */
 export function comparerAmd2(corpus: string, protocole: string, observations: string, shaProtocole: string): { preparation: Preparation; comparaison: Paire } {
   const script = fileURLToPath(new URL('./corpus-amd-v2/apparier.py', import.meta.url));
-  const execution = childProcess.spawnSync('python3', [script, corpus, protocole, observations, '--sha-protocole', shaProtocole], {
+  const execution = childProcess.spawnSync('/usr/bin/python3', [script, corpus, protocole, observations, '--sha-protocole', shaProtocole], {
     encoding: 'utf8', maxBuffer: 8 * 1024 * 1024, timeout: 30_000,
     env: { PATH: '/usr/bin:/bin', PYTHONDONTWRITEBYTECODE: '1', PYTHONNOUSERSITE: '1' },
   });
