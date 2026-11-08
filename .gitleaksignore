@@ -1,2 +1,11 @@
 # Faux positif : noms de points de contrôle de modèle (grpo_1400.ckpt, last.ckpt) dans un tableau de recherche, aucune clé.
 452437c80ddb223dd4c21e02a3e6399d7299d6ef:recherche/18-creative-3d-facon-meshy.md:generic-api-key:205
+
+# Six SHA-256 de fichiers publics HighSync, vérifiés au commit auteur 19a8efb.
+# Exception précise : commit + fichier + règle + ligne. Aucun dossier ni règle désactivés.
+6a336b1162f005d9ee0fd85512f989cc171f7db9:outils/sync/labo/highsync_fixture/source_manifest.json:generic-api-key:29
+6a336b1162f005d9ee0fd85512f989cc171f7db9:outils/sync/labo/highsync_fixture/source_manifest.json:generic-api-key:30
+6a336b1162f005d9ee0fd85512f989cc171f7db9:outils/sync/labo/highsync_fixture/source_manifest.json:generic-api-key:33
+6a336b1162f005d9ee0fd85512f989cc171f7db9:outils/sync/labo/highsync_fixture/source_manifest.json:generic-api-key:35
+6a336b1162f005d9ee0fd85512f989cc171f7db9:outils/sync/labo/highsync_fixture/source_manifest.json:generic-api-key:36
+6a336b1162f005d9ee0fd85512f989cc171f7db9:outils/sync/labo/highsync_fixture/source_manifest.json:generic-api-key:45
