@@ -1,6 +1,7 @@
 import {reprojectNormal} from '../mesh-storm-frame/reproject.mjs';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
+import {validateChartTopology} from './chart-topology.mjs';
 
 const appRequire = createRequire(new URL('../../../app/package.json', import.meta.url));
 const {orient2d} = await import(pathToFileURL(appRequire.resolve('robust-predicates')).href);
@@ -38,6 +39,8 @@ function sampleLinearClamp(image,u,v) {
  */
 export function bakeStormNormalMap({triangles,image,width,height,normalScale=1,sampler}) {
   if (!Array.isArray(triangles)||triangles.length===0||triangles.length>512) fail('triangle count outside laboratory limit');
+  const explicitCharts=triangles.some(t=>Object.hasOwn(t??{},'chartId'));
+  if (explicitCharts) validateChartTopology(triangles);
   if (!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>2048||height>2048) fail('output dimensions outside laboratory limit');
   if (!image||!Number.isInteger(image.width)||!Number.isInteger(image.height)||image.width<1||image.height<1||![3,4].includes(image.channels)||!(image.data instanceof Uint8Array)||image.data.length!==image.width*image.height*image.channels) fail('invalid source image');
   if (!sampler||sampler.magFilter!==9729||sampler.minFilter!==9729||sampler.wrapS!==33071||sampler.wrapT!==33071) fail('only LINEAR/CLAMP_TO_EDGE is supported');
@@ -73,7 +76,7 @@ export function bakeStormNormalMap({triangles,image,width,height,normalScale=1,s
       const weights=bary.map(w=>Math.max(0,w)),sum=weights.reduce((a,b)=>a+b,0), normalized=weights.map(w=>w/sum);
       const sourceUv=t.sourceUv.reduce((a,p,i)=>[a[0]+p[0]*normalized[i],a[1]+p[1]*normalized[i]],[0,0]);
       const target=reprojectNormal({...t,uv:t.targetUv,barycentric:normalized,rawNormal:sampleLinearClamp(image,...sourceUv),normalScale}).targetNormal;
-      pixels.set(target.map(c=>Math.round(Math.max(0,Math.min(1,c*.5+.5))*255)),index*3);mask[index]=1;owners[index]=chartIndex+1;covered++;
+      pixels.set(target.map(c=>Math.round(Math.max(0,Math.min(1,c*.5+.5))*255)),index*3);mask[index]=1;owners[index]=explicitCharts?t.chartId:chartIndex+1;covered++;
     }
   }
   if (!covered) fail('no output texels covered');
