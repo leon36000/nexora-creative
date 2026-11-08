@@ -7,7 +7,7 @@
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { crc32 } from 'node:zlib';
 import type { FastifyReply } from 'fastify';
-import { Document, NodeIO, type Primitive, type Transform } from '@gltf-transform/core';
+import { Document, NodeIO, type Primitive, type Texture, type Transform } from '@gltf-transform/core';
 import { simplify, weld } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { zipSync, strToU8 } from 'fflate';
@@ -527,21 +527,27 @@ export async function exporter(glb: Uint8Array, format: FormatRelief, opt: Optio
 }
 
 /** Cartes PBR d'un GLB (couleur, métal/rugosité, normales, occlusion, émission) : octets des images présentes. */
-export async function cartesPbr(glb: Uint8Array): Promise<{ nom: string; mime: string; octets: Uint8Array; largeur: number | null }[]> {
+export async function cartesPbr(glb: Uint8Array): Promise<{ nom: string; mime: string; octets: Uint8Array; largeur: number | null; materiaux: { index: number; nom: string }[] }[]> {
   const doc = await io.readBinary(glb);
-  const sortie: { nom: string; mime: string; octets: Uint8Array; largeur: number | null }[] = [];
-  const vues = new Set<string>();
-  for (const mat of doc.getRoot().listMaterials()) {
+  const sortie: { nom: string; mime: string; octets: Uint8Array; largeur: number | null; materiaux: { index: number; nom: string }[] }[] = [];
+  const vues = new Map<string, Map<Texture, (typeof sortie)[number]>>();
+  for (const [index, mat] of doc.getRoot().listMaterials().entries()) {
     const liste: [string, ReturnType<typeof mat.getBaseColorTexture>][] = [
       ['couleur', mat.getBaseColorTexture()], ['metal-rugosite', mat.getMetallicRoughnessTexture()], ['normales', mat.getNormalTexture()],
       ['occlusion', mat.getOcclusionTexture()], ['emission', mat.getEmissiveTexture()],
     ];
     for (const [nom, tex] of liste) {
       const img = tex?.getImage();
-      if (!tex || !img || vues.has(nom)) continue;
-      vues.add(nom);
+      if (!tex || !img) continue;
+      const dejaVues = vues.get(nom) ?? new Map<Texture, (typeof sortie)[number]>();
+      const deja = dejaVues.get(tex);
+      const materiau = { index: index + 1, nom: mat.getName() };
+      if (deja) { deja.materiaux.push(materiau); continue; }
       const taille = tex.getSize();
-      sortie.push({ nom, mime: tex.getMimeType() || 'image/png', octets: img, largeur: taille ? taille[0] : null });
+      const carte = { nom: dejaVues.size === 0 ? nom : `${nom}-${dejaVues.size + 1}`, mime: tex.getMimeType() || 'image/png', octets: img, largeur: taille ? taille[0] : null, materiaux: [materiau] };
+      dejaVues.set(tex, carte);
+      vues.set(nom, dejaVues);
+      sortie.push(carte);
     }
   }
   return sortie;

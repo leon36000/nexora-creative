@@ -212,7 +212,7 @@ export const api = {
   objetTexte: (b: { intention: string; qualite: 'draft' | 'quality' }) => j<{ id: number; secondesEstimees: number; credits?: number }>('/api/nexora/objet/texte', { method: 'POST', body: JSON.stringify(b) }),
   reliefRapport: (id: number, faces?: number) => j<RapportRelief>(`/api/nexora/relief/${id}/rapport${faces ? `?faces=${faces}` : ''}`),
   reliefJuger: (id: number) => j<JugeRelief>(`/api/nexora/relief/${id}/juger`, { method: 'POST', body: '{}' }),
-  reliefCartes: (id: number) => j<{ cartes: { nom: string; mime: string; largeur: number | null; octets: number }[] }>(`/api/nexora/relief/${id}/cartes`),
+  reliefCartes: (id: number) => j<{ cartes: { nom: string; mime: string; largeur: number | null; octets: number; materiaux?: { index: number; nom: string }[] }[] }>(`/api/nexora/relief/${id}/cartes`),
   objetTexteEtat: (id: number) => j<ObjetTexteEtat>(`/api/nexora/objet/${id}`),
   creerPersonnage: (b: { nom: string; description: string }) => j<{ takeId: number; nom: string; apparence: string }>('/api/nexora/personnage', { method: 'POST', body: JSON.stringify(b) }),
   statutPersonnage: (take: number) => j<{ etat: 'rendu' | 'pret' | 'echec'; membre?: CastMember; erreur?: string }>(`/api/nexora/personnage/${take}`),
