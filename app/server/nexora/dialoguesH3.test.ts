@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { spawnSync } from 'node:child_process';
+import { once } from 'node:events';
+import { Worker } from 'node:worker_threads';
 import { extraireDialoguesH3 } from './dialoguesH3.js';
 
 describe('blocs de dialogue H3', () => {
@@ -27,19 +28,15 @@ describe('blocs de dialogue H3', () => {
     expect(extraireDialoguesH3('<d>[French]Oui</d><d>[English]incomplet')).toEqual([{ langue: 'French', texte: 'Oui' }]);
   });
 
-  it('termine aussi sur de grandes suites incomplètes dans un enfant borné', () => {
-    const moduleUrl = new URL('./dialoguesH3.ts', import.meta.url).href;
-    const programme = `
-      import { extraireDialoguesH3 } from ${JSON.stringify(moduleUrl)};
-      const cas = ['<d>['.repeat(250000), '<d>[French]'.repeat(100000), '<d>[French]' + ' '.repeat(1000000)];
-      for (const texte of cas) {
-        if (extraireDialoguesH3(texte).length !== 0) throw new Error('Bloc incomplet accepté');
-      }
-      console.log('ok');
-    `;
-    const enfant = spawnSync(process.execPath, ['--input-type=module', '-e', programme], { env: {}, timeout: 5000, encoding: 'utf8' });
-    expect(enfant.error).toBeUndefined();
-    expect(enfant.status).toBe(0);
-    expect(enfant.stdout.trim()).toBe('ok');
+  it('termine aussi sur de grandes suites incomplètes dans un worker borné', async () => {
+    const worker = new Worker(new URL('../../scripts/test-dialogues-h3-worker.mjs', import.meta.url), {
+      env: {}, resourceLimits: { maxOldGenerationSizeMb: 64 },
+    });
+    try {
+      const [resultat] = await once(worker, 'message', { signal: AbortSignal.timeout(5000) });
+      expect(resultat).toBe('ok');
+    } finally {
+      await worker.terminate();
+    }
   }, 10000);
 });
