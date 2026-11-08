@@ -140,6 +140,7 @@ class ValidationTests(BaseHorsLigne):
             self.assertTrue(any('monter_v6.charger' in e for e in self.valider(d)[0]))
 
     def test_substitution_recursive_native_et_voix(self):
+        self.d['voix'][0].update(moteur='eleven4-liam', langue='fr')
         self.d['cles'].append({**self.d['cles'][0], 'id': 'kv', 'format': '9:16'})
         self.d['plans'].append({**self.d['plans'][0], 'id': 'pv', 'cle': 'kv', 'format': '9:16'})
         self.d['montage']['segments'][0]['fichier_vertical'] = 'plan_v:pv'
@@ -149,15 +150,17 @@ class ValidationTests(BaseHorsLigne):
         m = C.substituer(self.d, ESSAI.parent, self.root)
         self.assertEqual(m['segments'][0]['fichier_vertical'], str(self.root/'plans/pv.mp4'))
         self.assertEqual(m['segments'][1]['sur_video']['fichier'], str(self.root/'plans/p01.mp4'))
-        self.assertEqual(m['voix'][0]['fichier'], str(self.root/'voix/v01.wav'))
+        self.assertEqual(m['voix'][0]['fichier'], str(C.chemin_voix_film(self.root, self.d['voix'][0])))
         selection = {'p01': {'fichier': str(self.root/'plans/prises/p01-sig.mp4')}}
         m_choisi = C.substituer(self.d, ESSAI.parent, self.root, choix_plans=selection)
         self.assertEqual(m_choisi['segments'][0]['fichier'], selection['p01']['fichier'])
         self.assertEqual(avant, self.d)
         self.d['voix'][0]['moteur'] = 'h3-natif'
-        self.assertFalse(C.substituer(self.d, ESSAI.parent, self.root)['voix'])
+        with self.assertRaisesRegex(ValueError, 'ElevenLabs v4'):
+            C.substituer(self.d, ESSAI.parent, self.root)
 
     def test_calage_auto(self):
+        self.d['voix'][0].update(moteur='eleven4-liam', langue='fr')
         g = {'energie_db_05s': [-40]*10+[-5]*20, 'duree_s': 30, 'bpm': 120, 'phase_s': .1, 'temps_s': .5}
         self.assertEqual(C.calage_auto(g, 2, 10), 3)
         self.assertEqual(C.calage_auto(g, 6, 10), 0)
@@ -259,25 +262,126 @@ class ValidationTests(BaseHorsLigne):
         self.assertEqual(ask.call_args.args[0][0]['type'], 'image_url')
 
     def test_voix_deux_prises_choix_et_reprise(self):
+        self.d['voix'][0].update(moteur='eleven4-liam', langue='fr')
         atelier = P.Atelier(self.d, ESSAI.parent, self.root, blanc=True)
         def fake_media(f, **kw):
             Path(f).write_bytes(b'audio')
         def fake_ff(*args):
             Path(args[-1]).write_bytes(b'audio')
-        with patch.object(atelier, 'factice', side_effect=fake_media), patch.object(P, 'ff', side_effect=fake_ff):
+        with patch.object(atelier, 'factice', side_effect=fake_media), patch.object(P, 'ff', side_effect=fake_ff), \
+             patch.object(P, 'ff_exclusif', side_effect=fake_ff):
             atelier.voix()
             atelier.voix()
-        rows = C.lignes(self.root/'voix/journal.jsonl')
+        destination = C.chemin_voix_film(self.root, self.d['voix'][0], doublure=True)
+        rows = C.lignes(destination.parent/'journal.jsonl')
         self.assertEqual(len(rows), 2)
         self.assertEqual({r['prise'] for r in rows}, {1, 2})
-        self.assertTrue((self.root/'voix/v01.wav').exists())
-        self.assertEqual(C.lire_json(self.root/'voix/v01.json')['choix']['wer'], 0)
+        self.assertTrue(destination.exists())
+        self.assertEqual(C.lire_json(destination.with_suffix('.json'))['choix']['wer'], 0)
+        self.assertEqual(C.lire_json(destination.with_suffix('.json'))['origine'], 'factice')
 
-    def test_h3_natif_aucun_speech(self):
+    def test_eleven_producteur_consommateur_et_ancien_cache_conserve(self):
+        self.d['voix'][0].update(moteur='eleven4-liam', langue='fr')
+        self.d['montage']['musique'] = None
+        ancien = self.root / 'voix/v01.wav'
+        ancien.parent.mkdir(parents=True)
+        ancien.write_bytes(b'ancienne voix conservee')
+        atelier = P.Atelier(self.d, ESSAI.parent, self.root)
+        def fake_final(*args):
+            Path(args[-1]).write_bytes(b'nouvelle voix synthetique')
+        notes = {'langue_francaise': 8, 'energie': 8, 'caractere': 8, 'naturel': 8, 'cheap': 1, 'accent_quebecois': 8}
+        with patch.object(atelier, 'post', return_value=b'synthetic audio') as post, \
+             patch.object(C.banc(), 'juger', return_value=(notes, [], None)), \
+             patch.object(P, 'commande', return_value=json.dumps(self.d['voix'][0]['texte'])), \
+             patch.object(P, 'ff_exclusif', side_effect=fake_final):
+            atelier.voix()
+            atelier.voix()
+        destination = C.chemin_voix_film(self.root, self.d['voix'][0])
+        self.assertEqual(post.call_count, 2)
+        self.assertTrue(all(c.args[1]['model'] == 'elevenlabs/eleven-v4' and c.args[1]['voice'] == 'liam' for c in post.call_args_list))
+        self.assertEqual(ancien.read_bytes(), b'ancienne voix conservee')
+        self.assertEqual(destination.read_bytes(), b'nouvelle voix synthetique')
+        self.assertEqual(C.lire_json(destination.with_suffix('.json'))['modele_demande'], 'elevenlabs/eleven-v4')
+        self.d['montage']['voix'][0]['fichier'] = str(ancien)
+        montage = C.substituer(self.d, ESSAI.parent, self.root)
+        self.assertEqual(montage['voix'][0]['fichier'], str(destination))
+        meta = destination.with_suffix('.json')
+        recu = C.lire_json(meta)
+        C.ecrire_json(meta, {**recu, 'origine': 'factice'})
+        with self.assertRaisesRegex(ValueError, 'incompatible'):
+            C.substituer(self.d, ESSAI.parent, self.root)
+        C.ecrire_json(meta, recu)
+        autre = dict(self.d['voix'][0], moteur='eleven4-charlie')
+        self.assertNotEqual(C.chemin_voix_film(self.root, autre), destination)
+        candidat = C.banc().CANDIDATS['eleven4-liam']
+        with patch.dict(C.banc().CANDIDATS, {'eleven4-liam': (candidat[0], candidat[1], {'instructions': 'jeu'}, candidat[3])}):
+            self.assertNotEqual(C.chemin_voix_film(self.root, self.d['voix'][0]), destination)
+        with patch.dict(C.banc().CANDIDATS, {'eleven4-liam': (candidat[0], candidat[1], candidat[2], 'wav')}):
+            self.assertNotEqual(C.chemin_voix_film(self.root, self.d['voix'][0]), destination)
+
+    def test_voix_langue_ambigue_et_vitesse_refusees_avant_reseau(self):
+        self.d['voix'][0]['moteur'] = 'eleven4-liam'
+        atelier = P.Atelier(self.d, ESSAI.parent, self.root)
+        with patch.object(atelier, 'post') as post:
+            with self.assertRaisesRegex(ValueError, 'Langue de voix explicite'):
+                atelier.voix()
+            self.d['voix'][0].update(langue='en', vitesse=1.2)
+            with self.assertRaisesRegex(ValueError, 'vitesse numérique'):
+                atelier.voix()
+            post.assert_not_called()
+        self.assertFalse((self.root / 'voix').exists())
+
+    def test_voix_en_jugee_avec_cles_anglaises(self):
+        self.d['voix'][0].update(moteur='eleven4-charlie', langue='en', texte='Let us go!', direction='excited')
+        atelier = P.Atelier(self.d, ESSAI.parent, self.root)
+        notes = {'langue_anglaise': 9, 'accent_naturel': 8, 'energie': 7, 'caractere': 6, 'naturel': 8, 'cheap': 1}
+        def fake_final(*args): Path(args[-1]).write_bytes(b'synthetic wav')
+        with patch.object(atelier, 'post', return_value=b'synthetic mp3') as post, \
+             patch.object(C.banc(), 'juger', return_value=(notes, [], None)) as judge, \
+             patch.object(P, 'commande', return_value=json.dumps('Let us go!')), \
+             patch.object(P, 'ff_exclusif', side_effect=fake_final):
+            atelier.voix()
+        self.assertEqual(judge.call_args.kwargs['langue'], 'en')
+        self.assertTrue(all(call.args[1]['input'] == '[excited] Let us go!' for call in post.call_args_list))
+        destination = C.chemin_voix_film(self.root, self.d['voix'][0])
+        report = C.lire_json(destination.with_suffix('.json'))
+        self.assertEqual(report['origine'], 'modele_demande_non_atteste')
+        self.assertEqual(report['choix']['langue_jugement'], 'en')
+        self.assertAlmostEqual(report['choix']['score'], 7.45)
+        self.assertEqual(report['modele_demande'], 'elevenlabs/eleven-v4')
+
+    def test_montage_refuse_une_voix_fr_avec_destination_en(self):
+        self.d['voix'][0].update(moteur='eleven4-liam', langue='fr')
+        self.d['montage']['musique'] = None
+        self.d['montage']['voix'] = {'en': [{'id': 'v01', 't': 2, 'db': -3}]}
+        with self.assertRaisesRegex(ValueError, 'Langue incohérente'):
+            C.substituer(self.d, ESSAI.parent, self.root)
+
+    def test_liens_casses_de_prise_ou_recu_refuses_avant_post(self):
+        self.d['voix'][0].update(moteur='eleven4-liam', langue='fr')
+        atelier = P.Atelier(self.d, ESSAI.parent, self.root)
+        destination = C.chemin_voix_film(self.root, self.d['voix'][0])
+        for nom in ('prise.mp3', 'mesure.json'):
+            with self.subTest(nom=nom):
+                dossier = destination.parent / 'prises' / (self.d['voix'][0]['id'] + '-' + destination.parent.name + '-1')
+                dossier.mkdir(parents=True, exist_ok=True)
+                lien = dossier / nom
+                lien.symlink_to(dossier / ('absent-' + nom))
+                with patch.object(atelier, 'post') as post:
+                    with self.assertRaisesRegex(ValueError, 'Prise partielle'):
+                        atelier.voix()
+                    post.assert_not_called()
+                self.assertTrue(lien.is_symlink())
+                # Chaque cas garde sa préimage dans un répertoire de test distinct.
+                autre = self.root / ('conserve-' + nom)
+                dossier.rename(autre)
+
+    def test_h3_natif_refuse_par_politique_film(self):
         self.d['voix'][0]['moteur'] = 'h3-natif'
         atelier = P.Atelier(self.d, ESSAI.parent, self.root)
         with patch.object(C.banc(), 'generer', side_effect=AssertionError('aucun speech')):
-            atelier.voix()
+            with self.assertRaisesRegex(ValueError, 'ElevenLabs v4'):
+                atelier.voix()
         self.assertFalse((self.root/'voix/v01.wav').exists())
 
     def test_musique_reutilise_grille_et_pas_de_double_generation(self):
