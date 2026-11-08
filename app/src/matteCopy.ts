@@ -2,9 +2,22 @@
 export type LangueFixee = 'fr' | 'en';
 export type Forme = 'singulier' | 'pluriel';
 
+const texteValeur = (valeur: unknown): string => {
+  if (valeur === null || valeur === undefined) return '—';
+  switch (typeof valeur) {
+    case 'string':
+    case 'number':
+    case 'boolean':
+    case 'bigint':
+      return String(valeur);
+    default:
+      return '—';
+  }
+};
+
 const formater = (modele: string, valeurs: Record<string, unknown>): string =>
   modele.replace(/\{(\w+)\}/g, (m, k: string) =>
-    Object.prototype.hasOwnProperty.call(valeurs, k) ? String(valeurs[k] ?? '—') : m);
+    Object.hasOwn(valeurs, k) ? texteValeur(valeurs[k]) : m);
 
 export interface TextesMatte {
   langue: LangueFixee;
@@ -88,6 +101,8 @@ const TEXTES = {
     'mask.found': '{n} objet{s} pour « {mot} » ({sec} s) : clique le bon rectangle.',
     'mask.notFound': 'Rien trouvé pour « {texte} » : essaie un autre mot ou clique le sujet.',
     'mask.helpDefault': 'Tape un mot puis « Chercher », ou clique sur le sujet, pour voir son masque.',
+    'mask.keyboardTarget': 'Cible de pointage, x {x} %, y {y} %',
+    'mask.keyboardHelp': 'Flèches : déplacer la cible de 1 % (Maj : 10 %). Entrée ou Espace : ajouter un point. Alt + Entrée/Espace : point négatif.',
     'mask.keyFrames': 'Images clés : {liste}.',
     'player.playPause': 'Lecture / pause',
     'player.position': 'image {image} · {t} s',
@@ -188,6 +203,8 @@ const TEXTES = {
     'mask.found': '{n} object{s} for “{mot}” ({sec}s): click the right rectangle.',
     'mask.notFound': 'Nothing found for “{texte}”: try another word or click the subject.',
     'mask.helpDefault': 'Type a word then “Search”, or click the subject, to see its mask.',
+    'mask.keyboardTarget': 'Pointing target, x {x}%, y {y}%',
+    'mask.keyboardHelp': 'Arrow keys move the target by 1% (Shift: 10%). Enter or Space adds a point. Alt + Enter/Space: negative point.',
     'mask.keyFrames': 'Keyframes: {liste}.',
     'player.playPause': 'Play / pause',
     'player.position': 'frame {image} · {t}s',
@@ -247,11 +264,11 @@ export function creerCopieMatte(langue: LangueMatte): TextesMatte {
     fmtDuree: (secondes) => (secondes < 90
       ? t('format.duration', { s: Math.round(secondes) })
       : t('format.durationLong', { min: Math.floor(secondes / 60), sec: Math.round(secondes % 60) })),
-    fmtTaille: (octets) => (octets > 1e9
-      ? t('format.sizeGB', { v: (octets / 1e9).toFixed(2) })
-      : octets > 1e6
-        ? t('format.sizeMB', { v: (octets / 1e6).toFixed(1) })
-        : t('format.sizeKB', { v: Math.round(octets / 1e3) })),
+    fmtTaille: (octets) => {
+      if (octets > 1e9) return t('format.sizeGB', { v: (octets / 1e9).toFixed(2) });
+      if (octets > 1e6) return t('format.sizeMB', { v: (octets / 1e6).toFixed(1) });
+      return t('format.sizeKB', { v: Math.round(octets / 1e3) });
+    },
     etat: (code) => etats[code] ?? code,
     generique: () => t('error.server'),
   };
