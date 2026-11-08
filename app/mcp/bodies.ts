@@ -570,15 +570,22 @@ export function fixSeamBody(strategy: SeamStrategy = 'auto'): Body {
   return { strategy };
 }
 
-export interface ObjectOpts { source: SourceRef; quality: 'draft' | 'quality'; cutout: boolean; count: number }
+export interface ObjectOpts { source: SourceRef; quality: 'draft' | 'quality'; cutout: boolean; count: number; views?: Partial<Record<'left' | 'back' | 'right', SourceRef>> }
 
 /** Object.tsx go(): a still (by take id, or an upload token) to a textured GLB. */
 export function objectBody(o: ObjectOpts): Body {
-  const { source, quality, cutout, count } = o;
+  const { source, quality, cutout, count, views } = o;
   if (source.kind !== 'image') throw new Error('Make 3D needs a still.');
+  const viewEntries = (['left', 'back', 'right'] as const).flatMap((side) => {
+    const view = views?.[side];
+    return view ? [[side, view] as const] : [];
+  });
+  if (views && (!viewEntries.length || quality !== 'draft' || count !== 1)) throw new Error('Multi-view needs at least one additional view, draft quality and one take.');
+  if (viewEntries.some(([, view]) => view.kind !== 'image')) throw new Error('Make 3D views must be still images.');
   return {
     kind: 'object', app: 'object', quality, removeBackground: cutout, count,
     ...(source.takeId ? { sourceTake: source.takeId } : { image: source.token }),
+    ...(views ? { vues: Object.fromEntries(viewEntries.map(([side, view]) => [side, view.takeId ? { sourceTake: view.takeId } : { image: view.token }])) } : {}),
     shotName: `object_${(source.prompt || source.name || 'still').slice(0, 30)}`,
     userPrompt: source.prompt ? `3D: ${source.prompt}` : `3D from ${source.name}`,
   };

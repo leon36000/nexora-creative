@@ -116,7 +116,7 @@ async function changerLangue(target: 'English' | 'Français') {
   await act(async () => { await vi.advanceTimersByTimeAsync(3000); await Promise.resolve(); });
   // Un état terminal ne doit jamais réarmer de sonde après le re-rendu.
   // (Sous le bug actuel, l'effet relancé a déjà re-sondé sans attendre la minuterie.)
-  expect(mocks.objetTexteEtat.mock.calls.length).toBe(avant);
+  expect(mocks.objetTexteEtat.mock.calls).toHaveLength(avant);
 }
 
 describe('boucle de suivi Texte → 3D : arrêt sur état terminal', () => {
