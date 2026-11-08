@@ -24,7 +24,7 @@ const dot = (a, b) => a.reduce((sum, x, i) => sum + x * b[i], 0);
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 const unit = (v) => {
   const m = Math.hypot(...v);
-  if (!(m > 1e-20) || !Number.isFinite(m)) throw new Error('Zero/non-finite vector while building oracle.');
+  if (m <= 1e-20 || !Number.isFinite(m)) throw new Error('Zero/non-finite vector while building oracle.');
   return v.map((x) => x / m);
 };
 const fmt = (x) => {
@@ -98,7 +98,7 @@ const targetNode = dst.doc.getRoot().listNodes().find((n) => n.getMesh());
 const identityMatrix = (node) => node.getMatrix().every((x, i) => Math.abs(x - [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1][i]) < 1e-12);
 if (!identityMatrix(sourceNode) || !identityMatrix(targetNode)) throw new Error('Scene matrices must be identity for this frozen patch.');
 const sourceFaces = [];
-const positions = [], sourceNormals = [], sourceTangents = [], sourceUvs = [], targetUvs = [];
+const sourceUvs = [], targetUvs = [];
 const bbox = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
 for (let f = 0; f < src.indices.length / 3; f++) {
   const face = { sourceFaceId: src.primitive.getExtras().source_face_ids[f], corners: [] };
@@ -109,7 +109,7 @@ for (let f = 0; f < src.indices.length / 3; f++) {
     const pT = readElement(dst.attrs.POSITION, ti), rawNT = readElement(dst.attrs.NORMAL, ti);
     if (p.some((x, i) => !Object.is(x, pT[i])) || rawN.some((x, i) => !Object.is(x, rawNT[i]))) throw new Error(`Source/target point or geometric normal mismatch at face ${f}, corner ${c}.`);
     for (let k = 0; k < 3; k++) { bbox.min[k] = Math.min(bbox.min[k], p[k]); bbox.max[k] = Math.max(bbox.max[k], p[k]); }
-    positions.push(p); sourceNormals.push(n); sourceTangents.push(unit(tangent4.slice(0, 3))); sourceUvs.push(uv); targetUvs.push(uvT);
+    sourceUvs.push(uv); targetUvs.push(uvT);
     face.corners.push({ position: p, normal: n, tangent: unit(tangent4.slice(0, 3)), w: tangent4[3], uv, targetUv: uvT });
   }
   const ws = face.corners.map((c) => c.w);
@@ -124,7 +124,8 @@ for (let i = 0; i < 3 * 21; i++) {
 }
 const sameBounds = (() => {
   const b = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
-  for (const p of dst.attrs.POSITION.getArray().reduce((a, x, i) => { (a[Math.floor(i / 3)] ??= [0, 0, 0])[i % 3] = x; return a; }, [])) for (let k = 0; k < 3; k++) { b.min[k] = Math.min(b.min[k], p[k]); b.max[k] = Math.max(b.max[k], p[k]); }
+  const positionArray = dst.attrs.POSITION.getArray();
+  for (const p of positionArray.reduce((a, x, i) => { (a[Math.floor(i / 3)] ??= [0, 0, 0])[i % 3] = x; return a; }, [])) for (let k = 0; k < 3; k++) { b.min[k] = Math.min(b.min[k], p[k]); b.max[k] = Math.max(b.max[k], p[k]); }
   return b;
 })();
 if (bbox.min.some((x, i) => Math.abs(x - sameBounds.min[i]) > 1e-7) || bbox.max.some((x, i) => Math.abs(x - sameBounds.max[i]) > 1e-7)) throw new Error('Source/target bounding boxes differ.');
@@ -142,7 +143,7 @@ const sample = (map, u, v) => {
   return [0, 1, 2].map((c) => (1 - fy) * ((1 - fx) * at(x0, y0, c) + fx * at(x1, y0, c)) + fy * ((1 - fx) * at(x0, y1, c) + fx * at(x1, y1, c)));
 };
 const normalScale = src.material.getNormalScale();
-if (!(normalScale > 0) || !Number.isFinite(normalScale)) throw new Error(`Invalid source normalScale ${normalScale}.`);
+if (normalScale <= 0 || !Number.isFinite(normalScale)) throw new Error(`Invalid source normalScale ${normalScale}.`);
 
 function interp(corners, beta, key, width) {
   return Array.from({ length: width }, (_, k) => corners.reduce((s, c, i) => s + beta[i] * c[key][k], 0));
@@ -202,8 +203,7 @@ function textureDecl(slot, filename, mapPath, sourceColorSpace, scale4, bias4, o
 }
 
 function stageText({ name, arrays, baseFactor, metallic, roughness, occlusionStrength, alpha, baseFile, mraoFile, normalFile = null, normalMode = 'mapped', includeNormalTexture = false, flatNormal = false }) {
-  const nfaces = arrays.indices.length / 3;
-  if (!nfaces || !Number.isInteger(nfaces)) throw new Error(`Stage ${name} has no triangles.`);
+  if (!arrays.indices.length || !Number.isInteger(arrays.indices.length / 3)) throw new Error(`Stage ${name} has no triangles.`);
   const meshPath = '/Patch/mesh';
   const matPath = '/Patch/Materials/m0';
   const pointsText = arrays.positions.map(tuple).join(', ');
@@ -217,8 +217,7 @@ function stageText({ name, arrays, baseFactor, metallic, roughness, occlusionStr
   const normalTex = includeNormalTexture ? textureDecl('normal', normalFile, normalFile, 'raw', [2, 2, 2, 1], [-1, -1, -1, 0], [{ type: 'float3', name: 'rgb' }]) : '';
   const baseScale = baseFactor.slice(0, 3);
   const surfaceNormal = includeNormalTexture ? `normal3f inputs:normal.connect = <${matPath}/texture_normal.outputs:rgb>` : '';
-  const stage = `#usda 1.0\n(\n defaultPrim = "Patch"\n metersPerUnit = 1\n upAxis = "Y"\n)\ndef Xform "Patch" (kind = "component") {\n def Mesh "mesh" (prepend apiSchemas = ["MaterialBindingAPI"]) {\n  int[] faceVertexCounts = [${wrapValues(nfaces)}]\n  int[] faceVertexIndices = [${indexText}]\n  point3f[] points = [${pointsText}]\n  normal3f[] normals = [${normalsText}] (interpolation = "vertex")\n  texCoord2f[] primvars:st = [${stText}] (interpolation = "vertex")\n  uniform token subdivisionScheme = "none"\n  uniform bool doubleSided = true\n  rel material:binding = <${matPath}>\n }\n def Scope "Materials" {\n  def Material "m0" {\n   token outputs:surface.connect = <${matPath}/surface.outputs:surface>\n   def Shader "surface" {\n    uniform token info:id = "UsdPreviewSurface"\n    color3f inputs:diffuseColor.connect = <${matPath}/texture_base.outputs:rgb>\n    float inputs:opacity = ${fmt(alpha)}\n    float inputs:metallic.connect = <${matPath}/texture_mrao.outputs:b>\n    float inputs:roughness.connect = <${matPath}/texture_mrao.outputs:g>\n    float inputs:occlusion.connect = <${matPath}/texture_ao.outputs:r>\n    ${surfaceNormal}\n    token outputs:surface\n   }\n   ${baseTex}\n   ${mrTex}\n   ${aoTex}\n   ${normalTex}\n  }\n }\n}\n`;
-  return stage;
+  return `#usda 1.0\n(\n defaultPrim = "Patch"\n metersPerUnit = 1\n upAxis = "Y"\n)\ndef Xform "Patch" (kind = "component") {\n def Mesh "mesh" (prepend apiSchemas = ["MaterialBindingAPI"]) {\n  int[] faceVertexCounts = [${wrapValues(arrays.indices.length / 3)}]\n  int[] faceVertexIndices = [${indexText}]\n  point3f[] points = [${pointsText}]\n  normal3f[] normals = [${normalsText}] (interpolation = "vertex")\n  texCoord2f[] primvars:st = [${stText}] (interpolation = "vertex")\n  uniform token subdivisionScheme = "none"\n  uniform bool doubleSided = true\n  rel material:binding = <${matPath}>\n }\n def Scope "Materials" {\n  def Material "m0" {\n   token outputs:surface.connect = <${matPath}/surface.outputs:surface>\n   def Shader "surface" {\n    uniform token info:id = "UsdPreviewSurface"\n    color3f inputs:diffuseColor.connect = <${matPath}/texture_base.outputs:rgb>\n    float inputs:opacity = ${fmt(alpha)}\n    float inputs:metallic.connect = <${matPath}/texture_mrao.outputs:b>\n    float inputs:roughness.connect = <${matPath}/texture_mrao.outputs:g>\n    float inputs:occlusion.connect = <${matPath}/texture_ao.outputs:r>\n    ${surfaceNormal}\n    token outputs:surface\n   }\n   ${baseTex}\n   ${mrTex}\n   ${aoTex}\n   ${normalTex}\n  }\n }\n}\n`;
 }
 
 function writeNew(path, data) { writeFileSync(path, data, { flag: 'wx' }); }
@@ -282,9 +281,9 @@ for (const n of [4, 8, 16]) {
 }
 
 const packaged = [
-  await packageFiles('target-normal.usda', ['target-base.png', 'target-mrao.png', 'target-normal.png']),
-  await packageFiles('oracle-n16.usda', ['source-base.png', 'source-mrao.png']),
-  await packageFiles('source-direct-normal.usda', ['source-base.png', 'source-mrao.png', 'source-normal.png']),
+  packageFiles('target-normal.usda', ['target-base.png', 'target-mrao.png', 'target-normal.png']),
+  packageFiles('oracle-n16.usda', ['source-base.png', 'source-mrao.png']),
+  packageFiles('source-direct-normal.usda', ['source-base.png', 'source-mrao.png', 'source-normal.png']),
 ];
 
 const assets = [];
