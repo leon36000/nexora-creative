@@ -5,6 +5,29 @@ import hashlib
 import json
 from pathlib import Path, PurePosixPath
 
+def validate_entry(entry, seen):
+    name=entry['path']; rel=PurePosixPath(name)
+    if not name or rel.is_absolute() or rel.as_posix()!=name or any(x in ('','.', '..') for x in rel.parts) or '\\' in name or name in seen:
+        raise ValueError('invalid or duplicate relative path')
+    seen.add(name); expected=entry['sha256']
+    if len(expected)!=64 or any(c not in '0123456789abcdef' for c in expected):raise ValueError('invalid SHA-256')
+    return name,rel,expected
+
+def inspect_file(root, entry, name, rel, expected):
+    target=root
+    try:
+        for part in rel.parts:
+            target=target/part
+            if target.is_symlink():raise ValueError('symlink not accepted: '+name)
+        if not target.is_file():return {'path':name,'status':'missing'}
+        h=hashlib.sha256()
+        with target.open('rb') as f:
+            for chunk in iter(lambda:f.read(8*1024*1024),b''):h.update(chunk)
+        size=target.stat().st_size
+        return {'path':name,'status':'ok' if h.hexdigest()==expected and size==entry['bytes'] else 'mismatch','bytes':size,'sha256':h.hexdigest()}
+    except FileNotFoundError:
+        return {'path':name,'status':'missing'}
+
 def verify(root, manifest):
     root=Path(root).resolve(strict=True)
     if not root.is_dir():raise ValueError('root is not a directory')
@@ -13,25 +36,8 @@ def verify(root, manifest):
     if not isinstance(entries,list) or not entries:raise ValueError('empty file list')
     results=[]; seen=set()
     for entry in entries:
-        name=entry['path']; rel=PurePosixPath(name)
-        if not name or rel.is_absolute() or rel.as_posix()!=name or any(x in ('','.', '..') for x in rel.parts) or '\\' in name or name in seen:
-            raise ValueError('invalid or duplicate relative path')
-        seen.add(name); expected=entry['sha256']
-        if len(expected)!=64 or any(c not in '0123456789abcdef' for c in expected):raise ValueError('invalid SHA-256')
-        target=root
-        try:
-            for part in rel.parts:
-                target=target/part
-                if target.is_symlink():raise ValueError('symlink not accepted: '+name)
-            if not target.is_file():
-                results.append({'path':name,'status':'missing'});continue
-            h=hashlib.sha256()
-            with target.open('rb') as f:
-                for chunk in iter(lambda:f.read(8*1024*1024),b''):h.update(chunk)
-            size=target.stat().st_size
-            results.append({'path':name,'status':'ok' if h.hexdigest()==expected and size==entry['bytes'] else 'mismatch','bytes':size,'sha256':h.hexdigest()})
-        except FileNotFoundError:
-            results.append({'path':name,'status':'missing'})
+        name,rel,expected=validate_entry(entry,seen)
+        results.append(inspect_file(root,entry,name,rel,expected))
     return {'verified':all(x['status']=='ok' for x in results),'files':results}
 
 def main():
