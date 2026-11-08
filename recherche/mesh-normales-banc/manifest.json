@@ -1,0 +1,16 @@
+{
+  "statut": "banc CPU de recherche, non active dans le produit",
+  "source_script": "mesh_compare_chair_blender-exact-v7.py",
+  "source_run": "mesh-chair-render-20261106-50f779657ad94adeac05b08ae67deb70",
+  "script_sha256": "8eee5ff4d60c748e82abde754a94996c5349a503f544b5419cb4129c7f79f1aa",
+  "inputs": [
+    {"name": "trellis2-draft-gb10-01-chaise.glb", "bytes": 11123980, "sha256": "227cb2959def0a2b72e0d7c38173fae3cacf08d01a40514b6a9d4d339ff8e509"},
+    {"name": "real-chair-export.zip", "bytes": 14309825, "sha256": "8cda64887c6385579ba85f241eae7feaab8d23acc76eadba1c4c4f22ea41cab3"},
+    {"name": "chaise-obj-normales-v3.zip", "bytes": 19936936, "sha256": "66495d710fb54fba10c0d2ee770071c7245d0e674e60ebb0ac72d8e20f82d05d"}
+  ],
+  "triangles_attendus": 149942,
+  "glb": "reconstruction depuis tableaux, deux normales de coin corrigees par face",
+  "obj_validate_meshes": false,
+  "rendu": {"blender": "5.2.3", "moteur": "Cycles CPU", "materiau": "neutre", "echantillons": 16, "threads": 2, "resolution": [768, 768]},
+  "limites": ["pas d'import GLB natif", "pas de validation PBR complete", "pas de jugement visuel humain"]
+}

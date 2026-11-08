@@ -1,0 +1,33 @@
+{
+  "type": "trajectoire technique candidate, pas mémoire promue",
+  "schema": "preuve-correction-v1",
+  "id": "latentsync-mux-copy-20261108",
+  "comparison_parent": "latentsync-pcm-pc1-20261108-8756c313",
+  "classification": "ESSAI R&D — En préparation",
+  "defect": "write_video encode déjà en H264 CRF13, puis le mux réencode en CRF18",
+  "change": "Conserver le premier flux H264 au mux final ; encoder seulement l’audio AAC",
+  "neural_generation_replayed_for_this_factor": false,
+  "real_CPU_mux_executed": true,
+  "decoded_frames_identical_to_first_encode": 226,
+  "h264_packets_identical_phone": 226,
+  "phone": {
+    "sha256": "dbd2b069b4e81d45c95c1da1aab60335a403f5200a6eaf7172744f3557634e5c",
+    "bytes": 5241786,
+    "video_frames": 226,
+    "video_seconds": 9.04,
+    "AAC_PCM_bit_identical_claim": false
+  },
+  "canonical_pcm": {
+    "sha256": "7291b870d872ebe4c2d2bfb1098d6b55645abbac8fddb7cc1bc0f5a8ae5878b5",
+    "bytes": 5443204,
+    "decoded_PCM_bit_identical": true,
+    "PCM_samples": 144640,
+    "PCM_hz": 16000,
+    "validated_zero_padding_ffmpeg7_and9": true
+  },
+  "tests": "Un vrai mux du bloc AST adapté sur source H264 synthétique 6images échoue sur e396, passe après correction ; génération/imageio simulés, FFmpeg réel",
+  "human_quality": "non évaluée",
+  "quality_gain_score_claim": false,
+  "memory_promoted": false,
+  "proof_directory": "/media/pc6/Storage/Nexora/travail/latentsync-pcm-root-20261108-1de3ae9a"
+}

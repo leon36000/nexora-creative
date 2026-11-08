@@ -77,6 +77,22 @@ class Tests(unittest.TestCase):
         c.request(method, path, body=body, headers=headers or {'Content-Type': 'application/json'})
         r = c.getresponse(); result = (r.status, r.read()); c.close(); return result
 
+    def send_headers_only(self, method='POST', path='/v1/messages', body=None):
+        """Le refus doit arriver avant l'envoi du corps de la requête."""
+        body = json.dumps({'model': 'eco-deepseek', 'max_tokens': 100, 'messages': []}) if body is None else body
+        payload = body.encode('utf-8') if isinstance(body, str) else body
+        c = UnixHTTP(self.sockpath)
+        try:
+            c.putrequest(method, path)
+            c.putheader('Content-Type', 'application/json')
+            if method == 'POST':
+                c.putheader('Content-Length', str(len(payload)))
+            c.endheaders()
+            response = c.getresponse()
+            return response.status, response.read()
+        finally:
+            c.close()
+
     def test_only_allowed_route_model_and_forced_headers(self):
         code, _ = self.send(headers={'Content-Type': 'application/json', 'x-api-key': 'fake',
                                       'Authorization': 'Bearer fake', 'x-sa-run': 'forged',
@@ -89,8 +105,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(got['payload']['model'], 'eco-deepseek')
 
     def test_admin_and_wrong_model_are_never_forwarded(self):
-        self.assertEqual(self.send('GET', '/key/info')[0], 403)
-        self.assertEqual(self.send('POST', '/key/generate')[0], 403)
+        self.assertEqual(self.send_headers_only('GET', '/key/info')[0], 403)
+        self.assertEqual(self.send_headers_only('POST', '/key/generate')[0], 403)
         self.assertEqual(self.send(body=json.dumps({'model': 'eco-muse'}))[0], 403)
         self.assertEqual(self.upstream.received, [])
 
@@ -117,7 +133,9 @@ class Tests(unittest.TestCase):
         s.sendall(b'POST /v1/messages HTTP/1.1\r\nHost: localhost\r\nx-sa-run: one\r\nX-SA-RUN: two\r\nContent-Length: '
                   + str(len(body)).encode() + b'\r\n\r\n' + body)
         self.assertIn(b'400', s.recv(256)); s.close()
-        self.assertEqual(self.send(path='/v1/messages?model=eco-muse')[0], 403)
+
+        self.assertEqual(self.send_headers_only(
+            path='/v1/messages?model=eco-muse', body=body.decode())[0], 403)
         self.assertEqual(self.upstream.received, [])
 
     def test_duplicate_json_keys_cannot_bypass_model_filter(self):
@@ -181,7 +199,8 @@ class Tests(unittest.TestCase):
         c.close()
 
     def test_audit_contains_only_forwarding_attempts_and_no_sensitive_content(self):
-        self.assertEqual(self.send('POST', '/key/generate')[0], 403)
+        self.assertEqual(self.send_headers_only('POST', '/key/generate')[0], 403)
+        self.assertEqual(self.upstream.received, [])
         self.assertEqual(self.send()[0], 200)
         log = (Path(self.tmp.name)/'audit.jsonl').read_text()
         records = [json.loads(line) for line in log.splitlines()]

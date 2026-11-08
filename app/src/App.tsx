@@ -9,6 +9,7 @@ import { useGlobalDrop } from './drop';
 import { JudgeBanner, Toast } from './ui';
 import { Marque } from './studio/icons';
 import { Moteurs } from './studio/Moteurs';
+import { NEXORA_BRAND, NEXORA_PRODUCT_NAMES } from '../shared/productNames.js';
 import ImagePage from './pages/Image';
 import UpscalePage from './pages/Upscale';
 import Prolonger from './pages/Prolonger';
@@ -34,6 +35,8 @@ const SECTIONS = [
   { to: '/library', label: 'Bibliothèque' },
 ];
 const APP_LINKS = APPS_NEXORA.filter((a) => ['marketing', 'parler', 'prolonger', 'raccord', 'cast', 'projet', 'cutout', 'detourage', 'upscale', 'object'].includes(a.id));
+const CREATIVE_NAME = NEXORA_PRODUCT_NAMES.creative;
+const CREATIVE_LABEL = CREATIVE_NAME.slice(NEXORA_BRAND.length + 1);
 /**
  * Pages d'OpenField qui reposaient sur LTX-2.x (bloqué par la politique de licences) : leur adresse mène à l'outil
  * Nexora qui les remplace, jamais à un écran « indisponible ».
@@ -82,7 +85,7 @@ export default function App() {
   useEffect(() => {
     const name = path === '/' ? 'Créer' : path === '/setup' ? 'Réglages' : path === '/library' ? 'Bibliothèque'
       : SECTIONS.find((s) => s.to === path)?.label ?? APPS_NEXORA.find((a) => a.route.split('?')[0] === path)?.name;
-    document.title = name ? `${name} · Nexora Creative` : 'Nexora Creative';
+    document.title = name ? `${name} · ${CREATIVE_NAME}` : CREATIVE_NAME;
   }, [path]);
 
   const isActive = (to: string) => {
@@ -96,7 +99,7 @@ export default function App() {
   return (
     <div className={`app ${judge ? 'has-judge' : ''}`}>
       <header className="st-top">
-        <a className="st-brand" {...linkProps('/')}><Marque className="st-mark" /><span>Nexora <em>Creative</em></span></a>
+        <a className="st-brand" {...linkProps('/')}><Marque className="st-mark" /><span>{NEXORA_BRAND} <em>{CREATIVE_LABEL}</em></span></a>
         <nav className="st-nav" aria-label="Navigation principale">
           <a className={`st-link ${isActive('/') ? 'active' : ''}`} {...linkProps('/')}>Créer</a>
           <a className={`st-link ${isActive('/marketing') ? 'active' : ''}`} {...linkProps('/marketing')}>Marketing</a>

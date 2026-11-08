@@ -39,25 +39,25 @@ export interface AdapterModele {
 
 const OR = 'https://openrouter.ai/api/v1';
 export const ADAPTATEURS: Record<Palier, AdapterModele> = {
-  // DeepSeek V4.1 Flash 1017 (DeepInfra) : 0,20 $ entrée / 0,60 $ sortie par M. Raisonne par défaut : `reasoning_effort: none`.
+  // DeepSeek V4.1 Flash 1017 (DeepInfra) : 0,20 $ entrée / 0,60 $ sortie par M. Effort maximal numérique demandé : `reasoning_effort: 100`.
   eco: {
     palier: 'eco', modele: 'deepseek-ai/DeepSeek-V4.1-Flash-1017', fournisseur: 'deepinfra', url: 'https://api.deepinfra.com/v1/openai', envCle: 'NEXORA_LLM_CLE_DEEPINFRA',
     prixEntreeUsdM: 0.2, prixSortieUsdM: 0.6, endpoint: 'deepinfra', maxSortieMin: 2000,
-    corps: () => ({ reasoning_effort: 'none' }),
+    corps: () => ({ reasoning_effort: 100 }),
   },
-  // Muse Spark 1.3 Contributor (OpenRouter) : 0,10 $ / 0,20 $ par M. Raisonnement obligatoire : on le met au minimum.
+  // Muse Spark 1.3 Contributor (OpenRouter) : 0,10 $ / 0,20 $ par M. Effort max demandé selon le catalogue OpenRouter ; effort natif non garanti.
   equilibre: {
     palier: 'equilibre', modele: 'meta/muse-spark-1.3-contributor', fournisseur: 'openrouter', url: OR, envCle: 'NEXORA_LLM_CLE_OPENROUTER',
     prixEntreeUsdM: 0.1, prixSortieUsdM: 0.2, endpoint: 'openrouter', maxSortieMin: 6000,
-    corps: () => ({ reasoning: { effort: 'minimal' }, usage: { include: true } }),
+    corps: () => ({ reasoning: { effort: 'max' }, usage: { include: true } }),
   },
   // Gemini 4 Argon « Flex » (OpenRouter, point de terminaison google-ai-studio/flex) : 1 $ / 5 $ par M, file d'attente
   // possible. Repli explicite et plafonné sur le point standard (google-vertex/global) à 2 $ / 10 $.
   expert: {
     palier: 'expert', modele: 'google/gemini-4-argon', fournisseur: 'openrouter', url: OR, envCle: 'NEXORA_LLM_CLE_OPENROUTER',
     prixEntreeUsdM: 1, prixSortieUsdM: 5, endpoint: 'google-ai-studio/flex', maxSortieMin: 4000,
-    corps: () => ({ reasoning: { effort: 'low' }, usage: { include: true }, provider: { order: ['google-ai-studio/flex'], allow_fallbacks: false } }),
-    repli: { endpoint: 'google-vertex/global', prixEntreeUsdM: 2, prixSortieUsdM: 10, corps: () => ({ reasoning: { effort: 'low' }, usage: { include: true }, provider: { order: ['google-vertex/global'], allow_fallbacks: false } }) },
+    corps: () => ({ reasoning: { effort: 'high' }, usage: { include: true }, provider: { order: ['google-ai-studio/flex'], allow_fallbacks: false } }),
+    repli: { endpoint: 'google-vertex/global', prixEntreeUsdM: 2, prixSortieUsdM: 10, corps: () => ({ reasoning: { effort: 'high' }, usage: { include: true }, provider: { order: ['google-vertex/global'], allow_fallbacks: false } }) },
   },
 };
 
@@ -133,6 +133,7 @@ export function clientPalier(palier: Palier, o: OptionsClientPalier = {}): Clien
           role, palier, modele: a.modele, endpoint: repli && a.repli ? a.repli.endpoint : a.endpoint, usage: u,
           coutUsd: u.coutFournisseurUsd ?? liste, source: u.coutFournisseurUsd !== null ? 'fournisseur' : 'tarif', ms: Date.now() - t0, repli,
         });
+        if (j.choices?.[0]?.finish_reason === 'length') throw new ErreurLlm('réponse tronquée (jetons de sortie épuisés)');
         return j;
       }
       const statut = r?.status ?? 0;
@@ -155,7 +156,7 @@ export function clientPalier(palier: Palier, o: OptionsClientPalier = {}): Clien
       });
       const c = j.choices?.[0];
       const texte = c?.message?.content;
-      if (typeof texte !== 'string' || !texte.trim()) throw new ErreurLlm(c?.finish_reason === 'length' ? 'réponse tronquée (jetons de sortie épuisés)' : 'réponse LLM vide');
+      if (typeof texte !== 'string' || !texte.trim()) throw new ErreurLlm('réponse LLM vide');
       return texte;
     },
     async completerAvecOutils(role, messages, outils: DefinitionOutil[], options = {}) {

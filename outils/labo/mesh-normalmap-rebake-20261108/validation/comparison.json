@@ -1,0 +1,8 @@
+{
+  "mae_rgb_encoded_8bit_full_image": 0.019261067708333333,
+  "changed_pixels": 5917,
+  "max_channel_delta": 1,
+  "pixels": 307200,
+  "source_png_sha256": "eb50016490d23d29ec9793490f077020033143419d7861875348d921b63adea7",
+  "rebake_png_sha256": "225342d6e88552542370e774d95337f16ead6c84a602dc16384301281bb2ed45"
+}

@@ -1,0 +1,6 @@
+import runpy
+import torch
+
+# Limite de notre allocateur CUDA seulement; aucun réglage global.
+torch.cuda.set_per_process_memory_fraction(0.60, 0)
+runpy.run_path("scripts/inference.py", run_name="__main__")
