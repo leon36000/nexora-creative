@@ -4,9 +4,9 @@ Ce paquet de laboratoire vérifie une hypothèse ciblée : conserver le `TANGENT
 
 ## Contenu
 
-- `scripts/create_private_overlay.py` copie et adapte le seul module `nodes_mesh_postprocess.py` fourni à l’exécution. Le SHA source est épinglé; le module Comfy complet n’est pas inclus.
+- `scripts/create_private_overlay.py` copie et adapte le seul module `nodes_mesh_postprocess.py` fourni à l’exécution. Le SHA source est épinglé; le module Comfy complet n’est pas inclus. Les sorties dans Comfy ou un dépôt Git, les liens symboliques et les fichiers existants sont refusés.
 - `scripts/test_normalmap_rebake.py` génère la fixture GLB, appelle `BakeNormalMapFromMesh.execute` et `ApplyTextureToMesh.execute` de la copie privée, sérialise le GLB cible, puis compare numériquement les normales monde des textures source et rebakée.
-- `scripts/run_cpu_isolated.sh` lance Python en CPU dans `bwrap --unshare-net`; la racine est montée en lecture seule et seul le dossier de run est inscriptible.
+- `scripts/run_cpu_isolated.sh` lance Python en CPU dans `bwrap --unshare-net`; la racine est montée en lecture seule et seul le dossier de run est inscriptible, monté à son chemin absolu sans masquer `/run`.
 - `fixtures/` contient la fixture source générée (GLB de 2 060 octets et PNG raw RGB de 118 octets).
 - `references/analytical-proof-v3.json` conserve le rapport analytique du run validé.
 - `validation/` contient le récapitulatif indépendant Three.js/SwiftShader, ses deux contrôles, PNG et rapport complet.
@@ -30,6 +30,8 @@ python3 "$PACKAGE/scripts/create_private_overlay.py" \
 ```
 
 Choisir un nouveau dossier à chaque essai. Les scripts refusent de remplacer un overlay existant et le test refuse de réutiliser ses sorties. Le lanceur ne définit ni ne modifie `HOME`; il vide l’environnement du processus et fournit seulement les variables nécessaires au runtime isolé.
+
+Les tests de refus, sans Comfy ni GPU, se lancent avec `python3 -B -m unittest discover -s "$PACKAGE/tests" -v`.
 
 ## Versions épinglées et preuve
 

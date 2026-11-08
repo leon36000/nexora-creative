@@ -3,22 +3,40 @@
 from pathlib import Path
 import argparse
 import hashlib
+import os
+import stat
 
 EXPECTED_SOURCE_SHA256 = '3b7083984c974d9bc5d14e026a37d0eee0a4063b61a7df20ae15bdd68015a141'
 parser = argparse.ArgumentParser(description='Créer une copie privée instrumentée du nœud Comfy Mesh.')
 parser.add_argument('--source', type=Path, required=True, help='nodes_mesh_postprocess.py source, épinglé par SHA-256')
 parser.add_argument('--output', type=Path, required=True, help='chemin de sortie hors du dépôt, absent au départ')
 args = parser.parse_args()
-source = args.source.resolve()
-overlay = args.output.resolve()
-if not source.is_file():
-    raise SystemExit(f'Source introuvable: {source}')
-source_sha256 = hashlib.sha256(source.read_bytes()).hexdigest()
-if source_sha256 != EXPECTED_SOURCE_SHA256:
-    raise SystemExit(f'SHA source inattendu: {source_sha256}; attendu {EXPECTED_SOURCE_SHA256}')
+source = args.source.resolve(strict=True)
+overlay = Path(os.path.abspath(args.output))
+
+# Validate lexical components before resolution: a broken final symlink is also forbidden.
+for component in reversed((overlay, *overlay.parents)):
+    try:
+        mode = component.lstat().st_mode
+    except FileNotFoundError:
+        continue
+    if stat.S_ISLNK(mode):
+        raise SystemExit(f'Lien symbolique interdit dans le chemin de sortie: {component}')
+    marker = component / '.git'
+    if component != overlay and (marker.is_file() or (marker.is_dir() and (marker / 'HEAD').is_file())):
+        raise SystemExit('La sortie ne peut pas être dans un dépôt Git')
 if overlay.exists():
     raise SystemExit('La sortie existe déjà; la préserver et choisir un nouveau dossier de run')
-s=source.read_text()
+comfy_root = source.parent.parent
+if overlay.is_relative_to(comfy_root):
+    raise SystemExit('La sortie ne peut pas être dans le dossier Comfy source')
+if not source.is_file():
+    raise SystemExit(f'Source introuvable: {source}')
+source_bytes = source.read_bytes()
+source_sha256 = hashlib.sha256(source_bytes).hexdigest()
+if source_sha256 != EXPECTED_SOURCE_SHA256:
+    raise SystemExit(f'SHA source inattendu: {source_sha256}; attendu {EXPECTED_SOURCE_SHA256}')
+s = source_bytes.decode('utf-8')
 old_sig='''def _bake_normal_map(high_v, high_f, high_n, low_v_np, low_f_np, low_uv_np, low_n, tangents,
                      resolution, cage_distance=0.05, ignore_backfaces=True):'''
 new_sig='''def _bake_normal_map(high_v, high_f, high_n, low_v_np, low_f_np, low_uv_np, low_n, tangents,
@@ -199,8 +217,21 @@ new='''                n_attr_i = low_n_attr[i, :n] if low_n_attr is not None el
 '''
 assert s.count(old)==1
 s=s.replace(old,new)
-overlay.parent.mkdir(parents=True, exist_ok=True)
-with overlay.open('x', encoding='utf-8', newline='') as stream:
+# Descend by directory descriptors so a concurrent symlink replacement is never followed.
+dir_fd = os.open('/', os.O_RDONLY | os.O_DIRECTORY)
+try:
+    for part in overlay.parent.parts[1:]:
+        try:
+            os.mkdir(part, 0o700, dir_fd=dir_fd)
+        except FileExistsError:
+            pass
+        next_fd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=dir_fd)
+        os.close(dir_fd)
+        dir_fd = next_fd
+    fd = os.open(overlay.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=dir_fd)
+finally:
+    os.close(dir_fd)
+with os.fdopen(fd, 'w', encoding='utf-8', newline='') as stream:
     stream.write(s)
     stream.flush()
 print({'source':str(source),'source_sha256':source_sha256,'overlay':str(overlay),

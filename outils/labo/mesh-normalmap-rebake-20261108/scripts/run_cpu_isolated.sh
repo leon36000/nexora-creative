@@ -33,15 +33,15 @@ exec bwrap \
   --ro-bind / / \
   --dev /dev \
   --proc /proc \
-  --bind "$RUN_DIR" /run \
+  --bind "$RUN_DIR" "$RUN_DIR" \
   --ro-bind "$OVERLAY_FILE" "$TARGET_MODULE" \
-  --chdir /run \
+  --chdir "$RUN_DIR" \
   env -i \
     PATH=/usr/bin:/bin \
     PYTHONPATH="$COMFY_ROOT" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONNOUSERSITE=1 \
     CUDA_VISIBLE_DEVICES= \
-    TMPDIR=/run/tmp \
-    XDG_CACHE_HOME=/run/tmp/cache \
+    TMPDIR="$RUN_DIR/tmp" \
+    XDG_CACHE_HOME="$RUN_DIR/tmp/cache" \
     "$PYTHON" -u "$TEST_SCRIPT"
