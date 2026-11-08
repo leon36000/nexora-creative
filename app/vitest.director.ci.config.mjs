@@ -22,7 +22,7 @@ export default {
       'app/server/nexora/exportProres.test.ts',
       'app/server/nexora/exportProresRoute.test.ts',
       'app/server/nexora/montage/editplanVoix.test.ts', 'app/server/nexora/montage/editplanSourceBounds.test.ts',
-      'app/server/nexora/montage/editplanInventoryOwnKeys.test.ts', 'app/server/nexora/montage/producteurVoiceInventory.test.ts',
+      'app/server/nexora/montage/editplanInventoryOwnKeys.test.ts', 'app/server/nexora/montage/producteurVoiceInventory.test.ts', 'app/server/nexora/montage/producteurInventaireVoix.test.ts',
       'app/server/nexora/montage/producteur.test.ts',
       'app/server/nexora/filmReferenceLangue.test.ts', 'app/server/nexora/reecritureLangue.test.ts',
       'app/server/nexora/promptH3.test.ts', 'app/server/nexora/reecritureH3.test.ts', 'app/server/nexora/realisateur.test.ts',
