@@ -28,7 +28,7 @@ describe('blocs de dialogue H3', () => {
     expect(extraireDialoguesH3('<d>[French]Oui</d><d>[English]incomplet')).toEqual([{ langue: 'French', texte: 'Oui' }]);
   });
 
-  it('termine aussi sur de grandes suites incomplètes dans un worker borné', async () => {
+  it('borne les grandes suites de dialogues et de style incomplets dans un worker', async () => {
     const worker = new Worker(new URL('../../scripts/test-dialogues-h3-worker.mjs', import.meta.url), {
       env: {}, resourceLimits: { maxOldGenerationSizeMb: 64 },
     });

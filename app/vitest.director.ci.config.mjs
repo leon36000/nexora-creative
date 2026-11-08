@@ -40,6 +40,7 @@ export default {
         'app/server/nexora/film.ts', 'app/server/nexora/filmMoteur.ts', 'app/server/nexora/filmEchec.ts',
         'app/server/nexora/promptH3.ts', 'app/server/nexora/reecritureH3.ts', 'app/server/nexora/realisateur.ts',
         'app/server/nexora/dialoguesH3.ts',
+        'app/server/nexora/styleH3.ts',
         'app/server/nexora/filmClePlan.ts', 'app/server/nexora/reconciliationArrets.ts',
         'app/server/nexora/montage/film.ts', 'app/server/nexora/usage.ts',
         'app/server/nexora/personnagesCast.ts', 'app/src/api.ts', 'app/src/pages/Creer.tsx',

@@ -6,6 +6,7 @@
 
 import { type SujetRef, validerPromptRef } from './personnages.js';
 import { extraireDialoguesH3 } from './dialoguesH3.js';
+import { styleAvantPremierPlanRef } from './styleH3.js';
 
 export type ModeH3 = 't2va' | 'i2va' | 'fl2va' | 'l2va' | 'ref2va';
 
@@ -66,7 +67,7 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
     erreurs.push(...validerPromptRef(texte, sujets.length, nbImages));
     if (!texte.startsWith('subject_definitions:')) erreurs.push('en Ref2VA, commencer par subject_definitions:');
     if (!/summary:\s*\[reference generation\]/.test(texte)) erreurs.push('summary doit commencer par [reference generation]');
-    if (!/detailed_description:\s*[^[]+\[Shot 1\]/.test(texte)) erreurs.push('le style doit précéder [Shot 1] en Ref2VA');
+    if (!styleAvantPremierPlanRef(texte)) erreurs.push('le style doit précéder [Shot 1] en Ref2VA');
   }
   const plans = [...description.matchAll(/\[Shot (\d+)\]\s*(At (\d{2}):(\d{2})\.(\d{3}),)?/g)];
   if (!plans.length) erreurs.push('aucun plan « [Shot 1] » dans la description');
