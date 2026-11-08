@@ -30,19 +30,29 @@ VARIANTES = {
 SORTIES = {'png16': True, 'rgba16': False, 'exr': False, 'prores': False, 'webm': False, 'matte': False, 'apercu': False}
 
 
+def _afficher_mesure(value):
+    return 'N/A' if value is None else f'{value:.3f}'
+
+
 def main():
     base, travaux, clips, sortie = sys.argv[1].rstrip('/'), sys.argv[2], sys.argv[3], sys.argv[4]
     variantes = dict(VARIANTES)
     if len(sys.argv) > 5:
         variantes = {a.split('=', 1)[0]: json.loads(a.split('=', 1)[1]) for a in sys.argv[5:]}
-    res = json.load(open(sortie)) if os.path.exists(sortie) else {}
+    if os.path.exists(sortie):
+        with open(sortie, encoding='utf-8') as f:
+            res = json.load(f)
+    else:
+        res = {}
     for clip in sorted(d for d in os.listdir(clips) if d.startswith('clip-')):
         dc = os.path.join(clips, clip)
         id_ = f'verite-{clip[5:]}'
         if not os.path.exists(os.path.join(travaux, id_, 'source.mp4')):
-            r = appel(base, 'PUT', f'/travaux/{id_}/fichiers/source.mp4', brut=open(os.path.join(dc, 'source.mp4'), 'rb').read(), ct='application/octet-stream')
+            with open(os.path.join(dc, 'source.mp4'), 'rb') as f:
+                r = appel(base, 'PUT', f'/travaux/{id_}/fichiers/source.mp4', brut=f.read(), ct='application/octet-stream')
             assert r.get('ok'), r
-        invites = json.load(open(os.path.join(dc, 'invites.json')))
+        with open(os.path.join(dc, 'invites.json'), encoding='utf-8') as f:
+            invites = json.load(f)
         for nom, v in variantes.items():
             params = {'invites': invites, 'largeur_max': 1280, 'sorties': SORTIES, 'composite': None, **v}
             t0 = time.time()
@@ -61,9 +71,10 @@ def main():
                      scintillement=m.get('scintillement'))
             res.setdefault(clip[5:], {})[nom] = n
             b = n['bande']
-            print(f"{clip[5:]:9s} {nom:30s} bande: SAD {b['sad']:8.3f}  MSE {b['mse']:7.3f}  Grad {b['grad']:8.3f}  dtSSD {b['dtssd']:6.3f}"
+            print(f"{clip[5:]:9s} {nom:30s} bande: SAD {_afficher_mesure(b['sad'])}  MSE {_afficher_mesure(b['mse'])}  Grad {_afficher_mesure(b['grad'])}  dtSSD {_afficher_mesure(b['dtssd'])}"
                   f"   image: SAD {n['image']['sad']:8.3f}   matting {(m.get('temps_etapes_s') or {}).get('matting')} s", flush=True)
-            json.dump(res, open(sortie, 'w'), ensure_ascii=False, indent=1)
+            with open(sortie, 'w', encoding='utf-8') as f:
+                json.dump(res, f, ensure_ascii=False, indent=1)
 
 
 if __name__ == '__main__':
