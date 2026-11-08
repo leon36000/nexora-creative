@@ -170,14 +170,19 @@ async function clickButton(page: Page, pattern: RegExp, label: string) {
 async function selectOnePoint(page: Page) {
   const video = page.container.querySelector('video');
   if (!video?.parentElement) throw new Error('video is not visible');
-  const surface = video.parentElement;
+  const surface = video.parentElement.querySelector('button[aria-describedby]') as HTMLButtonElement | null;
+  if (!surface) throw new Error('pointing target is not visible');
   Object.defineProperty(surface, 'getBoundingClientRect', { configurable: true, value: () => ({ x: 0, y: 0, left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100, toJSON() {} }) });
   await act(async () => { surface.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 50, clientY: 50 })); await Promise.resolve(); });
-  await waitUntil(() => (page.container.querySelector('video')?.parentElement?.querySelectorAll('span').length ?? 0) === 1, 'one point selection');
+  await waitUntil(() => pointCount(page) === 1, 'one point selection');
+}
+
+function countPointMarkers(stage: Element | null) {
+  return Array.from(stage?.querySelectorAll('span') ?? []).filter((el) => (el as HTMLElement).style.width === '12px').length;
 }
 
 function pointCount(page: Page) {
-  return page.container.querySelector('video')?.parentElement?.querySelectorAll('span').length ?? 0;
+  return countPointMarkers(page.container.querySelector('video')?.parentElement ?? null);
 }
 
 async function clickDelete(page: Page) {

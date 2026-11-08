@@ -5,6 +5,7 @@
  * Rapport et mesures : recherche/22-detourage-video-pro.md.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MattePointage } from '../MattePointage';
 import { toast } from '../store';
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { creerCopieMatte, etatInterfaceMatte, type LangueMatte } from '../matteCopy';
@@ -215,11 +216,9 @@ export default function Detourage() {
     } catch (e) { if (monte.current && mon === jeton.current) toast(erreur(e, 'error.preview'), true); }
   }, [capturer, fps, copie]);
 
-  function cliquer(e: React.MouseEvent<HTMLDivElement>, negatifForce = false) {
+  function ajouterPoint(x: number, y: number, negatifForce = false) {
     if (!travail || envoi !== null) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-    const negatif = negatifForce || outil === 'retirer' || e.shiftKey || e.altKey;
+    const negatif = negatifForce || outil === 'retirer';
     const pts: Pt[] = [...points, [Math.min(1, Math.max(0, x)), Math.min(1, Math.max(0, y)), negatif ? 0 : 1]];
     setClics({ ...clics, [image]: pts });
     video.current?.pause();
@@ -345,6 +344,8 @@ export default function Detourage() {
       : trouves && trouves.image === image
         ? tr('mask.notFound', { texte: mot.trim() })
         : tr('mask.helpDefault');
+  const aidePointage = tr('mask.keyboardHelp');
+  const etiquettePointage = (x: number, y: number) => tr('mask.keyboardTarget', { x, y });
 
   return (
     <div className="rail-layout" lang={langue === 'fr' ? 'fr-CA' : 'en-CA'} style={{ gridTemplateColumns: '380px 1fr' }}>
@@ -422,17 +423,18 @@ export default function Detourage() {
         {!urlLocale && <div className="dim" style={{ padding: 40, textAlign: 'center' }}>{tr('empty.importPrompt')}</div>}
         {urlLocale && !fini && (
           <>
-            <div style={{ position: 'relative', alignSelf: 'center', maxWidth: '100%', cursor: 'crosshair' }} onClick={cliquer} onContextMenu={(e) => { e.preventDefault(); cliquer(e, true); }}>
-              <video key={urlLocale} ref={video} src={urlLocale} muted playsInline style={{ maxWidth: '100%', maxHeight: '62vh', display: 'block' }}
+            <div key={urlLocale} style={{ position: 'relative', alignSelf: 'center', maxWidth: '100%', cursor: 'crosshair' }}>
+              <video ref={video} src={urlLocale} muted playsInline style={{ maxWidth: '100%', maxHeight: '62vh', display: 'block' }}
                 onLoadedMetadata={(e) => setDuree((e.target as HTMLVideoElement).duration)} onTimeUpdate={(e) => setT((e.target as HTMLVideoElement).currentTime)} />
               {masque && masque.image === image && <div aria-hidden style={{ position: 'absolute', inset: 0, background: '#ff3b5c', opacity: 0.5, pointerEvents: 'none', maskImage: `url(${masque.src})`, WebkitMaskImage: `url(${masque.src})`, maskMode: 'luminance', maskSize: '100% 100%', WebkitMaskSize: '100% 100%' } as React.CSSProperties} />}
+              <MattePointage key={urlLocale} disabled={!travail || envoi !== null} onPoint={ajouterPoint} label={etiquettePointage} help={aidePointage} />
               {points.map(([x, y, l], i) => <span key={i} style={{ position: 'absolute', left: `${x * 100}%`, top: `${y * 100}%`, width: 12, height: 12, margin: -6, borderRadius: 6, background: l ? '#35e08a' : '#ff4d5e', border: '2px solid #fff', pointerEvents: 'none' }} />)}
               {boites[image] && <div aria-hidden style={{ position: 'absolute', left: `${boites[image][0] * 100}%`, top: `${boites[image][1] * 100}%`, width: `${(boites[image][2] - boites[image][0]) * 100}%`, height: `${(boites[image][3] - boites[image][1]) * 100}%`, border: '2px dashed #35e08a', borderRadius: 4, pointerEvents: 'none' }} />}
               {trouves && trouves.image === image && trouves.objets.map((o, i) => (
-                <div key={i} title={tr('finder.chooseTitle', { score: o.score.toFixed(2) })} onClick={(e) => { e.stopPropagation(); choisirObjet(o); }}
-                  style={{ position: 'absolute', left: `${o.boite[0] * 100}%`, top: `${o.boite[1] * 100}%`, width: `${(o.boite[2] - o.boite[0]) * 100}%`, height: `${(o.boite[3] - o.boite[1]) * 100}%`, border: '2px solid #4da3ff', borderRadius: 4, background: 'rgba(77, 163, 255, 0.12)', cursor: 'pointer' }}>
+                <button key={i} type="button" aria-label={tr('finder.chooseTitle', { score: o.score.toFixed(2) })} title={tr('finder.chooseTitle', { score: o.score.toFixed(2) })} onClick={() => choisirObjet(o)}
+                  style={{ position: 'absolute', left: `${o.boite[0] * 100}%`, top: `${o.boite[1] * 100}%`, width: `${(o.boite[2] - o.boite[0]) * 100}%`, height: `${(o.boite[3] - o.boite[1]) * 100}%`, padding: 0, textAlign: 'left', border: '2px solid #4da3ff', borderRadius: 4, background: 'rgba(77, 163, 255, 0.12)', cursor: 'pointer' }}>
                   <span style={{ position: 'absolute', left: 0, top: -18, fontSize: 11, lineHeight: '16px', padding: '0 4px', borderRadius: 3, background: '#4da3ff', color: '#fff', whiteSpace: 'nowrap' }}>{tr('finder.chooseLabel', { mot: mot.trim(), score: o.score.toFixed(2) })}</span>
-                </div>
+                </button>
               ))}
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
