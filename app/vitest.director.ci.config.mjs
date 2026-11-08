@@ -21,7 +21,7 @@ export default {
       'app/server/nexora/executionBornee.signal.test.ts',
       'app/server/nexora/exportProres.test.ts',
       'app/server/nexora/exportProresRoute.test.ts',
-      'app/server/nexora/montage/editplanVoix.test.ts',
+      'app/server/nexora/montage/editplanVoix.test.ts', 'app/server/nexora/montage/editplanSourceBounds.test.ts',
       'app/server/nexora/filmReferenceLangue.test.ts', 'app/server/nexora/reecritureLangue.test.ts',
       'app/server/nexora/promptH3.test.ts', 'app/server/nexora/reecritureH3.test.ts', 'app/server/nexora/realisateur.test.ts',
       'app/server/nexora/dialoguesH3.test.ts',
