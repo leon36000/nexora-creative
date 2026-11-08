@@ -2,6 +2,8 @@
 
 Le fichier canonique conserve les N premières images en H.264 lossless et
 l'audio PCM intégral. Il ne modifie jamais le rendu ni le PCM sources.
+Le mode « couvrir » autorise une fin audio entre deux images : il garde
+l'image source suivante, sans en fabriquer et sans tronquer le PCM.
 """
 from __future__ import annotations
 
@@ -43,8 +45,23 @@ def _images_md5(ffmpeg, video, nombre):
     return images
 
 
+def planifier_fin_audio(echantillons: int, frequence_hz: int, politique: str = 'exacte') -> dict:
+    """Calcule le nombre d'images à 25 i/s avec une arithmétique exacte."""
+    if type(echantillons) is not int or echantillons <= 0 or type(frequence_hz) is not int or frequence_hz != 16000:
+        raise ValueError('PCM positif entier à 16 kHz requis')
+    if politique not in ('exacte', 'couvrir'):
+        raise ValueError('politique de fin audio inconnue')
+    cible = Fraction(echantillons * 25, frequence_hz)
+    if politique == 'exacte' and cible.denominator != 1:
+        raise ValueError('durée PCM non entière en images à 25 i/s')
+    nombre = (cible.numerator + cible.denominator - 1) // cible.denominator
+    ecart = Fraction(nombre, 25) - Fraction(echantillons, frequence_hz)
+    return {'politique': politique, 'images_cibles': nombre, 'images_exactes': str(cible),
+            'ecart_fin_secondes': float(ecart), 'ecart_fin_exact_secondes': str(ecart)}
+
+
 def exporter(root: Path, brut: Path, brut_sha: str, audio: Path, audio_sha: str,
-             ffmpeg: Path, ffprobe: Path, telephone: bool = False) -> Path:
+             ffmpeg: Path, ffprobe: Path, telephone: bool = False, fin_audio: str = 'exacte') -> Path:
     if not root.is_absolute() or root.is_symlink() or not root.is_dir() or root.resolve() != root:
         raise ValueError('racine de sortie invalide')
     _verifier_fichier(brut, brut_sha)
@@ -61,10 +78,8 @@ def exporter(root: Path, brut: Path, brut_sha: str, audio: Path, audio_sha: str,
     mesures = av.mesure_audio(ffmpeg, audio, av.informations(ffprobe, audio, 120), 120)
     if mesures['frequence_hz'] != 16000:
         raise ValueError('audio 16 kHz requis')
-    cible = Fraction(mesures['echantillons'] * 25, mesures['frequence_hz'])
-    if cible.denominator != 1 or cible <= 0:
-        raise ValueError('durée PCM non entière en images à 25 i/s')
-    nombre = int(cible)
+    plan_fin = planifier_fin_audio(mesures['echantillons'], mesures['frequence_hz'], fin_audio)
+    nombre = plan_fin['images_cibles']
     video = av.mesure_video(ffprobe, brut, av.informations(ffprobe, brut, 120), 120)
     if (Fraction(video['cadence_moyenne']) != 25 or
         any(abs(i - .04) > .001 for i in video['intervalles_images_secondes']) or
@@ -82,7 +97,8 @@ def exporter(root: Path, brut: Path, brut_sha: str, audio: Path, audio_sha: str,
     resultat = {'statut':'echec','brut_sha256':brut_sha,'audio_sha256':audio_sha,
                 'ffmpeg_sha256':_sha(ffmpeg),'ffprobe_sha256':_sha(ffprobe),
                 'images_source':video['images_decodees'],'images_cibles':nombre,
-                'echantillons_pcm':mesures['echantillons'],'commande_canonique':commande}
+                'echantillons_pcm':mesures['echantillons'],'fin_audio':plan_fin,
+                'commande_canonique':commande}
     try:
         av.executer(commande, 180, True)
         if _images_md5(ffmpeg, canonique, nombre) != reference_images:
@@ -92,7 +108,10 @@ def exporter(root: Path, brut: Path, brut_sha: str, audio: Path, audio_sha: str,
         _verifier_fichier(brut, brut_sha)
         _verifier_fichier(audio, audio_sha)
         controle = av.valider(audio, canonique, ffmpeg, ffprobe, 0, cadence_cible='25')
-        if not controle['valide'] or controle['video']['images_decodees'] != nombre:
+        ecarts = controle['ecarts_secondes']
+        if (not controle['valide'] or controle['video']['images_decodees'] != nombre or
+            abs(ecarts['video_moins_reference'] - plan_fin['ecart_fin_secondes']) > 1e-6 or
+            abs(ecarts['debut_audio_moins_video']) > 1e-6):
             raise ValueError('validation audiovisuelle canonique refusée')
         resultat.update(statut='canonique_valide', validation_av=controle,
                         canonique_sha256=_sha(canonique), pcm_decode_sha256=reference_pcm,
@@ -123,9 +142,11 @@ def main():
     p.add_argument('--brut-sha256',required=True);p.add_argument('--audio',type=Path,required=True)
     p.add_argument('--audio-sha256',required=True);p.add_argument('--ffmpeg',type=Path,required=True)
     p.add_argument('--ffprobe',type=Path,required=True);p.add_argument('--telephone',action='store_true')
+    p.add_argument('--fin-audio',choices=('exacte','couvrir'),default='exacte',
+                   help='exacte : durée sur une image ; couvrir : garder la prochaine image source et tout le PCM')
     args=p.parse_args()
     try:
-        run=exporter(args.run_root,args.brut,args.brut_sha256,args.audio,args.audio_sha256,args.ffmpeg,args.ffprobe,args.telephone)
+        run=exporter(args.run_root,args.brut,args.brut_sha256,args.audio,args.audio_sha256,args.ffmpeg,args.ffprobe,args.telephone,args.fin_audio)
         manifest=json.loads((run/'manifest.json').read_text())
         print(json.dumps({'run':str(run),'statut':manifest['statut']},ensure_ascii=False))
         return 0 if manifest['statut']!='echec' else 1
