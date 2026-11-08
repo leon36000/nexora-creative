@@ -36,7 +36,7 @@ export async function exporterUsdz(glb: Uint8Array, nomOption?: string): Promise
   if (doc.getRoot().listCameras().length) incompatible('Caméras non prises en charge en USDZ.');
   const nom = (nomOption ?? 'relief').replace(/[^A-Za-z0-9_-]+/g, '_').slice(0, 40) || 'relief';
   // Les identifiants USD ne peuvent pas débuter par un chiffre ou contenir un tiret.
-  const prim = `Mesh_${nom.replace(/-/g, '_')}`;
+  const prim = `Mesh_${nom.replaceAll('-', '_')}`;
   const fichiers: { nom: string; octets: Uint8Array }[] = [];
   const meshes: string[] = [], mats: string[] = [];
   let nombre = 0;
@@ -55,21 +55,32 @@ export async function exporterUsdz(glb: Uint8Array, nomOption?: string): Promise
     for (const p of node.getMesh()!.listPrimitives()) {
       if (p.getMode() !== 4 || p.listTargets().length) incompatible('Primitive non triangulaire ou cible de morphose non prise en charge.');
       if (p.listSemantics().some((s) => s.startsWith('COLOR_') || s.startsWith('JOINTS_') || s.startsWith('WEIGHTS_'))) incompatible('Couleurs de sommets et peau non prises en charge.');
-      const P = p.getAttribute('POSITION');
-      if (!P || P.getType() !== 'VEC3') incompatible('Positions USDZ absentes ou invalides.');
-      const count = P!.getCount(), points: string[] = [], positions: Vector3[] = [], normales: (Vector3 | null)[] = [];
+      const P = p.getAttribute('POSITION') ?? incompatible('Positions USDZ absentes ou invalides.');
+      if (P.getType() !== 'VEC3') incompatible('Positions USDZ absentes ou invalides.');
+      const count = P.getCount(), points: string[] = [], positions: Vector3[] = [], normales: (Vector3 | null)[] = [];
       const a = [0, 0, 0], v = new Vector3();
       const N = p.getAttribute('NORMAL');
       if (N && (N.getType() !== 'VEC3' || N.getCount() !== count)) incompatible('Normales USDZ invalides.');
       for (let i = 0; i < count; i++) {
-        P!.getElement(i, a); v.set(a[0], a[1], a[2]).applyMatrix4(matrice); points.push(tuple([v.x, v.y, v.z])); positions.push(v.clone());
-        if (N) { N.getElement(i, a); v.set(a[0], a[1], a[2]).applyMatrix3(normaleMatrice); if (!Number.isFinite(v.lengthSq())) incompatible('Normale USDZ non finie.'); normales.push(v.lengthSq() === 0 ? null : v.clone().normalize()); }
+        P.getElement(i, a);
+        v.set(a[0], a[1], a[2]).applyMatrix4(matrice);
+        points.push(tuple([v.x, v.y, v.z]));
+        positions.push(v.clone());
+        if (N) {
+          N.getElement(i, a);
+          v.set(a[0], a[1], a[2]).applyMatrix3(normaleMatrice);
+          if (!Number.isFinite(v.lengthSq())) incompatible('Normale USDZ non finie.');
+          normales.push(v.lengthSq() === 0 ? null : v.clone().normalize());
+        }
       }
-      const indices: number[] = [], I = p.getIndices(), n = I?.getCount() ?? count;
+      const indices: number[] = [];
+      const I = p.getIndices();
+      const n = I?.getCount() ?? count;
       if (n === 0 || n % 3 !== 0) incompatible('Indices USDZ vides ou invalides.');
       for (let i = 0; i < n; i++) { const x = I ? I.getScalar(i) : i; if (!Number.isInteger(x) || x < 0 || x >= count) incompatible('Indice USDZ hors plage.'); indices.push(x); }
       if (det < 0) for (let i = 0; i < n; i += 3) [indices[i + 1], indices[i + 2]] = [indices[i + 2], indices[i + 1]];
-      let nrm: string[] = [], interpolation = 'vertex';
+      let nrm: string[] = [];
+      let interpolation = 'vertex';
       if (N && normales.some((x) => x === null)) {
         interpolation = 'faceVarying';
         for (let i = 0; i < n; i += 3) {
@@ -110,11 +121,12 @@ export async function exporterUsdz(glb: Uint8Array, nomOption?: string): Promise
         shaderDecl.push(`def Shader "coord_${type}" {\n uniform token info:id = "UsdPrimvarReader_float2"\n string inputs:varname = "st_${type}"\n float2 outputs:result\n}\ndef Shader "texture_${type}" {\n uniform token info:id = "UsdUVTexture"\n asset inputs:file = @${filename}@\n float2 inputs:st.connect = </${prim}/Materiaux/m${nombre}/coord_${type}.outputs:result>\n token inputs:sourceColorSpace = "${type === 'base' ? 'sRGB' : 'raw'}"\n token inputs:wrapS = "${wS}"\n token inputs:wrapT = "${wT}"\n float4 inputs:scale = ${tuple(scale)}\n float outputs:r\n float outputs:g\n float outputs:b\n float outputs:a\n float3 outputs:rgb\n}`);
         return true;
       };
-      const base = textureNode('base'), mr = textureNode('mr');
+      const base = textureNode('base');
+      const mr = textureNode('mr');
       const path = `/${prim}/Materiaux/m${nombre}`;
       const opacity = alpha === 'OPAQUE' ? 'float inputs:opacity = 1' : base ? `float inputs:opacity.connect = <${path}/texture_base.outputs:a>` : `float inputs:opacity = ${fmt(facteur[3])}`;
       mats.push(`def Material "m${nombre}" {\n token outputs:surface.connect = <${path}/surface.outputs:surface>\n def Shader "surface" {\n uniform token info:id = "UsdPreviewSurface"\n ${base ? `color3f inputs:diffuseColor.connect = <${path}/texture_base.outputs:rgb>` : `color3f inputs:diffuseColor = ${tuple(facteur.slice(0, 3))}`}\n ${opacity}\n ${alpha === 'MASK' ? `float inputs:opacityThreshold = ${fmt(mat!.getAlphaCutoff())}` : ''}\n ${mr ? `float inputs:metallic.connect = <${path}/texture_mr.outputs:b>\n float inputs:roughness.connect = <${path}/texture_mr.outputs:g>` : `float inputs:metallic = ${fmt(metallic)}\n float inputs:roughness = ${fmt(roughness)}`}\n token outputs:surface\n }\n ${shaderDecl.join('\n')}\n}`);
-      meshes.push(`def Mesh "mesh_${nombre}" (prepend apiSchemas = ["MaterialBindingAPI"]) {\n int[] faceVertexCounts = [${Array(n / 3).fill(3).join(', ')}]\n int[] faceVertexIndices = [${indices.join(', ')}]\n point3f[] points = [${points.join(', ')}]\n ${N ? `normal3f[] normals = [${nrm.join(', ')}] (interpolation = "${interpolation}")` : ''}\n uniform token subdivisionScheme = "none"\n uniform bool doubleSided = ${mat?.getDoubleSided() ? 'true' : 'false'}\n ${uvDecl.join('\n')}\n rel material:binding = <${path}>\n}`);
+      meshes.push(`def Mesh "mesh_${nombre}" (prepend apiSchemas = ["MaterialBindingAPI"]) {\n int[] faceVertexCounts = [${Array.from({ length: n / 3 }, () => 3).join(', ')}]\n int[] faceVertexIndices = [${indices.join(', ')}]\n point3f[] points = [${points.join(', ')}]\n ${N ? `normal3f[] normals = [${nrm.join(', ')}] (interpolation = "${interpolation}")` : ''}\n uniform token subdivisionScheme = "none"\n uniform bool doubleSided = ${mat?.getDoubleSided() ? 'true' : 'false'}\n ${uvDecl.join('\n')}\n rel material:binding = <${path}>\n}`);
       nombre++;
     }
   }

@@ -8,4 +8,4 @@ Three.js r186 a chargé la source et le GLB rebaké avec ANGLE/SwiftShader, mêm
 - Mesure image entière : `5917/307200` pixels différents, canal maximal `1/255`, MAE RGB encodée `0.0192610677/255`.
 - Sensibilité : dans le run `control/`, régler le normalScale source à zéro change `15791/307200` pixels, canal maximal `13/255`, MAE RGB encodée `0.2712109375/255`.
 
-Les PNG sont les sorties conservées telles quelles, y compris `difference-x8.png`; les rapports JSON et le script `run.cjs` sont les originaux copiés avec leurs octets. Ce résultat qualifie uniquement la fixture et ce lecteur précis.
+Les PNG et rapports JSON sont les sorties d’origine conservées, y compris `difference-x8.png`. Les scripts `run.cjs` ont été adaptés pour intercepter toutes les requêtes, refuser les origines autres que HTTPS réservée supprimer un serveur HTTP inutilisé et refuser l’écrasement des PNG; les originaux sont archivés sur Storage et pc1. Ce résultat qualifie uniquement la fixture et ce lecteur précis.
