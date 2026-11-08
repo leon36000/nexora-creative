@@ -56,6 +56,7 @@ export class ErreurDetourage extends Error {
 
 export class Detourage {
   private travaux = new Map<string, TravailDetourage>();
+  private readonly operations = new Set<string>();
   private readonly now: () => number;
   private readonly ttl: { termineMs: number; deposeMs: number };
 
@@ -83,6 +84,15 @@ export class Detourage {
     return t;
   }
 
+  /** Une mutation par travail dans cette instance, dès avant le premier await. */
+  private async modifier<T>(org: string, id: string, faire: (t: TravailDetourage) => Promise<T>): Promise<T> {
+    const t = this.possede(org, id);
+    if (this.operations.has(id)) throw new ErreurDetourage('Déjà en cours.', 409);
+    this.operations.add(id);
+    try { return await faire(t); }
+    finally { this.operations.delete(id); }
+  }
+
   lister(org: string): TravailDetourage[] {
     return [...this.travaux.values()].filter((t) => t.organisation === org).sort((a, b) => b.creeLe - a.creeLe);
   }
@@ -103,51 +113,59 @@ export class Detourage {
 
   /** Envoie la source ou le fond vers la machine GPU (flux ou tampon) et l'inscrit dans le registre. */
   async deposer(org: string, id: string, nom: 'source.mp4' | `fond-${string}`, flux: Parameters<ClientDetourage['deposer']>[2], octets?: number) {
-    const t = this.possede(org, id);
-    if (t.etat !== 'depose' && !TERMINAUX.has(t.etat)) throw new ErreurDetourage('Le travail est en cours : attends sa fin ou annule-le.', 409);
-    const c = this.o.clientDe(t.moteurId);
-    if (!c) throw new ErreurDetourage('Le moteur de ce travail est hors ligne.', 503);
-    const info = await c.deposer(id, nom, flux, octets);
-    if (nom === 'source.mp4' && info) t.source = info;
-    t.fichiers[nom] = octets ?? 0;
-    t.majLe = this.now();
-    this.sauver();
-    return t;
+    return this.modifier(org, id, async (t) => {
+      if (t.etat !== 'depose' && !TERMINAUX.has(t.etat)) throw new ErreurDetourage('Le travail est en cours : attends sa fin ou annule-le.', 409);
+      const c = this.o.clientDe(t.moteurId);
+      if (!c) throw new ErreurDetourage('Le moteur de ce travail est hors ligne.', 503);
+      const info = await c.deposer(id, nom, flux, octets);
+      if (nom === 'source.mp4' && info) t.source = info;
+      t.fichiers[nom] = octets ?? 0;
+      t.majLe = this.now();
+      this.sauver();
+      return t;
+    });
   }
 
   async lancer(org: string, id: string, params: Record<string, unknown>, devis?: { secondes: number; credits: number | null }, libelle = 'Détourage vidéo') {
-    const t = this.possede(org, id);
-    if (t.etat === 'en_cours' || t.etat === 'en_attente') throw new ErreurDetourage('Déjà en cours.', 409);
-    if (!t.fichiers['source.mp4']) throw new ErreurDetourage('Dépose d’abord la vidéo.', 409);
-    const c = this.o.clientDe(t.moteurId);
-    if (!c) throw new ErreurDetourage('Le moteur de ce travail est hors ligne.', 503);
-    const fac = this.o.facturation?.(org) ?? null;
-    if (t.credits?.etat === 'reservee') await fac?.liberer(t.credits.reservationId).catch(() => {}); // relance : l'ancien devis est rendu
-    t.credits = undefined;
-    if (fac && devis?.credits) {
-      const r = await fac.reserver({ idempotence: randomBytes(12).toString('hex'), credits: devis.credits, libelle });
-      if (!r.ok) throw new ErreurDetourage(r.message, 402);
-      t.credits = { reservationId: r.reservationId, credits: r.credits, etat: 'reservee' };
-    }
-    try {
-      await c.lancer(id, params);
-    } catch (e) {
-      if (t.credits) { await fac?.liberer(t.credits.reservationId).catch(() => {}); t.credits.etat = 'liberee'; }
-      throw e;
-    }
-    Object.assign(t, { params, devis, etat: 'en_attente', etape: 'file', progression: 0, message: 'En file', majLe: this.now(), mesures: undefined, sorties: undefined });
-    this.sauver();
-    return t;
+    return this.modifier(org, id, async (t) => {
+      if (t.etat === 'en_cours' || t.etat === 'en_attente') throw new ErreurDetourage('Déjà en cours.', 409);
+      if (!t.fichiers['source.mp4']) throw new ErreurDetourage('Dépose d’abord la vidéo.', 409);
+      const c = this.o.clientDe(t.moteurId);
+      if (!c) throw new ErreurDetourage('Le moteur de ce travail est hors ligne.', 503);
+      const fac = this.o.facturation?.(org) ?? null;
+      if (t.credits?.etat === 'reservee') await fac?.liberer(t.credits.reservationId).catch(() => {}); // relance : l'ancien devis est rendu
+      t.credits = undefined;
+      if (fac && devis?.credits) {
+        const r = await fac.reserver({ idempotence: randomBytes(12).toString('hex'), credits: devis.credits, libelle });
+        if (!r.ok) throw new ErreurDetourage(r.message, 402);
+        t.credits = { reservationId: r.reservationId, credits: r.credits, etat: 'reservee' };
+      }
+      try {
+        await c.lancer(id, params);
+      } catch (e) {
+        if (t.credits) { await fac?.liberer(t.credits.reservationId).catch(() => {}); t.credits.etat = 'liberee'; }
+        throw e;
+      }
+      Object.assign(t, { params, devis, etat: 'en_attente', etape: 'file', progression: 0, message: 'En file', majLe: this.now(), mesures: undefined, sorties: undefined });
+      this.sauver();
+      return t;
+    });
   }
 
   /** Interroge la machine GPU, met à jour le registre, solde les crédits si l'état est terminal. */
   async actualiser(org: string, id: string): Promise<TravailDetourage> {
     const t = this.possede(org, id);
+    // Une lecture concurrente ne règle jamais des crédits pendant une autre mutation.
+    if (this.operations.has(id)) return t;
+    return this.modifier(org, id, (travail) => this.actualiserTravail(org, travail));
+  }
+
+  private async actualiserTravail(org: string, t: TravailDetourage): Promise<TravailDetourage> {
     if (t.etat === 'depose' || TERMINAUX.has(t.etat) && t.credits?.etat !== 'reservee') return t;
     const c = this.o.clientDe(t.moteurId);
     if (!c) { t.message = 'Moteur hors ligne : la progression reprendra à son retour.'; return t; }
     let e: EtatMoteur | null;
-    try { e = await c.etat(id); } catch { t.message = 'Moteur injoignable : nouvelle tentative au prochain appel.'; return t; }
+    try { e = await c.etat(t.id); } catch { t.message = 'Moteur injoignable : nouvelle tentative au prochain appel.'; return t; }
     if (!e) {
       Object.assign(t, { etat: 'erreur', message: 'Le moteur a perdu ce travail (dossier supprimé).', majLe: this.now() });
     } else {
@@ -171,10 +189,13 @@ export class Detourage {
   }
 
   async annuler(org: string, id: string): Promise<TravailDetourage> {
-    const t = this.possede(org, id);
+    return this.modifier(org, id, (t) => this.annulerTravail(org, t));
+  }
+
+  private async annulerTravail(org: string, t: TravailDetourage): Promise<TravailDetourage> {
     if (TERMINAUX.has(t.etat) || t.etat === 'depose') return t;
-    await this.o.clientDe(t.moteurId)?.annuler(id).catch(() => {});
-    return this.actualiser(org, id);
+    await this.o.clientDe(t.moteurId)?.annuler(t.id).catch(() => {});
+    return this.actualiserTravail(org, t);
   }
 
   /** Reprise : relance les mêmes réglages ; le moteur saute ce qui est déjà calculé (suivi, matting) grâce à ses clés. */
@@ -187,12 +208,13 @@ export class Detourage {
 
   /** Supprime le travail et tout son dossier sur la machine GPU (fichiers temporaires, séquences, vidéos). */
   async supprimer(org: string, id: string) {
-    const t = this.possede(org, id);
-    if (t.etat === 'en_cours' || t.etat === 'en_attente') await this.annuler(org, id).catch(() => {});
-    if (t.credits?.etat === 'reservee') { await (this.o.facturation?.(org) ?? null)?.liberer(t.credits.reservationId).catch(() => {}); }
-    await this.o.clientDe(t.moteurId)?.supprimer(id).catch(() => {});
-    this.travaux.delete(id);
-    this.sauver();
+    return this.modifier(org, id, async (t) => {
+      if (t.etat === 'en_cours' || t.etat === 'en_attente') await this.annulerTravail(org, t).catch(() => {});
+      if (t.credits?.etat === 'reservee') { await (this.o.facturation?.(org) ?? null)?.liberer(t.credits.reservationId).catch(() => {}); }
+      await this.o.clientDe(t.moteurId)?.supprimer(id).catch(() => {});
+      this.travaux.delete(id);
+      this.sauver();
+    });
   }
 
   /** Nettoyage périodique : travaux terminés/échoués trop anciens, dépôts jamais lancés. Retourne les identifiants supprimés. */
