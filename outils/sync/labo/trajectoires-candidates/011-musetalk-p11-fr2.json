@@ -1,0 +1,64 @@
+{
+  "schema": "preuve-correction-v1",
+  "id": "musetalk-p11-fr2-20261108",
+  "type": "trajectoire technique candidate, pas mémoire promue",
+  "classification": "ESSAI R&D — En préparation",
+  "comparison_group": "sync-comparatif-p11-fr2-20261108",
+  "prompt": "Aucun prompt textuel : vidéo P11 et audio FR2 complet identiques à LatentSync, paramètres MuseTalk épinglés.",
+  "inputs": {
+    "video_sha256": "d8230ab3da7f5d70d2bad09eeaa25c388df2a06e3df41ba61d53d1814a4b03c4",
+    "video_frames": 253,
+    "video_fps": "25/1",
+    "video_seconds": 10.12,
+    "audio_pcm_sha256": "e95d7c62e85d12e02b3115b4b816af426c4296a3c05d6198ab92140922b6f6e2",
+    "audio_samples": 144640,
+    "audio_hz": 16000,
+    "voice_requested_model": "elevenlabs/eleven-v4",
+    "voice_effective_model": "non attesté indépendamment"
+  },
+  "generation": {
+    "model": "MuseTalk1.5",
+    "host": "pc1",
+    "gpu": "RTX5090",
+    "fps": 25,
+    "batch_size": 2,
+    "float16": true,
+    "parsing_mode": "jaw",
+    "extra_margin": 10,
+    "left_cheek_width": 90,
+    "right_cheek_width": 90,
+    "saved_coord": true,
+    "cuda_allocator_fraction": 0.6,
+    "seed": null,
+    "seed_controlled": false,
+    "wall_seconds_supervised": 44.75910572198336,
+    "max_gpu_mib": 7800,
+    "gpu_stop_confirmed": true,
+    "power_limits_w_observed": [
+      475.0
+    ]
+  },
+  "phone": {
+    "sha256": "0276f69764eef60bad7b178a336e796ca0a1b62fc6e8b0f749dd59615249a446",
+    "bytes": 1678007,
+    "video_frames": 226,
+    "video_seconds": 9.04,
+    "codecs": [
+      "h264",
+      "aac"
+    ],
+    "av_validated": true,
+    "AAC_PCM_bit_identical_claim": false
+  },
+  "defect": "Le calcul amont par flottants perd une image et une feature Whisper pour144640échantillons/25fps ;225/451 au lieu de226/452, reproduit sur la vraie méthode CPU avec doubles de tenseurs.",
+  "change": "Deux calculs utilisent le nombre entier d’échantillons. Runtime privé et poids épinglés ; Python privé réutilise les paquets existants dont les permissions restent intactes.",
+  "comparison": "Mêmes octets d’entrée que trajectoire010. Comparatif visuel encore en préparation ; budgets de surveillance communs, architectures et chaînes de codecs distinctes. Un seul essai par moteur ne mesure pas un gain généralisable.",
+  "human_quality": "non évaluée",
+  "human_voice_approved": false,
+  "quality_gain_score_claim": false,
+  "memory_promoted": false,
+  "blindness_limit": "Le fondateur a déjà reçu les deux clips identifiés. Masquer ensuite les panneaux ne garantit pas un jugement humain parfaitement aveugle.",
+  "method_TIDE": "Observation/correction temporelle conservées ; jugement visuel apparié hors échantillon restant à produire avant toute promotion.",
+  "proof_directory": "/media/pc6/Storage/Nexora/travail/musetalk-capsule-root-20261108-45db8d28",
+  "email_receipt_id": "1a1bbfd7cd712490"
+}
