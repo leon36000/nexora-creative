@@ -58,7 +58,7 @@ function orientedMatches(points,c,buckets,epsilon){
 }
 function assignCorner(state,si,di){
   const n=new Vector3(state.src.normals[3*si],state.src.normals[3*si+1],state.src.normals[3*si+2]);
-  if(!Number.isFinite(n.x)||!Number.isFinite(n.y)||!Number.isFinite(n.z)){throw new Error('nonfinite source normal');}
+  if(!Number.isFinite(n.x)||!Number.isFinite(n.y)||!Number.isFinite(n.z)){throw new TypeError('nonfinite source normal');}
   if(n.lengthSq()===0){state.undefinedCorners++;state.undefinedVertices.add(di);return;}
   n.applyNormalMatrix(state.srcNormalMatrix).applyMatrix3(state.dstWorldToLocal).normalize();
   if(!Number.isFinite(n.x)||!Number.isFinite(n.y)||!Number.isFinite(n.z)||n.lengthSq()===0){throw new Error('invalid transformed normal');}
