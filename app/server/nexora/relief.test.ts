@@ -7,7 +7,7 @@ import { unzipSync } from 'fflate';
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { Mesh, Material } from 'three';
-import { analyser, cartesPbr, cibleTriangles, cleArete, compatibiliteObj, decimerGlb, exporter, lireGlb, maillageDuDocument, nomCacheExport, repondreObjIncompatible, versObj, versStl, vers3mf, zipAligne, type Maillage } from './relief.js';
+import { analyser, cartesPbr, cibleTriangles, cleArete, compatibiliteObj, decimerGlb, exporter, lireGlb, maillageDuDocument, nomCacheExport, nomCacheRapport, repondreObjIncompatible, versObj, versStl, vers3mf, zipAligne, type Maillage } from './relief.js';
 
 /** Sphère UV (étanche une fois les sommets soudés), avec une texture 1×1 PNG. */
 async function glbSphere(divisions = 24, ouvert = false): Promise<Uint8Array> {
@@ -310,6 +310,36 @@ describe('Nexora Mesh : contrôle du maillage', () => {
   });
 });
 
+describe('Nexora Mesh : précision monde', () => {
+  it('calcule le volume avec un ancrage utilisé, même si un sommet isolé est très éloigné', () => {
+    const positions = Float64Array.from([1e18,0,0, 1e9,-1e9,1e9, 1e9+1,-1e9,1e9, 1e9,-1e9+1,1e9, 1e9,-1e9,1e9+1]);
+    const indices = Uint32Array.from([1,3,2, 1,2,4, 1,4,3, 2,3,4]);
+    const rapport = analyser({ positions, indices, uvs: null, couleur: null });
+    expect(rapport.etanche).toBe(true);
+    expect(rapport.volume).toBeCloseTo(1 / 6, 12);
+  });
+  it('préserve un tétraèdre local après une translation de nœud de 1e9', async () => {
+    const doc = new Document(), buffer = doc.createBuffer();
+    const points = doc.createAccessor().setType('VEC3').setArray(Float32Array.from([0,0,0, 1,0,0, 0,1,0, 0,0,1])).setBuffer(buffer);
+    const indices = doc.createAccessor().setType('SCALAR').setArray(Uint16Array.from([0,2,1, 0,1,3, 0,3,2, 1,2,3])).setBuffer(buffer);
+    const primitive = doc.createPrimitive().setAttribute('POSITION', points).setIndices(indices);
+    const node = doc.createNode().setMesh(doc.createMesh().addPrimitive(primitive)).setTranslation([1e9, -1e9, 1e9]);
+    doc.createScene().addChild(node);
+    const glb = await new NodeIO().writeBinary(doc);
+    const m = await lireGlb(glb), rapport = analyser(m);
+    expect(m.positions).toBeInstanceOf(Float64Array);
+    expect(rapport.taille).toEqual([1,1,1]);
+    expect(rapport.degeneres).toBe(0);
+    expect(rapport.etanche).toBe(true);
+    expect(rapport.volume).toBeCloseTo(1 / 6, 12);
+    const stl = versStl(m), bytes = new DataView(stl.buffer, stl.byteOffset, stl.byteLength);
+    expect(bytes.getUint32(80, true)).toBe(4);
+    const coordonnees: number[][] = [[], [], []];
+    for (let t = 0; t < 4; t++) for (let k = 0; k < 9; k++) coordonnees[k % 3].push(bytes.getFloat32(84 + 50 * t + 12 + 4 * k, true));
+    expect(coordonnees.map((axe) => Math.max(...axe) - Math.min(...axe))).toEqual([100, 100, 100]);
+  });
+});
+
 describe('Nexora Mesh : décimation', () => {
   it('cibleTriangles borne et ignore ce qui ne réduit pas', () => {
     expect(cibleTriangles(undefined, 1000)).toBeNull();
@@ -480,8 +510,11 @@ describe('Nexora Mesh : exports', () => {
     writeFileSync(nouveau, 'nouveau', { flag: 'wx' });
     expect(readFileSync(ancien, 'utf8')).toBe('ancien');
     expect(readFileSync(nouveau, 'utf8')).toBe('nouveau');
-    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v2-plein-100.stl');
-    expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v2-plein-100.3mf');
+    expect(nomCacheRapport(null)).toBe('rapport-monde64-v1-plein.json');
+    expect(nomCacheRapport(500)).toBe('rapport-monde64-v1-500.json');
+    expect(nomCacheExport('obj', null, 100)).toBe('export-obj-normales-v4-plein-100.zip');
+    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v3-plein-100.stl');
+    expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v3-plein-100.3mf');
     expect(nomCacheExport('usdz', null, 100)).toBe('export-usdz-matieres-v3-plein-100.usdz');
     expect(nomCacheExport('glb', null, 100)).toBe('export-glb-plein-100.glb');
   });
