@@ -2070,7 +2070,7 @@ app.get('/api/nexora/relief/:take/export', async (req, reply) => {
 app.get('/api/nexora/relief/:take/cartes', async (req, reply) => {
   const p = priseRelief(req, reply); if (!p) return;
   const c = await cartesPbr(readFileSync(p.glb));
-  return { cartes: c.map((x) => ({ nom: x.nom, mime: x.mime, largeur: x.largeur, octets: x.octets.length })) };
+  return { cartes: c.map((x) => ({ nom: x.nom, mime: x.mime, largeur: x.largeur, octets: x.octets.length, materiaux: x.materiaux })) };
 });
 app.get('/api/nexora/relief/:take/cartes/:nom', async (req, reply) => {
   const p = priseRelief(req, reply); if (!p) return;

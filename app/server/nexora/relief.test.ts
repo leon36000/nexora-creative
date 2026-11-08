@@ -169,7 +169,7 @@ describe('OBJ : normales et orientation', () => {
 });
 
 /** Deux primitives glTF avec couleurs différentes et une texture : aucune ressource externe. */
-async function glbDeuxMatieres(options: { sansUv?: boolean; uvNaN?: boolean; jpeg?: boolean; blend?: boolean; deuxTextures?: boolean; grille?: boolean } = {}): Promise<Uint8Array> {
+async function glbDeuxMatieres(options: { sansUv?: boolean; uvNaN?: boolean; jpeg?: boolean; blend?: boolean; deuxTextures?: boolean; grille?: boolean; texturePartagee?: boolean; memeNom?: boolean } = {}): Promise<Uint8Array> {
   const doc = new Document();
   const buf = doc.createBuffer();
   const png = Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'));
@@ -177,6 +177,8 @@ async function glbDeuxMatieres(options: { sansUv?: boolean; uvNaN?: boolean; jpe
   const tex = doc.createTexture('texture').setImage(options.jpeg ? jpeg : png).setMimeType(options.jpeg ? 'image/jpeg' : 'image/png');
   const mats = [doc.createMaterial('rouge').setBaseColorFactor([1, 0, 0, .2]),
     doc.createMaterial('bleu').setBaseColorFactor([0, 0, 1, 1]).setBaseColorTexture(tex)];
+  if (options.memeNom) mats[1].setName('rouge');
+  if (options.texturePartagee) mats[0].setBaseColorTexture(tex);
   if (options.deuxTextures) mats[0].setBaseColorTexture(doc.createTexture('premiere').setImage(png).setMimeType('image/png'));
   if (options.blend) mats[1].setAlphaMode('BLEND').setBaseColorFactor([0, 0, 1, .5]);
   mats[1].getBaseColorTextureInfo()!.setTexCoord(1);
@@ -542,5 +544,17 @@ describe('Nexora Mesh : exports', () => {
     const c = await cartesPbr(await glbSphere(8));
     expect(c.map((x) => x.nom)).toEqual(['couleur']);
     expect(c[0].mime).toBe('image/png');
+  });
+  it('liste deux cartes de couleur distinctes même si les matériaux ont le même nom', async () => {
+    const cartes = await cartesPbr(await glbDeuxMatieres({ deuxTextures: true, jpeg: true, memeNom: true }));
+    expect(cartes.map((c) => c.nom)).toEqual(['couleur', 'couleur-2']);
+    expect(cartes.map((c) => c.mime)).toEqual(['image/png', 'image/jpeg']);
+    expect(cartes.map((c) => c.materiaux)).toEqual([[{ index: 1, nom: 'rouge' }], [{ index: 2, nom: 'rouge' }]]);
+    expect(cartes[0].octets).not.toEqual(cartes[1].octets);
+  });
+  it('associe une même texture partagée aux deux matériaux sans la dupliquer', async () => {
+    const cartes = await cartesPbr(await glbDeuxMatieres({ texturePartagee: true }));
+    expect(cartes.map((c) => c.nom)).toEqual(['couleur']);
+    expect(cartes[0].materiaux).toEqual([{ index: 1, nom: 'rouge' }, { index: 2, nom: 'bleu' }]);
   });
 });

@@ -11,6 +11,39 @@ const FORMATS: FormatRelief[] = ['glb', 'obj', 'stl', '3mf', 'usdz'];
 const FACES = [0, 100_000, 50_000, 20_000, 10_000, 5_000] as const;
 const NOMS_FORMAT: Record<FormatRelief, string> = { glb: 'GLB', obj: 'OBJ', stl: 'STL', '3mf': '3MF', usdz: 'USDZ' };
 type CopieMesh = ReturnType<typeof meshCopy>;
+type CartePbr = { nom: string; materiaux?: { index: number; nom: string }[] };
+
+/** Noms d'URL inchangés ; seul leur libellé est traduit pour l'affichage. */
+export function libelleCartePbr(nom: string, langue: LangueClient): string {
+  const m = /^(couleur|metal-rugosite|normales|occlusion|emission)(?:-(\d+))?$/.exec(nom);
+  if (!m) return nom;
+  const roles: Record<LangueClient, Record<string, string>> = {
+    fr: { couleur: 'Couleur', 'metal-rugosite': 'Métal / rugosité', normales: 'Normales', occlusion: 'Occlusion', emission: 'Émission' },
+    en: { couleur: 'Color', 'metal-rugosite': 'Metal / roughness', normales: 'Normals', occlusion: 'Occlusion', emission: 'Emission' },
+  };
+  const suffixe = m[2] ? ' ' + m[2] : '';
+  return roles[langue][m[1]] + suffixe;
+}
+
+export function CartesPbr({ cartes, takeId, langue }: Readonly<{ cartes: CartePbr[]; takeId: number; langue: LangueClient }>) {
+  const c = meshCopy(langue);
+  return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: 8 }}>
+    {cartes.map((carte) => {
+      const label = libelleCartePbr(carte.nom, langue);
+      const materiaux = carte.materiaux?.map((m) => String(m.index) + (m.nom ? ' · ' + m.nom : '')).join(', ');
+      const pluriel = (carte.materiaux?.length ?? 0) > 1;
+      const types = { fr: ['Matériau', 'Matériaux'], en: ['Material', 'Materials'] };
+      const type = types[langue][Number(pluriel)];
+      const details = materiaux ? `${type} ${materiaux}` : '';
+      const accessible = details ? `${label} — ${details}` : label;
+      return <a key={carte.nom} href={reliefCarteUrl(takeId, carte.nom)} target="_blank" rel="noreferrer" title={c.openMap(accessible)} style={{ display: 'grid', gap: 3, fontSize: 11 }}>
+        <img src={reliefCarteUrl(takeId, carte.nom)} alt={c.mapAlt(accessible)} loading="lazy" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 8 }} />
+        <span className="dim">{label}</span>
+        {details && <span className="dim">{details}</span>}
+      </a>;
+    })}
+  </div>;
+}
 
 function aideFormat(format: FormatRelief, c: CopieMesh): string {
   const aides = {
@@ -128,7 +161,7 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
   }, []);
   const [info, setInfo] = useState<RapportRelief | null>(null);
   const [erreurRapport, setErreurRapport] = useState(false);
-  const [cartes, setCartes] = useState<{ nom: string }[]>([]);
+  const [cartes, setCartes] = useState<CartePbr[]>([]);
   const [juge, setJuge] = useState<JugeRelief | null>(null);
   const [jugement, setJugement] = useState(false);
   useEffect(() => {
@@ -180,14 +213,7 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
       {cartes.length > 0 && (
         <div className="rail-section">
           <div className="label">{c.pbrMaps}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: 8 }}>
-            {cartes.map((carte) => (
-              <a key={carte.nom} href={reliefCarteUrl(take.id, carte.nom)} target="_blank" rel="noreferrer" title={c.openMap(carte.nom)} style={{ display: 'grid', gap: 3, fontSize: 11 }}>
-                <img src={reliefCarteUrl(take.id, carte.nom)} alt={c.mapAlt(carte.nom)} loading="lazy" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 8 }} />
-                <span className="dim">{carte.nom}</span>
-              </a>
-            ))}
-          </div>
+          <CartesPbr cartes={cartes} takeId={take.id} langue={langue} />
         </div>
       )}
 

@@ -5,12 +5,33 @@ import type { RapportMaillage } from '../api';
 vi.mock('../Viewer', () => ({ recreate: vi.fn() }));
 vi.mock('../store', () => ({ toast: vi.fn() }));
 vi.mock('../ui', () => ({ Icon: () => null }));
-import { EtatAnalyseMaillage, LienExportMesh, ResumeMaillage } from './ReliefOutils';
+import { CartesPbr, EtatAnalyseMaillage, LienExportMesh, ResumeMaillage } from './ReliefOutils';
 
 const base: RapportMaillage = {
   sommets: 4, triangles: 4, degeneres: 0, aretesOuvertes: 0, aretesNonVariete: 0,
   composantes: 1, etanche: true, taille: [1, 1, 1], volume: 1 / 6, avertissements: [],
 };
+
+describe('cartes PBR multi-matériaux', () => {
+  const cartes = [
+    { nom: 'couleur', materiaux: [{ index: 1, nom: 'Rouge' }] },
+    { nom: 'couleur-2', materiaux: [{ index: 2, nom: 'Bleu' }, { index: 3, nom: '' }] },
+  ];
+  it.each([['fr', 'Couleur 2', 'Matériaux 2 · Bleu, 3'], ['en', 'Color 2', 'Materials 2 · Bleu, 3']] as const)(
+    'identifie cartes et matériaux en %s sans changer les URLs', (langue, carte, details) => {
+      const html = renderToStaticMarkup(<CartesPbr cartes={cartes} takeId={42} langue={langue} />);
+      expect(html).toContain('/api/nexora/relief/42/cartes/couleur"');
+      expect(html).toContain('/api/nexora/relief/42/cartes/couleur-2"');
+      expect(html).toContain(carte);
+      expect(html).toContain(details);
+    },
+  );
+  it('affiche une ancienne réponse sans liste de matériaux', () => {
+    const html = renderToStaticMarkup(<CartesPbr cartes={[{ nom: 'couleur' }]} takeId={42} langue="en" />);
+    expect(html).toContain('Color');
+    expect(html).not.toContain('Material');
+  });
+});
 
 describe('rapport du maillage', () => {
   it('décrit les arêtes fermées sans promettre une impression prête', () => {
