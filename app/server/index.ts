@@ -1613,17 +1613,17 @@ app.post('/api/nexora/film/:id/plan/:n/reference', async (req, reply) => {
   const sb = f.s.storyboard as Storyboard;
   const persos = role === 'composition' ? await resoudrePersonnages(intentionDuPlan(sb, n)) : null;
   const dureeS = (plan.duree === 10 ? 243 : 124) / 24;
-  const dialogues = plan.replique ? { dialogues: [{ texte: plan.replique, langue: 'French' }] } : {};
+  const dialogues = plan.replique ? { dialogues: [{ texte: plan.replique, langue: sb.langue === 'en' ? 'English' : 'French' }] } : {};
   const llm = llmRedaction();
   let corps: any;
   if (role === 'depart') {
-    const r = await reecrireH3({ intention: `${intentionDuPlan(sb, n)}\nThe video starts exactly from the provided first frame and continues the action from it.`, mode: 'i2va', dureeS, ...dialogues }, llm);
+    const r = await reecrireH3({ intention: `${intentionDuPlan(sb, n)}\nThe video starts exactly from the provided first frame and continues the action from it.`, mode: 'i2va', dureeS, moteur: 'h3-fast', format: f.s.format, langueClient: sb.langue ?? 'fr', ...dialogues }, llm);
     corps = { ...corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'rapide' }, r.prompt, 'h3-fast'), startImage: b.jeton, brouillon: true };
   } else {
     if (!moteurDuCompte('max')) return reply.code(422).send({ error: 'La composition par image demande le moteur cinéma, indisponible ici.' });
     // Une image par identité si nécessaire, pour conserver les sujets ET la composition dans quatre entrées.
     const { sujets, jetons } = referencesAvecComposition(persos?.sujets ?? [], persos?.jetons ?? [], b.jeton);
-    const r = await reecrireH3({ intention: persos?.sujets.length ? persos.texteClair : intentionDuPlan(sb, n), mode: 'ref2va', references: { sujets, composition: 1 }, dureeS, ...dialogues }, llm);
+    const r = await reecrireH3({ intention: persos?.sujets.length ? persos.texteClair : intentionDuPlan(sb, n), mode: 'ref2va', references: { sujets, composition: 1 }, dureeS, moteur: 'h3-max', format: f.s.format, langueClient: sb.langue ?? 'fr', ...dialogues }, llm);
     const base = corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'max' }, r.prompt, 'h3-max');
     corps = { ...base, refImages: jetons, personnages: sujets.map((s) => s.nom) };
     corps = corpsBrouillonDe(corps, Math.floor(Math.random() * 1e9), corps);
