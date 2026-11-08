@@ -53,6 +53,9 @@ import { xmlFcp7 } from './nexora/projetExport.js';
 import { demanderEffet, lireDemandeEffet } from './nexora/effets.js';
 import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
 import { transcrireSurGpu } from './nexora/transcriptionGpu.js';
+import { executerBorne } from './nexora/executionBornee.js';
+import { creerExportProres, verifierProres } from './nexora/exportProres.js';
+import { sansEcrasement } from './nexora/filmSorties.js';
 import { argsAvecMusique, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, marquerReservationFilmLiberee, tournerFilm } from './nexora/filmMoteur.js';
 import { erreurAncrageMaxFilm, libererReservationsFilmEchoue } from './nexora/filmAncrage.js';
@@ -1381,17 +1384,20 @@ app.post('/api/nexora/clip/:id/avec-musique', async (req, reply) => {
   return { takeId: id };
 });
 
+/** Un coordinateur par processus : les anciens caches ne sont jamais considérés complets. */
+const exporterProres = creerExportProres(
+  async (entree, provisoire) => {
+    await executerBorne(config.ffmpegBin, ['-nostdin', '-v', 'error', ...sansEcrasement(argsExport(entree, provisoire, 'prores'))], 3_600_000);
+  },
+  (provisoire, source) => verifierProres(provisoire, source, config.ffprobeBin),
+);
+
 /** Export professionnel d'un film terminé (ProRes 422 HQ + PCM, .mov). */
 app.get('/api/nexora/film/:id/export', async (req, reply) => {
   const film = takes.get(Number((req.params as any).id));
   if (!film || !film.output_path || film.status !== 'done') return reply.code(404).send({ error: 'Film introuvable ou pas terminé.' });
   const dossier = join(config.outputDir, 'films', 'exports');
-  mkdirSync(dossier, { recursive: true });
-  const sortie = join(dossier, `film_${film.id}_prores.mov`);
-  if (!existsSync(sortie)) {
-    const { execFile } = await import('child_process');
-    await new Promise<void>((ok, ko) => execFile(config.ffmpegBin, argsExport(film.output_path!, sortie, 'prores'), { maxBuffer: 1 << 24 }, (err) => (err ? ko(err) : ok())));
-  }
+  const sortie = await exporterProres(film.id, film.output_path, dossier);
   reply.header('content-type', 'video/quicktime');
   reply.header('content-disposition', `attachment; filename="${safeShotName(film.shot_name || 'film')}_prores.mov"`);
   return reply.send(createReadStream(sortie));

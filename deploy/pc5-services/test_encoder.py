@@ -1,18 +1,42 @@
 """Sans GPU : python test_encoder.py (FastAPI/httpx/python-multipart requis)."""
 import asyncio
+import errno
+import fcntl
 import json
 import os
 from pathlib import Path
+import signal
 import stat
 import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
+from unittest.mock import AsyncMock, patch
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 import encoder_endpoint as ep
+
+
+def peut_signaler_son_enfant():
+    """Teste uniquement SIGKILL sur un enfant court, avec attente bornée s'il sort naturellement."""
+    enfant = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(.25)'],
+                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL, env={})
+    try:
+        enfant.kill()
+    except (PermissionError, ProcessLookupError):
+        enfant.wait(timeout=1)
+        return False
+    try:
+        enfant.wait(timeout=1)
+    except subprocess.TimeoutExpired:
+        # Le processus a son propre délai court; on le réapprend sans nouvelle tentative de signal.
+        enfant.wait(timeout=1)
+        return False
+    return enfant.returncode == -signal.SIGKILL
 
 
 class Encoder(unittest.TestCase):
@@ -158,6 +182,8 @@ pathlib.Path(args[-1]).write_bytes(b'ENCODE-HEVC8BIT')
         finally: self.gpu_lock.release()
 
     def test_delai_nettoie_enfant(self):
+        if not peut_signaler_son_enfant():
+            self.skipTest('runner ne permet pas de confirmer SIGKILL sur notre enfant; refus couvert par mocks')
         ep.DELAI_S=.2
         self.assertEqual(self.post(b'DELAI').status_code,504)
         self.propre()
@@ -264,6 +290,192 @@ sys.exit(1)
         # La limite compte les options et les fichiers ; entrée23+{}2=25, sortie29 >25.
         self.assertEqual(self.post(b'V'*23).status_code,422)
         self.propre()
+
+
+class ProgrammeArretTests(unittest.IsolatedAsyncioTestCase):
+    def test_probe_refus_attend_lenfant_naturellement(self):
+        with patch.object(subprocess.Popen, 'kill', side_effect=PermissionError(errno.EACCES, 'permission denied')):
+            debut = time.monotonic()
+            self.assertFalse(peut_signaler_son_enfant())
+            self.assertLess(time.monotonic() - debut, 1)
+
+    async def test_permission_denied_is_explicit_bounded_and_passes_lock_fd(self):
+        class FauxProcessus:
+            returncode = None
+            stdout = None
+            def __init__(self): self.kill_calls = 0; self.wait_calls = 0
+            def kill(self):
+                self.kill_calls += 1
+                raise PermissionError(errno.EACCES, 'permission denied')
+            async def wait(self):
+                self.wait_calls += 1
+                await asyncio.Future()
+
+        proc = FauxProcessus()
+        spawn = AsyncMock(return_value=proc)
+        fd_r, fd_w = os.pipe()
+        try:
+            with patch.object(ep.asyncio, 'create_subprocess_exec', new=spawn), \
+                    patch.object(ep, 'DELAI_S', .01), patch.object(ep, 'DELAI_ARRET_S', .02):
+                with self.assertRaises(ep.HTTPException) as erreur:
+                    await asyncio.wait_for(ep.programme(['/fake/ffmpeg'], verrou_fd=fd_w), timeout=.5)
+            self.assertEqual(erreur.exception.status_code, 503)
+            self.assertIn('arrêt non confirmé', erreur.exception.detail)
+            self.assertEqual(proc.kill_calls, 1)
+            self.assertEqual(proc.wait_calls, 1, 'ne pas attendre un enfant qu’on ne peut pas arrêter')
+            self.assertEqual(spawn.await_args.kwargs['pass_fds'], (fd_w,))
+        finally:
+            os.close(fd_r); os.close(fd_w)
+
+    async def test_permission_denied_closes_only_stdout_pipe_parent(self):
+        class FauxPipe:
+            def __init__(self): self.closed = False
+            def close(self): self.closed = True
+
+        class FauxTransport:
+            def __init__(self): self.pipe = FauxPipe(); self.requested = []
+            def get_pipe_transport(self, fd):
+                self.requested.append(fd)
+                return self.pipe
+
+        class FauxStdout:
+            async def read(self, _limit): await asyncio.Future()
+
+        class FauxProcessus:
+            returncode = None
+            stdout = FauxStdout()
+            def __init__(self): self.kill_calls = 0; self.wait_calls = 0; self._transport = FauxTransport()
+            def kill(self):
+                self.kill_calls += 1
+                raise PermissionError(errno.EACCES, 'permission denied')
+            async def wait(self):
+                self.wait_calls += 1
+                await asyncio.Future()
+
+        proc = FauxProcessus()
+        spawn = AsyncMock(return_value=proc)
+        with patch.object(ep.asyncio, 'create_subprocess_exec', new=spawn), \
+                patch.object(ep, 'DELAI_S', .01), patch.object(ep, 'DELAI_ARRET_S', .02):
+            with self.assertRaises(ep.HTTPException) as erreur:
+                await asyncio.wait_for(ep.programme(['/fake/ffprobe'], sortie=True), timeout=.5)
+        self.assertEqual(erreur.exception.status_code, 503)
+        self.assertEqual(proc._transport.requested, [1])
+        self.assertTrue(proc._transport.pipe.closed)
+        self.assertEqual(proc.kill_calls, 1)
+        self.assertEqual(proc.wait_calls, 0)
+
+    async def test_permission_denied_closes_real_stdout_pipe_and_reaps_child(self):
+        created = {}
+        real_create = asyncio.create_subprocess_exec
+
+        async def capture_child(*args, **kwargs):
+            child = await real_create(*args, **kwargs)
+            created['child'] = child
+            return child
+
+        def deny_kill(_child):
+            raise PermissionError(errno.EACCES, 'permission denied')
+
+        try:
+            with patch.object(ep.asyncio, 'create_subprocess_exec', new=capture_child), \
+                    patch.object(asyncio.subprocess.Process, 'kill', new=deny_kill), \
+                    patch.object(ep, 'DELAI_S', .02), patch.object(ep, 'DELAI_ARRET_S', .02):
+                with self.assertRaises(ep.HTTPException) as erreur:
+                    await asyncio.wait_for(ep.programme(
+                        [sys.executable, '-c', 'import time; time.sleep(.4)'], sortie=True), timeout=.8)
+            self.assertEqual(erreur.exception.status_code, 503)
+            child = created['child']
+            pipe = child._transport.get_pipe_transport(1)
+            self.assertTrue(pipe.is_closing())
+            self.assertIsNone(child.returncode)
+            await asyncio.wait_for(child.wait(), timeout=1)
+            self.assertEqual(child.returncode, 0)
+        finally:
+            child = created.get('child')
+            if child is not None and child.returncode is None:
+                await asyncio.wait_for(child.wait(), timeout=1)
+
+    async def test_process_lookup_error_reconcile_wait_is_bounded_and_timeout_remains(self):
+        class FauxProcessus:
+            returncode = None
+            stdout = None
+            def __init__(self): self.kill_calls = 0; self.wait_calls = 0
+            def kill(self):
+                self.kill_calls += 1
+                raise ProcessLookupError(errno.ESRCH, 'already exited')
+            async def wait(self):
+                self.wait_calls += 1
+                if self.wait_calls == 1:
+                    await asyncio.Future()
+                self.returncode = -signal.SIGKILL
+                return self.returncode
+
+        proc = FauxProcessus()
+        spawn = AsyncMock(return_value=proc)
+        with patch.object(ep.asyncio, 'create_subprocess_exec', new=spawn), \
+                patch.object(ep, 'DELAI_S', .01), patch.object(ep, 'DELAI_ARRET_S', .02):
+            with self.assertRaises(TimeoutError):
+                await asyncio.wait_for(ep.programme(['/fake/ffmpeg']), timeout=.5)
+        self.assertEqual(proc.kill_calls, 1)
+        self.assertEqual(proc.wait_calls, 2)
+
+    async def test_wait_after_successful_kill_is_bounded(self):
+        class FauxProcessus:
+            returncode = None
+            stdout = None
+            def __init__(self): self.kill_calls = 0; self.wait_calls = 0
+            def kill(self): self.kill_calls += 1
+            async def wait(self):
+                self.wait_calls += 1
+                await asyncio.Future()
+
+        proc = FauxProcessus()
+        spawn = AsyncMock(return_value=proc)
+        with patch.object(ep.asyncio, 'create_subprocess_exec', new=spawn), \
+                patch.object(ep, 'DELAI_S', .01), patch.object(ep, 'DELAI_ARRET_S', .02):
+            with self.assertRaises(ep.HTTPException) as erreur:
+                await asyncio.wait_for(ep.programme(['/fake/ffmpeg']), timeout=.5)
+        self.assertEqual(erreur.exception.status_code, 503)
+        self.assertIn('arrêt non confirmé', erreur.exception.detail)
+        self.assertEqual(proc.wait_calls, 2)
+
+    async def test_permission_denied_child_keeps_lock_until_natural_exit(self):
+        with tempfile.TemporaryDirectory(prefix='programme-lock-') as tmp:
+            lock_path = Path(tmp)/'.encoder.lock'
+            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            created = {}
+            real_create = asyncio.create_subprocess_exec
+
+            async def capture_child(*args, **kwargs):
+                child = await real_create(*args, **kwargs)
+                created.update(child=child, pass_fds=kwargs.get('pass_fds'))
+                return child
+
+            def deny_kill(_child):
+                raise PermissionError(errno.EACCES, 'permission denied')
+
+            probe_fd = None
+            try:
+                with patch.object(ep.asyncio, 'create_subprocess_exec', new=capture_child), \
+                        patch.object(asyncio.subprocess.Process, 'kill', new=deny_kill), \
+                        patch.object(ep, 'DELAI_S', .02), patch.object(ep, 'DELAI_ARRET_S', .02):
+                    with self.assertRaises(ep.HTTPException) as erreur:
+                        await asyncio.wait_for(ep.programme([sys.executable, '-c', 'import time; time.sleep(.8)'], limite_fichier=1024, verrou_fd=fd), timeout=.5)
+                self.assertEqual(erreur.exception.status_code, 503)
+                self.assertEqual(created['pass_fds'], (fd,))
+                self.assertIsNone(created['child'].returncode)
+                os.close(fd); fd = None
+                probe_fd = os.open(lock_path, os.O_RDWR)
+                with self.assertRaises(BlockingIOError):
+                    fcntl.flock(probe_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                await asyncio.wait_for(created['child'].wait(), timeout=1.2)
+                fcntl.flock(probe_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            finally:
+                if created.get('child') is not None and created['child'].returncode is None:
+                    await asyncio.wait_for(created['child'].wait(), timeout=1.2)
+                if fd is not None: os.close(fd)
+                if probe_fd is not None: os.close(probe_fd)
 
 
 if __name__=='__main__': unittest.main()

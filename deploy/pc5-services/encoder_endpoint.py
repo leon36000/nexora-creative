@@ -34,6 +34,7 @@ TAILLE_MAX = 512 * 2**20
 PLAFOND_ESSAIS = os.environ.get('NEXORA_ENCODER_PLAFOND_ESSAIS', str(20 * 2**30))
 DUREE_MAX_S = 600
 DELAI_S = 180
+DELAI_ARRET_S = 1.0
 VERROU = threading.BoundedSemaphore(1)
 
 
@@ -110,9 +111,26 @@ async def programme(args, *, sortie=False, limite_fichier=None, verrou_fd=None):
                 raise HTTPException(422, 'media illisible ou encodeur indisponible / invalid media or encoder unavailable')
             return data
     finally:
-        if p.returncode is None:
-            p.kill()
-            await p.wait()
+        try:
+            if p.returncode is None:
+                try:
+                    p.kill()
+                except ProcessLookupError:
+                    # L'enfant est déjà sorti; on attend uniquement sa réconciliation bornée.
+                    pass
+                except OSError as exc:
+                    # Le processus peut encore tourner et conserve verrou_fd via pass_fds.
+                    raise HTTPException(503, 'arrêt non confirmé / stop unconfirmed') from exc
+                try:
+                    await asyncio.wait_for(p.wait(), timeout=DELAI_ARRET_S)
+                except TimeoutError as exc:
+                    raise HTTPException(503, 'arrêt non confirmé / stop unconfirmed') from exc
+        finally:
+            if sortie:
+                # Ferme seulement le lecteur du parent; le transport du processus peut retenter kill.
+                pipe = p._transport.get_pipe_transport(1)
+                if pipe is not None:
+                    pipe.close()
 
 
 async def sonder(path):
@@ -318,7 +336,17 @@ def installer(app, verrou_gpu=None):
         dossier = None
         verrou_stockage = None
         reception = None
-        rendu = False
+        verrou_travail = True
+        def liberer_verrous():
+            nonlocal verrou_stockage, verrou_travail
+            fd, verrou_stockage = verrou_stockage, None
+            try:
+                if fd is not None:
+                    os.close(fd)
+            finally:
+                if verrou_travail:
+                    verrou_travail = False
+                    VERROU.release()
         try:
             verrou_stockage = admettre_essai()
             dossier = Path(tempfile.mkdtemp(prefix='enc-', dir=RACINE))
@@ -373,19 +401,16 @@ def installer(app, verrou_gpu=None):
                 raise HTTPException(422, 'sortie tronquee / truncated output')
             # Décodage complet : un -fs ou un flux corrompu ne doit pas livrer une vidéo tronquée.
             await programme([FFMPEG, '-v', 'error', '-xerror', '-nostdin', '-threads', '2', '-i', str(sortie), '-map', '0:v:0', '-map', '0:a?', '-f', 'null', '-'])
+            # Seule la lecture d'un résultat complet persiste hors verrou.
+            liberer_verrous()
             async def flux():
-                try:
-                    with sortie.open('rb') as f:
-                        while chunk := f.read(256*1024):
-                            yield chunk
-                finally:
-                    os.close(verrou_stockage)
-                    VERROU.release()
+                with sortie.open('rb') as f:
+                    while chunk := f.read(256*1024):
+                        yield chunk
             response = StreamingResponse(flux(), media_type='video/mp4', headers={
                 'Content-Length': str(sortie.stat().st_size), 'X-Nexora-Encodeur': codec,
                 'Content-Disposition': 'attachment; filename="export.mp4"', 'Cache-Control': 'no-store',
             })
-            rendu = True
             return response
         except TimeoutError:
             raise HTTPException(504, 'delai depasse / timeout')
@@ -394,9 +419,8 @@ def installer(app, verrou_gpu=None):
         except ValueError:
             raise HTTPException(422, 'requete invalide / invalid request')
         finally:
-            if reception:
-                reception.fermer()
-            if not rendu:
-                if verrou_stockage is not None:
-                    os.close(verrou_stockage)
-                VERROU.release()
+            try:
+                if reception:
+                    reception.fermer()
+            finally:
+                liberer_verrous()
