@@ -148,7 +148,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     return c.texte({ imageB64: b.imageB64, texte, seuil });
   }));
 
-  app.get(`${P}/travaux`, async () => detourage.lister(qui().org).map(vue));
+  app.get(`${P}/travaux`, async (_req, reply) => garde(reply, async () => detourage.lister(qui().org).map(vue)));
 
   app.post(`${P}/travaux`, async (req, reply) => garde(reply, async () => {
     const b = (req.body ?? {}) as { nom?: string; palier?: string };

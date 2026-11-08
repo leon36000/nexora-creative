@@ -7,7 +7,7 @@
  * soldé une seule fois). Le registre est un fichier JSON écrit de façon atomique.
  */
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { Facturation } from '../credits.js';
 import type { ClientDetourage, EtatMoteur, InfoSource } from './client.js';
@@ -60,24 +60,70 @@ export class ErreurDetourage extends Error {
   constructor(message: string, readonly code = 400) { super(message); }
 }
 
+const ETATS_TRAVAIL: ReadonlySet<string> = new Set<EtatTravail>(['depose', 'en_attente', 'en_cours', 'termine', 'erreur', 'annule', 'interrompu']);
+
+function objet(v: unknown): v is Record<string, unknown> {
+  return v !== null && typeof v === 'object' && !Array.isArray(v);
+}
+function nombreFini(v: unknown): v is number { return typeof v === 'number' && Number.isFinite(v); }
+
+function creditsValides(c: unknown): boolean {
+  if (!objet(c) || typeof c.reservationId !== 'string' || !c.reservationId || !nombreFini(c.credits)) return false;
+  if (c.etat !== 'reservee' && c.etat !== 'validee' && c.etat !== 'liberee') return false;
+  return c.reglement === undefined || c.reglement === 'valider' || c.reglement === 'liberer';
+}
+
+/** Conserve les champs inconnus et les options historiques; contrôle les invariants du cycle de vie. */
+function travailValide(v: unknown): v is TravailDetourage {
+  if (!objet(v)) return false;
+  if (['id', 'organisation', 'moteurId'].some((k) => typeof v[k] !== 'string' || v[k] === '')) return false;
+  if (['utilisateur', 'nom', 'etape', 'message'].some((k) => typeof v[k] !== 'string')) return false;
+  if (!nombreFini(v.creeLe) || !nombreFini(v.majLe) || !nombreFini(v.progression)) return false;
+  if (typeof v.etat !== 'string' || !ETATS_TRAVAIL.has(v.etat)) return false;
+  if (!objet(v.fichiers) || Object.values(v.fichiers).some((n) => !nombreFini(n))) return false;
+  return v.credits === undefined || creditsValides(v.credits);
+}
+
+function chargerRegistre(chemin: string): Map<string, TravailDetourage> {
+  let texte: string;
+  try { texte = readFileSync(chemin, 'utf8'); }
+  catch (e) {
+    if ((e as NodeJS.ErrnoException | null)?.code === 'ENOENT') return new Map();
+    throw e;
+  }
+  const contenu: unknown = JSON.parse(texte);
+  if (!Array.isArray(contenu)) throw new Error('Registre invalide.');
+  const travaux = new Map<string, TravailDetourage>();
+  for (const t of contenu) {
+    if (!travailValide(t) || travaux.has(t.id)) throw new Error('Registre invalide.');
+    travaux.set(t.id, t);
+  }
+  return travaux;
+}
+
 export class Detourage {
   private travaux = new Map<string, TravailDetourage>();
   private readonly operations = new Set<string>();
+  private readonly registreIndisponible: boolean;
   private readonly now: () => number;
   private readonly ttl: { termineMs: number; deposeMs: number };
 
   constructor(private readonly o: OptionsDetourage) {
     this.now = o.maintenant ?? Date.now;
     this.ttl = o.ttl ?? { termineMs: 48 * 3600_000, deposeMs: 7 * 24 * 3600_000 };
-    if (existsSync(o.registre)) {
-      try {
-        for (const t of JSON.parse(readFileSync(o.registre, 'utf8')) as TravailDetourage[]) this.travaux.set(t.id, t);
-      } catch { /* registre illisible : on repart à vide, les dossiers GPU se nettoient par TTL côté machine */ }
-    }
+    let charge: Map<string, TravailDetourage> | null = null;
+    try { charge = chargerRegistre(o.registre); } catch { /* conserver le fichier original pour récupération */ }
+    this.registreIndisponible = charge === null;
+    if (charge !== null) this.travaux = charge;
     // Au redémarrage de ce serveur, ce qui était « en cours » est resuivi auprès de la machine GPU (qui seule sait).
   }
 
+  private verifierRegistre() {
+    if (this.registreIndisponible) throw new ErreurDetourage('Le registre du détourage est indisponible. Réessaie plus tard.', 503);
+  }
+
   private sauver() {
+    this.verifierRegistre();
     mkdirSync(dirname(this.o.registre), { recursive: true });
     const tmp = `${this.o.registre}.tmp`;
     writeFileSync(tmp, JSON.stringify([...this.travaux.values()]));
@@ -85,6 +131,7 @@ export class Detourage {
   }
 
   private possede(org: string, id: string): TravailDetourage {
+    this.verifierRegistre();
     const t = this.travaux.get(id);
     if (!t || t.organisation !== org) throw new ErreurDetourage('Travail introuvable.', 404); // même réponse : on ne révèle pas l'existence
     return t;
@@ -100,12 +147,14 @@ export class Detourage {
   }
 
   lister(org: string): TravailDetourage[] {
+    this.verifierRegistre();
     return [...this.travaux.values()].filter((t) => t.organisation === org).sort((a, b) => b.creeLe - a.creeLe);
   }
 
   obtenir(org: string, id: string): TravailDetourage { return this.possede(org, id); }
 
   creer(org: string, utilisateur: string, nom: string, palier = 'rapide'): TravailDetourage {
+    this.verifierRegistre();
     const m = this.o.moteur(palier);
     if (!m) throw new ErreurDetourage(palier === 'pro' ? 'Le détourage pro n’est pas encore disponible.' : 'Aucun moteur de détourage en ligne.', 503);
     const t: TravailDetourage = {
@@ -285,6 +334,7 @@ export class Detourage {
 
   /** Nettoyage périodique : travaux terminés/échoués trop anciens, dépôts jamais lancés. Retourne les identifiants supprimés. */
   async nettoyer(): Promise<string[]> {
+    if (this.registreIndisponible) return []; // minuteur : aucun rejet ni nettoyage d’un registre non chargé
     const maintenant = this.now();
     const sortis: string[] = [];
     for (const t of [...this.travaux.values()]) {

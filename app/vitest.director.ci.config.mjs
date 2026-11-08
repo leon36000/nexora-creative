@@ -32,6 +32,7 @@ export default {
       'app/server/nexora/montage/film.test.ts',
       'app/server/nexora/detourage/routes.test.ts',
       'app/server/nexora/detourage/gestion.test.ts',
+      'app/server/nexora/detourage/registre.test.ts',
       'app/server/nexora/detourage/serviceNatif.test.ts',
       'app/server/nexora/bench/appariementAmd2.test.ts',
       'app/src/FilmPartielAlerte.test.tsx', 'app/src/LangueSelection.test.tsx',
