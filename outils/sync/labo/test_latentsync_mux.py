@@ -64,6 +64,8 @@ class MuxReelLatentSync(unittest.TestCase):
             return json.loads(p.stdout)['packets']
         before,after = packets(video),packets(output)
         self.assertEqual(len(before),6)
+        for packet in before+after:
+            self.assertRegex(packet.get('data_hash') or '',r'^SHA256:[0-9a-f]{64}$')
         self.assertEqual(after,before)  # Paquets et calendrier, pas uniquement nombre d'images.
         self.assertEqual(initial,{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in (video,audio)})
         controle = av.valider(audio,output,Path(ff),Path(probe),.08,cadence_cible='25')
