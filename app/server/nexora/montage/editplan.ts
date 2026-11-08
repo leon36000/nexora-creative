@@ -216,6 +216,14 @@ export function validerEditPlan(brut: unknown, ctx: ContexteValidation = {}): Ra
     const s = plan.sources[v.src];
     if (!s || s.kind !== 'audio') erreurs.push(V('source_audio', `audio.voix.${i}.src`, `voix : source audio inconnue ${v.src}`));
     if (v.debut_f + v.duree_f > total) erreurs.push(V('dans_la_sequence', `audio.voix.${i}`, 'la voix dépasse la fin de la séquence'));
+    // Borne de source : durée déclarée sinon durée réelle de l'inventaire ; aucune durée connue → pas de borne inventée.
+    if (s?.kind === 'audio') {
+      const inv = ctx.inventaire?.[v.src];
+      const dureeSrc = s.duree_f ?? (inv ? framesDe(inv.duree_s, fps) : undefined);
+      if (dureeSrc !== undefined && v.entree_f + v.duree_f > dureeSrc) {
+        erreurs.push(V('dans_la_source', `audio.voix.${i}`, `la voix lit les images ${v.entree_f} à ${v.entree_f + v.duree_f} de ${v.src}, qui n’en a que ${dureeSrc}`, 'Réduis duree_f ou entree_f, ou choisis une source plus longue.'));
+      }
+    }
   });
   if (a.voix.length && m && (!a.ducking.actif || a.ducking.profondeur_db < 6)) {
     erreurs.push(V('ducking', 'audio.ducking', 'une voix sur une musique exige un ducking actif d’au moins 6 dB', 'audio.ducking = {"actif": true, "profondeur_db": 10}'));

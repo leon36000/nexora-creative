@@ -19,6 +19,7 @@ export default {
       'app/server/nexora/film.test.ts', 'app/server/nexora/filmSorties.test.ts',
       'app/server/nexora/executionBornee.test.ts', 'app/server/nexora/exportProres.test.ts',
       'app/server/nexora/exportProresRoute.test.ts',
+      'app/server/nexora/montage/editplanVoix.test.ts',
       'app/server/nexora/creer.test.ts', 'app/server/nexora/gardeNouveauRendu.test.ts',
       'app/server/nexora/creationLanguage.test.ts', 'app/server/nexora/personnages.test.ts',
       'app/server/nexora/credits.test.ts', 'app/src/filmErreurPartielle.test.ts',
@@ -32,6 +33,7 @@ export default {
       include: [
         'app/server/index.ts', 'app/server/jobs.ts', 'app/server/engine.ts',
         'app/server/nexora/film.ts', 'app/server/nexora/filmMoteur.ts', 'app/server/nexora/filmEchec.ts',
+        'app/server/nexora/montage/editplan.ts',
         'app/server/nexora/executionBornee.ts', 'app/server/nexora/exportProres.ts',
         'app/server/nexora/filmClePlan.ts', 'app/server/nexora/reconciliationArrets.ts',
         'app/server/nexora/personnagesCast.ts', 'app/src/api.ts', 'app/src/pages/Creer.tsx',
