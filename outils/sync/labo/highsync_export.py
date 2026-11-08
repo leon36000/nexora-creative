@@ -92,7 +92,10 @@ def exporter(root: Path, brut: Path, brut_sha: str, audio: Path, audio_sha: str,
     canonique = run/'canonique.mkv'
     commande = [str(ffmpeg),'-v','error','-xerror','-nostdin','-n','-protocol_whitelist','file,pipe',
                 '-i',str(brut),'-i',str(audio),'-map','0:v:0','-map','1:a:0',
-                '-frames:v',str(nombre),'-c:v','libx264','-crf','0','-pix_fmt','yuv420p',
+                # Limiter le flux vidéo par son filtre, pas la sortie entière :
+                # FFmpeg 5 peut arrêter le mux avant d'écrire tout le PCM avec
+                # -frames:v, notamment pour une vidéo d'une seule image.
+                '-vf',f'trim=end_frame={nombre}','-c:v','libx264','-crf','0','-pix_fmt','yuv420p',
                 '-c:a','pcm_s16le','-ar','16000',str(canonique)]
     resultat = {'statut':'echec','brut_sha256':brut_sha,'audio_sha256':audio_sha,
                 'ffmpeg_sha256':_sha(ffmpeg),'ffprobe_sha256':_sha(ffprobe),
