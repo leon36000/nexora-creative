@@ -5,10 +5,10 @@ import { PRODUIT_3D, ROUTE_3D } from './produit3d.js';
 import { APPS_NEXORA } from './studio/apps';
 
 describe('noms centraux des produits Nexora', () => {
-  it('contient les quinze noms décidés', () => {
+  it('centralise les quinze noms produit et le nom de la coque', () => {
     expect(NEXORA_BRAND).toBe('Nexora');
     expect(Object.values(NEXORA_PRODUCT_NAMES)).toEqual([
-      'Nexora Mesh', 'Nexora Matte', 'Nexora Director', 'Nexora Producer', 'Nexora Studio', 'Nexora Sync', 'Nexora Voice', 'Nexora Score', 'Nexora FX', 'Nexora Finish', 'Nexora Critic', 'Nexora Scribe', 'Nexora Campaign', 'Nexora Connect', 'Nexora Platform',
+      'Nexora Creative', 'Nexora Mesh', 'Nexora Matte', 'Nexora Director', 'Nexora Producer', 'Nexora Studio', 'Nexora Sync', 'Nexora Voice', 'Nexora Score', 'Nexora FX', 'Nexora Finish', 'Nexora Critic', 'Nexora Scribe', 'Nexora Campaign', 'Nexora Connect', 'Nexora Platform',
     ]);
   });
 

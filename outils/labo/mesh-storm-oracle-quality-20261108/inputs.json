@@ -1,0 +1,51 @@
+{
+  "schema": 2,
+  "title": "Nexora Mesh — oracle Storm sur extrait quality, package portable",
+  "inputs": [
+    {
+      "role": "quality_glb_source",
+      "required": true,
+      "path": "/home/pc6/nexora-creative-data/relief-banc/runs/trellis2-quality-gb10/01-chaise/quality.glb",
+      "bytes": 45974088,
+      "sha256": "637bc18e40f00f94f30e0005598dbea412df5397683aa314b7652f255949e57f"
+    },
+    {
+      "role": "extracted_patch_glb_with_source_textures",
+      "required": true,
+      "relative_path": "quality-overlap-patch-source.glb",
+      "bytes": 28616148,
+      "sha256": "4a13e53fa783d271adf72a6207a964b80392426a65836b9d99f3681ce9718571"
+    },
+    {
+      "role": "rebaked_atlas_patch_glb",
+      "required": true,
+      "relative_path": "atlas-run-01/quality-overlap-patch-rebaked-atlas.glb",
+      "bytes": 101228,
+      "sha256": "3e191393e09307ede7b47ac09b358a220848e4cffb416d9828eb3e4093dad04d"
+    },
+    {
+      "role": "independent_terra_recalculation",
+      "required": true,
+      "relative_path": "storm-oracle-run-01/independent-recalculation.json",
+      "bytes": 533,
+      "sha256": "572500e97421006bc8e16581c00f28887929f67f43fdcfaf979d3cd3eab852c0"
+    }
+  ],
+  "tools": {
+    "node": "v24.22.0",
+    "python": "3.12.3",
+    "node_dependencies": {
+      "@gltf-transform/core": "4.5.1",
+      "sharp": "0.35.5"
+    },
+    "blender_pc3": "/home/pc3/mesh-blender-5.2.3-2819365b50364f9a96d1ae50fdf8a27f/dist/blender-5.2.3-linux-x64/blender",
+    "blender_version": "5.2.3",
+    "openusd": "26.03",
+    "renderer": "HdStormRendererPlugin + Mesa llvmpipe, CPU, two threads"
+  },
+  "path_contract": {
+    "asset_root": "explicit --assets-root / MESH_ORACLE_ASSET_ROOT",
+    "source_code": "this folder; read-only during runs",
+    "run_output": "explicit new directory under /media/pc6/Storage/Nexora/travail, separate from asset_root and source_code"
+  }
+}

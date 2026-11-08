@@ -9,18 +9,29 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import type { LangueClient } from '../shared/creationLanguage';
+import { meshCopy, meshNumber } from './meshCopy';
 
 export type ModelLook = 'lit' | 'clay' | 'wire';
 
-export default function ModelView({ src, poster, look = 'lit', spin = true, className, style }: {
+const MESSAGE_MODELE_INDISPONIBLE_EN = 'This browser could not show the model. Download the GLB to open it elsewhere.';
+
+export function ModelViewUnavailable({ langue }: { langue?: LangueClient }) {
+  const message = langue ? meshCopy(langue).modelViewerUnavailable : MESSAGE_MODELE_INDISPONIBLE_EN;
+  return <span className="badge model-note" role="alert">{message}</span>;
+}
+
+export default function ModelView({ src, poster, look = 'lit', spin = true, className, style, langue }: {
   src: string;
   poster?: string;
   look?: ModelLook;
   spin?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  langue?: LangueClient;
 }) {
   const host = useRef<HTMLDivElement>(null);
+  const copy = langue ? meshCopy(langue) : null;
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [stats, setStats] = useState<{ tris: number; size: string } | null>(null);
   const lookRef = useRef(look);
@@ -159,12 +170,13 @@ export default function ModelView({ src, poster, look = 'lit', spin = true, clas
   useEffect(() => { spinRef.current = spin; if (controlsRef.current) controlsRef.current.autoRotate = spin; }, [spin]);
 
   return (
-    <div className={`model-view ${className ?? ''}`} style={style} data-state={state}>
+    <div className={`model-view ${className ?? ''}`} style={style} data-state={state}
+      role={langue ? 'region' : undefined} aria-label={copy?.modelViewerLabel}>
       <div ref={host} className="model-canvas" />
       {state !== 'ready' && poster && <img className="model-poster" src={poster} alt="" />}
-      {state === 'loading' && <span className="badge model-note">Loading the model...</span>}
-      {state === 'error' && <span className="badge model-note">This browser could not show the model. Download the GLB to open it elsewhere.</span>}
-      {stats && <span className="model-stats mono">{stats.tris.toLocaleString()} triangles</span>}
+      {state === 'loading' && <span className="badge model-note" role="status" aria-live="polite">{copy?.modelLoading ?? 'Loading the model...'}</span>}
+      {state === 'error' && <ModelViewUnavailable langue={langue} />}
+      {stats && <span className="model-stats mono">{copy ? copy.modelTriangles(meshNumber(stats.tris, langue ?? 'en')) : `${stats.tris.toLocaleString()} triangles`}</span>}
     </div>
   );
 }

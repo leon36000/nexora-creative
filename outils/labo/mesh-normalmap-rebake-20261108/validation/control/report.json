@@ -1,0 +1,56 @@
+{
+  "fixture": {
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "tangentCounts": {
+      "positive": 3,
+      "negative": 3,
+      "meshes": 1
+    },
+    "box": {
+      "min": [
+        -1.2000000476837158,
+        0,
+        0
+      ],
+      "max": [
+        1.2000000476837158,
+        1,
+        0
+      ]
+    },
+    "camera": [
+      0,
+      0.5,
+      6.000000238418579
+    ],
+    "three": "186",
+    "sha256": "1d805fe01a756def94de42e89ae797f6b87b0cc342d5a43d2be7904651aeae9b"
+  },
+  "fixture_mikk": {
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "tangentCounts": {
+      "positive": 3,
+      "negative": 3,
+      "meshes": 1
+    },
+    "box": {
+      "min": [
+        -1.2000000476837158,
+        0,
+        0
+      ],
+      "max": [
+        1.2000000476837158,
+        1,
+        0
+      ]
+    },
+    "camera": [
+      0,
+      0.5,
+      6.000000238418579
+    ],
+    "three": "186",
+    "sha256": "1d805fe01a756def94de42e89ae797f6b87b0cc342d5a43d2be7904651aeae9b"
+  }
+}

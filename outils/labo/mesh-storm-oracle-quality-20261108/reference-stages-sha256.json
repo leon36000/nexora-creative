@@ -1,0 +1,19 @@
+{
+  "reference_dir": "/media/pc6/Storage/Nexora/travail/mesh-quality-normal-patch-extract-20261108T-luna01/storm-oracle-run-01/payload-03",
+  "stages": {
+    "oracle-n4.usda": "4848c92a86920acacc8da996ab08c77b20eaf35ea7e95b253feb811138e3b50c",
+    "oracle-n8.usda": "c8c88b5a226e3c54392eb4de09de8ec3e19b6ae2f7a19ef1ae65b39cdb015d0b",
+    "oracle-n16.usda": "256654afde9b64ebe456816a0579eb75a5b01c017e42ca81227abe80312d13e3",
+    "oracle-n16-flat.usda": "282d0f92c5523b77117148a23ba71a08637703cd32daa6edf851dce1515c7491",
+    "oracle-n32-v2.usda": "2c3ac147dd3148a9f9bf51402be6a26ae110dcdcc6d8bdb9f251899d21367d19",
+    "oracle-n64.usda": "eeb48834396e7d2cd2407ca497435e12d10ffa4af0240561f36231bf23301474",
+    "source-direct-normal.usda": "e10bbb2906725980edf4fd00df3ef9b5573a3f9ee429d23640be41ab03474da9",
+    "source-flat-material.usda": "e82c245f5c014ce0fb5be81dcb820071d0cd916bd3a7850076e7df8868541e63",
+    "target-flat-material.usda": "8549180aec291933572c4a1732951ef0810c2e5e51f67fd389aedbe20d05324c",
+    "target-flat-normal.usda": "6a462114db674113c41728578dafa3fd037acfd910b30fdb41ee234b93393338",
+    "target-normal.usda": "52f8fc5dca4b85b2dd7f4e73ad7075d3b66e5dce1d662bbf46679d8dd1bf091a",
+    "target-normal-yflip.usda": "d51275d6571617bf1e2a8c56875de3d72f964460057c246e9e8aa984e6413972",
+    "target-normal-vsame.usda": "473a60624e852dbcf5d9285094f39ce22940597c78b7155162f5d80b3ac4cf94",
+    "target-normal-yflip-vsame.usda": "4037aa922d1604b6b455d4b6df75aee530c6dcafc5a38005d4e639b4d91dc56e"
+  }
+}
