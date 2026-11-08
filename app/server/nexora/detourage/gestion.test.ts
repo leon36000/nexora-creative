@@ -1,10 +1,10 @@
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { Facturation } from '../credits.js';
 import type { ClientDetourage, EtatMoteur } from './client.js';
-import { Detourage, ErreurDetourage } from './gestion.js';
+import { Detourage, ErreurDetourage, type OptionsDetourage } from './gestion.js';
 
 function faux() {
   const etats = new Map<string, EtatMoteur>();
@@ -24,8 +24,9 @@ function faux() {
 }
 function factu() {
   const appels: string[] = [];
+  let reservations = 0;
   const f: Facturation = {
-    async reserver({ credits }) { appels.push(`reserver ${credits}`); return { ok: true, reservationId: `r${appels.length}`, credits }; },
+    async reserver({ credits }) { appels.push(`reserver ${credits}`); return { ok: true, reservationId: `r${++reservations}`, credits }; },
     async valider(id, c) { appels.push(`valider ${id} ${c}`); },
     async liberer(id) { appels.push(`liberer ${id}`); },
   };
@@ -35,15 +36,18 @@ function monter(opts: { moteur?: boolean; registre?: string } = {}) {
   const m = faux();
   const fa = factu();
   let t = 1_000_000;
-  const d = new Detourage({
-    registre: opts.registre ?? join(mkdtempSync(join(tmpdir(), 'detourage-')), 'registre.json'),
+  const registre = opts.registre ?? join(mkdtempSync(join(tmpdir(), 'detourage-')), 'registre.json');
+  const options: OptionsDetourage = {
+    registre,
     moteur: (palier) => (palier === 'rapide' && opts.moteur !== false ? { id: 'gb10', client: m.client } : null),
     clientDe: (id) => (id === 'gb10' ? m.client : null),
     facturation: () => fa.f,
     maintenant: () => t,
     ttl: { termineMs: 1000, deposeMs: 5000 },
-  });
-  return { ...m, fa, d, avancer: (ms: number) => { t += ms; } };
+  };
+  const nouveau = () => new Detourage(options);
+  const d = nouveau();
+  return { ...m, fa, d, nouveau, registre, avancer: (ms: number) => { t += ms; } };
 }
 const A = 'org-a';
 const B = 'org-b';
@@ -351,5 +355,226 @@ describe('cycle de vie d’un travail de détourage', () => {
     expect(liberations).toBe(0);
     expect(d.lister(A)).toHaveLength(1);
     expect(d.lister(A)[0]?.credits?.etat).toBe('reservee');
+  });
+
+  it('après échec moteur et remboursement refusé, garde l’intention libérer au registre et à la reprise après redémarrage', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    let demarrages = 0;
+    h.client.lancer = async (id) => {
+      h.journal.push(`lancer ${id}`);
+      demarrages++;
+      h.etats.set(id, { etat: 'termine', progression: 1 });
+      if (demarrages === 1) throw new Error('moteur refuse le lancement');
+    };
+    const libererBase = h.fa.f.liberer;
+    let echecsLibere = 2;
+    h.fa.f.liberer = async (id) => {
+      if (echecsLibere-- > 0) { h.fa.appels.push(`liberer ${id}`); throw new Error('facturation indisponible'); }
+      await libererBase(id);
+    };
+
+    await expect(h.d.lancer(A, t.id, params, { secondes: 10, credits: 5 })).rejects.toThrow('moteur refuse le lancement');
+    const dansMemoire = h.d.obtenir(A, t.id);
+    const dansRegistre = (JSON.parse(readFileSync(h.registre, 'utf8')) as typeof dansMemoire[]).find((x) => x.id === t.id)!;
+    expect(dansMemoire).toMatchObject({ etat: 'erreur', credits: { reservationId: 'r1', etat: 'reservee', reglement: 'liberer' } });
+    expect(dansRegistre).toMatchObject({ etat: 'erreur', credits: { reservationId: 'r1', etat: 'reservee', reglement: 'liberer' } });
+
+    const redemarre = h.nouveau();
+    const apresNouvelEchec = await redemarre.actualiser(A, t.id);
+    expect(apresNouvelEchec).toMatchObject({ etat: 'erreur', credits: { reservationId: 'r1', etat: 'reservee', reglement: 'liberer' } });
+    expect(h.fa.appels).toEqual(['reserver 5', 'liberer r1', 'liberer r1']);
+    expect(h.journal.filter((x) => x.startsWith('lancer '))).toHaveLength(1);
+    expect(h.fa.appels.some((x) => x.startsWith('valider '))).toBe(false);
+
+    const recupere = await h.nouveau().actualiser(A, t.id);
+    expect(recupere).toMatchObject({ etat: 'erreur', credits: { reservationId: 'r1', etat: 'liberee', reglement: 'liberer' } });
+    expect(h.fa.appels).toEqual(['reserver 5', 'liberer r1', 'liberer r1', 'liberer r1']);
+    expect(h.journal.filter((x) => x.startsWith('lancer '))).toHaveLength(1);
+  });
+
+  it('un remboursement refusé empêche une nouvelle réservation ou une suppression distante', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    await h.d.lancer(A, t.id, params, { secondes: 10, credits: 5 });
+    h.etats.set(t.id, { etat: 'erreur', message: 'moteur en erreur' });
+    const libererBase = h.fa.f.liberer;
+    let echecsLibere = 3;
+    h.fa.f.liberer = async (id) => {
+      if (echecsLibere-- > 0) { h.fa.appels.push(`liberer ${id}`); throw new Error('facturation indisponible'); }
+      await libererBase(id);
+    };
+    await h.d.actualiser(A, t.id);
+    await expect(h.d.reprendre(A, t.id)).rejects.toMatchObject({ code: 503 });
+    expect(h.fa.appels).toEqual(['reserver 5', 'liberer r1', 'liberer r1']);
+    expect(h.journal.filter((x) => x.startsWith('lancer '))).toHaveLength(1);
+
+    const avantDelete = (JSON.parse(readFileSync(h.registre, 'utf8')) as typeof t[]).find((x) => x.id === t.id)!;
+    await expect(h.d.supprimer(A, t.id)).rejects.toMatchObject({ code: 503 });
+    expect(h.d.lister(A)).toHaveLength(1);
+    expect((JSON.parse(readFileSync(h.registre, 'utf8')) as typeof t[]).find((x) => x.id === t.id)).toEqual(avantDelete);
+    expect(h.journal.filter((x) => x.startsWith('supprimer '))).toEqual([]);
+
+    await h.d.supprimer(A, t.id);
+    expect(h.fa.appels).toEqual(['reserver 5', 'liberer r1', 'liberer r1', 'liberer r1', 'liberer r1']);
+    expect(h.journal.filter((x) => x.startsWith('supprimer '))).toEqual([`supprimer ${t.id}`]);
+    expect(h.d.lister(A)).toEqual([]);
+  });
+
+  it('une tâche interrompue dont le moteur a terminé ne reçoit pas une nouvelle réservation', async () => {
+    const reprise = monter();
+    const fini = reprise.d.creer(A, 'u', 'fini');
+    await reprise.d.deposer(A, fini.id, 'source.mp4', Buffer.from('x'), 1);
+    await reprise.d.lancer(A, fini.id, params, { secondes: 10, credits: 5 });
+    fini.etat = 'interrompu'; // état local après redémarrage; le moteur a fini entre-temps.
+    reprise.etats.set(fini.id, { etat: 'termine', progression: 1 });
+    await expect(reprise.d.reprendre(A, fini.id)).rejects.toMatchObject({ code: 409 });
+    expect(reprise.d.obtenir(A, fini.id).etat).toBe('termine');
+    expect(reprise.fa.appels).toEqual(['reserver 5', 'valider r1 5']);
+    expect(reprise.journal.filter((x) => x.startsWith('lancer '))).toHaveLength(1);
+  });
+
+  it('une tâche interrompue encore active est arrêtée avant suppression', async () => {
+    const suppression = monter();
+    const actif = suppression.d.creer(A, 'u', 'actif');
+    await suppression.d.deposer(A, actif.id, 'source.mp4', Buffer.from('x'), 1);
+    await suppression.d.lancer(A, actif.id, params, { secondes: 10, credits: 5 });
+    actif.etat = 'interrompu'; // le registre est périmé; le moteur est encore actif.
+    suppression.etats.set(actif.id, { etat: 'en_cours', progression: 0.5 });
+    await suppression.d.supprimer(A, actif.id);
+    expect(suppression.journal.indexOf(`annuler ${actif.id}`)).toBeGreaterThanOrEqual(0);
+    expect(suppression.journal.indexOf(`annuler ${actif.id}`)).toBeLessThan(suppression.journal.indexOf(`supprimer ${actif.id}`));
+    expect(suppression.fa.appels).toEqual(['reserver 5', 'liberer r1']);
+  });
+
+  it('un moteur absent bloque la suppression et conserve le registre', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    await h.d.lancer(A, t.id, params);
+    h.etats.set(t.id, { etat: 'erreur' });
+    await h.d.actualiser(A, t.id);
+    const sansMoteur = new Detourage({ registre: h.registre, moteur: () => null, clientDe: () => null });
+
+    await expect(sansMoteur.supprimer(A, t.id)).rejects.toMatchObject({ code: 503 });
+    expect(sansMoteur.lister(A).map((x) => x.id)).toEqual([t.id]);
+    expect((JSON.parse(readFileSync(h.registre, 'utf8')) as typeof t[]).map((x) => x.id)).toEqual([t.id]);
+    expect(h.journal.filter((x) => x.startsWith('supprimer '))).toEqual([]);
+  });
+
+  it('une lecture moteur inconnue bloque la suppression et conserve le registre', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    await h.d.lancer(A, t.id, params);
+    h.client.etat = async () => { throw new Error('lecture moteur indisponible'); };
+
+    await expect(h.d.supprimer(A, t.id)).rejects.toMatchObject({ code: 503 });
+    expect(h.d.lister(A).map((x) => x.id)).toEqual([t.id]);
+    expect((JSON.parse(readFileSync(h.registre, 'utf8')) as typeof t[]).map((x) => x.id)).toEqual([t.id]);
+    expect(h.journal.filter((x) => x.startsWith('supprimer '))).toEqual([]);
+  });
+
+  it('une annulation non confirmée bloque la suppression et conserve le registre', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    await h.d.lancer(A, t.id, params);
+    h.etats.set(t.id, { etat: 'en_cours', progression: 0.8 });
+    h.client.annuler = async (id) => { h.journal.push(`annuler ${id}`); /* le faux moteur reste en_cours */ };
+
+    await expect(h.d.supprimer(A, t.id)).rejects.toMatchObject({ code: 409 });
+    expect(h.d.obtenir(A, t.id).etat).toBe('en_cours');
+    expect(h.d.lister(A).map((x) => x.id)).toEqual([t.id]);
+    expect((JSON.parse(readFileSync(h.registre, 'utf8')) as typeof t[]).map((x) => x.id)).toEqual([t.id]);
+    expect(h.journal).toContain(`annuler ${t.id}`);
+    expect(h.journal.filter((x) => x.startsWith('supprimer '))).toEqual([]);
+  });
+
+  it('un DELETE refusé laisse le travail dans le registre', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    await h.d.lancer(A, t.id, params);
+    h.etats.set(t.id, { etat: 'erreur' });
+    await h.d.actualiser(A, t.id);
+    h.client.supprimer = async (id) => { h.journal.push(`supprimer ${id}`); throw new Error('DELETE refusé'); };
+
+    await expect(h.d.supprimer(A, t.id)).rejects.toThrow('DELETE refusé');
+    expect(h.d.lister(A).map((x) => x.id)).toEqual([t.id]);
+    expect((JSON.parse(readFileSync(h.registre, 'utf8')) as typeof t[]).map((x) => x.id)).toEqual([t.id]);
+    expect(h.journal).toContain(`supprimer ${t.id}`);
+  });
+
+  it('après échec d’écriture suivant une réservation, ne valide pas le crédit d’un lancement jamais appelé', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    await h.d.lancer(A, t.id, params, { secondes: 10, credits: 5 });
+    h.etats.set(t.id, { etat: 'termine', progression: 1 });
+    await h.d.actualiser(A, t.id);
+    expect(h.fa.appels).toEqual(['reserver 5', 'valider r1 5']);
+
+    const callsBefore = h.journal.filter((x) => x.startsWith('lancer ')).length;
+    const reserverBase = h.fa.f.reserver;
+    let ecritureBloquee = false;
+    h.fa.f.reserver = async (devis) => {
+      const r = await reserverBase(devis);
+      if (r.ok && r.reservationId === 'r2') {
+        mkdirSync(`${h.registre}.tmp`); // l’échec arrive après la création réelle de r2, juste avant sauver.
+        ecritureBloquee = true;
+      }
+      return r;
+    };
+    try {
+      await expect(h.d.lancer(A, t.id, params, { secondes: 10, credits: 5 })).rejects.toBeTruthy();
+    } finally {
+      if (ecritureBloquee) rmdirSync(`${h.registre}.tmp`);
+    }
+    expect(h.fa.appels).toEqual(['reserver 5', 'valider r1 5', 'reserver 5']);
+    expect(h.d.obtenir(A, t.id).credits).toMatchObject({ reservationId: 'r2', etat: 'reservee', reglement: 'liberer' });
+    expect(h.journal.filter((x) => x.startsWith('lancer '))).toHaveLength(callsBefore);
+    await h.d.actualiser(A, t.id);
+    expect(h.fa.appels).toEqual(['reserver 5', 'valider r1 5', 'reserver 5', 'liberer r2']);
+    expect(h.fa.appels.filter((x) => x.startsWith('valider '))).toEqual(['valider r1 5']);
+    expect(h.d.obtenir(A, t.id).credits).toMatchObject({ reservationId: 'r2', etat: 'liberee', reglement: 'liberer' });
+  });
+
+  it('si sauver échoue après le rejet moteur, rejoue libérer r2 sans relire le moteur', async () => {
+    const h = monter();
+    const t = h.d.creer(A, 'u', 'x');
+    await h.d.deposer(A, t.id, 'source.mp4', Buffer.from('x'), 1);
+    let appelsMoteur = 0;
+    const lancerBase = h.client.lancer;
+    h.client.lancer = async (id, p) => {
+      appelsMoteur++;
+      if (appelsMoteur === 1) return lancerBase(id, p);
+      mkdirSync(`${h.registre}.tmp`); // la réservation r2 est sauvée; le sauver du catch moteur échouera.
+      throw new Error('moteur refuse le second lancement');
+    };
+    const etatBase = h.client.etat;
+    let lecturesMoteur = 0;
+    h.client.etat = async (id) => { lecturesMoteur++; return etatBase(id); };
+
+    await h.d.lancer(A, t.id, params, { secondes: 10, credits: 5 });
+    h.etats.set(t.id, { etat: 'termine', progression: 1 });
+    await h.d.actualiser(A, t.id);
+    expect(h.fa.appels).toEqual(['reserver 5', 'valider r1 5']);
+    const lecturesAvantNouvellePrise = lecturesMoteur;
+    try {
+      await expect(h.d.lancer(A, t.id, params, { secondes: 10, credits: 5 })).rejects.toBeTruthy();
+    } finally {
+      rmdirSync(`${h.registre}.tmp`);
+    }
+    expect(h.fa.appels).toEqual(['reserver 5', 'valider r1 5', 'reserver 5']);
+    expect(h.d.obtenir(A, t.id).credits).toMatchObject({ reservationId: 'r2', etat: 'reservee', reglement: 'liberer' });
+    expect(lecturesMoteur).toBe(lecturesAvantNouvellePrise + 1); // la seule lecture est le prévol avant r2.
+
+    await h.d.actualiser(A, t.id);
+    expect(h.fa.appels).toEqual(['reserver 5', 'valider r1 5', 'reserver 5', 'liberer r2']);
+    expect(lecturesMoteur).toBe(lecturesAvantNouvellePrise + 1);
+    expect(h.d.obtenir(A, t.id).credits).toMatchObject({ reservationId: 'r2', etat: 'liberee', reglement: 'liberer' });
   });
 });
