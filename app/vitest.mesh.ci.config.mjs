@@ -27,6 +27,7 @@ export default {
       'app/mcp/mesh.test.ts', 'app/mcp/mesh-init.test.ts',
       'app/src/ModelView.test.tsx',
       'app/src/SourcePick.test.tsx',
+      'app/src/SourcePickRace.contract.test.tsx',
       'app/src/ViewerActions.test.tsx',
       'app/src/meshCopy.test.ts',
       'app/src/store.test.ts',

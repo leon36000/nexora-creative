@@ -113,7 +113,7 @@ async function changerLangue(target: 'English' | 'Français') {
   // chaîne (correctif) aller au bout avant de compter.
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
   const avant = mocks.objetTexteEtat.mock.calls.length;
-  await act(async () => { vi.advanceTimersByTime(3000); await Promise.resolve(); });
+  await act(async () => { await vi.advanceTimersByTimeAsync(3000); await Promise.resolve(); });
   // Un état terminal ne doit jamais réarmer de sonde après le re-rendu.
   // (Sous le bug actuel, l'effet relancé a déjà re-sondé sans attendre la minuterie.)
   expect(mocks.objetTexteEtat.mock.calls.length).toBe(avant);
@@ -178,7 +178,7 @@ describe('boucle de suivi Texte → 3D : arrêt sur état terminal', () => {
     await lancerTexte();
     const r = root!; root = null;
     await act(async () => { r.unmount(); });
-    await act(async () => { terminer({ etat: 'echec' }); await Promise.resolve(); vi.advanceTimersByTime(5000); });
+    await act(async () => { terminer({ etat: 'echec' }); await Promise.resolve(); await vi.advanceTimersByTimeAsync(5000); });
     expect(mocks.objetTexteEtat).toHaveBeenCalledTimes(1);
     expect(mocks.toast).not.toHaveBeenCalled();
   });
