@@ -75,7 +75,7 @@ export async function tournerFilm(
     // Personnages @ : un plan qui cite @nom part en Ref2VA (moteur cinéma) avec les images du personnage.
     const persos = await Promise.all(sb.plans.map((p, i) => (p.suite || p.take || opts.moteur !== 'h3-max' ? null : resoudrePersonnages(intentionDuPlan(sb, i)))));
     const prompts = await Promise.all(
-      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, ...dialoguesDe(p, sb) }, llm))),
+      sb.plans.map((p, i) => (p.suite || p.take ? null : reecrireH3({ intention: persos[i]?.sujets.length ? persos[i]!.texteClair : intentionDuPlan(sb, i), mode: persos[i]?.sujets.length ? 'ref2va' : 't2va', ...(persos[i]?.sujets.length ? { references: { sujets: persos[i]!.sujets } } : {}), dureeS: dureePlan(p), moteur: opts.moteur, format: opts.format, langueClient: sb.langue ?? 'fr', ...dialoguesDe(p, sb) }, llm))),
     );
     const lancerPlan = async (p: PlanFilm, i: number): Promise<void> => {
       const ecrit = prompts[i];
@@ -214,6 +214,7 @@ async function lancerSuite(film: Take, i: number, precedent: string) {
     dureeS: dureePlan(p),
     moteur,
     format: s.format,
+    langueClient: sb.langue ?? 'fr',
     ...dialoguesDe(p, sb),
   }, deps.llmPour(org));
   const corps = {

@@ -15,15 +15,16 @@ vi.mock('./ui', () => ({ Icon: () => null, Spill: () => null }));
 vi.mock('./castStore', () => ({ useCast: () => [] }));
 vi.mock('./pages/Cast', () => ({ SaveToCast: () => null }));
 import { navigate } from './router';
-import { setHandoff } from './store';
-import type { Take } from './api';
-import Viewer, { animate } from './Viewer';
+import { setHandoff, toast } from './store';
+import { api, type Take } from './api';
+import Viewer, { animate, recreate } from './Viewer';
 
-function view() { return renderToStaticMarkup(<Viewer takeId={42} onClose={() => {}} onStep={() => {}} />); }
+function view(langue?: 'fr' | 'en') { return renderToStaticMarkup(<Viewer takeId={42} onClose={() => {}} onStep={() => {}} langue={langue} />); }
 
 beforeEach(() => {
   vi.mocked(navigate).mockClear();
   vi.mocked(setHandoff).mockClear();
+  vi.mocked(toast).mockClear();
 });
 
 describe('actions Viewer et routes Nexora actives', () => {
@@ -47,6 +48,37 @@ describe('actions Viewer et routes Nexora actives', () => {
     expect(html).toContain('Download GLB');
   });
 
+  it.each([
+    ['fr', 'Recréer'],
+    ['en', 'Recreate'],
+  ] as const)('localise le bouton Recreate du Viewer en %s', (langue, label) => {
+    fixture.take = { id: 42, kind: 'object', status: 'done', settings: '{}' };
+    expect(view(langue)).toContain(`>${label}<`);
+  });
+
+  it.each([
+    ['fr', 'Texturé', 'Argile', 'Fil de fer', 'Apparence du modèle', 'Image source du modèle'],
+    ['en', 'Textured', 'Clay', 'Wireframe', 'Model appearance', 'Source image for the model'],
+  ] as const)('localise les commandes, le groupe et le titre de l’image source en %s', (langue, textured, clay, wire, group, subject) => {
+    fixture.take = { id: 42, kind: 'object', status: 'done', settings: '{}' };
+    const html = view(langue);
+    expect(html).toContain(`aria-label="${group}"`);
+    expect(html).toContain(`>${textured}<`);
+    expect(html).toContain(`>${clay}<`);
+    expect(html).toContain(`>${wire}<`);
+    expect(html).toContain(`title="${subject}"`);
+    expect(html).not.toContain('The subject as the model saw it');
+  });
+
+  it('conserve les libellés historiques du modèle sans langue', () => {
+    fixture.take = { id: 42, kind: 'object', status: 'done', settings: '{}' };
+    const html = view();
+    expect(html).toContain('>Textured<');
+    expect(html).toContain('>Clay<');
+    expect(html).toContain('>Wireframe<');
+    expect(html).toContain('title="The subject as the model saw it"');
+  });
+
   it('ne propose pas Animate tant que la prise image n’est pas terminée', () => {
     fixture.take = { id: 42, kind: 'still', status: 'queued', settings: '{}' };
     expect(view()).not.toContain('>Animate<');
@@ -64,5 +96,43 @@ describe('actions Viewer et routes Nexora actives', () => {
     expect(url.searchParams.get('cle')).toBe('42');
     expect(url.searchParams.get('intention')).toBe(intention);
     expect(setHandoff).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['fr', 'Demande de recréation envoyée.'],
+    ['en', 'Recreation request submitted.'],
+  ] as const)('localise le succès de recréation dans l’interface %s', async (langue, message) => {
+    const generate = vi.spyOn(api, 'generate').mockResolvedValue(undefined as never);
+    const take = { id: 42, kind: 'object', status: 'done', settings: JSON.stringify({ seed: 1071, prompt: 'test' }) } as unknown as Take;
+
+    await recreate(take, { langue });
+
+    expect(generate).toHaveBeenCalledWith({ prompt: 'test' });
+    expect(toast).toHaveBeenCalledWith(message);
+    generate.mockRestore();
+  });
+
+  it.each([
+    ['fr', 'Impossible de confirmer l’envoi de la demande de recréation. Vérifie tes prises avant de réessayer.'],
+    ['en', 'Could not confirm whether the recreation request was submitted. Check your takes before trying again.'],
+  ] as const)('masque les détails réseau et signale une confirmation impossible en %s', async (langue, message) => {
+    const generate = vi.spyOn(api, 'generate').mockRejectedValue(new Error('HTTP 503 détail synthétique'));
+    const take = { id: 42, kind: 'object', status: 'done', settings: JSON.stringify({ seed: 1071, prompt: 'test' }) } as unknown as Take;
+
+    await recreate(take, { langue });
+
+    expect(toast).toHaveBeenCalledWith(message, true);
+    expect(vi.mocked(toast).mock.calls.flat().join(' ')).not.toContain('HTTP 503');
+    generate.mockRestore();
+  });
+
+  it('conserve les messages historiques des autres usages sans langue Mesh', async () => {
+    const generate = vi.spyOn(api, 'generate').mockRejectedValue(new Error('legacy detail'));
+    const take = { id: 42, kind: 'still', status: 'done', settings: JSON.stringify({ seed: 1071, prompt: 'test' }) } as unknown as Take;
+
+    await recreate(take);
+
+    expect(toast).toHaveBeenCalledWith('legacy detail', true);
+    generate.mockRestore();
   });
 });

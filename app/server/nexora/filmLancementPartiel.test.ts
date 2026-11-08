@@ -249,6 +249,7 @@ it('une suite ambiguë conserve sa réservation sur la prise créée avant soumi
   await avancerFilm(1);
   expect(queueTakes).toHaveBeenCalledOnce();
   expect(memoire.reecritures.at(-1).dialogues).toEqual([{ texte: 'Hello!', langue: 'English' }]);
+  expect(memoire.reecritures.at(-1).langueClient).toBe('en');
 });
 
 it('une prise existante garde ses crédits ; le nouveau plan reçoit seulement sa nouvelle réservation', async () => {
@@ -477,6 +478,7 @@ it('transmet la langue du storyboard au réécrivain et conserve la réplique', 
     const sb = lireStoryboard({ langue, titre: 'Test', plans: [{ resume: 'one', description: 'A car moves', replique: texte }] }, 5);
     await tournerFilm(sb, { format: '16:9', son: true, intention: 'test', moteur: 'h3-fast' }, null);
     expect(memoire.reecritures[0].dialogues).toEqual([{ texte, langue: etiquette }]);
+    expect(memoire.reecritures[0].langueClient).toBe(langue);
     expect(JSON.parse(memoire.lignes.get(1).settings).storyboard.langue).toBe(langue);
   }
 });

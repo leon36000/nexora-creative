@@ -1,3 +1,4 @@
+import { NEXORA_PRODUCT_NAMES } from '../shared/productNames.ts';
 /**
  * Thin HTTP client for the OpenField server (:3161), plus the local-file side
  * of uploads: read a path, measure it, POST it to /api/upload as a data URL.
@@ -45,7 +46,7 @@ async function j<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     r = await fetch(`${BASE}${path}`, init && { ...init, headers });
   } catch (e) {
-    throw new ApiError(`OpenField is not answering at ${BASE} (${e instanceof Error ? e.message : e}). Start it with \`npm run dev\`, or set OPENFIELD_URL.`);
+    throw new ApiError(`${NEXORA_PRODUCT_NAMES.creative} is not answering at ${BASE} (${e instanceof Error ? e.message : e}). Start it with \`npm run dev\`, or set OPENFIELD_URL.`);
   }
   const text = await r.text();
   let d: any;
@@ -108,7 +109,7 @@ export function settingsOf(t: Take): Record<string, any> {
 export const mediaUrl = (id: number) => `${BASE}/api/media/${id}`;
 
 async function fetchBytes(path: string): Promise<{ data: Buffer; mime: string }> {
-  const r = await fetch(`${BASE}${path}`).catch((e) => { throw new ApiError(`OpenField is not answering at ${BASE}: ${e}`); });
+  const r = await fetch(`${BASE}${path}`).catch((e) => { throw new ApiError(`${NEXORA_PRODUCT_NAMES.creative} is not answering at ${BASE}: ${e}`); });
   if (!r.ok) throw new ApiError(`GET ${path} -> ${r.status}`);
   return { data: Buffer.from(await r.arrayBuffer()), mime: (r.headers.get('content-type') || 'application/octet-stream').split(';')[0] };
 }

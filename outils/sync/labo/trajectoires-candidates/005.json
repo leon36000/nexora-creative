@@ -1,0 +1,62 @@
+{
+  "type": "trajectoire technique candidate, pas mémoire promue",
+  "schema": "preuve-correction-v1 (proposition locale ; distinct de TrajectoireProfesseur)",
+  "objectif": "Préserver la chaîne observée entrée → rendu → défaut → correction → comparaison",
+  "classification": "ESSAI TECHNIQUE NON APPROUVÉ",
+  "langue_demande": "fr-CA (métadonnée d’entrée, pas validation linguistique humaine)",
+  "voix": "candidate 3146, non choisie ; aucune préférence ou note humaine",
+  "origine_equipe": "non attestée ; clip interne de revue",
+  "prompt": "non récupéré dans les preuves ; ne pas inventer",
+  "limites": [
+    "Aucun score esthétique ou jugement des lèvres",
+    "Aucun entraînement ou promotion de mémoire",
+    "Pas une trajectoire professeur validée, pas un élément du banc de 50 briefs",
+    "Le clip comporte un graphique numérique généré incohérent vers 6 s, hors extrait"
+  ],
+  "id": "20261106T010405Z-fr-ec4b1dbdfed7",
+  "etat": "echec_av_duree",
+  "archive_pc1": "/run/media/pc1/Infrastructure/NexoraStudioWork/Essais-techniques/codex-sync-premier-fr-20261106-77a8e5045b",
+  "entrees": {
+    "video": {
+      "relatif_run": "inputs/p21-r1-fr.mp4",
+      "sha256": "18fc4f883e1d4ae91f465cc3ed0e0475e83c9cb55c7698f30ed47c47190473cf",
+      "octets": 3964381
+    },
+    "audio_original": {
+      "relatif_run": "inputs/voice-fr.mp3",
+      "sha256": "7d8d592f82dd881232497f5d6f727dc3db6f91735bb19a6a519333b962331a3b",
+      "octets": 13704
+    }
+  },
+  "sortie": {
+    "relatif_run": "results/v15/p21-r1-fr_voice-fr.mp4",
+    "sha256": "93fb5429a6d7ddea44a7e4d6c9037900d3fe9a2a9670c45549c2be498280a088",
+    "octets": 200049
+  },
+  "preuve": {
+    "relatif_run": "analysis-001/postrun-verdict.json",
+    "sha256": "93ae5ca2265934e4fce7369334efe5523e07bd0d478e6cf45f187ea73030a3e5",
+    "octets": 3805
+  },
+  "observation": {
+    "audio_source_ffmpeg_pcm_s": 2.716734693877551,
+    "audio_lu_librosa_s": 1.1436875,
+    "whisper_chunks": 27,
+    "images": 27,
+    "fps": 24,
+    "video_s": 1.125,
+    "audio_sortie_decode_s": 2.7399546485260773,
+    "constat": "MP3 décodé plus court par soundfile/librosa que par FFmpeg ; quantité de features et images cohérente avec les 27 chunks ; aucun saut de composition établi."
+  },
+  "correction_candidate": "Décoder la même source en WAV mono PCM s16le 16 kHz avant extraction des features.",
+  "comparaison_suivante": "20261106T013131Z-fr-951ab3d5987f",
+  "preuve_duree_audio_rendu_commun": {
+    "echantillons": 60416,
+    "frequence_hz": 22050,
+    "calcul": "60416 / 22050",
+    "secondes": 2.7399546485260773,
+    "interpretation": "durée de l’audio rendu décodé en PCM ; distincte de la durée de flux AAC ffprobe",
+    "preuve_pc1": "/run/media/pc1/Infrastructure/NexoraStudioWork/Essais-techniques/codex-sync-premier-fr-20261106-77a8e5045b/20261106T010405Z-fr-ec4b1dbdfed7/analysis-001/postrun-verdict.json",
+    "preuve_sha256": "93ae5ca2265934e4fce7369334efe5523e07bd0d478e6cf45f187ea73030a3e5"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "control": "source glb with normalScale=(0,0) vs source unmodified",
+  "mae_rgb_encoded_8bit_full_image": 0.2712109375,
+  "changed_pixels": 15791,
+  "max_channel_delta": 13,
+  "pixels": 307200,
+  "png_source_sha256": "eb50016490d23d29ec9793490f077020033143419d7861875348d921b63adea7",
+  "png_control_sha256": "1734c6addc60276b63b8a1d2bf65957f448bd9c657140912e5e52c5eb71fd95d"
+}

@@ -19,6 +19,7 @@ export interface Live {
 
 let state: Live = { takes: [], status: null, progress: {}, started: {}, preview: null, toast: null };
 const listeners = new Set<() => void>();
+let messageEchecPriseMesh: (() => string) | null = null;
 function set(patch: Partial<Live>) {
   state = { ...state, ...patch };
   listeners.forEach((l) => l());
@@ -32,6 +33,12 @@ export function useStore<T>(sel: (s: Live) => T): T {
   return sel(useSyncExternalStore(subscribe, snap));
 }
 export const getState = () => state;
+
+/** Install a page-scoped, localized failure toast. Other pages keep the legacy detail message. */
+export function definirMessageEchecPriseMesh(message: (() => string) | null) {
+  messageEchecPriseMesh = message;
+  return () => { if (messageEchecPriseMesh === message) messageEchecPriseMesh = null; };
+}
 
 let toastTimer: number | undefined;
 export function toast(text: string, err = false) {
@@ -79,7 +86,7 @@ export function startLive() {
       upsert(t);
       // A finished render's last frame must never show on the next one.
       if (t.status !== 'rendering' && state.preview?.promptId && state.preview.promptId === t.prompt_id) set({ preview: null });
-      if (t.status === 'failed') toast(`Render failed: ${t.error ?? 'unknown error'}`, true);
+      if (t.status === 'failed') toast(t.kind === 'object' && messageEchecPriseMesh ? messageEchecPriseMesh() : `Render failed: ${t.error ?? 'unknown error'}`, true);
     },
     onQueue: () => void refreshStatus(),
     onPhone: (e) => phoneListeners.forEach((l) => l(e)),
