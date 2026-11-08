@@ -32,6 +32,7 @@ export default {
       'app/src/store.test.ts',
       'app/src/pages/MeshLanguageSwitch.test.tsx',
       'app/src/pages/Object.test.tsx',
+      'app/src/pages/ObjectTextPolling.test.tsx',
       'app/src/pages/ObjectPolling.test.ts',
       'app/src/pages/ReliefOutils.test.tsx',
       'app/src/pages/ReliefUsdz.test.tsx',

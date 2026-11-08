@@ -97,9 +97,19 @@ export default function ObjectPage() {
       try {
         const e = await api.objetTexteEtat(chaineId);
         if (mort) return;
+        if (e.etat === 'fini' && !e.objet) {
+          setChaine({ ...e, etat: 'echec' });
+          setChaineId(null);
+          toast(c.requestFailure, true);
+          return;
+        }
         setChaine(e);
-        if (e.etat === 'fini' && e.objet) { setSelected(e.objet); return; }
-        if (e.etat === 'echec') { toast(c.requestFailure, true); return; }
+        if (e.etat === 'fini') {
+          if (e.objet) setSelected(e.objet);
+          setChaineId(null);
+          return;
+        }
+        if (e.etat === 'echec') { setChaineId(null); toast(c.requestFailure, true); return; }
       } catch { /* réessaie au prochain tour */ }
       if (!mort) minuterie = setTimeout(() => void tour(), 2500);
     };
