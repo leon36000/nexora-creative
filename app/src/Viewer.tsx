@@ -405,7 +405,7 @@ function ObjectStage({ take, look, onLook, langue }: { take: Take; look: ModelLo
       <Suspense fallback={<img className="model-poster" src={posterUrl(take.id)} alt={c?.modelLoading ?? ''} title={c?.modelLoading} />}>
         <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} langue={langue} />
       </Suspense>
-      <div className="object-looks" role={c ? 'group' : undefined} aria-label={c?.modelLooks} onClick={(e) => e.stopPropagation()}>
+      <div className="object-looks" role={c ? 'group' : undefined} aria-label={c?.modelLooks}>
         {(['lit', 'clay', 'wire'] as const).map((l) => (
           <button key={l} type="button" className={`pill ${look === l ? 'active' : ''}`} aria-pressed={look === l} onClick={() => onLook(l)}>
             {c ? c[l === 'lit' ? 'textured' : l === 'clay' ? 'clay' : 'wire'] : l === 'lit' ? 'Textured' : l === 'clay' ? 'Clay' : 'Wireframe'}
