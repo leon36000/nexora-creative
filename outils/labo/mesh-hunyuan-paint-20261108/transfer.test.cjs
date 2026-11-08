@@ -1,0 +1,11 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {transfer}=require('./transfer-core.cjs');
+const I=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+const geometry=()=>({positions:[0,0,0,1,0,0,0,1,0],indices:[0,1,2],normals:[0,0,1,0,0,1,0,0,1],matrix:I});
+test('transfers normals and accepts cyclic face order',()=>{const a=geometry(),b=geometry();b.indices=[1,2,0];b.normals=[1,0,0,1,0,0,1,0,0];const r=transfer(a,b);assert.deepEqual(Array.from(r.normals),a.normals);assert.equal(r.stats.triangles,1)});
+test('preserves explicit zero-normal fallback',()=>{const a=geometry(),b=geometry();a.normals[0]=a.normals[1]=a.normals[2]=0;b.normals[0]=1;b.normals[2]=0;const r=transfer(a,b);assert.deepEqual(Array.from(r.normals.slice(0,3)),[1,0,0]);assert.equal(r.stats.undefinedCorners,1)});
+test('rejects inverted winding',()=>{const a=geometry(),b=geometry();b.indices=[0,2,1];assert.throws(()=>transfer(a,b),/oriented matches/)});
+test('rejects conflicting source normals sharing an output vertex',()=>{const a={positions:[0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,-1,0,0],indices:[0,1,2,3,4,5],normals:[0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1],matrix:I};const b={positions:[0,0,0,1,0,0,0,1,0,-1,0,0],indices:[0,1,2,0,2,3],normals:[0,0,1,0,0,1,0,0,1,0,0,1],matrix:I};assert.throws(()=>transfer(a,b),/conflicting source normals/)});
+test('handles a target node rotation for world-space normals',()=>{const a=geometry(),b=geometry();a.normals=[1,0,0,1,0,0,1,0,0];b.positions=[0,0,0,0,-1,0,1,0,0];b.matrix=[0,1,0,0,-1,0,0,0,0,0,1,0,0,0,0,1];const r=transfer(a,b);assert.ok(Math.abs(r.normals[0])<1e-6);assert.ok(Math.abs(r.normals[1]+1)<1e-6)});
+test('rejects missing faces and out-of-range indices',()=>{const a=geometry(),b=geometry();b.indices=[];assert.throws(()=>transfer(a,b),/triangle count/);b.indices=[0,1,9];assert.throws(()=>transfer(a,b),/invalid index/)});

@@ -1,0 +1,400 @@
+{
+  "schema": "nexora-mesh-paint-inputs-v1",
+  "source_commit": "82920d643c0dc2f7bfd7255f45f62d386edfe60c",
+  "paint_revision": "0b94677654c57bb9a6b6845cd7b704ccf551d327",
+  "dino_revision": "611a9d42f2335e0f921f1e313ad3c1b7178d206d",
+  "files": [
+    {
+      "path": "source/LICENSE",
+      "bytes": 17914,
+      "sha256": "b79ac5e11ce063b6c6570dbe9686a45a03ba08bd248aa6aa82fb342a23a81c0c"
+    },
+    {
+      "path": "source/hy3dpaint/DifferentiableRenderer/MeshRender.py",
+      "bytes": 56848,
+      "sha256": "5f008d9149c0dcac2ac5ffa7d2e797657b21515878d9b5804f6bf95c08135cce"
+    },
+    {
+      "path": "source/hy3dpaint/DifferentiableRenderer/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source/hy3dpaint/DifferentiableRenderer/camera_utils.py",
+      "bytes": 3771,
+      "sha256": "a192b81c6d938dfe50a40f0e248a10c174a9c37b311b41b908f35e5b7304512c"
+    },
+    {
+      "path": "source/hy3dpaint/DifferentiableRenderer/compile_mesh_painter.sh",
+      "bytes": 158,
+      "sha256": "121f33ca0ecdc06d5b9907ae9670fab13db82cadc60fad651fe8bef58a2179ee"
+    },
+    {
+      "path": "source/hy3dpaint/DifferentiableRenderer/mesh_inpaint_processor.cpp",
+      "bytes": 15328,
+      "sha256": "bb01d43b06c0a267be6fd8fdf29b1b13637f354a56f06b486b1d794ea4c81ba6"
+    },
+    {
+      "path": "source/hy3dpaint/DifferentiableRenderer/mesh_utils.py",
+      "bytes": 10078,
+      "sha256": "407ae316ceaf47894efcc8636ccb9b96b079882566b9f081f8885869adac71e2"
+    },
+    {
+      "path": "source/hy3dpaint/LICENSE",
+      "bytes": 15928,
+      "sha256": "e135813e2ce830c6b46c62bd24e9b6094105c46f825a75341ec6ceb1d915222f"
+    },
+    {
+      "path": "source/hy3dpaint/README.md",
+      "bytes": 4108,
+      "sha256": "b5ad557f07ff025a8165e5524a716358b1c6048a0e0ab43fbf7d8f16756b8c5e"
+    },
+    {
+      "path": "source/hy3dpaint/cfgs/hunyuan-paint-pbr.yaml",
+      "bytes": 1240,
+      "sha256": "6fdb8942da866d67c0ff7737d2aa513a2f08a4fb0cc1ce310e9f2c19a9deb7df"
+    },
+    {
+      "path": "source/hy3dpaint/convert_utils.py",
+      "bytes": 4542,
+      "sha256": "0adc9c2b2245132c9318253cf1a8ff79c791be455a2149f59320e3ba4ef052dc"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/custom_rasterizer/__init__.py",
+      "bytes": 73,
+      "sha256": "f684748125910839557f1728ae036a8e7bb0640ae43a3546b4551f10cdc2166b"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/custom_rasterizer/render.py",
+      "bytes": 1556,
+      "sha256": "249686f872e7959334f2c4b32a43ef8f22cf76796c986b20405ab99018c5b817"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel/grid_neighbor.cpp",
+      "bytes": 22161,
+      "sha256": "ce92dcb20136c9350c3a6ae9609b5f6aef01f7f005ddfb4a23f1d45b95b10ecd"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel/rasterizer.cpp",
+      "bytes": 6777,
+      "sha256": "0946731dde37e87d7d6d5cf89b5429cde07337f162959fc07f1711d46cfd2a0e"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel/rasterizer.h",
+      "bytes": 1972,
+      "sha256": "938bd458a04a66223acd19999381801d765ba6047581fb54b75b29321b379564"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel/rasterizer_gpu.cu",
+      "bytes": 6398,
+      "sha256": "9b69491e08a24bca91b05561b0be36d45eb7745fbb5103388229160b5603b676"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel_for_windows/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel_for_windows/grid_neighbor.cpp",
+      "bytes": 22287,
+      "sha256": "50ddf08317292fdc6f0c7fd8b9675520ff1b97184ea038bb1988ee075bdec4b9"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel_for_windows/rasterizer.cpp",
+      "bytes": 6817,
+      "sha256": "18286c6657bcd2fd9e8145d38aeb50a8c0396a5a4e41303fe83bf93694c63d94"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel_for_windows/rasterizer.h",
+      "bytes": 1980,
+      "sha256": "e48ff31c6d4e9d769c996105491feebecebfad2ea62ec11b6d8c225980f0cdf4"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/lib/custom_rasterizer_kernel_for_windows/rasterizer_gpu.cu",
+      "bytes": 6456,
+      "sha256": "a4a65e4e881d1a60be13ab155af4b27c1f0f5ac9673219feb91c293eb13960ad"
+    },
+    {
+      "path": "source/hy3dpaint/custom_rasterizer/setup.py",
+      "bytes": 1599,
+      "sha256": "e792b7390ba3c9d5c57ce4ed2d2382b4b4c2725a1d920789e2e226e33d68d68e"
+    },
+    {
+      "path": "source/hy3dpaint/demo.py",
+      "bytes": 1651,
+      "sha256": "c37f98c7fbb6fe8ece0e11ae46ccaa6d07996f6c81c4c818ad7b1bd5839c0d6f"
+    },
+    {
+      "path": "source/hy3dpaint/hunyuanpaintpbr/__init__.py",
+      "bytes": 1492,
+      "sha256": "13a4e0a42826babc68abbe2634e35d40af4dfe0156c3bae078fc6b6139eea6df"
+    },
+    {
+      "path": "source/hy3dpaint/hunyuanpaintpbr/pipeline.py",
+      "bytes": 33717,
+      "sha256": "0ce6e0cab54e1f73ef3b606c7b66a12b59207e80df1dfedce4c34ebb5ebef8f5"
+    },
+    {
+      "path": "source/hy3dpaint/hunyuanpaintpbr/unet/attn_processor.py",
+      "bytes": 35104,
+      "sha256": "a41bf0f79864691bc831cc2de9714f6d25baf73463ad3fdcb224dc09fe2e6705"
+    },
+    {
+      "path": "source/hy3dpaint/hunyuanpaintpbr/unet/model.py",
+      "bytes": 25514,
+      "sha256": "5d135a73c12f0d7765366a72a37264b6bcb15da1551d3e7d60526d04b5eb1dc0"
+    },
+    {
+      "path": "source/hy3dpaint/hunyuanpaintpbr/unet/modules.py",
+      "bytes": 45181,
+      "sha256": "664983290a63849503c64714948d97444400bd95f24ad67e3a5dc557ba5a7a68"
+    },
+    {
+      "path": "source/hy3dpaint/src/__init__.py",
+      "bytes": 921,
+      "sha256": "9f1da29263d33f2791aecea183b3cbaceadae13a78a701db0b673a56c3c0f75b"
+    },
+    {
+      "path": "source/hy3dpaint/src/data/__init__.py",
+      "bytes": 921,
+      "sha256": "9f1da29263d33f2791aecea183b3cbaceadae13a78a701db0b673a56c3c0f75b"
+    },
+    {
+      "path": "source/hy3dpaint/src/data/dataloader/loader_util.py",
+      "bytes": 8532,
+      "sha256": "139f837edd683af384cb7cc3a73a48cb6e1d624ab82db6750365684d90f63c57"
+    },
+    {
+      "path": "source/hy3dpaint/src/data/dataloader/objaverse_loader_forTexturePBR.py",
+      "bytes": 6063,
+      "sha256": "262bad0e5004a3eafa3705f30a09b30fc17bfeb694734fbcb90b841a6c10a179"
+    },
+    {
+      "path": "source/hy3dpaint/src/data/dataloader/pbr_data_format.txt",
+      "bytes": 549,
+      "sha256": "c9715bf35851e02c592ea4c79e11a42992b87d1a6a6d91f5137a3bd61edc1be6"
+    },
+    {
+      "path": "source/hy3dpaint/src/data/objaverse_hunyuan.py",
+      "bytes": 3050,
+      "sha256": "47cd9b9f0c3f6b6dfb0e420032e9aabfbfea1c353892eec2d4b41a88a24db885"
+    },
+    {
+      "path": "source/hy3dpaint/src/utils/__init__.py",
+      "bytes": 921,
+      "sha256": "9f1da29263d33f2791aecea183b3cbaceadae13a78a701db0b673a56c3c0f75b"
+    },
+    {
+      "path": "source/hy3dpaint/src/utils/train_util.py",
+      "bytes": 1779,
+      "sha256": "fa5ba33a500d21df83333966d8a80d783421e9e6844cec9a2a0e0e8d72f397c1"
+    },
+    {
+      "path": "source/hy3dpaint/textureGenPipeline.py",
+      "bytes": 8136,
+      "sha256": "b940f03354fee976229f8acf2007517ab4ca6e6029e69072fb3bcbe0490622e8"
+    },
+    {
+      "path": "source/hy3dpaint/train.py",
+      "bytes": 14145,
+      "sha256": "f415a2aaa248009369561a3568b91bc579900c8360bec853498552b30013c5f0"
+    },
+    {
+      "path": "source/hy3dpaint/utils/__init__.py",
+      "bytes": 921,
+      "sha256": "9f1da29263d33f2791aecea183b3cbaceadae13a78a701db0b673a56c3c0f75b"
+    },
+    {
+      "path": "source/hy3dpaint/utils/image_super_utils.py",
+      "bytes": 1706,
+      "sha256": "3688f49deb54b13f1d65c15e07ff42f3ef3b4b5934b73011cf3dc9478d09280d"
+    },
+    {
+      "path": "source/hy3dpaint/utils/multiview_utils.py",
+      "bytes": 5576,
+      "sha256": "ad90cf21adb8fc225b6cd77cb49fa76b12ded97d122566a74252e92208250f99"
+    },
+    {
+      "path": "source/hy3dpaint/utils/pipeline_utils.py",
+      "bytes": 6078,
+      "sha256": "a479de70e3d90a6060cf2fd03731e9e29af988880f3adaa5fc4643dd3573bd08"
+    },
+    {
+      "path": "source/hy3dpaint/utils/simplify_mesh_utils.py",
+      "bytes": 1680,
+      "sha256": "946764073baa70854561392d710ab1fca7d4321d05fbba3dd6be8a446e7acf6d"
+    },
+    {
+      "path": "source/hy3dpaint/utils/torchvision_fix.py",
+      "bytes": 5201,
+      "sha256": "5e2133d574ed1f6386e11e30ffe960ff0687df9f675545a0d78454cf2ea5272a"
+    },
+    {
+      "path": "source/hy3dpaint/utils/uvwrap_utils.py",
+      "bytes": 1379,
+      "sha256": "52936fbcc1719c6a6b2e424d9177ac19e106489b4c958c23605ab7f44bcd233b"
+    },
+    {
+      "path": "source/requirements.txt",
+      "bytes": 1066,
+      "sha256": "ce8954023db68966a6fb2b80253b24c9da81ae48ee9d96f8f4a8d98b4cead289"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/README.md",
+      "bytes": 1801,
+      "sha256": "cff91f78ba939df60b532e73238a05af0e89c84f6bfb70dfe6b711d911e53c59"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/feature_extractor/preprocessor_config.json",
+      "bytes": 342,
+      "sha256": "2a1da83b5e1032aaeef397552ddb408dca0d8cd1dc58f61bf6abf38d6f33a0a2"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/image_encoder/config.json",
+      "bytes": 554,
+      "sha256": "18ea44b2d65e4d08184a7beacd01704451ade33e9a0c09e54d9d68d171d91296"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/image_encoder/model.safetensors",
+      "bytes": 1264217240,
+      "sha256": "ae616c24393dd1854372b0639e5541666f7521cbe219669255e865cb7f89466a"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/model_index.json",
+      "bytes": 617,
+      "sha256": "5b4d5d7cf32171ae93cbed10e2b775419cc2a7cd23c2c2442657c357f454801c"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/scheduler/scheduler_config.json",
+      "bytes": 387,
+      "sha256": "9a6a7268e4d7c1bc5000450927070e338dc57a51f4530078627c88f5828e792d"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/text_encoder/config.json",
+      "bytes": 613,
+      "sha256": "7e33bfc475f6cf76e69b28b101993ca834d1f22ff4d35caefde32d63d4f42fba"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/text_encoder/pytorch_model.bin",
+      "bytes": 1361671895,
+      "sha256": "c3e254d7b61353497ea0be2c4013df4ea8f739ee88cffa0ba58cd085459ed565"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/tokenizer/merges.txt",
+      "bytes": 524619,
+      "sha256": "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/tokenizer/special_tokens_map.json",
+      "bytes": 460,
+      "sha256": "f118ab3a983206e4f32583448de6bd6aae4ee21869135cef1f5848a753cdaab6"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/tokenizer/tokenizer_config.json",
+      "bytes": 807,
+      "sha256": "d562b18a0c6d32a168fce3d7a342fce64579ebacffb98fb71b0affc494fc32d8"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/tokenizer/vocab.json",
+      "bytes": 1059962,
+      "sha256": "e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/unet/attn_processor.py",
+      "bytes": 35104,
+      "sha256": "a41bf0f79864691bc831cc2de9714f6d25baf73463ad3fdcb224dc09fe2e6705"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/unet/config.json",
+      "bytes": 911,
+      "sha256": "ce0c6d379e3b1d3e1f79338de70c80a1e36f17a6372439a8249b6fb0dfa1b608"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/unet/diffusion_pytorch_model.bin",
+      "bytes": 3925293863,
+      "sha256": "675a1b5cd0098b2002637c443946529c03c5cd54427f40245263350feb3dd5b8"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/unet/model.py",
+      "bytes": 25514,
+      "sha256": "5d135a73c12f0d7765366a72a37264b6bcb15da1551d3e7d60526d04b5eb1dc0"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/unet/modules.py",
+      "bytes": 45181,
+      "sha256": "664983290a63849503c64714948d97444400bd95f24ad67e3a5dc557ba5a7a68"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/vae/config.json",
+      "bytes": 553,
+      "sha256": "424117cb534ce03497c41305ed868980123917b2b6abba4bbaa615e968772903"
+    },
+    {
+      "path": "model-source/hunyuan3d-paintpbr-v2-1/vae/diffusion_pytorch_model.bin",
+      "bytes": 334707217,
+      "sha256": "1b4889b6b1d4ce7ae320a02dedaeff1780ad77d415ea0d744b476155c6377ddc"
+    },
+    {
+      "path": "dinov2-giant/config.json",
+      "bytes": 548,
+      "sha256": "15d2e68b709674c0eb9bb5cc8b73e57ebe9a169a425bef224f46ae10053806a2"
+    },
+    {
+      "path": "dinov2-giant/model.safetensors",
+      "bytes": 4546005432,
+      "sha256": "917d3c470db999d32a312f8542149be91c7cbac61ee8fb4b67ae3d82b79ce21f"
+    },
+    {
+      "path": "dinov2-giant/preprocessor_config.json",
+      "bytes": 436,
+      "sha256": "14e780d86fa1861f8751f868d7f45425b5feb55c38ca26f152ca5097ab30f828"
+    },
+    {
+      "path": "inputs/01-chaise.glb",
+      "bytes": 11123980,
+      "sha256": "227cb2959def0a2b72e0d7c38173fae3cacf08d01a40514b6a9d4d339ff8e509"
+    },
+    {
+      "path": "inputs/01-chaise.png",
+      "bytes": 997514,
+      "sha256": "52c90fd149babb471f58cce2ed9d61edf6090a912ec4ccc2d6ab388baec25be5"
+    },
+    {
+      "path": "source/hy3dpaint/ckpt/RealESRGAN_x4plus.pth",
+      "bytes": 67040989,
+      "sha256": "4fa0d38905f75ac06eb49a7951b426670021be3018265fd191d2125df9d682f1"
+    },
+    {
+      "path": "venv/lib/python3.10/site-packages/custom_rasterizer_kernel.cpython-310-x86_64-linux-gnu.so",
+      "bytes": 1960416,
+      "sha256": "711cfe60238f7df71560f1d59dca21c4b9d0acfdd480a7997777a21eb80e1340"
+    },
+    {
+      "path": "source/hy3dpaint/DifferentiableRenderer/mesh_inpaint_processor.cpython-310-x86_64-linux-gnu.so",
+      "bytes": 249936,
+      "sha256": "4a15fd29267fe5985024265002552f1936dcf13ed166218055c8f187bbd34216"
+    }
+  ],
+  "blender_sha256": "b8b07a190fb25db76aae6de08dbc6c2b3d64e22e82bed6ba90de9545859f3431",
+  "runtime_versions": {
+    "torch": "2.7.1+cu128",
+    "torchvision": "0.22.1+cu128",
+    "diffusers": "0.30.2",
+    "transformers": "4.39.2",
+    "huggingface-hub": "0.30.2",
+    "numpy": "1.23.5",
+    "trimesh": "4.4.7",
+    "xatlas": "0.0.9",
+    "pymeshlab": "2022.2.post3",
+    "pytorch-lightning": "1.9.5",
+    "torchmetrics": "1.6.0",
+    "realesrgan": "0.3.0",
+    "basicsr": "1.4.2",
+    "custom-rasterizer": "0.1"
+  }
+}
