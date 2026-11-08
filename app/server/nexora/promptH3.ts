@@ -5,6 +5,7 @@
  */
 
 import { type SujetRef, validerPromptRef } from './personnages.js';
+import { extraireDialoguesH3 } from './dialoguesH3.js';
 
 export type ModeH3 = 't2va' | 'i2va' | 'fl2va' | 'l2va' | 'ref2va';
 
@@ -96,7 +97,7 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
     else if ((texte.split('\n')[1] ?? 'x').trim() !== '') erreurs.push('une ligne vide doit suivre la ligne d’instruction');
   }
 
-  const blocs = [...texte.matchAll(/<d>\[([^\]]+)\]\s*([\s\S]*?)<\/d>/g)].map((m) => ({ langue: m[1], texte: m[2].trim() }));
+  const blocs = extraireDialoguesH3(texte);
   for (const replique of ctx.dialogues ?? []) {
     if (!blocs.some((b) => b.texte === replique.trim())) erreurs.push(`réplique absente ou modifiée, à recopier mot pour mot : ${replique}`);
   }
