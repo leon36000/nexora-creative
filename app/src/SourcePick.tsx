@@ -3,7 +3,7 @@
  * pick one of your takes, or drop a file. Either way the media is uploaded as
  * an input and comes back as a token plus the facts the page sizes itself by.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { mediaUrl, posterUrl, takeAsInput, uploadFile, type Take } from './api';
 import { useDropZone } from './drop';
 import { DropWell } from './pages/Mirror';
@@ -133,14 +133,26 @@ export async function loadFile(f: File, accept: SourceKind[], langue?: LangueCli
 /** Load ?take=<id> once into a source, then drop the param. */
 export function useTakeParam(id: string | null, onSource: (s: Source) => void, errorMessage?: string) {
   const takes = useStore((s) => s.takes);
-  const [loaded, setLoaded] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState<{ id: string; generation: number } | null>(null);
+  const generation = useRef(0);
+  const latest = useRef({ onSource, errorMessage });
+  useLayoutEffect(() => { latest.current = { onSource, errorMessage }; }, [onSource, errorMessage]);
+  useLayoutEffect(() => {
+    generation.current++;
+    return () => { generation.current++; };
+  }, [id]);
   useEffect(() => {
     if (!id) { if (loaded) setLoaded(null); return; }
-    if (id === loaded) return;
+    if (id === loaded?.id && generation.current === loaded.generation) return;
     const t = takes.find((x) => x.id === Number(id));
     if (!t) return;
-    setLoaded(id);
-    void sourceFromTake(t).then(onSource).catch((e) => toast(errorMessage ?? (e instanceof Error ? e.message : 'could not load the take'), true));
+    setLoaded({ id, generation: generation.current });
+    const current = generation.current;
+    void sourceFromTake(t).then((source) => {
+      if (generation.current === current) latest.current.onSource(source);
+    }).catch((e) => {
+      if (generation.current === current) toast(latest.current.errorMessage ?? (e instanceof Error ? e.message : 'could not load the take'), true);
+    });
   }, [id, takes, loaded, errorMessage]);
 }
 
