@@ -328,6 +328,22 @@ describe('Nexora Mesh : décimation', () => {
 });
 
 describe('Nexora Mesh : exports', () => {
+  for (const indices of [false, true]) for (const reflet of [false, true]) {
+    it(`préserve l'orientation pour STL, 3MF et USDZ, reflet=${reflet}, indexé=${indices}`, async () => {
+      const glb = await glbNormales({ echelle: [reflet ? -1 : 1, 1, 1], indices });
+      const ordre = reflet ? [0, 2, 1] : [0, 1, 2];
+      const m = await lireGlb(glb);
+      expect(Array.from(m.indices)).toEqual(ordre);
+      const stl = await exporter(glb, 'stl');
+      const vue = new DataView(stl.buffer, stl.byteOffset, stl.byteLength);
+      // La normale +Z glTF devient -Y dans le repère d'impression.
+      expect(vue.getFloat32(88, true)).toBeCloseTo(-1);
+      const xml = new TextDecoder().decode(unzipSync(await exporter(glb, '3mf'))['3D/3dmodel.model']);
+      expect(xml).toContain(`<triangle v1="${ordre[0]}" v2="${ordre[1]}" v3="${ordre[2]}"/>`);
+      const usda = new TextDecoder().decode(unzipSync(await exporter(glb, 'usdz'))['relief.usda']);
+      expect(usda).toContain(`int[] faceVertexIndices = [${ordre.join(', ')}]`);
+    });
+  }
   it('STL binaire : taille = 84 + 50 par triangle, plus grande dimension à 100 mm', async () => {
     const m = await lireGlb(await glbSphere(8));
     const stl = versStl(m);
@@ -464,7 +480,10 @@ describe('Nexora Mesh : exports', () => {
     writeFileSync(nouveau, 'nouveau', { flag: 'wx' });
     expect(readFileSync(ancien, 'utf8')).toBe('ancien');
     expect(readFileSync(nouveau, 'utf8')).toBe('nouveau');
-    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-plein-100.stl');
+    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v2-plein-100.stl');
+    expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v2-plein-100.3mf');
+    expect(nomCacheExport('usdz', null, 100)).toBe('export-usdz-orientation-v2-plein-100.usdz');
+    expect(nomCacheExport('glb', null, 100)).toBe('export-glb-plein-100.glb');
   });
   it('USDZ : zip non compressé, chaque fichier aligné sur 64 octets, USDA lisible', async () => {
     const octets = versUsdz(await lireGlb(await glbSphere(8)), { nom: 'balle' });

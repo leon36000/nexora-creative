@@ -137,8 +137,9 @@ export function maillageDuDocument(doc: Document): Maillage {
       if (I) { for (let i = 0; i < I.getCount(); i++) idx.push(base + I.getScalar(i)); }
       else { for (let i = 0; i < P.getCount(); i++) idx.push(base + i); }
       for (let i = debut; i < idx.length; i += 3) {
-        if (determinant < 0) indicesObj.push(idx[i], idx[i + 2], idx[i + 1]);
-        else indicesObj.push(idx[i], idx[i + 1], idx[i + 2]);
+        // Un reflet inverse l'orientation géométrique : la rétablir pour tous les exports.
+        if (determinant < 0 && i + 2 < idx.length) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]];
+        indicesObj.push(idx[i], idx[i + 1], idx[i + 2]);
       }
       const image = tex?.getImage();
       const mime = tex?.getMimeType() || '';
@@ -433,9 +434,10 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
   return zipSync(fichiers, { level: 0 });
 }
 
-/** Anciennes versions de cache conservées ; les ZIP OBJ sont recalculés pour les matériaux par primitive. */
+/** Les anciennes versions restent en place ; les exports corrigés utilisent un nouveau cache. */
 export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
-  return `export-${format}${format === 'obj' ? '-normales-v3' : ''}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
+  const version = format === 'obj' ? '-normales-v3' : format === 'glb' ? '' : '-orientation-v2';
+  return `export-${format}${version}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
 }
 
 /** STL binaire, en millimètres, Z vers le haut, posé sur le plateau. */
