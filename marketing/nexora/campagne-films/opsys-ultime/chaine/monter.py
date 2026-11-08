@@ -72,6 +72,31 @@ def valider_ts(plan):
         return {"ok": False, "erreurs": [{"regle": "tsx", "message": (r.stderr or r.stdout)[-400:]}]}
 
 
+class ValidationEditPlanRefusee(ValueError):
+    """Le rapport du validateur officiel ne permet pas le rendu."""
+
+
+def verifier_rapport_validation(rapport):
+    """Refuse un rapport invalide; rend explicite l'absence du validateur tsx."""
+    if rapport is None:
+        print("AVERTISSEMENT : EditPlan non validé (tsx absent); rendu poursuivi sans validation officielle.", file=sys.stderr)
+        return None
+    if not isinstance(rapport, dict) or rapport.get("ok") is not True:
+        erreurs = rapport.get("erreurs") if isinstance(rapport, dict) else None
+        details = []
+        if isinstance(erreurs, list):
+            for erreur in erreurs:
+                if isinstance(erreur, dict):
+                    details.append(f"{erreur.get('regle', '?')} : {erreur.get('message', '')}".strip())
+                else:
+                    details.append(str(erreur))
+        elif erreurs:
+            details.append(str(erreurs))
+        raison = " ; ".join(details) or "rapport absent ou mal formé (ok doit être strictement true)"
+        raise ValidationEditPlanRefusee(f"EditPlan refusé par le validateur officiel : {raison}. Rendu refusé.")
+    return rapport
+
+
 def ligne_de_temps(video):
     debuts, t = [], 0
     for i, c in enumerate(video):
@@ -298,6 +323,29 @@ def contexte(args):
     return _CTX[cle]
 
 
+@lru_cache(maxsize=512)
+def mesurer_typo_cadre(typo, texte, type_, W, H, echelle, mx, y):
+    """Plus grande police qui entre dans le cadre ; résultat réutilisé entre images."""
+    maxi = min(max(W, H), max(6, int(min(W, H) * 0.024 * echelle)))
+    bas_taille, haut_taille, meilleur = 6, maxi, None
+    while bas_taille <= haut_taille:
+        taille = (bas_taille + haut_taille) // 2
+        f = typo.police("mono", taille, "Medium")
+        lw = typo.larg(f, texte, 0.12)
+        pad = f.size * 0.6
+        largeur = lw + (2 * pad if type_ == "etiquette" else f.size * 1.3)
+        haut = y - pad * 0.6 if type_ == "etiquette" else y
+        bas = y + f.size + pad * 0.7 if type_ == "etiquette" else y + f.size
+        if largeur <= W - 2 * mx and haut >= H * 0.04 and bas <= H * 0.96:
+            meilleur = f, lw, pad, largeur
+            bas_taille = taille + 1
+        else:
+            haut_taille = taille - 1
+    if meilleur is None:
+        raise ValueError("Texte d'incrustation trop long pour le cadre sûr")
+    return meilleur
+
+
 def poser_typo(ctx, im, spec, u):
     t = spec["type"]
     d = spec["duree_f"] / FPS
@@ -312,16 +360,12 @@ def poser_typo(ctx, im, spec, u):
     # surtitre / étiquette : tracés ici pour gérer les quatre coins
     calque = Image.new("RGBA", im.size, (0, 0, 0, 0))
     dd = ImageDraw.Draw(calque)
-    s = min(W, H)
-    f = ctx.typo.police("mono", s * 0.024 * spec.get("echelle", 1.0), "Medium")
     txt = spec["texte"].upper()
-    lw = ctx.typo.larg(f, txt, 0.12)
     mx = (0.08 if v else 0.06) * W
     pos = spec.get("position", "haut-gauche" if t == "surtitre" else "bas-droite")
-    pad = f.size * 0.6
-    largeur = lw + (2 * pad if t == "etiquette" else f.size * 1.3)
-    x = mx if "gauche" in pos else (W - mx - largeur if "droite" in pos else (W - largeur) / 2)
     y = (0.105 * H if v else 0.075 * H) if pos.startswith("haut") else ((0.86 if v else 0.885) * H if pos.startswith("bas") else 0.5 * H)
+    f, lw, pad, largeur = mesurer_typo_cadre(ctx.typo, txt, t, W, H, spec.get("echelle", 1.0), mx, y)
+    x = mx if "gauche" in pos else (W - mx - largeur if "droite" in pos else (W - largeur) / 2)
     p = ease_out(u / 0.3)
     sortie = min(1.0, max(0.0, (d - u) / 0.22))
     a = int(255 * p * sortie)
@@ -349,6 +393,14 @@ def textes_plan(ctx):
     return out
 
 
+def verifier_typo_cadre(ctx, incs, W, H):
+    """Refuse avant l'encodeur les mentions qui ne rentrent pas dans le cadre sûr."""
+    fond = Image.new('RGB', (W, H))
+    for spec in incs:
+        if spec.get('type') in ('surtitre', 'etiquette'):
+            poser_typo(ctx, fond, spec, 0.5)
+
+
 def rendre_tranche(args):
     equipe, version, brouillon, a, b, sortie = args
     sortie = verifier_fichier_libre(sortie, "la tranche")
@@ -357,6 +409,7 @@ def rendre_tranche(args):
     video = ctx.plan["video"]
     rec_v = ctx.annexe.get("recadrage_v") or {}
     incs = sorted(textes_plan(ctx) + list(ctx.annexe.get("incrustations", [])), key=lambda s: 1 if s["type"] in ("flash", "glitch") else 0)
+    verifier_typo_cadre(ctx, incs, W, H)
     enc = subprocess.Popen([FF, "-v", "error", "-n", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                             "-c:v", "libx264", "-preset", "ultrafast" if brouillon else "medium", "-crf", "24" if brouillon else "13",
                             "-pix_fmt", "yuv420p", str(sortie)], stdin=subprocess.PIPE)
@@ -507,7 +560,7 @@ def construire(equipe, version, brouillon=False, sortie=None, jobs=14):
     nom_sortie = f"{equipe}-{version}{'-brouillon' if brouillon else ''}.mp4"
     chemin_defaut = T.TRAVAIL / equipe / "montage" / nom_sortie
     sortie = verifier_sortie_libre(sortie if sortie is not None else chemin_defaut)
-    rapport = valider_ts(ctx.plan)
+    rapport = verifier_rapport_validation(valider_ts(ctx.plan))
     out_dir = T.dossier_travail(equipe, "montage")
     tranches = creer_dossier_tranches(out_dir, equipe, version, brouillon)
     pas = 36
@@ -538,6 +591,6 @@ if __name__ == "__main__":
     o = a.parse_args()
     try:
         construire(o.equipe, o.version, o.brouillon, o.sortie, o.jobs)
-    except (PlansVideoManquants, FileExistsError) as e:
+    except (PlansVideoManquants, FileExistsError, ValidationEditPlanRefusee) as e:
         print(f"ERREUR : {e}", file=sys.stderr)
         raise SystemExit(2)

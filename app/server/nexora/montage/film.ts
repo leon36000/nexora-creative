@@ -407,12 +407,15 @@ export interface ResultatEscalade { runs: RunFilm[]; final: RunFilm; palierFinal
 export async function escalader(
   clients: Record<Palier, ClientLlm>, depart: Palier, b: BriefFilm, o: OptionsRun & { seuil?: number; ordre?: readonly Palier[]; /** Options propres à chaque palier (mémoire, harnais), appliquées par-dessus `o`. */ politique?: (p: Palier) => OptionsRun } = {},
 ): Promise<ResultatEscalade> {
-  const ordre = (o.ordre ?? PALIERS).slice((o.ordre ?? PALIERS).indexOf(depart));
+  const paliers = o.ordre ?? PALIERS;
+  const debut = paliers.indexOf(depart);
+  if (debut < 0) throw new RangeError('Le palier de départ est absent de l’ordre d’escalade.');
+  const ordre = paliers.slice(debut);
   const runs: RunFilm[] = [];
   for (const p of ordre) {
     let r: RunFilm;
     try { r = await runFilm(clients[p], p, b, { ...o, ...(o.politique?.(p) ?? {}) }); } catch (e) {
-      if (e instanceof ErreurPlafondLlm) break;
+      if (e instanceof ErreurPlafondLlm && runs.length > 0) break;
       throw e;
     }
     runs.push(r);
