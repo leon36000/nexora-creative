@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from '../store';
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
+import { creerCopieMatte, etatInterfaceMatte, type LangueMatte } from '../matteCopy';
 
 const P = '/api/nexora/detourage';
 type Pt = [number, number, 0 | 1];
@@ -18,31 +19,58 @@ interface Travail {
 }
 interface Capacites { rapide: { disponible: boolean; moteur: { nom: string } | null }; pro: { disponible: boolean; description: string }; limites: { secondesMax: number } }
 
+class ErreurHttpMatte extends Error {
+  constructor(readonly statut: number) { super('Matte HTTP'); }
+}
+
 async function appel<T>(chemin: string, init?: RequestInit): Promise<T> {
   const r = await fetch(`${P}${chemin}`, init);
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((j as { error?: string }).error ?? `Erreur ${r.status}`);
+  if (!r.ok) throw new ErreurHttpMatte(r.status);
   return j as T;
 }
 
 /** Envoi d'un fichier en flux avec progression (XHR : fetch n'expose pas la progression d'envoi). */
-function envoyer(url: string, fichier: Blob, progression: (p: number) => void): Promise<any> {
+function envoyer(url: string, fichier: Blob, progression: (p: number) => void, copie: Copie = copieFR): Promise<any> {
   return new Promise((res, rej) => {
     const x = new XMLHttpRequest();
     x.open('PUT', url);
     x.upload.onprogress = (e) => e.lengthComputable && progression(e.loaded / e.total);
-    x.onload = () => { try { const j = JSON.parse(x.responseText); x.status < 300 ? res(j) : rej(new Error(j.error ?? `Erreur ${x.status}`)); } catch { rej(new Error(`Erreur ${x.status}`)); } };
-    x.onerror = () => rej(new Error('Envoi interrompu'));
+    x.onload = () => { try { const j = JSON.parse(x.responseText); x.status < 300 ? res(j) : rej(new ErreurHttpMatte(x.status)); } catch { rej(new ErreurHttpMatte(x.status)); } };
+    x.onerror = () => rej(new Error(copie.t('error.uploadInterrupted')));
     x.setRequestHeader('content-type', 'application/octet-stream');
     x.send(fichier);
   });
 }
 
 const dateurMasque = (b64: string) => `data:image/png;base64,${b64}`;
-const fmtS = (s: number) => (s < 90 ? `${Math.round(s)} s` : `${Math.floor(s / 60)} min ${Math.round(s % 60)} s`);
-const fmtO = (o: number) => (o > 1e9 ? `${(o / 1e9).toFixed(2)} Go` : o > 1e6 ? `${(o / 1e6).toFixed(1)} Mo` : `${Math.round(o / 1e3)} Ko`);
+type Copie = ReturnType<typeof creerCopieMatte>;
+const copieFR = creerCopieMatte('fr');
+const vueIdentifiants = ['apercu-echecs.mp4', 'matte.mp4', 'composite.mp4', 'suivi.mp4'] as const;
+type VueId = typeof vueIdentifiants[number];
+const CLES_VUE = {
+  'apercu-echecs.mp4': 'view.damier', 'matte.mp4': 'view.matte', 'composite.mp4': 'view.newBackground', 'suivi.mp4': 'view.tracking',
+} as const;
+const CLES_FOND = { transparent: 'bg.label.transparent', couleur: 'bg.label.color', flou: 'bg.label.blur', image: 'bg.label.image' } as const;
+const CLES_SEQ = { alpha: 'export.seq.alpha', rgba16: 'export.seq.rgba16', exr: 'export.seq.exr', alpha_exr: 'export.seq.alphaExr' } as const;
 
 export default function Detourage() {
+  const [langue, setLangue] = useState<LangueMatte>('fr');
+  const copie = useMemo(() => creerCopieMatte(langue), [langue]);
+  const tr = copie.t;
+  const textesEtat = etatInterfaceMatte(langue);
+  const copieCourante = useRef(copie);
+  copieCourante.current = copie;
+  const erreur = (e: unknown, cle: 'error.import' | 'error.preview' | 'error.search' | 'error.background' | 'error.launch'): string => {
+    const c = copieCourante.current;
+    const messages = etatInterfaceMatte(c.langue);
+    if (e instanceof ErreurHttpMatte) {
+      if (e.statut === 503) return messages.serviceUnavailable;
+      if (e.statut === 402) return messages.credits;
+      if (e.statut === 413) return messages.tooLarge;
+    }
+    return c.t(cle);
+  };
   const [cap, setCap] = useState<Capacites | null>(null);
   const [travail, setTravail] = useState<Travail | null>(null);
   const [recents, setRecents] = useState<Travail[]>([]);
@@ -57,7 +85,7 @@ export default function Detourage() {
   const [trouves, setTrouves] = useState<{ image: number; secondes: number; objets: { masqueB64: string; score: number; boite: number[]; aire: number }[] } | null>(null);
   const [outil, setOutil] = useState<'ajouter' | 'retirer'>('ajouter');
   const [masque, setMasque] = useState<{ image: number; src: string; aire: number; s: number } | null>(null);
-  const [occupe, setOccupe] = useState<string | null>(null);
+  const [occupe, setOccupe] = useState<'creating' | 'searching' | 'launching' | null>(null);
   const [mode, setMode] = useState<'suivi' | 'complet'>('complet');
   const [palier, setPalier] = useState<'rapide' | 'pro'>('rapide');
   const [largeur, setLargeur] = useState(1280);
@@ -66,34 +94,105 @@ export default function Detourage() {
   const [couleur, setCouleur] = useState('#1aa36f');
   const [fichierFond, setFichierFond] = useState<string | null>(null);
   const [lissage, setLissage] = useState(1);
-  const [vue, setVue] = useState<'apercu-echecs.mp4' | 'matte.mp4' | 'composite.mp4' | 'suivi.mp4'>('apercu-echecs.mp4');
+  const [vue, setVue] = useState<VueId>('apercu-echecs.mp4');
   const video = useRef<HTMLVideoElement>(null);
   const jeton = useRef(0);
+  const importCourant = useRef(0);
+  const occupationCourante = useRef(0);
 
-  useEffect(() => { void appel<Capacites>('/capacites').then(setCap).catch(() => setCap(null)); void appel<Travail[]>('/travaux').then(setRecents).catch(() => {}); }, []);
+  const [listeEtat, setListeEtat] = useState<'chargement' | 'ok' | 'erreur'>('chargement');
+  const [listeVersion, setListeVersion] = useState(0);
+  const [capErreur, setCapErreur] = useState(false);
+  const [capVersion, setCapVersion] = useState(0);
+  const [pollErreur, setPollErreur] = useState(false);
+  const [suppressionEnCours, setSuppressionEnCours] = useState(false);
+  const travailCourant = useRef(travail);
+  travailCourant.current = travail;
+  const monte = useRef(false);
+  useEffect(() => { monte.current = true; return () => { monte.current = false; }; }, []);
+
+  useEffect(() => {
+    let actif = true;
+    setCapErreur(false);
+    void appel<Capacites>('/capacites').then((c) => {
+      if (typeof c?.rapide?.disponible !== 'boolean' || !Number.isFinite(c?.limites?.secondesMax)) throw new Error('Capacités invalides.');
+      if (actif) setCap(c);
+    })
+      .catch(() => { if (actif) setCapErreur(true); });
+    return () => { actif = false; };
+  }, [capVersion]);
+
+  useEffect(() => {
+    let actif = true;
+    setListeEtat('chargement');
+    void appel<Travail[]>('/travaux').then((l) => {
+      if (!Array.isArray(l)) throw new Error('Liste invalide.');
+      if (actif) { setRecents(l); setListeEtat('ok'); }
+    }).catch(() => { if (actif) setListeEtat('erreur'); });
+    return () => { actif = false; };
+  }, [listeVersion]);
+
+  useEffect(() => () => { if (urlLocale) URL.revokeObjectURL(urlLocale); }, [urlLocale]);
 
   const image = Math.round(t * fps);
   const points = clics[image] ?? [];
 
-  // Suivi de l'avancement d'un travail en cours
+  // Chaque requête attend la précédente; les réponses d’un ancien travail sont ignorées.
   useEffect(() => {
+    setPollErreur(false);
     if (!travail || !['en_attente', 'en_cours'].includes(travail.etat)) return;
-    const h = setInterval(() => { void appel<Travail>(`/travaux/${travail.id}`).then(setTravail).catch(() => {}); }, 1500);
-    return () => clearInterval(h);
+    const id = travail.id;
+    let actif = true;
+    let minuterie: ReturnType<typeof setTimeout> | undefined;
+    const controleur = new AbortController();
+    const tour = async () => {
+      let delai = 1500;
+      try {
+        const r = await appel<Travail>(`/travaux/${id}`, { signal: controleur.signal });
+        if (!actif || travailCourant.current?.id !== id || !['en_attente', 'en_cours'].includes(travailCourant.current.etat)) return;
+        if (r.id !== id) throw new Error('Réponse de suivi incohérente.');
+        travailCourant.current = r;
+        setTravail(r);
+        setPollErreur(false);
+        if (!['en_attente', 'en_cours'].includes(r.etat)) return;
+      } catch {
+        if (!actif || travailCourant.current?.id !== id) return;
+        setPollErreur(true);
+        delai = 5000;
+      }
+      if (actif) minuterie = setTimeout(() => { void tour(); }, delai);
+    };
+    minuterie = setTimeout(() => { void tour(); }, 1500);
+    return () => { actif = false; clearTimeout(minuterie); controleur.abort(); };
   }, [travail?.id, travail?.etat]);
 
   async function importer(f: File) {
+    const version = ++importCourant.current;
+    const courant = () => monte.current && version === importCourant.current;
+    const occupation = ++occupationCourante.current;
+    setOccupe('creating');
+    setEnvoi(0);
     try {
-      setOccupe('Création du travail…');
       const nouveau = await appel<Travail>('/travaux', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: f.name.replace(/\.[^.]+$/, '') }) });
+      if (!courant()) return;
+      const r = await envoyer(`${P}/travaux/${nouveau.id}/source`, f, (p) => { if (courant()) setEnvoi(p); });
+      if (!courant()) return;
+      if (r.id !== nouveau.id) throw new Error('Source importée incohérente.');
+      // Le nouvel import remplace l’ancien seulement une fois son dépôt confirmé.
+      travailCourant.current = r;
+      setTravail(r);
       setUrlLocale(URL.createObjectURL(f));
+      jeton.current++;
       setClics({}); setBoites({}); setTrouves(null); setMasque(null); setPlage(null); setT(0);
-      setEnvoi(0);
-      const r = await envoyer(`${P}/travaux/${nouveau.id}/source`, f, setEnvoi);
-      setTravail(r); setEnvoi(null);
+      setFichierFond(null); setDuree(r.source?.duree ?? 0);
       if (r.source) setFps(r.source.fps);
-      if (r.avertissement) toast(r.avertissement, true);
-    } catch (e) { toast(e instanceof Error ? e.message : 'import impossible', true); setEnvoi(null); } finally { setOccupe(null); }
+      if (r.avertissement) toast(copieCourante.current.langue === 'fr' ? r.avertissement : etatInterfaceMatte(copieCourante.current.langue).sourceWarning, true);
+      setListeVersion((v) => v + 1);
+    } catch (e) {
+      if (courant()) toast(erreur(e, 'error.import'), true);
+    } finally {
+      if (courant()) { setEnvoi(null); if (occupation === occupationCourante.current) setOccupe(null); }
+    }
   }
 
   /** Image courante de la vidéo, réduite à 1280 px de large, en JPEG (base 64). */
@@ -112,9 +211,9 @@ export default function Detourage() {
     try {
       const r = await appel<{ masqueB64: string; aire: number; secondes: number }>('/apercu', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageB64: b64, points: pts, ...(boite ? { boite } : {}) }) });
       const imageActuelle = Math.round((video.current?.currentTime ?? 0) * fps);
-      if (mon === jeton.current && imageDemandee === imageActuelle) setMasque({ image: imageDemandee, src: dateurMasque(r.masqueB64), aire: r.aire, s: r.secondes });
-    } catch (e) { if (mon === jeton.current) toast(e instanceof Error ? e.message : 'aperçu impossible', true); }
-  }, [capturer, fps]);
+      if (monte.current && mon === jeton.current && imageDemandee === imageActuelle) setMasque({ image: imageDemandee, src: dateurMasque(r.masqueB64), aire: r.aire, s: r.secondes });
+    } catch (e) { if (monte.current && mon === jeton.current) toast(erreur(e, 'error.preview'), true); }
+  }, [capturer, fps, copie]);
 
   function cliquer(e: React.MouseEvent<HTMLDivElement>, negatifForce = false) {
     if (!travail || envoi !== null) return;
@@ -140,14 +239,15 @@ export default function Detourage() {
     const texte = mot.trim(); if (!texte || !travail || envoi !== null) return;
     const b64 = capturer(); if (!b64) return;
     const mon = ++jeton.current;
+    const occupation = ++occupationCourante.current;
     video.current?.pause();
     try {
-      setOccupe('Recherche…');
+      setOccupe('searching');
       const r = await appel<{ objets: { masqueB64: string; score: number; boite: number[]; aire: number }[]; secondes: number }>('/texte', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageB64: b64, texte }) });
-      if (mon !== jeton.current) return;
+      if (!monte.current || mon !== jeton.current) return;
       setTrouves({ image, secondes: r.secondes, objets: r.objets });
-      if (!r.objets.length) toast(`Rien trouvé pour « ${texte} » : essaie un autre mot ou clique le sujet.`, true);
-    } catch (e) { if (mon === jeton.current) toast(e instanceof Error ? e.message : 'recherche impossible', true); } finally { setOccupe(null); }
+      if (!r.objets.length) toast(copieCourante.current.t('mask.notFound', { texte }), true);
+    } catch (e) { if (monte.current && mon === jeton.current) toast(erreur(e, 'error.search'), true); } finally { if (monte.current && occupation === occupationCourante.current) setOccupe(null); }
   }
 
   /** Un objet trouvé devient la graine de l'image courante : sa boîte, ses points éventuels, et son masque en aperçu. */
@@ -165,12 +265,16 @@ export default function Detourage() {
   const imagesCles = useMemo(() => [...new Set([...Object.keys(clics).map(Number).filter((i) => (clics[i]?.length ?? 0) > 0), ...Object.keys(boites).map(Number)])].sort((a, b) => a - b), [clics, boites]);
 
   async function deposerFond(f: File) {
-    if (!travail) return;
+    const id = travail?.id;
+    if (!id) return;
     try {
       const ext = (f.name.split('.').pop() ?? 'png').toLowerCase();
-      const r = await envoyer(`${P}/travaux/${travail.id}/fond?ext=${ext}`, f, () => {});
-      setFichierFond(r.fond); setFond('image'); toast('Fond déposé');
-    } catch (e) { toast(e instanceof Error ? e.message : 'fond impossible', true); }
+      const r = await envoyer(`${P}/travaux/${id}/fond?ext=${ext}`, f, () => {});
+      if (!monte.current || travailCourant.current?.id !== id) return;
+      setFichierFond(r.fond); setFond('image'); toast(copieCourante.current.t('toast.uploadDone'));
+    } catch (e) {
+      if (monte.current && travailCourant.current?.id === id) toast(erreur(e, 'error.background'), true);
+    }
   }
 
   async function lancer() {
@@ -178,20 +282,52 @@ export default function Detourage() {
     const invites = imagesCles.filter((i) => i >= Math.round(debut * fps)).map((i) => ({
       image: i - Math.round(debut * fps), points: clics[i] ?? [], ...(boites[i] ? { boite: boites[i] } : {}),
     }));
-    if (!invites.length) { toast('Clique d’abord sur le sujet (dans la plage choisie)', true); return; }
+    if (!invites.length) { toast(tr('error.launchHint'), true); return; }
     const composite = fond === 'couleur' ? { type: 'couleur', valeur: couleur } : fond === 'flou' ? { type: 'flou' } : fond === 'image' && fichierFond ? { type: /\.(mp4|mov|webm)$/.test(fichierFond) ? 'video' : 'image', fichier: fichierFond } : null;
+    const id = travail.id;
+    const occupation = ++occupationCourante.current;
     try {
-      setOccupe('Lancement…');
-      setTravail(await appel<Travail>(`/travaux/${travail.id}/lancer`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+      setOccupe('launching');
+      const r = await appel<Travail>(`/travaux/${id}/lancer`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
         palier, mode, invites, debutS: debut, dureeS: plage ? plage[1] - plage[0] : null, largeurMax: largeur, lissage, composite,
-      }) }));
-    } catch (e) { toast(e instanceof Error ? e.message : 'lancement impossible', true); } finally { setOccupe(null); }
+      }) });
+      if (monte.current && travailCourant.current?.id === id) { travailCourant.current = r; setTravail(r); }
+    } catch (e) {
+      if (monte.current && travailCourant.current?.id === id) toast(erreur(e, 'error.launch'), true);
+    } finally { if (monte.current && occupation === occupationCourante.current) setOccupe(null); }
   }
-  async function action(a: 'annuler' | 'reprendre') { if (travail) setTravail(await appel<Travail>(`/travaux/${travail.id}/${a}`, { method: 'POST' }).catch((e) => { toast(e.message, true); return travail; })); }
+  async function action(a: 'annuler' | 'reprendre') {
+    const id = travail?.id;
+    if (!id) return;
+    try {
+      const r = await appel<Travail>(`/travaux/${id}/${a}`, { method: 'POST' });
+      if (monte.current && travailCourant.current?.id === id) { travailCourant.current = r; setTravail(r); }
+    } catch {
+      if (monte.current && travailCourant.current?.id === id) toast(copieCourante.current.generique(), true);
+    }
+  }
+
   async function supprimer() {
-    if (!travail || !confirm('Supprimer ce détourage et tous ses fichiers temporaires ?')) return;
-    await appel(`/travaux/${travail.id}`, { method: 'DELETE' }).catch((e) => toast(e.message, true));
-    setTravail(null); setUrlLocale(null); setClics({}); setBoites({}); setTrouves(null); setMasque(null); void appel<Travail[]>('/travaux').then(setRecents);
+    const courant = travail;
+    if (!courant || suppressionEnCours || !confirm(tr('confirm.deleteJob'))) return;
+    setSuppressionEnCours(true);
+    try {
+      await appel(`/travaux/${courant.id}`, { method: 'DELETE' });
+    } catch {
+      if (monte.current) { toast(etatInterfaceMatte(copieCourante.current.langue).deleteError, true); setSuppressionEnCours(false); }
+      return;
+    }
+    if (!monte.current) return;
+    // La suppression confirmée d’A ne doit jamais effacer un nouveau travail B.
+    if (travailCourant.current?.id === courant.id) {
+      travailCourant.current = null;
+      jeton.current++;
+      setTravail(null); setUrlLocale(null); setClics({}); setBoites({}); setTrouves(null); setMasque(null);
+      setFichierFond(null); setPlage(null); setDuree(0); setT(0);
+    }
+    setRecents((l) => l.filter((r) => r.id !== courant.id));
+    setSuppressionEnCours(false);
+    setListeVersion((v) => v + 1);
   }
 
   const fini = travail?.etat === 'termine';
@@ -200,102 +336,111 @@ export default function Detourage() {
   const seq = travail?.sorties?.sequences ?? {};
   const m = travail?.mesures;
   const lien = (nom: string) => `${P}/travaux/${travail!.id}/sorties/${nom}`;
-  const vues = [['apercu-echecs.mp4', 'Damier'], ['matte.mp4', 'Matte'], ['composite.mp4', 'Nouveau fond'], ['suivi.mp4', 'Suivi']].filter(([n]) => fich[n]) as [typeof vue, string][];
+  const vues = vueIdentifiants.filter((n) => fich[n]).map((n) => [n, tr(CLES_VUE[n])] as [VueId, string]);
   /** Ligne d’aide sous l’image : masque calculé, objets trouvés par le mot, ou invitation à cliquer. */
   const aideMasque = masque && masque.image === image
-    ? `Masque : ${(masque.aire * 100).toFixed(1)} % de l’image${masque.s ? `, calculé en ${masque.s.toFixed(2)} s` : ''}.`
+    ? tr('mask.summary', { pourcent: (masque.aire * 100).toFixed(1), detailCalcul: masque.s ? tr('mask.summary.detail', { s: masque.s.toFixed(2) }) : '' })
     : trouves && trouves.image === image && trouves.objets.length
-      ? `${trouves.objets.length} objet${trouves.objets.length > 1 ? 's' : ''} pour « ${mot.trim()} » (${trouves.secondes.toFixed(2)} s) : clique le bon rectangle.`
+      ? copie.t('mask.found', { n: trouves.objets.length, s: trouves.objets.length > 1 ? 's' : '', mot: mot.trim(), sec: trouves.secondes.toFixed(2) })
       : trouves && trouves.image === image
-        ? `Rien trouvé pour « ${mot.trim()} » : essaie un autre mot ou clique le sujet.`
-        : 'Tape un mot puis « Chercher », ou clique sur le sujet, pour voir son masque.';
+        ? tr('mask.notFound', { texte: mot.trim() })
+        : tr('mask.helpDefault');
 
   return (
-    <div className="rail-layout" style={{ gridTemplateColumns: '380px 1fr' }}>
+    <div className="rail-layout" lang={langue === 'fr' ? 'fr-CA' : 'en-CA'} style={{ gridTemplateColumns: '380px 1fr' }}>
       <aside className="rail">
         <div className="display" style={{ fontSize: 26 }}>{NEXORA_PRODUCT_NAMES.matte}</div>
-        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>Détoure un sujet dans une vidéo, puis garde la transparence ou choisis un nouveau fond.</div>
+        <div style={{ display: 'flex', gap: 6, margin: '4px 0' }}>
+          <button className={`btn sm${langue === 'fr' ? ' on' : ''}`} lang="fr-CA" onClick={() => setLangue('fr')}>{copie.boutons.francais}</button>
+          <button className={`btn sm${langue === 'en' ? ' on' : ''}`} lang="en-CA" onClick={() => setLangue('en')}>{copie.boutons.english}</button>
+        </div>
+        <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>{tr('header.subtitle')}</div>
 
-        {cap && !cap.rapide.disponible && <div className="rail-section" style={{ color: 'var(--bad)', fontSize: 12.5 }}>Aucun moteur de détourage en ligne. Lance le serveur de détourage sur la machine GPU (outils/detourage).</div>}
+        {capErreur && <div className="rail-section" role="alert">{textesEtat.capError} <button type="button" className="btn sm" onClick={() => setCapVersion((v) => v + 1)}>{textesEtat.retry}</button></div>}
+        {pollErreur && <div className="rail-section" role="alert">{textesEtat.pollError}</div>}
+        {cap && !cap.rapide.disponible && <div className="rail-section" style={{ color: 'var(--bad)', fontSize: 12.5 }}>{tr('engine.unavailable')}</div>}
 
         <div className="rail-section">
-          <div className="label">1 · Vidéo</div>
-          <input type="file" accept="video/*" onChange={(e) => e.target.files?.[0] && importer(e.target.files[0])} disabled={!cap?.rapide.disponible || !!enCours} />
+          <div className="label">{tr('section.video.title')}</div>
+          <input type="file" aria-label={tr('section.video.title')} accept="video/*" onChange={(e) => e.target.files?.[0] && importer(e.target.files[0])} disabled={!cap?.rapide.disponible || !!enCours} />
           {envoi !== null && <progress value={envoi} max={1} style={{ width: '100%' }} />}
-          {travail?.source && <div className="dim" style={{ fontSize: 12 }}>{travail.source.largeur}×{travail.source.hauteur} · {travail.source.fps.toFixed(2)} i/s · {fmtS(travail.source.duree)}{travail.source.duree > (cap?.limites.secondesMax ?? 120) ? ` (limite ${cap?.limites.secondesMax} s par travail : choisis une plage)` : ''}</div>}
+          {travail?.source && <div className="dim" style={{ fontSize: 12 }}>{tr('source.summary', { largeur: travail.source.largeur, hauteur: travail.source.hauteur, fps: travail.source.fps.toFixed(2), duree: copie.fmtDuree(travail.source.duree) })}{travail.source.duree > (cap?.limites.secondesMax ?? 120) ? tr('source.limitHint', { secondesMax: cap?.limites.secondesMax }) : ''}</div>}
         </div>
 
         <div className="rail-section">
-          <div className="label">2 · Sujet {imagesCles.length ? `(${[nbClics ? `${nbClics} clic${nbClics > 1 ? 's' : ''}` : '', `${imagesCles.length} image${imagesCles.length > 1 ? 's' : ''} clé${imagesCles.length > 1 ? 's' : ''}`].filter(Boolean).join(', ')})` : ''}</div>
-          <label className="dim" style={{ fontSize: 12 }} htmlFor="mot-detourage">Désigner par un mot (en anglais)</label>
+          <div className="label">{tr('section.subject.title')} {imagesCles.length ? ` ${tr('subject.counts', { virgule: nbClics && imagesCles.length ? ', ' : '', clics: nbClics ? tr(nbClics > 1 ? 'subject.counts.clics.pluriel' : 'subject.counts.clics.singulier', { n: nbClics }) : '', imagesCles: tr(imagesCles.length > 1 ? 'subject.counts.images.pluriel' : 'subject.counts.images.singulier', { n: imagesCles.length }) })}` : ''}</div>
+          <label className="dim" style={{ fontSize: 12 }} htmlFor="mot-detourage">{tr('subject.wordLabel')}</label>
           <div style={{ display: 'flex', gap: 6 }}>
-            <input id="mot-detourage" type="text" value={mot} placeholder="person, dog, red car…" onChange={(e) => setMot(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void chercherTexte(); }} style={{ flex: 1, minWidth: 0 }} disabled={!travail || envoi !== null} />
-            <button className="btn sm" onClick={() => void chercherTexte()} disabled={!mot.trim() || !!occupe || !travail || envoi !== null}>Chercher</button>
+            <input id="mot-detourage" type="text" value={mot} placeholder={tr('subject.wordPlaceholder')} onChange={(e) => setMot(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void chercherTexte(); }} style={{ flex: 1, minWidth: 0 }} disabled={!travail || envoi !== null} />
+            <button className="btn sm" onClick={() => void chercherTexte()} disabled={!mot.trim() || !!occupe || !travail || envoi !== null}>{tr('action.search')}</button>
           </div>
-          <div className="seg"><button className={outil === 'ajouter' ? 'on' : ''} onClick={() => setOutil('ajouter')}>+ Ajouter</button><button className={outil === 'retirer' ? 'on' : ''} onClick={() => setOutil('retirer')}>− Retirer</button></div>
-          <div className="dim" style={{ fontSize: 12 }}>Tape un mot (person, dog, red car…) puis « Chercher » : clique le rectangle du sujet trouvé. Sinon, clique le sujet ; Maj ou Alt + clic retire. Change d’image et ajoute un clic quand le sujet change de forme, passe derrière un objet ou ressort.</div>
-          <div style={{ display: 'flex', gap: 6 }}><button className="btn sm" onClick={annulerClic} disabled={!points.length}>Annuler le dernier</button><button className="btn sm" onClick={effacer} disabled={!points.length && !boites[image]}>Effacer cette image</button></div>
+          <div className="seg"><button className={outil === 'ajouter' ? 'on' : ''} onClick={() => setOutil('ajouter')}>{tr('tool.add')}</button><button className={outil === 'retirer' ? 'on' : ''} onClick={() => setOutil('retirer')}>{tr('tool.remove')}</button></div>
+          <div className="dim" style={{ fontSize: 12 }}>{tr('subject.help')}</div>
+          <div style={{ display: 'flex', gap: 6 }}><button className="btn sm" onClick={annulerClic} disabled={!points.length}>{tr('action.undoLast')}</button><button className="btn sm" onClick={effacer} disabled={!points.length && !boites[image]}>{tr('action.clearFrame')}</button></div>
           {duree > 0 && <>
-            <div className="label" style={{ marginTop: 6 }}>Plage traitée</div>
+            <div className="label" style={{ marginTop: 6 }}>{tr('range.title')}</div>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <button className="btn sm" onClick={() => setPlage([t, plage?.[1] ?? duree])}>Début ici</button>
-              <button className="btn sm" onClick={() => setPlage([plage?.[0] ?? 0, Math.max(t, (plage?.[0] ?? 0) + 0.5)])}>Fin ici</button>
-              <span className="dim" style={{ fontSize: 12 }}>{plage ? `${plage[0].toFixed(1)} → ${plage[1].toFixed(1)} s` : 'toute la vidéo'}</span>
+              <button className="btn sm" onClick={() => setPlage([t, plage?.[1] ?? duree])}>{tr('range.setStart')}</button>
+              <button className="btn sm" onClick={() => setPlage([plage?.[0] ?? 0, Math.max(t, (plage?.[0] ?? 0) + 0.5)])}>{tr('range.setEnd')}</button>
+              <span className="dim" style={{ fontSize: 12 }}>{plage ? tr('range.value', { debut: plage[0].toFixed(1), fin: plage[1].toFixed(1) }) : tr('range.allVideo')}</span>
             </div></>}
         </div>
 
         <div className="rail-section">
-          <div className="label">3 · Qualité</div>
-          <div className="seg"><button className={palier === 'rapide' ? 'on' : ''} onClick={() => setPalier('rapide')}>Rapide</button>
-            <button className={palier === 'pro' ? 'on' : ''} disabled title={cap?.pro.description} style={{ opacity: 0.45 }}>Pro (bientôt)</button></div>
-          <div className="seg"><button className={mode === 'suivi' ? 'on' : ''} onClick={() => setMode('suivi')}>Aperçu du suivi</button><button className={mode === 'complet' ? 'on' : ''} onClick={() => setMode('complet')}>Détourage complet</button></div>
-          <label className="dim" style={{ fontSize: 12 }}>Largeur max : {largeur} px
+          <div className="label">{tr('section.quality.title')}</div>
+          <div className="seg"><button className={palier === 'rapide' ? 'on' : ''} onClick={() => setPalier('rapide')}>{tr('tier.fast')}</button>
+            <button className={palier === 'pro' ? 'on' : ''} disabled title={tr('tier.proSoon')} style={{ opacity: 0.45 }}>{tr('tier.proSoon')}</button></div>
+          <div className="seg"><button className={mode === 'suivi' ? 'on' : ''} onClick={() => setMode('suivi')}>{tr('mode.trackPreview')}</button><button className={mode === 'complet' ? 'on' : ''} onClick={() => setMode('complet')}>{tr('mode.full')}</button></div>
+          <label className="dim" style={{ fontSize: 12 }}>{tr('quality.maxWidth', { largeur })}
             <input type="range" min={640} max={3840} step={160} value={largeur} onChange={(e) => setLargeur(Number(e.target.value))} style={{ width: '100%' }} /></label>
-          <label className="dim" style={{ fontSize: 12 }}>Stabilisation des bords : {lissage.toFixed(1)}
+          <label className="dim" style={{ fontSize: 12 }}>{tr('quality.edgeSmoothing', { lissage: lissage.toFixed(1) })}
             <input type="range" min={0} max={1.5} step={0.1} value={lissage} onChange={(e) => setLissage(Number(e.target.value))} style={{ width: '100%' }} /></label>
         </div>
 
         <div className="rail-section">
-          <div className="label">4 · Fond</div>
-          <div className="seg">{(['transparent', 'couleur', 'flou', 'image'] as const).map((f) => <button key={f} className={fond === f ? 'on' : ''} onClick={() => setFond(f)}>{f === 'transparent' ? 'Aucun' : f === 'couleur' ? 'Couleur' : f === 'flou' ? 'Flou' : 'Image'}</button>)}</div>
+          <div className="label">{tr('section.background.title')}</div>
+          <div className="seg">{(['transparent', 'couleur', 'flou', 'image'] as const).map((f) => <button key={f} className={fond === f ? 'on' : ''} onClick={() => setFond(f)}>{tr(CLES_FOND[f])}</button>)}</div>
           {fond === 'couleur' && <input type="color" value={couleur} onChange={(e) => setCouleur(e.target.value)} />}
-          {fond === 'image' && <><input type="file" accept="image/*,video/*" onChange={(e) => e.target.files?.[0] && deposerFond(e.target.files[0])} />{fichierFond && <span className="dim" style={{ fontSize: 12 }}>fond déposé</span>}</>}
-          <div className="dim" style={{ fontSize: 12 }}>La transparence est toujours exportée (PNG 16 bits, EXR, ProRes 4444, WebM) ; le fond ajoute une vidéo composée.</div>
+          {fond === 'image' && <><input type="file" accept="image/*,video/*" onChange={(e) => e.target.files?.[0] && deposerFond(e.target.files[0])} />{fichierFond && <span className="dim" style={{ fontSize: 12 }}>{tr('bg.deposited')}</span>}</>}
+          <div className="dim" style={{ fontSize: 12 }}>{tr('bg.help')}</div>
         </div>
 
         <div className="rail-section">
           {enCours
-            ? <><progress value={travail!.progression} max={1} style={{ width: '100%' }} /><div className="dim" style={{ fontSize: 12.5 }}>{travail!.message || travail!.etape} · {Math.round(travail!.progression * 100)} %</div><button className="btn sm" onClick={() => action('annuler')}>Annuler</button></>
-            : <button className="btn sm accent" onClick={lancer} disabled={!travail || !imagesCles.length || !!occupe || envoi !== null}>{occupe ?? (mode === 'suivi' ? 'Lancer l’aperçu du suivi' : 'Lancer le détourage')}</button>}
-          {travail && ['interrompu', 'erreur', 'annule'].includes(travail.etat) && <><div style={{ color: 'var(--bad)', fontSize: 12.5 }}>{travail.message}</div><button className="btn sm" onClick={() => action('reprendre')}>Reprendre (le calcul déjà fait est conservé)</button></>}
-          {travail && !enCours && <button className="btn sm" onClick={supprimer}>Supprimer le travail et ses fichiers</button>}
+            ? <><progress value={travail!.progression} max={1} style={{ width: '100%' }} /><div className="dim" style={{ fontSize: 12.5 }}>{tr('job.progress', { etapeOuMessage: langue === 'fr' ? (travail!.message || copie.etat(travail!.etat)) : copie.etat(travail!.etat), pourcent: Math.round(travail!.progression * 100) })}</div><button className="btn sm" onClick={() => action('annuler')}>{tr('action.cancelJob')}</button></>
+            : <button className="btn sm accent" onClick={lancer} disabled={!travail || !imagesCles.length || !!occupe || envoi !== null}>{occupe ? tr(`job.busy.${occupe}`) : (mode === 'suivi' ? tr('job.launch.trackPreview') : tr('job.launch.full'))}</button>}
+          {travail && ['interrompu', 'erreur', 'annule'].includes(travail.etat) && <><div style={{ color: 'var(--bad)', fontSize: 12.5 }}>{tr('job.interrupted')}</div><button className="btn sm" onClick={() => action('reprendre')}>{tr('action.resumeKept')}</button></>}
+          {travail && !enCours && <button className="btn sm" disabled={suppressionEnCours} onClick={supprimer}>{suppressionEnCours ? textesEtat.deleting : tr('action.deleteJob')}</button>}
         </div>
-        {recents.length > 0 && !travail && <div className="rail-section"><div className="label">Travaux récents</div>{recents.slice(0, 6).map((r) => <div key={r.id} className="dim" style={{ fontSize: 12 }}>{r.nom} · {r.etat}</div>)}</div>}
+        {!travail && listeEtat === 'chargement' && <div className="rail-section" role="status">{textesEtat.loading}</div>}
+        {listeEtat === 'erreur' && <div className="rail-section" role="alert">{textesEtat.listError} <button type="button" className="btn sm" onClick={() => setListeVersion((v) => v + 1)}>{textesEtat.retry}</button></div>}
+        {!travail && listeEtat === 'ok' && recents.length === 0 && <div className="rail-section">{textesEtat.empty}</div>}
+        {recents.length > 0 && !travail && <div className="rail-section"><div className="label">{tr('recents.title')}</div>{recents.slice(0, 6).map((r) => <div key={r.id} className="dim" style={{ fontSize: 12 }}>{tr('recents.item', { nom: r.nom, etat: copie.etat(r.etat) })}</div>)}</div>}
       </aside>
 
       <main style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0, overflow: 'auto' }}>
-        {!urlLocale && <div className="dim" style={{ padding: 40, textAlign: 'center' }}>Importe une vidéo pour commencer.</div>}
+        {!urlLocale && <div className="dim" style={{ padding: 40, textAlign: 'center' }}>{tr('empty.importPrompt')}</div>}
         {urlLocale && !fini && (
           <>
             <div style={{ position: 'relative', alignSelf: 'center', maxWidth: '100%', cursor: 'crosshair' }} onClick={cliquer} onContextMenu={(e) => { e.preventDefault(); cliquer(e, true); }}>
-              <video ref={video} src={urlLocale} muted playsInline style={{ maxWidth: '100%', maxHeight: '62vh', display: 'block' }}
+              <video key={urlLocale} ref={video} src={urlLocale} muted playsInline style={{ maxWidth: '100%', maxHeight: '62vh', display: 'block' }}
                 onLoadedMetadata={(e) => setDuree((e.target as HTMLVideoElement).duration)} onTimeUpdate={(e) => setT((e.target as HTMLVideoElement).currentTime)} />
               {masque && masque.image === image && <div aria-hidden style={{ position: 'absolute', inset: 0, background: '#ff3b5c', opacity: 0.5, pointerEvents: 'none', maskImage: `url(${masque.src})`, WebkitMaskImage: `url(${masque.src})`, maskMode: 'luminance', maskSize: '100% 100%', WebkitMaskSize: '100% 100%' } as React.CSSProperties} />}
               {points.map(([x, y, l], i) => <span key={i} style={{ position: 'absolute', left: `${x * 100}%`, top: `${y * 100}%`, width: 12, height: 12, margin: -6, borderRadius: 6, background: l ? '#35e08a' : '#ff4d5e', border: '2px solid #fff', pointerEvents: 'none' }} />)}
               {boites[image] && <div aria-hidden style={{ position: 'absolute', left: `${boites[image][0] * 100}%`, top: `${boites[image][1] * 100}%`, width: `${(boites[image][2] - boites[image][0]) * 100}%`, height: `${(boites[image][3] - boites[image][1]) * 100}%`, border: '2px dashed #35e08a', borderRadius: 4, pointerEvents: 'none' }} />}
               {trouves && trouves.image === image && trouves.objets.map((o, i) => (
-                <div key={i} title={`Choisir cet objet (score ${o.score.toFixed(2)})`} onClick={(e) => { e.stopPropagation(); choisirObjet(o); }}
+                <div key={i} title={tr('finder.chooseTitle', { score: o.score.toFixed(2) })} onClick={(e) => { e.stopPropagation(); choisirObjet(o); }}
                   style={{ position: 'absolute', left: `${o.boite[0] * 100}%`, top: `${o.boite[1] * 100}%`, width: `${(o.boite[2] - o.boite[0]) * 100}%`, height: `${(o.boite[3] - o.boite[1]) * 100}%`, border: '2px solid #4da3ff', borderRadius: 4, background: 'rgba(77, 163, 255, 0.12)', cursor: 'pointer' }}>
-                  <span style={{ position: 'absolute', left: 0, top: -18, fontSize: 11, lineHeight: '16px', padding: '0 4px', borderRadius: 3, background: '#4da3ff', color: '#fff', whiteSpace: 'nowrap' }}>{mot.trim()} · {o.score.toFixed(2)}</span>
+                  <span style={{ position: 'absolute', left: 0, top: -18, fontSize: 11, lineHeight: '16px', padding: '0 4px', borderRadius: 3, background: '#4da3ff', color: '#fff', whiteSpace: 'nowrap' }}>{tr('finder.chooseLabel', { mot: mot.trim(), score: o.score.toFixed(2) })}</span>
                 </div>
               ))}
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <button className="btn sm" onClick={() => (video.current?.paused ? video.current?.play() : video.current?.pause())}>Lecture / pause</button>
+              <button className="btn sm" onClick={() => (video.current?.paused ? video.current?.play() : video.current?.pause())}>{tr('player.playPause')}</button>
               <input type="range" min={0} max={duree || 1} step={1 / fps} value={t} onChange={(e) => { if (video.current) video.current.currentTime = Number(e.target.value); }} style={{ flex: 1 }} />
-              <span className="dim" style={{ fontSize: 12 }}>image {image} · {t.toFixed(2)} s</span>
+              <span className="dim" style={{ fontSize: 12 }}>{tr('player.position', { image, t: t.toFixed(2) })}</span>
             </div>
-            <div className="dim" style={{ fontSize: 12 }}>{aideMasque} {imagesCles.length ? `Images clés : ${imagesCles.join(', ')}.` : ''}</div>
+            <div className="dim" style={{ fontSize: 12 }}>{aideMasque} {imagesCles.length ? tr('mask.keyFrames', { liste: imagesCles.join(', ') }) : ''}</div>
           </>
         )}
         {fini && (
@@ -303,18 +448,18 @@ export default function Detourage() {
             <div className="seg" style={{ alignSelf: 'flex-start' }}>{vues.map(([n, l]) => <button key={n} className={vue === n ? 'on' : ''} onClick={() => setVue(n)}>{l}</button>)}</div>
             <video key={vue} src={lien(vue)} controls loop autoPlay muted style={{ maxWidth: '100%', maxHeight: '62vh', alignSelf: 'center', background: '#000' }} />
             <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-              {Object.entries(fich).filter(([n]) => /\.(mov|webm|mp4)$/.test(n) && n !== 'echecs.png').map(([n, o]) => <a key={n} className="btn sm" href={`${lien(n)}?telecharger=1`}>{n} · {fmtO(o)}</a>)}
-              {[['alpha', 'Alpha PNG 16 bits'], ['rgba16', 'RGBA PNG 16 bits'], ['exr', 'EXR RGBA (prémultiplié, linéaire)'], ['alpha_exr', 'EXR alpha']].filter(([s]) => seq[s]).map(([s, l]) => <a key={s} className="btn sm" href={`${lien(`${s}.zip`)}?telecharger=1`}>{l} · {seq[s]} images (zip)</a>)}
-              <a className="btn sm" href="/mode-studio/" title="Importe le ProRes 4444 ou le WebM alpha dans la timeline">Ouvrir Mode Studio</a>
+              {Object.entries(fich).filter(([n]) => /\.(mov|webm|mp4)$/.test(n) && n !== 'echecs.png').map(([n, o]) => <a key={n} className="btn sm" href={`${lien(n)}?telecharger=1`}>{tr('export.videoFile', { nom: n, taille: copie.fmtTaille(o) })}</a>)}
+              {(Object.keys(CLES_SEQ) as (keyof typeof CLES_SEQ)[]).filter((s) => seq[s]).map((s) => <a key={s} className="btn sm" href={`${lien(`${s}.zip`)}?telecharger=1`}>{tr('export.seq.count', { label: tr(CLES_SEQ[s]), n: seq[s] })}</a>)}
+              <a className="btn sm" href="/mode-studio/" title={tr('export.openStudio.title')}>{tr('export.openStudio')}</a>
             </div>
             {m && <div className="dim" style={{ fontSize: 12, lineHeight: 1.6 }}>
-              Calcul {m.temps_total_s} s · {m.images} images · {m.segments} segment(s){m.coupures?.length ? ` · coupures aux images ${m.coupures.join(', ')}` : ''}{m.occlusions?.length ? ` · sujet absent aux images ${m.occlusions.map((o: number[]) => `${o[0]}–${o[1]}`).join(', ')}` : ''}
-              {m.plans_sans_clic?.length ? <span style={{ color: 'var(--bad)' }}> · plans sans clic (masque vide) : {m.plans_sans_clic.map((o: number[]) => `${o[0]}–${o[1]}`).join(', ')}</span> : null}
-              <br />GPU {m.gpu?.gpu} · VRAM pic {m.gpu?.vram_pic_go} Go · RAM pic {m.ram_pic_go} Go · disque {m.disque_sorties_go} Go
-              {m.scintillement ? <><br />Scintillement des bords : {m.scintillement.avant} → {m.scintillement.apres} ({Math.round(m.scintillement.gain * 100)} % de moins)</> : null}
-              {m.controle?.exr ? <><br />EXR : {m.controle.exr.bits.join('/')} bits, alpha {m.controle.exr.alpha}, {m.controle.exr.compression}, {m.controle.exr.espace} · PNG : {m.controle.alpha_png?.bits} bits</> : null}
+              {tr('measures.summary', { duree: m.temps_total_s, images: m.images, segments: m.segments, coupures: m.coupures?.length ? tr('measures.cuts', { liste: m.coupures.join(', ') }) : '', occlusions: m.occlusions?.length ? tr('measures.occlusions', { plages: m.occlusions.map((o: number[]) => `${o[0]}–${o[1]}`).join(', ') }) : '', sansClic: '' })}
+              {m.plans_sans_clic?.length ? <span style={{ color: 'var(--bad)' }}>{tr('measures.noClick', { plages: m.plans_sans_clic.map((o: number[]) => `${o[0]}–${o[1]}`).join(', ') })}</span> : null}
+              <br />{tr('measures.hardware', { gpu: m.gpu?.gpu, vram: m.gpu?.vram_pic_go, ram: m.ram_pic_go, disque: m.disque_sorties_go })}
+              {m.scintillement ? <><br />{tr('measures.flicker', { avant: m.scintillement.avant, apres: m.scintillement.apres, gain: Math.round(m.scintillement.gain * 100) })}</> : null}
+              {m.controle?.exr ? <><br />{tr('measures.control', { bits: m.controle.exr.bits.join('/'), alpha: m.controle.exr.alpha, compression: m.controle.exr.compression, espace: m.controle.exr.espace, bitsPng: m.controle.alpha_png?.bits })}</> : null}
             </div>}
-            <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={() => setTravail({ ...travail!, etat: 'depose' })}>Modifier les clics et relancer</button>
+            <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={() => setTravail({ ...travail!, etat: 'depose' })}>{tr('action.editAndRelaunch')}</button>
           </>
         )}
       </main>

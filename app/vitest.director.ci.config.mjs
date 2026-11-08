@@ -36,6 +36,7 @@ export default {
       'app/server/nexora/detourage/serviceNatif.test.ts',
       'app/server/nexora/bench/appariementAmd2.test.ts',
       'app/src/FilmPartielAlerte.test.tsx', 'app/src/LangueSelection.test.tsx',
+      'app/src/pages/Detourage.async.dom.test.tsx', 'app/src/pages/Detourage.races.dom.test.tsx',
     ],
     coverage: {
       provider: 'v8', reporter: ['text', 'lcov', 'json-summary'],
@@ -57,6 +58,7 @@ export default {
         'app/server/nexora/bench/appariementAmd2.ts', 'app/server/nexora/bench/stats.ts',
         'app/server/nexora/detourage/gestion.ts',
         'app/src/filmPartielActions.ts', 'app/src/FilmPartielAlerte.tsx', 'app/src/LangueSelection.tsx', 'app/src/FilmPlans.tsx',
+        'app/src/pages/Detourage.tsx', 'app/src/matteCopy.ts',
       ],
     },
   },
