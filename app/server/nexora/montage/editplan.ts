@@ -112,6 +112,14 @@ export interface ContexteValidation {
 export const framesDe = (s: number, fps: number) => Math.round(s * fps);
 export const secondesDe = (f: number, fps: number) => f / fps;
 
+/** Durée mesurée si elle est exploitable, sans remplacer une mesure inconnue par zéro. */
+function dureeSourceEnFrames(declareeF: number | undefined, mesureeS: unknown, fps: number): number | undefined {
+  if (typeof mesureeS !== 'number' || !Number.isFinite(mesureeS) || mesureeS <= 0) return declareeF;
+  const mesureeF = framesDe(mesureeS, fps);
+  if (!Number.isFinite(mesureeF)) return declareeF;
+  return declareeF === undefined ? mesureeF : Math.min(declareeF, mesureeF);
+}
+
 /** Début de chaque plan vidéo sur la ligne de temps (images) et durée totale. */
 export function lignedeTemps(plan: Pick<EditPlan, 'video'>): { debuts: number[]; fins: number[]; total: number } {
   const debuts: number[] = [];
@@ -163,7 +171,7 @@ export function validerEditPlan(brut: unknown, ctx: ContexteValidation = {}): Ra
     if (ctx.inventaire && !inv) erreurs.push(V('source_autorisee', `${ch}.src`, `${c.src} n’est pas dans l’inventaire du projet`));
     if (c.duree_f / fps < DUREE_PLAN_MIN_S) erreurs.push(V('duree_min', `${ch}.duree_f`, `plan de ${c.duree_f} images : au moins ${Math.ceil(DUREE_PLAN_MIN_S * fps)}`));
     const conso = consommation(c);
-    const dureeSrc = src.duree_f ?? (inv ? framesDe(inv.duree_s, fps) : undefined);
+    const dureeSrc = dureeSourceEnFrames(src.duree_f, inv?.duree_s, fps);
     if (src.kind === 'video' && dureeSrc !== undefined && c.entree_f + conso > dureeSrc) {
       erreurs.push(V('dans_la_source', `${ch}`, `le plan ${c.id} lit les images ${c.entree_f} à ${c.entree_f + conso} de ${c.src}, qui n’en a que ${dureeSrc}`, 'Réduis duree_f ou entree_f (ou la vitesse), ou choisis une source plus longue.'));
     }
@@ -209,17 +217,18 @@ export function validerEditPlan(brut: unknown, ctx: ContexteValidation = {}): Ra
     else if (s.kind !== 'audio') erreurs.push(V('source_audio', 'audio.musique.src', `${m.src} n’est pas un audio`));
     else if (ctx.inventaire && !ctx.inventaire[m.src]) erreurs.push(V('source_autorisee', 'audio.musique.src', `${m.src} n’est pas dans l’inventaire du projet`));
     const dureeJouee = m.duree_f ?? total - 0;
-    if (s?.duree_f && m.entree_f + dureeJouee > s.duree_f) erreurs.push(V('dans_la_source', 'audio.musique', `la musique lit au-delà de sa fin (${m.entree_f + dureeJouee} > ${s.duree_f} images)`, 'Donne duree_f ≤ durée de la piste − entree_f.'));
+    const dureeSrc = s ? dureeSourceEnFrames(s.duree_f, ctx.inventaire?.[m.src]?.duree_s, fps) : undefined;
+    if (dureeSrc !== undefined && m.entree_f + dureeJouee > dureeSrc) erreurs.push(V('dans_la_source', 'audio.musique', `la musique lit au-delà de sa fin (${m.entree_f + dureeJouee} > ${dureeSrc} images)`, 'Donne duree_f ≤ durée de la piste − entree_f.'));
     if (m.fondu_in_f + m.fondu_out_f > dureeJouee) erreurs.push(V('fondus_musique', 'audio.musique', 'les fondus de la musique dépassent sa durée'));
   }
   a.voix.forEach((v, i) => {
     const s = plan.sources[v.src];
     if (!s || s.kind !== 'audio') erreurs.push(V('source_audio', `audio.voix.${i}.src`, `voix : source audio inconnue ${v.src}`));
     if (v.debut_f + v.duree_f > total) erreurs.push(V('dans_la_sequence', `audio.voix.${i}`, 'la voix dépasse la fin de la séquence'));
-    // Borne de source : durée déclarée sinon durée réelle de l'inventaire ; aucune durée connue → pas de borne inventée.
+    // Borne de source : la plus courte durée connue, déclarée ou mesurée ; aucune durée connue → pas de borne inventée.
     if (s?.kind === 'audio') {
       const inv = ctx.inventaire?.[v.src];
-      const dureeSrc = s.duree_f ?? (inv ? framesDe(inv.duree_s, fps) : undefined);
+      const dureeSrc = dureeSourceEnFrames(s.duree_f, inv?.duree_s, fps);
       if (dureeSrc !== undefined && v.entree_f + v.duree_f > dureeSrc) {
         erreurs.push(V('dans_la_source', `audio.voix.${i}`, `la voix lit les images ${v.entree_f} à ${v.entree_f + v.duree_f} de ${v.src}, qui n’en a que ${dureeSrc}`, 'Réduis duree_f ou entree_f, ou choisis une source plus longue.'));
       }
