@@ -91,8 +91,9 @@ import { ajusterProposition, depassement, devisProduction, nouvelleSession, plan
 import { jugeDisponible } from './nexora/juge.js';
 import { MESURES_OBJET_PC5, recetteMultivue } from './nexora/objet3d.js';
 import { PRODUIT_3D } from '../src/produit3d.js';
-import { analyser, cartesPbr, cibleTriangles, decimerGlb, EXTENSION_RELIEF, exporter, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief } from './nexora/relief.js';
-import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
+import { analyser, cartesPbr, cibleTriangles, compatibiliteObj, decimerGlb, EXTENSION_RELIEF, exporter, nomCacheExport, ObjIncompatible, repondreObjIncompatible, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief, type Maillage } from './nexora/relief.js';
+import { UsdzIncompatible } from './nexora/usdz.js';
+import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, meilleurePriseNotee, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
 import {
   CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles, storeRef,
   setCastQueue, sheetPlan, type HeroOpts,
@@ -1930,14 +1931,19 @@ async function avancerTexte3D(id: number): Promise<void> {
     const ecrire = (patch: Record<string, unknown>) => takes.patchSettings(id, { objet3d: { ...o, ...patch, etat: { ...e, ...(patch.etat as object ?? {}) } } });
     if (etape.action === 'attendre') return;
     if (etape.action === 'echec') { ecrire({ erreur: etape.motif, etat: { phase: 'echec' } }); return; }
-    if (etape.action === 'finir') { ecrire({ retenu: etape.retenu, etat: { phase: 'fini' } }); return; }
+    if (etape.action === 'finir') { ecrire({ retenu: etape.retenu, avertissement: etape.avertissement ?? null, etat: { phase: 'fini' } }); return; }
     if (etape.action === 'lancer-objet') {
       const q: QualiteObjet = o.qualite;
       const r = await lancerPriseNexora(
         { kind: 'object', app: 'nexora-objet', quality: q, sourceTake: id, removeBackground: true, tournette: TOURNETTE_JUGE.frames, ...(etape.essai > 1 ? { seed: Math.floor(Math.random() * 1e9) } : {}),
           shotName: `objet3d_${String(o.intention).slice(0, 30)}`, userPrompt: `3D : ${String(o.intention).slice(0, 80)}`, nexoraObjetDe: id },
         'Nexora Creative · objet 3D', Math.max(1, Math.ceil(secondesObjet(q) * tarifDepuisEnv().creditsParSecondeGpu)));
-      if (!r.ok) { ecrire({ erreur: r.message, etat: { phase: 'echec' } }); return; }
+      if (!r.ok) {
+        const retenu = etape.essai > 1 ? meilleurePriseNotee(e) : undefined;
+        if (retenu !== undefined) ecrire({ retenu, avertissement: 'relance-echouee', etat: { phase: 'fini' } });
+        else ecrire({ erreur: r.message, etat: { phase: 'echec' } });
+        return;
+      }
       ecrire({ etat: { phase: 'objet', essai: etape.essai, tentatives: [...e.tentatives, r.takeId] } });
       continue;
     }
@@ -1975,7 +1981,7 @@ app.get('/api/nexora/objet/:take', async (req, reply) => {
   const e = o.etat as EtatTexte3D;
   return {
     etat: e.phase, essai: e.essai, image: t.id, objet: e.phase === 'fini' ? o.retenu : e.tentatives[e.tentatives.length - 1] ?? null,
-    notes: o.jugements ?? [], erreur: o.erreur ?? null, qualite: o.qualite, intention: o.intention,
+    notes: o.jugements ?? [], erreur: o.erreur ?? null, avertissement: o.avertissement ?? null, qualite: o.qualite, intention: o.intention,
   };
 });
 
@@ -2006,10 +2012,12 @@ app.get('/api/nexora/relief/:take/rapport', async (req, reply) => {
   const dir = `${p.glb}.relief`;
   mkdirSync(dir, { recursive: true });
   const octets = readFileSync(p.glb);
+  let maillagePlein: Maillage | null = null;
+  const chargerPlein = async () => maillagePlein ??= await lireGlb(octets);
   const lire = async (cible: number | null) => {
     const fichier = join(dir, `rapport-${cible ?? 'plein'}.json`);
     if (existsSync(fichier)) return JSON.parse(readFileSync(fichier, 'utf8'));
-    const r = await unSeulCalcul(fichier, async () => analyser(await lireGlb(cible ? await decimerGlb(octets, cible) : octets)));
+    const r = await unSeulCalcul(fichier, async () => analyser(cible ? await lireGlb(await decimerGlb(octets, cible)) : await chargerPlein()));
     writeFileSync(fichier, JSON.stringify(r));
     return r;
   };
@@ -2019,6 +2027,7 @@ app.get('/api/nexora/relief/:take/rapport', async (req, reply) => {
   return {
     rapport: plein, decime: cible ? await lire(cible) : null, cible,
     formats: FORMATS_RELIEF, extensions: EXTENSION_RELIEF, tailleMm: TAILLE_MM_DEFAUT,
+    compatibiliteObj: compatibiliteObj(octets, await chargerPlein()),
     // Les exports sont calculés par le serveur (CPU, quelques secondes) : aucun crédit GPU.
     credits: 0, juge: s.relief?.juge ?? null,
   };
@@ -2033,11 +2042,20 @@ app.get('/api/nexora/relief/:take/export', async (req, reply) => {
   const dir = `${p.glb}.relief`;
   mkdirSync(dir, { recursive: true });
   const octets = readFileSync(p.glb);
-  const cible = cibleTriangles(q.faces, analyser(await lireGlb(octets)).triangles);
-  const fichier = join(dir, `export-${format}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`);
+  const maillage = await lireGlb(octets);
+  const compatibilite = format === 'obj' ? compatibiliteObj(octets, maillage) : null;
+  if (compatibilite && !compatibilite.compatible) return repondreObjIncompatible(reply);
+  const cible = cibleTriangles(q.faces, analyser(maillage).triangles);
+  const fichier = join(dir, nomCacheExport(format, cible, taille));
   if (!existsSync(fichier)) {
-    const sortie = await unSeulCalcul(fichier, () => exporter(octets, format, { nom: `relief-${p.id}`, tailleMm: taille, cible }));
-    writeFileSync(fichier, sortie);
+    try {
+      const sortie = await unSeulCalcul(fichier, () => exporter(octets, format, { nom: `relief-${p.id}`, tailleMm: taille, cible }));
+      writeFileSync(fichier, sortie);
+    } catch (error) {
+      if (error instanceof ObjIncompatible) return repondreObjIncompatible(reply);
+      if (error instanceof UsdzIncompatible) return reply.code(400).send({ code: error.code, error: 'Export USDZ incompatible avec ce modèle. Utilisez le GLB. / USDZ export does not support this model. Use GLB.' });
+      throw error;
+    }
   }
   reply.headers({ 'Content-Type': TYPE_MIME_RELIEF[format === 'obj' ? 'zip' : format], 'Content-Length': statSync(fichier).size, 'Content-Disposition': `attachment; filename="relief-${p.id}${cible ? `-${cible}` : ''}.${EXTENSION_RELIEF[format]}"` });
   return reply.send(createReadStream(fichier));

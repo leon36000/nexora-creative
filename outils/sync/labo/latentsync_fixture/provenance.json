@@ -1,0 +1,31 @@
+{
+  "repository": "https://github.com/bytedance/LatentSync",
+  "commit": "a229c3948406bc2cf6eaf4873e662e70c6a04746",
+  "scope": "Public committed source fixtures, not tracked inference.py work in progress",
+  "files": [
+    {
+      "path": "scripts/inference.py",
+      "sha256": "0c719555a4d2566237d7e768a5111dc0d61457a0676eb02acf16ee05bf8c91f5"
+    },
+    {
+      "path": "latentsync/pipelines/lipsync_pipeline.py",
+      "sha256": "1355313d99ef0ce3bce22deec2db82ac0910b3f887650a14611e8077a2dc800c"
+    },
+    {
+      "path": "latentsync/utils/util.py",
+      "sha256": "87a7866fa1b5dfbba3f86ff97265496f05da8f13c6c26887d5fc6a159ae023e0"
+    },
+    {
+      "path": "latentsync/models/unet.py",
+      "sha256": "9064845c34ebb9d4c854a56705b249130471822c101e84c0bf9df7ff2f604fe6"
+    },
+    {
+      "path": "latentsync/whisper/whisper/__init__.py",
+      "sha256": "5cb231ebd0daa0b0048d7166d671d69fc00a8eec85fa033d58bda68aac334d70"
+    },
+    {
+      "path": "latentsync/utils/face_detector.py",
+      "sha256": "37cfc600f8f0e409c21f8abf001ce813d08475ccaa26afde32794493d19c23e2"
+    }
+  ]
+}

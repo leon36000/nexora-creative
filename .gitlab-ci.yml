@@ -6,11 +6,7 @@ pc4_ci_fallback:
 nexora_sonar_developpement:
   stage: test
   needs:
-    - job: nexora_v7_tests_cpu
-      artifacts: true
-    - job: nexora_director_tests_cpu
-      artifacts: true
-    - job: nexora_sous_agents_tests
+    - job: nexora_rapports_sonar
       artifacts: true
   image:
     name: sonarsource/sonar-scanner-cli:12.3.0.4285_8.1.0@sha256:47956b669bf486bdad919e1cbd0533223515aa0b6d1d31763e5a3754942df6d7
@@ -22,7 +18,68 @@ nexora_sonar_developpement:
     - if: '$CI_COMMIT_BRANCH == "developpement"'
   script:
     - 'test "${SONAR_TOKEN:+present}" = present || { echo "SONAR_TOKEN absent"; exit 1; }'
-    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.tests=. '-Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.test.mjs,**/test_*.py,app/scripts/test-*.mjs,app/scripts/test-*.ts' '-Dsonar.test.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' '-Dsonar.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' -Dsonar.python.coverage.reportPaths=.ci-v7/coverage.xml,.ci-sousagents/coverage.xml -Dsonar.javascript.lcov.reportPaths=.ci-director/coverage/lcov.info -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
+    - |
+      nexora_sonar_lcov=
+      for rapport in .ci-v7/sonar-reports/*.lcov.info; do
+        test -f "$rapport" || exit 1
+        nexora_sonar_lcov="${nexora_sonar_lcov:+$nexora_sonar_lcov,}$rapport"
+      done
+    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.tests=. '-Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.test.mjs,**/test_*.py,app/scripts/test-*.mjs,app/scripts/test-*.ts' '-Dsonar.test.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' '-Dsonar.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' -Dsonar.python.coverage.reportPaths=.ci-v7/sonar-reports/coverage-v7.xml,.ci-v7/sonar-reports/coverage-sync.xml,.ci-v7/sonar-reports/coverage-sous-agents.xml "-Dsonar.javascript.lcov.reportPaths=$nexora_sonar_lcov" -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
+
+nexora_rapports_sonar:
+  stage: test
+  image: python:3.12-slim-bookworm@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
+  needs:
+    - job: nexora_v7_tests_cpu
+      artifacts: true
+    - job: nexora_director_tests_cpu
+      artifacts: true
+    - job: nexora_sous_agents_tests
+      artifacts: true
+  script:
+    - |
+      python3 -B - <<'PY_REPORTS'
+      import hashlib
+      import os
+      from pathlib import Path
+      from xml.etree import ElementTree
+
+      # Copies publiques des seuls rapports, sans changer les données privées.
+      os.umask(0o022)
+      rapports = [
+          ('.ci-v7/coverage.xml', 'coverage-v7.xml'),
+          ('.ci-v7/coverage-sync.xml', 'coverage-sync.xml'),
+          ('.ci-sousagents/coverage.xml', 'coverage-sous-agents.xml'),
+          ('.ci-director/coverage/lcov.info', 'director.lcov.info'),
+          ('.ci-director/coverage-mesh/lcov.info', 'mesh.lcov.info'),
+      ]
+      if Path('outils/labo/mesh-storm-frame/reproject.mjs').is_file():
+          rapports.append(('.ci-director/coverage-storm-frame/lcov.info', 'storm-frame.lcov.info'))
+      copies = []
+      for nom, cible in rapports:
+          source = Path(nom)
+          if any(p.is_symlink() for p in (source, *source.parents)) or not source.is_file():
+              raise SystemExit('Rapport absent ou lié : ' + nom)
+          donnees = source.read_bytes()
+          if cible.endswith('.xml'):
+              if ElementTree.fromstring(donnees).tag != 'coverage':
+                  raise SystemExit('Rapport XML invalide : ' + nom)
+          elif b'SF:' not in donnees or b'end_of_record' not in donnees:
+              raise SystemExit('Rapport LCOV invalide : ' + nom)
+          copies.append((cible, donnees))
+      sortie = Path('.ci-v7/sonar-reports')
+      sortie.mkdir(mode=0o755)
+      for cible, donnees in copies:
+          fichier = sortie / cible
+          with fichier.open('xb') as f:
+              f.write(donnees)
+          print(str(fichier) + ' sha256=' + hashlib.sha256(donnees).hexdigest())
+      PY_REPORTS
+  artifacts:
+    when: always
+    expire_in: 14 days
+    paths:
+      - .ci-v7/sonar-reports/
 
 nexora_v7_tests_cpu:
   stage: test
@@ -33,6 +90,9 @@ nexora_v7_tests_cpu:
     - apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
     - python3 -m pip install --no-cache-dir numpy==2.2.6 Pillow==11.2.1 coverage==7.10.7
     - 'if env -i HOME="$CI_PROJECT_DIR/.ci-v7/home-$CI_JOB_ID" PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin V7_CI_ROOT="$CI_PROJECT_DIR/.ci-v7" TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" V7_TEST_TMPDIR="$CI_PROJECT_DIR/.ci-v7/test-$CI_JOB_ID" V6_CACHE="$CI_PROJECT_DIR/.ci-v7/cache-$CI_JOB_ID" V6_FFMPEG=/usr/bin/ffmpeg V6_FFPROBE=/usr/bin/ffprobe PYTHONDONTWRITEBYTECODE=1 COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage" COVERAGE_RCFILE="$CI_PROJECT_DIR/marketing/creative/video-v7/chaine/coverage-ci.ini" sh marketing/creative/video-v7/chaine/ci_coverage.sh > .ci-v7/job.log 2>&1; then cat .ci-v7/job.log; else cat .ci-v7/job.log; exit 1; fi'
+    - 'env -i TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" PATH=/usr/local/bin:/usr/bin:/bin PYTHONDONTWRITEBYTECODE=1 COVERAGE_RCFILE="$CI_PROJECT_DIR/outils/sync/coverage-ci.ini" COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-sync" SYNC_TEST_ROOT="$CI_PROJECT_DIR/.ci-v7/test-$CI_JOB_ID" SYNC_FFMPEG=/usr/bin/ffmpeg SYNC_FFPROBE=/usr/bin/ffprobe python3 -m coverage run -m unittest discover -v -s outils/sync'
+    - 'COVERAGE_RCFILE="$CI_PROJECT_DIR/outils/sync/coverage-ci.ini" COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-sync" python3 -m coverage combine --keep'
+    - 'COVERAGE_RCFILE="$CI_PROJECT_DIR/outils/sync/coverage-ci.ini" COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-sync" python3 -m coverage xml -o .ci-v7/coverage-sync.xml'
   artifacts:
     when: always
     expire_in: 14 days
@@ -46,13 +106,15 @@ nexora_director_tests_cpu:
     - mkdir -p .ci-director/home .ci-director/tmp .ci-director/cache .ci-director/npm-cache
     - touch .ci-director/npm-user-config .ci-director/npm-global-config
     - apk add --no-cache python3 make g++
-    - 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME="$CI_PROJECT_DIR/.ci-director/home" TMPDIR="$CI_PROJECT_DIR/.ci-director/tmp" DIRECTOR_CI_ROOT="$CI_PROJECT_DIR" DIRECTOR_CI_CACHE="$CI_PROJECT_DIR/.ci-director/cache" npm_config_cache="$CI_PROJECT_DIR/.ci-director/npm-cache" npm_config_userconfig="$CI_PROJECT_DIR/.ci-director/npm-user-config" npm_config_globalconfig="$CI_PROJECT_DIR/.ci-director/npm-global-config" npm_config_nodedir=/usr/local npm_config_build_from_source=true sh app/scripts/ci-director.sh'
+    - 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME="$CI_PROJECT_DIR/.ci-director/home" TMPDIR="$CI_PROJECT_DIR/.ci-director/tmp" DIRECTOR_CI_ROOT="$CI_PROJECT_DIR" DIRECTOR_CI_CACHE="$CI_PROJECT_DIR/.ci-director/cache" MESH_CI_COVERAGE="$CI_PROJECT_DIR/.ci-director/coverage-mesh" npm_config_cache="$CI_PROJECT_DIR/.ci-director/npm-cache" npm_config_userconfig="$CI_PROJECT_DIR/.ci-director/npm-user-config" npm_config_globalconfig="$CI_PROJECT_DIR/.ci-director/npm-global-config" npm_config_nodedir=/usr/local npm_config_build_from_source=true sh app/scripts/ci-director.sh'
   artifacts:
     when: always
     expire_in: 14 days
     paths:
       - .ci-director/*.log
       - .ci-director/coverage/
+      - .ci-director/coverage-mesh/
+      - .ci-director/coverage-storm-frame/
 
 nexora_sous_agents_tests:
   stage: test

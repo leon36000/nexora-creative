@@ -138,7 +138,7 @@ export interface Storyboard {
 export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; objet3d?: { nom?: string; formats?: string[]; multivue?: boolean; vuesMax?: number; apercu: boolean; qualite: boolean; texte: boolean } | null }
 export interface ObjetTexteEtat {
   etat: 'image' | 'objet' | 'jugement' | 'fini' | 'echec'; essai: number; image: number; objet: number | null;
-  notes: { take: number; note: number; defauts: string[]; raison: string }[]; erreur: string | null; qualite: 'draft' | 'quality'; intention: string;
+  notes: { take: number; note: number; defauts: string[]; raison: string }[]; erreur: string | null; avertissement?: 'relance-echouee' | null; qualite: 'draft' | 'quality'; intention: string;
 }
 export type FormatRelief = 'glb' | 'obj' | 'stl' | '3mf' | 'usdz';
 export interface RapportMaillage {
@@ -146,7 +146,7 @@ export interface RapportMaillage {
   etanche: boolean; taille: [number, number, number]; volume: number | null; avertissements: string[];
 }
 export interface JugeRelief { note: number; defauts: string[]; raison: string; modele: string | null; jetons: number; credits: number; relancer?: boolean }
-export interface RapportRelief { rapport: RapportMaillage; decime: RapportMaillage | null; cible: number | null; formats: FormatRelief[]; extensions: Record<FormatRelief, string>; tailleMm: number; credits: number; juge: JugeRelief | null }
+export interface RapportRelief { compatibiliteObj?: { compatible: boolean; code: 'OBJ_UNSUPPORTED' | null }; rapport: RapportMaillage; decime: RapportMaillage | null; cible: number | null; formats: FormatRelief[]; extensions: Record<FormatRelief, string>; tailleMm: number; credits: number; juge: JugeRelief | null }
 export interface MoteurGpu { id: string; nom: string; recettes: string[]; enLigne: boolean; enCours: number }
 
 /** Agent Producteur (server/nexora/agent.ts). */

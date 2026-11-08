@@ -10,6 +10,8 @@
  * stdout is the MCP channel. Log to stderr only.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import {
@@ -29,20 +31,19 @@ import { CAMERA_MOVES, LENS_MAX, LENS_MIN, MAX_KEYS, MAX_PROPS, MODEL_PROP_SIZE,
 import { BASE, api, finishFileUrl, getTake, localPath, mediaUrl, posterImage, resolveInput, settingsOf, type Asset, type Take } from './client.ts';
 import { OBJECT_DETAIL } from '../src/catalog.ts';
 import { PRODUIT_3D } from '../src/produit3d.ts';
+import { NEXORA_PRODUCT_NAMES } from '../shared/productNames.ts';
 import { enregistrerMontage } from './montage.ts';
 
-const server = new McpServer(
-  { name: 'openfield', version: '0.1.0' },
+export const server = new McpServer(
+  { name: 'openfield', title: NEXORA_PRODUCT_NAMES.creative, version: '0.1.0' },
   {
     instructions: [
-      'OpenField is a local, open-weights creative suite (video, image, edit, remove background, director, loop, effects, mirror, restyle, object swap, reshoot, extend, transition, speak, add sound, upscale, stage, image to 3D) running on the user\'s own GPU through ComfyUI.',
-      'Generate tools only QUEUE work and return take ids; renders take from ~20 s (stills) to several minutes (video). Call wait_for_take with those ids, then get_take for the output path and a preview image.',
-      'Image and clip inputs are local file paths or `take:<id>` to reuse a finished take (e.g. animate a still made by generate_image).',
-      'Cast: characters, props and places saved with create_cast are @mentioned by name in any prompt (e.g. "@Mara walks through the market"). Stills compose them from their pictures (Qwen-Image-Edit), videos hold them on a reference sheet (LTX-2.5 Ingredients IC-LoRA) or start from a composed hero frame, Mirror and Speak make a hero frame when no frame is given.',
-      'Director: direct_shot for one frame or shot, direct_scene to plan a scene into shots with a local LLM and cut them together.',
-      'Stage: stage_render blocks a shot in 3D (boxes, figures, walls, a camera path) and renders it with LTX-2.5 Layout to Render; the shot keeps the blocking\'s camera move and layout.',
-      'Call status first if unsure whether the engine is up. Video renders occupy the GPU; prefer count 1 while iterating.',
-      'Render size: every video tool renders at the machine-wide size set in Setup (720p on a 24 GB or larger card, 480p below; OPENFIELD_RENDER_TIER can set it) unless you pass `resolution`. 720p takes 1.3 to 2x the time of 480p; past 720p, use upscale.',
+      `${NEXORA_PRODUCT_NAMES.creative} exposes registered tools through the local stdio component of ${NEXORA_PRODUCT_NAMES.connect}.`,
+      `For ${NEXORA_PRODUCT_NAMES.mesh}, nexora_mesh_rapport reads the report for a completed take.`,
+      'Use the MCP tools/list response as the authoritative list; call only registered tools. Other capabilities are En préparation / in preparation.',
+      'Generation tools can queue work and return take IDs; use wait_for_take and get_take when available.',
+      'Inputs may be local file paths or take:<id> for a finished take; check status if unsure and prefer count 1 for GPU work.',
+      'Tool availability does not guarantee that a particular engine or installation is available; check tool responses.',
     ].join(' '),
   },
 );
@@ -1171,5 +1172,7 @@ server.registerTool('nexora_raccord', {
 // Harnais de montage (EditPlan v1) : mêmes fonctions que l'élève.
 enregistrerMontage(server, text, safe);
 
-await server.connect(new StdioServerTransport());
-console.error(`openfield-mcp: stdio ready, API ${BASE}`);
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await server.connect(new StdioServerTransport());
+  console.error(`openfield-mcp: stdio ready, API ${BASE}`);
+}

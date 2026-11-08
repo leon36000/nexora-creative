@@ -18,3 +18,6 @@ run_logged sqlite-build npm rebuild --prefix app better-sqlite3 --ignore-scripts
 run_logged tsc-server node app/node_modules/typescript/bin/tsc -p app/server/tsconfig.json --noEmit
 run_logged tsc-client node app/node_modules/typescript/bin/tsc -p app/tsconfig.json --noEmit
 run_logged vitest node app/node_modules/vitest/vitest.mjs run --config app/vitest.director.ci.config.mjs --coverage
+run_logged vitest-mesh node app/node_modules/vitest/vitest.mjs run --config app/vitest.mesh.ci.config.mjs --coverage
+mkdir -p .ci-director/coverage-storm-frame
+run_logged mesh-storm-frame node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=.ci-director/coverage-storm-frame/lcov.info outils/labo/mesh-storm-frame/reproject.test.mjs
