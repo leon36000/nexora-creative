@@ -105,8 +105,13 @@ export type EtapeTexte3D =
   | { action: 'attendre' }
   | { action: 'lancer-objet'; essai: number }
   | { action: 'juger' }
-  | { action: 'finir'; retenu: number }
+  | { action: 'finir'; retenu: number; avertissement?: 'relance-echouee' }
   | { action: 'echec'; motif: string };
+
+/** Seules les prises jugées sont connues comme terminées et peuvent servir de repli. */
+export function meilleurePriseNotee(e: EtatTexte3D): number | undefined {
+  return [...e.notes].filter((n) => e.tentatives.includes(n.take)).sort((a, b) => b.note - a.note)[0]?.take;
+}
 
 /** Décide la suite du texte → 3D d'après l'état gardé et les statuts lus sur les prises. */
 export function prochaineEtapeTexte3D(e: EtatTexte3D, vu: { image: StatutPrise3D; objet?: StatutPrise3D }): EtapeTexte3D {
@@ -116,15 +121,18 @@ export function prochaineEtapeTexte3D(e: EtatTexte3D, vu: { image: StatutPrise3D
     return vu.image === 'done' ? { action: 'lancer-objet', essai: 1 } : { action: 'attendre' };
   }
   if (e.phase === 'objet') {
-    if (vu.objet === 'failed' || vu.objet === 'stopped') return { action: 'echec', motif: 'Le modèle 3D n’a pas abouti.' };
+    if (vu.objet === 'failed' || vu.objet === 'stopped') {
+      const retenu = meilleurePriseNotee(e);
+      if (vu.objet === 'failed' && e.essai > 1 && retenu !== undefined) return { action: 'finir', retenu, avertissement: 'relance-echouee' };
+      return { action: 'echec', motif: 'Le modèle 3D n’a pas abouti.' };
+    }
     return vu.objet === 'done' ? { action: 'juger' } : { action: 'attendre' };
   }
   // jugement rendu : relancer une fois ou finir avec la meilleure prise
   const dernier = e.tentatives[e.tentatives.length - 1];
   const noteDernier = e.notes.find((n) => n.take === dernier)?.note;
   if (noteDernier !== undefined && noteDernier < NOTE_MINIMALE && e.essai < 2) return { action: 'lancer-objet', essai: e.essai + 1 };
-  const meilleure = [...e.notes].sort((a, b) => b.note - a.note)[0];
-  return { action: 'finir', retenu: meilleure?.take ?? dernier };
+  return { action: 'finir', retenu: meilleurePriseNotee(e) ?? dernier };
 }
 
 // ---- parties qui touchent au disque et au LLM (non testées sans moteur) ----

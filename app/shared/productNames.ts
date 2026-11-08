@@ -2,6 +2,7 @@
 export const NEXORA_BRAND = 'Nexora' as const;
 
 export const NEXORA_PRODUCT_NAMES = {
+  creative: `${NEXORA_BRAND} Creative`,
   mesh: `${NEXORA_BRAND} Mesh`,
   matte: `${NEXORA_BRAND} Matte`,
   director: `${NEXORA_BRAND} Director`,
