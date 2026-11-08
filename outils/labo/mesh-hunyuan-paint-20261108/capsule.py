@@ -14,6 +14,8 @@ import gpu_guard
 from verify_manifest import verify
 
 CODE = Path(__file__).resolve().parent
+PYTHON_EXECUTABLE = 'venv/bin/python'
+MINIMAL_PATH = '/usr/bin:/bin'
 
 
 def safe_name(value):
@@ -79,9 +81,9 @@ def verify_configuration(args):
         failures = [item for item in checked['files'] if item['status'] != 'ok']
         raise RuntimeError('input verification failed: ' + json.dumps(failures))
     check = 'import importlib.metadata as m,json,sys; print(json.dumps({n:m.version(n) for n in json.loads(sys.argv[1])}))'
-    command = [str(root / 'venv/bin/python'), '-c', check, json.dumps(list(manifest['runtime_versions']))]
+    command = [str(root / PYTHON_EXECUTABLE), '-c', check, json.dumps(list(manifest['runtime_versions']))]
     runtime = subprocess.run(command, capture_output=True, text=True, check=True, timeout=30,
-                             env={'PATH': '/usr/bin:/bin', 'PYTHONDONTWRITEBYTECODE': '1'})
+                             env={'PATH': MINIMAL_PATH, 'PYTHONDONTWRITEBYTECODE': '1'})
     if json.loads(runtime.stdout) != manifest['runtime_versions']:
         raise RuntimeError('runtime versions mismatch')
     return root, blender, len(checked['files'])
@@ -106,7 +108,7 @@ def base_command(root, run):
 
 
 def environment(root, run, gpu):
-    return {'PATH': '/usr/bin:/bin', 'HOME': str(run / 'home'), 'TMPDIR': str(run / 'tmp'),
+    return {'PATH': MINIMAL_PATH, 'HOME': str(run / 'home'), 'TMPDIR': str(run / 'tmp'),
             'HF_HOME': str(run / 'hf'), 'TORCH_HOME': str(run / 'torch'),
             'XDG_CACHE_HOME': str(run / 'xdg'), 'MPLCONFIGDIR': str(run / 'mpl'),
             'MESH_PAINT_ROOT': str(root), 'MESH_PAINT_RUN_ROOT': str(run / 'output'),
@@ -127,10 +129,10 @@ def cpu_preflight(root, run):
         raise RuntimeError('insufficient RAM for CPU preflight')
     command = base_command(root, run)
     add_environment(command, environment(root, run, ''))
-    command += [str(root / 'venv/bin/python'), str(CODE / 'preflight_cpu.py')]
+    command += [str(root / PYTHON_EXECUTABLE), str(CODE / 'preflight_cpu.py')]
     with (run / 'cpu-preflight.log').open('x') as output:
         subprocess.run(command, stdout=output, stderr=subprocess.STDOUT,
-                       env={'PATH': '/usr/bin:/bin'}, check=True, timeout=180)
+                       env={'PATH': MINIMAL_PATH}, check=True, timeout=180)
 
 
 def gpu_preflight(run, record):
@@ -165,7 +167,7 @@ def execute(root, lock_path, blender, run):
             values = environment(root, run, uuid)
             values['MESH_PAINT_BLENDER'] = str(blender)
             add_environment(command, values)
-            command += [str(root / 'venv/bin/python'), str(CODE / 'run_paint.py'), '--run-id', 'paint']
+            command += [str(root / PYTHON_EXECUTABLE), str(CODE / 'run_paint.py'), '--run-id', 'paint']
             last = [0.0]
             def controle(_identity, namespace_pids):
                 if time.monotonic() - last[0] < 1:
