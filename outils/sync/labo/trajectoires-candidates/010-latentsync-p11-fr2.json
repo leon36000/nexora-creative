@@ -1,0 +1,58 @@
+{
+  "type": "trajectoire technique candidate, pas mémoire promue",
+  "schema": "preuve-correction-v1",
+  "id": "latentsync-p11-fr2-20261108",
+  "classification": "ESSAI R&D — En préparation",
+  "comparison_group": "sync-comparatif-p11-fr2-20261108",
+  "not_paired_with_previous_different_video": true,
+  "prompt": "Aucun prompt textuel dans cette étape : conditionnement par vidéo p11 et audio FR-2 complet, paramètres de génération épinglés.",
+  "inputs": {
+    "video_sha256": "d8230ab3da7f5d70d2bad09eeaa25c388df2a06e3df41ba61d53d1814a4b03c4",
+    "video_frames": 253,
+    "video_fps": "25/1",
+    "video_seconds": 10.12,
+    "source_original_sha256": "47183c57fecde4d398cd06c4b8e1490f2cd248ffdfb67d219c481d6f2fff9e94",
+    "source_original_frames": 243,
+    "resampled_duplicate_frames": 10,
+    "source_frames_lost": 0,
+    "audio_pcm_sha256": "e95d7c62e85d12e02b3115b4b816af426c4296a3c05d6198ab92140922b6f6e2",
+    "audio_samples": 144640,
+    "audio_hz": 16000,
+    "voice_requested_model": "elevenlabs/eleven-v4",
+    "voice_effective_model": "non attesté indépendamment"
+  },
+  "generation": {
+    "model": "LatentSync1.6",
+    "steps": 20,
+    "guidance_scale": 1,
+    "seed": 1247,
+    "deepcache": false,
+    "host": "pc1",
+    "gpu": "RTX5090",
+    "wall_seconds_supervised": 97.87713090899342,
+    "max_gpu_mib": 17488,
+    "gpu_stop_confirmed": true
+  },
+  "phone": {
+    "sha256": "5217e5f3c4ee878401fc7afa9c19f5dad67debf8b9f791beae579a9703dbcb72",
+    "bytes": 3309511,
+    "video_frames": 226,
+    "video_seconds": 9.04,
+    "codecs": [
+      "h264",
+      "aac"
+    ],
+    "av_validated": true,
+    "AAC_PCM_bit_identical_claim": false
+  },
+  "defect": "Défauts visuels et labiaux non encore jugés. La collecte a tenté de réécrire le reçu du superviseur après le succès du rendu.",
+  "change": "Aucune correction de qualité déduite. Reçu existant et validation AV relus, sans relancer le modèle.",
+  "comparison": "Deuxième moteur sur mêmes entrées encore en préparation; aucune comparaison appariée acquise.",
+  "human_quality": "non évaluée",
+  "human_voice_approved": false,
+  "quality_gain_score_claim": false,
+  "memory_promoted": false,
+  "method_TIDE": "Trajectoire conservée; observation et correction visuelle/comparaison restent à produire avant toute promotion.",
+  "proof_directory": "/media/pc6/Storage/Nexora/travail/sync-p11-execution-root-20261108-4bdb88e7",
+  "email_receipt_id": "1a1bb8d06a29b8f7"
+}
