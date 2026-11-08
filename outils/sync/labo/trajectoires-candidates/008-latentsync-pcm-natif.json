@@ -1,0 +1,55 @@
+{
+  "type": "trajectoire technique candidate, pas mémoire promue",
+  "schema": "preuve-correction-v1",
+  "id": "latentsync-pcm-pc1-20261108-8756c313",
+  "classification": "ESSAI R&D — En préparation",
+  "comparison_parent": "latentsync-pc1-20261108-f5d05744",
+  "parameters_unchanged": {
+    "input_video_sha256": "8f8d4d3646362ecf2872b502e57a880e1ec7f743e8fa2d7b448dd9dfae91c9e9",
+    "input_pcm_sha256": "e95d7c62e85d12e02b3115b4b816af426c4296a3c05d6198ab92140922b6f6e2",
+    "seed": 1247,
+    "steps": 20,
+    "guidance": 1,
+    "deepcache": false,
+    "torch_fraction": 0.6
+  },
+  "change": "Borner les chunks à ceil(nombre PCM *25/16000) avant affine et denoising ; aucun post-trim",
+  "observed_dimensions": {
+    "samples": 144640,
+    "rate": 16000,
+    "fps": 25,
+    "features": 452,
+    "chunks": 228,
+    "frames": 226
+  },
+  "generation": {
+    "elapsed_seconds": 98.43501666199882,
+    "code_exit": 0,
+    "observed_processes_stopped": true,
+    "output_sha256": "0d2faaa5c9567274dfef53ba2897ec2e2d2a465861ff4fba908ae1b5af101595",
+    "output_frames": 226,
+    "output_video_seconds": 9.04,
+    "validated_pc1_ffmpeg9": true
+  },
+  "cross_decoder": {
+    "ffmpeg9_samples": 144640,
+    "ffmpeg7_samples": 145408,
+    "ffmpeg7_extra_samples": 768,
+    "ffmpeg7_extra_seconds": 0.048,
+    "existing_padding_protocol_seconds": 0.08,
+    "zero_padding_diagnostic_ffmpeg7": false,
+    "audio_bit_identical_claim": false
+  },
+  "pixel_comparison": {
+    "equal_decoded_frames": 148,
+    "total_common_frames": 226,
+    "first_different_index": 148,
+    "preencode_tensors_captured": false,
+    "scope": "Deux encodages H264 peuvent modifier les pixels au-delà du dernier batch ; aucune identité des tenseurs bruts ou amélioration perceptuelle déduite."
+  },
+  "quality_human": "non évaluée",
+  "memory_promoted": false,
+  "performance_gain_claim": false,
+  "proof_directory": "/media/pc6/Storage/Nexora/travail/latentsync-pcm-root-20261108-1de3ae9a",
+  "pipeline_runtime_sha256": "5b36fab583c3af09004116a775805c2ebcea0a021fd5fc8a9d1c28c97dde00e2"
+}

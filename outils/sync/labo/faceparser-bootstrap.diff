@@ -1,0 +1,72 @@
+--- /opt/nexora-sync-rd-20261105/src/MuseTalk-safe-globals-test-001/musetalk/utils/face_parsing/resnet.py	2025-09-26 05:44:17.000000000 +0000
++++ /opt/nexora-sync-rd-20261105/src/MuseTalk-safe-parser-bootstrap-001/musetalk/utils/face_parsing/resnet.py	2026-11-06 00:33:29.392913659 +0000
+@@ -56,7 +56,7 @@
+ 
+ 
+ class Resnet18(nn.Module):
+-    def __init__(self, model_path):
++    def __init__(self, model_path=None, *, pretrained=True):
+         super(Resnet18, self).__init__()
+         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+                                bias=False)
+@@ -66,7 +66,10 @@
+         self.layer2 = create_layer_basic(64, 128, bnum=2, stride=2)
+         self.layer3 = create_layer_basic(128, 256, bnum=2, stride=2)
+         self.layer4 = create_layer_basic(256, 512, bnum=2, stride=2)
+-        self.init_weight(model_path)
++        if pretrained:
++            if model_path is None:
++                raise ValueError('model_path is required when pretrained=True')
++            self.init_weight(model_path)
+ 
+     def forward(self, x):
+         x = self.conv1(x)
+--- /opt/nexora-sync-rd-20261105/src/MuseTalk-safe-globals-test-001/musetalk/utils/face_parsing/model.py	2025-09-26 05:44:17.000000000 +0000
++++ /opt/nexora-sync-rd-20261105/src/MuseTalk-safe-parser-bootstrap-001/musetalk/utils/face_parsing/model.py	2026-11-06 00:33:29.393065112 +0000
+@@ -90,9 +90,9 @@
+ 
+ 
+ class ContextPath(nn.Module):
+-    def __init__(self, resnet_path, *args, **kwargs):
++    def __init__(self, resnet_path, *args, pretrained=True, **kwargs):
+         super(ContextPath, self).__init__()
+-        self.resnet = Resnet18(resnet_path)
++        self.resnet = Resnet18(resnet_path, pretrained=pretrained)
+         self.arm16 = AttentionRefinementModule(256, 128)
+         self.arm32 = AttentionRefinementModule(512, 128)
+         self.conv_head32 = ConvBNReLU(128, 128, ks=3, stride=1, padding=1)
+@@ -228,9 +228,9 @@
+ 
+ 
+ class BiSeNet(nn.Module):
+-    def __init__(self, resnet_path='models/resnet18-5c106cde.pth', n_classes=19, *args, **kwargs):
++    def __init__(self, resnet_path='models/resnet18-5c106cde.pth', n_classes=19, *args, pretrained=True, **kwargs):
+         super(BiSeNet, self).__init__()
+-        self.cp = ContextPath(resnet_path)
++        self.cp = ContextPath(resnet_path, pretrained=pretrained)
+         ## here self.sp is deleted
+         self.ffm = FeatureFusionModule(256, 256)
+         self.conv_out = BiSeNetOutput(256, 256, n_classes)
+--- /opt/nexora-sync-rd-20261105/src/MuseTalk-safe-globals-test-001/musetalk/utils/face_parsing/__init__.py	2025-09-26 05:44:17.000000000 +0000
++++ /opt/nexora-sync-rd-20261105/src/MuseTalk-safe-parser-bootstrap-001/musetalk/utils/face_parsing/__init__.py	2026-11-06 00:33:29.393156649 +0000
+@@ -59,12 +59,16 @@
+     def model_init(self, 
+                    resnet_path='./models/face-parse-bisent/resnet18-5c106cde.pth', 
+                    model_pth='./models/face-parse-bisent/79999_iter.pth'):
+-        net = BiSeNet(resnet_path)
++        # The full pinned BiSeNet checkpoint contains the ResNet backbone too.
++        # Skip only the legacy pretrained bootstrap; strict full-state loading
++        # below must cover every parameter and buffer.
++        net = BiSeNet(resnet_path, pretrained=False)
++        state_dict = torch.load(
++            model_pth, map_location=torch.device('cpu'), weights_only=True
++        )
++        net.load_state_dict(state_dict, strict=True)
+         if torch.cuda.is_available():
+             net.cuda()
+-            net.load_state_dict(torch.load(model_pth)) 
+-        else:
+-            net.load_state_dict(torch.load(model_pth, map_location=torch.device('cpu')))
+         net.eval()
+         return net
+ 
