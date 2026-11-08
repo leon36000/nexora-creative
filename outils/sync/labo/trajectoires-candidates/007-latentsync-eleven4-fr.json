@@ -1,0 +1,67 @@
+{
+  "type": "trajectoire technique candidate, pas mémoire promue",
+  "schema": "preuve-correction-v1 (distinct de TrajectoireProfesseur)",
+  "id": "latentsync-pc1-20261108-f5d05744",
+  "classification": "ESSAI R&D — En préparation",
+  "moteur": "LatentSync a229c3948406bc2cf6eaf4873e662e70c6a04746, six adaptations locales épinglées",
+  "prompt": "Prompt original du clip p21-r1 non récupéré dans ces preuves ; ne pas inventer",
+  "audio_modele_demande": "elevenlabs/eleven-v4",
+  "audio_modele_effectivement_servi": "non attesté indépendamment",
+  "voix_validee_humain": false,
+  "plan_sha256": "29aef87bad0f4fd1da25a9cee8bfa4b97d5dddd66253b7eb8b47f289f15b5e86",
+  "entrees": {
+    "video_sha256": "8f8d4d3646362ecf2872b502e57a880e1ec7f743e8fa2d7b448dd9dfae91c9e9",
+    "audio_original_sha256": "eb950b517955323dcd1447bc54e8ac49ad8a49f8e394dbc87166239a8faa3a25",
+    "pcm_sha256": "e95d7c62e85d12e02b3115b4b816af426c4296a3c05d6198ab92140922b6f6e2",
+    "images_video": 253,
+    "cadence": "25",
+    "echantillons_pcm": 144640,
+    "frequence_pcm": 16000
+  },
+  "generation": {
+    "seed": 1247,
+    "etapes": 20,
+    "guidance": 1,
+    "deepcache": false,
+    "duree_secondes": 100.25609194999561,
+    "code_sortie": 0,
+    "arret_processus_observes_confirme": true,
+    "gpu_mesures": 95,
+    "gpu_memoire_max_observee_mib": 17490,
+    "gpu_power_limit_w": [
+      475.0
+    ]
+  },
+  "defaut_observe": {
+    "brut_sha256": "8314d0ac11fc1bba8769952de9a776053e0feb466be9889d74d0e9f53de68889",
+    "images": 228,
+    "video_secondes": 9.12,
+    "pcm_secondes": 9.04,
+    "validation_av": false,
+    "cause_observee": "deux images supplémentaires par rapport à la durée du PCM ; origine Whisper non démontrée ici"
+  },
+  "correction": {
+    "nature": "export CPU distinct, aucun changement au modèle ou nouvelle inférence",
+    "premieres_images": 226,
+    "meme_images_decodees": true,
+    "pcm_complet_identique": true,
+    "canonique_sha256": "08908593513cddd9c2b273ce5f1097c0e11f0c7fd0f76d0013212c96445409de",
+    "validation_av": true,
+    "telephone_etiquete_sha256": "61af5627d8748fdcc2d903c7e34b04c2116f538b619cd2400518fd883cb5f701",
+    "telephone_octets": 2893803
+  },
+  "comparaison": {
+    "juge_humain": "non effectué",
+    "qualite_labiale": "non validée",
+    "promotion_memoire": false,
+    "banc_50_briefs": false
+  },
+  "preuves": {
+    "storage": "/media/pc6/Storage/Nexora/travail/latentsync-inputs-20261108-d94c5089",
+    "pc1_run": "/run/media/pc1/Infrastructure/NexoraStudioWork/lipsync/rnd-latentsync-20261108-98a2d11e/essai-fr-f5d05744",
+    "resultat_supervision_sha256": "ff792e78e96f3dcdb93a760a86b109f41623fb88a90aad03c058d2ed4e83af7d",
+    "validation_brut_sha256": "be02346784b546f62b975285e3e6fabd83fb10b954f93e686489dc162af80601",
+    "export_manifest_sha256": "7e570aa82e205b52dd15aa6fcbee97cd3ff98ad701af87716f9ef0ee6d29b157",
+    "clip_etiquete_receipt_sha256": "569423fd5664b6e1cd9a1decb15cf28d1b5bd6717410ce5d667b17dfba69a68a"
+  }
+}
