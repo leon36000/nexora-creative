@@ -25,17 +25,32 @@ def fichier(valeur):
         raise ValidationErreur('Fichier local absent ou invalide') from exc
 
 
+def _arreter_decodeur(p):
+    if p.poll() is not None:
+        return
+    try:
+        p.terminate()
+        p.wait(timeout=1)
+    except (OSError, subprocess.TimeoutExpired):
+        try:
+            p.kill()
+            p.wait(timeout=1)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise ValidationErreur('Arrêt du décodeur non confirmé') from exc
+
+
 def executer(args, limite_s, conserver, limite_contenu=65536):
     """Lit les octets sans stocker le PCM ; n'attend jamais indéfiniment l'enfant."""
     try:
         p = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     except OSError as exc:
         raise ValidationErreur('Exécutable indisponible') from exc
-    selection = selectors.DefaultSelector()
-    selection.register(p.stdout, selectors.EVENT_READ)
-    fin = time.monotonic() + limite_s
+    selection = None
     contenu, taille = bytearray(), 0
     try:
+        selection = selectors.DefaultSelector()
+        selection.register(p.stdout, selectors.EVENT_READ)
+        fin = time.monotonic() + limite_s
         while True:
             reste = fin - time.monotonic()
             if reste <= 0:
@@ -58,19 +73,17 @@ def executer(args, limite_s, conserver, limite_contenu=65536):
             raise ValidationErreur('Média illisible ou décodage échoué')
         return bytes(contenu) if conserver else taille
     finally:
-        selection.close()
-        if p.poll() is None:
+        try:
+            if selection is not None:
+                selection.close()
+        finally:
             try:
-                p.terminate()
-                p.wait(timeout=1)
-            except (OSError, subprocess.TimeoutExpired):
-                try:
-                    p.kill()
-                    p.wait(timeout=1)
-                except (OSError, subprocess.TimeoutExpired) as exc:
-                    raise ValidationErreur('Arrêt du décodeur non confirmé') from exc
-        if p.stdout:
-            p.stdout.close()
+                _arreter_decodeur(p)
+            finally:
+                # Même si le système refuse nos signaux, ne garder aucun tube
+                # ouvert et ne pas présenter l'arrêt comme confirmé.
+                if p.stdout:
+                    p.stdout.close()
 
 
 def informations(ffprobe, chemin, delai):
