@@ -54,3 +54,7 @@ Contrôle indépendant Three.js `r186` avec ANGLE/SwiftShader, mêmes caméra et
 La preuve couvre seulement deux triangles avec normales, tangentes et `w` constants par face. Elle n’établit pas le comportement pour `w` mixtes par triangle, normales/tangentes variables, repeat, UV hors `[0,1]`, UDIM, `KHR_texture_transform`, ni d’autres lecteurs. La source utilise `TEXCOORD_1` et la cible atlas UV0. Cette comparaison ne constitue pas une validation Apple/Quick Look ni une équivalence PBR générale.
 
 Les échecs des runs v1 et v2 sont préservés dans le dossier Storage du banc, pas dans ce paquet : v1 utilisait la clé de primitif avant fusion; v2 s’arrêtait après export sur la même différence de clé lors du contrôle. Le run v3 complet est reproductible dans `references/`.
+
+## Fixture à repères variables
+
+Pour refaire le deuxième banc, employer les mêmes commandes dans un nouveau dossier vide et remplacer `test_normalmap_rebake.py` par `test_varying_frame.py`. Sur deux triangles distincts, les normales et tangentes varient par sommet; les signes restent constants par face. Les contrôles analytiques pour les deux interpolations exigent un angle maximal inférieur à 1,5° sur les pixels intérieurs. Ce seuil concerne cette fixture et ne prouve pas la fidélité générale ou le comportement des w mixtes. Le comparatif Three/SwiftShader et les artefacts sont archivés dans le lot `mesh-normalmap-varying-frame-bench-20261108T-luna01` sur Storage et pc1.
