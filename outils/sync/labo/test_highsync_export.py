@@ -62,10 +62,14 @@ class ExportTest(unittest.TestCase):
         cls.root.mkdir(parents=True)
         cls.audio=cls.root/'source.wav';cls.brut=cls.root/'brut27.mp4';cls.court=cls.root/'brut23.mp4'
         cls.audio_fraction=cls.root/'source-16320-echantillons.wav'
+        cls.audio_image=cls.root/'source-640-echantillons.wav'
         cls.brut25=cls.root/'brut25.mp4'
         with wave.open(str(cls.audio_fraction), 'wb') as wav:
             wav.setparams((1, 2, 16000, 0, 'NONE', 'not compressed'))
             wav.writeframes(b''.join(struct.pack('<h', i % 2000 - 1000) for i in range(16320)))
+        with wave.open(str(cls.audio_image), 'wb') as wav:
+            wav.setparams((1, 2, 16000, 0, 'NONE', 'not compressed'))
+            wav.writeframes(b''.join(struct.pack('<h', i % 2000 - 1000) for i in range(640)))
         def ff(*args):
             subprocess.run([str(FFMPEG),'-v','error','-nostdin','-n',*args],check=True,timeout=30)
         ff('-f','lavfi','-i','sine=frequency=440:sample_rate=16000:duration=1',str(cls.audio))
@@ -112,6 +116,14 @@ class ExportTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'non entière'):
             exporter(self.root, self.brut, sha(self.brut), self.audio_fraction, sha(self.audio_fraction), FFMPEG, FFPROBE)
         self.assertEqual(set(self.root.iterdir()), avant)
+
+    def test_export_une_image_a_la_bonne_cadence(self):
+        run = exporter(self.root, self.brut, sha(self.brut), self.audio_image, sha(self.audio_image), FFMPEG, FFPROBE)
+        d = json.loads((run/'manifest.json').read_text())
+        self.assertEqual(d['statut'], 'canonique_valide', d.get('erreur'))
+        self.assertEqual(d['images_cibles'], 1)
+        self.assertEqual(d['validation_av']['audio_rendu']['echantillons'], 640)
+        self.assertTrue(d['validation_av']['cadence_cible_valide'])
 
     def test_couvrir_ne_boucle_pas_une_source_de_25_images(self):
         avant = set(self.root.iterdir())

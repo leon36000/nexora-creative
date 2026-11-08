@@ -40,12 +40,14 @@ def preflight(video: Path, audio: Path, video_sha: str, audio_sha: str,
     flux_video = av.informations(ffprobe, video, delai)
     v = av.mesure_video(ffprobe, video, flux_video, delai)
     a = av.mesure_audio(ffmpeg, audio, av.informations(ffprobe, audio, delai), delai)
-    if Fraction(v['cadence_moyenne']) != 25 or any(
+    if Fraction(v['cadence_moyenne']) != 25 or abs(v['duree_derniere_image_secondes'] - 0.04) > 0.001 or any(
         abs(intervalle - 0.04) > 0.001 for intervalle in v['intervalles_images_secondes']
     ):
         raise ValueError('vidéo non CFR 25 fps')
     if a['frequence_hz'] != 16000:
         raise ValueError('audio source non échantillonné à 16 kHz')
+    if v['images_decodees'] * 16000 < a['echantillons'] * 25:
+        raise ValueError('vidéo plus courte que le PCM : nombre d’images insuffisant')
     if v['duree_secondes'] < a['duree_secondes']:
         raise ValueError('vidéo plus courte que le PCM décodé')
     return {'video_sha256': video_sha, 'audio_sha256': audio_sha,

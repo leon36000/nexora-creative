@@ -8,6 +8,7 @@ import subprocess
 import sys
 import unittest
 import uuid
+from unittest import mock
 
 from outils.sync.labo.highsync_preflight import preflight
 from outils.sync.labo.highsync_prepare import preparer, preparer_audio_source
@@ -102,6 +103,22 @@ class HighSyncPreflightTest(unittest.TestCase):
     def test_cadence_differente(self):
         with self.assertRaisesRegex(ValueError, 'CFR 25'):
             self.verifier(self.fps24)
+
+    def test_derniere_image_allongee_refusee_meme_si_la_cadence_moyenne_est_25(self):
+        # Mesure contradictoire injectée, pas une fixture FFmpeg réelle.
+        reel = self.verifier(self.video)['video']
+        mesure = {**reel, 'duree_derniere_image_secondes': .5}
+        with mock.patch('outils.sync.labo.highsync_preflight.av.mesure_video', return_value=mesure):
+            with self.assertRaisesRegex(ValueError, 'CFR 25'):
+                self.verifier(self.video)
+
+    def test_duree_annoncee_suffisante_ne_remplace_pas_les_images_manquantes(self):
+        # Contrat numérique : une durée annoncée ne justifie pas une boucle vidéo.
+        reel = self.verifier(self.video)['video']
+        mesure = {**reel, 'images_decodees': 24, 'duree_secondes': 1.01}
+        with mock.patch('outils.sync.labo.highsync_preflight.av.mesure_video', return_value=mesure):
+            with self.assertRaisesRegex(ValueError, 'nombre d’images insuffisant'):
+                self.verifier(self.video)
 
     def test_empreinte_invalide_avant_decodage(self):
         with self.assertRaisesRegex(ValueError, 'empreinte'):

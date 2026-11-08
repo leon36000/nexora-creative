@@ -179,7 +179,8 @@ def valider(reference, rendu, ffmpeg, ffprobe, padding_codec, delai=120, cadence
         except (ValueError, TypeError, ZeroDivisionError) as exc:
             raise ValidationErreur('Cadence cible invalide') from exc
         periode = 1 / float(cible)
-        cadence_valide = (bool(intervalles) and abs(image - periode) <= .001
+        # Une image n'a pas d'intervalle voisin : sa durée fournit le contrôle.
+        cadence_valide = ((video['images_decodees'] == 1 or bool(intervalles)) and abs(image - periode) <= .001
                            and all(abs(x - periode) <= .001 for x in intervalles))
     valide = (abs(ecart_video) <= image + 1e-6 and abs(ecart_audio) <= padding_codec + 1e-6
               and abs(decalage) <= image + padding_codec + 1e-6 and cadence_valide is not False)

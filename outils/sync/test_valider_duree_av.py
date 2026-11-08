@@ -90,6 +90,20 @@ class DureeAV(unittest.TestCase):
         self.assertEqual(code, 1, variable)
         self.assertFalse(variable['cadence_cible_valide'])
 
+    def test_image_unique_verifie_sa_duree_pour_la_cadence(self):
+        audio = self.dossier / 'une-image-audio.wav'
+        rendu = self.dossier / 'une-image.mkv'
+        commande('-f', 'lavfi', '-i', 'sine=frequency=440:sample_rate=48000:duration=0.04', str(audio))
+        commande('-f', 'lavfi', '-i', 'color=c=blue:s=64x64:r=25:d=0.04', '-i', str(audio),
+                 '-c:v', 'ffv1', '-c:a', 'pcm_s16le', str(rendu))
+        correct = validateur.valider(audio, rendu, FFMPEG, FFPROBE, 0, cadence_cible='25')
+        self.assertTrue(correct['valide'], correct)
+        self.assertEqual(correct['video']['images_decodees'], 1)
+        self.assertAlmostEqual(correct['video']['duree_derniere_image_secondes'], .04)
+        mauvais = validateur.valider(audio, rendu, FFMPEG, FFPROBE, 0, cadence_cible='50')
+        self.assertFalse(mauvais['cadence_cible_valide'])
+        self.assertFalse(mauvais['valide'])
+
     def test_video_variable_jugee_sur_pts(self):
         code, resultat = self.verifier(self.wav, self.vfr)
         self.assertEqual(code, 0, resultat)
