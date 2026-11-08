@@ -400,7 +400,7 @@ function ObjectFocus({ take, look, onLook, onOpen, langue }: { take: Take; look:
 }
 
 /** Les trois temps du texte → 3D, avec la note du juge quand elle est tombée. */
-function EtapesTexte({ e, langue }: { e: ObjetTexteEtat; langue: LangueClient }) {
+export function EtapesTexte({ e, langue }: { e: ObjetTexteEtat; langue: LangueClient }) {
   const c = meshCopy(langue);
   const ordre = ['image', 'objet', 'jugement', 'fini'] as const;
   const rang = e.etat === 'echec' ? -1 : ordre.indexOf(e.etat);
@@ -415,6 +415,7 @@ function EtapesTexte({ e, langue }: { e: ObjetTexteEtat; langue: LangueClient })
         </div>
       ))}
       {derniere && <div className="dim" style={{ fontSize: 12 }}>{c.judge} : {derniere.note}/10{derniere.raison ? ` · ${derniere.raison}` : ''}</div>}
+      {e.avertissement === 'relance-echouee' && <div role="status" style={{ fontSize: 12.5 }}>{c.retryFailedKept}</div>}
       {e.etat === 'echec' && <div role="alert" style={{ fontSize: 12.5, color: 'var(--danger, #e5534b)' }}>{c.failed}</div>}
     </div>
   );

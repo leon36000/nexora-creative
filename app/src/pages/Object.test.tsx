@@ -50,7 +50,7 @@ vi.mock('../Viewer', () => ({ default: () => null, recreate: vi.fn(), remove: vi
 vi.mock('../drop', () => ({ usePageDrop: vi.fn() }));
 vi.mock('./ReliefOutils', () => ({ default: () => null }));
 
-import ObjectPage from './Object';
+import ObjectPage, { EtapesTexte } from './Object';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -94,6 +94,19 @@ async function addSource(label: string) {
 }
 
 function slot(label: string) { return container.querySelector(`[data-testid="slot-${label}"]`); }
+
+describe('repli texte vers 3D', () => {
+  it.each([
+    ['fr', 'La deuxième tentative a échoué. Le premier modèle est conservé.'],
+    ['en', 'The second attempt failed. The first model was kept.'],
+  ] as const)('explique le repli en %s', async (langue, message) => {
+    root = createRoot(container);
+    const e = { etat: 'fini' as const, essai: 2, image: 1, objet: 11, notes: [], erreur: null,
+      avertissement: 'relance-echouee' as const, qualite: 'draft' as const, intention: 'chaise' };
+    await act(async () => { root.render(<EtapesTexte e={e} langue={langue} />); });
+    expect(container.querySelector('[role="status"]')?.textContent).toBe(message);
+  });
+});
 
 describe('limite multivue réelle du serveur dans ObjectPage', () => {
   it.each([2, 3, 4])('réserve la face et n’offre que %i vues au total', async (max) => {

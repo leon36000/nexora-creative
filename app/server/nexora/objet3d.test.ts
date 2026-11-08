@@ -97,6 +97,15 @@ describe('texte → 3D : prochaine étape', () => {
     const s = { ...base, phase: 'objet' as const, tentatives: [11] };
     expect(prochaineEtapeTexte3D(s, { image: 'done', objet: 'failed' }).action).toBe('echec');
   });
+  it('conserve la première prise jugée si la relance échoue', () => {
+    const s = { phase: 'objet' as const, essai: 2, tentatives: [11, 12], notes: [{ take: 11, note: 3 }] };
+    expect(prochaineEtapeTexte3D(s, { image: 'done', objet: 'failed' })).toEqual({ action: 'finir', retenu: 11, avertissement: 'relance-echouee' });
+    expect(prochaineEtapeTexte3D(s, { image: 'done', objet: 'stopped' }).action).toBe('echec');
+  });
+  it('ne choisit pas une prise absente des tentatives comme repli', () => {
+    const s = { phase: 'objet' as const, essai: 2, tentatives: [11, 12], notes: [{ take: 13, note: 9 }] };
+    expect(prochaineEtapeTexte3D(s, { image: 'done', objet: 'failed' }).action).toBe('echec');
+  });
 });
 
 describe('Nexora Mesh : vues et GIF', () => {
