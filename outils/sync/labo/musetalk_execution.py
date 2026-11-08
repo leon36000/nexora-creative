@@ -12,12 +12,26 @@ from outils.sync.labo import capsule_sync, highsync_preflight, lanceur_musetalk
 from outils.sync.labo import latentsync_execution as commun
 from outils.sync.labo.musetalk_patch import PATCHED_SHA256
 
+TASK_YAML = 'task.yaml'
+SORTIE_MP4 = 'sortie.mp4'
+AUDIO_ENTREE_WAV = 'audio-entree.wav'
+VIDEO_ENTREE_MP4 = 'video-entree.mp4'
+MOTEUR = 'MuseTalk1.5'
+PLAN_EXECUTION_JSON = 'plan-execution.json'
+
+
+def _verrou_exclusif(fd: int):
+    m = os.fstat(fd)
+    if not stat.S_ISREG(m.st_mode) or m.st_uid != os.getuid() or m.st_mode & 0o077:
+        raise ValueError('verrou non privé')
+    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
 
 def _arguments(c, run: Path):
     models = Path(c['models'])
-    return ['--inference_config', str(run/'task.yaml'),
+    return ['--inference_config', str(run/TASK_YAML),
             '--result_dir', str(run/'results'),
-            '--output_vid_name', str(run/'sortie.mp4'),
+            '--output_vid_name', str(run/SORTIE_MP4),
             '--unet_model_path', str(models/'musetalkV15/unet.pth'),
             '--unet_config', str(models/'musetalkV15/musetalk.json'),
             '--whisper_dir', str(models/'whisper'),
@@ -35,7 +49,7 @@ def _commande(c, run: Path, lock_fd: int, status_fd: int):
     # Variables spécifiques du runner préservant, après le clearenv du socle.
     i = argv.index('--')
     argv[i:i] = ['--setenv', 'NEXORA_FFMPEG_BIN', c['ffmpeg'],
-                 '--setenv', 'NEXORA_FEATURE_AUDIO_PATH', str(run/'audio-entree.wav')]
+                 '--setenv', 'NEXORA_FEATURE_AUDIO_PATH', str(run/AUDIO_ENTREE_WAV)]
     return argv
 
 
@@ -92,28 +106,28 @@ def _verifier(c, run: Path):
     p = commun._lire(provenance)
     if p['modele_demande'] != 'elevenlabs/eleven-v4':
         raise ValueError('provenance Eleven4 requise')
-    for name in ('audio-original.mp3', 'audio-entree.wav', 'video-entree.mp4'):
+    for name in ('audio-original.mp3', AUDIO_ENTREE_WAV, VIDEO_ENTREE_MP4):
         highsync_preflight._verifier_fichier(run/name, p['fichiers'][name])
-    return highsync_preflight.preflight(run/'video-entree.mp4', run/'audio-entree.wav',
-        p['fichiers']['video-entree.mp4'], p['fichiers']['audio-entree.wav'],
+    return highsync_preflight.preflight(run/VIDEO_ENTREE_MP4, run/AUDIO_ENTREE_WAV,
+        p['fichiers'][VIDEO_ENTREE_MP4], p['fichiers'][AUDIO_ENTREE_WAV],
         Path(c['ffmpeg']), Path(c['ffprobe']))
 
 
 def _task(run: Path):
-    return {'task_0': {'video_path': str(run/'video-entree.mp4'),
-                       'audio_path': str(run/'audio-entree.wav')}}
+    return {'task_0': {'video_path': str(run/VIDEO_ENTREE_MP4),
+                       'audio_path': str(run/AUDIO_ENTREE_WAV)}}
 
 
 def planifier(c, run: Path):
     entree = _verifier(c, run)
     prevol = commun._prevol(c)
-    commun._ecrire(run/'task.yaml', _task(run))  # JSON est un sous-ensemble de YAML.
-    plan = {'statut': 'planifie_sans_inference', 'moteur': 'MuseTalk1.5',
+    commun._ecrire(run/TASK_YAML, _task(run))  # JSON est un sous-ensemble de YAML.
+    plan = {'statut': 'planifie_sans_inference', 'moteur': MOTEUR,
             'configuration': c, 'entrees_av': entree, 'prevol': prevol,
-            'task_sha256': commun.empreinte(run/'task.yaml'),
+            'task_sha256': commun.empreinte(run/TASK_YAML),
             'voix_validee_humain': False, 'produit_livre': False}
-    commun._ecrire(run/'plan-execution.json', plan)
-    return commun.empreinte(run/'plan-execution.json')
+    commun._ecrire(run/PLAN_EXECUTION_JSON, plan)
+    return commun.empreinte(run/PLAN_EXECUTION_JSON)
 
 
 def _cache_sfd(c, run: Path):
@@ -130,17 +144,17 @@ def _cache_sfd(c, run: Path):
 
 def executer(run: Path, plan_sha256: str):
     from outils.sync.labo.supervision_capsule import superviser
-    plan_path = run/'plan-execution.json'
+    plan_path = run/PLAN_EXECUTION_JSON
     highsync_preflight._verifier_fichier(plan_path, plan_sha256)
     plan = commun._lire(plan_path)
-    if plan['statut'] != 'planifie_sans_inference' or plan['moteur'] != 'MuseTalk1.5':
+    if plan['statut'] != 'planifie_sans_inference' or plan['moteur'] != MOTEUR:
         raise ValueError('plan MuseTalk non exécutable')
     c = plan['configuration']
     _verifier(c, run)
-    highsync_preflight._verifier_fichier(run/'task.yaml', plan['task_sha256'])
-    if commun._lire(run/'task.yaml') != _task(run):
+    highsync_preflight._verifier_fichier(run/TASK_YAML, plan['task_sha256'])
+    if commun._lire(run/TASK_YAML) != _task(run):
         raise ValueError('tâche différente')
-    if any(os.path.lexists(run/p) for p in ('sortie.mp4', 'results',
+    if any(os.path.lexists(run/p) for p in (SORTIE_MP4, 'results',
                    'execution.log', 'resultat-execution.json', 'validation-av.json')):
         raise ValueError('essai déjà exécuté ; créer un autre dossier')
     lock = Path(c['gpu_lock'])
@@ -148,10 +162,7 @@ def executer(run: Path, plan_sha256: str):
     capsule_sync._dossier(lock.parent, 'dossier du verrou', 0o700)
     fd = os.open(lock, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
     try:
-        m = os.fstat(fd)
-        if not stat.S_ISREG(m.st_mode) or m.st_uid != os.getuid() or m.st_mode & 0o077:
-            raise ValueError('verrou non privé')
-        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _verrou_exclusif(fd)
         for rel in ('cache/hf', 'cache/torch', 'cache/xdg', 'cache/mpl', 'tmp'):
             (run/rel).mkdir(parents=True, mode=0o700, exist_ok=True)
         _cache_sfd(c, run)
@@ -178,13 +189,13 @@ def executer(run: Path, plan_sha256: str):
         commun._ecrire(run/'surveillance-gpu.json', samples)
     finally:
         os.close(fd)
-    resultat = {'plan_sha256': plan_sha256, 'moteur': 'MuseTalk1.5',
+    resultat = {'plan_sha256': plan_sha256, 'moteur': MOTEUR,
                 'supervision': bilan, 'qualite_humaine': 'non évaluée',
                 'statut': 'echec_ou_non_verifie'}
     if bilan['statut'] == 'succès' and bilan['arret_confirmé'] is True:
-        resultat['av'] = av.valider(run/'audio-entree.wav', run/'sortie.mp4',
+        resultat['av'] = av.valider(run/AUDIO_ENTREE_WAV, run/SORTIE_MP4,
             Path(c['ffmpeg']), Path(c['ffprobe']), .08, cadence_cible='25')
-        resultat['sortie_sha256'] = commun.empreinte(run/'sortie.mp4')
+        resultat['sortie_sha256'] = commun.empreinte(run/SORTIE_MP4)
         resultat['statut'] = 'av_valide_non_juge' if resultat['av']['valide'] else 'av_refuse'
     commun._ecrire(run/'validation-av.json', resultat)
     return resultat
