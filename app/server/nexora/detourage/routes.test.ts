@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -331,5 +331,41 @@ describe('routes /api/nexora/detourage (moteur simulé)', () => {
     const r = await inj(A, { method: 'GET', url: '/api/nexora/detourage/travaux/..%2F..' });
     expect(r.statusCode).toBe(404);
     expect(recu.length).toBe(avant);
+  });
+});
+
+
+describe('registre de détourage illisible', () => {
+  it('répond 503 sur la liste et la création sans écraser le fichier ni appeler moteur ou crédits', async () => {
+    const dossierDonnees = mkdtempSync(join(tmpdir(), 'matte-registre-http-'));
+    const dossier = join(dossierDonnees, 'detourage');
+    mkdirSync(dossier);
+    const chemin = join(dossier, 'registre.json');
+    const original = '[{"id":"contenu-a-ne-pas-exposer"';
+    writeFileSync(chemin, original);
+    let appels = 0;
+    const app = Fastify();
+    const { arreter, detourage } = enregistrerDetourage(app, {
+      dossierDonnees, moteurs: () => { appels++; return []; },
+      facturation: () => { appels++; return null; }, nexora: false,
+    });
+    try {
+      for (const requete of [
+        { method: 'GET' as const, url: '/api/nexora/detourage/travaux' },
+        { method: 'POST' as const, url: '/api/nexora/detourage/travaux', payload: {} },
+        { method: 'GET' as const, url: `/api/nexora/detourage/travaux/${'a'.repeat(24)}` },
+      ]) {
+        const reponse = await app.inject(requete);
+        expect(reponse.statusCode).toBe(503);
+        expect(reponse.json()).toEqual({ error: 'Le registre du détourage est indisponible. Réessaie plus tard.' });
+        expect(reponse.body).not.toContain(chemin);
+        expect(reponse.body).not.toContain('contenu-a-ne-pas-exposer');
+      }
+      expect(await detourage.nettoyer()).toEqual([]);
+      expect(appels).toBe(0);
+      expect(readFileSync(chemin, 'utf8')).toBe(original);
+      // Le reste du serveur et la déclaration des capacités restent accessibles.
+      expect((await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' })).statusCode).toBe(200);
+    } finally { arreter(); await app.close(); }
   });
 });
