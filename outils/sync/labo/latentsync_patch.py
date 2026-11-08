@@ -1,6 +1,7 @@
 """Adaptation pure des sources LatentSync épinglées : aucun modèle exécuté.
 
 Ce module produit des octets adaptés; il ne prépare ni ne lance un essai GPU.
+Le mux conserve la vidéo H264 déjà encodée par write_video ; l'audio reste AAC.
 L'intégrité des modèles, les chemins, le verrou et les résultats restent à contrôler
 par un lanceur séparé. Les sources non reconnues sont refusées.
 """
@@ -125,8 +126,8 @@ def adapter(nom: str, source: bytes) -> bytes:
                      '        subprocess.run(command, shell=True)',
                      '        command = ["ffmpeg", "-n", "-loglevel", "error", "-nostdin",\n'
                      '                   "-i", os.path.join(temp_dir, "video.mp4"), "-i", audio_path,\n'
-                     '                   "-map", "0:v:0", "-map", "1:a:0", "-c:v", "libx264",\n'
-                     '                   "-crf", "18", "-c:a", "aac", video_out_path]\n'
+                     '                   "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy",\n'
+                     '                   "-c:a", "aac", video_out_path]\n'
                      '        subprocess.run(command, check=True, timeout=180, stdin=subprocess.DEVNULL)')
     ast.parse(texte)
     return texte.encode('utf-8')
