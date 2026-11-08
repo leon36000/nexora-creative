@@ -235,7 +235,7 @@ class MuseTalkExecutionTests(unittest.TestCase):
 
         def fake_superviser(argv, run, lock_fd, status_fd_lire, status_fd_ecrire, delai, controle):
             self.assertEqual(delai, 1200)
-            self.assertTrue({'--unshare-net', '--unshare-pid', '--clearenv'} <= set(argv))
+            self.assertLessEqual({'--unshare-net', '--unshare-pid', '--clearenv'}, set(argv))
             self.assertEqual(argv[argv.index('--sync-fd') + 1], str(lock_fd))
             self.assertEqual(argv[argv.index('--json-status-fd') + 1], str(status_fd_ecrire))
             boundary = argv.index('--')
