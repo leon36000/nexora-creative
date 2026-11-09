@@ -24,9 +24,14 @@ import { MeshLanguageSwitch } from './MeshLanguageSwitch';
 
 const ModelView = lazy(() => import('../ModelView'));
 
-export default function ObjectPage() {
+export default function ObjectPage({
+  langue,
+  onLangueChange,
+}: {
+  langue: LangueClient;
+  onLangueChange: (langue: LangueClient) => void;
+}) {
   const { params } = useRoute();
-  const [langue, setLangue] = useState<LangueClient>('fr');
   const c = meshCopy(langue);
   useEffect(() => definirMessageEchecPriseMesh(() => c.cardFailedHelp), [c]);
   const [source, setSource] = useState<Source | null>(null);
@@ -212,7 +217,7 @@ export default function ObjectPage() {
       <aside className="rail">
         <Spill src={presetClip('turntable')} video />
         <div className="display" style={{ fontSize: 26 }}>{PRODUIT_3D}</div>
-        <MeshLanguageSwitch langue={langue} onChange={setLangue} />
+        <MeshLanguageSwitch langue={langue} onChange={onLangueChange} />
         <div className="dim" style={{ fontSize: 12.5, marginTop: -4 }}>{c.intro}</div>
 
         <div className="seg" role="group" aria-label={c.startingPoint}>
