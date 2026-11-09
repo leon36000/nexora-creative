@@ -25,6 +25,8 @@ ENGINE_IDS = frozenset({'musetalk', 'latentsync'})
 TASK_STATE = 'worker-task.json'
 PLAN_NAME = 'plan-execution.json'
 MAX_TASK_ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]{0,95}\Z')
+ERROR_TASK_ID = 'ID de tâche invalide'
+ERROR_JSON_NON_FINIE = 'valeur JSON non finie'
 
 
 class ErreurTache(ValueError):
@@ -91,6 +93,10 @@ def _paires(pairs):
     return result
 
 
+def _rejeter_constante_json(_value: str) -> None:
+    raise ErreurTache(ERROR_JSON_NON_FINIE)
+
+
 def _lire_json(path: Path) -> dict:
     if path.is_symlink() or not path.is_file():
         raise ErreurTache('état de tâche absent ou non régulier')
@@ -99,7 +105,7 @@ def _lire_json(path: Path) -> dict:
         raise ErreurTache('état de tâche non privé')
     try:
         value = json.loads(path.read_text(encoding='utf-8'), object_pairs_hook=_paires,
-                           parse_constant=lambda _: (_ for _ in ()).throw(ErreurTache('valeur JSON non finie')))
+                           parse_constant=_rejeter_constante_json)
     except (UnicodeError, json.JSONDecodeError) as exc:
         raise ErreurTache('état de tâche illisible') from exc
     if not isinstance(value, dict):
@@ -140,7 +146,7 @@ def _sha(path: Path) -> str:
     return h.hexdigest()
 
 
-def _trusted_dir(path: Path, label: str, mode: int = 0o700) -> None:
+def _trusted_dir(path: Path, label: str) -> None:
     if not path.is_absolute() or path.is_symlink() or not path.is_dir():
         raise ErreurTache(f'{label} absent ou lié')
     st = path.stat(follow_symlinks=False)
@@ -160,7 +166,7 @@ def _sans_lien(path: Path) -> None:
             raise ErreurTache('composant de chemin inaccessible') from exc
 
 
-def _ouvrir_prise(prise: PriseResolue, racines: tuple[Path, ...]) -> int:
+def _valider_prise(prise: PriseResolue) -> Path:
     if isinstance(prise.take_id, bool) or not isinstance(prise.take_id, int) or prise.take_id <= 0:
         raise ErreurTache('ID de prise résolue invalide')
     if (not isinstance(prise.sha256, str) or len(prise.sha256) != 64 or
@@ -171,36 +177,47 @@ def _ouvrir_prise(prise: PriseResolue, racines: tuple[Path, ...]) -> int:
     path = Path(prise.path)
     if not path.is_absolute() or '..' in path.parts:
         raise ErreurTache('chemin résolu non absolu ou traversant')
-    for root in racines:
-        root = Path(root)
-        if not root.is_absolute():
-            raise ErreurTache('racine média non absolue')
-        _sans_lien(root)
-        try:
-            relative = path.relative_to(root)
-        except ValueError:
-            continue
-        if not relative.parts:
-            continue
-        root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
-        current_fd = root_fd
-        try:
-            for part in relative.parts[:-1]:
-                next_fd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
-                                  dir_fd=current_fd)
-                if current_fd != root_fd:
-                    os.close(current_fd)
-                current_fd = next_fd
-            fd = os.open(relative.parts[-1], os.O_RDONLY | os.O_NOFOLLOW, dir_fd=current_fd)
-            st = os.fstat(fd)
-            if not stat.S_ISREG(st.st_mode) or st.st_size != prise.bytes:
-                os.close(fd)
-                raise ErreurTache('fichier source différent de la prise résolue')
-            return fd
-        finally:
+    return path
+
+
+def _ouvrir_dans_racine(path: Path, root: Path, prise: PriseResolue) -> int | None:
+    root = Path(root)
+    if not root.is_absolute():
+        raise ErreurTache('racine média non absolue')
+    _sans_lien(root)
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        return None
+    if not relative.parts:
+        return None
+    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    current_fd = root_fd
+    try:
+        for part in relative.parts[:-1]:
+            next_fd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                              dir_fd=current_fd)
             if current_fd != root_fd:
                 os.close(current_fd)
-            os.close(root_fd)
+            current_fd = next_fd
+        fd = os.open(relative.parts[-1], os.O_RDONLY | os.O_NOFOLLOW, dir_fd=current_fd)
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_size != prise.bytes:
+            os.close(fd)
+            raise ErreurTache('fichier source différent de la prise résolue')
+        return fd
+    finally:
+        if current_fd != root_fd:
+            os.close(current_fd)
+        os.close(root_fd)
+
+
+def _ouvrir_prise(prise: PriseResolue, racines: tuple[Path, ...]) -> int:
+    path = _valider_prise(prise)
+    for root in racines:
+        fd = _ouvrir_dans_racine(path, root, prise)
+        if fd is not None:
+            return fd
     raise ErreurTache('fichier résolu hors racines médias autorisées')
 
 
@@ -241,12 +258,29 @@ def _copier_prise(prise: PriseResolue, racines: tuple[Path, ...], destination: P
 
 def _run_dir(task_root: Path, task_id: str) -> Path:
     if not isinstance(task_id, str) or MAX_TASK_ID.fullmatch(task_id) is None:
-        raise ErreurTache('ID de tâche invalide')
+        raise ErreurTache(ERROR_TASK_ID)
     root = Path(task_root)
     _trusted_dir(root, 'racine des tâches')
     run = root / f'sync-{task_id}'
     os.mkdir(run, 0o700)
     return run
+
+
+def _verifier_sortie_av(run: Path, status: str, mapped: str,
+                        receipt: dict, result: dict) -> tuple[str, str]:
+    av_result = receipt.get('av')
+    if not isinstance(av_result, dict) or av_result.get('valide') is not (status == 'av_valide_non_juge'):
+        raise ErreurTache('reçu audiovisuel incohérent')
+    output = run / 'sortie.mp4'
+    if output.is_symlink() or not output.is_file() or output.stat(follow_symlinks=False).st_size <= 0:
+        raise ErreurTache('sortie audiovisuelle absente ou liée')
+    output_sha = result.get('sortie_sha256')
+    if (not isinstance(output_sha, str) or len(output_sha) != 64 or
+            any(ch not in '0123456789abcdef' for ch in output_sha) or _sha(output) != output_sha):
+        raise ErreurTache('empreinte de sortie moteur incohérente')
+    if receipt.get('sortie_sha256') != output_sha:
+        raise ErreurTache('reçu et sortie moteur différents')
+    return mapped, output_sha
 
 
 def _statut_resultat(run: Path, plan_sha: str, result: object) -> tuple[str, str | None]:
@@ -264,19 +298,7 @@ def _statut_resultat(run: Path, plan_sha: str, result: object) -> tuple[str, str
     if receipt.get('plan_sha256') != plan_sha or receipt.get('statut') != status:
         raise ErreurTache('reçu audiovisuel différent du plan ou du résultat')
     if status in {'av_valide_non_juge', 'av_refuse'}:
-        av_result = receipt.get('av')
-        if not isinstance(av_result, dict) or av_result.get('valide') is not (status == 'av_valide_non_juge'):
-            raise ErreurTache('reçu audiovisuel incohérent')
-        output = run / 'sortie.mp4'
-        if output.is_symlink() or not output.is_file() or output.stat(follow_symlinks=False).st_size <= 0:
-            raise ErreurTache('sortie audiovisuelle absente ou liée')
-        output_sha = result.get('sortie_sha256')
-        if (not isinstance(output_sha, str) or len(output_sha) != 64 or
-                any(ch not in '0123456789abcdef' for ch in output_sha) or _sha(output) != output_sha):
-            raise ErreurTache('empreinte de sortie moteur incohérente')
-        if receipt.get('sortie_sha256') != output_sha:
-            raise ErreurTache('reçu et sortie moteur différents')
-        return mapped, output_sha
+        return _verifier_sortie_av(run, status, mapped, receipt, result)
     av_result = receipt.get('av')
     if av_result is not None and not isinstance(av_result, dict):
         raise ErreurTache('reçu audiovisuel invalide')
@@ -348,12 +370,31 @@ def preparer_depuis_ids(task_root: Path, racines_medias: tuple[Path, ...],
     if engine_id not in ENGINE_IDS or engine_id not in moteurs:
         raise ErreurTache('capacité R&D indisponible')
     if not isinstance(task_id, str) or MAX_TASK_ID.fullmatch(task_id) is None:
-        raise ErreurTache('ID de tâche invalide')
+        raise ErreurTache(ERROR_TASK_ID)
     medias = resoudre_autorisees(video_take_id, audio_take_id)
     if (not isinstance(medias, MediasResolus) or
             medias.video.take_id != video_take_id or medias.audio.take_id != audio_take_id):
         raise ErreurTache('le résolveur serveur a retourné d’autres prises')
     return preparer_tache(task_root, racines_medias, medias, task_id, engine_id, moteurs)
+
+
+def _plan_pour_dispatch(run: Path, task_id: str, moteurs: Mapping[str, Moteur]) -> tuple[dict, str, Moteur, str]:
+    state = _lire_json(run / TASK_STATE)
+    if state.get('schema') != 'nexora.sync.worker-task.v1' or state.get('task_id') != task_id:
+        raise ErreurTache('état de tâche incohérent')
+    if state.get('status') != 'prepared':
+        raise DispatchAmbigu('tâche non préparée ou dispatch déjà commencé; aucun rejeu automatique')
+    engine_id = state.get('engine_id')
+    binding = moteurs.get(engine_id)
+    if binding is None or engine_id not in ENGINE_IDS:
+        raise ErreurTache('binding de moteur absent')
+    plan_sha = state.get('plan_sha256')
+    plan_path = run / PLAN_NAME
+    if (not isinstance(plan_sha, str) or len(plan_sha) != 64 or
+            any(ch not in '0123456789abcdef' for ch in plan_sha) or
+            plan_path.is_symlink() or not plan_path.is_file() or _sha(plan_path) != plan_sha):
+        raise ErreurTache('plan absent ou empreinte différente')
+    return state, engine_id, binding, plan_sha
 
 
 def executer_une_fois(task_root: Path, task_id: str,
@@ -364,7 +405,7 @@ def executer_une_fois(task_root: Path, task_id: str,
     Toute exception après la transition persistée demeure ambiguë jusqu'à inspection.
     """
     if not isinstance(task_id, str) or MAX_TASK_ID.fullmatch(task_id) is None:
-        raise ErreurTache('ID de tâche invalide')
+        raise ErreurTache(ERROR_TASK_ID)
     root = Path(task_root)
     _trusted_dir(root, 'racine des tâches')
     run = root / f'sync-{task_id}'
@@ -381,21 +422,7 @@ def executer_une_fois(task_root: Path, task_id: str,
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
             raise ErreurTache('dispatch déjà actif') from exc
-        state = _lire_json(run / TASK_STATE)
-        if state.get('schema') != 'nexora.sync.worker-task.v1' or state.get('task_id') != task_id:
-            raise ErreurTache('état de tâche incohérent')
-        if state.get('status') != 'prepared':
-            raise DispatchAmbigu('tâche non préparée ou dispatch déjà commencé; aucun rejeu automatique')
-        engine_id = state.get('engine_id')
-        binding = moteurs.get(engine_id)
-        if binding is None or engine_id not in ENGINE_IDS:
-            raise ErreurTache('binding de moteur absent')
-        plan_sha = state.get('plan_sha256')
-        plan_path = run / PLAN_NAME
-        if (not isinstance(plan_sha, str) or len(plan_sha) != 64 or
-                any(ch not in '0123456789abcdef' for ch in plan_sha) or
-                plan_path.is_symlink() or not plan_path.is_file() or _sha(plan_path) != plan_sha):
-            raise ErreurTache('plan absent ou empreinte différente')
+        state, engine_id, binding, plan_sha = _plan_pour_dispatch(run, task_id, moteurs)
         state.update(status='dispatch_unknown', dispatch_started_at=_maintenant())
         _ecrire_atomique(run, TASK_STATE, state)
         try:

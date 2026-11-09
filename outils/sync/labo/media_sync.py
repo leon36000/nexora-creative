@@ -18,6 +18,7 @@ HEX = re.compile(r'[0-9a-f]{64}\Z')
 MAX_MEDIA_BYTES = 4 * 1024 ** 3
 VIDEO_NAME = 'video-entree.mp4'
 AUDIO_NAME = 'audio-entree.wav'
+AUDIO_ORIGINAL = 'audio-original.mp3'
 
 
 class ErreurEntree(ValueError):
@@ -41,10 +42,14 @@ def _paires(paires):
     return out
 
 
+def _rejeter_nombre_non_fini(_value: str) -> None:
+    raise ErreurEntree('nombre non fini')
+
+
 def _json(path: Path):
     try:
         return json.loads(path.read_text(encoding='utf8'), object_pairs_hook=_paires,
-                          parse_constant=lambda _: (_ for _ in ()).throw(ErreurEntree('nombre non fini')))
+                          parse_constant=_rejeter_nombre_non_fini)
     except (UnicodeError, json.JSONDecodeError) as exc:
         raise ErreurEntree('provenance JSON invalide') from exc
 
@@ -66,26 +71,17 @@ def _fichier_exact(run: Path, name: str, sha: str, nbytes: int | None = None) ->
         raise ErreurEntree('empreinte différente')
 
 
-def verifier_provenance(run: Path, sha_attendu: str) -> tuple[str, dict[str, str]]:
-    """Vérifie une provenance existante sans confondre banc vocal et média générique."""
-    path = run / 'provenance-entrees.json'
-    if path.is_symlink() or not path.is_file() or not _sha(sha_attendu) or empreinte(path) != sha_attendu:
-        raise ErreurEntree('provenance absente ou empreinte différente')
-    p = _json(path)
-    if not isinstance(p, dict):
-        raise ErreurEntree('provenance invalide')
+def _verifier_provenance_eleven4(run: Path, p: dict) -> tuple[str, dict[str, str]]:
+    files = p.get('fichiers')
+    required = (AUDIO_ORIGINAL, AUDIO_NAME, VIDEO_NAME)
+    if not isinstance(files, dict) or any(not _sha(files.get(n)) for n in required):
+        raise ErreurEntree('provenance Eleven4 incomplète')
+    for name in required:
+        _fichier_exact(run, name, files[name])
+    return 'eleven4-bench', {n: files[n] for n in required}
 
-    # Le banc existant garde sa provenance exacte, y compris le MP3 source.
-    if p.get('modele_demande') == ELEVEN4:
-        files = p.get('fichiers')
-        required = ('audio-original.mp3', AUDIO_NAME, VIDEO_NAME)
-        if not isinstance(files, dict) or any(not _sha(files.get(n)) for n in required):
-            raise ErreurEntree('provenance Eleven4 incomplète')
-        for name in required:
-            _fichier_exact(run, name, files[name])
-        return 'eleven4-bench', {n: files[n] for n in required}
 
-    # Le générique ne peut porter aucune allégation de modèle ou de voix.
+def _verifier_provenance_serveur(run: Path, p: dict) -> tuple[str, dict[str, str]]:
     if p.get('schema') != SCHEMA_SERVER_MEDIA:
         raise ErreurEntree('schéma de provenance non pris en charge')
     if set(p) != {'schema', 'source_ids', 'fichiers'} or 'modele_demande' in p or 'voix' in p:
@@ -107,9 +103,22 @@ def verifier_provenance(run: Path, sha_attendu: str) -> tuple[str, dict[str, str
             raise ErreurEntree('taille média serveur invalide')
         _fichier_exact(run, name, item['sha256'], item['bytes'])
         hashes[name] = item['sha256']
-    if os.path.lexists(run / 'audio-original.mp3'):
+    if os.path.lexists(run / AUDIO_ORIGINAL):
         raise ErreurEntree('audio-original réservé au banc Eleven4')
     return 'server-media', hashes
+
+
+def verifier_provenance(run: Path, sha_attendu: str) -> tuple[str, dict[str, str]]:
+    """Vérifie une provenance existante sans confondre banc vocal et média générique."""
+    path = run / 'provenance-entrees.json'
+    if path.is_symlink() or not path.is_file() or not _sha(sha_attendu) or empreinte(path) != sha_attendu:
+        raise ErreurEntree('provenance absente ou empreinte différente')
+    p = _json(path)
+    if not isinstance(p, dict):
+        raise ErreurEntree('provenance invalide')
+    if p.get('modele_demande') == ELEVEN4:
+        return _verifier_provenance_eleven4(run, p)
+    return _verifier_provenance_serveur(run, p)
 
 
 def ecrire_provenance_serveur(run: Path, video_take_id: int, audio_take_id: int) -> str:
@@ -117,7 +126,7 @@ def ecrire_provenance_serveur(run: Path, video_take_id: int, audio_take_id: int)
     for value in (video_take_id, audio_take_id):
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ErreurEntree('identifiant de prise invalide')
-    if os.path.lexists(run / 'audio-original.mp3'):
+    if os.path.lexists(run / AUDIO_ORIGINAL):
         raise ErreurEntree('audio-original réservé au banc Eleven4')
     files = {}
     for name in (VIDEO_NAME, AUDIO_NAME):

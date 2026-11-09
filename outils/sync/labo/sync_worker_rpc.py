@@ -24,7 +24,7 @@ import sys
 import threading
 import time
 import traceback
-from typing import Callable, Mapping
+from typing import Callable, Mapping, TypeGuard
 import uuid
 
 from outils.sync.labo import media_sync, sync_worker_adapter as adapter
@@ -40,6 +40,9 @@ MAX_JOB_ID = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 SHA256 = re.compile(r'[0-9a-f]{64}\Z')
 MAX_SAFE_INTEGER = (1 << 53) - 1
 ACTIVE_STATES = ('queued', 'planning', 'prepared', 'dispatch_unknown')
+ERROR_JSON_NON_FINIE = 'valeur JSON non finie'
+ERROR_METADATA_TAKE = 'métadonnées de prise invalides'
+TASK_ROOT_LABEL = 'racine des tâches'
 
 
 class RpcError(ValueError):
@@ -142,10 +145,14 @@ def _pairs(pairs):
     return result
 
 
+def _rejeter_json_non_fini(_value: str) -> None:
+    raise RpcError(ERROR_JSON_NON_FINIE)
+
+
 def _json_load(data: bytes):
     try:
         return json.loads(data.decode('utf-8'), object_pairs_hook=_pairs,
-                          parse_constant=lambda _v: (_ for _ in ()).throw(RpcError('valeur JSON non finie')))
+                          parse_constant=_rejeter_json_non_fini)
     except (UnicodeError, json.JSONDecodeError) as exc:
         raise RpcError('JSON invalide') from exc
 
@@ -171,7 +178,7 @@ def _safe_positive_integer(value: object) -> bool:
             0 < value <= MAX_SAFE_INTEGER)
 
 
-def _exact_keys(value: object, required: set[str], optional: set[str] = frozenset()) -> bool:
+def _exact_keys(value: object, required: set[str], optional: set[str] = frozenset()) -> TypeGuard[dict[str, object]]:
     return isinstance(value, dict) and required.issubset(value) and set(value).issubset(required | optional)
 
 
@@ -191,15 +198,15 @@ def _parse_request(body: object) -> dict:
     ):
         claim = body[side]
         if not _exact_keys(claim, required) or set(claim) != required:
-            raise RpcError('métadonnées de prise invalides')
+            raise RpcError(ERROR_METADATA_TAKE)
         if (not _safe_positive_integer(claim['takeId']) or
                 not isinstance(claim['path'], str) or len(claim['path']) > 4096 or '\0' in claim['path'] or
                 not isinstance(claim['sha256'], str) or SHA256.fullmatch(claim['sha256']) is None or
                 not _safe_positive_integer(claim['bytes']) or claim['bytes'] > media_sync.MAX_MEDIA_BYTES or
                 not _finite_positive(claim['durationSeconds'])):
-            raise RpcError('métadonnées de prise invalides')
+            raise RpcError(ERROR_METADATA_TAKE)
     if not _finite_positive(body['video']['fps']) or not _safe_positive_integer(body['audio']['sampleRate']):
-        raise RpcError('métadonnées de prise invalides')
+        raise RpcError(ERROR_METADATA_TAKE)
     manifest = body['manifest']
     keys = {'schema', 'id', 'engine', 'videoTakeId', 'audioTakeId', 'inputs',
             'state', 'researchOnly', 'productAvailable', 'humanReview', 'quality'}
@@ -246,7 +253,7 @@ def _write_child_error_receipt(task_root: Path, job_id: str, error: BaseExceptio
     if MAX_JOB_ID.fullmatch(job_id) is None:
         return
     root = Path(task_root)
-    _trusted_dir(root, 'racine des tâches')
+    _trusted_dir(root, TASK_ROOT_LABEL)
     run = root / f'sync-{job_id}'
     _trusted_dir(run, 'dossier de tâche')
 
@@ -329,7 +336,7 @@ class SyncWorkerRpc:
             raise RpcError('socket existante refusée; utiliser une nouvelle racine privée')
         if not self.task_root.exists():
             os.mkdir(self.task_root, 0o700)
-        _trusted_dir(self.task_root, 'racine des tâches')
+        _trusted_dir(self.task_root, TASK_ROOT_LABEL)
         self._open_database()
 
     def _validate_configuration(self):
@@ -428,15 +435,10 @@ class SyncWorkerRpc:
     def _request_matches_registry(self, request: dict) -> None:
         self.resolver.verifier_assertions(request)
 
-    def enqueue(self, raw_request: object, peer_uid: int) -> tuple[int, dict]:
-        try:
-            request = _parse_request(raw_request)
-        except RpcError:
-            return 400, {'accepted': False, 'errorCode': 'input_rejected'}
+    def _preflight_enqueue(self, request: dict, peer_uid: int, engine: str) -> tuple[int, dict] | None:
         job_id = request['jobId']
         if not self.principal_allowed(peer_uid, request['organisationId'], request['createdBy']):
             return 200, {'accepted': False, 'jobId': job_id, 'errorCode': 'input_rejected'}
-        engine = request['engine']
         limits = self.engine_limits.get(engine)
         if (not self.capabilities()['ready'] or engine not in self.engines or limits is None):
             return 200, {'accepted': False, 'jobId': job_id, 'errorCode': 'engine_unavailable'}
@@ -448,6 +450,18 @@ class SyncWorkerRpc:
             self._request_matches_registry(request)
         except RpcError:
             return 200, {'accepted': False, 'jobId': job_id, 'errorCode': 'input_rejected'}
+        return None
+
+    def enqueue(self, raw_request: object, peer_uid: int) -> tuple[int, dict]:
+        try:
+            request = _parse_request(raw_request)
+        except RpcError:
+            return 400, {'accepted': False, 'errorCode': 'input_rejected'}
+        job_id = request['jobId']
+        engine = request['engine']
+        refusal = self._preflight_enqueue(request, peer_uid, engine)
+        if refusal is not None:
+            return refusal
         encoded = json.dumps(request, ensure_ascii=False, sort_keys=True,
                              separators=(',', ':'), allow_nan=False)
         request_sha = hashlib.sha256(encoded.encode('utf-8')).hexdigest()
@@ -629,8 +643,7 @@ class SyncWorkerRpc:
                 ('engine_failed', time.time(), job_id)))
         return job_id
 
-    def _read_http(self, conn: socket.socket) -> tuple[str, str, bytes]:
-        conn.settimeout(5.0)
+    def _read_header_block(self, conn: socket.socket) -> tuple[bytes, bytes]:
         data = bytearray()
         marker = -1
         while marker < 0:
@@ -643,19 +656,19 @@ class SyncWorkerRpc:
             marker = data.find(b'\r\n\r\n')
             if marker < 0 and len(data) > MAX_HEADER_BYTES:
                 raise RpcError('en-têtes trop grands')
-        header_raw = bytes(data[:marker])
-        body = bytes(data[marker + 4:])
-        try:
-            lines = header_raw.decode('ascii').split('\r\n')
-        except UnicodeDecodeError as exc:
-            raise RpcError('en-têtes invalides') from exc
-        if not lines or len(lines) - 1 > MAX_HEADERS:
-            raise RpcError('en-têtes invalides')
-        parts = lines[0].split(' ')
+        return bytes(data[:marker]), bytes(data[marker + 4:])
+
+    @staticmethod
+    def _parse_http_request_line(line: str) -> tuple[str, str]:
+        parts = line.split(' ')
         if len(parts) != 3 or parts[2] != 'HTTP/1.1' or not parts[0] or not parts[1].startswith('/'):
             raise RpcError('ligne HTTP invalide')
+        return parts[0], parts[1]
+
+    @staticmethod
+    def _parse_http_header_fields(lines: list[str]) -> dict[str, str]:
         headers = {}
-        for line in lines[1:]:
+        for line in lines:
             if ':' not in line:
                 raise RpcError('en-tête HTTP invalide')
             key, value = line.split(':', 1)
@@ -663,6 +676,10 @@ class SyncWorkerRpc:
             if not key or key in headers or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789-' for c in key):
                 raise RpcError('en-tête HTTP dupliqué ou invalide')
             headers[key] = value.strip()
+        return headers
+
+    @staticmethod
+    def _http_content_length(headers: dict[str, str], method: str) -> int:
         if 'transfer-encoding' in headers or 'expect' in headers:
             raise RpcError('encodage HTTP non pris en charge')
         if 'content-length' in headers:
@@ -672,13 +689,16 @@ class SyncWorkerRpc:
             length = int(value)
         else:
             length = 0
-        method, path = parts[:2]
         if method == 'POST' and length == 0:
             raise RpcError('corps requis')
         if method != 'POST' and length != 0:
             raise RpcError('corps HTTP inattendu')
         if length > MAX_REQUEST_BYTES:
             raise RpcError('requête trop grande')
+        return length
+
+    @staticmethod
+    def _read_http_body(conn: socket.socket, body: bytes, length: int) -> bytes:
         while len(body) < length:
             chunk = conn.recv(min(4096, length - len(body)))
             if not chunk:
@@ -686,6 +706,21 @@ class SyncWorkerRpc:
             body += chunk
         if len(body) != length:
             raise RpcError('octets après le corps HTTP')
+        return body
+
+    def _read_http(self, conn: socket.socket) -> tuple[str, str, bytes]:
+        conn.settimeout(5.0)
+        header_raw, body = self._read_header_block(conn)
+        try:
+            lines = header_raw.decode('ascii').split('\r\n')
+        except UnicodeDecodeError as exc:
+            raise RpcError('en-têtes invalides') from exc
+        if not lines or len(lines) - 1 > MAX_HEADERS:
+            raise RpcError('en-têtes invalides')
+        method, path = self._parse_http_request_line(lines[0])
+        headers = self._parse_http_header_fields(lines[1:])
+        length = self._http_content_length(headers, method)
+        body = self._read_http_body(conn, body, length)
         return method, path, body
 
     @staticmethod
@@ -706,22 +741,25 @@ class SyncWorkerRpc:
             raise RpcError('pair Unix non autorisé')
         return uid
 
+    def _dispatch_http_request(self, method: str, path: str, body: bytes,
+                               peer_uid: int) -> tuple[int, dict]:
+        if method == 'GET' and path == '/capabilities':
+            return 200, self.capabilities()
+        if method == 'POST' and path == '/jobs':
+            try:
+                decoded = _json_load(body)
+                return self.enqueue(decoded, peer_uid)
+            except RpcError:
+                return 400, {'accepted': False, 'errorCode': 'input_rejected'}
+        if method == 'GET' and path.startswith('/jobs/') and '?' not in path and path.count('/') == 2:
+            return self.inspect(path.rsplit('/', 1)[1])
+        return 404, {'errorCode': 'not_found'}
+
     def handle_connection(self, conn: socket.socket) -> None:
         try:
             peer_uid = self._peer_uid(conn)
             method, path, body = self._read_http(conn)
-            if method == 'GET' and path == '/capabilities':
-                status, payload = 200, self.capabilities()
-            elif method == 'POST' and path == '/jobs':
-                try:
-                    decoded = _json_load(body)
-                    status, payload = self.enqueue(decoded, peer_uid)
-                except RpcError:
-                    status, payload = 400, {'accepted': False, 'errorCode': 'input_rejected'}
-            elif method == 'GET' and path.startswith('/jobs/') and '?' not in path and path.count('/') == 2:
-                status, payload = self.inspect(path.rsplit('/', 1)[1])
-            else:
-                status, payload = 404, {'errorCode': 'not_found'}
+            status, payload = self._dispatch_http_request(method, path, body, peer_uid)
             try:
                 self._send_http(conn, status, payload)
             except OSError:
@@ -730,7 +768,7 @@ class SyncWorkerRpc:
                 job_id = payload.get('jobId')
                 if isinstance(job_id, str):
                     self._acknowledge(job_id)
-        except (OSError, RpcError, TimeoutError):
+        except (OSError, RpcError):
             try:
                 self._send_http(conn, 400, {'errorCode': 'invalid_request'})
             except OSError:
@@ -847,7 +885,7 @@ def _executer_tache_enfant(task_root: Path, job_id: str, engine_id: str,
             SHA256.fullmatch(expected_plan_sha) is None):
         raise RpcError('commande d’exécution enfant invalide')
     root = Path(task_root)
-    _trusted_dir(root, 'racine des tâches')
+    _trusted_dir(root, TASK_ROOT_LABEL)
     run = root / f'sync-{job_id}'
     _trusted_dir(run, 'dossier de tâche')
     state = adapter._lire_json(run / adapter.TASK_STATE)
