@@ -1,15 +1,17 @@
 /** Coque de Nexora Creative (fork d'OpenField) : barre du haut + page routée. « Créer » est l'accueil. */
 import { estRoute3D } from './produit3d.js';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { APPS_NEXORA } from './studio/apps';
-import { linkProps, navigate, useRoute } from './router';
+import { navigate, useRoute } from './router';
 import { prolongerRedirect } from './prolongerRedirect';
 import { startLive, useStore } from './store';
 import { useGlobalDrop } from './drop';
 import { JudgeBanner, Toast } from './ui';
-import { Marque } from './studio/icons';
 import { Moteurs } from './studio/Moteurs';
-import { NEXORA_BRAND, NEXORA_PRODUCT_NAMES } from '../shared/productNames.js';
+import { NEXORA_PRODUCT_NAMES } from '../shared/productNames.js';
+import type { LangueClient } from '../shared/creationLanguage.js';
+import { attributLangueDocument, enregistrerLangueInterface, lireLangueInterface, libellesNavigation, langueContenuPrincipal, nomAppNavigation } from './interfaceLanguage.js';
+import { GlobalNavigation } from './GlobalNavigation.js';
 import ImagePage from './pages/Image';
 import UpscalePage from './pages/Upscale';
 import Prolonger from './pages/Prolonger';
@@ -25,18 +27,8 @@ import Setup from './pages/Setup';
 import Creer from './pages/Creer';
 import MarketingPage from './pages/Marketing';
 
-const SECTIONS = [
-  { to: '/', label: 'Créer' },
-  { to: '/explorer', label: 'Explorer' },
-  { to: '/image', label: 'Image' },
-  { to: '/edit', label: 'Retouche' },
-  { to: '/video', label: 'Vidéo' },
-  { to: '/apps', label: 'Outils' },
-  { to: '/library', label: 'Bibliothèque' },
-];
 const APP_LINKS = APPS_NEXORA.filter((a) => ['marketing', 'parler', 'prolonger', 'raccord', 'cast', 'projet', 'cutout', 'detourage', 'upscale', 'object'].includes(a.id));
 const CREATIVE_NAME = NEXORA_PRODUCT_NAMES.creative;
-const CREATIVE_LABEL = CREATIVE_NAME.slice(NEXORA_BRAND.length + 1);
 /**
  * Pages d'OpenField qui reposaient sur LTX-2.x (bloqué par la politique de licences) : leur adresse mène à l'outil
  * Nexora qui les remplace, jamais à un écran « indisponible ».
@@ -48,7 +40,14 @@ const REMPLACEES: Record<string, string> = {
 
 export default function App() {
   const { path, params } = useRoute();
+  const [langueInterface, setLangueInterface] = useState<LangueClient>(lireLangueInterface);
+  const copy = libellesNavigation(langueInterface);
+  const langueContenu = langueContenuPrincipal(path, langueInterface);
   useEffect(() => { startLive(); }, []);
+  useEffect(() => {
+    enregistrerLangueInterface(langueInterface);
+    document.documentElement.lang = attributLangueDocument(langueContenu);
+  }, [langueContenu]);
   const drop = useGlobalDrop();
   const judge = useStore((s) => !!s.status?.judge);
 
@@ -69,7 +68,7 @@ export default function App() {
     if (path === '/projet') return <ProjetPage />;
     if (path === '/cutout') return <CutoutPage />;
     if (path === '/detourage') return <DetouragePage />;
-    if (estRoute3D(path)) return <ObjectPage />;
+    if (estRoute3D(path)) return <ObjectPage langue={langueInterface} onLangueChange={setLangueInterface} />;
     if (path === '/marketing') return <MarketingPage />;
     if (path === '/apps') return <Apps />;
     if (path === '/library') return <Library />;
@@ -81,53 +80,28 @@ export default function App() {
   // le menu Atelier se referme à chaque navigation
   useEffect(() => { document.querySelectorAll('.st-atelier').forEach((d) => d.removeAttribute('open')); }, [path]);
 
-  // the tab says where you are
+  // Keep the browser tab language in step with the shared shell and Mesh language.
   useEffect(() => {
-    const name = path === '/' ? 'Créer' : path === '/setup' ? 'Réglages' : path === '/library' ? 'Bibliothèque'
-      : SECTIONS.find((s) => s.to === path)?.label ?? APPS_NEXORA.find((a) => a.route.split('?')[0] === path)?.name;
+    const name = path === '/' ? copy.create : path === '/setup' ? copy.settings : path === '/library' ? copy.library
+      : path === '/explorer' ? copy.explore : copy.pageTitles[path]
+        ?? (() => {
+          const app = APPS_NEXORA.find((a) => a.route.split('?')[0] === path);
+          return app ? nomAppNavigation(app.id, app.name, langueInterface) : undefined;
+        })();
     document.title = name ? `${name} · ${CREATIVE_NAME}` : CREATIVE_NAME;
-  }, [path]);
+  }, [path, langueInterface, copy]);
 
-  const isActive = (to: string) => {
-    if (to === '/') return path === '/';
-    const [p, q] = to.split('?');
-    if (p !== path) return false;
-    if (!q) return !(path === '/video' && params.get('mode') === 'loop');
-    return [...new URLSearchParams(q)].every(([k, v]) => params.get(k) === v);
-  };
+  const appLinks = APP_LINKS.map((a) => ({
+    id: a.id, to: a.route, label: nomAppNavigation(a.id, a.name, langueInterface), badge: a.badge,
+  }));
 
   return (
-    <div className={`app ${judge ? 'has-judge' : ''}`}>
-      <header className="st-top">
-        <a className="st-brand" {...linkProps('/')}><Marque className="st-mark" /><span>{NEXORA_BRAND} <em>{CREATIVE_LABEL}</em></span></a>
-        <nav className="st-nav" aria-label="Navigation principale">
-          <a className={`st-link ${isActive('/') ? 'active' : ''}`} {...linkProps('/')}>Créer</a>
-          <a className={`st-link ${isActive('/marketing') ? 'active' : ''}`} {...linkProps('/marketing')}>Marketing</a>
-          <a className={`st-link ${isActive('/library') ? 'active' : ''}`} {...linkProps('/library')}>Bibliothèque</a>
-          <a className={`st-link ${isActive('/explorer') ? 'active' : ''}`} {...linkProps('/explorer')}>Explorer</a>
-          {/* Mode Studio : le montage expert (éditeur FreeCut servi sous /mode-studio/, page à part). */}
-          <a className="st-link st-link-studio" href="/mode-studio/" title="Montage expert assisté par l’IA">Mode Studio</a>
-          <details className="st-atelier">
-            <summary className="st-link">Atelier ▾</summary>
-            <div className="st-menu">
-              <a {...linkProps('/?mode=video')}>Vidéo</a>
-              <a {...linkProps('/?mode=image')}>Image</a>
-              <a {...linkProps('/?mode=film')}>Film</a>
-              <a {...linkProps('/edit')}>Retouche</a>
-              <hr />
-              {APP_LINKS.map((a) => <a key={a.id} {...linkProps(a.route)}>{a.name}{a.badge === 'new' && <span className="badge">Nouveau</span>}</a>)}
-              <hr />
-              <a {...linkProps('/apps')}>Tous les outils</a>
-            </div>
-          </details>
-        </nav>
-        <div className="st-right">
-          <Moteurs />
-          <a className={`st-link ${isActive('/setup') ? 'active' : ''}`} {...linkProps('/setup')} title="Modèles et réglages">Réglages</a>
-        </div>
-      </header>
+    <div className={`app ${judge ? 'has-judge' : ''}`} lang={attributLangueDocument(langueContenu)}>
+      <GlobalNavigation langue={langueInterface} path={path} params={params} apps={appLinks}>
+        <Moteurs langue={langueInterface} />
+      </GlobalNavigation>
       <JudgeBanner />
-      <main className="main"><Suspense fallback={null}>{page}</Suspense></main>
+      <main className="main" lang={attributLangueDocument(langueContenu)}><Suspense fallback={null}>{page}</Suspense></main>
       {drop.dragging && drop.label && <div className="drop-veil" aria-hidden><span>{drop.label}</span></div>}
       <Toast />
     </div>

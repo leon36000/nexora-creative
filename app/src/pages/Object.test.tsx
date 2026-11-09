@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { act } from 'react';
+import { act, useState } from 'react';
+import type { LangueClient } from '../../shared/creationLanguage';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -69,9 +70,14 @@ afterEach(async () => {
   container.remove();
 });
 
+function ObjectHarness() {
+  const [langue, setLangue] = useState<LangueClient>('fr');
+  return <ObjectPage langue={langue} onLangueChange={setLangue} />;
+}
+
 async function mount() {
   root = createRoot(container);
-  await act(async () => { root.render(<ObjectPage />); });
+  await act(async () => { root.render(<ObjectHarness />); });
   await act(async () => { await Promise.resolve(); });
 }
 
@@ -105,6 +111,26 @@ describe('repli texte vers 3D', () => {
       avertissement: 'relance-echouee' as const, qualite: 'draft' as const, intention: 'chaise' };
     await act(async () => { root.render(<EtapesTexte e={e} langue={langue} />); });
     expect(container.querySelector('[role="status"]')?.textContent).toBe(message);
+  });
+});
+
+describe('langue Mesh partagée avec App', () => {
+  it('reçoit la langue de l’enveloppe et ne modifie pas le payload de génération', async () => {
+    const onLangueChange = vi.fn();
+    root = createRoot(container);
+    await act(async () => { root.render(<ObjectPage langue="en" onLangueChange={onLangueChange} />); });
+    await act(async () => { await Promise.resolve(); });
+
+    const selecteur = container.querySelector('[role="group"][aria-label="Interface language"]');
+    expect(selecteur?.querySelector('button[aria-pressed="true"]')?.textContent).toBe('English');
+    await click(selecteur?.querySelector('button'));
+    expect(onLangueChange).toHaveBeenCalledWith('fr');
+
+    await click(container.querySelector('[aria-label="Add an image"]') ?? container.querySelector('[aria-label="Ajouter Image"]'));
+    await click(container.querySelector<HTMLButtonElement>('button.generate'));
+    const payload = mocks.generate.mock.calls[0][0];
+    expect(payload.userPrompt).toBe('3D from Image');
+    expect(payload.langueClient).toBeUndefined();
   });
 });
 
