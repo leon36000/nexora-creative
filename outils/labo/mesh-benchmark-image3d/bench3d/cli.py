@@ -9,7 +9,7 @@ from pathlib import Path
 from . import __version__
 from .layout import LayoutError, build_layout
 from .manifest import ManifestError, load_manifest, _refuse_sensitive_path
-from .outputs import OutputExistsError, dumps, prepare_outdir, relative_portable, write_exclusive
+from .outputs import dumps, prepare_outdir, relative_portable, write_exclusive
 
 EXIT_OK = 0
 EXIT_ERROR = 1
@@ -60,7 +60,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
         return EXIT_USAGE
     try:
         out_dir = prepare_outdir(Path(args.out), inputs=[manifest.path])
-    except (OutputExistsError, OSError) as exc:
+    except OSError as exc:
         _write_stderr("error: %s\n" % exc)
         return EXIT_EXISTS
 
@@ -70,7 +70,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
             target = out_dir / name
             write_exclusive(target, text)
             created.append(target)
-    except (OutputExistsError, OSError) as exc:
+    except OSError as exc:
         _write_stderr("error: %s\n(partial outputs kept for inspection)\n" % exc)
         return EXIT_EXISTS
 
@@ -92,7 +92,7 @@ def cmd_verify_key(args: argparse.Namespace) -> int:
         _refuse_sensitive_path(key_path)
         _refuse_sensitive_path(key_path.resolve())
         key = json.loads(key_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
         _write_stderr("error: cannot read key: %s\n" % exc)
         return EXIT_ERROR
     if not isinstance(key, dict) or key.get("kind") != "local_answer_key":
