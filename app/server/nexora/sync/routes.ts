@@ -328,6 +328,56 @@ async function actualiser(worker: SyncWorker | undefined, store: SyncJobStore, j
   return job;
 }
 
+async function envoyerTravail(
+  deps: SyncRouteDeps, job: SyncJob, request: SyncWorkerRequest, reply: FastifyReply,
+  contexte: { organisationId: string; langue: LangueClient | undefined; timeoutEnqueue: number; maintenant: () => number },
+) {
+  const { organisationId, langue, timeoutEnqueue, maintenant } = contexte;
+  let ack: Awaited<ReturnType<SyncWorker['enqueue']>>;
+  try {
+    ack = await avecDelai((signal) => deps.worker!.enqueue(request, signal), timeoutEnqueue);
+  } catch (e) {
+    const unknown = e instanceof DelaiDepasse;
+    // Une erreur de transport peut survenir après l’envoi de la requête. Seul un refus
+    // explicite du worker permet d’affirmer que la file n’a pas accepté le travail.
+    deps.store.transition(organisationId, job.id, 'dispatch_unknown', {
+      errorCode: 'acceptance_unconfirmed',
+    }, maintenant());
+    return erreur(reply, unknown ? 504 : 502, 'sync_acceptance_unknown', langue,
+      'La mise en file n’est pas confirmée. Consulte le travail avant de réessayer.',
+      'Queue acceptance is unconfirmed. Check the job before retrying.',
+      { jobId: job.id, accepted: false });
+  }
+  const refusExplicite = object(ack) && ack.accepted === false &&
+    (ack.errorCode === undefined || typeof ack.errorCode === 'string') &&
+    (!('jobId' in ack) || ack.jobId === job.id);
+  if (refusExplicite) {
+    deps.store.transition(organisationId, job.id, 'failed', { errorCode: 'enqueue_rejected' }, maintenant());
+    return erreur(reply, 503, 'sync_enqueue_rejected', langue,
+      'Le worker Sync n’a pas confirmé le travail.',
+      'The Sync worker did not confirm the job.',
+      { jobId: job.id, accepted: false });
+  }
+  if (!object(ack) || ack.accepted !== true || ack.jobId !== job.id) {
+    // Une réponse incohérente ne prouve aucun refus : conserver la réservation.
+    deps.store.transition(organisationId, job.id, 'dispatch_unknown', {
+      errorCode: 'acceptance_unconfirmed',
+    }, maintenant());
+    return erreur(reply, 502, 'sync_acceptance_unknown', langue,
+      'La mise en file n’est pas confirmée. Consulte le travail avant de réessayer.',
+      'Queue acceptance is unconfirmed. Check the job before retrying.',
+      { jobId: job.id, accepted: false });
+  }
+  const queued = deps.store.transition(organisationId, job.id, 'queued', { workerJobId: job.id, errorCode: null }, maintenant());
+  if (queued?.workerJobId !== job.id || !['queued', 'running', 'completed_rnd'].includes(queued.state)) {
+    return erreur(reply, 503, 'sync_persistence_unconfirmed', langue,
+      'Le travail est enregistré, mais son acceptation n’est pas confirmée.',
+      'The job is recorded, but acceptance is not confirmed.',
+      { jobId: job.id, accepted: false });
+  }
+  return reply.code(202).send({ accepted: true, reused: false, job: vue(queued) });
+}
+
 export function enregistrerRoutesSync(app: FastifyInstance, deps: SyncRouteDeps): void {
   const maintenant = deps.now ?? Date.now;
   const nouveauId = deps.newId ?? randomUUID;
@@ -361,7 +411,7 @@ export function enregistrerRoutesSync(app: FastifyInstance, deps: SyncRouteDeps)
         'La demande de synchronisation est invalide.',
         'The sync request is invalid.');
     }
-    const engine = b.engine as SyncEngine;
+    const engine = b.engine;
     const idempotency = req.headers['idempotency-key'];
     if (typeof idempotency !== 'string' || !IDEMPOTENCY.test(idempotency)) {
       return erreur(reply, 400, 'sync_idempotency_required', langue,
@@ -434,49 +484,7 @@ export function enregistrerRoutesSync(app: FastifyInstance, deps: SyncRouteDeps)
       audio: inputOf(audio),
       manifest: manifesteRAndD(job),
     };
-    let ack: Awaited<ReturnType<SyncWorker['enqueue']>>;
-    try {
-      ack = await avecDelai((signal) => deps.worker!.enqueue(request, signal), timeoutEnqueue);
-    } catch (e) {
-      const unknown = e instanceof DelaiDepasse;
-      // Une erreur de transport peut survenir après l’envoi de la requête. Seul un refus
-      // explicite du worker permet d’affirmer que la file n’a pas accepté le travail.
-      deps.store.transition(organisationId, job.id, 'dispatch_unknown', {
-        errorCode: 'acceptance_unconfirmed',
-      }, maintenant());
-      return erreur(reply, unknown ? 504 : 502, 'sync_acceptance_unknown', langue,
-        'La mise en file n’est pas confirmée. Consulte le travail avant de réessayer.',
-        'Queue acceptance is unconfirmed. Check the job before retrying.',
-        { jobId: job.id, accepted: false });
-    }
-    const refusExplicite = object(ack) && ack.accepted === false &&
-      (ack.errorCode === undefined || typeof ack.errorCode === 'string') &&
-      (!('jobId' in ack) || ack.jobId === job.id);
-    if (refusExplicite) {
-      deps.store.transition(organisationId, job.id, 'failed', { errorCode: 'enqueue_rejected' }, maintenant());
-      return erreur(reply, 503, 'sync_enqueue_rejected', langue,
-        'Le worker Sync n’a pas confirmé le travail.',
-        'The Sync worker did not confirm the job.',
-        { jobId: job.id, accepted: false });
-    }
-    if (!object(ack) || ack.accepted !== true || ack.jobId !== job.id) {
-      // Une réponse incohérente ne prouve aucun refus : conserver la réservation.
-      deps.store.transition(organisationId, job.id, 'dispatch_unknown', {
-        errorCode: 'acceptance_unconfirmed',
-      }, maintenant());
-      return erreur(reply, 502, 'sync_acceptance_unknown', langue,
-        'La mise en file n’est pas confirmée. Consulte le travail avant de réessayer.',
-        'Queue acceptance is unconfirmed. Check the job before retrying.',
-        { jobId: job.id, accepted: false });
-    }
-    const queued = deps.store.transition(organisationId, job.id, 'queued', { workerJobId: job.id, errorCode: null }, maintenant());
-    if (queued?.workerJobId !== job.id || !['queued', 'running', 'completed_rnd'].includes(queued.state)) {
-      return erreur(reply, 503, 'sync_persistence_unconfirmed', langue,
-        'Le travail est enregistré, mais son acceptation n’est pas confirmée.',
-        'The job is recorded, but acceptance is not confirmed.',
-        { jobId: job.id, accepted: false });
-    }
-    return reply.code(202).send({ accepted: true, reused: false, job: vue(queued) });
+    return envoyerTravail(deps, job, request, reply, { organisationId, langue, timeoutEnqueue, maintenant });
   });
 
   app.get(PREFIX + '/travaux/:id', async (req: FastifyRequest, reply: FastifyReply) => {
