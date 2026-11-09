@@ -100,7 +100,11 @@ export function maillageDuDocument(doc: Document): Maillage {
   let aUv = true;
   let couleur: Maillage['couleur'] = null;
   const racine = doc.getRoot();
-  const noeuds = racine.listNodes().filter((n) => n.getMesh());
+  // Comme le lecteur GLB, ne considérer que la scène désignée, ou la première
+  // si aucune scène par défaut n'est indiquée ; ignorer les nœuds hors scène.
+  const scene = racine.getDefaultScene() ?? racine.listScenes()[0];
+  const noeuds: ReturnType<typeof racine.listNodes> = [];
+  scene?.traverse((n) => { if (n.getMesh()) noeuds.push(n); });
   for (const n of noeuds) {
     const m = n.getWorldMatrix();
     const matrice = new Matrix4().fromArray(m);
@@ -440,13 +444,14 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
 
 /** Les anciennes versions restent en place ; les exports corrigés utilisent un nouveau cache. */
 export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
-  const version = format === 'obj' ? '-normales-v4' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v3';
-  return `export-${format}${version}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
+  const version = format === 'obj' ? '-normales-v5' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v4';
+  const scene = cible && (format === 'glb' || format === 'usdz') ? '-scene-v1' : '';
+  return `export-${format}${version}${scene}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
 }
 
 /** Sépare les rapports calculés après conservation de la précision des coordonnées monde. */
 export function nomCacheRapport(cible: number | null): string {
-  return `rapport-monde64-v1-${cible ?? 'plein'}.json`;
+  return `rapport-monde64-v2-${cible ?? 'plein'}.json`;
 }
 
 /** STL binaire, en millimètres, Z vers le haut, posé sur le plateau. */

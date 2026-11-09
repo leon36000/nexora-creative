@@ -370,15 +370,24 @@ function ApercuMontage({ vue, occupe, ameliorer, fermer }: { vue: VueMontage; oc
   const texte = langue === 'fr'
     ? { titre: 'Aperçu du montage', musique: 'Montage', fermer: 'Fermer', plans: 'plans', moyenne: 'par plan', coupes: 'coupes/min', sonie: 'sonie', sansMusique: 'sans musique', note: 'Note d’origine : ', attendre: 'Un instant…', maximum: 'Montage au maximum', ameliorer: 'Améliorer', telecharger: 'Télécharger l’aperçu', langue: 'Langue de l’aperçu', apercu: 'Aperçu 720p.' }
     : { titre: 'Edit preview', musique: 'Edit preview', fermer: 'Close', plans: 'shots', moyenne: 'per shot', coupes: 'cuts/min', sonie: 'loudness', sansMusique: 'no music', note: 'Original note: ', attendre: 'One moment…', maximum: 'Improvement limit reached', ameliorer: 'Improve', telecharger: 'Download preview', langue: 'Preview language', apercu: '720p preview.' };
+  let libelleAmeliorer: string;
+  if (occupe) libelleAmeliorer = texte.attendre;
+  else if (fini) libelleAmeliorer = texte.maximum;
+  else libelleAmeliorer = `${texte.ameliorer} (${nombre(vue.tours)}/${nombre(vue.plafondTours)})`;
+  const ecartsAffiches = Array.from(new Map(m.ecarts.map((e) => [
+    JSON.stringify([e.gravite, e.message, e.indice]),
+    e,
+  ] as const)).entries()).slice(0, 3);
   return (
     <div className="pr-montage" aria-label={texte.titre} lang={locale}>
       <div className="pr-carte-tete" style={{ flexWrap: 'wrap', gap: 8 }}>
         <div><span className="st-etiq">{texte.musique}</span><h4>Score {nombre(pct(m.score))} / 100</h4></div>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-          <div role="group" aria-label={texte.langue}>
+          <fieldset style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
+            <legend style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>{texte.langue}</legend>
             <button type="button" className={`st-bouton${langue === 'fr' ? ' primaire' : ''}`} lang="fr-CA" aria-pressed={langue === 'fr'} onClick={() => setLangue('fr')}>Français</button>
             <button type="button" className={`st-bouton${langue === 'en' ? ' primaire' : ''}`} lang="en-CA" aria-pressed={langue === 'en'} onClick={() => setLangue('en')}>English</button>
-          </div>
+          </fieldset>
           <button type="button" className="nx-lien" onClick={fermer}>{texte.fermer}</button>
         </div>
       </div>
@@ -390,10 +399,10 @@ function ApercuMontage({ vue, occupe, ameliorer, fermer }: { vue: VueMontage; oc
         {nombre(m.plans)} {texte.plans} · {nombre(vue.dureeS, 1)} s · {nombre(m.dureeMoyennePlanS, 1)} s {texte.moyenne} · {nombre(m.coupesParMinute)} {texte.coupes}{m.bpm ? ` · ${nombre(Math.round(m.bpm))} BPM` : ''}
         {vue.sonie ? ` · ${texte.sonie} ${nombre(vue.sonie.lufs, 1)} LUFS` : ''}{vue.musique === false ? ` · ${texte.sansMusique}` : ''}
       </p>
-      {m.ecarts.length > 0 && <ul className="pr-ecarts">{m.ecarts.slice(0, 3).map((e, i) => <li key={i}><small className={e.gravite === 'majeur' || e.gravite === 'bloquant' ? 'bad' : ''}>{texte.note}{e.message}</small></li>)}</ul>}
-      {vue.amelioration && <p className="pr-meta" role="status">{texte.note}{vue.amelioration.message}</p>}
+      {ecartsAffiches.length > 0 && <ul className="pr-ecarts">{ecartsAffiches.map(([cle, e]) => <li key={cle}><small className={e.gravite === 'majeur' || e.gravite === 'bloquant' ? 'bad' : ''}>{texte.note}{e.message}</small></li>)}</ul>}
+      {vue.amelioration && <output className="pr-meta">{texte.note}{vue.amelioration.message}</output>}
       <div className="pr-variantes">
-        <button type="button" className="st-bouton primaire" disabled={occupe || fini} onClick={ameliorer}>{occupe ? texte.attendre : fini ? texte.maximum : `${texte.ameliorer} (${nombre(vue.tours)}/${nombre(vue.plafondTours)})`}</button>
+        <button type="button" className="st-bouton primaire" disabled={occupe || fini} onClick={ameliorer}>{libelleAmeliorer}</button>
         <a className="st-bouton" href={`${vue.url}?v=${vue.tours}`} download>{texte.telecharger}</a>
       </div>
       <p className="pr-meta">{texte.apercu}</p>

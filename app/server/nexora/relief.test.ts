@@ -211,6 +211,41 @@ async function glbDeuxMatieres(options: { sansUv?: boolean; uvNaN?: boolean; jpe
 }
 
 describe('Nexora Mesh : contrôle du maillage', () => {
+  it('analyse et exporte uniquement la scène GLB par défaut, y compris ses descendants', async () => {
+    const doc = new Document(), buf = doc.createBuffer();
+    const position = doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf);
+    const mesh = doc.createMesh().addPrimitive(doc.createPrimitive().setAttribute('POSITION', position));
+    doc.createScene('inactive').addChild(doc.createNode().setMesh(mesh));
+    const active = doc.createScene('active').addChild(doc.createNode().setTranslation([10, 0, 0]).addChild(doc.createNode().setMesh(mesh)));
+    doc.createNode('orphan').setMesh(mesh);
+    doc.getRoot().setDefaultScene(active);
+    const glb = await new NodeIO().writeBinary(doc);
+    const m = await lireGlb(glb);
+    expect(m.indices).toHaveLength(3);
+    expect(Array.from(m.positions)).toEqual([10, 0, 0, 11, 0, 0, 10, 1, 0]);
+    const stl = await exporter(glb, 'stl');
+    expect(new DataView(stl.buffer, stl.byteOffset, stl.byteLength).getUint32(80, true)).toBe(1);
+    const model = new TextDecoder().decode(unzipSync(await exporter(glb, '3mf'))['3D/3dmodel.model']);
+    expect(model.match(/<triangle /g)).toHaveLength(1);
+    const obj = new TextDecoder().decode(unzipSync(await exporter(glb, 'obj'))['relief.obj']);
+    expect(obj.match(/^f /gm)).toHaveLength(1);
+  });
+  it('utilise la première scène si aucune scène par défaut n’est indiquée', async () => {
+    const doc = new Document(), buf = doc.createBuffer();
+    const position = doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf);
+    const mesh = doc.createMesh().addPrimitive(doc.createPrimitive().setAttribute('POSITION', position));
+    doc.createScene('première').addChild(doc.createNode().setTranslation([2, 0, 0]).setMesh(mesh));
+    doc.createScene('seconde').addChild(doc.createNode().setTranslation([50, 0, 0]).setMesh(mesh));
+    const m = await lireGlb(await new NodeIO().writeBinary(doc));
+    expect(m.indices).toHaveLength(3);
+    expect(Array.from(m.positions)).toEqual([2, 0, 0, 3, 0, 0, 2, 1, 0]);
+  });
+  it('ne considère pas un nœud orphelin comme une scène', () => {
+    const doc = new Document(), buf = doc.createBuffer();
+    const position = doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf);
+    doc.createNode().setMesh(doc.createMesh().addPrimitive(doc.createPrimitive().setAttribute('POSITION', position)));
+    expect(maillageDuDocument(doc).indices).toHaveLength(0);
+  });
   it('refuse un accessoire d’indices qui pointe hors des sommets après lecture GLB', async () => {
     const glb = await glbMaillage(Float32Array.from([0, 0, 0, 1, 0, 0, 0, 1, 0]), Uint32Array.from([0, 1, 99]));
     const maillage = await lireGlb(glb);
@@ -505,20 +540,22 @@ describe('Nexora Mesh : exports', () => {
     const base = process.env.DIRECTOR_CI_CACHE;
     if (!base) throw new Error('DIRECTOR_CI_CACHE requis pour conserver la fixture');
     const dir = mkdtempSync(join(base, 'obj-cache-fixture-'));
-    const ancien = join(dir, 'export-obj-plein-100.zip');
+    const ancien = join(dir, 'export-obj-normales-v4-plein-100.zip');
     const nouveau = join(dir, nomCacheExport('obj', null, 100));
     writeFileSync(ancien, 'ancien', { flag: 'wx' });
     expect(existsSync(nouveau)).toBe(false);
     writeFileSync(nouveau, 'nouveau', { flag: 'wx' });
     expect(readFileSync(ancien, 'utf8')).toBe('ancien');
     expect(readFileSync(nouveau, 'utf8')).toBe('nouveau');
-    expect(nomCacheRapport(null)).toBe('rapport-monde64-v1-plein.json');
-    expect(nomCacheRapport(500)).toBe('rapport-monde64-v1-500.json');
-    expect(nomCacheExport('obj', null, 100)).toBe('export-obj-normales-v4-plein-100.zip');
-    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v3-plein-100.stl');
-    expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v3-plein-100.3mf');
+    expect(nomCacheRapport(null)).toBe('rapport-monde64-v2-plein.json');
+    expect(nomCacheRapport(500)).toBe('rapport-monde64-v2-500.json');
+    expect(nomCacheExport('obj', null, 100)).toBe('export-obj-normales-v5-plein-100.zip');
+    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v4-plein-100.stl');
+    expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v4-plein-100.3mf');
     expect(nomCacheExport('usdz', null, 100)).toBe('export-usdz-matieres-v3-plein-100.usdz');
     expect(nomCacheExport('glb', null, 100)).toBe('export-glb-plein-100.glb');
+    expect(nomCacheExport('glb', 500, 100)).toBe('export-glb-scene-v1-500-100.glb');
+    expect(nomCacheExport('usdz', 500, 100)).toBe('export-usdz-matieres-v3-scene-v1-500-100.usdz');
   });
   it('USDZ : zip non compressé, chaque fichier aligné sur 64 octets, USDA lisible', async () => {
     const octets = await exporter(await glbSphere(8), 'usdz', { nom: 'balle' });
