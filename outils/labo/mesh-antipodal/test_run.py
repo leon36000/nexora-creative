@@ -29,6 +29,23 @@ class ContractTests(unittest.TestCase):
    with self.assertRaises(ValueError):self.validate()
   self.q={'reference_glb_sha256':'0'*64,'points':[{'id':'p','point':[0,1,2]}]};self.points.write_text(json.dumps(self.q))
   with self.assertRaisesRegex(ValueError,'reference GLB'):self.validate()
+ def test_invalid_or_oversized_json_and_excess_points(self):
+  self.meta.write_text('{not json')
+  with self.assertRaises(json.JSONDecodeError):self.validate()
+  self.meta.write_text(json.dumps(self.m));self.points.write_text(' '*1048577)
+  with self.assertRaisesRegex(ValueError,'JSON input too large'):self.validate()
+  self.q['points']=[{'id':f'p{i}','point':[0,0,1]} for i in range(bench.MAX_POINTS+1)];self.points.write_text(json.dumps(self.q))
+  with self.assertRaisesRegex(ValueError,'point count'):self.validate()
+ def test_compile_failure_keeps_failure_without_success_receipt(self):
+  args=SimpleNamespace(upstream=self.p,positions=self.positions,faces=self.faces,glb=self.glb,source_json=self.meta,points=self.points,reference_glb=self.ref,out=self.p/'output')
+  with patch.object(bench,'verify_upstream'),patch.object(bench.shutil,'which',return_value='/usr/bin/c++'),patch.object(bench,'command',side_effect=[{'argv':['c++','--version']},RuntimeError('synthetic compile failure')]):
+   with self.assertRaisesRegex(RuntimeError,'compile failure'):bench.run(args)
+  self.assertIn('synthetic compile failure',(args.out/'failure.txt').read_text());self.assertFalse((args.out/'receipt.json').exists());self.assertEqual(bench.sha(self.glb),self.m['source_sha256'])
+ def test_existing_output_refused_before_execution(self):
+  out=self.p/'out';out.mkdir();args=SimpleNamespace(upstream=self.p,positions=self.positions,faces=self.faces,glb=self.glb,source_json=self.meta,points=self.points,reference_glb=self.ref,out=out)
+  with patch.object(bench,'verify_upstream'),patch.object(bench.shutil,'which',return_value='/usr/bin/c++'),patch.object(bench,'command') as cmd:
+   with self.assertRaisesRegex(ValueError,'already exists'):bench.run(args)
+   cmd.assert_not_called()
  def test_pin_refuses_wrong_revision_and_dirty_headers(self):
   upstream=self.p/'upstream';(upstream/'src/antipodal').mkdir(parents=True);(upstream/'src/antipodal/gwn_mesh.hh').write_text('fixture')
   for revision,changes in [('0'*40,''),(bench.REVISION,' M src/antipodal/gwn_mesh.hh')]:
