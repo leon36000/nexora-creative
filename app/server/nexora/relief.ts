@@ -9,9 +9,11 @@ import { crc32 } from 'node:zlib';
 import type { FastifyReply } from 'fastify';
 import { Document, NodeIO, type Primitive, type Texture, type Transform } from '@gltf-transform/core';
 import { simplify, weld } from '@gltf-transform/functions';
+import { EXTMeshGPUInstancing } from '@gltf-transform/extensions';
+import { checkExpansion, instanceMatrices, InstanceExtensionUnsupported } from './meshInstances.js';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { zipSync, strToU8 } from 'fflate';
-import { Matrix3, Matrix4, Vector3 } from 'three';
+import { Color, Matrix3, Matrix4, Vector3 } from 'three';
 import { exporterUsdz, verifierGlbUsdz } from './usdz.js';
 
 export const CODE_OBJ_INCOMPATIBLE = 'OBJ_UNSUPPORTED' as const;
@@ -51,6 +53,7 @@ export interface Maillage {
   normalesObj?: Float32Array;
   indicesObj?: Uint32Array;
   normalesCoinsObj?: Map<number, [number, number, number]>;
+  instancesExpanded?: boolean;
 }
 
 interface PartieObj {
@@ -80,11 +83,17 @@ export interface RapportMaillage {
 
 // ---------- lecture ----------
 
-const io = new NodeIO();
+const io = new NodeIO().registerExtensions([EXTMeshGPUInstancing]);
+
+async function lireDocument(glb: Uint8Array): Promise<Document> {
+  const json = await io.binaryToJSON(glb);
+  if (json.json.extensionsRequired?.some((name) => name !== 'EXT_mesh_gpu_instancing')) throw new InstanceExtensionUnsupported();
+  return io.readJSON(json);
+}
 
 /** Aplatit toutes les primitives triangulaires d'un GLB (transformations de nœuds appliquées) en un seul maillage. */
 export async function lireGlb(glb: Uint8Array): Promise<Maillage> {
-  const doc = await io.readBinary(glb);
+  const doc = await lireDocument(glb);
   return maillageDuDocument(doc);
 }
 
@@ -105,9 +114,10 @@ export function maillageDuDocument(doc: Document): Maillage {
   const scene = racine.getDefaultScene() ?? racine.listScenes()[0];
   const noeuds: ReturnType<typeof racine.listNodes> = [];
   scene?.traverse((n) => { if (n.getMesh()) noeuds.push(n); });
-  for (const n of noeuds) {
-    const m = n.getWorldMatrix();
-    const matrice = new Matrix4().fromArray(m);
+  checkExpansion(noeuds);
+  const instancesExpanded = noeuds.some((n) => !!n.getExtension('EXT_mesh_gpu_instancing'));
+  for (const n of noeuds) for (const instance of instanceMatrices(n)) {
+    const matrice = instance.matrix, m = matrice.elements;
     const determinant = matrice.determinant();
     const matriceNormale = new Matrix3().getNormalMatrix(matrice);
     for (const p of n.getMesh()!.listPrimitives() as Primitive[]) {
@@ -148,7 +158,7 @@ export function maillageDuDocument(doc: Document): Maillage {
       }
       const image = tex?.getImage();
       const mime = tex?.getMimeType() || '';
-      let erreur: string | null = null;
+      let erreur: string | null = instance.unknown ? 'Attribut d’instance OBJ non pris en charge.' : null;
       const N = p.getAttribute('NORMAL');
       const aNormale = !!N && N.getType() === 'VEC3' && N.getArray() instanceof Float32Array && N.getCount() === P.getCount();
       if (N && (!aNormale || !Number.isFinite(determinant) || determinant === 0)) erreur = 'Normales OBJ ou transformation invalides.';
@@ -183,12 +193,15 @@ export function maillageDuDocument(doc: Document): Maillage {
       else if (tex && (!image || !uvValides)) erreur = 'Texture de base sans image ou coordonnées UV utilisables.';
       else if (tex && mime !== 'image/png' && mime !== 'image/jpeg') erreur = 'Texture OBJ : seuls PNG et JPEG sont pris en charge.';
       else if (info && info.listExtensions().length) erreur = 'Transformation de texture OBJ non prise en charge.';
-      partiesObj.push({ debut, fin: idx.length, base, sommets: P.getCount(), aUv: uvValides, aNormale, facteur: mat?.getBaseColorFactor() ?? [1, 1, 1, 1],
+      const facteur = mat?.getBaseColorFactor() ?? [1, 1, 1, 1];
+      const rgb = instance.color ? new Color().setRGB(facteur[0] * instance.color[0], facteur[1] * instance.color[1], facteur[2] * instance.color[2]).convertLinearToSRGB().toArray() : facteur;
+      const facteurObj = instance.color ? [rgb[0], rgb[1], rgb[2], facteur[3]] : facteur;
+      partiesObj.push({ debut, fin: idx.length, base, sommets: P.getCount(), aUv: uvValides, aNormale, facteur: facteurObj,
         alphaMode: mat?.getAlphaMode() ?? 'OPAQUE', texture: image ? { octets: image, mime } : null, erreur });
       if (!couleur && image) couleur = { octets: image, mime: mime || 'image/png' };
     }
   }
-  return { positions: Float64Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj), normalesObj: Float32Array.from(normalesObj), indicesObj: Uint32Array.from(indicesObj), normalesCoinsObj };
+  return { positions: Float64Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj), normalesObj: Float32Array.from(normalesObj), indicesObj: Uint32Array.from(indicesObj), normalesCoinsObj, instancesExpanded };
 }
 
 // ---------- contrôle ----------
@@ -307,7 +320,7 @@ export function cibleTriangles(valeur: unknown, actuels: number): number | null 
 export async function decimerGlb(glb: Uint8Array, cible: number): Promise<Uint8Array> {
   simplifierPret ??= MeshoptSimplifier.ready;
   await simplifierPret;
-  const doc = await io.readBinary(glb);
+  const doc = await lireDocument(glb);
   const avant = maillageDuDocument(doc).indices.length / 3;
   const transformations: Transform[] = [
     weld(),
@@ -413,6 +426,7 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
   if (indexNormalesCoins.size) lignes.push(`# ${indexNormalesCoins.size} normales de coin calculées depuis les faces pour remplacer des normales nulles`);
   const fichiers: Record<string, Uint8Array> = {};
   const definitions: string[] = [];
+  const images = new Map<Uint8Array, Map<string, string>>();
   for (let i = 0; i < parties.length; i++) {
     const partie = parties[i];
     if (partie.erreur) throw new ObjIncompatible(partie.erreur);
@@ -430,8 +444,13 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
     }
     let map = '';
     if (partie.texture) {
-      const fichier = `${nom}${parties.length === 1 ? '' : `_${i}`}.${extensionImage(partie.texture.mime)}`;
+      const fichier = (m.instancesExpanded && images.get(partie.texture.octets)?.get(partie.texture.mime)) || `${nom}${parties.length === 1 ? '' : `_${i}`}.${extensionImage(partie.texture.mime)}`;
       fichiers[fichier] = partie.texture.octets;
+      if (m.instancesExpanded) {
+        const types = images.get(partie.texture.octets) ?? new Map<string, string>();
+        types.set(partie.texture.mime, fichier);
+        images.set(partie.texture.octets, types);
+      }
       map = `map_Kd ${fichier}\n`;
     }
     const alpha = partie.alphaMode === 'BLEND' ? partie.facteur[3] : 1;
@@ -444,14 +463,14 @@ function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
 
 /** Les anciennes versions restent en place ; les exports corrigés utilisent un nouveau cache. */
 export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
-  const version = format === 'obj' ? '-normales-v5' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v4';
-  const scene = cible && (format === 'glb' || format === 'usdz') ? '-scene-v1' : '';
+  const version = format === 'obj' ? '-normales-v6' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v5';
+  const scene = cible && (format === 'glb' || format === 'usdz') ? '-scene-v2' : '';
   return `export-${format}${version}${scene}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
 }
 
 /** Sépare les rapports calculés après conservation de la précision des coordonnées monde. */
 export function nomCacheRapport(cible: number | null): string {
-  return `rapport-monde64-v2-${cible ?? 'plein'}.json`;
+  return `rapport-monde64-v3-${cible ?? 'plein'}.json`;
 }
 
 /** STL binaire, en millimètres, Z vers le haut, posé sur le plateau. */
@@ -533,7 +552,7 @@ export async function exporter(glb: Uint8Array, format: FormatRelief, opt: Optio
 
 /** Cartes PBR d'un GLB (couleur, métal/rugosité, normales, occlusion, émission) : octets des images présentes. */
 export async function cartesPbr(glb: Uint8Array): Promise<{ nom: string; mime: string; octets: Uint8Array; largeur: number | null; materiaux: { index: number; nom: string }[] }[]> {
-  const doc = await io.readBinary(glb);
+  const doc = await lireDocument(glb);
   const sortie: { nom: string; mime: string; octets: Uint8Array; largeur: number | null; materiaux: { index: number; nom: string }[] }[] = [];
   const vues = new Map<string, Map<Texture, (typeof sortie)[number]>>();
   for (const [index, mat] of doc.getRoot().listMaterials().entries()) {

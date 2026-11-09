@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import Fastify from 'fastify';
 import { Document, NodeIO } from '@gltf-transform/core';
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
@@ -540,22 +540,22 @@ describe('Nexora Mesh : exports', () => {
     const base = process.env.DIRECTOR_CI_CACHE;
     if (!base) throw new Error('DIRECTOR_CI_CACHE requis pour conserver la fixture');
     const dir = mkdtempSync(join(base, 'obj-cache-fixture-'));
-    const ancien = join(dir, 'export-obj-normales-v4-plein-100.zip');
+    const ancien = join(dir, 'export-obj-normales-v5-plein-100.zip');
     const nouveau = join(dir, nomCacheExport('obj', null, 100));
     writeFileSync(ancien, 'ancien', { flag: 'wx' });
     expect(existsSync(nouveau)).toBe(false);
     writeFileSync(nouveau, 'nouveau', { flag: 'wx' });
     expect(readFileSync(ancien, 'utf8')).toBe('ancien');
     expect(readFileSync(nouveau, 'utf8')).toBe('nouveau');
-    expect(nomCacheRapport(null)).toBe('rapport-monde64-v2-plein.json');
-    expect(nomCacheRapport(500)).toBe('rapport-monde64-v2-500.json');
-    expect(nomCacheExport('obj', null, 100)).toBe('export-obj-normales-v5-plein-100.zip');
-    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v4-plein-100.stl');
-    expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v4-plein-100.3mf');
+    expect(nomCacheRapport(null)).toBe('rapport-monde64-v3-plein.json');
+    expect(nomCacheRapport(500)).toBe('rapport-monde64-v3-500.json');
+    expect(nomCacheExport('obj', null, 100)).toBe('export-obj-normales-v6-plein-100.zip');
+    expect(nomCacheExport('stl', null, 100)).toBe('export-stl-orientation-v5-plein-100.stl');
+    expect(nomCacheExport('3mf', null, 100)).toBe('export-3mf-orientation-v5-plein-100.3mf');
     expect(nomCacheExport('usdz', null, 100)).toBe('export-usdz-matieres-v3-plein-100.usdz');
     expect(nomCacheExport('glb', null, 100)).toBe('export-glb-plein-100.glb');
-    expect(nomCacheExport('glb', 500, 100)).toBe('export-glb-scene-v1-500-100.glb');
-    expect(nomCacheExport('usdz', 500, 100)).toBe('export-usdz-matieres-v3-scene-v1-500-100.usdz');
+    expect(nomCacheExport('glb', 500, 100)).toBe('export-glb-scene-v2-500-100.glb');
+    expect(nomCacheExport('usdz', 500, 100)).toBe('export-usdz-matieres-v3-scene-v2-500-100.usdz');
   });
   it('USDZ : zip non compressé, chaque fichier aligné sur 64 octets, USDA lisible', async () => {
     const octets = await exporter(await glbSphere(8), 'usdz', { nom: 'balle' });
@@ -595,3 +595,283 @@ describe('Nexora Mesh : exports', () => {
     expect(cartes[0].materiaux).toEqual([{ index: 1, nom: 'rouge' }, { index: 2, nom: 'bleu' }]);
   });
 });
+
+async function glbInstances(options: { required?: boolean; colorSize?: 3 | 4; texture?: boolean; badCount?: boolean; unknown?: boolean; normalizedRotation?: boolean; int8Rotation?: boolean; int8Half?: boolean; int8HalfLow?: boolean; int8Invalid?: boolean; doubleRotation?: boolean; zeroRotation?: boolean; nonfiniteRotation?: boolean; twoPrimitives?: boolean } = {}) {
+  const { EXTMeshGPUInstancing } = await import('@gltf-transform/extensions');
+  const doc = new Document(), buffer = doc.createBuffer();
+  const attr = (type: 'VEC2' | 'VEC3' | 'VEC4', data: number[]) => doc.createAccessor().setType(type).setArray(Float32Array.from(data)).setBuffer(buffer);
+  const position = attr('VEC3', [0, 0, 0, 1, 0, 0, 0, 1, 0]);
+  const normal = attr('VEC3', [0, 0, 1, 0, 0, 1, 0, 0, 1]);
+  const uv = attr('VEC2', [0, 0, 1, 0, 0, 1]);
+  const primitive = doc.createPrimitive().setAttribute('POSITION', position).setAttribute('NORMAL', normal).setAttribute('TEXCOORD_0', uv);
+  const material = doc.createMaterial().setBaseColorFactor([.2, .4, .6, 1]);
+  if (options.texture) material.setBaseColorTexture(doc.createTexture().setMimeType('image/png').setImage(Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'))));
+  primitive.setMaterial(material);
+  const ext = doc.createExtension(EXTMeshGPUInstancing).setRequired(options.required ?? true);
+  const batch = ext.createInstancedMesh()
+    .setAttribute('TRANSLATION', attr('VEC3', [0, 0, 0, 3, 0, 0]))
+    .setAttribute('ROTATION', options.normalizedRotation ? doc.createAccessor().setType('VEC4').setArray(new Int16Array([0, 0, 0, 32767, 0, 0, 23170, 23170])).setNormalized(true).setBuffer(buffer) : (options.int8Rotation || options.int8Half || options.int8HalfLow || options.int8Invalid) ? doc.createAccessor().setType('VEC4').setArray(new Int8Array(options.int8Half ? [64, 64, 64, 64, 0, 0, 90, 90] : options.int8HalfLow ? [63, 63, 63, 63, 0, 0, 90, 90] : options.int8Invalid ? [65, 65, 65, 65, 0, 0, 90, 90] : [0, 0, 0, 127, 0, 0, 90, 90])).setNormalized(true).setBuffer(buffer) : attr('VEC4', [0, 0, 0, options.zeroRotation ? 0 : options.doubleRotation ? 2 : options.nonfiniteRotation ? Number.NaN : 1, 0, 0, Math.SQRT1_2, Math.SQRT1_2]))
+    .setAttribute('SCALE', attr('VEC3', [1, 1, 1, -1, 2, 1]));
+  if (options.colorSize === 3) batch.setAttribute('_COLOR_0', attr('VEC3', options.badCount ? [1, .5, .25] : [1, .5, .25, .25, 1, .5]));
+  if (options.colorSize === 4) batch.setAttribute('_COLOR_0', attr('VEC4', [1, .5, .25, .2, .25, 1, .5, .75]));
+  if (options.unknown) batch.setAttribute('_ID', attr('VEC2', [0, 0, 1, 0]));
+  const mesh = doc.createMesh().addPrimitive(primitive);
+  if (options.twoPrimitives) mesh.addPrimitive(doc.createPrimitive().setAttribute('POSITION', position).setAttribute('NORMAL', normal).setAttribute('TEXCOORD_0', uv).setMaterial(material));
+  const child = doc.createNode().setTranslation([1, 2, 3]).setMesh(mesh).setExtension('EXT_mesh_gpu_instancing', batch);
+  doc.createScene().addChild(doc.createNode().setScale([2, 1, 1]).addChild(child));
+  return new NodeIO().registerExtensions([EXTMeshGPUInstancing]).writeBinary(doc);
+}
+
+function withUnknownRequired(glb: Uint8Array): Uint8Array {
+  const header = new DataView(glb.buffer, glb.byteOffset, glb.byteLength);
+  const originalSize = header.getUint32(12, true);
+  const json = JSON.parse(new TextDecoder().decode(glb.subarray(20, 20 + originalSize)));
+  json.extensionsUsed.push('EXT_unknown_fixture'); json.extensionsRequired.push('EXT_unknown_fixture');
+  const encoded = new TextEncoder().encode(JSON.stringify(json));
+  const padded = Math.ceil(encoded.length / 4) * 4;
+  const output = new Uint8Array(20 + padded + glb.length - 20 - originalSize);
+  output.set(glb.subarray(0, 20)); output.fill(32, 20, 20 + padded); output.set(encoded, 20);
+  output.set(glb.subarray(20 + originalSize), 20 + padded);
+  new DataView(output.buffer).setUint32(8, output.length, true);
+  new DataView(output.buffer).setUint32(12, padded, true);
+  return output;
+}
+
+describe('instancing glTF : lecture et exports statiques', () => {
+  it.each([false, true])('reproduit GLTFLoader pour les TRS et le reflet, extension requise=%s', async (required) => {
+    const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+    const { InstancedMesh, Matrix3, Matrix4, Vector3 } = await import('three');
+    const glb = await glbInstances({ required });
+    const gltf = await new Promise<any>((resolve, reject) => new GLTFLoader().parse(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), '', resolve, reject));
+    gltf.scene.updateMatrixWorld(true);
+    let instance: InstanceType<typeof InstancedMesh> | undefined;
+    gltf.scene.traverse((node: any) => { if (node.isInstancedMesh) instance = node; });
+    expect(instance?.count).toBe(2);
+    const m = await lireGlb(glb);
+    expect(m.indices).toHaveLength(6);
+    for (let i = 0; i < 2; i++) {
+      const local = new Matrix4(); instance!.getMatrixAt(i, local);
+      const world = instance!.matrixWorld.clone().multiply(local);
+      for (let v = 0; v < 3; v++) {
+        const point = new Vector3().fromBufferAttribute(instance!.geometry.getAttribute('position'), v).applyMatrix4(world);
+        [point.x, point.y, point.z].forEach((x, k) => expect(m.positions[9 * i + 3 * v + k]).toBeCloseTo(x, 5));
+        const normal = new Vector3(0, 0, 1).applyMatrix3(new Matrix3().getNormalMatrix(world)).normalize();
+        [normal.x, normal.y, normal.z].forEach((x, k) => expect(m.normalesObj![9 * i + 3 * v + k]).toBeCloseTo(x, 5));
+      }
+    }
+    expect(Array.from(m.indices)).toEqual([0, 1, 2, 3, 5, 4]);
+    for (let i = 0; i < 2; i++) {
+      const [a, b, c] = Array.from(m.indices.slice(3 * i, 3 * i + 3)).map((index) => new Vector3().fromArray(m.positions, 3 * index));
+      const face = b.sub(a).cross(c.sub(a)).normalize();
+      const normal = new Vector3().fromArray(m.normalesObj!, 9 * i);
+      expect(face.dot(normal)).toBeGreaterThan(.99999);
+    }
+    const obj = new TextDecoder().decode(unzipSync(await exporter(glb, 'obj'))['relief.obj']);
+    expect(obj.match(/^f /gm)).toHaveLength(2);
+    const stl = await exporter(glb, 'stl'); expect(new DataView(stl.buffer, stl.byteOffset).getUint32(80, true)).toBe(2);
+    const model = new TextDecoder().decode(unzipSync(await exporter(glb, '3mf'))['3D/3dmodel.model']);
+    expect(model.match(/<triangle /g)).toHaveLength(2);
+    expect(await exporter(glb, 'glb')).toEqual(glb);
+  });
+
+  it('décode les quaternions int16 normalisés comme GLTFLoader', async () => {
+    const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+    const { Matrix4, Vector3 } = await import('three');
+    const glb = await glbInstances({ normalizedRotation: true });
+    const gltf = await new Promise<any>((resolve, reject) => new GLTFLoader().parse(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), '', resolve, reject));
+    gltf.scene.updateMatrixWorld(true);
+    let instance: any; gltf.scene.traverse((node: any) => { if (node.isInstancedMesh) instance = node; });
+    const local = new Matrix4(); instance.getMatrixAt(1, local);
+    const expected = new Vector3(1, 0, 0).applyMatrix4(instance.matrixWorld.clone().multiply(local));
+    const positions = (await lireGlb(glb)).positions;
+    [expected.x, expected.y, expected.z].forEach((value, i) => expect(positions[12 + i]).toBeCloseTo(value, 5));
+  });
+
+  it.each([3, 4] as const)('restitue les couleurs VEC%s avec un seul fichier texture dans OBJ', async (colorSize) => {
+    const { MTLLoader } = await import('three/examples/jsm/loaders/MTLLoader.js');
+    const { LoadingManager, Texture } = await import('three');
+    const zip = unzipSync(await exporter(await glbInstances({ colorSize, texture: true }), 'obj'));
+    expect(Object.keys(zip).filter((name) => name.endsWith('.png'))).toHaveLength(1);
+    expect(zip['relief_0.png']).toEqual(Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')));
+    const mtl = new TextDecoder().decode(zip['relief.mtl']);
+    expect(mtl.match(/^map_Kd relief_0\.png$/gm)).toHaveLength(2);
+    class CpuTextureLoader { setCrossOrigin() { return this; } load() { return new Texture(); } }
+    const manager = new LoadingManager(); manager.addHandler(/\.png$/, new CpuTextureLoader() as any);
+    const materials = new MTLLoader(manager).parse(mtl, '');
+    const expected = [[.2, .2, .15], [.05, .4, .3]];
+    for (let i = 0; i < 2; i++) {
+      const material = materials.create(`matiere_${i}`) as Material & { color: { r: number; g: number; b: number }; map: unknown };
+      expect(material.map).toBeTruthy();
+      [material.color.r, material.color.g, material.color.b].forEach((value, j) => expect(value).toBeCloseTo(expected[i][j], 4));
+    }
+  });
+
+  it('développe chaque primitive et réutilise la texture entre parties et instances', async () => {
+    const glb = await glbInstances({ colorSize: 3, texture: true, twoPrimitives: true });
+    expect((await lireGlb(glb)).indices).toHaveLength(12);
+    const zip = unzipSync(await exporter(glb, 'obj'));
+    expect(Object.keys(zip).filter((name) => name.endsWith('.png'))).toHaveLength(1);
+    expect(new TextDecoder().decode(zip['relief.obj']).match(/^f /gm)).toHaveLength(4);
+    expect(new TextDecoder().decode(zip['relief.mtl']).match(/^map_Kd relief_0\.png$/gm)).toHaveLength(4);
+  });
+
+  it('refuse les attributs incohérents sans altérer le GLB brut', async () => {
+    const glb = await glbInstances({ colorSize: 3, badCount: true });
+    await expect(lireGlb(glb)).rejects.toMatchObject({ code: 'MESH_INSTANCE_INVALID', statusCode: 422 });
+    expect(await exporter(glb, 'glb')).toEqual(glb);
+  });
+
+  it('refuse les quaternions d’instance nuls ou non finis par la route réelle', async () => {
+    const { creerPriseRelief, enregistrerRoutesRelief } = await import('./reliefRoutes.js');
+    const base = process.env.DIRECTOR_CI_CACHE; if (!base) throw new Error('DIRECTOR_CI_CACHE requis');
+    const dir = mkdtempSync(join(base, 'instancing-rotation-'));
+    const paths = [join(dir, 'zero.glb'), join(dir, 'nan.glb'), join(dir, 'double.glb'), join(dir, 'int8-invalid.glb')];
+    writeFileSync(paths[0], await glbInstances({ zeroRotation: true }));
+    writeFileSync(paths[1], await glbInstances({ nonfiniteRotation: true }));
+    writeFileSync(paths[2], await glbInstances({ doubleRotation: true }));
+    writeFileSync(paths[3], await glbInstances({ int8Invalid: true }));
+    const app = Fastify();
+    enregistrerRoutesRelief(app, { priseRelief: creerPriseRelief((id) => ({ output_path: paths[id - 1], status: 'done', settings: '{}' })), unSeulCalcul: (_key, work) => work() });
+    for (const id of [1, 2, 3, 4]) {
+      const response = await app.inject({ method: 'GET', url: `/api/nexora/relief/${id}/rapport` });
+      expect(response.statusCode).toBe(422);
+      expect(response.json().code).toBe('MESH_INSTANCE_INVALID');
+    }
+    await app.close();
+    expect((await lireGlb(await glbInstances({ int8Rotation: true }))).indices).toHaveLength(6);
+    const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+    const { Matrix4, Vector3 } = await import('three');
+    expect((await lireGlb(await glbInstances({ int8HalfLow: true }))).indices).toHaveLength(6);
+    const half = await glbInstances({ int8Half: true });
+    const halfMesh = await lireGlb(half);
+    let threeInstance: any;
+    const parsed = await new GLTFLoader().parseAsync(half.buffer.slice(half.byteOffset, half.byteOffset + half.byteLength) as ArrayBuffer, '');
+    parsed.scene.updateMatrixWorld(true); parsed.scene.traverse((n: any) => { if (n.isInstancedMesh) threeInstance = n; });
+    const localHalf = new Matrix4(); threeInstance.getMatrixAt(0, localHalf);
+    const firstHalf = new Vector3().fromBufferAttribute(threeInstance.geometry.getAttribute('position'), 1).applyMatrix4(threeInstance.matrixWorld.clone().multiply(localHalf));
+    expect(halfMesh.positions[3]).toBeCloseTo(firstHalf.x, 5);
+    expect(halfMesh.positions[4]).toBeCloseTo(firstHalf.y, 5);
+    expect(halfMesh.positions[5]).toBeCloseTo(firstHalf.z, 5);
+    expect((await lireGlb(await glbInstances({ normalizedRotation: true }))).indices).toHaveLength(6);
+  });
+
+  it('distingue une extension requise non prise en charge d’une instance invalide', async () => {
+    const output = withUnknownRequired(await glbInstances());
+    await expect(lireGlb(output)).rejects.toMatchObject({ code: 'MESH_EXTENSION_UNSUPPORTED', statusCode: 422 });
+    expect(await exporter(output, 'glb')).toEqual(output);
+  });
+
+  it('garde le GLB brut et refuse un attribut d’instance sans traduction connue en OBJ', async () => {
+    const glb = await glbInstances({ unknown: true });
+    expect((await lireGlb(glb)).indices).toHaveLength(6);
+    await expect(exporter(glb, 'obj')).rejects.toMatchObject({ code: 'OBJ_UNSUPPORTED' });
+    expect(await exporter(glb, 'glb')).toEqual(glb);
+  });
+
+  it('vérifie les trois budgets cumulés avant expansion et refuse les débordements', async () => {
+    const { checkExpansion, addInstances, INSTANCE_LIMITS } = await import('./meshInstances.js');
+    for (const limit of Object.values(INSTANCE_LIMITS)) {
+      expect(addInstances(0, 1, limit, limit)).toBe(limit);
+      expect(() => addInstances(0, 1, limit + 1, limit)).toThrow(/trop grande/);
+      expect(() => addInstances(0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, limit)).toThrow(/trop grande/);
+    }
+    const fake = (count: number, vertices: number, triangles: number, primitives = 1) => {
+      const batch = { listAttributes: () => [{ getCount: () => count }], getAttribute: () => null };
+      const primitive = { getMode: () => 4, getAttribute: () => ({ getCount: () => vertices }), getIndices: () => ({ getCount: () => triangles * 3 }) };
+      return { getExtension: () => batch, getMesh: () => ({ listPrimitives: () => Array.from({ length: primitives }, () => primitive) }) } as unknown as Parameters<typeof checkExpansion>[0][number];
+    };
+    for (const [count, vertices, triangles] of [[1, 3, 2_000_000], [1, 750_000, 1], [250_000, 0, 0]]) expect(() => checkExpansion([fake(count, vertices, triangles)])).not.toThrow();
+    for (const [count, vertices, triangles] of [[1, 3, 2_000_001], [1, 750_001, 1], [250_001, 0, 0]]) expect(() => checkExpansion([fake(count, vertices, triangles)])).toThrow(/trop grande/);
+    expect(() => checkExpansion([fake(125_000, 0, 0, 2)])).not.toThrow();
+    expect(() => checkExpansion([fake(125_001, 0, 0, 2)])).toThrow(/trop grande/);
+  });
+});
+
+it('limite instancing explicite en HTTP sans plafonner les nœuds ordinaires', async () => {
+  const { InstanceExpansionLimit, checkExpansion } = await import('./meshInstances.js');
+  const app = Fastify();
+  app.get('/limit', () => { throw new InstanceExpansionLimit('Expansion des instances trop grande pour cet export.'); });
+  const response = await app.inject({ method: 'GET', url: '/limit' });
+  expect(response.statusCode).toBe(422);
+  expect(response.json().code).toBe('MESH_INSTANCE_LIMIT');
+  expect(() => checkExpansion([{ getExtension: () => null } as unknown as Parameters<typeof checkExpansion>[0][number]])).not.toThrow();
+  await app.close();
+});
+
+it('garde l’extension dans un GLB décimé', async () => {
+  const { EXTMeshGPUInstancing } = await import('@gltf-transform/extensions');
+  const glb = await exporter(await glbInstances({ colorSize: 3 }), 'glb', { cible: 1 });
+  const doc = await new NodeIO().registerExtensions([EXTMeshGPUInstancing]).readBinary(glb);
+  const batch = doc.getRoot().listNodes().map((node) => node.getExtension('EXT_mesh_gpu_instancing')).find(Boolean);
+  expect(batch).toBeTruthy();
+  const colors = (batch as import('@gltf-transform/extensions').InstancedMesh).getAttribute('_COLOR_0')!;
+  expect(colors.getCount()).toBe(2);
+  expect(colors.getElement(1, [])).toEqual([.25, 1, .5]);
+  expect((await lireGlb(glb)).indices).toHaveLength(6);
+});
+
+it('routes réelles : conserve le GLB brut, les refus et les anciens caches au-delà de la limite', async () => {
+  const { creerPriseRelief, enregistrerRoutesRelief } = await import('./reliefRoutes.js');
+  // Construit un accessor compact en temps constant, sans sérialiser 750 003 zéros un par un.
+  const source = await glbInstances(), view = new DataView(source.buffer, source.byteOffset, source.byteLength);
+  const jsonSize = view.getUint32(12, true), oldBinOffset = 20 + jsonSize;
+  const oldBinSize = view.getUint32(oldBinOffset, true), oldBin = source.subarray(oldBinOffset + 8, oldBinOffset + 8 + oldBinSize);
+  const json = JSON.parse(new TextDecoder().decode(source.subarray(20, 20 + jsonSize)));
+  const extraSize = 250_001 * 3 * 4;
+  const bufferView = json.bufferViews.length;
+  json.bufferViews.push({ buffer: 0, byteOffset: oldBin.length, byteLength: extraSize });
+  const accessor = json.accessors.length;
+  json.accessors.push({ bufferView, componentType: 5126, count: 250_001, type: 'VEC3' });
+  const node = json.nodes.find((n: any) => n.extensions?.EXT_mesh_gpu_instancing);
+  node.extensions.EXT_mesh_gpu_instancing.attributes = { TRANSLATION: accessor };
+  json.buffers[0].byteLength = oldBin.length + extraSize;
+  const encoded = new TextEncoder().encode(JSON.stringify(json)), padded = Math.ceil(encoded.length / 4) * 4;
+  const glb = new Uint8Array(20 + padded + 8 + oldBin.length + extraSize);
+  const out = new DataView(glb.buffer); glb.set(source.subarray(0, 12));
+  out.setUint32(8, glb.length, true); out.setUint32(12, padded, true); out.setUint32(16, 0x4e4f534a, true);
+  glb.fill(32, 20, 20 + padded); glb.set(encoded, 20);
+  out.setUint32(20 + padded, oldBin.length + extraSize, true); out.setUint32(24 + padded, 0x004e4942, true);
+  glb.set(oldBin, 28 + padded);
+  const base = process.env.DIRECTOR_CI_CACHE; if (!base) throw new Error('DIRECTOR_CI_CACHE requis');
+  const dir = mkdtempSync(join(base, 'instancing-http-')), path = join(dir, 'model.glb');
+  writeFileSync(path, glb); const oldDir = `${path}.relief`;
+  const unsupported = join(dir, 'unsupported.glb'); writeFileSync(unsupported, withUnknownRequired(await glbInstances()));
+  const cases: Record<number, { output_path: string; status: string; settings: string }> = {
+    42: { output_path: path, status: 'done', settings: '{}' },
+    43: { output_path: path, status: 'rendering', settings: '{}' },
+    44: { output_path: join(dir, 'absent.glb'), status: 'done', settings: '{}' },
+    45: { output_path: unsupported, status: 'done', settings: '{}' },
+  };
+  const app = Fastify();
+  enregistrerRoutesRelief(app, { priseRelief: creerPriseRelief((id) => cases[id]), unSeulCalcul: (_key, work) => work() });
+  for (const url of ['/api/nexora/relief/42/export?format=glb', '/api/nexora/relief/42/export?format=glb&faces=0']) {
+    const response = await app.inject({ method: 'GET', url });
+    expect(response.statusCode).toBe(200); expect(response.headers['content-type']).toBe('model/gltf-binary');
+    expect(response.headers['content-disposition']).toBe('attachment; filename="relief-42.glb"');
+    expect(response.rawPayload).toEqual(Buffer.from(glb));
+    expect(existsSync(oldDir)).toBe(false);
+  }
+  mkdirSync(oldDir);
+  const oldReport = join(oldDir, 'rapport-monde64-v2-plein.json');
+  const oldObj = join(oldDir, 'export-obj-normales-v5-plein-100.zip');
+  writeFileSync(oldReport, 'ancien rapport'); writeFileSync(oldObj, 'ancien OBJ');
+  for (const url of ['/api/nexora/relief/42/rapport', '/api/nexora/relief/42/export?format=obj', '/api/nexora/relief/42/export?format=glb&faces=500']) {
+    const response = await app.inject({ method: 'GET', url });
+    expect(response.statusCode).toBe(422); expect(response.json().code).toBe('MESH_INSTANCE_LIMIT');
+  }
+  for (const url of ['/api/nexora/relief/42/rapport?faces=garbage', '/api/nexora/relief/42/export?format=glb&faces=-1', '/api/nexora/relief/42/export?format=glb&faces=garbage']) {
+    const response = await app.inject({ method: 'GET', url });
+    expect(response.statusCode).toBe(400); expect(response.json().code).toBe('MESH_INVALID_FACES');
+  }
+  expect(readFileSync(oldReport, 'utf8')).toBe('ancien rapport');
+  expect(readFileSync(oldObj, 'utf8')).toBe('ancien OBJ');
+  expect((await app.inject({ method: 'GET', url: '/api/nexora/relief/43/export?format=glb' })).statusCode).toBe(404);
+  expect((await app.inject({ method: 'GET', url: '/api/nexora/relief/43/export?format=glb&faces=garbage' })).statusCode).toBe(404);
+  expect((await app.inject({ method: 'GET', url: '/api/nexora/relief/44/export?format=glb' })).statusCode).toBe(410);
+  expect((await app.inject({ method: 'GET', url: '/api/nexora/relief/42/export?format=nope' })).statusCode).toBe(400);
+  const unsupportedResponse = await app.inject({ method: 'GET', url: '/api/nexora/relief/45/rapport' });
+  expect(unsupportedResponse.statusCode).toBe(422); expect(unsupportedResponse.json().code).toBe('MESH_EXTENSION_UNSUPPORTED');
+  const originalUnsupported = await app.inject({ method: 'GET', url: '/api/nexora/relief/45/export?format=glb' });
+  expect(originalUnsupported.statusCode).toBe(200); expect(originalUnsupported.rawPayload).toEqual(readFileSync(unsupported));
+  await app.close();
+}, 30_000);

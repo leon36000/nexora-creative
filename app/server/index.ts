@@ -94,8 +94,8 @@ import { ajusterProposition, depassement, devisProduction, nouvelleSession, plan
 import { jugeDisponible } from './nexora/juge.js';
 import { MESURES_OBJET_PC5, recetteMultivue } from './nexora/objet3d.js';
 import { PRODUIT_3D } from '../src/produit3d.js';
-import { analyser, cartesPbr, cibleTriangles, compatibiliteObj, decimerGlb, EXTENSION_RELIEF, exporter, nomCacheExport, nomCacheRapport, ObjIncompatible, repondreObjIncompatible, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief, type Maillage } from './nexora/relief.js';
-import { UsdzIncompatible } from './nexora/usdz.js';
+import { cartesPbr, FORMATS_RELIEF } from './nexora/relief.js';
+import { creerPriseRelief, enregistrerRoutesRelief } from './nexora/reliefRoutes.js';
 import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, meilleurePriseNotee, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
 import {
   CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles, storeRef,
@@ -1992,14 +1992,7 @@ app.get('/api/nexora/objet/:take', async (req, reply) => {
 
 // ---------- Nexora Mesh (ex-Relief) : rapport, exports, cartes PBR, GIF de la tournette, juge ----------
 
-type PriseRelief = { id: number; glb: string; t: NonNullable<ReturnType<typeof takes.get>> };
-function priseRelief(req: FastifyRequest, reply: FastifyReply): PriseRelief | null {
-  const id = Number((req.params as any).take);
-  const t = takes.get(id);
-  if (!t?.output_path || !/\.glb$/i.test(t.output_path) || t.status !== 'done') { void reply.code(404).send({ error: `${PRODUIT_3D} : modèle introuvable ou pas encore prêt.` }); return null; }
-  if (!existsSync(t.output_path)) { void reply.code(410).send({ error: 'Le fichier du modèle n’est plus sur le disque.' }); return null; }
-  return { id, glb: t.output_path, t };
-}
+const priseRelief = creerPriseRelief((id) => takes.get(id));
 const execFichier = (bin: string, args: string[]) => new Promise<string>((ok, ko) => execFile(bin, args, { maxBuffer: 1 << 24 }, (e, o, err) => (e ? ko(new Error(String(err).slice(-300))) : ok(String(o)))));
 const enCalculRelief = new Map<string, Promise<unknown>>();
 /** Un calcul à la fois par fichier de sortie : deux demandes identiques partagent le même travail. */
@@ -2011,60 +2004,7 @@ function unSeulCalcul<T>(cle: string, travail: () => Promise<T>): Promise<T> {
   return p;
 }
 
-app.get('/api/nexora/relief/:take/rapport', async (req, reply) => {
-  const p = priseRelief(req, reply); if (!p) return;
-  const q = req.query as any;
-  const dir = `${p.glb}.relief`;
-  mkdirSync(dir, { recursive: true });
-  const octets = readFileSync(p.glb);
-  let maillagePlein: Maillage | null = null;
-  const chargerPlein = async () => maillagePlein ??= await lireGlb(octets);
-  const lire = async (cible: number | null) => {
-    const fichier = join(dir, nomCacheRapport(cible));
-    if (existsSync(fichier)) return JSON.parse(readFileSync(fichier, 'utf8'));
-    const r = await unSeulCalcul(fichier, async () => analyser(cible ? await lireGlb(await decimerGlb(octets, cible)) : await chargerPlein()));
-    writeFileSync(fichier, JSON.stringify(r));
-    return r;
-  };
-  const plein = await lire(null);
-  const cible = cibleTriangles(q.faces, plein.triangles);
-  const s = JSON.parse(p.t.settings ?? '{}');
-  return {
-    rapport: plein, decime: cible ? await lire(cible) : null, cible,
-    formats: FORMATS_RELIEF, extensions: EXTENSION_RELIEF, tailleMm: TAILLE_MM_DEFAUT,
-    compatibiliteObj: compatibiliteObj(octets, await chargerPlein()),
-    // Les exports sont calculés par le serveur (CPU, quelques secondes) : aucun crédit GPU.
-    credits: 0, juge: s.relief?.juge ?? null,
-  };
-});
-
-app.get('/api/nexora/relief/:take/export', async (req, reply) => {
-  const p = priseRelief(req, reply); if (!p) return;
-  const q = req.query as any;
-  const format = String(q.format ?? 'glb').toLowerCase() as FormatRelief;
-  if (!FORMATS_RELIEF.includes(format)) return reply.code(400).send({ error: `Format inconnu : ${FORMATS_RELIEF.join(', ')}.` });
-  const taille = Math.max(1, Math.min(2000, Number(q.taille) || TAILLE_MM_DEFAUT));
-  const dir = `${p.glb}.relief`;
-  mkdirSync(dir, { recursive: true });
-  const octets = readFileSync(p.glb);
-  const maillage = await lireGlb(octets);
-  const compatibilite = format === 'obj' ? compatibiliteObj(octets, maillage) : null;
-  if (compatibilite && !compatibilite.compatible) return repondreObjIncompatible(reply);
-  const cible = cibleTriangles(q.faces, analyser(maillage).triangles);
-  const fichier = join(dir, nomCacheExport(format, cible, taille));
-  if (!existsSync(fichier)) {
-    try {
-      const sortie = await unSeulCalcul(fichier, () => exporter(octets, format, { nom: `relief-${p.id}`, tailleMm: taille, cible }));
-      writeFileSync(fichier, sortie);
-    } catch (error) {
-      if (error instanceof ObjIncompatible) return repondreObjIncompatible(reply);
-      if (error instanceof UsdzIncompatible) return reply.code(400).send({ code: error.code, error: 'Export USDZ incompatible avec ce modèle. Utilisez le GLB. / USDZ export does not support this model. Use GLB.' });
-      throw error;
-    }
-  }
-  reply.headers({ 'Content-Type': TYPE_MIME_RELIEF[format === 'obj' ? 'zip' : format], 'Content-Length': statSync(fichier).size, 'Content-Disposition': `attachment; filename="relief-${p.id}${cible ? `-${cible}` : ''}.${EXTENSION_RELIEF[format]}"` });
-  return reply.send(createReadStream(fichier));
-});
+enregistrerRoutesRelief(app, { priseRelief, unSeulCalcul });
 
 app.get('/api/nexora/relief/:take/cartes', async (req, reply) => {
   const p = priseRelief(req, reply); if (!p) return;
