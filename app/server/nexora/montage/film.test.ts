@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { ClientLlm } from '../llm.js';
 import { compilerListe, listeVersPlan, planVersListe, validerListe, aimanter, reparerListe } from './liste.js';
 import { BRIEFS_FILMS } from '../bench/briefsFilms.js';
-import { MemoireFilm, briefDeMontage, clipsDuTournage, escalader, exclusionPour, validerTournage, type Tournage } from './film.js';
+import { MemoireFilm, briefDeMontage, clipsDuTournage, escalader, exclusionPour, monterListe, validerTournage, type Tournage } from './film.js';
 import { ErreurPlafondLlm } from '../usage.js';
 import { mesurer } from './metriques.js';
 
@@ -196,5 +196,60 @@ describe('escalade', () => {
     expect(r.final.montage.source).toBe('llm');
     expect(r.final.montage.premierCoup).toBe(false);
     expect(r.runs).toHaveLength(1);
+  });
+});
+
+describe('meilleur-de-n et plafond', () => {
+  it('conserve un candidat validé si un autre atteint le plafond et arrête les paliers suivants', async () => {
+    const plafond = new ErreurPlafondLlm('plafond');
+    let appels = 0;
+    const llm: ClientLlm = { async completer() {
+      if (appels++ === 0) return JSON.stringify(bonneListe());
+      throw plafond;
+    } };
+    const clients = { eco: llm, equilibre: llm, expert: llm };
+
+    const r = await escalader(clients, 'eco', B, {
+      sansTournage: bm(), candidats: 2, reparations: 0, seuil: 2,
+    });
+
+    expect(appels).toBe(2);
+    expect(r.runs).toHaveLength(1);
+    expect(r.final.montage.source).toBe('llm');
+    expect(r.final.montage.plafondAtteint).toBe(true);
+  });
+});
+
+describe('monterListe et plafond', () => {
+  it('garde le candidat validé quand le premier jette le plafond et que le second réussit', async () => {
+    const plafond = new ErreurPlafondLlm('plafond');
+    let appels = 0;
+    const llm: ClientLlm = { async completer() {
+      if (appels++ === 0) throw plafond;
+      return JSON.stringify(bonneListe());
+    } };
+
+    const r = await monterListe(llm, bm(), {
+      candidats: 2, reparations: 0,
+    });
+
+    expect(appels).toBe(2);
+    expect(r.source).toBe('llm');
+    expect(r.plafondAtteint).toBe(true);
+  });
+  it('rejette avec la première instance du plafond quand tous les candidats échouent, sans repli', async () => {
+    const p1 = new ErreurPlafondLlm('plafond 1');
+    const p2 = new ErreurPlafondLlm('plafond 2');
+    let appels = 0;
+    const llm: ClientLlm = { async completer() {
+      throw (appels++ === 0 ? p1 : p2);
+    } };
+
+    const promesse = monterListe(llm, bm(), {
+      candidats: 2, reparations: 0,
+    });
+
+    await expect(promesse).rejects.toBe(p1);
+    expect(appels).toBe(2);
   });
 });

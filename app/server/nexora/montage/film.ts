@@ -207,7 +207,7 @@ function blocMontage(s: { segment: Segment | null; recette: Recette | null }): s
   return p.length ? `${p.join('\n\n')}\n\n` : '';
 }
 
-export interface ResultatMontage { plan: EditPlan; liste: ListeMontage | null; source: 'llm' | 'repli'; premierCoup: boolean; appels: number; brutes: string[]; notes: string[]; erreurs: Violation[]; journal?: string[]; reparePar?: 'code' }
+export interface ResultatMontage { plan: EditPlan; liste: ListeMontage | null; source: 'llm' | 'repli'; premierCoup: boolean; appels: number; brutes: string[]; notes: string[]; erreurs: Violation[]; journal?: string[]; reparePar?: 'code'; plafondAtteint?: boolean }
 
 export interface OptionsMontage {
   savoir?: { segment: Segment | null; recette: Recette | null }; reparations?: number;
@@ -237,10 +237,24 @@ export async function monterListe(llm: ClientLlm | null, bm: Brief, o: OptionsMo
   if (!llm) return repli(['aucun LLM']);
   if ((o.candidats ?? 1) > 1) {
     const n = o.candidats!;
-    const rs = await Promise.all(Array.from({ length: n }, () => monterListe(llm, bm, { ...o, candidats: 1, temperature: o.temperature ?? 0.8 })));
+    const resultats = await Promise.allSettled(Array.from({ length: n }, () => monterListe(llm, bm, { ...o, candidats: 1, temperature: o.temperature ?? 0.8 })));
+    const rs: ResultatMontage[] = [];
+    const plafonds: ErreurPlafondLlm[] = [];
+    for (const resultat of resultats) {
+      if (resultat.status === 'fulfilled') rs.push(resultat.value);
+      else if (resultat.reason instanceof ErreurPlafondLlm) plafonds.push(resultat.reason);
+      else throw resultat.reason;
+    }
+    if (!rs.length && plafonds.length) throw plafonds[0];
     const note = (r: ResultatMontage) => (r.source === 'llm' ? 1 + mesurer(r.plan, bm).composite - (r.reparePar ? 0.5 : 0) : 0);
     const best = rs.reduce((a, r) => (note(r) > note(a) ? r : a), rs[0]);
-    return { ...best, appels: rs.reduce((s, r) => s + r.appels, 0), premierCoup: rs.some((r) => r.premierCoup), notes: [...best.notes, `meilleur de ${n} (${rs.filter((r) => r.source === 'llm').length} valides)`] };
+    return {
+      ...best,
+      appels: rs.reduce((s, r) => s + r.appels, 0),
+      premierCoup: rs.some((r) => r.premierCoup),
+      notes: [...best.notes, `meilleur de ${n} (${rs.filter((r) => r.source === 'llm').length} valides)`, ...(plafonds.length ? [`plafond atteint; ${plafonds.length} candidat(s) interrompu(s)`] : [])],
+      ...(plafonds.length ? { plafondAtteint: true } : {}),
+    };
   }
   const sys = o.brief ? o.module?.systeme?.('montage', o.brief) : '';
   const prefixe = `${blocMontage(o.savoir ?? { segment: null, recette: null })}${o.brief ? (o.module?.avant?.('montage', o.brief, bm) ?? '') : ''}`;
@@ -419,6 +433,7 @@ export async function escalader(
       throw e;
     }
     runs.push(r);
+    if (r.montage.plafondAtteint) break;
     if (r.montage.source === 'llm' && r.tournageValide && r.score >= (o.seuil ?? 0.85)) break;
   }
   const final = runs.reduce((best, r) => (r.score > best.score ? r : best), runs[0]);
