@@ -1,14 +1,17 @@
 /** État des moteurs GPU dans la barre du haut : points verts (en ligne), orange qui pulse (au travail). */
 import { useEffect, useState } from 'react';
 import { api, type MoteurGpu } from '../api';
+import type { LangueClient } from '../../shared/creationLanguage.js';
+import { libellesNavigation } from '../interfaceLanguage.js';
 
 const NOMS: Record<string, { court: string; role: string }> = {
-  principal: { court: 'GB10', role: 'Image · Musique' },
-  rtx5090: { court: 'RTX 5090', role: 'MiniMax H3' },
+  principal: { court: 'GB10', role: 'principal' },
+  rtx5090: { court: 'RTX 5090', role: 'rtx5090' },
 };
 
-export function Moteurs() {
+export function Moteurs({ langue = 'fr' }: { langue?: LangueClient } = {}) {
   const [moteurs, setMoteurs] = useState<MoteurGpu[]>([]);
+  const copy = libellesNavigation(langue);
   useEffect(() => {
     let actif = true;
     const lire = () => api.nexoraMoteursGpu().then((m) => actif && setMoteurs(m)).catch(() => actif && setMoteurs([]));
@@ -20,11 +23,12 @@ export function Moteurs() {
     <>
       {moteurs.map((m) => {
         const n = NOMS[m.id] ?? { court: m.nom, role: '' };
+        const role = n.role ? copy.gpu.roles[n.role] ?? n.role : '';
         return (
-          <span key={m.id} className="st-gpu" title={`${m.nom} : ${m.enLigne ? 'en ligne' : 'hors ligne'}${m.enCours ? `, ${m.enCours} tâche(s)` : ''} · ${m.recettes.join(', ')}`}>
+          <span key={m.id} className="st-gpu" title={`${m.nom}: ${m.enLigne ? copy.gpu.online : copy.gpu.offline}${m.enCours ? `, ${copy.gpu.tasks(m.enCours)}` : ''} · ${m.recettes.join(', ')}`}>
             <i className={`st-dot ${m.enLigne ? (m.enCours ? 'busy' : 'on') : ''}`} />
             <b>{n.court}</b>
-            <span className="long">{n.role}</span>
+            <span className="long">{role}</span>
           </span>
         );
       })}

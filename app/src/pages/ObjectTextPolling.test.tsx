@@ -3,7 +3,8 @@
  * Repro : la boucle de suivi Texte → 3D d'ObjectPage doit s'arrêter sur un état
  * terminal (fini / echec), même si le changement de langue relance l'effet.
  */
-import { act } from 'react';
+import { act, useState } from 'react';
+import type { LangueClient } from '../../shared/creationLanguage';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -71,6 +72,11 @@ afterEach(async () => {
   vi.useRealTimers();
 });
 
+function ObjectHarness() {
+  const [langue, setLangue] = useState<LangueClient>('fr');
+  return <ObjectPage langue={langue} onLangueChange={setLangue} />;
+}
+
 function button(text: string) {
   return [...container.querySelectorAll('button')].find((b) => b.textContent?.includes(text));
 }
@@ -83,7 +89,7 @@ async function click(target: Element | undefined | null) {
 /** Monte la page, passe en Texte → 3D, saisit l'intention, lance la création et attend le premier sondage. */
 async function lancerTexte() {
   root = createRoot(container);
-  await act(async () => { root!.render(<ObjectPage />); });
+  await act(async () => { root!.render(<ObjectHarness />); });
   await act(async () => { await Promise.resolve(); });
   await click(button('Texte → 3D'));
   // Ignore le devis éventuellement relancé par le changement de mode.
