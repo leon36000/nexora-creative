@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ESSAI — comparaison TRELLIS A/B/C/D</title>
+<style>
+body{margin:0;background:#e9ecef;color:#17202a;font:15px system-ui,sans-serif}header{padding:12px 18px;background:#fff}main{padding:12px 18px}.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}.bar img{width:96px;height:96px;object-fit:contain;background:white}.bar button{padding:8px 12px}#status{font-weight:600}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{background:white;padding:8px;border-radius:6px}.card strong{display:block;margin-bottom:5px}.view{width:100%;height:220px}canvas{display:block;width:100%;height:100%}#dimensions{font-size:13px}@media(max-width:650px){.grid{grid-template-columns:1fr}.view{height:280px}}
+</style><script type="importmap">{"imports":{"three":"./assets/three.module.js"}}</script></head>
+<body><header id="headline"><strong>ESSAI TRELLIS — comparaison appariée</strong> · cadrage commun basé sur A · aucune note de qualité</header>
+<main><div class="bar"><img src="./input.png" alt="Image de référence"><span id="case-label">Entrée…</span><button data-view="front">Avant</button><button data-view="perspective">Perspective</button><button data-view="back">Arrière</button><button data-view="side">Côté</button><button data-view="top">Dessus</button><span id="status">Chargement 0/4</span></div>
+<div class="bar"><button id="measure" disabled>Démarrer les mesures</button><button id="download" disabled>Exporter JSON</button><span id="metric-status">Mesures non exécutées</span></div><pre id="metrics" style="white-space:pre-wrap;font-size:12px"></pre><div id="dimensions">Dimensions des vues en attente</div><div class="grid">
+<section class="card"><strong>ESSAI A / UDF</strong><div class="view" id="view-A"></div></section>
+<section class="card"><strong id="branch-b">ESSAI B / pôles</strong><div class="view" id="view-B"></div></section>
+<section class="card"><strong>ESSAI C / SDF</strong><div class="view" id="view-C"></div></section>
+<section class="card"><strong>ESSAI D / solid</strong><div class="view" id="view-D"></div></section>
+</div></main><script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from './assets/loaders/GLTFLoader.js';
+import {comparePixels} from './metrics.mjs';
+import {cameras} from './views.mjs';
+const labels=['A','B','C','D'], status=document.querySelector('#status'), dimensions=document.querySelector('#dimensions');
+const lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'fr';
+const text=lang==='en'?{front:'Front',perspective:'Perspective',back:'Back',side:'Side',top:'Top',measure:'Start measurements',download:'Export JSON',pending:'Measurements not run',loading:'Loading',ready:'Loaded 4/4 · synchronized views · SHA verified',caseLabel:'Input',computing:'Measuring…',done:'Measurements complete · reference A',dimensions:'Canvas dimensions',undefined:'undefined',error:'Error'}:{front:'Avant',perspective:'Perspective',back:'Arrière',side:'Côté',top:'Dessus',measure:'Démarrer les mesures',download:'Exporter JSON',pending:'Mesures non exécutées',loading:'Chargement',ready:'Chargé 4/4 · vues synchronisées · SHA vérifiés',caseLabel:'Entrée',computing:'Calcul en cours…',done:'Mesures terminées · référence A',dimensions:'Dimensions des canvases',undefined:'indéfini',error:'Erreur'};
+document.documentElement.lang=lang;if(lang==='en'){document.getElementById('headline').textContent='TRELLIS TRIAL — paired comparison · shared framing based on A · no quality score';document.getElementById('branch-b').textContent='TRIAL B / poles'}for(const b of document.querySelectorAll('[data-view]'))b.textContent=text[b.dataset.view];document.getElementById('measure').textContent=text.measure;document.getElementById('download').textContent=text.download;document.getElementById('metric-status').textContent=text.pending;
+let current='perspective', center, extent, completed=0, ready=false, manifest, provenance, provenanceSha256, metricsResult;
+const metricStatus=document.getElementById('metric-status'), metricText=document.getElementById('metrics'), measure=document.getElementById('measure'), download=document.getElementById('download');
+const views=labels.map(label=>{
+ const host=document.getElementById('view-'+label), scene=new THREE.Scene();scene.background=new THREE.Color(0xf4f5f6);
+ scene.add(new THREE.HemisphereLight(0xffffff,0x84898f,2));const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(3,5,4);scene.add(key);
+ const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(1);renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
+ return {label,host,scene,renderer,camera:new THREE.PerspectiveCamera(36,1,.001,1000)};
+});
+function render(){
+ if(!ready)return;
+ for(const v of views){const w=Math.max(1,v.host.clientWidth),h=Math.max(1,v.host.clientHeight);v.renderer.setSize(w,h,false);v.camera.aspect=w/h;v.camera.near=extent/1000;v.camera.far=extent*100;v.camera.position.copy(center).add(new THREE.Vector3(...cameras[current]).normalize().multiplyScalar(extent*2.8));v.camera.lookAt(center);v.camera.updateProjectionMatrix();v.renderer.render(v.scene,v.camera)}
+ dimensions.textContent=text.dimensions+' : '+views.map(v=>`${v.label} ${v.renderer.domElement.width} × ${v.renderer.domElement.height} px`).join(' · ');
+ window.meshPairedViewer={ready:true,loaded:completed,view:current,dimensions:views.map(v=>({label:v.label,width:v.renderer.domElement.width,height:v.renderer.domElement.height}))};
+}
+for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{current=button.dataset.view;render()});
+window.addEventListener('resize',render);
+
+const SIZE=512;
+function capture(view, direction){
+ const {renderer,scene,camera}=view, target=new THREE.WebGLRenderTarget(SIZE,SIZE,{depthBuffer:true,stencilBuffer:false});
+ target.texture.colorSpace=THREE.SRGBColorSpace;
+ const rgb=new Uint8Array(SIZE*SIZE*4),mask=new Uint8Array(SIZE*SIZE*4), priorTarget=renderer.getRenderTarget(),priorBackground=scene.background,priorOverride=scene.overrideMaterial;
+ const white=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.FrontSide});
+ try{
+  camera.aspect=1;camera.near=extent/1000;camera.far=extent*100;camera.position.copy(center).add(new THREE.Vector3(...cameras[direction]).normalize().multiplyScalar(extent*2.8));camera.lookAt(center);camera.updateProjectionMatrix();camera.updateMatrixWorld();
+  const cameraInfo={matrixWorld:camera.matrixWorld.toArray(),matrixWorldInverse:camera.matrixWorldInverse.toArray(),projectionMatrix:camera.projectionMatrix.toArray(),near:camera.near,far:camera.far,fov:camera.fov,aspect:camera.aspect};
+  renderer.setRenderTarget(target);renderer.render(scene,camera);renderer.readRenderTargetPixels(target,0,0,SIZE,SIZE,rgb);
+  scene.background=new THREE.Color(0x000000);scene.overrideMaterial=white;renderer.render(scene,camera);renderer.readRenderTargetPixels(target,0,0,SIZE,SIZE,mask);
+  return {rgb,mask,cameraInfo};
+ }finally{scene.overrideMaterial=priorOverride;scene.background=priorBackground;renderer.setRenderTarget(priorTarget);target.dispose();white.dispose();}
+}
+measure.addEventListener('click',async()=>{
+ if(!ready)return;measure.disabled=true;download.disabled=true;metricStatus.textContent=text.computing;metricText.textContent='';
+ await new Promise(requestAnimationFrame);
+ try{
+  const results=[];
+  for(const direction of Object.keys(cameras)){
+   const frames=views.map(v=>capture(v,direction));
+   for(let i=0;i<views.length;i++)results.push({view:direction,label:views[i].label,reference:'A',camera:frames[i].cameraInfo,...comparePixels(frames[0].mask,frames[i].mask,frames[0].rgb,frames[i].rgb,SIZE,SIZE)});
+   await new Promise(requestAnimationFrame);
+  }
+  const gl=views[0].renderer.getContext(), worldMatrices={};
+  for(const v of views){v.scene.updateMatrixWorld(true);worldMatrices[v.label]=[];v.scene.traverse(o=>{if(o.isMesh)worldMatrices[v.label].push({name:o.name,matrixWorld:o.matrixWorld.toArray()})})}
+  metricsResult={protocol_revision:'five-view-v2',views:Object.keys(cameras),scope:'ESSAI descriptif, comparaison avec A ; pas un score de qualité humaine',created_utc:new Date().toISOString(),resolution:{width:SIZE,height:SIZE},three_revision:THREE.REVISION,webgl_version:gl.getParameter(gl.VERSION),glsl_version:gl.getParameter(gl.SHADING_LANGUAGE_VERSION),provenance_sidecar_sha256:provenanceSha256,case_id:provenance.case_id,prompt_id:provenance.prompt_id,graph_sha256:provenance.graph_sha256,models:manifest.models,model_mesh_world_matrices:worldMatrices,camera_reference:{center:center.toArray(),extent},lighting:{hemisphere_sky:0xffffff,hemisphere_ground:0x84898f,hemisphere_intensity:2,directional_color:0xffffff,directional_intensity:2.2,directional_position:[3,5,4]},mask:'matériau blanc opaque, faces avant ; seuil rouge >127, fond noir ; transparence et matériaux non représentés',rgb:'moyenne absolue des 3 canaux 8 bits encodés sur intersection des silhouettes',results};
+  metricText.textContent=results.map(r=>`${r.view} ${r.label} : IoU ${r.iou===null?text.undefined:r.iou.toFixed(4)} · écart RGB ${r.rgb_mae_0_255===null?text.undefined:r.rgb_mae_0_255.toFixed(3)} / 255 · intersection ${r.intersection_pixels}`).join('\n');
+  metricStatus.textContent=text.done;download.disabled=false;
+ }catch(error){metricsResult=undefined;metricStatus.textContent=text.error+' : '+String(error);console.error(error)}
+ finally{measure.disabled=false;render()}
+});
+download.addEventListener('click',()=>{if(!metricsResult)return;const url=URL.createObjectURL(new Blob([JSON.stringify(metricsResult,null,2)+'\n'],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ESSAI-mesures-appariees.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
+
+try{
+ const sidecarResponse=await fetch('./provenance.json');if(!sidecarResponse.ok)throw Error('sidecar absent');const sidecarBytes=await sidecarResponse.arrayBuffer();
+ provenanceSha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',sidecarBytes)),b=>b.toString(16).padStart(2,'0')).join('');provenance=JSON.parse(new TextDecoder().decode(sidecarBytes));
+ const expectedFiles=['index.html','metrics.mjs','views.mjs','model-manifest.json','input.png','assets/three.module.js','assets/three.core.js','assets/loaders/GLTFLoader.js','assets/utils/BufferGeometryUtils.js','assets/utils/SkeletonUtils.js'];
+ if(!/^s[0-9]{2}$/.test(provenance.case_id)||JSON.stringify(Object.keys(provenance.viewer_files).sort())!==JSON.stringify([...expectedFiles].sort()))throw Error('sidecar incohérent');
+ for(const name of expectedFiles){const response=await fetch('./'+name);if(!response.ok)throw Error('fichier viewer absent : '+name);const bytes=await response.arrayBuffer();const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');if(bytes.byteLength!==provenance.viewer_files[name].bytes||digest!==provenance.viewer_files[name].sha256)throw Error('empreinte viewer incorrecte : '+name)}
+ document.getElementById('case-label').textContent=text.caseLabel+' '+provenance.case_id+' · '+provenance.case_names[lang];
+ manifest=await (await fetch('./model-manifest.json')).json();
+ const objects=await Promise.all(views.map(async v=>{const item=manifest.models[v.label];if(item.filename!==v.label+'.glb')throw Error('manifeste incohérent');const response=await fetch('./'+item.filename);if(!response.ok)throw Error('chargement GLB refusé');const bytes=await response.arrayBuffer();const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');if(bytes.byteLength!==item.bytes||digest!==item.sha256)throw Error('empreinte GLB incorrecte : '+v.label);const gltf=await new GLTFLoader().parseAsync(bytes,'./');v.scene.add(gltf.scene);completed++;status.textContent=`${text.loading} ${completed}/4`;return gltf.scene}));
+ const box=new THREE.Box3().setFromObject(objects[0]);center=box.getCenter(new THREE.Vector3());const size=box.getSize(new THREE.Vector3());extent=Math.max(size.x,size.y,size.z);if(box.isEmpty()||!Number.isFinite(extent)||extent<=0)throw Error('Bornes de A invalides');
+ ready=true;status.textContent=text.ready;measure.disabled=false;render();
+}catch(error){status.textContent=`${text.error} (${completed}/4) : ${String(error)}`;window.meshPairedViewer={ready:false,loaded:completed,error:String(error)};console.error(error)}
+</script></body></html>
