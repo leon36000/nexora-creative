@@ -35,6 +35,7 @@ MIN_ARMS = 3
 
 _ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 _SHA_RE = re.compile(r"^[0-9a-f]{64}$")
+_IMAGE_ERROR_MESSAGE = "%s.image: %s"
 
 
 class ManifestError(ValueError):
@@ -168,10 +169,7 @@ def _check_seed(seed: Any, where: str, problems: List[str]) -> Optional[int]:
     return seed
 
 
-def load_manifest(manifest_path: Path) -> Manifest:
-    """Load and fully validate a manifest. Raises ManifestError with all problems."""
-    manifest_path = Path(manifest_path)
-    problems: List[str] = []
+def _read_manifest(manifest_path: Path):
     try:
         _refuse_sensitive_path(manifest_path)
         _refuse_sensitive_path(manifest_path.resolve())
@@ -188,12 +186,10 @@ def load_manifest(manifest_path: Path) -> Manifest:
         raise ManifestError(["manifest is not valid JSON: %s" % exc])
     if not isinstance(raw, dict):
         raise ManifestError(["manifest root must be a JSON object"])
+    return source_bytes, raw
 
-    version = raw.get("version", 1)
-    if version != 1:
-        problems.append("version: unsupported value %r (expected 1)" % (version,))
 
-    base = manifest_path.resolve().parent
+def _image_root(base: Path, raw: Dict[str, Any], problems: List[str]) -> Path:
     root_raw = raw.get("image_root", ".")
     if not isinstance(root_raw, str):
         raise ManifestError(["image_root: must be a string"])
@@ -202,10 +198,31 @@ def load_manifest(manifest_path: Path) -> Manifest:
         root = base / root_raw
     if not root.is_dir():
         problems.append("image_root: not a directory: %s" % root)
-    root = Path(os.path.realpath(root))
+    return Path(os.path.realpath(root))
 
-    seed = _check_seed(raw.get("seed"), "seed", problems)
 
+def _parse_arm(index: int, item: Any, seen_arms: set, problems: List[str]) -> Optional[Arm]:
+    where = "arms[%d]" % index
+    aid = _get(item, "id", where, problems, typ=str)
+    label = _get(item, "label", where, problems, typ=str)
+    kind = _get(item, "kind", where, problems, required=False, typ=str)
+    notes = _get(item, "notes", where, problems, required=False, typ=str)
+    if kind is not None and kind not in ("nexora", "alternative"):
+        problems.append("%s.kind: must be 'nexora' or 'alternative'" % where)
+    if aid is not None:
+        if not _ID_RE.fullmatch(aid):
+            problems.append("%s.id: invalid id %r" % (where, aid))
+        elif aid in seen_arms:
+            problems.append("%s.id: duplicate arm id %r" % (where, aid))
+        seen_arms.add(aid)
+    if label is not None and not label.strip():
+        problems.append("%s.label: must be non-empty" % where)
+    if aid is not None and label is not None:
+        return Arm(id=aid, label=label, kind=kind, notes=notes)
+    return None
+
+
+def _load_arms(raw: Dict[str, Any], problems: List[str]) -> List[Arm]:
     arms_raw = raw.get("arms")
     arms: List[Arm] = []
     if not isinstance(arms_raw, list):
@@ -214,31 +231,100 @@ def load_manifest(manifest_path: Path) -> Manifest:
     if len(arms_raw) < MIN_ARMS:
         problems.append("arms: need at least %d arms, got %d" % (MIN_ARMS, len(arms_raw)))
     seen_arms = set()
-    for i, a in enumerate(arms_raw):
-        where = "arms[%d]" % i
-        aid = _get(a, "id", where, problems, typ=str)
-        label = _get(a, "label", where, problems, typ=str)
-        kind = _get(a, "kind", where, problems, required=False, typ=str)
-        notes = _get(a, "notes", where, problems, required=False, typ=str)
-        if kind is not None and kind not in ("nexora", "alternative"):
-            problems.append("%s.kind: must be 'nexora' or 'alternative'" % where)
-        if aid is not None:
-            if not _ID_RE.fullmatch(aid):
-                problems.append("%s.id: invalid id %r" % (where, aid))
-            elif aid in seen_arms:
-                problems.append("%s.id: duplicate arm id %r" % (where, aid))
-            seen_arms.add(aid)
-        if label is not None and not label.strip():
-            problems.append("%s.label: must be non-empty" % where)
-        if aid is not None and label is not None:
-            arms.append(Arm(id=aid, label=label, kind=kind, notes=notes))
+    for index, item in enumerate(arms_raw):
+        arm = _parse_arm(index, item, seen_arms, problems)
+        if arm is not None:
+            arms.append(arm)
     n_nexora = sum(1 for a in arms if a.kind == "nexora")
     n_alt = sum(1 for a in arms if a.kind == "alternative")
     if n_nexora > 1:
         problems.append("arms: at most one arm may have kind nexora")
     if n_nexora != 1 or n_alt < 2:
         problems.append("arms: exactly one nexora and at least two alternative arms are required (found %d, %d)" % (n_nexora, n_alt))
+    return arms
 
+
+def _resolve_subject_image(where: str, image: str, root: Path, seen_images: set,
+                           problems: List[str]) -> Optional[tuple]:
+    try:
+        rel = normalize_rel(image)
+    except ValueError as exc:
+        problems.append(_IMAGE_ERROR_MESSAGE % (where, exc))
+        return None
+    key = rel.lower()
+    if key in seen_images:
+        problems.append("%s.image: duplicate image path %r" % (where, rel))
+    seen_images.add(key)
+    try:
+        _refuse_sensitive_path(Path(rel))
+        real = _resolve_inside(root, rel)
+        _refuse_sensitive_path(real)
+    except ValueError as exc:
+        problems.append(_IMAGE_ERROR_MESSAGE % (where, exc))
+        return None
+    if not real.exists():
+        problems.append("%s.image: file does not exist: %s" % (where, rel))
+        return None
+    if not real.is_file():
+        problems.append("%s.image: not a regular file: %s" % (where, rel))
+        return None
+    return rel, real
+
+
+def _check_subject_digest(where: str, rel: str, real: Path, sha: Optional[str],
+                          seen_hashes: set, problems: List[str]) -> bool:
+    if sha is None or not _SHA_RE.fullmatch(sha.lower()):
+        return True
+    try:
+        actual = _image_sha256(real)
+    except (OSError, ValueError) as exc:
+        problems.append(_IMAGE_ERROR_MESSAGE % (where, exc))
+        return False
+    if actual in seen_hashes:
+        problems.append("%s.image: duplicate image bytes" % where)
+    seen_hashes.add(actual)
+    if actual != sha.lower():
+        problems.append("%s.sha256: mismatch for %s" % (where, rel))
+    return True
+
+
+def _parse_subject(index: int, item: Any, root: Path, seen_subjects: set,
+                   seen_images: set, seen_hashes: set,
+                   problems: List[str]) -> Optional[Subject]:
+    where = "subjects[%d]" % index
+    sid = _get(item, "id", where, problems, typ=str)
+    img = _get(item, "image", where, problems, typ=str)
+    sha = _get(item, "sha256", where, problems, typ=str)
+    category = _get(item, "category", where, problems, required=False, typ=str)
+    notes = _get(item, "notes", where, problems, required=False, typ=str)
+    if sid is not None:
+        if not _ID_RE.fullmatch(sid):
+            problems.append("%s.id: invalid id %r" % (where, sid))
+        elif sid in seen_subjects:
+            problems.append("%s.id: duplicate subject id %r" % (where, sid))
+        seen_subjects.add(sid)
+    if sha is not None and not _SHA_RE.fullmatch(sha.lower()):
+        problems.append("%s.sha256: not a 64-char lowercase hex digest" % where)
+    if img is None or not root.is_dir():
+        return None
+    resolved = _resolve_subject_image(where, img, root, seen_images, problems)
+    if resolved is None:
+        return None
+    rel, real = resolved
+    size = real.stat().st_size
+    if size == 0:
+        problems.append("%s.image: file is empty: %s" % (where, rel))
+    if not _check_subject_digest(where, rel, real, sha, seen_hashes, problems):
+        return None
+    if sid is not None and _ID_RE.fullmatch(sid):
+        return Subject(id=sid, image_rel=rel, abs_path=real, size=size,
+                       sha256=sha.lower() if isinstance(sha, str) else "",
+                       category=category, notes=notes)
+    return None
+
+
+def _load_subjects(raw: Dict[str, Any], root: Path,
+                   problems: List[str]) -> List[Subject]:
     subjects_raw = raw.get("subjects")
     subjects: List[Subject] = []
     if not isinstance(subjects_raw, list):
@@ -249,65 +335,27 @@ def load_manifest(manifest_path: Path) -> Manifest:
     seen_subjects = set()
     seen_images = set()
     seen_hashes = set()
-    for i, s in enumerate(subjects_raw):
-        where = "subjects[%d]" % i
-        sid = _get(s, "id", where, problems, typ=str)
-        img = _get(s, "image", where, problems, typ=str)
-        sha = _get(s, "sha256", where, problems, typ=str)
-        category = _get(s, "category", where, problems, required=False, typ=str)
-        notes = _get(s, "notes", where, problems, required=False, typ=str)
-        if sid is not None:
-            if not _ID_RE.fullmatch(sid):
-                problems.append("%s.id: invalid id %r" % (where, sid))
-            elif sid in seen_subjects:
-                problems.append("%s.id: duplicate subject id %r" % (where, sid))
-            seen_subjects.add(sid)
-        if sha is not None and not _SHA_RE.fullmatch(sha.lower()):
-            problems.append("%s.sha256: not a 64-char lowercase hex digest" % where)
-        if img is None or not root.is_dir():
-            continue
-        try:
-            rel = normalize_rel(img)
-        except ValueError as exc:
-            problems.append("%s.image: %s" % (where, exc))
-            continue
-        key = rel.lower()
-        if key in seen_images:
-            problems.append("%s.image: duplicate image path %r" % (where, rel))
-        seen_images.add(key)
-        try:
-            _refuse_sensitive_path(Path(rel))
-            real = _resolve_inside(root, rel)
-            _refuse_sensitive_path(real)
-        except ValueError as exc:
-            problems.append("%s.image: %s" % (where, exc))
-            continue
-        if not real.exists():
-            problems.append("%s.image: file does not exist: %s" % (where, rel))
-            continue
-        if not real.is_file():
-            problems.append("%s.image: not a regular file: %s" % (where, rel))
-            continue
-        size = real.stat().st_size
-        if size == 0:
-            problems.append("%s.image: file is empty: %s" % (where, rel))
-        if sha is not None and _SHA_RE.fullmatch(sha.lower()):
-            try:
-                actual = _image_sha256(real)
-            except (OSError, ValueError) as exc:
-                problems.append("%s.image: %s" % (where, exc))
-                continue
-            if actual in seen_hashes:
-                problems.append("%s.image: duplicate image bytes" % where)
-            seen_hashes.add(actual)
-            if actual != sha.lower():
-                problems.append(
-                    "%s.sha256: mismatch for %s" % (where, rel)
-                )
-        if sid is not None and _ID_RE.fullmatch(sid):
-            subjects.append(Subject(id=sid, image_rel=rel, abs_path=real, size=size,
-                                    sha256=sha.lower() if isinstance(sha, str) else "",
-                                    category=category, notes=notes))
+    for index, item in enumerate(subjects_raw):
+        subject = _parse_subject(index, item, root, seen_subjects, seen_images,
+                                 seen_hashes, problems)
+        if subject is not None:
+            subjects.append(subject)
+    return subjects
+
+
+def load_manifest(manifest_path: Path) -> Manifest:
+    """Load and fully validate a manifest. Raises ManifestError with all problems."""
+    manifest_path = Path(manifest_path)
+    source_bytes, raw = _read_manifest(manifest_path)
+    problems: List[str] = []
+    version = raw.get("version", 1)
+    if version != 1:
+        problems.append("version: unsupported value %r (expected 1)" % (version,))
+    base = manifest_path.resolve().parent
+    root = _image_root(base, raw, problems)
+    seed = _check_seed(raw.get("seed"), "seed", problems)
+    arms = _load_arms(raw, problems)
+    subjects = _load_subjects(raw, root, problems)
 
     if problems:
         raise ManifestError(problems)
