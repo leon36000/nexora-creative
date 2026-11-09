@@ -25,6 +25,7 @@ export default {
     minWorkers: 1,
     include: [
       'app/mcp/mesh.test.ts', 'app/mcp/mesh-init.test.ts', 'app/mcp/mesh-multivue.test.ts',
+      'outils/labo/mesh-topologie/paired-graph.test.ts', 'outils/labo/mesh-topologie/paired-schema.test.ts',
       'app/src/ModelView.test.tsx',
       'app/src/SourcePick.test.tsx',
       'app/src/SourcePickRace.contract.test.tsx',
@@ -49,6 +50,7 @@ export default {
       reportsDirectory: coverage,
       include: [
         'app/mcp/server.ts', 'app/mcp/client.ts',
+        'outils/labo/mesh-topologie/paired-graph.ts', 'outils/labo/mesh-topologie/paired-schema.ts',
         'app/src/ModelView.tsx',
         'app/src/SourcePick.tsx',
         'app/src/Viewer.tsx',

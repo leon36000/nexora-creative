@@ -22,7 +22,7 @@ import CutoutPage from './pages/Cutout';
 import DetouragePage from './pages/Detourage';
 // three.js is only needed by Stage and Object: load them when opened, not on every page
 const ObjectPage = lazy(() => import('./pages/Object'));
-import { Apps, Explore, Library, Soon } from './pages/Home';
+import { Apps, Explore, Library } from './pages/Home';
 import Setup from './pages/Setup';
 import Creer from './pages/Creer';
 import MarketingPage from './pages/Marketing';
@@ -37,6 +37,17 @@ const REMPLACEES: Record<string, string> = {
   '/video': '/?mode=video', '/director': '/?mode=film', '/extend': '/prolonger', '/speak': '/?mode=video&depart=photo',
   '/mirror': '/apps', '/reshoot': '/apps', '/effects': '/apps', '/stage': '/apps',
 };
+
+function titrePage(path: string, copy: ReturnType<typeof libellesNavigation>, langue: LangueClient): string | undefined {
+  if (path === '/') return copy.create;
+  if (path === '/setup') return copy.settings;
+  if (path === '/library') return copy.library;
+  if (path === '/explorer') return copy.explore;
+  const titre = copy.pageTitles[path];
+  if (titre !== undefined) return titre;
+  const app = APPS_NEXORA.find((a) => a.route.split('?')[0] === path);
+  return app ? nomAppNavigation(app.id, app.name, langue) : undefined;
+}
 
 export default function App() {
   const { path, params } = useRoute();
@@ -82,12 +93,7 @@ export default function App() {
 
   // Keep the browser tab language in step with the shared shell and Mesh language.
   useEffect(() => {
-    const name = path === '/' ? copy.create : path === '/setup' ? copy.settings : path === '/library' ? copy.library
-      : path === '/explorer' ? copy.explore : copy.pageTitles[path]
-        ?? (() => {
-          const app = APPS_NEXORA.find((a) => a.route.split('?')[0] === path);
-          return app ? nomAppNavigation(app.id, app.name, langueInterface) : undefined;
-        })();
+    const name = titrePage(path, copy, langueInterface);
     document.title = name ? `${name} · ${CREATIVE_NAME}` : CREATIVE_NAME;
   }, [path, langueInterface, copy]);
 

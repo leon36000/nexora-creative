@@ -105,11 +105,12 @@ export function EtatAnalyseMaillage({ rapport, loading, failed, langue = 'fr', c
   return null;
 }
 
-export function LienExportMesh({ format, url, takeId, compatibilite, rapportRecu, rapportEchoue, langue }: {
-  format: FormatRelief; url: string; takeId: number; compatibilite: RapportRelief['compatibiliteObj']; rapportRecu: boolean; rapportEchoue: boolean; langue: LangueClient;
+export function LienExportMesh({ format, url, takeId, compatibilite, rapportRecu, rapportEchoue, rapportEnAttente = false, langue }: {
+  format: FormatRelief; url: string; takeId: number; compatibilite: RapportRelief['compatibiliteObj']; rapportRecu: boolean; rapportEchoue: boolean; rapportEnAttente?: boolean; langue: LangueClient;
 }) {
   const c = meshCopy(langue);
   if (rapportEchoue) return <span className="btn sm accent" aria-disabled="true">{c.exportUnavailable}</span>;
+  if (rapportEnAttente) return <span className="btn sm accent" aria-disabled="true">{c.export} {NOMS_FORMAT[format]}</span>;
   if (format === 'obj' && !compatibilite && !rapportRecu) return <span role="status">{c.objChecking}</span>;
   if (format === 'obj' && (!compatibilite || !compatibilite.compatible)) return <div role="alert">{compatibilite ? c.objUnsupported : c.objUnknown} <a href={reliefExportUrl(takeId, 'glb')} download>{c.downloadOriginalGlb}</a></div>;
   if (format === 'usdz') return <TelechargementUsdz url={url} takeId={takeId} langue={langue} />;
@@ -165,18 +166,18 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
     vivant.current = true;
     return () => { vivant.current = false; };
   }, []);
-  const [info, setInfo] = useState<RapportRelief | null>(null);
-  const [erreurRapport, setErreurRapport] = useState<string | null>(null);
+  const [reponse, setReponse] = useState<{ faces: number; info: RapportRelief | null; erreur: string | null } | null>(null);
+  const courante = reponse?.faces === faces ? reponse : null;
+  const info = courante?.info ?? null;
+  const erreurRapport = courante?.erreur ?? null;
   const [cartes, setCartes] = useState<CartePbr[]>([]);
   const [juge, setJuge] = useState<JugeRelief | null>(null);
   const [jugement, setJugement] = useState(false);
   useEffect(() => {
     let mort = false;
-    setInfo(null);
-    setErreurRapport(null);
     api.reliefRapport(take.id, faces || undefined)
-      .then((r) => { if (!mort) { setInfo(r); setJuge((j) => j ?? r.juge); } })
-      .catch((error: unknown) => { if (!mort) { setInfo(null); setErreurRapport(error instanceof ErreurApi ? error.code ?? 'ERREUR' : 'ERREUR'); } });
+      .then((r) => { if (!mort) { setReponse({ faces, info: r, erreur: null }); setJuge((j) => j ?? r.juge); } })
+      .catch((error: unknown) => { if (!mort) setReponse({ faces, info: null, erreur: error instanceof ErreurApi ? error.code ?? 'ERREUR' : 'ERREUR' }); });
     return () => { mort = true; };
   }, [take.id, faces]);
   useEffect(() => {
@@ -209,10 +210,11 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
         <div className="dim" style={{ fontSize: 12 }}>{aideFormat(format, c)}</div>
         <div className="label" style={{ textTransform: 'none', letterSpacing: 0 }}>{c.numberOfFaces}</div>
         <div className="seg" role="group" aria-label={c.numberOfFaces}>
-          {FACES.map((v) => <button key={v} type="button" className={faces === v ? 'on' : ''} onClick={() => setFaces(v)}>{nomFaces(v, langue)}</button>)}
+          {FACES.map((v) => <button key={v} type="button" className={faces === v ? 'on' : ''} onClick={() => { if (v !== faces) { setReponse(null); setFaces(v); } }}>{nomFaces(v, langue)}</button>)}
         </div>
+        {faces > 0 && info && <div className="dim" style={{ fontSize: 12 }}>{info.decime ? c.simplifiedResult : c.noSimplification}</div>}
         <EtatAnalyseMaillage rapport={affiche ?? null} loading={!info && !erreurRapport} failed={!!erreurRapport} code={erreurRapport} takeId={take.id} langue={langue} />
-        <LienExportMesh format={format} url={urlExport} takeId={take.id} compatibilite={info?.compatibiliteObj} rapportRecu={info !== null} rapportEchoue={!!erreurRapport} langue={langue} />
+        <LienExportMesh format={format} url={urlExport} takeId={take.id} compatibilite={info?.compatibiliteObj} rapportRecu={info !== null} rapportEchoue={!!erreurRapport} rapportEnAttente={faces > 0 && !info && !erreurRapport} langue={langue} />
         <div className="dim" style={{ fontSize: 11.5 }}>{c.serverNoCredits}</div>
       </div>
 

@@ -19,7 +19,7 @@ class TopologyTest(unittest.TestCase):
 
     def test_closed_tetrahedron(self):
         result = analyze(self.v, self.f)
-        for mode in ('exact', 'quantized'):
+        for mode in ('raw_indices', 'exact', 'quantized'):
             self.assertEqual((result[mode]['open_edges'],result[mode]['nonmanifold_edges'],result[mode]['components']),(0,0,1))
 
     def test_open_triangle(self):
@@ -33,7 +33,37 @@ class TopologyTest(unittest.TestCase):
     def test_exact_uv_seam_duplicates_are_welded(self):
         v = np.concatenate([self.v,self.v])
         f = self.f.copy();f[1] += len(self.v)
-        self.assertEqual(analyze(v,f)['exact']['open_edges'], 0)
+        result = analyze(v,f)
+        self.assertEqual(result['raw_indices']['open_edges'], 6)
+        self.assertEqual(result['raw_indices']['components'], 2)
+        self.assertEqual(result['exact']['open_edges'], 0)
+        self.assertEqual(result['exact']['components'], 1)
+        self.assertEqual(result['quantized']['open_edges'], 0)
+
+    def test_two_tangent_leaf_triangles_keep_raw_and_welded_counts_separate(self):
+        vertices = np.array([
+            [0,0,0], [1,0,0], [0,1,0],
+            [1,0,0], [1,1,0], [0,1,0],
+        ], dtype=float)
+        faces = np.array([[0,1,2], [3,4,5]], dtype=np.int32)
+        result = analyze(vertices, faces)
+        # Two triangles meet along one geometric edge, but their vertex indices are disjoint.
+        self.assertEqual(result['raw_indices']['open_edges'], 6)
+        self.assertEqual(result['raw_indices']['components'], 2)
+        self.assertEqual(result['exact']['open_edges'], 4)
+        self.assertEqual(result['exact']['components'], 1)
+        self.assertEqual(result['quantized']['open_edges'], 4)
+
+    def test_two_closed_tetrahedra_share_a_geometric_edge_with_distinct_indices(self):
+        first = np.array([[0,0,0], [1,0,0], [0,1,0], [0,0,1]], dtype=float)
+        second = np.array([[0,0,0], [1,0,0], [0,-1,0], [0,0,-1]], dtype=float)
+        vertices = np.concatenate((first, second))
+        tetra = np.array([[0,2,1], [0,1,3], [0,3,2], [1,2,3]], dtype=np.int32)
+        faces = np.vstack((tetra, tetra + len(first)))
+        result = analyze(vertices, faces)
+        self.assertEqual((result['raw_indices']['open_edges'], result['raw_indices']['nonmanifold_edges'], result['raw_indices']['components']), (0,0,2))
+        self.assertEqual((result['exact']['open_edges'], result['exact']['nonmanifold_edges'], result['exact']['components']), (0,1,1))
+        self.assertEqual((result['quantized']['open_edges'], result['quantized']['nonmanifold_edges'], result['quantized']['components']), (0,1,1))
 
     def test_near_vertices_quantization_changes_partition(self):
         v = np.vstack([self.v, self.v[0] + [1e-6,0,0]])
