@@ -64,7 +64,7 @@ export function briefDepuisAnalyses(a: z.infer<typeof SCHEMAS_MONTAGE.plan_edit>
   const clips: ClipInfo[] = a.medias.map((id) => {
     const x = an[id];
     if (!x?.a_video) throw new Error(`${id} n’est pas une vidéo du projet`);
-    return { id, duree_s: x.duree_s, coupes_s: x.coupes_s };
+    return { id, duree_s: x.duree_s, a_audio: x.a_audio, coupes_s: x.coupes_s };
   });
   const m = a.musique ? an[a.musique] : undefined;
   if (a.musique && !m?.a_audio) throw new Error(`${a.musique} n’est pas un média audio du projet`);

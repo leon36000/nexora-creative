@@ -3,7 +3,7 @@
  * fait que concaténer des plans). Coupes, fondus/dip/glisse (xfade), vitesse constante et rampes (par morceaux), zoom
  * lent, texte (ASS, posé EN DERNIER comme l'exige la recette), musique avec fondus, voix, ducking (sidechaincompress)
  * et normalisation loudnorm. Sans `drawtext` (absent de certains ffmpeg statiques) : le texte passe par libass.
- * Limites assumées de la v1 : le son propre des plans vidéo est ignoré (montage sur musique et voix off) ; loudnorm en une
+ * Le son des clips mesurés est préservé et suit les coupes, vitesses et transitions. Limites : loudnorm en une
  * passe (la mesure en deux passes viendra avec `mix_audio`) ; le ducking est approché (ratio dérivé de la profondeur).
  */
 import { execFile } from 'node:child_process';
@@ -13,6 +13,7 @@ import { couperLignes, texteAss } from '../cartons.js';
 import { ffmpegParDefaut } from './analyse.js';
 import { type EditPlan, lignedeTemps, validerEditPlan } from './editplan.js';
 import { segmentsVitesse } from './retiming.js';
+import { audioDesClips } from './audioClips.js';
 
 export const TAILLES: Record<EditPlan['format'], [number, number]> = { '16:9': [1280, 720], '9:16': [720, 1280], '1:1': [720, 720] };
 
@@ -114,18 +115,18 @@ export function commandeRendu(plan: EditPlan, chemin: (src: string) => string, s
   }
   filtres.push(`[${sortieVideo}]trim=duration=${n(dureeS)},setpts=PTS-STARTPTS,format=yuv420p[vout]`);
 
-  // Audio : musique + voix (ducking), puis loudnorm.
+  // Audio : clips mesurés + voix au premier plan, musique avec ducking, puis loudnorm.
   const a = plan.audio;
-  const pistes: string[] = [];
+  const clipsAudio = audioDesClips(plan, index);
+  filtres.push(...clipsAudio.filtres);
   if (a.musique) {
     const m = a.musique;
     const kd = index.get(m.src)!;
     const jouee = (m.duree_f ?? total) / fps;
     const fin = Math.max(0, jouee - m.fondu_out_f / fps);
     filtres.push(`[${kd}:a]atrim=start=${secs(m.entree_f, fps)}:duration=${n(jouee)},asetpts=PTS-STARTPTS,volume=${n(m.gain_db)}dB${m.fondu_in_f ? `,afade=t=in:d=${secs(m.fondu_in_f, fps)}` : ''}${m.fondu_out_f ? `,afade=t=out:st=${n(fin)}:d=${secs(m.fondu_out_f, fps)}` : ''},apad,atrim=duration=${n(dureeS)}[mus]`);
-    pistes.push('mus');
   }
-  const voixNoms: string[] = [];
+  const voixNoms: string[] = [...clipsAudio.pistes];
   a.voix.forEach((v, i) => {
     const kd = index.get(v.src)!;
     filtres.push(`[${kd}:a]atrim=start=${secs(v.entree_f, fps)}:duration=${secs(v.duree_f, fps)},asetpts=PTS-STARTPTS,volume=${n(v.gain_db)}dB,adelay=${Math.round((v.debut_f / fps) * 1000)}:all=1,apad,atrim=duration=${n(dureeS)}[vx${i}]`);
@@ -145,12 +146,12 @@ export function commandeRendu(plan: EditPlan, chemin: (src: string) => string, s
     } else audioFinal = 'voix';
   } else if (a.musique) audioFinal = 'mus';
   if (audioFinal) {
-    filtres.push(`[${audioFinal}]loudnorm=I=${n(a.cible_lufs)}:TP=${n(a.crete_db)}:LRA=11,aresample=48000,atrim=duration=${n(dureeS)}[aout]`);
+    filtres.push(`[${audioFinal}]loudnorm=I=${n(a.cible_lufs)}:TP=${n(a.crete_db)}:LRA=11,aresample=48000,apad=whole_len=${total * 48000 / fps},atrim=end_sample=${total * 48000 / fps}[aout]`);
   }
   args.push('-filter_complex', filtres.join(';'), '-map', '[vout]');
   if (audioFinal) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', o.apercu ? '128k' : '192k');
   else args.push('-an');
-  args.push('-c:v', 'libx264', '-preset', o.apercu ? 'veryfast' : 'medium', '-crf', o.apercu ? '28' : '19', '-pix_fmt', 'yuv420p', '-r', String(fps), '-t', n(dureeS), '-movflags', '+faststart', sortie);
+  args.push('-c:v', 'libx264', '-preset', o.apercu ? 'veryfast' : 'medium', '-crf', o.apercu ? '28' : '19', '-pix_fmt', 'yuv420p', '-r', String(fps), '-t', String(dureeS), '-movflags', '+faststart', '-movie_timescale', '48000', sortie);
   return { args, ass, dureeS };
 }
 

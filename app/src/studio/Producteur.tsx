@@ -356,30 +356,47 @@ const pct = (v: number) => Math.round(v * 100);
 
 /** Aperçu du montage construit par le harnais (code seul) : lecteur, mesures en clair, un tour d'amélioration. */
 function ApercuMontage({ vue, occupe, ameliorer, fermer }: { vue: VueMontage; occupe: boolean; ameliorer: () => void; fermer: () => void }) {
+  const [langue, setLangue] = useState<'fr' | 'en'>('fr');
+  const locale = langue === 'fr' ? 'fr-CA' : 'en-CA';
+  const nombre = (n: number, decimales = 0) => new Intl.NumberFormat(locale, {
+    minimumFractionDigits: decimales,
+    maximumFractionDigits: decimales,
+  }).format(n);
   const m = vue.metriques;
-  const mesures: [string, number][] = [['Rythme', m.rythme], ['Coupes sur le temps', m.battues], ['Variété des plans', m.doublons], ['Texte', m.texte], ['Audio', m.audio]];
+  const mesures: [string, number][] = langue === 'fr'
+    ? [['Rythme', m.rythme], ['Coupes sur le temps', m.battues], ['Variété des plans', m.doublons], ['Texte', m.texte], ['Audio', m.audio]]
+    : [['Rhythm', m.rythme], ['Cuts on beat', m.battues], ['Shot variety', m.doublons], ['Text', m.texte], ['Audio', m.audio]];
   const fini = vue.tours >= vue.plafondTours;
+  const texte = langue === 'fr'
+    ? { titre: 'Aperçu du montage', musique: 'Montage', fermer: 'Fermer', plans: 'plans', moyenne: 'par plan', coupes: 'coupes/min', sonie: 'sonie', sansMusique: 'sans musique', note: 'Note d’origine : ', attendre: 'Un instant…', maximum: 'Montage au maximum', ameliorer: 'Améliorer', telecharger: 'Télécharger l’aperçu', langue: 'Langue de l’aperçu', apercu: 'Aperçu 720p.' }
+    : { titre: 'Edit preview', musique: 'Edit preview', fermer: 'Close', plans: 'shots', moyenne: 'per shot', coupes: 'cuts/min', sonie: 'loudness', sansMusique: 'no music', note: 'Original note: ', attendre: 'One moment…', maximum: 'Improvement limit reached', ameliorer: 'Improve', telecharger: 'Download preview', langue: 'Preview language', apercu: '720p preview.' };
   return (
-    <div className="pr-montage" aria-label="Aperçu du montage">
-      <div className="pr-carte-tete">
-        <div><span className="st-etiq">Montage sur la musique</span><h4>Score {pct(m.score)} / 100</h4></div>
-        <button type="button" className="nx-lien" onClick={fermer}>Fermer</button>
+    <div className="pr-montage" aria-label={texte.titre} lang={locale}>
+      <div className="pr-carte-tete" style={{ flexWrap: 'wrap', gap: 8 }}>
+        <div><span className="st-etiq">{texte.musique}</span><h4>Score {nombre(pct(m.score))} / 100</h4></div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+          <div role="group" aria-label={texte.langue}>
+            <button type="button" className={`st-bouton${langue === 'fr' ? ' primaire' : ''}`} lang="fr-CA" aria-pressed={langue === 'fr'} onClick={() => setLangue('fr')}>Français</button>
+            <button type="button" className={`st-bouton${langue === 'en' ? ' primaire' : ''}`} lang="en-CA" aria-pressed={langue === 'en'} onClick={() => setLangue('en')}>English</button>
+          </div>
+          <button type="button" className="nx-lien" onClick={fermer}>{texte.fermer}</button>
+        </div>
       </div>
       <video key={vue.url + vue.tours} className="pr-montage-video" src={`${vue.url}?v=${vue.tours}`} controls playsInline preload="metadata" />
       <ul className="pr-mesures">
-        {mesures.map(([n, v]) => <li key={n}><span>{n}</span><i style={{ ['--v' as string]: `${pct(v)}%` }} /><b>{pct(v)}</b></li>)}
+        {mesures.map(([n, v]) => <li key={n}><span>{n}</span><i style={{ ['--v' as string]: `${pct(v)}%` }} /><b>{nombre(pct(v))}</b></li>)}
       </ul>
       <p className="pr-meta">
-        {m.plans} plans · {vue.dureeS.toFixed(1)} s · {m.dureeMoyennePlanS.toFixed(1)} s par plan · {m.coupesParMinute} coupes/min{m.bpm ? ` · ${Math.round(m.bpm)} BPM` : ''}
-        {vue.sonie ? ` · sonie ${vue.sonie.lufs.toFixed(1)} LUFS` : ''}{vue.musique === false ? ' · sans musique' : ''}
+        {nombre(m.plans)} {texte.plans} · {nombre(vue.dureeS, 1)} s · {nombre(m.dureeMoyennePlanS, 1)} s {texte.moyenne} · {nombre(m.coupesParMinute)} {texte.coupes}{m.bpm ? ` · ${nombre(Math.round(m.bpm))} BPM` : ''}
+        {vue.sonie ? ` · ${texte.sonie} ${nombre(vue.sonie.lufs, 1)} LUFS` : ''}{vue.musique === false ? ` · ${texte.sansMusique}` : ''}
       </p>
-      {m.ecarts.length > 0 && <ul className="pr-ecarts">{m.ecarts.slice(0, 3).map((e, i) => <li key={i}><small className={e.gravite === 'majeur' || e.gravite === 'bloquant' ? 'bad' : ''}>{e.message}</small></li>)}</ul>}
-      {vue.amelioration && <p className="pr-meta" role="status">{vue.amelioration.message}</p>}
+      {m.ecarts.length > 0 && <ul className="pr-ecarts">{m.ecarts.slice(0, 3).map((e, i) => <li key={i}><small className={e.gravite === 'majeur' || e.gravite === 'bloquant' ? 'bad' : ''}>{texte.note}{e.message}</small></li>)}</ul>}
+      {vue.amelioration && <p className="pr-meta" role="status">{texte.note}{vue.amelioration.message}</p>}
       <div className="pr-variantes">
-        <button type="button" className="st-bouton primaire" disabled={occupe || fini} onClick={ameliorer}>{occupe ? 'Un instant…' : fini ? 'Montage au maximum' : `Améliorer (${vue.tours}/${vue.plafondTours})`}</button>
-        <a className="st-bouton" href={`${vue.url}?v=${vue.tours}`} download>Télécharger l’aperçu</a>
+        <button type="button" className="st-bouton primaire" disabled={occupe || fini} onClick={ameliorer}>{occupe ? texte.attendre : fini ? texte.maximum : `${texte.ameliorer} (${nombre(vue.tours)}/${nombre(vue.plafondTours)})`}</button>
+        <a className="st-bouton" href={`${vue.url}?v=${vue.tours}`} download>{texte.telecharger}</a>
       </div>
-      <p className="pr-meta">Aperçu 720p : plans et bande originale ; le son propre des plans n’est pas mixé.</p>
+      <p className="pr-meta">{texte.apercu}</p>
     </div>
   );
 }

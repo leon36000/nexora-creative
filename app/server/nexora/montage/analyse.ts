@@ -177,5 +177,5 @@ export function vueTexte(id: string, a: AnalyseMedia): string {
 }
 
 /** Média analysé → entrées du brief/inventaire (clip ou musique). */
-export const versClip = (id: string, a: AnalyseMedia) => ({ id, duree_s: a.duree_s, coupes_s: a.coupes_s, mots: undefined as [number, number][] | undefined });
+export const versClip = (id: string, a: AnalyseMedia) => ({ id, duree_s: a.duree_s, a_audio: a.a_audio, coupes_s: a.coupes_s, mots: undefined as [number, number][] | undefined });
 export const versMusique = (id: string, a: AnalyseMedia) => ({ id, duree_s: a.duree_s, bpm: a.bpm, battues_s: a.battues_s, energie: a.energie });
