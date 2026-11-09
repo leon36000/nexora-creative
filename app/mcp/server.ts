@@ -10,6 +10,8 @@
  * stdout is the MCP channel. Log to stderr only.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import {
@@ -29,20 +31,19 @@ import { CAMERA_MOVES, LENS_MAX, LENS_MIN, MAX_KEYS, MAX_PROPS, MODEL_PROP_SIZE,
 import { BASE, api, finishFileUrl, getTake, localPath, mediaUrl, posterImage, resolveInput, settingsOf, type Asset, type Take } from './client.ts';
 import { OBJECT_DETAIL } from '../src/catalog.ts';
 import { PRODUIT_3D } from '../src/produit3d.ts';
+import { NEXORA_PRODUCT_NAMES } from '../shared/productNames.ts';
 import { enregistrerMontage } from './montage.ts';
 
-const server = new McpServer(
-  { name: 'openfield', version: '0.1.0' },
+export const server = new McpServer(
+  { name: 'openfield', title: NEXORA_PRODUCT_NAMES.creative, version: '0.1.0' },
   {
     instructions: [
-      'OpenField is a local, open-weights creative suite (video, image, edit, remove background, director, loop, effects, mirror, restyle, object swap, reshoot, extend, transition, speak, add sound, upscale, stage, image to 3D) running on the user\'s own GPU through ComfyUI.',
-      'Generate tools only QUEUE work and return take ids; renders take from ~20 s (stills) to several minutes (video). Call wait_for_take with those ids, then get_take for the output path and a preview image.',
-      'Image and clip inputs are local file paths or `take:<id>` to reuse a finished take (e.g. animate a still made by generate_image).',
-      'Cast: characters, props and places saved with create_cast are @mentioned by name in any prompt (e.g. "@Mara walks through the market"). Stills compose them from their pictures (Qwen-Image-Edit), videos hold them on a reference sheet (LTX-2.5 Ingredients IC-LoRA) or start from a composed hero frame, Mirror and Speak make a hero frame when no frame is given.',
-      'Director: direct_shot for one frame or shot, direct_scene to plan a scene into shots with a local LLM and cut them together.',
-      'Stage: stage_render blocks a shot in 3D (boxes, figures, walls, a camera path) and renders it with LTX-2.5 Layout to Render; the shot keeps the blocking\'s camera move and layout.',
-      'Call status first if unsure whether the engine is up. Video renders occupy the GPU; prefer count 1 while iterating.',
-      'Render size: every video tool renders at the machine-wide size set in Setup (720p on a 24 GB or larger card, 480p below; OPENFIELD_RENDER_TIER can set it) unless you pass `resolution`. 720p takes 1.3 to 2x the time of 480p; past 720p, use upscale.',
+      `${NEXORA_PRODUCT_NAMES.creative} exposes registered tools through the local stdio component of ${NEXORA_PRODUCT_NAMES.connect}.`,
+      `For ${NEXORA_PRODUCT_NAMES.mesh}, nexora_mesh_rapport reads the report for a completed take.`,
+      'Use the MCP tools/list response as the authoritative list; call only registered tools. Other capabilities are En préparation / in preparation.',
+      'Generation tools can queue work and return take IDs; use wait_for_take and get_take when available.',
+      'Inputs may be local file paths or take:<id> for a finished take; check status if unsure and prefer count 1 for GPU work.',
+      'Tool availability does not guarantee that a particular engine or installation is available; check tool responses.',
     ].join(' '),
   },
 );
@@ -923,6 +924,17 @@ server.registerTool('upscale', {
 
 // ---------- image to 3D ----------
 
+/** Mesh accepte directement les prises d'image existantes ; le serveur prépare leur fichier. */
+async function meshImageSource(ref: string): Promise<SourceRef> {
+  const match = /^take:(\d+)$/i.exec(ref.trim());
+  if (!match) return sourceRef(await resolveInput(ref, 'image'), 'image');
+  const take = await getTake(Number(match[1]));
+  if (take.status !== 'done') throw new Error(`take ${take.id} is ${take.status}, not done`);
+  if (take.kind !== 'still') throw new Error(`take ${take.id} is ${take.kind === 'object' ? 'a 3D model' : 'a video'}; this input needs an image`);
+  const settings = settingsOf(take);
+  return { token: '', kind: 'image', name: `take ${take.id}`, w: 0, h: 0, seconds: 0, takeId: take.id, prompt: settings.userPrompt || settings.prompt };
+}
+
 server.registerTool('make_3d', {
   title: `Make 3D (${PRODUIT_3D})`,
   description: [
@@ -933,14 +945,35 @@ server.registerTool('make_3d', {
   ].join(' '),
   inputSchema: {
     image: inputRef('The still to turn into a model (png, jpg or webp)'),
+    views: z.object({
+      left: inputRef('Left view of the same object').optional(),
+      back: inputRef('Back view of the same object').optional(),
+      right: inputRef('Right view of the same object').optional(),
+    }).strict().optional().describe('Additional views; multi-view uses draft quality and one take.'),
     quality: z.enum(['draft', 'high']).default('draft').describe('draft to check the shape, high for the keeper'),
     remove_background: z.boolean().default(true).describe('Cut the subject out with BiRefNet first'),
     count,
   },
   annotations: GPU,
 }, safe(async (a) => {
-  const src = sourceRef(await resolveInput(a.image, 'image'), 'image');
-  return queue(wire(objectBody({ source: src, quality: a.quality === 'high' ? 'quality' : 'draft', cutout: a.remove_background, count: a.count })), { quality: a.quality });
+  let views: Partial<Record<'left' | 'back' | 'right', SourceRef>> | undefined;
+  const sides = (['left', 'back', 'right'] as const).filter(side => a.views?.[side]);
+  if (a.views) {
+    if (!sides.length || a.quality !== 'draft' || a.count !== 1) throw new Error('Multi-view needs at least one additional view, draft quality and one take.');
+    let etat: { objet3d?: { multivue?: unknown; vuesMax?: unknown } } | null | undefined;
+    let etatCharge = false;
+    try { etat = await api.nexora('etat'); etatCharge = true; } catch { /* Conservative two-view fallback. */ }
+    if (etatCharge && etat?.objet3d?.multivue !== true) throw new Error(`${PRODUIT_3D}: multi-view is unavailable.`);
+    const max = etat?.objet3d?.vuesMax;
+    const limit = typeof max === 'number' && Number.isFinite(max) ? Math.max(2, Math.min(4, Math.floor(max))) : 2;
+    if (sides.length + 1 > limit) throw new Error(`${PRODUIT_3D}: multi-view accepts at most ${limit} views.`);
+  }
+  const src = await meshImageSource(a.image);
+  if (a.views) {
+    views = {};
+    for (const side of sides) views[side] = await meshImageSource(a.views[side]!);
+  }
+  return queue(wire(objectBody({ source: src, quality: a.quality === 'high' ? 'quality' : 'draft', cutout: a.remove_background, count: a.count, views })), { quality: a.quality });
 }));
 
 // ---------- cast ----------
@@ -1171,5 +1204,7 @@ server.registerTool('nexora_raccord', {
 // Harnais de montage (EditPlan v1) : mêmes fonctions que l'élève.
 enregistrerMontage(server, text, safe);
 
-await server.connect(new StdioServerTransport());
-console.error(`openfield-mcp: stdio ready, API ${BASE}`);
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await server.connect(new StdioServerTransport());
+  console.error(`openfield-mcp: stdio ready, API ${BASE}`);
+}

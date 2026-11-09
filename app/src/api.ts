@@ -138,7 +138,7 @@ export interface Storyboard {
 export interface EtatNexora { llm: boolean; moteur: string | null; son: boolean; territoire: string | null; cinema?: boolean; erreur?: string; image?: string | null; musique?: string | null; objet3d?: { nom?: string; formats?: string[]; multivue?: boolean; vuesMax?: number; apercu: boolean; qualite: boolean; texte: boolean } | null }
 export interface ObjetTexteEtat {
   etat: 'image' | 'objet' | 'jugement' | 'fini' | 'echec'; essai: number; image: number; objet: number | null;
-  notes: { take: number; note: number; defauts: string[]; raison: string }[]; erreur: string | null; qualite: 'draft' | 'quality'; intention: string;
+  notes: { take: number; note: number; defauts: string[]; raison: string }[]; erreur: string | null; avertissement?: 'relance-echouee' | null; qualite: 'draft' | 'quality'; intention: string;
 }
 export type FormatRelief = 'glb' | 'obj' | 'stl' | '3mf' | 'usdz';
 export interface RapportMaillage {
@@ -146,7 +146,7 @@ export interface RapportMaillage {
   etanche: boolean; taille: [number, number, number]; volume: number | null; avertissements: string[];
 }
 export interface JugeRelief { note: number; defauts: string[]; raison: string; modele: string | null; jetons: number; credits: number; relancer?: boolean }
-export interface RapportRelief { rapport: RapportMaillage; decime: RapportMaillage | null; cible: number | null; formats: FormatRelief[]; extensions: Record<FormatRelief, string>; tailleMm: number; credits: number; juge: JugeRelief | null }
+export interface RapportRelief { compatibiliteObj?: { compatible: boolean; code: 'OBJ_UNSUPPORTED' | null }; rapport: RapportMaillage; decime: RapportMaillage | null; cible: number | null; formats: FormatRelief[]; extensions: Record<FormatRelief, string>; tailleMm: number; credits: number; juge: JugeRelief | null }
 export interface MoteurGpu { id: string; nom: string; recettes: string[]; enLigne: boolean; enCours: number }
 
 /** Agent Producteur (server/nexora/agent.ts). */
@@ -212,7 +212,7 @@ export const api = {
   objetTexte: (b: { intention: string; qualite: 'draft' | 'quality' }) => j<{ id: number; secondesEstimees: number; credits?: number }>('/api/nexora/objet/texte', { method: 'POST', body: JSON.stringify(b) }),
   reliefRapport: (id: number, faces?: number) => j<RapportRelief>(`/api/nexora/relief/${id}/rapport${faces ? `?faces=${faces}` : ''}`),
   reliefJuger: (id: number) => j<JugeRelief>(`/api/nexora/relief/${id}/juger`, { method: 'POST', body: '{}' }),
-  reliefCartes: (id: number) => j<{ cartes: { nom: string; mime: string; largeur: number | null; octets: number }[] }>(`/api/nexora/relief/${id}/cartes`),
+  reliefCartes: (id: number) => j<{ cartes: { nom: string; mime: string; largeur: number | null; octets: number; materiaux?: { index: number; nom: string }[] }[] }>(`/api/nexora/relief/${id}/cartes`),
   objetTexteEtat: (id: number) => j<ObjetTexteEtat>(`/api/nexora/objet/${id}`),
   creerPersonnage: (b: { nom: string; description: string }) => j<{ takeId: number; nom: string; apparence: string }>('/api/nexora/personnage', { method: 'POST', body: JSON.stringify(b) }),
   statutPersonnage: (take: number) => j<{ etat: 'rendu' | 'pret' | 'echec'; membre?: CastMember; erreur?: string }>(`/api/nexora/personnage/${take}`),

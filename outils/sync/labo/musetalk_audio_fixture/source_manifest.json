@@ -1,0 +1,13 @@
+{
+  "upstream": "TMElyralab/MuseTalk",
+  "commit": "0a89dec45a0192b824e3cf4daf96c239440c5ed8",
+  "path": "musetalk/utils/audio_processor.py",
+  "url": "https://github.com/TMElyralab/MuseTalk/blob/0a89dec45a0192b824e3cf4daf96c239440c5ed8/musetalk/utils/audio_processor.py",
+  "git_blob_sha": "dbdee25393f721bc27b35bc4cb5bda7a82b2b9bc",
+  "sha256": "b7b62f3daa99678576138bf581a6394a10d346571a2530a760d1299ffd622b81",
+  "bytes": 4227,
+  "pc1_matches_public_pinned": true,
+  "fixture": "audio_processor.py.txt",
+  "license_file": "LICENSE",
+  "models_included": false
+}

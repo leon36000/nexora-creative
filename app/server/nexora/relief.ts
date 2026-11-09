@@ -6,10 +6,24 @@
  */
 import { NEXORA_PRODUCT_NAMES } from '../../shared/productNames.js';
 import { crc32 } from 'node:zlib';
-import { Document, NodeIO, type Primitive, type Transform } from '@gltf-transform/core';
+import type { FastifyReply } from 'fastify';
+import { Document, NodeIO, type Primitive, type Texture, type Transform } from '@gltf-transform/core';
 import { simplify, weld } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { zipSync, strToU8 } from 'fflate';
+import { Matrix3, Matrix4, Vector3 } from 'three';
+import { exporterUsdz, verifierGlbUsdz } from './usdz.js';
+
+export const CODE_OBJ_INCOMPATIBLE = 'OBJ_UNSUPPORTED' as const;
+
+export class ObjIncompatible extends Error {
+  readonly code = CODE_OBJ_INCOMPATIBLE;
+}
+
+/** Réponse stable pour les clients qui téléchargent directement sans passer par l'interface. */
+export function repondreObjIncompatible(reply: FastifyReply) {
+  return reply.code(400).send({ code: CODE_OBJ_INCOMPATIBLE, error: 'Export OBJ incompatible avec les textures, les coordonnées UV ou les normales de ce modèle. Utilisez le GLB.' });
+}
 
 export type FormatRelief = 'glb' | 'obj' | 'stl' | '3mf' | 'usdz';
 export const FORMATS_RELIEF: readonly FormatRelief[] = ['glb', 'obj', 'stl', '3mf', 'usdz'];
@@ -25,12 +39,25 @@ export const FACES_MAX = 2_000_000;
 export const TAILLE_MM_DEFAUT = 100;
 
 export interface Maillage {
-  positions: Float32Array;
+  positions: Float32Array | Float64Array;
   /** Coordonnées de texture (2 par sommet) ; null si le modèle n'en a pas. */
   uvs: Float32Array | null;
   indices: Uint32Array;
   /** Image de la couleur de base (PNG ou JPEG) et son type. */
   couleur: { octets: Uint8Array; mime: string } | null;
+  /** Données OBJ par primitive ; absentes pour les maillages construits directement. */
+  partiesObj?: PartieObj[];
+  uvsObj?: Float32Array;
+  normalesObj?: Float32Array;
+  indicesObj?: Uint32Array;
+  normalesCoinsObj?: Map<number, [number, number, number]>;
+}
+
+interface PartieObj {
+  debut: number; fin: number; base: number; sommets: number; aUv: boolean; aNormale: boolean;
+  facteur: readonly number[]; alphaMode: string;
+  texture: { octets: Uint8Array; mime: string } | null;
+  erreur: string | null;
 }
 
 export interface RapportMaillage {
@@ -65,12 +92,20 @@ export function maillageDuDocument(doc: Document): Maillage {
   const pos: number[] = [];
   const uv: number[] = [];
   const idx: number[] = [];
+  const uvObj: number[] = [];
+  const normalesObj: number[] = [];
+  const indicesObj: number[] = [];
+  const normalesCoinsObj = new Map<number, [number, number, number]>();
+  const partiesObj: PartieObj[] = [];
   let aUv = true;
   let couleur: Maillage['couleur'] = null;
   const racine = doc.getRoot();
   const noeuds = racine.listNodes().filter((n) => n.getMesh());
   for (const n of noeuds) {
     const m = n.getWorldMatrix();
+    const matrice = new Matrix4().fromArray(m);
+    const determinant = matrice.determinant();
+    const matriceNormale = new Matrix3().getNormalMatrix(matrice);
     for (const p of n.getMesh()!.listPrimitives() as Primitive[]) {
       if (p.getMode() !== 4) continue; // triangles seulement
       const P = p.getAttribute('POSITION');
@@ -86,14 +121,70 @@ export function maillageDuDocument(doc: Document): Maillage {
         const u = [0, 0];
         for (let i = 0; i < U.getCount(); i++) { U.getElement(i, u); uv.push(u[0], u[1]); }
       } else { aUv = false; for (let i = 0; i < P.getCount(); i++) uv.push(0, 0); }
+      const mat = p.getMaterial();
+      const tex = mat?.getBaseColorTexture();
+      const info = mat?.getBaseColorTextureInfo();
+      const uvPourObj = p.getAttribute(`TEXCOORD_${tex ? info?.getTexCoord() ?? 0 : 0}`);
+      const uvValides = !!uvPourObj && uvPourObj.getCount() === P.getCount();
+      const coord = [0, 0];
+      let uvFinies = true;
+      for (let i = 0; i < P.getCount(); i++) {
+        if (uvValides) uvPourObj!.getElement(i, coord);
+        if (uvValides && (!Number.isFinite(coord[0]) || !Number.isFinite(coord[1]))) uvFinies = false;
+        uvObj.push(uvValides ? coord[0] : 0, uvValides ? coord[1] : 0);
+      }
+      const debut = idx.length;
       const I = p.getIndices();
       if (I) { for (let i = 0; i < I.getCount(); i++) idx.push(base + I.getScalar(i)); }
       else { for (let i = 0; i < P.getCount(); i++) idx.push(base + i); }
-      const tex = p.getMaterial()?.getBaseColorTexture();
-      if (!couleur && tex?.getImage()) couleur = { octets: tex.getImage()!, mime: tex.getMimeType() || 'image/png' };
+      for (let i = debut; i < idx.length; i += 3) {
+        // Un reflet inverse l'orientation géométrique : la rétablir pour tous les exports.
+        if (determinant < 0 && i + 2 < idx.length) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]];
+        indicesObj.push(idx[i], idx[i + 1], idx[i + 2]);
+      }
+      const image = tex?.getImage();
+      const mime = tex?.getMimeType() || '';
+      let erreur: string | null = null;
+      const N = p.getAttribute('NORMAL');
+      const aNormale = !!N && N.getType() === 'VEC3' && N.getArray() instanceof Float32Array && N.getCount() === P.getCount();
+      if (N && (!aNormale || !Number.isFinite(determinant) || determinant === 0)) erreur = 'Normales OBJ ou transformation invalides.';
+      const normale = [0, 0, 0];
+      const v = new Vector3();
+      let normalesNulles = false;
+      for (let i = 0; i < P.getCount(); i++) {
+        if (!aNormale || erreur) { normalesObj.push(0, 0, 0); continue; }
+        N!.getElement(i, normale);
+        if (normale.every((x) => x === 0)) { normalesObj.push(0, 0, 0); normalesNulles = true; continue; }
+        v.set(normale[0], normale[1], normale[2]).applyMatrix3(matriceNormale);
+        if (![v.x, v.y, v.z, v.lengthSq()].every(Number.isFinite) || v.lengthSq() === 0) erreur = 'Normale OBJ non finie ou nulle.';
+        v.normalize();
+        normalesObj.push(v.x, v.y, v.z);
+      }
+      if (normalesNulles && !erreur) {
+        const a = new Vector3(), b = new Vector3(), c = new Vector3(), face = new Vector3();
+        for (let t = debut; t < idx.length; t += 3) {
+          const coins = indicesObj.slice(t, t + 3);
+          const manque = coins.map((s) => normalesObj[3 * s] === 0 && normalesObj[3 * s + 1] === 0 && normalesObj[3 * s + 2] === 0);
+          if (!manque.some(Boolean)) continue;
+          a.fromArray(pos, 3 * coins[0]); b.fromArray(pos, 3 * coins[1]); c.fromArray(pos, 3 * coins[2]);
+          face.subVectors(b, a).cross(c.sub(a));
+          if (![face.x, face.y, face.z, face.lengthSq()].every(Number.isFinite) || face.lengthSq() === 0) {
+            erreur = 'Normale nulle sur une face OBJ dégénérée.'; break;
+          }
+          face.normalize();
+          for (let coin = 0; coin < 3; coin++) if (manque[coin]) normalesCoinsObj.set(t + coin, [face.x, face.y, face.z]);
+        }
+      }
+      if (!erreur && !uvFinies) erreur = 'Coordonnées UV OBJ non finies.';
+      else if (tex && (!image || !uvValides)) erreur = 'Texture de base sans image ou coordonnées UV utilisables.';
+      else if (tex && mime !== 'image/png' && mime !== 'image/jpeg') erreur = 'Texture OBJ : seuls PNG et JPEG sont pris en charge.';
+      else if (info && info.listExtensions().length) erreur = 'Transformation de texture OBJ non prise en charge.';
+      partiesObj.push({ debut, fin: idx.length, base, sommets: P.getCount(), aUv: uvValides, aNormale, facteur: mat?.getBaseColorFactor() ?? [1, 1, 1, 1],
+        alphaMode: mat?.getAlphaMode() ?? 'OPAQUE', texture: image ? { octets: image, mime } : null, erreur });
+      if (!couleur && image) couleur = { octets: image, mime: mime || 'image/png' };
     }
   }
-  return { positions: Float32Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur };
+  return { positions: Float64Array.from(pos), uvs: aUv ? Float32Array.from(uv) : null, indices: Uint32Array.from(idx), couleur, partiesObj, uvsObj: Float32Array.from(uvObj), normalesObj: Float32Array.from(normalesObj), indicesObj: Uint32Array.from(indicesObj), normalesCoinsObj };
 }
 
 // ---------- contrôle ----------
@@ -121,7 +212,21 @@ export function cleArete(a: number, b: number, nombreSommets: number): number | 
   return (BigInt(bas) << 32n) | BigInt(haut);
 }
 
+/** Refuse les géométries qui rendraient les mesures de topologie ou de boîte englobante trompeuses. */
+function validerGeometrie(m: Maillage): void {
+  if (m.positions.length % 3 !== 0) throw new Error('Maillage invalide : la longueur des positions doit être un multiple de 3.');
+  if (m.indices.length % 3 !== 0) throw new Error('Maillage invalide : la longueur des indices doit être un multiple de 3.');
+  for (let i = 0; i < m.positions.length; i++) {
+    if (!Number.isFinite(m.positions[i])) throw new Error(`Maillage invalide : coordonnée de position non finie à l’offset ${i}.`);
+  }
+  const sommets = m.positions.length / 3;
+  for (let i = 0; i < m.indices.length; i++) {
+    if (m.indices[i] >= sommets) throw new Error(`Maillage invalide : indice ${m.indices[i]} hors plage (${sommets} sommets).`);
+  }
+}
+
 export function analyser(m: Maillage): RapportMaillage {
+  validerGeometrie(m);
   const soude = sommetsSoudes(m);
   const nTri = m.indices.length / 3;
   const aretes = new Map<number | bigint, number>();
@@ -133,6 +238,7 @@ export function analyser(m: Maillage): RapportMaillage {
   let degeneres = 0;
   const utilises = new Uint8Array(nbSoudes);
   let volume6 = 0;
+  let ancrage: [number, number, number] | null = null;
   for (let t = 0; t < nTri; t++) {
     const a = soude[m.indices[3 * t]], b = soude[m.indices[3 * t + 1]], c = soude[m.indices[3 * t + 2]];
     const ia = m.indices[3 * t] * 3, ib = m.indices[3 * t + 1] * 3, ic = m.indices[3 * t + 2] * 3;
@@ -148,9 +254,11 @@ export function analyser(m: Maillage): RapportMaillage {
     }
     utilises[a] = utilises[b] = utilises[c] = 1;
     p[racine(a)] = racine(b); p[racine(b)] = racine(c);
-    volume6 += m.positions[ia] * (m.positions[ib + 1] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic + 1])
-      - m.positions[ia + 1] * (m.positions[ib] * m.positions[ic + 2] - m.positions[ib + 2] * m.positions[ic])
-      + m.positions[ia + 2] * (m.positions[ib] * m.positions[ic + 1] - m.positions[ib + 1] * m.positions[ic]);
+    ancrage ??= [m.positions[ia], m.positions[ia + 1], m.positions[ia + 2]];
+    const ax = m.positions[ia] - ancrage[0], ay = m.positions[ia + 1] - ancrage[1], az = m.positions[ia + 2] - ancrage[2];
+    const bx = m.positions[ib] - ancrage[0], by = m.positions[ib + 1] - ancrage[1], bz = m.positions[ib + 2] - ancrage[2];
+    const cx = m.positions[ic] - ancrage[0], cy = m.positions[ic + 1] - ancrage[1], cz = m.positions[ic + 2] - ancrage[2];
+    volume6 += ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx);
   }
   let ouvertes = 0, nonVariete = 0, orientationIncoherente = false;
   for (const etat of aretes.values()) {
@@ -256,11 +364,12 @@ export function zipAligne(fichiers: { nom: string; octets: Uint8Array }[]): Uint
 
 export function versObj(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   const nom = nomSur(opt.nom);
+  if (m.partiesObj) return versObjAvecMatieres(m, nom);
   const lignes: string[] = [`# ${NEXORA_PRODUCT_NAMES.mesh} : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
   const n = m.positions.length / 3;
   for (let i = 0; i < n; i++) lignes.push(`v ${f(m.positions[3 * i])} ${f(m.positions[3 * i + 1])} ${f(m.positions[3 * i + 2])}`);
   if (m.uvs) for (let i = 0; i < n; i++) lignes.push(`vt ${f(m.uvs[2 * i])} ${f(1 - m.uvs[2 * i + 1])}`);
-  lignes.push('usemtl matiere');
+  lignes.push('usemtl matiere', 's off');
   for (let t = 0; t < m.indices.length; t += 3) {
     const [a, b, c] = [m.indices[t] + 1, m.indices[t + 1] + 1, m.indices[t + 2] + 1];
     lignes.push(m.uvs ? `f ${a}/${a} ${b}/${b} ${c}/${c}` : `f ${a} ${b} ${c}`);
@@ -271,6 +380,73 @@ export function versObj(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   fichiers[`${nom}.mtl`] = strToU8(`newmtl matiere\nKa 1 1 1\nKd 1 1 1\nKs 0 0 0\nd 1\nillum 1\n${m.couleur ? `map_Kd ${nom}.${ext}\n` : ''}`);
   if (m.couleur) fichiers[`${nom}.${ext}`] = m.couleur.octets;
   return zipSync(fichiers, { level: 0 });
+}
+
+/** OBJ/MTL : une affectation de matériau par primitive, sans prétention d'export PBR complet. */
+function versObjAvecMatieres(m: Maillage, nom: string): Uint8Array {
+  const parties = m.partiesObj!;
+  const lignes = [`# ${NEXORA_PRODUCT_NAMES.mesh} : ${nom}`, `mtllib ${nom}.mtl`, `o ${nom}`];
+  const n = m.positions.length / 3;
+  for (let i = 0; i < n; i++) lignes.push(`v ${f(m.positions[3 * i])} ${f(m.positions[3 * i + 1])} ${f(m.positions[3 * i + 2])}`);
+  if (parties.some((p) => p.aUv)) {
+    const uv = m.uvsObj!;
+    for (let i = 0; i < n; i++) lignes.push(`vt ${f(uv[2 * i])} ${f(1 - uv[2 * i + 1])}`);
+  }
+  const indexNormales = new Map<number, number>();
+  const indexNormalesCoins = new Map<number, number>();
+  const normales = m.normalesObj!;
+  for (const partie of parties) if (partie.aNormale && !partie.erreur) {
+    for (let i = partie.base; i < partie.base + partie.sommets; i++) {
+      if (normales[3 * i] === 0 && normales[3 * i + 1] === 0 && normales[3 * i + 2] === 0) continue;
+      indexNormales.set(i + 1, indexNormales.size + 1);
+      lignes.push(`vn ${f(normales[3 * i])} ${f(normales[3 * i + 1])} ${f(normales[3 * i + 2])}`);
+    }
+  }
+  for (const [coin, normale] of m.normalesCoinsObj ?? []) {
+    indexNormalesCoins.set(coin, indexNormales.size + indexNormalesCoins.size + 1);
+    lignes.push(`vn ${normale.map(f).join(' ')}`);
+  }
+  if (indexNormalesCoins.size) lignes.push(`# ${indexNormalesCoins.size} normales de coin calculées depuis les faces pour remplacer des normales nulles`);
+  const fichiers: Record<string, Uint8Array> = {};
+  const definitions: string[] = [];
+  for (let i = 0; i < parties.length; i++) {
+    const partie = parties[i];
+    if (partie.erreur) throw new ObjIncompatible(partie.erreur);
+    const mat = parties.length === 1 ? 'matiere' : `matiere_${i}`;
+    lignes.push(`usemtl ${mat}`);
+    lignes.push(partie.aNormale ? 's 1' : 's off');
+    for (let t = partie.debut; t < partie.fin; t += 3) {
+      const idx = m.indicesObj!;
+      const sommets = [idx[t] + 1, idx[t + 1] + 1, idx[t + 2] + 1];
+      const face = sommets.map((s, coin) => {
+        const normale = indexNormales.get(s) ?? indexNormalesCoins.get(t + coin);
+        return partie.aNormale ? (partie.aUv ? `${s}/${s}/${normale}` : `${s}//${normale}`) : (partie.aUv ? `${s}/${s}` : `${s}`);
+      });
+      lignes.push(`f ${face.join(' ')}`);
+    }
+    let map = '';
+    if (partie.texture) {
+      const fichier = `${nom}${parties.length === 1 ? '' : `_${i}`}.${extensionImage(partie.texture.mime)}`;
+      fichiers[fichier] = partie.texture.octets;
+      map = `map_Kd ${fichier}\n`;
+    }
+    const alpha = partie.alphaMode === 'BLEND' ? partie.facteur[3] : 1;
+    definitions.push(`newmtl ${mat}\nKa 1 1 1\nKd ${partie.facteur.slice(0, 3).map(f).join(' ')}\nKs 0 0 0\nd ${f(alpha)}\nillum 1\n${map}`);
+  }
+  fichiers[`${nom}.obj`] = strToU8(lignes.join('\n') + '\n');
+  fichiers[`${nom}.mtl`] = strToU8(definitions.join(''));
+  return zipSync(fichiers, { level: 0 });
+}
+
+/** Les anciennes versions restent en place ; les exports corrigés utilisent un nouveau cache. */
+export function nomCacheExport(format: FormatRelief, cible: number | null, taille: number): string {
+  const version = format === 'obj' ? '-normales-v4' : format === 'glb' ? '' : format === 'usdz' ? '-matieres-v3' : '-orientation-v3';
+  return `export-${format}${version}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`;
+}
+
+/** Sépare les rapports calculés après conservation de la précision des coordonnées monde. */
+export function nomCacheRapport(cible: number | null): string {
+  return `rapport-monde64-v1-${cible ?? 'plein'}.json`;
 }
 
 /** STL binaire, en millimètres, Z vers le haut, posé sur le plateau. */
@@ -308,96 +484,70 @@ export function vers3mf(m: Maillage, opt: OptionsExport = {}): Uint8Array {
   }, { level: 6 });
 }
 
-/** USDZ (Apple : Quick Look, Vision Pro) : un USDA et la texture, zip non compressé aligné sur 64 octets. */
-export function versUsdz(m: Maillage, opt: OptionsExport = {}): Uint8Array {
-  const nom = nomSur(opt.nom);
-  const n = m.positions.length / 3;
-  const pts: string[] = [];
-  for (let i = 0; i < n; i++) pts.push(`(${f(m.positions[3 * i])}, ${f(m.positions[3 * i + 1])}, ${f(m.positions[3 * i + 2])})`);
-  const nbFaces = m.indices.length / 3;
-  const ext = m.couleur ? extensionImage(m.couleur.mime) : 'png';
-  const st = m.uvs ? Array.from({ length: n }, (_, i) => `(${f(m.uvs![2 * i])}, ${f(m.uvs![2 * i + 1])})`) : [];
-  const usda = `#usda 1.0
-(
-    defaultPrim = "${nom}"
-    metersPerUnit = 1
-    upAxis = "Y"
-)
-
-def Xform "${nom}" (kind = "component")
-{
-    def Mesh "maillage"
-    {
-        int[] faceVertexCounts = [${Array(nbFaces).fill(3).join(', ')}]
-        int[] faceVertexIndices = [${Array.from(m.indices).join(', ')}]
-        point3f[] points = [${pts.join(', ')}]
-        uniform token subdivisionScheme = "none"
-        ${m.uvs ? `texCoord2f[] primvars:st = [${st.join(', ')}] (interpolation = "vertex")` : ''}
-        rel material:binding = </${nom}/Materiaux/matiere>
-    }
-    def Scope "Materiaux"
-    {
-        def Material "matiere"
-        {
-            token outputs:surface.connect = </${nom}/Materiaux/matiere/surface.outputs:surface>
-            def Shader "surface"
-            {
-                uniform token info:id = "UsdPreviewSurface"
-                ${m.couleur ? `color3f inputs:diffuseColor.connect = </${nom}/Materiaux/matiere/texture.outputs:rgb>` : 'color3f inputs:diffuseColor = (0.8, 0.8, 0.8)'}
-                float inputs:roughness = 0.7
-                float inputs:metallic = 0
-                token outputs:surface
-            }
-            ${m.couleur ? `def Shader "texture"
-            {
-                uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @couleur.${ext}@
-                float2 inputs:st.connect = </${nom}/Materiaux/matiere/coord.outputs:result>
-                token inputs:sourceColorSpace = "sRGB"
-                float3 outputs:rgb
-            }
-            def Shader "coord"
-            {
-                uniform token info:id = "UsdPrimvarReader_float2"
-                token inputs:varname = "st"
-                float2 outputs:result
-            }` : ''}
-        }
-    }
-}
-`;
-  const fichiers: { nom: string; octets: Uint8Array }[] = [{ nom: `${nom}.usda`, octets: strToU8(usda) }];
-  if (m.couleur) fichiers.push({ nom: `couleur.${ext}`, octets: m.couleur.octets });
-  return zipAligne(fichiers);
-}
-
 /** Le fichier du format voulu, depuis un GLB (décimé d'abord si `cible` est donné). */
+/** L'export OBJ ne sait pas appliquer KHR_texture_transform ; le refuser avant toute décimation. */
+function refuserTransformationTextureObj(glb: Uint8Array): void {
+  if (glb.byteLength < 20) throw new Error('GLB invalide.');
+  const vue = new DataView(glb.buffer, glb.byteOffset, glb.byteLength);
+  const longueur = vue.getUint32(12, true);
+  if (vue.getUint32(0, true) !== 0x46546c67 || vue.getUint32(16, true) !== 0x4e4f534a || longueur > glb.byteLength - 20) {
+    throw new Error('GLB invalide.');
+  }
+  const json = JSON.parse(new TextDecoder().decode(glb.subarray(20, 20 + longueur))) as {
+    materials?: { pbrMetallicRoughness?: { baseColorTexture?: { extensions?: Record<string, unknown> } } }[];
+  };
+  if (json.materials?.some((m) => m.pbrMetallicRoughness?.baseColorTexture?.extensions?.KHR_texture_transform != null)) {
+    throw new ObjIncompatible('Transformation de texture OBJ non prise en charge.');
+  }
+}
+
+/** Compatibilité avant téléchargement ; aucun export ni génération GPU n'est lancé. */
+export function compatibiliteObj(glb: Uint8Array, m: Maillage): { compatible: boolean; code: typeof CODE_OBJ_INCOMPATIBLE | null } {
+  try {
+    refuserTransformationTextureObj(glb);
+    const erreur = m.partiesObj?.find((partie) => partie.erreur)?.erreur;
+    if (erreur) throw new ObjIncompatible(erreur);
+    return { compatible: true, code: null };
+  } catch (error) {
+    if (error instanceof ObjIncompatible) return { compatible: false, code: CODE_OBJ_INCOMPATIBLE };
+    throw error;
+  }
+}
+
 export async function exporter(glb: Uint8Array, format: FormatRelief, opt: OptionsExport & { cible?: number | null } = {}): Promise<Uint8Array> {
+  if (format === 'obj') refuserTransformationTextureObj(glb);
+  if (format === 'usdz') verifierGlbUsdz(glb);
   const source = opt.cible ? await decimerGlb(glb, opt.cible) : glb;
   if (format === 'glb') return source;
+  if (format === 'usdz') return exporterUsdz(source, opt.nom);
   const m = await lireGlb(source);
   if (format === 'obj') return versObj(m, opt);
   if (format === 'stl') return versStl(m, opt);
-  if (format === '3mf') return vers3mf(m, opt);
-  return versUsdz(m, opt);
+  return vers3mf(m, opt);
 }
 
 /** Cartes PBR d'un GLB (couleur, métal/rugosité, normales, occlusion, émission) : octets des images présentes. */
-export async function cartesPbr(glb: Uint8Array): Promise<{ nom: string; mime: string; octets: Uint8Array; largeur: number | null }[]> {
+export async function cartesPbr(glb: Uint8Array): Promise<{ nom: string; mime: string; octets: Uint8Array; largeur: number | null; materiaux: { index: number; nom: string }[] }[]> {
   const doc = await io.readBinary(glb);
-  const sortie: { nom: string; mime: string; octets: Uint8Array; largeur: number | null }[] = [];
-  const vues = new Set<string>();
-  for (const mat of doc.getRoot().listMaterials()) {
+  const sortie: { nom: string; mime: string; octets: Uint8Array; largeur: number | null; materiaux: { index: number; nom: string }[] }[] = [];
+  const vues = new Map<string, Map<Texture, (typeof sortie)[number]>>();
+  for (const [index, mat] of doc.getRoot().listMaterials().entries()) {
     const liste: [string, ReturnType<typeof mat.getBaseColorTexture>][] = [
       ['couleur', mat.getBaseColorTexture()], ['metal-rugosite', mat.getMetallicRoughnessTexture()], ['normales', mat.getNormalTexture()],
       ['occlusion', mat.getOcclusionTexture()], ['emission', mat.getEmissiveTexture()],
     ];
     for (const [nom, tex] of liste) {
       const img = tex?.getImage();
-      if (!tex || !img || vues.has(nom)) continue;
-      vues.add(nom);
+      if (!tex || !img) continue;
+      const dejaVues = vues.get(nom) ?? new Map<Texture, (typeof sortie)[number]>();
+      const deja = dejaVues.get(tex);
+      const materiau = { index: index + 1, nom: mat.getName() };
+      if (deja) { deja.materiaux.push(materiau); continue; }
       const taille = tex.getSize();
-      sortie.push({ nom, mime: tex.getMimeType() || 'image/png', octets: img, largeur: taille ? taille[0] : null });
+      const carte = { nom: dejaVues.size === 0 ? nom : `${nom}-${dejaVues.size + 1}`, mime: tex.getMimeType() || 'image/png', octets: img, largeur: taille ? taille[0] : null, materiaux: [materiau] };
+      dejaVues.set(tex, carte);
+      vues.set(nom, dejaVues);
+      sortie.push(carte);
     }
   }
   return sortie;

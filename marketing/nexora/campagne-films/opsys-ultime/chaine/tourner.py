@@ -119,45 +119,68 @@ def cles(equipe):
 
 
 # -------------------------------------------------------------------------------------------------------------- voix
-def voix(equipe, ids=None):
+def lire_palette(palette):
+    if not palette:
+        raise ValueError('Palette explicite requise (--palette ou OPSYS_PALETTE).')
+    chemin_palette = Path(palette)
+    if chemin_palette.suffix.lower() != '.json' or chemin_palette.is_symlink() or not chemin_palette.is_file():
+        raise ValueError('Palette JSON explicite et régulière requise.')
+    return json.loads(chemin_palette.read_text())['voix']
+
+
+def voix(equipe, ids=None, *, palette):
+    """Génère seulement des rôles Eleven v4 depuis une palette fournie explicitement."""
     import voix as V
     D = dossier(equipe)
-    pal = json.loads((RACINE / "casting" / "palette.json").read_text())["voix"]
+    pal = lire_palette(palette)
     for l in D.get("voix", []):
         if ids and l["id"] not in ids:
             continue
         p = pal.get(l["voix"])
         if not p:
-            print(f"voix inconnue dans la palette : {l['voix']} ({l['id']})", flush=True)
-            continue
+            raise ValueError(f"Voix absente de la palette : {l['voix']}")
+        vitesse = l.get("vitesse", p.get("vitesse", 1.0))
+        direction = l.get("direction") or p.get("direction", "")
         for k in range(1, int(l.get("prises", 1)) + 1):
-            if (TRAVAIL / equipe / "voix" / f"{l['id']}-p{k}.json").exists():
-                continue
-            vit = float(l.get("vitesse", p.get("vitesse", 1.0)))
-            direc = l.get("direction") or p.get("direction", "")
-            if p["moteur"].startswith("qwen3tts"):
-                direc = ""
-            try:
-                m = V.ligne(equipe, l["id"], p["moteur"], l["texte"], direc, vit, k)
-                print(l["id"], k, m["utile_s"], "s emr", m["emr"], (m.get("oreille") or {}).get("moyennes"), flush=True)
-            except Exception as e:
-                print("ECHEC voix", l["id"], k, str(e)[:300], flush=True)
+            m = V.ligne(equipe, l["id"], p["moteur"], l["texte"], direction, vitesse, k,
+                        langue=l.get("langue"), racine=TRAVAIL, ffmpeg=FF)
+            print(l["id"], k, m["statut_humain"], flush=True)
 
 
-def prise_voix(equipe, lid):
-    """Prise retenue d'une réplique (choix.json, sinon la meilleure par EMR puis oreille)."""
+def prise_voix(equipe, lid, *, palette=None, autoriser_factice=False):
+    """Lit seulement les nouveaux reçus Eleven v4 liés par SHA ; aucune note inventée."""
+    import voix as V
+    V._identifiant(equipe, 'Équipe'); V._identifiant(lid, 'Réplique')
+    lignes = [ligne for ligne in dossier(equipe)['voix'] if ligne.get('id') == lid]
+    if len(lignes) != 1 or lignes[0].get('langue') not in ('fr', 'en'):
+        raise ValueError(f'Langue explicite et unique requise pour {lid}.')
+    langue = lignes[0]['langue']
+    ligne = lignes[0]
+    import os
+    pal = lire_palette(palette or os.environ.get('OPSYS_PALETTE'))
+    p = pal.get(ligne['voix'])
+    if not p:
+        raise ValueError(f"Voix absente de la palette : {ligne['voix']}")
     c = choix(equipe)["voix"].get(lid)
-    d = TRAVAIL / equipe / "voix"
-    if c:
-        return d / f"{lid}-p{c}.wav"
-    cands = []
-    for j in sorted(d.glob(f"{lid}-p*.json")):
+    d = TRAVAIL / equipe / "voix" / "eleven4"
+    candidats = []
+    for j in sorted(d.glob(f"*/*/{lid}-p*.json")):
+        if j.is_symlink() or j.parent.is_symlink() or j.parent.parent.is_symlink():
+            continue
         m = json.loads(j.read_text())
-        o = (m.get("oreille") or {}).get("moyennes") or {}
-        cands.append((m.get("emr", 1) > 0.1, -sum(o.values()), m["fichier"]))
-    if not cands:
-        raise FileNotFoundError(f"aucune prise pour {lid}")
-    return Path(sorted(cands)[0][2])
+        if m.get('id') != lid or m.get('equipe') != equipe or m.get('langue') != langue or (c is not None and m.get('prise') != c):
+            continue
+        try:
+            spec = V.contrat(equipe, lid, p['moteur'], ligne['texte'], ligne.get('direction') or p.get('direction', ''),
+                             ligne.get('vitesse', p.get('vitesse', 1.0)), m['prise'], langue)
+            attendu = V.signature(spec, m.get('origine') == 'factice')
+        except (KeyError, TypeError, ValueError):
+            continue
+        if m.get('contrat') == spec and m.get('signature') == attendu and V.verifier_recu(m, j, autoriser_factice):
+            candidats.append(Path(m['fichier']))
+    if len(candidats) != 1:
+        raise ValueError(f"Prise Eleven v4 absente ou ambiguë pour {lid} ; sélection explicite requise.")
+    return candidats[0]
 
 
 def duree(f):
@@ -279,7 +302,9 @@ if __name__ == "__main__":
     elif cmd == "cles":
         cles(eq)
     elif cmd == "voix":
-        voix(eq, set(reste) or None)
+        if len(reste) < 2 or reste[0] != '--palette':
+            raise SystemExit('Usage : tourner.py EQUIPE voix --palette CHEMIN [IDS...]')
+        voix(eq, set(reste[2:]) or None, palette=reste[1])
     elif cmd == "musique":
         musique(eq, reste[0] if reste else None)
     elif cmd == "specs":

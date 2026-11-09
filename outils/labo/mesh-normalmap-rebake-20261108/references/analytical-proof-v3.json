@@ -1,0 +1,138 @@
+{
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.14.1+cu130",
+    "device": "CPU",
+    "network": "bwrap --unshare-net",
+    "comfy_operator": "private overlay only"
+  },
+  "source": {
+    "path": "inputs/source-normalmap-uv1-w-plus-minus.glb",
+    "sha256": "1d805fe01a756def94de42e89ae797f6b87b0cc342d5a43d2be7904651aeae9b",
+    "image_path": "inputs/source-normal-raw-rgb.png",
+    "image_sha256": "ec0bbbd8f9ab4d95dd289a7332f4e8d15ae5d0a98e21c8218461299bd8b34243",
+    "normal_scale": 0.35,
+    "normal_texcoord": 1,
+    "sampler": {
+      "magFilter": "LINEAR",
+      "minFilter": "LINEAR",
+      "wrapS": "CLAMP_TO_EDGE",
+      "wrapT": "CLAMP_TO_EDGE"
+    }
+  },
+  "target": {
+    "path": "results/target-rebaked-atlas.glb",
+    "sha256": "21c561cdd9e3f8ead326650ace459102af54a19eb03c1b580bce94c5cac2ac18",
+    "baked_png_path": "results/baked-normal-atlas.png",
+    "baked_png_sha256": "10f20fa4a790e1d571adffbd2dff81ed51bb0a3e784454a7207a869e8aecf2cb",
+    "normal_texcoord": 0,
+    "normal_scale": 1.0,
+    "vertices": 6,
+    "triangles": 2
+  },
+  "fixture": {
+    "vertices": 6,
+    "triangles": 2,
+    "corner_duplicated": true,
+    "source_tangent_w_per_triangle": [
+      1.0,
+      -1.0
+    ],
+    "target_tangent_w_per_triangle": [
+      1.0,
+      1.0
+    ],
+    "texcoord_0_atlas_and_texcoord_1_source_are_distinct": true,
+    "all_uvs_in_unit_square": true,
+    "real_source_png_normal_map": true,
+    "normal_map_rgb_is_sampled_raw_linear_values_without_srgb_transfer": true,
+    "normal_map_uses_asymmetric_xy_variation": true,
+    "remesh_decimate_weld_unwrap": false
+  },
+  "operator": {
+    "path": "BakeNormalMapFromMesh.execute on copied overlay, then ApplyTextureToMesh.execute on copied overlay",
+    "source_tangent_preserved_as_input": true,
+    "source_normal_map_sampled_at_barycentric_hit_uv1": true,
+    "source_frame": "orthonormalize interpolated T against interpolated N; B=w*cross(N,T)",
+    "normal_scale_applied_to_decoded_XY_before_normalization": true,
+    "target_frame": "per-texel from target mesh TANGENT at atlas UV0",
+    "expected_parser_warning": [
+      {
+        "key": "texcoord:normalTexture",
+        "message": "normalTexture uses TEXCOORD_1; MESH only carries TEXCOORD_0"
+      }
+    ]
+  },
+  "measurements": [
+    {
+      "face": 0,
+      "source_tangent_w": 1.0,
+      "target_tangent_w": 1.0,
+      "interior_pixels": 210,
+      "source_uv1_bounds": [
+        [
+          0.10000000149011612,
+          0.10000000149011612
+        ],
+        [
+          0.4000000059604645,
+          0.4000000059604645
+        ]
+      ],
+      "target_uv0_bounds": [
+        [
+          0.10000000149011612,
+          0.550000011920929
+        ],
+        [
+          0.4000000059604645,
+          0.8500000238418579
+        ]
+      ],
+      "world_normal_angle_error_degrees": {
+        "mean": 0.36501670117336554,
+        "median": 0.376709554283446,
+        "p95": 0.5582623587121005,
+        "max": 0.6691709169955776
+      }
+    },
+    {
+      "face": 1,
+      "source_tangent_w": -1.0,
+      "target_tangent_w": 1.0,
+      "interior_pixels": 210,
+      "source_uv1_bounds": [
+        [
+          0.6000000238418579,
+          0.10000000149011612
+        ],
+        [
+          0.8999999761581421,
+          0.4000000059604645
+        ]
+      ],
+      "target_uv0_bounds": [
+        [
+          0.6000000238418579,
+          0.550000011920929
+        ],
+        [
+          0.8999999761581421,
+          0.8500000238418579
+        ]
+      ],
+      "world_normal_angle_error_degrees": {
+        "mean": 0.32617127775112614,
+        "median": 0.34146729779156026,
+        "p95": 0.5085634705466121,
+        "max": 0.5735033547079988
+      }
+    }
+  ],
+  "limits": [
+    "Synthetic two-triangle fixture with constant N/T/w per triangle; this does not establish behavior for mixed w within a triangle or varying normals/tangents.",
+    "All UVs are inside [0,1], sampler is LINEAR + CLAMP_TO_EDGE; repeat, UVs outside the unit square, UDIM, and KHR_texture_transform are not tested.",
+    "Analytical angular metric uses constant per-face tangent frames; it is a numerical cross-check, not a substitute for the Three.js/SwiftShader reader comparison.",
+    "No production Comfy source was modified; no shared ComfyUI service was started or contacted; no Apple/Quick Look conclusion is made."
+  ]
+}

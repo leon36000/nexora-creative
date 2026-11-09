@@ -5,6 +5,8 @@
  */
 
 import { type SujetRef, validerPromptRef } from './personnages.js';
+import { extraireDialoguesH3 } from './dialoguesH3.js';
+import { styleAvantPremierPlanRef } from './styleH3.js';
 
 export type ModeH3 = 't2va' | 'i2va' | 'fl2va' | 'l2va' | 'ref2va';
 
@@ -14,6 +16,8 @@ export interface ContexteH3 {
   dureeS: number;
   /** Répliques fournies par l'utilisateur, à recopier mot pour mot dans <d>…</d>. */
   dialogues?: string[];
+  /** Langue explicitement demandée pour chaque réplique ; distincte de la langue UI. */
+  dialoguesAvecLangue?: { texte: string; langue: string }[];
   references?: { sujets: SujetRef[]; composition?: number };
 }
 
@@ -63,7 +67,7 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
     erreurs.push(...validerPromptRef(texte, sujets.length, nbImages));
     if (!texte.startsWith('subject_definitions:')) erreurs.push('en Ref2VA, commencer par subject_definitions:');
     if (!/summary:\s*\[reference generation\]/.test(texte)) erreurs.push('summary doit commencer par [reference generation]');
-    if (!/detailed_description:\s*[^[]+\[Shot 1\]/.test(texte)) erreurs.push('le style doit précéder [Shot 1] en Ref2VA');
+    if (!styleAvantPremierPlanRef(texte)) erreurs.push('le style doit précéder [Shot 1] en Ref2VA');
   }
   const plans = [...description.matchAll(/\[Shot (\d+)\]\s*(At (\d{2}):(\d{2})\.(\d{3}),)?/g)];
   if (!plans.length) erreurs.push('aucun plan « [Shot 1] » dans la description');
@@ -94,9 +98,21 @@ export function validerPromptH3(prompt: string, ctx: ContexteH3): string[] {
     else if ((texte.split('\n')[1] ?? 'x').trim() !== '') erreurs.push('une ligne vide doit suivre la ligne d’instruction');
   }
 
-  const blocs = [...texte.matchAll(/<d>\[[^\]]+\]\s*([\s\S]*?)<\/d>/g)].map((m) => m[1].trim());
+  const blocs = extraireDialoguesH3(texte);
   for (const replique of ctx.dialogues ?? []) {
-    if (!blocs.some((b) => b === replique.trim())) erreurs.push(`réplique absente ou modifiée, à recopier mot pour mot : ${replique}`);
+    if (!blocs.some((b) => b.texte === replique.trim())) erreurs.push(`réplique absente ou modifiée, à recopier mot pour mot : ${replique}`);
+  }
+  const disponibles = [...blocs];
+  for (const replique of ctx.dialoguesAvecLangue ?? []) {
+    const i = disponibles.findIndex((b) => b.texte === replique.texte.trim() && b.langue === replique.langue);
+    if (i < 0) erreurs.push(`langue ou texte de la réplique incorrect : ${replique.texte}`);
+    else disponibles.splice(i, 1);
+  }
+  if (ctx.dialoguesAvecLangue !== undefined) {
+    const ouvertures = (texte.match(/<d>/g) ?? []).length;
+    const fermetures = (texte.match(/<\/d>/g) ?? []).length;
+    if (ouvertures !== blocs.length || fermetures !== blocs.length) erreurs.push('balises de réplique mal formées');
+    for (const bloc of disponibles) erreurs.push(`réplique en trop ou langue incorrecte : ${bloc.texte}`);
   }
   return erreurs;
 }

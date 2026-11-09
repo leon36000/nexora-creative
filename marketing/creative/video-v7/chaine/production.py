@@ -20,7 +20,7 @@ import urllib.parse
 import urllib.request
 
 from commun import (ICI, V7, DATA, absolu, banc, budget, calage_auto, duree, ecrire_json,
-                    api_configuration, ecrire_octets_exclusifs, journal, juge, lignes, lire_json, module,
+                    api_configuration, chemin_voix_film, ecrire_octets_exclusifs, journal, juge, lignes, lire_json, module,
                     montage_module, moteur, recette, substituer, unites, musique_legacy)
 
 ENGINE = Path.home() / 'nexora-creative-data/engine'
@@ -50,6 +50,18 @@ def commande(args, **kw):
 
 def ff(*args):
     return commande([binaire('ffmpeg'), '-v', 'error', '-nostdin', '-y', *args])
+
+
+def ff_exclusif(*args):
+    return commande([binaire('ffmpeg'), '-v', 'error', '-nostdin', '-n', *args])
+
+
+def empreinte_fichier(f):
+    digest = hashlib.sha256()
+    with Path(f).open('rb') as stream:
+        for bloc in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(bloc)
+    return digest.hexdigest()
 
 
 def sonder(f):
@@ -425,25 +437,34 @@ class Atelier:
 
     def voix(self):
         b = banc()
-        root = self.travail / 'voix'
-        root.mkdir(parents=True, exist_ok=True)
         for spec in self.d['voix']:
-            if spec['moteur'] == 'h3-natif':
-                journal(root / 'journal.jsonl', {**spec, 'natif': True})
-                continue
-            token = signature(spec)
-            meta = root / (spec['id']+'.json')
-            dst = root / (spec['id']+'.wav')
-            if lire_json(meta, {}).get('signature') == token and dst.exists():
-                continue
+            chemin_voix_film(self.travail, spec, self.blanc)
+        for spec in self.d['voix']:
+            dst = chemin_voix_film(self.travail, spec, self.blanc)
+            root = dst.parent
+            root.mkdir(parents=True, exist_ok=True)
+            token = dst.parent.name
+            origine = 'factice' if self.blanc else 'modele_demande_non_atteste'
+            meta = dst.with_suffix('.json')
+            if meta.exists() or meta.is_symlink() or dst.exists() or dst.is_symlink():
+                precedent = lire_json(meta, {}) if meta.is_file() and not meta.is_symlink() else {}
+                if (dst.is_file() and not dst.is_symlink() and precedent.get('signature') == token
+                        and precedent.get('origine') == origine and precedent.get('modele_demande') == b.MODELE_FILM and precedent.get('sha256') == empreinte_fichier(dst)):
+                    continue
+                raise FileExistsError(f'Prise vocale existante non réutilisable ; conservée : {dst}')
             prises = []
             for i in (0, 1):
                 folder = root / 'prises' / (spec['id']+'-'+token+f'-{i+1}')
                 folder.mkdir(parents=True, exist_ok=True)
                 f = folder / 'prise.mp3'
                 report = folder / 'mesure.json'
-                if report.exists() and f.exists():
-                    prises.append(lire_json(report))
+                if report.exists() or report.is_symlink() or f.exists() or f.is_symlink():
+                    if not report.is_file() or not f.is_file() or report.is_symlink() or f.is_symlink():
+                        raise ValueError(f'Prise partielle conservée sans réutilisation : {f}')
+                    ancienne = lire_json(report)
+                    if ancienne.get('origine') != origine or ancienne.get('modele_demande') != b.MODELE_FILM or ancienne.get('sha256') != empreinte_fichier(f):
+                        raise ValueError(f'Provenance de prise non attestée : {f}')
+                    prises.append(ancienne)
                     continue
                 if not f.exists():
                     if self.blanc:
@@ -456,12 +477,12 @@ class Atelier:
                              patch.object(b, 'post', self.post), patch.dict(b.TEXTES, {'replique': spec['texte']}), \
                              patch.dict(b.JEU, {'replique': spec['direction']}):
                             produit = b.generer(spec['moteur'], 'replique')
-                        if f.exists():
-                            raise FileExistsError(f'Prise vocale déjà présente : {f}')
-                        produit.replace(f)
+                        # Lien exclusif : ne remplace aucune prise et conserve la source reçue.
+                        os.link(produit, f)
                 if self.blanc:
-                    texte, oreille, com, genre = spec['texte'], {'langue_francaise': 8, 'energie': 8, 'caractere': 8,
-                                                               'naturel': 8, 'cheap': 1, 'accent_quebecois': 8}, [], None
+                    cles = ('langue_francaise', 'accent_quebecois') if spec['langue'] == 'fr' else ('langue_anglaise', 'accent_naturel')
+                    texte, oreille, com, genre = spec['texte'], {cles[0]: 8, 'energie': 8, 'caractere': 8,
+                                                               'naturel': 8, 'cheap': 1, cles[1]: 8}, [], None
                 else:
                     code = ('import json,sys; from faster_whisper import WhisperModel; '
                             'm=WhisperModel("small",device="cpu",compute_type="int8"); '
@@ -470,20 +491,22 @@ class Atelier:
                     texte = json.loads(commande([ENGINE / 'transcription-venv/bin/python', '-c', code, f, spec.get('langue', 'fr')]))
                     from unittest.mock import patch
                     with patch.object(b, 'post', self.post), patch.dict(b.TEXTES, {'replique': spec['texte']}):
-                        oreille, com, genre = b.juger(f, 'replique')
+                        oreille, com, genre = b.juger(f, 'replique', langue=spec['langue'])
                     if not oreille:
                         raise RuntimeError(f'Oreille de machine indisponible pour {spec["id"]}')
                 taux = wer(spec['texte'], texte)
-                score = sum(oreille.get(k, 0)*w for k, w in [('langue_francaise', .25), ('energie', .2),
-                            ('caractere', .2), ('naturel', .25), ('cheap', -.2), ('accent_quebecois', .1)]) - 5*taux
+                langue_cle, accent_cle = ('langue_francaise', 'accent_quebecois') if spec['langue'] == 'fr' else ('langue_anglaise', 'accent_naturel')
+                score = sum(oreille.get(k, 0)*w for k, w in [(langue_cle, .25), ('energie', .2),
+                            ('caractere', .2), ('naturel', .25), ('cheap', -.2), (accent_cle, .1)]) - 5*taux
                 res = {'id': spec['id'], 'prise': i+1, 'fichier': str(f), 'transcription': texte, 'wer': taux,
-                       'oreille': oreille, 'commentaires': com, 'genre': genre, 'score': score, 'doublure': self.blanc}
+                       'oreille': oreille, 'commentaires': com, 'genre': genre, 'score': score, 'doublure': self.blanc,
+                       'origine': origine, 'modele_demande': b.MODELE_FILM, 'langue_jugement': spec['langue'], 'sha256': empreinte_fichier(f)}
                 ecrire_json(report, res)
                 journal(root / 'journal.jsonl', res)
                 prises.append(res)
             best = max(prises, key=lambda x: x['score'])
-            ff('-i', best['fichier'], '-ar', '48000', '-ac', '2', dst)
-            ecrire_json(meta, {'signature': token, 'choix': best, 'prises': prises})
+            ff_exclusif('-i', best['fichier'], '-ar', '48000', '-ac', '2', dst)
+            ecrire_json(meta, {'signature': token, 'origine': origine, 'modele_demande': b.MODELE_FILM, 'sha256': empreinte_fichier(dst), 'choix': best, 'prises': prises})
 
     def musique(self):
         root = self.travail / 'musique'
@@ -618,7 +641,7 @@ class Atelier:
                 choix_plans[spec['id']] = choix
             if choix.get('signature') != self.empreinte_rendu('plans', spec) or fichier is None or not fichier.is_file():
                 raise ValueError(f'Plan {spec["id"]} absent ou obsolète : lancer plans avant monter')
-        m = substituer(self.d, self.base, self.travail, musique, choix_plans=choix_plans)
+        m = substituer(self.d, self.base, self.travail, musique, choix_plans=choix_plans, doublure=self.blanc)
         mid = musique or self.d['montage'].get('musique', {}).get('fichier', 'sans-musique').removeprefix('musique:')
         path = self.travail / 'montages' / (mid+'.json')
         ecrire_json(path, m)

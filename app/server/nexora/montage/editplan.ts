@@ -29,6 +29,7 @@ const imagesNonNeg = z.number().int().min(0).max(200_000);
 
 const Source = z.object({
   kind: z.enum(['video', 'audio', 'image']),
+  a_audio: z.boolean().optional().describe('présence mesurée d’un flux audio dans une source vidéo'),
   duree_f: imagesPos.optional().describe('durée connue de la source, en images au fps du plan'),
   chemin: z.string().max(400).optional(),
   mots: z.array(z.tuple([imagesNonNeg, imagesNonNeg])).max(2000).optional().describe('intervalles de parole [début, fin[ en images'),
@@ -112,6 +113,14 @@ export interface ContexteValidation {
 export const framesDe = (s: number, fps: number) => Math.round(s * fps);
 export const secondesDe = (f: number, fps: number) => f / fps;
 
+/** Durée mesurée si elle est exploitable, sans remplacer une mesure inconnue par zéro. */
+function dureeSourceEnFrames(declareeF: number | undefined, mesureeS: unknown, fps: number): number | undefined {
+  if (typeof mesureeS !== 'number' || !Number.isFinite(mesureeS) || mesureeS <= 0) return declareeF;
+  const mesureeF = framesDe(mesureeS, fps);
+  if (!Number.isFinite(mesureeF)) return declareeF;
+  return declareeF === undefined ? mesureeF : Math.min(declareeF, mesureeF);
+}
+
 /** Début de chaque plan vidéo sur la ligne de temps (images) et durée totale. */
 export function lignedeTemps(plan: Pick<EditPlan, 'video'>): { debuts: number[]; fins: number[]; total: number } {
   const debuts: number[] = [];
@@ -139,6 +148,10 @@ export function dureeTotaleS(plan: EditPlan): number {
 
 const V = (regle: string, chemin: string, message: string, indice?: string): Violation => ({ regle, chemin, message, ...(indice ? { indice } : {}) });
 
+function lireClePropre<T>(record: Record<string, T> | undefined, id: string): T | undefined {
+  return record && Object.hasOwn(record, id) ? record[id] : undefined;
+}
+
 /** Valide un objet quelconque : schéma Zod puis invariants de montage. Ne lève jamais. */
 export function validerEditPlan(brut: unknown, ctx: ContexteValidation = {}): RapportValidation {
   const lu = EditPlanSchema.safeParse(brut);
@@ -156,14 +169,14 @@ export function validerEditPlan(brut: unknown, ctx: ContexteValidation = {}): Ra
     const ch = `video.${i}`;
     if (ids.has(c.id)) erreurs.push(V('id_unique', `${ch}.id`, `identifiant de plan en double : ${c.id}`));
     ids.add(c.id);
-    const src = plan.sources[c.src];
+    const src = lireClePropre(plan.sources, c.src);
     if (!src) { erreurs.push(V('source_connue', `${ch}.src`, `source inconnue : ${c.src}`, 'Déclare la source dans `sources` avec le même identifiant que dans l’inventaire.')); return; }
     if (src.kind === 'audio') erreurs.push(V('source_video', `${ch}.src`, `${c.src} est un audio, pas une vidéo`));
-    const inv = ctx.inventaire?.[c.src];
+    const inv = lireClePropre(ctx.inventaire, c.src);
     if (ctx.inventaire && !inv) erreurs.push(V('source_autorisee', `${ch}.src`, `${c.src} n’est pas dans l’inventaire du projet`));
     if (c.duree_f / fps < DUREE_PLAN_MIN_S) erreurs.push(V('duree_min', `${ch}.duree_f`, `plan de ${c.duree_f} images : au moins ${Math.ceil(DUREE_PLAN_MIN_S * fps)}`));
     const conso = consommation(c);
-    const dureeSrc = src.duree_f ?? (inv ? framesDe(inv.duree_s, fps) : undefined);
+    const dureeSrc = dureeSourceEnFrames(src.duree_f, inv?.duree_s, fps);
     if (src.kind === 'video' && dureeSrc !== undefined && c.entree_f + conso > dureeSrc) {
       erreurs.push(V('dans_la_source', `${ch}`, `le plan ${c.id} lit les images ${c.entree_f} à ${c.entree_f + conso} de ${c.src}, qui n’en a que ${dureeSrc}`, 'Réduis duree_f ou entree_f (ou la vitesse), ou choisis une source plus longue.'));
     }
@@ -204,18 +217,29 @@ export function validerEditPlan(brut: unknown, ctx: ContexteValidation = {}): Ra
   const a = plan.audio;
   const m = a.musique;
   if (m) {
-    const s = plan.sources[m.src];
+    const s = lireClePropre(plan.sources, m.src);
+    const inv = lireClePropre(ctx.inventaire, m.src);
     if (!s) erreurs.push(V('source_connue', 'audio.musique.src', `source musique inconnue : ${m.src}`));
     else if (s.kind !== 'audio') erreurs.push(V('source_audio', 'audio.musique.src', `${m.src} n’est pas un audio`));
-    else if (ctx.inventaire && !ctx.inventaire[m.src]) erreurs.push(V('source_autorisee', 'audio.musique.src', `${m.src} n’est pas dans l’inventaire du projet`));
+    else if (ctx.inventaire && !inv) erreurs.push(V('source_autorisee', 'audio.musique.src', `${m.src} n’est pas dans l’inventaire du projet`));
     const dureeJouee = m.duree_f ?? total - 0;
-    if (s?.duree_f && m.entree_f + dureeJouee > s.duree_f) erreurs.push(V('dans_la_source', 'audio.musique', `la musique lit au-delà de sa fin (${m.entree_f + dureeJouee} > ${s.duree_f} images)`, 'Donne duree_f ≤ durée de la piste − entree_f.'));
+    const dureeSrc = s ? dureeSourceEnFrames(s.duree_f, inv?.duree_s, fps) : undefined;
+    if (dureeSrc !== undefined && m.entree_f + dureeJouee > dureeSrc) erreurs.push(V('dans_la_source', 'audio.musique', `la musique lit au-delà de sa fin (${m.entree_f + dureeJouee} > ${dureeSrc} images)`, 'Donne duree_f ≤ durée de la piste − entree_f.'));
     if (m.fondu_in_f + m.fondu_out_f > dureeJouee) erreurs.push(V('fondus_musique', 'audio.musique', 'les fondus de la musique dépassent sa durée'));
   }
   a.voix.forEach((v, i) => {
-    const s = plan.sources[v.src];
+    const s = lireClePropre(plan.sources, v.src);
+    const inv = lireClePropre(ctx.inventaire, v.src);
     if (!s || s.kind !== 'audio') erreurs.push(V('source_audio', `audio.voix.${i}.src`, `voix : source audio inconnue ${v.src}`));
+    else if (ctx.inventaire && !inv) erreurs.push(V('source_autorisee', `audio.voix.${i}.src`, `${v.src} n’est pas dans l’inventaire du projet`));
     if (v.debut_f + v.duree_f > total) erreurs.push(V('dans_la_sequence', `audio.voix.${i}`, 'la voix dépasse la fin de la séquence'));
+    // Borne de source : la plus courte durée connue, déclarée ou mesurée ; aucune durée connue → pas de borne inventée.
+    if (s?.kind === 'audio') {
+      const dureeSrc = dureeSourceEnFrames(s.duree_f, inv?.duree_s, fps);
+      if (dureeSrc !== undefined && v.entree_f + v.duree_f > dureeSrc) {
+        erreurs.push(V('dans_la_source', `audio.voix.${i}`, `la voix lit les images ${v.entree_f} à ${v.entree_f + v.duree_f} de ${v.src}, qui n’en a que ${dureeSrc}`, 'Réduis duree_f ou entree_f, ou choisis une source plus longue.'));
+      }
+    }
   });
   if (a.voix.length && m && (!a.ducking.actif || a.ducking.profondeur_db < 6)) {
     erreurs.push(V('ducking', 'audio.ducking', 'une voix sur une musique exige un ducking actif d’au moins 6 dB', 'audio.ducking = {"actif": true, "profondeur_db": 10}'));

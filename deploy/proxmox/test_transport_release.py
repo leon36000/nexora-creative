@@ -18,7 +18,7 @@ class Transport(unittest.TestCase):
             for p in (repo / 'deploy/proxmox', repo / 'app', repo / 'mode-studio', distant, binaires):
                 p.mkdir(parents=True)
             origine = Path(__file__).parent
-            for nom in ('preparer_release.py', 'transaction_release.py', 'livrer_release.py', 'mettre-a-jour-creative.sh'):
+            for nom in ('preparer_release.py', 'transaction_release.py', 'livrer_release.py', 'mettre-a-jour-creative.sh', 'qualifier-release.mjs'):
                 shutil.copyfile(origine / nom, repo / 'deploy/proxmox' / nom)
             (repo / 'app/package.json').write_text('{}')
             (repo / 'mode-studio/package.json').write_text('{}')
@@ -47,7 +47,7 @@ class Transport(unittest.TestCase):
             cmd = ['bash', str(script), str(repo), sha, str(artefact), sha_artefact, str(local), 'test-12345678']
             subprocess.run(cmd, env=env, check=True, stdout=subprocess.DEVNULL)
             recu = distant / 'livraisons/test-12345678'
-            for nom in ('release.tar', 'release.sha256', 'commit.sha', 'preparer_release.py', 'transaction_release.py', 'livrer_release.py', 'mettre-a-jour-creative.sh'):
+            for nom in ('release.tar', 'release.sha256', 'commit.sha', 'preparer_release.py', 'transaction_release.py', 'livrer_release.py', 'mettre-a-jour-creative.sh', 'qualifier-release.mjs'):
                 self.assertEqual(hashlib.sha256((local / nom).read_bytes()).digest(), hashlib.sha256((recu / nom).read_bytes()).digest())
             original = (recu / 'release.tar').read_bytes()
             cmd[6] = str(base / 'local-autre')

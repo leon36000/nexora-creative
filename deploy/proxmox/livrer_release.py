@@ -118,7 +118,7 @@ def activer(release, cible, data, backup, actions, dependances, stopper=None, de
     release, cible, data, backup = map(Path, (release, cible, data, backup))
     stopper = stopper or (lambda: service('stop'))
     demarrer = demarrer or (lambda: service('start'))
-    verifier = verifier or sante
+    verifier = verifier or sante_creative
     identite = identite or verifier_base_active
     with T.verrou(cible / '.nexora-livraison.lock'):
         identite(data)
@@ -142,7 +142,7 @@ def activer(release, cible, data, backup, actions, dependances, stopper=None, de
             demarre = True  # même une erreur de commande peut suivre un démarrage effectif
             demarrer()
             if not verifier():
-                raise ValueError('santé Matte indisponible après livraison')
+                raise ValueError('Creative indisponible après livraison')
         except BaseException:
             if demarre:
                 stopper()

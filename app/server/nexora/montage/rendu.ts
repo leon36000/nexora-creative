@@ -3,7 +3,7 @@
  * fait que concaténer des plans). Coupes, fondus/dip/glisse (xfade), vitesse constante et rampes (par morceaux), zoom
  * lent, texte (ASS, posé EN DERNIER comme l'exige la recette), musique avec fondus, voix, ducking (sidechaincompress)
  * et normalisation loudnorm. Sans `drawtext` (absent de certains ffmpeg statiques) : le texte passe par libass.
- * Limites assumées de la v1 : le son propre des plans vidéo est ignoré (montage sur musique et voix off) ; loudnorm en une
+ * Le son des clips mesurés est préservé et suit les coupes, vitesses et transitions. Limites : loudnorm en une
  * passe (la mesure en deux passes viendra avec `mix_audio`) ; le ducking est approché (ratio dérivé de la profondeur).
  */
 import { execFile } from 'node:child_process';
@@ -12,9 +12,10 @@ import { dirname, join } from 'node:path';
 import { couperLignes, texteAss } from '../cartons.js';
 import { ffmpegParDefaut } from './analyse.js';
 import { type EditPlan, lignedeTemps, validerEditPlan } from './editplan.js';
+import { segmentsVitesse } from './retiming.js';
+import { audioDesClips } from './audioClips.js';
 
 export const TAILLES: Record<EditPlan['format'], [number, number]> = { '16:9': [1280, 720], '9:16': [720, 1280], '1:1': [720, 720] };
-const RAMPE_MORCEAUX = 6;
 
 export interface OptionsRendu { apercu?: boolean; taille?: [number, number]; dossierPolices?: string }
 export interface CommandeRendu { args: string[]; ass: string | null; dureeS: number }
@@ -74,16 +75,19 @@ export function commandeRendu(plan: EditPlan, chemin: (src: string) => string, s
     const zoom = c.zoom && c.zoom.a !== c.zoom.de ? `,scale=w='trunc(iw*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':h='trunc(ih*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':eval=frame,crop=${W}:${H},setsar=1` : '';
     if (c.rampe) {
       const morceaux: string[] = [];
-      let lu = c.entree_f, restant = c.duree_f;
-      for (let m = 0; m < RAMPE_MORCEAUX; m++) {
-        const sortieF = m === RAMPE_MORCEAUX - 1 ? restant : Math.max(1, Math.round(c.duree_f / RAMPE_MORCEAUX));
-        const v = c.rampe.de + ((c.rampe.a - c.rampe.de) * (m + 0.5)) / RAMPE_MORCEAUX;
-        const conso = Math.max(1, Math.round(sortieF * v));
-        filtres.push(`[${k}:v]trim=start=${secs(lu, fps)}:duration=${secs(conso, fps)},setpts=(PTS-STARTPTS)/${n(v)},${base}[r${i}_${m}]`);
+      const sentinelles: number[] = [];
+      let finAvecSentinelle = 0;
+      const segments = segmentsVitesse(c);
+      for (const [m, segment] of segments.entries()) {
+        const finSource = segment.entree_f + segment.source_f;
+        // Une image sentinelle donne aussi une durée à concat pour un morceau d'une seule image.
+        filtres.push(`[${k}:v]fps=${fps},trim=start_frame=${segment.entree_f}:end_frame=${finSource},settb=AVTB,setpts=(PTS-STARTPTS)*${segment.duree_f}/${segment.source_f},fps=${fps}:eof_action=pass,tpad=stop_mode=clone:stop=${segment.duree_f + 1},${base},trim=end_frame=${segment.duree_f + 1},setpts=N/(${fps}*TB)[r${i}_${m}]`);
         morceaux.push(`[r${i}_${m}]`);
-        lu += conso; restant -= sortieF;
+        finAvecSentinelle += segment.duree_f + 1;
+        sentinelles.push(finAvecSentinelle - 1);
       }
-      filtres.push(`${morceaux.join('')}concat=n=${RAMPE_MORCEAUX}:v=1:a=0,setpts=PTS-STARTPTS${zoom},trim=duration=${n(dureeClip)}[c${i}]`);
+      const sansSentinelles = sentinelles.map(image => `eq(n,${image})`).join('+');
+      filtres.push(`${morceaux.join('')}concat=n=${segments.length}:v=1:a=0,select='not(${sansSentinelles})',setpts=N/(${fps}*TB)${zoom},trim=end_frame=${c.duree_f}[c${i}]`);
     } else {
       const conso = Math.max(1, Math.round(c.duree_f * c.vitesse));
       filtres.push(`[${k}:v]trim=start=${secs(c.entree_f, fps)}:duration=${secs(conso, fps)},setpts=(PTS-STARTPTS)/${n(c.vitesse)},${base}${zoom},trim=duration=${n(dureeClip)},setpts=PTS-STARTPTS[c${i}]`);
@@ -111,18 +115,18 @@ export function commandeRendu(plan: EditPlan, chemin: (src: string) => string, s
   }
   filtres.push(`[${sortieVideo}]trim=duration=${n(dureeS)},setpts=PTS-STARTPTS,format=yuv420p[vout]`);
 
-  // Audio : musique + voix (ducking), puis loudnorm.
+  // Audio : clips mesurés + voix au premier plan, musique avec ducking, puis loudnorm.
   const a = plan.audio;
-  const pistes: string[] = [];
+  const clipsAudio = audioDesClips(plan, index);
+  filtres.push(...clipsAudio.filtres);
   if (a.musique) {
     const m = a.musique;
     const kd = index.get(m.src)!;
     const jouee = (m.duree_f ?? total) / fps;
     const fin = Math.max(0, jouee - m.fondu_out_f / fps);
     filtres.push(`[${kd}:a]atrim=start=${secs(m.entree_f, fps)}:duration=${n(jouee)},asetpts=PTS-STARTPTS,volume=${n(m.gain_db)}dB${m.fondu_in_f ? `,afade=t=in:d=${secs(m.fondu_in_f, fps)}` : ''}${m.fondu_out_f ? `,afade=t=out:st=${n(fin)}:d=${secs(m.fondu_out_f, fps)}` : ''},apad,atrim=duration=${n(dureeS)}[mus]`);
-    pistes.push('mus');
   }
-  const voixNoms: string[] = [];
+  const voixNoms: string[] = [...clipsAudio.pistes];
   a.voix.forEach((v, i) => {
     const kd = index.get(v.src)!;
     filtres.push(`[${kd}:a]atrim=start=${secs(v.entree_f, fps)}:duration=${secs(v.duree_f, fps)},asetpts=PTS-STARTPTS,volume=${n(v.gain_db)}dB,adelay=${Math.round((v.debut_f / fps) * 1000)}:all=1,apad,atrim=duration=${n(dureeS)}[vx${i}]`);
@@ -142,12 +146,12 @@ export function commandeRendu(plan: EditPlan, chemin: (src: string) => string, s
     } else audioFinal = 'voix';
   } else if (a.musique) audioFinal = 'mus';
   if (audioFinal) {
-    filtres.push(`[${audioFinal}]loudnorm=I=${n(a.cible_lufs)}:TP=${n(a.crete_db)}:LRA=11,aresample=48000,atrim=duration=${n(dureeS)}[aout]`);
+    filtres.push(`[${audioFinal}]loudnorm=I=${n(a.cible_lufs)}:TP=${n(a.crete_db)}:LRA=11,aresample=48000,apad=whole_len=${total * 48000 / fps},atrim=end_sample=${total * 48000 / fps}[aout]`);
   }
   args.push('-filter_complex', filtres.join(';'), '-map', '[vout]');
   if (audioFinal) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', o.apercu ? '128k' : '192k');
   else args.push('-an');
-  args.push('-c:v', 'libx264', '-preset', o.apercu ? 'veryfast' : 'medium', '-crf', o.apercu ? '28' : '19', '-pix_fmt', 'yuv420p', '-r', String(fps), '-t', n(dureeS), '-movflags', '+faststart', sortie);
+  args.push('-c:v', 'libx264', '-preset', o.apercu ? 'veryfast' : 'medium', '-crf', o.apercu ? '28' : '19', '-pix_fmt', 'yuv420p', '-r', String(fps), '-t', String(dureeS), '-movflags', '+faststart', '-movie_timescale', '48000', sortie);
   return { args, ass, dureeS };
 }
 

@@ -9,7 +9,7 @@ import stat
 import re
 import sys
 from pathlib import Path
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
@@ -60,7 +60,7 @@ def request_json(base: str, route: str, *, token: str | None = None,
             status = response.status
     except HTTPError as exc:
         return exc.code, None
-    except (OSError, URLError, TimeoutError, ValueError):
+    except (OSError, ValueError):
         return None, None
     if len(body) > MAX_RESPONSE:
         return status, None
@@ -111,7 +111,7 @@ def main() -> int:
         aliases = aliases_from_config(Path(args.config))
         # The secret is read inside Python and never included in argv or output.
         key = load_master_key(Path(args.key_file))
-    except (OSError, UnicodeError, ValueError):
+    except (OSError, ValueError):
         print("configuration locale ou clé maître invalide", file=sys.stderr)
         return 1
 

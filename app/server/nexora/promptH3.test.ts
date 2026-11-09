@@ -1,6 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import { convertirEnPromptRef } from './personnages.js';
 import { instructionH3, validerPromptH3 } from './promptH3.js';
+import { styleAvantPremierPlanRef } from './styleH3.js';
+
+describe('style avant le premier plan Ref2VA', () => {
+  it.each<[string, boolean]>([
+    ['', false],
+    ['detailed_description: [Shot 1]', true],
+    ['detailed_description:[Shot 1]', false],
+    ['detailed_description:\uFEFF\u0085\n[Shot 1]', true],
+    ['Detailed_description: x[Shot 1]', false],
+    ['[Shot 1] detailed_description: x', false],
+    ['detailed_description: x[Shot 10]', false],
+    ['detailed_description: x[Shot 1', false],
+    ['detailed_description: a[Bad] detailed_description: b[Shot 1]', true],
+    ['detailed_description:'.repeat(10), false],
+    ['detailed_description:'.repeat(10) + 'x[Bad]', false],
+    ['xx[detailed_description: y[Shot 1]', true],
+  ])('conserve le résultat pour %j', (texte, attendu) => {
+    expect(styleAvantPremierPlanRef(texte)).toBe(attendu);
+  });
+});
 
 const corps = `integrated_multimodal_description: [Shot 1] Live-action, cinematic, a wide shot frames a red car on a coastal road. The camera performs an arc shot at slow speed around the car. [Shot 2] At 00:03.500, the camera cuts to a close-up of the headlight as the woman (S1) says: <d>[French] On y va.</d>
 
@@ -38,6 +58,14 @@ describe('validateur de prompt H3 (guide officiel MiniMax)', () => {
   it('exige les répliques de l’utilisateur mot pour mot dans <d>', () => {
     const e = validerPromptH3(corps.replace('On y va.', 'Allons-y.'), { mode: 't2va', dureeS: 5.17, dialogues: ['On y va.'] });
     expect(e.join(' ')).toMatch(/On y va\./);
+  });
+
+  it('refuse aussi une ouverture sans langue après une réplique conforme', () => {
+    const erreurs = validerPromptH3(`${corps} <d>sans langue`, {
+      mode: 't2va', dureeS: 5.17,
+      dialoguesAvecLangue: [{ texte: 'On y va.', langue: 'French' }],
+    });
+    expect(erreurs).toContain('balises de réplique mal formées');
   });
 
   it('exige la ligne d’instruction exacte en I2VA et FL2VA', () => {

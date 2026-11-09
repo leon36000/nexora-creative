@@ -33,7 +33,7 @@ def build_seulement(path):
     p = PurePosixPath(path)
     return (len(p.parts) > 1 and p.parts[0] == 'app'
             and (p.parts[1] in ('docs', 'deploy') or len(p.parts) == 2 and
-                 (p.parts[1] in ('.dockerignore', '.gitignore', 'LICENSE', 'vitest.director.ci.config.mjs', 'vite-build.test.ts')
+                 (p.parts[1] in ('.dockerignore', '.gitignore', 'LICENSE', 'vitest.director.ci.config.mjs', 'vitest.mesh.ci.config.mjs', 'vite-build.test.ts')
                   or p.parts[1].endswith('.md'))))
 
 

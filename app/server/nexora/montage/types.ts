@@ -4,6 +4,8 @@ import type { Format, Genre } from './editplan.js';
 export interface ClipInfo {
   id: string;
   duree_s: number;
+  /** Présence d’un flux audio mesurée dans la source vidéo; absent pour les briefs historiques/non mesurés. */
+  a_audio?: boolean;
   description?: string;
   /** Coupes de plan internes à la source (s) : un plan monté ne les traverse pas. */
   coupes_s?: number[];

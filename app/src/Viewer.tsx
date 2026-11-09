@@ -13,6 +13,8 @@ import { DIRECTOR_AXES, IMAGE_MODELS, SPEED_RAMPS, VIDEO_MODELS, editAppById } f
 import { effectById } from './effects';
 import { SaveToCast } from './pages/Cast';
 import { useCast } from './castStore';
+import type { LangueClient } from '../shared/creationLanguage';
+import { meshCopy } from './meshCopy';
 
 export function animate(t: Take) {
   const s = settingsOf(t);
@@ -45,20 +47,21 @@ export async function removeBackground(t: Take) {
   navigate('/cutout');
 }
 
-export async function recreate(t: Take) {
+export async function recreate(t: Take, options?: { langue?: LangueClient }) {
+  const c = options?.langue ? meshCopy(options.langue) : null;
   const s = { ...settingsOf(t) };
   delete s.seed;
   try {
     if (s.cut) {
       // A cut is recreated by shooting every shot again with new seeds.
       await api.directorScene({ ...s, shots: (s.shots ?? []).map((x: any) => ({ ...x, take: undefined, hero: undefined })) });
-      toast('Shooting the scene again');
+      toast(c?.recreateSent ?? 'Shooting the scene again');
       return;
     }
     await api.generate(s);
-    toast('Recreating with a new seed');
+    toast(c?.recreateSent ?? 'Recreating with a new seed');
   } catch (e) {
-    toast(e instanceof Error ? e.message : 'failed', true);
+    toast(c?.recreateUnconfirmed ?? (e instanceof Error ? e.message : 'failed'), true);
   }
 }
 
@@ -164,11 +167,12 @@ function ComfyWorkflow({ take }: { take: Take }) {
   );
 }
 
-export default function Viewer({ takeId, onClose, onStep }: { takeId: number; onClose: () => void; onStep: (dir: 1 | -1) => void }) {
+export default function Viewer({ takeId, onClose, onStep, langue }: { takeId: number; onClose: () => void; onStep: (dir: 1 | -1) => void; langue?: LangueClient }) {
   const take = useStore((s) => s.takes.find((x) => x.id === takeId));
   const [casting, setCasting] = useState(false);
   const [look, setLook] = useState<ModelLook>('lit');
   const cast = useCast();
+  const c = langue ? meshCopy(langue) : null;
   useEffect(() => { setCasting(false); }, [takeId]);
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
@@ -222,7 +226,7 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
       <Spill src={posterUrl(take.id)} key={take.id} />
       <div className="viewer-stage" onClick={(e) => e.stopPropagation()}>
         {object && take.status === 'done'
-          ? <ObjectStage take={take} look={look} onLook={setLook} />
+          ? <ObjectStage take={take} look={look} onLook={setLook} langue={langue} />
           : image
           ? <img src={mediaUrl(take.id)} alt="" className={s.app === 'cutout' && s.background === 'transparent' ? 'checker' : undefined} />
           : <video src={mediaUrl(take.id)} controls autoPlay muted loop playsInline />}
@@ -249,7 +253,7 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
             <a className="btn sm accent" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download GLB</a>
             <a className="btn sm" href={`${turntableUrl(take.id)}`} download={`take_${take.id}_turntable.mp4`}><Icon name="video" size={14} />Turntable</a>
             {s.sourceTake && <button type="button" className="btn sm" onClick={() => { onClose(); navigate(`${ROUTE_3D}?take=${s.sourceTake}`); }}><Icon name="image" size={14} />Source still</button>}
-            <button type="button" className="btn sm" onClick={act(() => recreate(take))}><Icon name="redo" size={14} />Recreate</button>
+            <button type="button" className="btn sm" onClick={act(() => recreate(take, langue ? { langue } : undefined))}><Icon name="redo" size={14} />{c?.recreate ?? 'Recreate'}</button>
             <button type="button" className="btn sm danger" onClick={act(async () => { await remove(take); onClose(); })}><Icon name="trash" size={14} />Delete</button>
           </div>
         ) : (
@@ -264,7 +268,7 @@ export default function Viewer({ takeId, onClose, onStep }: { takeId: number; on
             <button key={m.label} type="button" className="btn sm" onClick={m.run} title={m.title}><Icon name={m.icon} size={14} />{m.label}</button>
           )) : more.length > 0 && <MoreMenu items={more} />}
           {image && take.status === 'done' && <button type="button" className={`btn sm ${casting ? 'on' : ''}`} onClick={() => setCasting(!casting)} title="Keep this face, prop or place and @mention it in any prompt"><Icon name="person" size={14} />Save to cast</button>}
-          <button type="button" className="btn sm" onClick={act(() => recreate(take))}><Icon name="redo" size={14} />Recreate</button>
+          <button type="button" className="btn sm" onClick={act(() => recreate(take, langue ? { langue } : undefined))}><Icon name="redo" size={14} />{c?.recreate ?? 'Recreate'}</button>
           <a className="btn sm" href={downloadUrl(take.id)}><Icon name="download" size={14} />Download{s.alphaPath ? ' preview' : ''}</a>
           {s.alphaPath && <a className="btn sm accent" href={`/api/media/${take.id}?alpha=1`}><Icon name="download" size={14} />ProRes 4444 with alpha</a>}
           <button type="button" className="btn sm danger" onClick={act(async () => { await remove(take); onClose(); })}><Icon name="trash" size={14} />Delete</button>
@@ -394,20 +398,22 @@ function HdrFiles({ take }: { take: Take }) {
  * An Object take in the Viewer: the GLB to grab and turn, with the clay and
  * wire looks for judging the geometry, and the subject it was built from.
  */
-function ObjectStage({ take, look, onLook }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void }) {
+function ObjectStage({ take, look, onLook, langue }: { take: Take; look: ModelLook; onLook: (l: ModelLook) => void; langue?: LangueClient }) {
+  const c = langue ? meshCopy(langue) : null;
   return (
     <div className="object-stage">
-      <Suspense fallback={<img className="model-poster" src={posterUrl(take.id)} alt="" />}>
-        <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} />
+      <Suspense fallback={<img className="model-poster" src={posterUrl(take.id)} alt={c?.modelLoading ?? ''} title={c?.modelLoading} />}>
+        <ModelView src={mediaUrl(take.id)} poster={posterUrl(take.id)} look={look} langue={langue} />
       </Suspense>
-      <div className="object-looks" onClick={(e) => e.stopPropagation()}>
+      <div className="object-looks" role={c ? 'group' : undefined} aria-label={c?.modelLooks}>
         {(['lit', 'clay', 'wire'] as const).map((l) => (
-          <button key={l} type="button" className={`pill ${look === l ? 'active' : ''}`} onClick={() => onLook(l)}>
-            {l === 'lit' ? 'Textured' : l === 'clay' ? 'Clay' : 'Wireframe'}
+          <button key={l} type="button" className={`pill ${look === l ? 'active' : ''}`} aria-pressed={look === l} onClick={() => onLook(l)}>
+            {c ? c[l === 'lit' ? 'textured' : l === 'clay' ? 'clay' : 'wire'] : l === 'lit' ? 'Textured' : l === 'clay' ? 'Clay' : 'Wireframe'}
           </button>
         ))}
       </div>
-      <img className="object-subject" src={subjectUrl(take.id)} alt="" title="The subject as the model saw it" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+      <img className="object-subject" src={subjectUrl(take.id)} alt={c?.modelSubject ?? ''}
+        title={c?.modelSubject ?? 'The subject as the model saw it'} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
     </div>
   );
 }

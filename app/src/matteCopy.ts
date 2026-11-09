@@ -1,0 +1,301 @@
+/** Textes FR/EN de la page Mattage (Detourage). Aucune traduction par DOM : la langue est passée explicitement. */
+export type LangueFixee = 'fr' | 'en';
+export type Forme = 'singulier' | 'pluriel';
+
+const texteValeur = (valeur: unknown): string => {
+  if (valeur === null || valeur === undefined) return '—';
+  switch (typeof valeur) {
+    case 'string':
+    case 'number':
+    case 'boolean':
+    case 'bigint':
+      return String(valeur);
+    default:
+      return '—';
+  }
+};
+
+const formater = (modele: string, valeurs: Record<string, unknown>): string =>
+  modele.replace(/\{(\w+)\}/g, (m, k: string) =>
+    Object.hasOwn(valeurs, k) ? texteValeur(valeurs[k]) : m);
+
+export interface TextesMatte {
+  langue: LangueFixee;
+  boutons: { francais: string; english: string };
+  t: (cle: keyof typeof TEXTES.fr, valeurs?: Record<string, unknown>) => string;
+  pluriel: (n: number, s: string, p: string) => string;
+  fmtDuree: (secondes: number) => string;
+  fmtTaille: (octets: number) => string;
+  etat: (code: string) => string;
+  /** Message serveur : affiché tel quel (jamais de message API brut présenté comme FR). */
+  generique: () => string;
+}
+
+const ETATS_FR: Record<string, string> = {
+  en_attente: 'En attente', en_cours: 'En cours', termine: 'Terminé', interrompu: 'Interrompu',
+  erreur: 'Erreur', annule: 'Annulé', depose: 'Déposé',
+};
+const ETATS_EN: Record<string, string> = {
+  en_attente: 'Queued', en_cours: 'Running', termine: 'Done', interrompu: 'Interrupted',
+  erreur: 'Error', annule: 'Cancelled', depose: 'Uploaded',
+};
+
+const TEXTES = {
+  fr: {
+    'header.subtitle': 'Détoure un sujet dans une vidéo, puis garde la transparence ou choisis un nouveau fond.',
+    'engine.unavailable': 'Le détourage est temporairement indisponible. Réessaie plus tard.',
+    'section.video.title': '1 · Vidéo',
+    'source.summary': '{largeur}×{hauteur} · {fps} i/s · {duree}',
+    'source.limitHint': ' (limite {secondesMax} s par travail : choisis une plage)',
+    'section.subject.title': '2 · Sujet',
+    'subject.counts': '{clics}{virgule}{imagesCles}',
+    'subject.counts.clics.singulier': '{n} clic',
+    'subject.counts.clics.pluriel': '{n} clics',
+    'subject.counts.images.singulier': '{n} image clé',
+    'subject.counts.images.pluriel': '{n} images clés',
+    'subject.wordLabel': 'Désigner par un mot (en anglais)',
+    'subject.wordPlaceholder': 'person, dog, red car…',
+    'action.search': 'Chercher',
+    'tool.add': '+ Ajouter',
+    'tool.remove': '− Retirer',
+    'subject.help': 'Tape un mot (person, dog, red car…) puis « Chercher » : clique le rectangle du sujet trouvé. Sinon, clique le sujet ; Maj ou Alt + clic retire. Change d’image et ajoute un clic quand le sujet change de forme, passe derrière un objet ou ressort.',
+    'action.undoLast': 'Annuler le dernier',
+    'action.clearFrame': 'Effacer cette image',
+    'range.title': 'Plage traitée',
+    'range.setStart': 'Début ici',
+    'range.setEnd': 'Fin ici',
+    'range.allVideo': 'toute la vidéo',
+    'range.value': '{debut} → {fin} s',
+    'section.quality.title': '3 · Qualité',
+    'tier.fast': 'Rapide',
+    'tier.proSoon': 'Pro (en préparation)',
+    'mode.trackPreview': 'Aperçu du suivi',
+    'mode.full': 'Détourage complet',
+    'quality.maxWidth': 'Largeur max : {largeur} px',
+    'quality.edgeSmoothing': 'Stabilisation des bords : {lissage}',
+    'section.background.title': '4 · Fond',
+    'bg.label.transparent': 'Aucun',
+    'bg.label.color': 'Couleur',
+    'bg.label.blur': 'Flou',
+    'bg.label.image': 'Image',
+    'bg.deposited': 'fond déposé',
+    'bg.help': 'Les formats disponibles (PNG 16 bits, EXR, ProRes 4444, WebM) apparaîtront après le calcul ; le fond ajoute une vidéo composée.',
+    'job.busy.creating': 'Création du travail…',
+    'job.busy.launching': 'Lancement…',
+    'job.busy.searching': 'Recherche…',
+    'job.launch.trackPreview': 'Lancer l’aperçu du suivi',
+    'job.launch.full': 'Lancer le détourage',
+    'job.progress': '{etapeOuMessage} · {pourcent} %',
+    'job.running': 'Traitement en cours',
+    'measures.summary': 'Calcul {duree} s · {images} images · {segments} segment(s){coupures}{occlusions}{sansClic}',
+    'job.interrupted': 'Traitement interrompu',
+    'action.cancelJob': 'Annuler',
+    'action.resumeKept': 'Reprendre (le calcul déjà fait est conservé)',
+    'action.deleteJob': 'Supprimer le travail et ses fichiers',
+    'confirm.deleteJob': 'Supprimer ce détourage et tous ses fichiers temporaires ?',
+    'recents.title': 'Travaux récents',
+    'recents.item': '{nom} · {etat}',
+    'empty.importPrompt': 'Importe une vidéo pour commencer.',
+    'mask.summary': 'Masque : {pourcent} % de l’image{detailCalcul}.',
+    'mask.summary.detail': ', calculé en {s} s',
+    'mask.found': '{n} objet{s} pour « {mot} » ({sec} s) : clique le bon rectangle.',
+    'mask.notFound': 'Rien trouvé pour « {texte} » : essaie un autre mot ou clique le sujet.',
+    'mask.helpDefault': 'Tape un mot puis « Chercher », ou clique sur le sujet, pour voir son masque.',
+    'mask.keyboardTarget': 'Cible de pointage, x {x} %, y {y} %',
+    'mask.keyboardHelp': 'Flèches : déplacer la cible de 1 % (Maj : 10 %). Entrée ou Espace : ajouter un point. Alt + Entrée/Espace : point négatif.',
+    'mask.keyFrames': 'Images clés : {liste}.',
+    'player.playPause': 'Lecture / pause',
+    'player.position': 'image {image} · {t} s',
+    'finder.chooseTitle': 'Choisir cet objet (score {score})',
+    'finder.chooseLabel': '{mot} · {score}',
+    'view.damier': 'Damier',
+    'view.matte': 'Matte',
+    'view.newBackground': 'Nouveau fond',
+    'view.tracking': 'Suivi',
+    'export.videoFile': '{nom} · {taille}',
+    'export.seq.alpha': 'Alpha PNG 16 bits',
+    'export.seq.rgba16': 'RGBA PNG 16 bits',
+    'export.seq.exr': 'EXR RGBA (prémultiplié, linéaire)',
+    'export.seq.alphaExr': 'EXR alpha',
+    'export.seq.count': '{label} · {n} images (zip)',
+    'export.openStudio': 'Ouvrir Mode Studio',
+    'export.openStudio.title': 'Importe le ProRes 4444 ou le WebM alpha dans la timeline',
+    'measures.cuts': ' · coupures aux images {liste}',
+    'measures.occlusions': ' · sujet absent aux images {plages}',
+    'measures.noClick': ' · plans sans clic (masque vide) : {plages}',
+    'measures.hardware': 'GPU {gpu} · VRAM pic {vram} Go · RAM pic {ram} Go · disque {disque} Go',
+    'measures.flicker': 'Scintillement des bords : {avant} → {apres} ({gain} % de moins)',
+    'measures.control': 'EXR : {bits} bits, alpha {alpha}, {compression}, {espace} · PNG : {bitsPng} bits',
+    'action.editAndRelaunch': 'Modifier les clics et relancer',
+    'format.duration': '{s} s',
+    'format.durationLong': '{min} min {sec} s',
+    'format.sizeGB': '{v} Go',
+    'format.sizeMB': '{v} Mo',
+    'format.sizeKB': '{v} Ko',
+    'toast.uploadDone': 'Fond déposé',
+    'error.genericWithStatus': 'Erreur {status}',
+    'error.uploadInterrupted': 'Envoi interrompu',
+    'error.import': 'Import impossible',
+    'error.preview': 'Aperçu impossible',
+    'error.search': 'Recherche impossible',
+    'error.background': 'Dépôt du fond impossible',
+    'error.launchHint': 'Clique d’abord sur le sujet (dans la plage choisie)',
+    'error.launch': 'Lancement impossible',
+    'error.server': 'Opération refusée par le serveur : réessaie plus tard.',
+  },
+  en: {
+    'header.subtitle': 'Cut out a subject in a video, then keep transparency or pick a new background.',
+    'engine.unavailable': 'Matting is temporarily unavailable. Please try again later.',
+    'section.video.title': '1 · Video',
+    'source.summary': '{largeur}×{hauteur} · {fps} fps · {duree}',
+    'source.limitHint': ' ({secondesMax}s limit per job: pick a range)',
+    'section.subject.title': '2 · Subject',
+    'subject.counts': '{clics}{virgule}{imagesCles}',
+    'subject.counts.clics.singulier': '{n} click',
+    'subject.counts.clics.pluriel': '{n} clicks',
+    'subject.counts.images.singulier': '{n} keyframe',
+    'subject.counts.images.pluriel': '{n} keyframes',
+    'subject.wordLabel': 'Describe with a word (in English)',
+    'subject.wordPlaceholder': 'person, dog, red car…',
+    'action.search': 'Search',
+    'tool.add': '+ Add',
+    'tool.remove': '− Remove',
+    'subject.help': 'Type a word (person, dog, red car…) then “Search”: click the found subject’s rectangle. Otherwise click the subject; Shift or Alt + click removes. Change frame and add a click when the subject changes shape, goes behind an object, or reappears.',
+    'action.undoLast': 'Undo last',
+    'action.clearFrame': 'Clear this frame',
+    'range.title': 'Range to process',
+    'range.setStart': 'Start here',
+    'range.setEnd': 'End here',
+    'range.allVideo': 'whole video',
+    'range.value': '{debut} → {fin} s',
+    'section.quality.title': '3 · Quality',
+    'tier.fast': 'Fast',
+    'tier.proSoon': 'Pro (in preparation)',
+    'mode.trackPreview': 'Tracking preview',
+    'mode.full': 'Full matte',
+    'quality.maxWidth': 'Max width: {largeur} px',
+    'quality.edgeSmoothing': 'Edge stabilization: {lissage}',
+    'section.background.title': '4 · Background',
+    'bg.label.transparent': 'None',
+    'bg.label.color': 'Color',
+    'bg.label.blur': 'Blur',
+    'bg.label.image': 'Image',
+    'bg.deposited': 'background uploaded',
+    'bg.help': 'Available formats (16-bit PNG, EXR, ProRes 4444, WebM) will appear once processing completes; the background adds a composited video.',
+    'job.busy.creating': 'Creating job…',
+    'job.busy.launching': 'Starting…',
+    'job.busy.searching': 'Searching…',
+    'job.launch.trackPreview': 'Start tracking preview',
+    'job.launch.full': 'Start matting',
+    'job.progress': '{etapeOuMessage} · {pourcent}%',
+    'job.running': 'Processing',
+    'measures.summary': 'Compute {duree}s · {images} frames · {segments} segment(s){coupures}{occlusions}{sansClic}',
+    'job.interrupted': 'Processing interrupted',
+    'action.cancelJob': 'Cancel',
+    'action.resumeKept': 'Resume (already computed work is kept)',
+    'action.deleteJob': 'Delete job and its files',
+    'confirm.deleteJob': 'Delete this matte and all its temporary files?',
+    'recents.title': 'Recent jobs',
+    'recents.item': '{nom} · {etat}',
+    'empty.importPrompt': 'Import a video to start.',
+    'mask.summary': 'Mask: {pourcent}% of the frame{detailCalcul}.',
+    'mask.summary.detail': ', computed in {s}s',
+    'mask.found': '{n} object{s} for “{mot}” ({sec}s): click the right rectangle.',
+    'mask.notFound': 'Nothing found for “{texte}”: try another word or click the subject.',
+    'mask.helpDefault': 'Type a word then “Search”, or click the subject, to see its mask.',
+    'mask.keyboardTarget': 'Pointing target, x {x}%, y {y}%',
+    'mask.keyboardHelp': 'Arrow keys move the target by 1% (Shift: 10%). Enter or Space adds a point. Alt + Enter/Space: negative point.',
+    'mask.keyFrames': 'Keyframes: {liste}.',
+    'player.playPause': 'Play / pause',
+    'player.position': 'frame {image} · {t}s',
+    'finder.chooseTitle': 'Pick this object (score {score})',
+    'finder.chooseLabel': '{mot} · {score}',
+    'view.damier': 'Checker',
+    'view.matte': 'Matte',
+    'view.newBackground': 'New background',
+    'view.tracking': 'Tracking',
+    'export.videoFile': '{nom} · {taille}',
+    'export.seq.alpha': '16-bit PNG alpha',
+    'export.seq.rgba16': '16-bit RGBA PNG',
+    'export.seq.exr': 'EXR RGBA (premultiplied, linear)',
+    'export.seq.alphaExr': 'EXR alpha',
+    'export.seq.count': '{label} · {n} frames (zip)',
+    'export.openStudio': 'Open Studio Mode',
+    'export.openStudio.title': 'Import the ProRes 4444 or alpha WebM into the timeline',
+    'measures.cuts': ' · cuts at frames {liste}',
+    'measures.occlusions': ' · subject missing at frames {plages}',
+    'measures.noClick': ' · shots with no clicks (empty mask): {plages}',
+    'measures.hardware': 'GPU {gpu} · peak VRAM {vram} GB · peak RAM {ram} GB · disk {disque} GB',
+    'measures.flicker': 'Edge flicker: {avant} → {apres} ({gain}% less)',
+    'measures.control': 'EXR: {bits}-bit, alpha {alpha}, {compression}, {espace} · PNG: {bitsPng}-bit',
+    'action.editAndRelaunch': 'Edit clicks and rerun',
+    'format.duration': '{s}s',
+    'format.durationLong': '{min} min {sec}s',
+    'format.sizeGB': '{v} GB',
+    'format.sizeMB': '{v} MB',
+    'format.sizeKB': '{v} KB',
+    'toast.uploadDone': 'Background uploaded',
+    'error.genericWithStatus': 'Error {status}',
+    'error.uploadInterrupted': 'Upload interrupted',
+    'error.import': 'Import failed',
+    'error.preview': 'Preview failed',
+    'error.search': 'Search failed',
+    'error.background': 'Background upload failed',
+    'error.launchHint': 'Click the subject first (inside the selected range)',
+    'error.launch': 'Start failed',
+    'error.server': 'The server refused the operation: try again later.',
+  },
+} as const;
+
+export type LangueMatte = keyof typeof TEXTES;
+type CleTexte = keyof typeof TEXTES.fr;
+type ValeursTexte = Record<string, unknown>;
+
+/** Crée les utilitaires de copie pour une langue explicite. */
+export function creerCopieMatte(langue: LangueMatte): TextesMatte {
+  const table = TEXTES[langue];
+  const etats = langue === 'fr' ? ETATS_FR : ETATS_EN;
+  const t = (cle: CleTexte, valeurs: ValeursTexte = {}): string => formater(table[cle], valeurs);
+  return {
+    langue,
+    boutons: { francais: 'Français', english: 'English' },
+    t,
+    pluriel: (n, s, p) => (n > 1 ? p : s),
+    fmtDuree: (secondes) => (secondes < 90
+      ? t('format.duration', { s: Math.round(secondes) })
+      : t('format.durationLong', { min: Math.floor(secondes / 60), sec: Math.round(secondes % 60) })),
+    fmtTaille: (octets) => {
+      if (octets > 1e9) return t('format.sizeGB', { v: (octets / 1e9).toFixed(2) });
+      if (octets > 1e6) return t('format.sizeMB', { v: (octets / 1e6).toFixed(1) });
+      return t('format.sizeKB', { v: Math.round(octets / 1e3) });
+    },
+    etat: (code) => etats[code] ?? code,
+    generique: () => t('error.server'),
+  };
+}
+
+const ETAT_INTERFACE = {
+  fr: {
+    loading: 'Chargement des travaux…', empty: 'Aucun travail récent.',
+    listError: 'Impossible de charger les travaux. Réessaie.', retry: 'Réessayer',
+    capError: 'Impossible de vérifier la disponibilité du détourage.',
+    pollError: 'Le suivi est interrompu. Une nouvelle tentative est prévue.',
+    deleteError: 'Suppression non effectuée. Ton travail et tes sélections sont conservés.',
+    deleting: 'Suppression…', sourceWarning: 'Vérifie la vidéo importée avant de continuer.',
+    serviceUnavailable: 'Le service est temporairement indisponible. Réessaie plus tard.',
+    credits: 'Les crédits sont insuffisants pour cette opération.', tooLarge: 'Le fichier dépasse la taille autorisée.',
+    language: 'Langue',
+  },
+  en: {
+    loading: 'Loading jobs…', empty: 'No recent jobs.',
+    listError: 'Could not load your jobs. Please try again.', retry: 'Retry',
+    capError: 'Could not check matting availability.',
+    pollError: 'Tracking is interrupted. Another attempt is scheduled.',
+    deleteError: 'Deletion failed. Your job and selections have been kept.',
+    deleting: 'Deleting…', sourceWarning: 'Check the imported video before continuing.',
+    serviceUnavailable: 'The service is temporarily unavailable. Please try again later.',
+    credits: 'There are not enough credits for this operation.', tooLarge: 'The file exceeds the allowed size.',
+    language: 'Language',
+  },
+};
+export const etatInterfaceMatte = (langue: LangueMatte) => ETAT_INTERFACE[langue];

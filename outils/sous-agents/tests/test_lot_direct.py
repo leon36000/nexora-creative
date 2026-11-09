@@ -7,6 +7,7 @@ import subprocess
 import sys
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import lot
@@ -14,6 +15,41 @@ import test_lot
 
 
 class LotDirectTests(unittest.TestCase):
+    def test_completed_tasks_are_all_reaped_from_snapshot(self):
+        process = SimpleNamespace(returncode=0, poll=lambda: 0)
+        first = lot.Task('first', Path('/fictif/first.txt'), Path('/fictif/first'), process=process, run_id='lot-first')
+        second = lot.Task('second', Path('/fictif/second.txt'), Path('/fictif/second'), process=process, run_id='lot-second')
+        state = lot.SupervisorState(tasks=[first, second], pending=[], active=[first, second],
+                                    run_owners={}, duplicate_run_ids=set())
+        journal = lot.Ledger(True, 0, {'lot-first': 0, 'lot-second': 0})
+        baseline = lot.LedgerBaseline(raw=b'', unattributed_rows=0)
+        with patch.object(lot, 'register_run_id', return_value=''), patch.object(lot, 'read_ledger', return_value=journal), patch.object(lot, 'finish_task') as finish:
+            changed = lot.reap_finished(state, 'lot', Path('/fictif/journal'), baseline, 1, state.tasks)
+        self.assertTrue(changed)
+        self.assertEqual(state.active, [])
+        self.assertEqual(finish.call_count, 2)
+
+    def test_cost_report_write_error_is_classified_as_127(self):
+        config = SimpleNamespace(sa_dir=Path('/fictif'))
+        report = SimpleNamespace(stdout='donnée fictive', returncode=0)
+        with patch.object(lot.subprocess, 'run', return_value=report), patch('builtins.print', side_effect=OSError('fictif')):
+            result = lot.report_costs(config, 'lot-fictif', {})
+        self.assertEqual(result, 127)
+
+    def test_workdir_creation_error_blocks_other_tasks(self):
+        root = Path('/fictif')
+        failed = lot.Task('bad', root / 'bad.txt', root / 'bad', detail='a_creer')
+        other = lot.Task('ready', root / 'ready.txt', root / 'ready')
+        with patch.object(Path, 'mkdir', side_effect=PermissionError('fictif')):
+            result = lot.create_workdirs([failed, other], root)
+        self.assertEqual((result[0].status, result[0].detail), ('FAIL', 'creation_workdir_echec'))
+        self.assertEqual((result[1].status, result[1].detail), ('SKIP', 'creation_lot_incomplete'))
+
+    def test_run_suffix_digits_remain_ascii_only(self):
+        tag = 'lot-fake--p0123456789abcdef--c1٢'
+        self.assertEqual(lot.base_run_id(tag), tag)
+        self.assertEqual(lot.base_run_id('lot-fake--p0123456789abcdef--c12'), 'lot-fake')
+
     def setUp(self):
         self.fixture = test_lot.LotTests('runTest')
         self.fixture.setUp()

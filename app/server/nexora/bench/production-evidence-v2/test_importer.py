@@ -16,7 +16,8 @@ REPO_ROOT = next(
     if (parent / "app/server/nexora/montage/memoires.ts").is_file()
 )
 spec = importlib.util.spec_from_file_location("production_evidence_v2_importer", HERE / "importer.py")
-assert spec is not None and spec.loader is not None
+assert spec is not None
+assert spec.loader is not None
 importer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(importer)
 
@@ -91,6 +92,82 @@ def fixture_record(storage_root: Path, repo_root: Path) -> dict:
     }
 
 
+def fixture_opsys_record(storage_root: Path, repo_root: Path) -> dict:
+    run = storage_root / "opsys-deepseek-workcut-r1-fixture"
+    files = {
+        "opsys_shared_brief": ("inputs/evidence/brief-commun.md", b"shared brief"),
+        "opsys_editplan": ("inputs/editplan.json", b"edit plan"),
+        "opsys_annexe": ("inputs/annexe.json", b"annexe"),
+        "opsys_team_source_manifest": ("inputs/provenance.json", b"same-team sources; prompt unknown"),
+        "opsys_source_video": ("inputs/deepseek/p01.mp4", b"source video"),
+        "opsys_master_video": ("output/opsys-deepseek-r1.mp4", b"master video"),
+        "opsys_review_contact_sheet": ("review/contact-sheet.jpg", b"contact sheet"),
+        "opsys_trajectory": ("trajectory.json", b"unjudged trajectory"),
+        "opsys_postflight": ("postflight.json", b"decode passed"),
+    }
+    artifacts = []
+    archive_assets = []
+    for kind, (relative, content) in files.items():
+        path = run / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        relative_path = path.relative_to(storage_root).as_posix()
+        artifacts.append(_artifact("storage", relative_path, content, kind))
+        archive_assets.append({
+            "archive": f"{hashlib.sha256(content).hexdigest()}.bin",
+            "sha256": hashlib.sha256(content).hexdigest(),
+            "size_bytes": len(content),
+            "kind": kind,
+            "sources": [str(path)],
+        })
+
+    corpus = json.dumps({"statut": "fixture", "briefs": [{"id": "AMD2-001"}]}).encode()
+    corpus_path = repo_root / "app/server/nexora/bench/corpus-amd-v2/corpus.json"
+    corpus_path.parent.mkdir(parents=True, exist_ok=True)
+    corpus_path.write_bytes(corpus)
+    artifacts.append(_artifact(
+        "repo", "app/server/nexora/bench/corpus-amd-v2/corpus.json", corpus, "amd2_corpus"
+    ))
+
+    manifest = {
+        "label": "opsys-deepseek-r1-fixture", "team": "deepseek",
+        "status": "experimental OPSYS workcut; unjudged; not final", "assets": archive_assets,
+    }
+    manifest_bytes = (json.dumps(manifest, sort_keys=True) + "\n").encode()
+    manifest_path = run / "pc1-archive-manifest.json"
+    manifest_path.write_bytes(manifest_bytes)
+    receipt = {
+        "host": "pc1", "verified": True,
+        "infrastructure": "/run/media/pc1/Infrastructure/NexoraStudioWork/ArchivesNexora/opsys-fixture",
+        "assets": len(archive_assets), "bytes": sum(item["size_bytes"] for item in archive_assets),
+        "inventory_rows": 12, "files": archive_assets,
+    }
+    receipt_bytes = (json.dumps(receipt, sort_keys=True) + "\n").encode()
+    receipt_path = run / "pc1-archive-receipt.json"
+    receipt_path.write_bytes(receipt_bytes)
+    artifacts.extend([
+        _artifact("storage", manifest_path.relative_to(storage_root).as_posix(),
+                  manifest_bytes, "opsys_pc1_archive_manifest"),
+        _artifact("storage", receipt_path.relative_to(storage_root).as_posix(),
+                  receipt_bytes, "opsys_pc1_archive_receipt"),
+    ])
+    return {
+        "schema": importer.OPSYS_SCHEMA,
+        "record_id": "opsys.workcut.deepseek.r1.v2",
+        "team": "deepseek", "edition": "R1",
+        "team_role": "independent_team_not_confirmed_professor",
+        "status": "codex_machine_observation_unjudged",
+        "amd2_brief_id": None,
+        "amd2_corpus_sha256": hashlib.sha256(corpus).hexdigest(),
+        "artifacts": artifacts,
+        "seed_reconciliation": [],
+        "observations": [{
+            "authority": "codex_machine",
+            "text": "Original generation prompt is not attested; this is an orchestration workcut, not a human verdict.",
+        }],
+        "founder_review": {"status": "pending"}, "memory_promotion": "none",
+        "lineage": [], "replaces_v1_record": None,
+    }
 class TestImportEvidenceV2(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -114,6 +191,127 @@ class TestImportEvidenceV2(unittest.TestCase):
         self.assertEqual(saved["record_sha256"], importer.record_digest(record))
         saved_line = json.loads(self.registry.read_text(encoding="utf-8").strip())
         self.assertEqual(saved_line, saved)
+
+    def test_opsys_native_creation_rehashes_and_attests_pc1_archive(self):
+        record = fixture_opsys_record(self.storage, self.repo)
+        action, saved = importer.import_record(record, self.registry, self.storage, self.repo)
+        self.assertEqual(action, "imported")
+        self.assertEqual(saved["schema"], importer.OPSYS_SCHEMA)
+        self.assertIsNone(saved["amd2_brief_id"])
+        self.assertIsNone(saved["replaces_v1_record"])
+        self.assertEqual(saved["memory_promotion"], "none")
+        self.assertEqual(saved["founder_review"], {"status": "pending"})
+        self.assertEqual(saved["record_sha256"], importer.record_digest(record))
+        self.assertEqual(len([item for item in saved["artifacts"] if item["kind"] == "opsys_source_video"]), 1)
+
+    def test_opsys_native_record_import_is_idempotent_and_conflicts_do_not_append(self):
+        record = fixture_opsys_record(self.storage, self.repo)
+        first, saved = importer.import_record(record, self.registry, self.storage, self.repo)
+        original = self.registry.read_bytes()
+        second, _ = importer.import_record(record, self.registry, self.storage, self.repo)
+        self.assertEqual((first, second), ("imported", "already_present"))
+        self.assertEqual(self.registry.read_bytes(), original)
+
+        changed = dict(record)
+        changed["observations"] = [{"authority": "codex_machine", "text": "different verified note"}]
+        with self.assertRaisesRegex(importer.EvidenceError, "different SHA-256"):
+            importer.import_record(changed, self.registry, self.storage, self.repo)
+        self.assertEqual(self.registry.read_bytes(), original)
+        self.assertEqual(saved["record_sha256"], importer.record_digest(record))
+
+    def test_opsys_record_cannot_claim_an_existing_amd2_brief(self):
+        record = fixture_opsys_record(self.storage, self.repo)
+        real_corpus_path = (Path(__file__).resolve().parents[5]
+                            / "app/server/nexora/bench/corpus-amd-v2/corpus.json")
+        real_corpus = json.loads(real_corpus_path.read_text(encoding="utf-8"))
+        existing_id = real_corpus["briefs"][0]["id"]
+        self.assertTrue(importer.AMD2_BRIEF_ID.fullmatch(existing_id))
+        corpus_path = self.repo / "app/server/nexora/bench/corpus-amd-v2/corpus.json"
+        fixture_corpus = {"status": "fixture", "briefs": [{"id": existing_id}]}
+        corpus_bytes = json.dumps(fixture_corpus).encode()
+        corpus_path.write_bytes(corpus_bytes)
+        corpus_artifact = next(item for item in record["artifacts"] if item["kind"] == "amd2_corpus")
+        corpus_artifact.update({"sha256": hashlib.sha256(corpus_bytes).hexdigest(),
+                                "size_bytes": len(corpus_bytes)})
+        record["amd2_corpus_sha256"] = corpus_artifact["sha256"]
+        record["amd2_brief_id"] = existing_id
+        with self.assertRaisesRegex(importer.EvidenceError, "OPSYS R1 records must keep amd2_brief_id null"):
+            importer.validate_record(record)
+
+    def test_opsys_pc1_receipt_counts_reject_booleans(self):
+        receipt = {
+            "host": "pc1", "verified": True,
+            "infrastructure": "/run/media/pc1/Infrastructure/NexoraStudioWork/ArchivesNexora/fixture",
+            "assets": 1, "bytes": 1,
+            "files": [{"sha256": "a" * 64, "size_bytes": 1}],
+        }
+        self.assertEqual(importer._validate_opsys_pc1_receipt(receipt), receipt["files"])
+        for field, message in (("assets", "asset count must be an integer"),
+                               ("bytes", "byte count must be an integer")):
+            with self.subTest(field=field):
+                malformed = dict(receipt, **{field: True})
+                with self.assertRaisesRegex(importer.EvidenceError, message):
+                    importer._validate_opsys_pc1_receipt(malformed)
+
+    def test_registry_reads_v7_migration_and_opsys_creation_without_mixing_lineage(self):
+        v7 = fixture_record(self.storage, self.repo)
+        importer.import_record(v7, self.registry, self.storage, self.repo)
+        opsys = fixture_opsys_record(self.storage, self.repo)
+        importer.import_record(opsys, self.registry, self.storage, self.repo)
+        with self.registry.open("rb") as stream:
+            records, _ = importer._load_registry(stream.fileno())
+        self.assertEqual(set(records), {v7["record_id"], opsys["record_id"]})
+        self.assertIsNotNone(records[v7["record_id"]]["replaces_v1_record"])
+        self.assertIsNone(records[opsys["record_id"]]["replaces_v1_record"])
+
+    def test_v7_creation_without_its_archived_v1_predecessor_is_refused(self):
+        record = fixture_record(self.storage, self.repo)
+        record["replaces_v1_record"] = None
+        with self.assertRaisesRegex(importer.EvidenceError, "V7 workcut must link"):
+            importer.validate_record(record)
+
+    def test_opsys_fake_v1_link_unknown_identity_and_missing_proof_are_refused(self):
+        record = fixture_opsys_record(self.storage, self.repo)
+        record["replaces_v1_record"] = {
+            "record_id": "v7.workcut.deepseek.r1", "record_sha256": "a" * 64,
+            "registry_sha256": "b" * 64,
+        }
+        with self.assertRaisesRegex(importer.EvidenceError, "native creation"):
+            importer.validate_record(record)
+
+        unknown = fixture_opsys_record(self.storage, self.repo)
+        unknown["record_id"] = "opsys.workcut.experimental.r1.v2"
+        with self.assertRaisesRegex(importer.EvidenceError, "invalid V2 record_id"):
+            importer.validate_record(unknown)
+
+        missing = fixture_opsys_record(self.storage, self.repo)
+        missing["artifacts"] = [item for item in missing["artifacts"]
+                                if item["kind"] != "opsys_shared_brief"]
+        with self.assertRaisesRegex(importer.EvidenceError, "OPSYS required proof is missing"):
+            importer.validate_record(missing)
+
+    def test_opsys_native_record_cannot_claim_promotion_or_nonpending_review(self):
+        record = fixture_opsys_record(self.storage, self.repo)
+        record["memory_promotion"] = "candidate"
+        with self.assertRaisesRegex(importer.EvidenceError, "cannot promote"):
+            importer.validate_record(record)
+        record = fixture_opsys_record(self.storage, self.repo)
+        record["founder_review"] = {"status": "approved"}
+        with self.assertRaisesRegex(importer.EvidenceError, "remain pending"):
+            importer.validate_record(record)
+
+    def test_opsys_master_must_be_listed_in_pc1_manifest_and_receipt(self):
+        record = fixture_opsys_record(self.storage, self.repo)
+        manifest_ref = next(item for item in record["artifacts"]
+                            if item["kind"] == "opsys_pc1_archive_manifest")
+        manifest_path = self.storage / manifest_ref["path"]
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["assets"] = [item for item in manifest["assets"] if item["kind"] != "opsys_master_video"]
+        content = (json.dumps(manifest, sort_keys=True) + "\n").encode()
+        manifest_path.write_bytes(content)
+        manifest_ref.update({"sha256": hashlib.sha256(content).hexdigest(), "size_bytes": len(content)})
+        with self.assertRaisesRegex(importer.EvidenceError, "not attested by a pc1 archive"):
+            importer.verify_artifacts(record, self.storage, self.repo)
 
     def test_null_typed_seed_with_raw_text_remains_unknown(self):
         record = fixture_record(self.storage, self.repo)
@@ -260,14 +458,19 @@ class TestImportEvidenceV2(unittest.TestCase):
         with self.assertRaisesRegex(importer.EvidenceError, "lineage parent is absent"):
             importer.import_record(record, self.registry, self.storage, self.repo)
         self.assertFalse(self.registry.exists())
+        with self.assertRaisesRegex(importer.EvidenceError, "lineage parent is absent"):
+            importer.import_record(record, self.base / "missing" / "registry.jsonl",
+                                   self.storage, self.repo)
+        self.assertFalse((self.base / "missing").exists())
 
     def test_registry_rejects_dangling_lineage_on_readback(self):
         record = fixture_record(self.storage, self.repo)
         record["lineage"] = ["v7.workcut.opus.r8c.v2"]
         self.registry.write_text(json.dumps(record) + "\n", encoding="utf-8")
         with self.registry.open("rb") as stream:
+            fd = stream.fileno()
             with self.assertRaisesRegex(importer.EvidenceError, "absent prior parent"):
-                importer._load_registry(stream.fileno())
+                importer._load_registry(fd)
 
     def test_amd2_brief_id_must_exist_in_the_referenced_corpus(self):
         record = fixture_record(self.storage, self.repo)
@@ -338,9 +541,10 @@ class TestImportEvidenceV2(unittest.TestCase):
         legacy = dict(record, schema="nexora-creative-v7-production-evidence-v1")
         legacy_registry = self.base / "legacy.jsonl"
         legacy_registry.write_text(json.dumps(legacy) + "\n", encoding="utf-8")
-        with legacy_registry.open("rb") as fd:
+        with legacy_registry.open("rb") as stream:
+            fd = stream.fileno()
             with self.assertRaisesRegex(importer.EvidenceError, "schema 2 only"):
-                importer._load_registry(fd.fileno())
+                importer._load_registry(fd)
 
         professor_dir = (REPO_ROOT / "app/server/nexora/memoire/professeur").resolve()
         self.assertFalse(importer.DEFAULT_REGISTRY.resolve().is_relative_to(professor_dir))
@@ -439,16 +643,18 @@ class TestImportEvidenceV2(unittest.TestCase):
                 registry = self.base / "broken.jsonl"
                 registry.write_bytes(content)
                 with registry.open("rb") as stream:
+                    fd = stream.fileno()
                     with self.assertRaisesRegex(importer.EvidenceError, message):
-                        importer._load_registry(stream.fileno())
+                        importer._load_registry(fd)
 
         record = fixture_record(self.storage, self.repo)
         encoded = json.dumps(record) + "\n"
         registry = self.base / "duplicate.jsonl"
         registry.write_text(encoded + encoded, encoding="utf-8")
         with registry.open("rb") as stream:
+            fd = stream.fileno()
             with self.assertRaisesRegex(importer.EvidenceError, "duplicate record_id"):
-                importer._load_registry(stream.fileno())
+                importer._load_registry(fd)
 
     def test_registry_json_refuses_duplicate_keys_and_nonstandard_constants(self):
         record = fixture_record(self.storage, self.repo)
@@ -468,8 +674,9 @@ class TestImportEvidenceV2(unittest.TestCase):
                 registry = self.base / "strict.jsonl"
                 registry.write_text(content, encoding="utf-8")
                 with registry.open("rb") as stream:
+                    fd = stream.fileno()
                     with self.assertRaisesRegex(importer.EvidenceError, message):
-                        importer._load_registry(stream.fileno())
+                        importer._load_registry(fd)
 
     def test_artifact_roots_missing_files_and_non_regular_files_are_refused(self):
         record = fixture_record(self.storage, self.repo)

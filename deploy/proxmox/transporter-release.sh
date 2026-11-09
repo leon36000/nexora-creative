@@ -24,20 +24,21 @@ with tarfile.open(sys.argv[1], 'r:*') as t:
             raise SystemExit('SHA Git de l’artefact différent')
 PY
 mkdir -m 700 "$LOCAL"
-for fichier in preparer_release.py transaction_release.py livrer_release.py mettre-a-jour-creative.sh; do
+for fichier in preparer_release.py transaction_release.py livrer_release.py mettre-a-jour-creative.sh qualifier-release.mjs; do
   git -C "$DEPOT" show "${REVISION}:deploy/proxmox/${fichier}" > "$LOCAL/$fichier"
 done
 cp -- "$ARTEFACT" "$LOCAL/release.tar"
 printf '%s\n' "$SHA_ARTEFACT" > "$LOCAL/release.sha256"
 printf '%s\n' "$REVISION" > "$LOCAL/commit.sha"
-(cd "$LOCAL" && sha256sum release.tar release.sha256 commit.sha preparer_release.py transaction_release.py livrer_release.py mettre-a-jour-creative.sh > SHA256SUMS)
+(cd "$LOCAL" && sha256sum release.tar release.sha256 commit.sha preparer_release.py transaction_release.py livrer_release.py mettre-a-jour-creative.sh qualifier-release.mjs > SHA256SUMS)
 DISTANT="/srv/creative/livraisons/$ID"
 ssh -o BatchMode=yes nexora-creative "test -d /srv/creative && test ! -L /srv/creative && for p in /srv/creative/livraisons /srv/creative/releases /srv/creative/backups; do { test -d \"\$p\" || mkdir -m 700 \"\$p\"; } && test ! -L \"\$p\" || exit 1; done && mkdir -m 700 '$DISTANT'"
-tar -C "$LOCAL" -cf - release.tar release.sha256 commit.sha preparer_release.py transaction_release.py livrer_release.py mettre-a-jour-creative.sh SHA256SUMS | \
+tar -C "$LOCAL" -cf - release.tar release.sha256 commit.sha preparer_release.py transaction_release.py livrer_release.py mettre-a-jour-creative.sh qualifier-release.mjs SHA256SUMS | \
   ssh -o BatchMode=yes nexora-creative "tar --keep-old-files -xf - -C '$DISTANT'"
 ssh -o BatchMode=yes nexora-creative "cd '$DISTANT' && sha256sum -c SHA256SUMS"
 printf 'Artefact et outils vérifiés : %s\n' "$DISTANT"
 printf "Importer : ssh -T nexora-creative 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent PYTHONDONTWRITEBYTECODE=1 python3 -B %s/preparer_release.py importer %s/release.tar %s %s /srv/creative/releases/%s'\n" "$DISTANT" "$DISTANT" "$SHA_ARTEFACT" "$REVISION" "$ID"
+printf "Qualifier sous l’identité du service : ssh -T nexora-creative 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent node %s/qualifier-release.mjs /srv/creative/releases/%s 1000'\n" "$DISTANT" "$ID"
 printf "Plan : ssh -T nexora-creative 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/nonexistent PYTHONDONTWRITEBYTECODE=1 python3 -B %s/livrer_release.py plan /srv/creative/releases/%s /srv/creative %s/plan.json'\n" "$DISTANT" "$ID" "$DISTANT"
 printf "Activer après revue : ssh -T nexora-creative 'sudo -n env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/nonexistent PYTHONDONTWRITEBYTECODE=1 python3 -B %s/livrer_release.py activer /srv/creative/releases/%s /srv/creative /srv/creative/data /srv/creative/backups/%s %s/plan.json'\n" "$DISTANT" "$ID" "$ID" "$DISTANT"
 printf "Retour : ssh -T nexora-creative 'sudo -n env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/nonexistent PYTHONDONTWRITEBYTECODE=1 python3 -B %s/livrer_release.py retour /srv/creative /srv/creative/data /srv/creative/backups/%s'\n" "$DISTANT" "$ID"

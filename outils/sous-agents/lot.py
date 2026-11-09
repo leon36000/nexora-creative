@@ -30,6 +30,8 @@ MAX_LEDGER_LINE_BYTES = 1024 * 1024
 MAX_LEDGER_RECORDS = 250_000
 RUN_ID_PATTERN = re.compile(r"[A-Za-z0-9_.-]{1,128}")
 
+INDEX_FILENAME = "index.tsv"
+STATUS_FILENAME = "lot_status.txt"
 
 class LotError(Exception):
     pass
@@ -133,7 +135,7 @@ def is_strict_descendant(path: Path, root: Path) -> bool:
     return path != root and path.is_relative_to(root)
 
 
-def discover_tasks(prompt_dir: Path, work_root: Path, create_workdirs: bool) -> list[Task]:
+def discover_prompts(prompt_dir: Path, work_root: Path) -> list[Task]:
     entries = sorted(
         (p for p in prompt_dir.iterdir() if p.name.endswith((".txt", ".md"))),
         key=lambda p: p.name,
@@ -142,7 +144,6 @@ def discover_tasks(prompt_dir: Path, work_root: Path, create_workdirs: bool) -> 
         raise LotError("aucun prompt .txt ou .md dans le dossier")
     tasks: list[Task] = []
     by_name: dict[str, Path] = {}
-    effective_workdirs: list[tuple[str, Path]] = []
     for entry in entries:
         suffix = ".txt" if entry.name.endswith(".txt") else ".md"
         name = entry.name[:-len(suffix)]
@@ -161,40 +162,56 @@ def discover_tasks(prompt_dir: Path, work_root: Path, create_workdirs: bool) -> 
             raise LotError(f"le prompt n'est pas un fichier régulier : {entry.name}")
         tasks.append(Task(name=name, prompt=prompt, workdir=work_root / name))
 
+    return tasks
+
+
+def resolve_existing_workdir(task, target, work_root, identities):
+    if not target.is_dir():
+        raise LotError(f"workdir existant non répertoire : {task.name}")
+    try:
+        identity = workdir_identity(target)
+    except OSError:
+        raise LotError(f"workdir illisible : {task.name}") from None
+    resolved = Path(identity[0])
+    if not is_strict_descendant(resolved, work_root):
+        raise LotError(f"workdir résolu hors du dossier déclaré : {task.name}")
+    prior = identities.get(identity)
+    if prior is not None:
+        raise LotError(f"workdirs identiques ou liés par symlink : {prior!r} et {task.name!r}")
+    identities[identity] = task.name
+    task.workdir = resolved
+    return resolved
+
+
+def resolve_new_workdir(task, target, work_root, identities):
+    # Tous les workdirs manquants sont enfants directs du chemin canonique.
+    # Les noms ont déjà été limités à des noms de base sûrs et uniques.
+    identity = (str(work_root), task.name)
+    prior = identities.get(identity)
+    if prior is not None:
+        raise LotError(f"collision de workdir : {prior!r} et {task.name!r}")
+    identities[identity] = task.name
+    resolved = target.resolve(strict=False)
+    if not is_strict_descendant(resolved, work_root):
+        raise LotError(f"workdir à créer hors du dossier déclaré : {task.name}")
+    task.detail = "a_creer"
+    return resolved
+
+
+def discover_tasks(prompt_dir: Path, work_root: Path, create_workdirs: bool) -> list[Task]:
+    tasks = discover_prompts(prompt_dir, work_root)
     identities: dict[tuple[Any, ...], str] = {}
+    effective_workdirs: list[tuple[str, Path]] = []
     for task in tasks:
         target = task.workdir
         if os.path.lexists(target):
-            if not target.is_dir():
-                raise LotError(f"workdir existant non répertoire : {task.name}")
-            try:
-                identity = workdir_identity(target)
-            except OSError:
-                raise LotError(f"workdir illisible : {task.name}") from None
-            resolved = Path(identity[0])
-            if not is_strict_descendant(resolved, work_root):
-                raise LotError(f"workdir résolu hors du dossier déclaré : {task.name}")
-            prior = identities.get(identity)
-            if prior is not None:
-                raise LotError(f"workdirs identiques ou liés par symlink : {prior!r} et {task.name!r}")
-            identities[identity] = task.name
-            task.workdir = resolved
-            effective_workdirs.append((task.name, resolved))
+            resolved = resolve_existing_workdir(task, target, work_root, identities)
         elif create_workdirs:
-            # Tous les workdirs manquants sont enfants directs du chemin canonique.
-            # Les noms ont déjà été limités à des noms de base sûrs et uniques.
-            identity = (str(work_root), task.name)
-            prior = identities.get(identity)
-            if prior is not None:
-                raise LotError(f"collision de workdir : {prior!r} et {task.name!r}")
-            identities[identity] = task.name
-            resolved = target.resolve(strict=False)
-            if not is_strict_descendant(resolved, work_root):
-                raise LotError(f"workdir à créer hors du dossier déclaré : {task.name}")
-            task.detail = "a_creer"
-            effective_workdirs.append((task.name, resolved))
+            resolved = resolve_new_workdir(task, target, work_root, identities)
         else:
             task.status, task.detail = "SKIP", "pas_de_workdir"
+            continue
+        effective_workdirs.append((task.name, resolved))
 
     # Deux chemins distincts mais imbriqués partagent le contenu visible à l'agent
     # parent; ils ne constituent donc pas deux workdirs indépendants.
@@ -207,7 +224,7 @@ def discover_tasks(prompt_dir: Path, work_root: Path, create_workdirs: bool) -> 
 
 def validate_output_names(tasks: list[Task]) -> None:
     """Reserve top-level lot artifacts before any workdir or agent is started."""
-    reserved = {"index.tsv", "index.tsv.tmp", "lot_status.txt"}
+    reserved = {INDEX_FILENAME, INDEX_FILENAME + ".tmp", STATUS_FILENAME}
     claims: dict[str, tuple[str, str]] = {}
     for task in tasks:
         for path_name, kind in ((task.name, "sortie"), (task.name + ".launcher.log", "journal")):
@@ -239,7 +256,7 @@ def parse_cost(raw: Any) -> Decimal | None:
 def base_run_id(run: str) -> str:
     # The current host relay appends one nonce/call tag to every provider request:
     # RUN--p<16 lowercase hex digits>--c<N>. Older runners record RUN directly.
-    match = re.fullmatch(r"(.+)--p[0-9a-f]{16}--c[1-9][0-9]*", run)
+    match = re.fullmatch(r"(.+)--p[0-9a-f]{16}--c[1-9]\d*", run, flags=re.ASCII)
     return match.group(1) if match else run
 
 
@@ -286,7 +303,7 @@ def parse_journal(raw: bytes) -> list[dict[str, Any]]:
                 raise ValueError(f"ligne {line_number} non objet")
             rows.append(row)
         return rows
-    except (UnicodeError, ValueError, DecimalException, json.JSONDecodeError, RecursionError):
+    except (ValueError, DecimalException, RecursionError):
         raise ValueError("journal_illisible") from None
 
 
@@ -344,6 +361,10 @@ def read_ledger(path: Path, lot_id: str, baseline: LedgerBaseline) -> Ledger:
         new_rows = parse_journal(current[len(baseline.raw):])
     except (OSError, ValueError):
         return Ledger(False, 0, {}, "journal_illisible")
+    return summarize_ledger(historical, new_rows, lot_id)
+
+
+def summarize_ledger(historical, new_rows, lot_id):
     # Only exact pre-lot bytes may contain records without a run identifier.
     if any(not isinstance(row.get("run"), str) or not row.get("run") for row in new_rows):
         return Ledger(False, 0, {}, "cout_nouveau_non_attribuable")
@@ -371,7 +392,7 @@ def read_run_id(task: Task) -> str | None:
         data = json.loads(meta_path.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
         run = data.get("run") if isinstance(data, dict) else None
         return run if isinstance(run, str) and run else None
-    except (OSError, UnicodeError, ValueError, json.JSONDecodeError, RecursionError):
+    except (OSError, ValueError, RecursionError):
         return None
 
 
@@ -457,48 +478,58 @@ def make_lot_dir(state: Path) -> tuple[str, Path]:
     raise LotError("impossible de réserver un dossier de sortie unique")
 
 
+def create_one_workdir(task):
+    # Explicit creation overrides only this preflight state.
+    try:
+        task.workdir.mkdir(mode=0o755)
+        task.status, task.detail = "SKIP", "non_demarre"
+    except FileExistsError:
+        if task.workdir.is_dir():
+            task.status, task.detail = "SKIP", "non_demarre"
+        else:
+            task.status, task.detail = "FAIL", "creation_workdir_echec"
+            return False
+    except OSError:
+        task.status, task.detail = "FAIL", "creation_workdir_echec"
+        return False
+    return True
+
+
+def recheck_workdirs(tasks, work_root):
+    # Recheck identities after explicit creation to catch a concurrent alias.
+    identities: dict[tuple[Any, ...], str] = {}
+    paths: list[tuple[str, Path]] = []
+    for task in tasks:
+        if task.status == "FAIL":
+            continue
+        identity = workdir_identity(task.workdir)
+        resolved = Path(identity[0])
+        if not is_strict_descendant(resolved, work_root):
+            raise LotError(f"workdir créé ou résolu hors du dossier déclaré : {task.name}")
+        prior = identities.get(identity)
+        if prior is not None:
+            raise LotError(f"workdirs devenus identiques : {prior!r} et {task.name!r}")
+        identities[identity] = task.name
+        task.workdir = resolved
+        paths.append((task.name, resolved))
+    for index, (name, path) in enumerate(paths):
+        for other_name, other_path in paths[index + 1:]:
+            if path in other_path.parents or other_path in path.parents:
+                raise LotError(f"workdirs devenus imbriqués : {name!r} et {other_name!r}")
+
+
 def create_workdirs(tasks: list[Task], work_root: Path) -> list[Task]:
     failures = False
     for task in tasks:
         if task.status == "SKIP" and task.detail == "a_creer":
-            # Explicit creation overrides only this preflight state.
-            try:
-                task.workdir.mkdir(mode=0o755)
-                task.status, task.detail = "SKIP", "non_demarre"
-            except FileExistsError:
-                if task.workdir.is_dir():
-                    task.status, task.detail = "SKIP", "non_demarre"
-                else:
-                    task.status, task.detail = "FAIL", "creation_workdir_echec"
-                    failures = True
-            except OSError:
-                task.status, task.detail = "FAIL", "creation_workdir_echec"
+            if not create_one_workdir(task):
                 failures = True
     if failures:
         for task in tasks:
             if task.status == "SKIP" and task.detail == "non_demarre":
                 task.detail = "creation_lot_incomplete"
     else:
-        # Recheck identities after explicit creation to catch a concurrent alias.
-        identities: dict[tuple[Any, ...], str] = {}
-        paths: list[tuple[str, Path]] = []
-        for task in tasks:
-            if task.status == "FAIL":
-                continue
-            identity = workdir_identity(task.workdir)
-            resolved = Path(identity[0])
-            if not is_strict_descendant(resolved, work_root):
-                raise LotError(f"workdir créé ou résolu hors du dossier déclaré : {task.name}")
-            prior = identities.get(identity)
-            if prior is not None:
-                raise LotError(f"workdirs devenus identiques : {prior!r} et {task.name!r}")
-            identities[identity] = task.name
-            task.workdir = resolved
-            paths.append((task.name, resolved))
-        for index, (name, path) in enumerate(paths):
-            for other_name, other_path in paths[index + 1:]:
-                if path in other_path.parents or other_path in path.parents:
-                    raise LotError(f"workdirs devenus imbriqués : {name!r} et {other_name!r}")
+        recheck_workdirs(tasks, work_root)
     return tasks
 
 
@@ -540,185 +571,285 @@ def launch(task: Task, alias: str, lot_id: str, lot_dir: Path, turns: int, run_b
         task.process = None
 
 
+@dataclass
+class LotConfig:
+    alias: str
+    prompt_dir: Path
+    work_root: Path
+    parallelism: int
+    allow_create: bool
+    budget: Decimal
+    per_run_budget: Decimal
+    budget_units: int
+    run_budget_units: int
+    turns: int
+    sa_dir: Path
+    state: Path
+
+
+def load_config(argv: list[str]) -> LotConfig:
+    """Parse arguments and environment into a validated, immutable lot config."""
+    alias, prompt_dir, work_root, parallelism, allow_create = parse_args(argv)
+    budget = positive_decimal(os.environ.get("LOT_BUDGET", "5"), "LOT_BUDGET")
+    per_run_budget = positive_decimal(os.environ.get("LOT_RUN_BUDGET", "0.30"), "LOT_RUN_BUDGET")
+    if per_run_budget > budget:
+        raise LotError("LOT_RUN_BUDGET ne peut pas dépasser LOT_BUDGET")
+    budget_units = money_units(budget)
+    run_budget_units = money_units(per_run_budget)
+    try:
+        turns = int(os.environ.get("LOT_TURNS", "30"))
+    except ValueError:
+        raise LotError("LOT_TURNS invalide") from None
+    if turns < 1:
+        raise LotError("LOT_TURNS doit être supérieur à zéro")
+    sa_dir = Path(os.environ["SA_DIR"]).resolve(strict=True)
+    state = Path(os.environ["SA_STATE"]).expanduser().resolve(strict=False)
+    return LotConfig(
+        alias=alias, prompt_dir=prompt_dir, work_root=work_root, parallelism=parallelism,
+        allow_create=allow_create, budget=budget, per_run_budget=per_run_budget,
+        budget_units=budget_units, run_budget_units=run_budget_units,
+        turns=turns, sa_dir=sa_dir, state=state,
+    )
+
+
+def build_child_env(config: LotConfig, lot_id: str, lot_dir: Path) -> dict[str, str]:
+    env = dict(os.environ)
+    env.update({
+        "LOT_ID": lot_id, "LOT": str(lot_dir), "LOT_BUDGET": str(config.budget),
+        "LOT_RUN_BUDGET": str(config.per_run_budget), "LOT_TURNS": str(config.turns),
+        "LOT_ALIAS": config.alias, "WDIR": str(config.work_root), "SA_DIR": str(config.sa_dir),
+        "SA_STATE": str(config.state),
+    })
+    return env
+
+
+def initial_ledger_state(ledger_path: Path, lot_id: str) -> tuple[LedgerBaseline, Ledger]:
+    try:
+        ledger_baseline = snapshot_ledger(ledger_path)
+    except LotError as exc:
+        return LedgerBaseline(raw=b"", unattributed_rows=0), Ledger(False, 0, {}, str(exc))
+    return ledger_baseline, read_ledger(ledger_path, lot_id, ledger_baseline)
+
+
+def write_lot_status(lot_dir: Path, lot_ok: bool) -> None:
+    (lot_dir / STATUS_FILENAME).write_text(("OK" if lot_ok else "FAIL") + "\n", encoding="utf-8")
+
+
+def report_initial_ledger_failure(lot_dir: Path, tasks: list[Task], reason: str) -> None:
+    for task in tasks:
+        if task.status == "SKIP" and task.detail == "non_demarre":
+            task.detail = reason
+    write_index(lot_dir / INDEX_FILENAME, tasks)
+    write_lot_status(lot_dir, False)
+    print(f"statut du lot : FAIL ({reason}); aucun lancement ; index : {lot_dir / INDEX_FILENAME}")
+
+
+def start_gateway(sa_dir: Path, env: dict[str, str], eligible: list[Task]) -> None:
+    """Start the gateway; mark every eligible task skipped when it is unavailable."""
+    try:
+        gateway = subprocess.run(
+            [str(sa_dir / "gateway.sh"), "start"], env=env,
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    except OSError:
+        gateway = subprocess.CompletedProcess([], 127)
+    if gateway.returncode != 0:
+        for task in eligible:
+            task.status, task.detail = "SKIP", "passerelle_indisponible"
+
+
+@dataclass
+class SupervisorState:
+    tasks: list[Task]
+    pending: list[Task]
+    active: list[Task]
+    run_owners: dict[str, str]
+    duplicate_run_ids: set[str]
+    ledger_problem: str = ""
+    launched_any: bool = False
+
+
+def fail_task(task: Task, detail: str, rc: int | None = None) -> str:
+    task.status, task.detail = "FAIL", detail
+    if rc is not None:
+        task.rc = str(rc)
+    return detail
+
+
+def reap_finished(state: SupervisorState, lot_id: str, ledger_path: Path,
+                  ledger_baseline: LedgerBaseline, run_budget_units: int,
+                  tasks: list[Task]) -> bool:
+    """Collect completed processes; return whether any task changed state."""
+    changed = False
+    # Iterate a snapshot because completed tasks are removed from active.
+    for task in state.active.copy():
+        process = task.process
+        if process is None or process.poll() is None:
+            continue
+        task.run_id = task.run_id or read_run_id(task)
+        run_problem = register_run_id(task, lot_id, tasks, state.run_owners, state.duplicate_run_ids)
+        if run_problem:
+            state.ledger_problem = fail_task(task, run_problem, process.returncode)
+        else:
+            current = read_ledger(ledger_path, lot_id, ledger_baseline)
+            if not current.known:
+                state.ledger_problem = fail_task(task, current.reason, process.returncode)
+            elif not task.run_id or task.run_id not in current.costs_by_run:
+                state.ledger_problem = fail_task(task, "cout_run_non_verifiable", process.returncode)
+            else:
+                finish_task(task, process.returncode, run_budget_units, current.costs_by_run)
+        state.active.remove(task)
+        changed = True
+    return changed
+
+
+def observe_active_run_ids(state: SupervisorState, lot_id: str, tasks: list[Task]) -> None:
+    # Observe per-run metadata while requests are active. Missing metadata
+    # leaves the full reservation in place.
+    for task in state.active:
+        task.run_id = task.run_id or read_run_id(task)
+        run_problem = register_run_id(task, lot_id, tasks, state.run_owners, state.duplicate_run_ids)
+        if run_problem:
+            state.ledger_problem = run_problem
+
+
+def skip_all(pending: list[Task], detail: str) -> None:
+    while pending:
+        task = pending.pop(0)
+        task.status, task.detail = "SKIP", detail
+
+
+def active_reservation(active: list[Task], costs_by_run: dict[str, int],
+                       run_budget_units: int) -> int:
+    total = 0
+    for running in active:
+        if running.run_id:
+            observed = costs_by_run.get(running.run_id, 0)
+            total += max(0, run_budget_units - observed)
+        else:
+            total += run_budget_units
+    return total
+
+
+def launch_pending(config: LotConfig, state: SupervisorState, lot_id: str, lot_dir: Path,
+                   env: dict[str, str], ledger_path: Path,
+                   ledger_baseline: LedgerBaseline) -> bool:
+    """Launch pending tasks while slots and local budget remain; return whether state changed."""
+    changed = False
+    while state.pending and len(state.active) < config.parallelism and not state.ledger_problem:
+        ledger = read_ledger(ledger_path, lot_id, ledger_baseline)
+        if not ledger.known:
+            state.ledger_problem = ledger.reason
+            break
+        reserved = active_reservation(state.active, ledger.costs_by_run, config.run_budget_units)
+        if ledger.spent + reserved + config.run_budget_units > config.budget_units:
+            if state.active:
+                break
+            skip_all(state.pending, "budget_reserve_insuffisante")
+            changed = True
+            break
+        task = state.pending.pop(0)
+        launch(task, config.alias, lot_id, lot_dir, config.turns, config.per_run_budget,
+               config.sa_dir, config.work_root, env)
+        if task.process is not None:
+            state.active.append(task)
+            state.launched_any = True
+        else:
+            changed = True
+    return changed
+
+
+def supervise(config: LotConfig, state: SupervisorState, lot_id: str, lot_dir: Path,
+              env: dict[str, str], ledger_path: Path, ledger_baseline: LedgerBaseline) -> None:
+    while state.pending or state.active:
+        # Collect completions first; their full reservation becomes reusable
+        # only after the cost journal has been read again and validated.
+        changed = reap_finished(state, lot_id, ledger_path, ledger_baseline,
+                                config.run_budget_units, state.tasks)
+        observe_active_run_ids(state, lot_id, state.tasks)
+        ledger = read_ledger(ledger_path, lot_id, ledger_baseline)
+        if not ledger.known:
+            state.ledger_problem = ledger.reason
+        if launch_pending(config, state, lot_id, lot_dir, env, ledger_path, ledger_baseline):
+            changed = True
+        if state.ledger_problem:
+            skip_all(state.pending, state.ledger_problem)
+            changed = True
+        if not state.active:
+            continue
+        if changed:
+            # Revisit active PIDs promptly without introducing a long wait.
+            continue
+        # Reparse the append-only ledger at a bounded cadence; new starts
+        # still require a fresh read immediately before each launch.
+        time.sleep(0.5)
+
+
+def report_costs(config: LotConfig, lot_id: str, env: dict[str, str]) -> int:
+    try:
+        report = subprocess.run(
+            [str(config.sa_dir / "cout.sh"), "--run", lot_id], env=env,
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding="utf-8", errors="replace", check=False,
+        )
+        if report.stdout:
+            print(report.stdout.rstrip())
+        return report.returncode
+    except OSError:
+        return 127
+
+
+def finalize_lot(config: LotConfig, state: SupervisorState, lot_id: str, lot_dir: Path,
+                 env: dict[str, str], ledger_path: Path, ledger_baseline: LedgerBaseline) -> int:
+    final_ledger = read_ledger(ledger_path, lot_id, ledger_baseline)
+    all_tasks_ok = all(task.status == "OK" for task in state.tasks)
+    final_cost_ok = final_ledger.known and final_ledger.spent <= config.budget_units
+    cost_report_rc = report_costs(config, lot_id, env) if state.launched_any else 0
+    lot_ok = all_tasks_ok and final_cost_ok and cost_report_rc == 0
+    write_index(lot_dir / INDEX_FILENAME, state.tasks)
+    write_lot_status(lot_dir, lot_ok)
+    if not final_ledger.known:
+        cost_note = final_ledger.reason
+    elif final_ledger.spent > config.budget_units:
+        cost_note = "depassement_budget_constate"
+    else:
+        cost_note = "cout_attribue"
+    print(f"statut du lot : {'OK' if lot_ok else 'FAIL'} ({cost_note}); index : {lot_dir / INDEX_FILENAME}")
+    print("réservations budgétaires locales à ce lot ; aucun partage entre lots simultanés ni plafond dur d'appel en vol")
+    if ledger_baseline.unattributed_rows:
+        print(f"{ledger_baseline.unattributed_rows} ligne(s) sans run existaient avant ce lot ; seules ces lignes historiques sont ignorées pour sa réserve")
+    return 0 if lot_ok else 1
+
+
 def main(argv: list[str]) -> int:
     try:
-        alias, prompt_dir, work_root, parallelism, allow_create = parse_args(argv)
-        budget = positive_decimal(os.environ.get("LOT_BUDGET", "5"), "LOT_BUDGET")
-        per_run_budget = positive_decimal(os.environ.get("LOT_RUN_BUDGET", "0.30"), "LOT_RUN_BUDGET")
-        if per_run_budget > budget:
-            raise LotError("LOT_RUN_BUDGET ne peut pas dépasser LOT_BUDGET")
-        budget_units = money_units(budget)
-        run_budget_units = money_units(per_run_budget)
-        try:
-            turns = int(os.environ.get("LOT_TURNS", "30"))
-        except ValueError:
-            raise LotError("LOT_TURNS invalide") from None
-        if turns < 1:
-            raise LotError("LOT_TURNS doit être supérieur à zéro")
-        sa_dir = Path(os.environ["SA_DIR"]).resolve(strict=True)
-        state = Path(os.environ["SA_STATE"]).expanduser().resolve(strict=False)
-        tasks = discover_tasks(prompt_dir, work_root, allow_create)
+        config = load_config(argv)
+        tasks = discover_tasks(config.prompt_dir, config.work_root, config.allow_create)
         validate_output_names(tasks)
-        if allow_create:
-            create_workdirs(tasks, work_root)
-        lot_id, lot_dir = make_lot_dir(state)
-        env = dict(os.environ)
-        env.update({
-            "LOT_ID": lot_id, "LOT": str(lot_dir), "LOT_BUDGET": str(budget),
-            "LOT_RUN_BUDGET": str(per_run_budget), "LOT_TURNS": str(turns),
-            "LOT_ALIAS": alias, "WDIR": str(work_root), "SA_DIR": str(sa_dir),
-            "SA_STATE": str(state),
-        })
-        ledger_path = state / "usage.jsonl"
-        try:
-            ledger_baseline = snapshot_ledger(ledger_path)
-        except LotError as exc:
-            ledger_baseline = LedgerBaseline(raw=b"", unattributed_rows=0)
-            initial_ledger = Ledger(False, 0, {}, str(exc))
-        else:
-            initial_ledger = read_ledger(ledger_path, lot_id, ledger_baseline)
+        if config.allow_create:
+            create_workdirs(tasks, config.work_root)
+        lot_id, lot_dir = make_lot_dir(config.state)
+        env = build_child_env(config, lot_id, lot_dir)
+        ledger_path = config.state / "usage.jsonl"
+        ledger_baseline, initial_ledger = initial_ledger_state(ledger_path, lot_id)
         if not initial_ledger.known:
-            for task in tasks:
-                if task.status == "SKIP" and task.detail == "non_demarre":
-                    task.detail = initial_ledger.reason
-            write_index(lot_dir / "index.tsv", tasks)
-            (lot_dir / "lot_status.txt").write_text("FAIL\n", encoding="utf-8")
-            print(f"statut du lot : FAIL ({initial_ledger.reason}); aucun lancement ; index : {lot_dir / 'index.tsv'}")
+            report_initial_ledger_failure(lot_dir, tasks, initial_ledger.reason)
             return 1
 
         eligible = [task for task in tasks if task.detail == "non_demarre"]
         if eligible:
-            try:
-                gateway = subprocess.run(
-                    [str(sa_dir / "gateway.sh"), "start"], env=env,
-                    stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                    check=False,
-                )
-            except OSError:
-                gateway = subprocess.CompletedProcess([], 127)
-            if gateway.returncode != 0:
-                for task in eligible:
-                    task.status, task.detail = "SKIP", "passerelle_indisponible"
-                eligible = []
+            start_gateway(config.sa_dir, env, eligible)
 
-        active: list[Task] = []
-        launched_any = False
-        pending = [task for task in tasks if task.detail == "non_demarre"]
-        ledger_problem = ""
-        run_owners: dict[str, str] = {}
-        duplicate_run_ids: set[str] = set()
-        while pending or active:
-            changed = False
-            # Collect completions first; their full reservation becomes reusable
-            # only after the cost journal has been read again and validated.
-            for task in list(active):
-                process = task.process
-                if process is not None and process.poll() is not None:
-                    task.run_id = task.run_id or read_run_id(task)
-                    run_problem = register_run_id(task, lot_id, tasks, run_owners, duplicate_run_ids)
-                    if run_problem:
-                        task.status, task.detail = "FAIL", run_problem
-                        task.rc = str(process.returncode)
-                        ledger_problem = run_problem
-                    else:
-                        current = read_ledger(ledger_path, lot_id, ledger_baseline)
-                        if current.known:
-                            if not task.run_id or task.run_id not in current.costs_by_run:
-                                task.status, task.detail = "FAIL", "cout_run_non_verifiable"
-                                task.rc = str(process.returncode)
-                                ledger_problem = "cout_run_non_verifiable"
-                            else:
-                                finish_task(task, process.returncode, run_budget_units, current.costs_by_run)
-                        else:
-                            task.status, task.detail = "FAIL", current.reason
-                            task.rc = str(process.returncode)
-                            ledger_problem = current.reason
-                    active.remove(task)
-                    changed = True
-            # Observe per-run metadata while requests are active. Missing metadata
-            # leaves the full reservation in place.
-            for task in active:
-                task.run_id = task.run_id or read_run_id(task)
-                run_problem = register_run_id(task, lot_id, tasks, run_owners, duplicate_run_ids)
-                if run_problem:
-                    ledger_problem = run_problem
-
-            ledger = read_ledger(ledger_path, lot_id, ledger_baseline)
-            if not ledger.known:
-                ledger_problem = ledger.reason
-
-            while pending and len(active) < parallelism and not ledger_problem:
-                ledger = read_ledger(ledger_path, lot_id, ledger_baseline)
-                if not ledger.known:
-                    ledger_problem = ledger.reason
-                    break
-                active_reservation = 0
-                for running in active:
-                    if running.run_id:
-                        observed = ledger.costs_by_run.get(running.run_id, 0)
-                        active_reservation += max(0, run_budget_units - observed)
-                    else:
-                        active_reservation += run_budget_units
-                if ledger.spent + active_reservation + run_budget_units > budget_units:
-                    # An in-flight task may finish below its reservation; wait and
-                    # re-evaluate before classifying the remaining tasks as skips.
-                    if active:
-                        break
-                    while pending:
-                        task = pending.pop(0)
-                        task.status, task.detail = "SKIP", "budget_reserve_insuffisante"
-                    changed = True
-                    break
-                task = pending.pop(0)
-                launch(task, alias, lot_id, lot_dir, turns, per_run_budget, sa_dir, work_root, env)
-                if task.process is not None:
-                    active.append(task)
-                    launched_any = True
-                else:
-                    changed = True
-            if ledger_problem:
-                while pending:
-                    task = pending.pop(0)
-                    task.status, task.detail = "SKIP", ledger_problem
-                changed = True
-            if active and not changed:
-                # Reparse the append-only ledger at a bounded cadence; new starts
-                # still require a fresh read immediately before each launch.
-                time.sleep(0.5)
-            elif active and changed:
-                # Revisit active PIDs promptly without introducing a long wait.
-                continue
-
-        final_ledger = read_ledger(ledger_path, lot_id, ledger_baseline)
-        all_tasks_ok = all(task.status == "OK" for task in tasks)
-        final_cost_ok = final_ledger.known and final_ledger.spent <= budget_units
-        cost_report_rc = 0
-        if launched_any:
-            try:
-                report = subprocess.run(
-                    [str(sa_dir / "cout.sh"), "--run", lot_id], env=env,
-                    stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                    text=True, encoding="utf-8", errors="replace", check=False,
-                )
-                cost_report_rc = report.returncode
-                if report.stdout:
-                    print(report.stdout.rstrip())
-            except OSError:
-                cost_report_rc = 127
-        lot_ok = all_tasks_ok and final_cost_ok and cost_report_rc == 0
-        write_index(lot_dir / "index.tsv", tasks)
-        (lot_dir / "lot_status.txt").write_text(("OK" if lot_ok else "FAIL") + "\n", encoding="utf-8")
-        if not final_ledger.known:
-            cost_note = final_ledger.reason
-        elif final_ledger.spent > budget_units:
-            cost_note = "depassement_budget_constate"
-        else:
-            cost_note = "cout_attribue"
-        print(f"statut du lot : {'OK' if lot_ok else 'FAIL'} ({cost_note}); index : {lot_dir / 'index.tsv'}")
-        print("réservations budgétaires locales à ce lot ; aucun partage entre lots simultanés ni plafond dur d'appel en vol")
-        if ledger_baseline.unattributed_rows:
-            print(f"{ledger_baseline.unattributed_rows} ligne(s) sans run existaient avant ce lot ; seules ces lignes historiques sont ignorées pour sa réserve")
-        return 0 if lot_ok else 1
+        state = SupervisorState(
+            tasks=tasks,
+            pending=[task for task in tasks if task.detail == "non_demarre"],
+            active=[],
+            run_owners={},
+            duplicate_run_ids=set(),
+        )
+        supervise(config, state, lot_id, lot_dir, env, ledger_path, ledger_baseline)
+        return finalize_lot(config, state, lot_id, lot_dir, env, ledger_path, ledger_baseline)
     except (LotError, OSError, KeyError) as exc:
         print(f"lot refusé : {exc}", file=sys.stderr)
         return 2

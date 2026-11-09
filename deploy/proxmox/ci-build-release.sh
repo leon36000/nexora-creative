@@ -27,6 +27,7 @@ mknod -m 666 "$ROOT/dev/null" c 1 3
 mknod -m 666 "$ROOT/dev/urandom" c 1 9
 chmod 1777 "$ROOT/tmp"
 cp "$CI_PROJECT_DIR/deploy/proxmox/preparer_release.py" "$CI_PROJECT_DIR/deploy/proxmox/transaction_release.py" "$ROOT/tools/"
+cp "$CI_PROJECT_DIR/deploy/proxmox/qualifier-release.mjs" "$ROOT/tools/"
 cp "$OUT/source.tar" "$ROOT/input/source.tar"
 chmod 755 "$ROOT" "$ROOT/tools" "$ROOT/input"
 chmod 644 "$ROOT/tools/"*.py "$ROOT/input/source.tar"
@@ -42,6 +43,8 @@ cmd = ['/usr/sbin/chroot', '--userspec=65534:65534', '--groups=65534', root, '/u
 check = "import os,sys; assert os.geteuid()==65534 and os.getegid()==65534 and set(os.getgroups())<={65534}; assert not os.path.exists('/proc/self/environ'); assert not os.path.exists('/etc/nexora'); assert not os.path.exists('/root/.npmrc'); assert not os.path.exists(sys.argv[1])"
 subprocess.run(cmd + ['-c', check, canari], check=True, close_fds=True, stdin=subprocess.DEVNULL)
 subprocess.run(cmd + ['/tools/preparer_release.py', 'construire', '/input/source.tar', sha, '/work/release'],
+               check=True, close_fds=True, stdin=subprocess.DEVNULL)
+subprocess.run(cmd[:-2] + ['/usr/local/bin/node', '/tools/qualifier-release.mjs', '/work/release', '65534'],
                check=True, close_fds=True, stdin=subprocess.DEVNULL)
 PY
 printf '%s\n' "$CI_COMMIT_SHA" > "$ROOT/work/release/CI_COMMIT_SHA"

@@ -62,19 +62,7 @@ def money(amount: str) -> str:
         return amount
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--since', default='')
-    parser.add_argument('--run', default='', help='identifiant exact ou identifiant de lot suivi de ses runs')
-    parser.add_argument('--json', action='store_true')
-    args = parser.parse_args()
-    if args.since:
-        try:
-            parsed = date.fromisoformat(args.since)
-            if parsed.isoformat() != args.since:
-                raise ValueError
-        except ValueError:
-            parser.error('--since doit être une date AAAA-MM-JJ valide')
+def load_rows():
     try:
         state = os.environ.get('SA_STATE')
         path = (Path(state) if state else Path.home() / '.local/share/nexora-sous-agents') / 'usage.jsonl'
@@ -85,25 +73,31 @@ def main() -> int:
                     continue
                 try:
                     row = json.loads(line, parse_float=Decimal, parse_constant=lambda _x: None, object_pairs_hook=unique_object)
-                except (json.JSONDecodeError, ValueError, DecimalException, RecursionError):
+                except (ValueError, DecimalException, RecursionError):
                     print(f'journal illisible à la ligne {index} ; coût inconnu', file=sys.stderr)
-                    return 1
+                    return None
                 if not isinstance(row, dict):
                     print(f'journal invalide à la ligne {index} ; coût inconnu', file=sys.stderr)
-                    return 1
+                    return None
                 rows.append(row)
     except (OSError, UnicodeError, RuntimeError):
         print('journal indisponible ; coût inconnu', file=sys.stderr)
-        return 1
-    def day(row: dict) -> date | None:
-        stamp = row.get('ts')
-        if not isinstance(stamp, str):
-            return None
-        try:
-            return datetime.fromisoformat(stamp).date()
-        except ValueError:
-            return None
+        return None
+    return rows
 
+
+def day(row: dict) -> date | None:
+    stamp = row.get('ts')
+    if not isinstance(stamp, str):
+        return None
+    try:
+        return datetime.fromisoformat(stamp).date()
+    except ValueError:
+        return None
+
+
+
+def select_rows(rows, args, parsed):
     if args.run:
         # Entries without a run cannot be assigned to the requested run.
         unattributed = sum(
@@ -120,6 +114,50 @@ def main() -> int:
         rows = [row for row in rows if day(row) is not None and day(row) >= parsed]
     else:
         undated = 0
+    return rows, undated, unattributed
+
+
+def format_cost(alias, group, undated, unattributed):
+    known = money(group['cout_connu'])
+    amount = Decimal(group['cout_connu'])
+    shown = '<$0.00001' if Decimal(0) < amount < Decimal('0.00001') else f'≈${known}'
+    if not group['requetes']:
+        cost = 'aucune donnée de coût'
+    elif group['cout_total'] is None:
+        cost = f'coût déclaré {shown} + {group["couts_inconnus"]} coût(s) inconnu(s)'
+        if alias == 'TOTAL' and (undated or unattributed):
+            cost += f' + {undated + unattributed} entrée(s) non attribuable(s)'
+    else:
+        cost = shown
+    return cost
+
+
+def print_report(report, undated, unattributed):
+    for alias, group in [*report['groupes'].items(), ('TOTAL', report['total'])]:
+        cost = format_cost(alias, group, undated, unattributed)
+        unknown = f' (+{group["statuts_inconnus"]} statut(s) inconnu(s))' if group['statuts_inconnus'] else ''
+        print(f'{alias}\t{group["requetes"]} req\t{group["echecs"]} echecs{unknown}\t{group["in"] or "?"} in\t{group["out"] or "?"} out\t{cost}')
+    if undated or unattributed:
+        print(f'Non attribuables au filtre : {undated} sans date, {unattributed} sans identifiant.')
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--since', default='')
+    parser.add_argument('--run', default='', help='identifiant exact ou identifiant de lot suivi de ses runs')
+    parser.add_argument('--json', action='store_true')
+    args = parser.parse_args()
+    if args.since:
+        try:
+            parsed = date.fromisoformat(args.since)
+            if parsed.isoformat() != args.since:
+                raise ValueError
+        except ValueError:
+            parser.error('--since doit être une date AAAA-MM-JJ valide')
+    rows = load_rows()
+    if rows is None:
+        return 1
+    rows, undated, unattributed = select_rows(rows, args, parsed if args.since else None)
     groups: dict[str, list[dict]] = {}
     for row in rows:
         alias = row.get('alias')
@@ -136,22 +174,7 @@ def main() -> int:
     if args.json:
         print(json.dumps(report, ensure_ascii=False))
         return 0
-    for alias, group in [*report['groupes'].items(), ('TOTAL', report['total'])]:
-        known = money(group['cout_connu'])
-        amount = Decimal(group['cout_connu'])
-        shown = '<$0.00001' if Decimal(0) < amount < Decimal('0.00001') else f'≈${known}'
-        if not group['requetes']:
-            cost = 'aucune donnée de coût'
-        elif group['cout_total'] is None:
-            cost = f'coût déclaré {shown} + {group["couts_inconnus"]} coût(s) inconnu(s)'
-            if alias == 'TOTAL' and (undated or unattributed):
-                cost += f' + {undated + unattributed} entrée(s) non attribuable(s)'
-        else:
-            cost = shown
-        unknown = f' (+{group["statuts_inconnus"]} statut(s) inconnu(s))' if group['statuts_inconnus'] else ''
-        print(f'{alias}\t{group["requetes"]} req\t{group["echecs"]} echecs{unknown}\t{group["in"] or "?"} in\t{group["out"] or "?"} out\t{cost}')
-    if undated or unattributed:
-        print(f'Non attribuables au filtre : {undated} sans date, {unattributed} sans identifiant.')
+    print_report(report, undated, unattributed)
     return 0
 
 

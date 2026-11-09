@@ -53,6 +53,9 @@ import { xmlFcp7 } from './nexora/projetExport.js';
 import { demanderEffet, lireDemandeEffet } from './nexora/effets.js';
 import { argsPcm, argsSilences, creationsPourStudio, decouperSousTitres, demanderAssistant, detecterTemps, lireDemandeAssistant, lireSilences, lireTranscription, silencesAvecMarge, TAUX_RYTHME } from './nexora/studio.js';
 import { transcrireSurGpu } from './nexora/transcriptionGpu.js';
+import { executerBorne } from './nexora/executionBornee.js';
+import { creerExportProres, verifierProres } from './nexora/exportProres.js';
+import { sansEcrasement } from './nexora/filmSorties.js';
 import { argsAvecMusique, argsExport, intentionDuPlan, lireStoryboard, planifierFilm, storyboardPourMontage, storyboardPourRefaire, storyboardProlonger, storyboardRaccord, type Storyboard } from './nexora/film.js';
 import { avancerFilm, filmsEnAttente, initFilms, marquerReservationFilmLiberee, tournerFilm } from './nexora/filmMoteur.js';
 import { erreurAncrageMaxFilm, libererReservationsFilmEchoue } from './nexora/filmAncrage.js';
@@ -85,14 +88,15 @@ import { aplatir, estimerProjet, intentionDuPlanProjet, ordreAssemblage, prochai
 import { decoupeFiche, promptFiche, referencesAvecComposition } from './nexora/personnages.js';
 import { dureeTotaleS } from './nexora/montage/editplan.js';
 import { rendreEditPlan } from './nexora/montage/rendu.js';
-import { ameliorerMontage, briefDuFilm, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
+import { ameliorerMontage, briefDuFilm, inventaireDuBrief, type EtatMontageFilm, GENRES_MONTAGE, monterEnCode, vueMetriques } from './nexora/montage/producteur.js';
 import type { DepsAgent } from './nexora/agent.js';
 import { ajusterProposition, depassement, devisProduction, nouvelleSession, planVersStoryboard, tourProducteur, validerProposition, variante, type GenreVariante, type PlanProduction, type Proposition, type SessionProducteur } from './nexora/agent.js';
 import { jugeDisponible } from './nexora/juge.js';
 import { MESURES_OBJET_PC5, recetteMultivue } from './nexora/objet3d.js';
 import { PRODUIT_3D } from '../src/produit3d.js';
-import { analyser, cartesPbr, cibleTriangles, decimerGlb, EXTENSION_RELIEF, exporter, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief } from './nexora/relief.js';
-import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
+import { analyser, cartesPbr, cibleTriangles, compatibiliteObj, decimerGlb, EXTENSION_RELIEF, exporter, nomCacheExport, nomCacheRapport, ObjIncompatible, repondreObjIncompatible, FORMATS_RELIEF, lireGlb, TAILLE_MM_DEFAUT, TYPE_MIME_RELIEF, type FormatRelief, type Maillage } from './nexora/relief.js';
+import { UsdzIncompatible } from './nexora/usdz.js';
+import { TOURNETTE_JUGE, NOTE_MINIMALE, argsGif, indicesQuatreVues, jugerVuesObjet, plancheVuesDataUrl, type VerdictVues, prochaineEtapeTexte3D, meilleurePriseNotee, decisionApresJuge, promptReferenceObjet, recetteObjet, secondesTexteVers3D, secondesObjet, type EtatTexte3D, type QualiteObjet } from './nexora/objet3d.js';
 import {
   CAST_KINDS, MAX_REFS, allocate, isCastFile, castHeroFrame, composeInstruction, liveRefs, mentioned, plainText, refFrom, renameFiles, storeRef,
   setCastQueue, sheetPlan, type HeroOpts,
@@ -1380,17 +1384,20 @@ app.post('/api/nexora/clip/:id/avec-musique', async (req, reply) => {
   return { takeId: id };
 });
 
+/** Un coordinateur par processus : les anciens caches ne sont jamais considérés complets. */
+const exporterProres = creerExportProres(
+  async (entree, provisoire) => {
+    await executerBorne(config.ffmpegBin, ['-nostdin', '-v', 'error', ...sansEcrasement(argsExport(entree, provisoire, 'prores'))], 3_600_000);
+  },
+  (provisoire, source) => verifierProres(provisoire, source, config.ffprobeBin),
+);
+
 /** Export professionnel d'un film terminé (ProRes 422 HQ + PCM, .mov). */
 app.get('/api/nexora/film/:id/export', async (req, reply) => {
   const film = takes.get(Number((req.params as any).id));
   if (!film || !film.output_path || film.status !== 'done') return reply.code(404).send({ error: 'Film introuvable ou pas terminé.' });
   const dossier = join(config.outputDir, 'films', 'exports');
-  mkdirSync(dossier, { recursive: true });
-  const sortie = join(dossier, `film_${film.id}_prores.mov`);
-  if (!existsSync(sortie)) {
-    const { execFile } = await import('child_process');
-    await new Promise<void>((ok, ko) => execFile(config.ffmpegBin, argsExport(film.output_path!, sortie, 'prores'), { maxBuffer: 1 << 24 }, (err) => (err ? ko(err) : ok())));
-  }
+  const sortie = await exporterProres(film.id, film.output_path, dossier);
   reply.header('content-type', 'video/quicktime');
   reply.header('content-disposition', `attachment; filename="${safeShotName(film.shot_name || 'film')}_prores.mov"`);
   return reply.send(createReadStream(sortie));
@@ -1409,8 +1416,7 @@ async function rendreApercuMontage(etat: EtatMontageFilm, id: string) {
     if (!t?.output_path || !existsSync(t.output_path)) throw new Error(`média ${src} introuvable`);
     return t.output_path;
   };
-  const sources = Object.fromEntries(etat.brief.clips.map((c) => [c.id, { duree_s: c.duree_s }]));
-  if (etat.brief.musique) sources[etat.brief.musique.id] = { duree_s: etat.brief.musique.duree_s };
+  const sources = inventaireDuBrief(etat.brief);
   const sortie = join(dossierMontages(), `${id}.mp4`);
   const r = await rendreEditPlan(etat.plan, chemin, sortie, { apercu: true, ffmpeg: config.ffmpegBin, ctx: { inventaire: sources, duree_cible_s: etat.brief.duree_cible_s } });
   if (!r.ok) throw new Error(`plan invalide : ${r.erreurs.slice(0, 2).join(' ; ')}`);
@@ -1612,17 +1618,17 @@ app.post('/api/nexora/film/:id/plan/:n/reference', async (req, reply) => {
   const sb = f.s.storyboard as Storyboard;
   const persos = role === 'composition' ? await resoudrePersonnages(intentionDuPlan(sb, n)) : null;
   const dureeS = (plan.duree === 10 ? 243 : 124) / 24;
-  const dialogues = plan.replique ? { dialogues: [{ texte: plan.replique, langue: 'French' }] } : {};
+  const dialogues = plan.replique ? { dialogues: [{ texte: plan.replique, langue: sb.langue === 'en' ? 'English' : 'French' }] } : {};
   const llm = llmRedaction();
   let corps: any;
   if (role === 'depart') {
-    const r = await reecrireH3({ intention: `${intentionDuPlan(sb, n)}\nThe video starts exactly from the provided first frame and continues the action from it.`, mode: 'i2va', dureeS, ...dialogues }, llm);
+    const r = await reecrireH3({ intention: `${intentionDuPlan(sb, n)}\nThe video starts exactly from the provided first frame and continues the action from it.`, mode: 'i2va', dureeS, moteur: 'h3-fast', format: f.s.format, langueClient: sb.langue ?? 'fr', ...dialogues }, llm);
     corps = { ...corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'rapide' }, r.prompt, 'h3-fast'), startImage: b.jeton, brouillon: true };
   } else {
     if (!moteurDuCompte('max')) return reply.code(422).send({ error: 'La composition par image demande le moteur cinéma, indisponible ici.' });
     // Une image par identité si nécessaire, pour conserver les sujets ET la composition dans quatre entrées.
     const { sujets, jetons } = referencesAvecComposition(persos?.sujets ?? [], persos?.jetons ?? [], b.jeton);
-    const r = await reecrireH3({ intention: persos?.sujets.length ? persos.texteClair : intentionDuPlan(sb, n), mode: 'ref2va', references: { sujets, composition: 1 }, dureeS, ...dialogues }, llm);
+    const r = await reecrireH3({ intention: persos?.sujets.length ? persos.texteClair : intentionDuPlan(sb, n), mode: 'ref2va', references: { sujets, composition: 1 }, dureeS, moteur: 'h3-max', format: f.s.format, langueClient: sb.langue ?? 'fr', ...dialogues }, llm);
     const base = corpsRendu({ intention: plan.resume, format: f.s.format, duree: plan.duree, son: !!f.s.son, qualite: 'max' }, r.prompt, 'h3-max');
     corps = { ...base, refImages: jetons, personnages: sujets.map((s) => s.nom) };
     corps = corpsBrouillonDe(corps, Math.floor(Math.random() * 1e9), corps);
@@ -1930,14 +1936,19 @@ async function avancerTexte3D(id: number): Promise<void> {
     const ecrire = (patch: Record<string, unknown>) => takes.patchSettings(id, { objet3d: { ...o, ...patch, etat: { ...e, ...(patch.etat as object ?? {}) } } });
     if (etape.action === 'attendre') return;
     if (etape.action === 'echec') { ecrire({ erreur: etape.motif, etat: { phase: 'echec' } }); return; }
-    if (etape.action === 'finir') { ecrire({ retenu: etape.retenu, etat: { phase: 'fini' } }); return; }
+    if (etape.action === 'finir') { ecrire({ retenu: etape.retenu, avertissement: etape.avertissement ?? null, etat: { phase: 'fini' } }); return; }
     if (etape.action === 'lancer-objet') {
       const q: QualiteObjet = o.qualite;
       const r = await lancerPriseNexora(
         { kind: 'object', app: 'nexora-objet', quality: q, sourceTake: id, removeBackground: true, tournette: TOURNETTE_JUGE.frames, ...(etape.essai > 1 ? { seed: Math.floor(Math.random() * 1e9) } : {}),
           shotName: `objet3d_${String(o.intention).slice(0, 30)}`, userPrompt: `3D : ${String(o.intention).slice(0, 80)}`, nexoraObjetDe: id },
         'Nexora Creative · objet 3D', Math.max(1, Math.ceil(secondesObjet(q) * tarifDepuisEnv().creditsParSecondeGpu)));
-      if (!r.ok) { ecrire({ erreur: r.message, etat: { phase: 'echec' } }); return; }
+      if (!r.ok) {
+        const retenu = etape.essai > 1 ? meilleurePriseNotee(e) : undefined;
+        if (retenu !== undefined) ecrire({ retenu, avertissement: 'relance-echouee', etat: { phase: 'fini' } });
+        else ecrire({ erreur: r.message, etat: { phase: 'echec' } });
+        return;
+      }
       ecrire({ etat: { phase: 'objet', essai: etape.essai, tentatives: [...e.tentatives, r.takeId] } });
       continue;
     }
@@ -1975,7 +1986,7 @@ app.get('/api/nexora/objet/:take', async (req, reply) => {
   const e = o.etat as EtatTexte3D;
   return {
     etat: e.phase, essai: e.essai, image: t.id, objet: e.phase === 'fini' ? o.retenu : e.tentatives[e.tentatives.length - 1] ?? null,
-    notes: o.jugements ?? [], erreur: o.erreur ?? null, qualite: o.qualite, intention: o.intention,
+    notes: o.jugements ?? [], erreur: o.erreur ?? null, avertissement: o.avertissement ?? null, qualite: o.qualite, intention: o.intention,
   };
 });
 
@@ -2006,10 +2017,12 @@ app.get('/api/nexora/relief/:take/rapport', async (req, reply) => {
   const dir = `${p.glb}.relief`;
   mkdirSync(dir, { recursive: true });
   const octets = readFileSync(p.glb);
+  let maillagePlein: Maillage | null = null;
+  const chargerPlein = async () => maillagePlein ??= await lireGlb(octets);
   const lire = async (cible: number | null) => {
-    const fichier = join(dir, `rapport-${cible ?? 'plein'}.json`);
+    const fichier = join(dir, nomCacheRapport(cible));
     if (existsSync(fichier)) return JSON.parse(readFileSync(fichier, 'utf8'));
-    const r = await unSeulCalcul(fichier, async () => analyser(await lireGlb(cible ? await decimerGlb(octets, cible) : octets)));
+    const r = await unSeulCalcul(fichier, async () => analyser(cible ? await lireGlb(await decimerGlb(octets, cible)) : await chargerPlein()));
     writeFileSync(fichier, JSON.stringify(r));
     return r;
   };
@@ -2019,6 +2032,7 @@ app.get('/api/nexora/relief/:take/rapport', async (req, reply) => {
   return {
     rapport: plein, decime: cible ? await lire(cible) : null, cible,
     formats: FORMATS_RELIEF, extensions: EXTENSION_RELIEF, tailleMm: TAILLE_MM_DEFAUT,
+    compatibiliteObj: compatibiliteObj(octets, await chargerPlein()),
     // Les exports sont calculés par le serveur (CPU, quelques secondes) : aucun crédit GPU.
     credits: 0, juge: s.relief?.juge ?? null,
   };
@@ -2033,11 +2047,20 @@ app.get('/api/nexora/relief/:take/export', async (req, reply) => {
   const dir = `${p.glb}.relief`;
   mkdirSync(dir, { recursive: true });
   const octets = readFileSync(p.glb);
-  const cible = cibleTriangles(q.faces, analyser(await lireGlb(octets)).triangles);
-  const fichier = join(dir, `export-${format}-${cible ?? 'plein'}-${taille}.${EXTENSION_RELIEF[format]}`);
+  const maillage = await lireGlb(octets);
+  const compatibilite = format === 'obj' ? compatibiliteObj(octets, maillage) : null;
+  if (compatibilite && !compatibilite.compatible) return repondreObjIncompatible(reply);
+  const cible = cibleTriangles(q.faces, analyser(maillage).triangles);
+  const fichier = join(dir, nomCacheExport(format, cible, taille));
   if (!existsSync(fichier)) {
-    const sortie = await unSeulCalcul(fichier, () => exporter(octets, format, { nom: `relief-${p.id}`, tailleMm: taille, cible }));
-    writeFileSync(fichier, sortie);
+    try {
+      const sortie = await unSeulCalcul(fichier, () => exporter(octets, format, { nom: `relief-${p.id}`, tailleMm: taille, cible }));
+      writeFileSync(fichier, sortie);
+    } catch (error) {
+      if (error instanceof ObjIncompatible) return repondreObjIncompatible(reply);
+      if (error instanceof UsdzIncompatible) return reply.code(400).send({ code: error.code, error: 'Export USDZ incompatible avec ce modèle. Utilisez le GLB. / USDZ export does not support this model. Use GLB.' });
+      throw error;
+    }
   }
   reply.headers({ 'Content-Type': TYPE_MIME_RELIEF[format === 'obj' ? 'zip' : format], 'Content-Length': statSync(fichier).size, 'Content-Disposition': `attachment; filename="relief-${p.id}${cible ? `-${cible}` : ''}.${EXTENSION_RELIEF[format]}"` });
   return reply.send(createReadStream(fichier));
@@ -2046,7 +2069,7 @@ app.get('/api/nexora/relief/:take/export', async (req, reply) => {
 app.get('/api/nexora/relief/:take/cartes', async (req, reply) => {
   const p = priseRelief(req, reply); if (!p) return;
   const c = await cartesPbr(readFileSync(p.glb));
-  return { cartes: c.map((x) => ({ nom: x.nom, mime: x.mime, largeur: x.largeur, octets: x.octets.length })) };
+  return { cartes: c.map((x) => ({ nom: x.nom, mime: x.mime, largeur: x.largeur, octets: x.octets.length, materiaux: x.materiaux })) };
 });
 app.get('/api/nexora/relief/:take/cartes/:nom', async (req, reply) => {
   const p = priseRelief(req, reply); if (!p) return;

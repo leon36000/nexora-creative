@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "upstream": "TMElyralab/MuseTalk",
+  "commit": "0a89dec45a0192b824e3cf4daf96c239440c5ed8",
+  "archive_path": "/media/pc6/Storage/Nexora/travail/sync-musetalk-preflight-20261105-bKBL1E/source-export-0a89dec-20261105/MuseTalk-0a89dec.tar",
+  "archive_sha256": "6e20b30210846113094e2402e5358ac59ef08ae342010c8458f76bab46d4693b",
+  "fixtures_are_raw_text_data": true,
+  "no_models_or_weights_included": true,
+  "files": [
+    {
+      "upstream_path": "scripts/inference.py",
+      "fixture": "fixtures/upstream/inference.py.txt",
+      "bytes": 13461,
+      "sha256": "aaf9c8289c8f07eaf00b87fb11442ac0e1005ac4e2f469966ae3dab2dc4a03aa"
+    },
+    {
+      "upstream_path": "musetalk/utils/preprocessing.py",
+      "fixture": "fixtures/upstream/preprocessing.py.txt",
+      "bytes": 6963,
+      "sha256": "ca22548666af9bb0b059306e3955bffb97a4a97592b4a050fdce42c5361359f8"
+    },
+    {
+      "upstream_path": "musetalk/utils/face_parsing/__init__.py",
+      "fixture": "fixtures/upstream/faceparser-init.py.txt",
+      "bytes": 4700,
+      "sha256": "c2824281e80458b81b7ecdde6cfd2b5f0224b022f41aaf1c61144a52163b2494"
+    },
+    {
+      "upstream_path": "musetalk/utils/face_parsing/model.py",
+      "fixture": "fixtures/upstream/faceparser-model.py.txt",
+      "bytes": 10676,
+      "sha256": "05d69d1bd77fbca7b537602fe3f7851e8b2e1a3ea0279f383b4223598157e2d2"
+    },
+    {
+      "upstream_path": "musetalk/utils/face_parsing/resnet.py",
+      "fixture": "fixtures/upstream/faceparser-resnet.py.txt",
+      "bytes": 3706,
+      "sha256": "a3419dabeff41c535e24f4d056b054c1bfc70d56f9ee430808b440005cc3189f"
+    },
+    {
+      "upstream_path": "LICENSE",
+      "fixture": "fixtures/upstream/LICENSE",
+      "bytes": 13427,
+      "sha256": "992ec5fd1dd4964cfa003665196cd0c0c10a7a5aa10109991e964eebd2c7f116"
+    }
+  ]
+}

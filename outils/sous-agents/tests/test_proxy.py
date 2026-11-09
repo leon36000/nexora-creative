@@ -77,6 +77,22 @@ class Tests(unittest.TestCase):
         c.request(method, path, body=body, headers=headers or {'Content-Type': 'application/json'})
         r = c.getresponse(); result = (r.status, r.read()); c.close(); return result
 
+    def send_headers_only(self, method='POST', path='/v1/messages', body=None):
+        """Le refus doit arriver avant l'envoi du corps de la requête."""
+        body = json.dumps({'model': 'eco-deepseek', 'max_tokens': 100, 'messages': []}) if body is None else body
+        payload = body.encode('utf-8') if isinstance(body, str) else body
+        c = UnixHTTP(self.sockpath)
+        try:
+            c.putrequest(method, path)
+            c.putheader('Content-Type', 'application/json')
+            if method == 'POST':
+                c.putheader('Content-Length', str(len(payload)))
+            c.endheaders()
+            response = c.getresponse()
+            return response.status, response.read()
+        finally:
+            c.close()
+
     def test_only_allowed_route_model_and_forced_headers(self):
         code, _ = self.send(headers={'Content-Type': 'application/json', 'x-api-key': 'fake',
                                       'Authorization': 'Bearer fake', 'x-sa-run': 'forged',
@@ -89,15 +105,23 @@ class Tests(unittest.TestCase):
         self.assertEqual(got['payload']['model'], 'eco-deepseek')
 
     def test_admin_and_wrong_model_are_never_forwarded(self):
-        self.assertEqual(self.send('GET', '/key/info')[0], 403)
-        self.assertEqual(self.send('POST', '/key/generate')[0], 403)
+        self.assertEqual(self.send_headers_only('GET', '/key/info')[0], 403)
+        self.assertEqual(self.send_headers_only('POST', '/key/generate')[0], 403)
         self.assertEqual(self.send(body=json.dumps({'model': 'eco-muse'}))[0], 403)
         self.assertEqual(self.upstream.received, [])
 
     def test_count_tokens_is_explicitly_disabled_before_audit_or_upstream(self):
-        code, body = self.send(path='/v1/messages/count_tokens?beta=true', body='not-json')
-        self.assertEqual(code, 501)
-        self.assertIn('suivi de coût fiable', json.loads(body)['error'])
+        c = UnixHTTP(self.sockpath)
+        try:
+            c.putrequest('POST', '/v1/messages/count_tokens?beta=true')
+            c.putheader('Content-Type', 'application/json')
+            c.putheader('Content-Length', '8')
+            c.endheaders()
+            response = c.getresponse()
+            self.assertEqual(response.status, 501)
+            self.assertIn('suivi de coût fiable', json.loads(response.read())['error'])
+        finally:
+            c.close()
         audit = Path(self.tmp.name) / 'audit.jsonl'
         self.assertEqual(audit.read_text(), '')
         self.assertEqual(self.server._sequence, 0)
@@ -109,7 +133,9 @@ class Tests(unittest.TestCase):
         s.sendall(b'POST /v1/messages HTTP/1.1\r\nHost: localhost\r\nx-sa-run: one\r\nX-SA-RUN: two\r\nContent-Length: '
                   + str(len(body)).encode() + b'\r\n\r\n' + body)
         self.assertIn(b'400', s.recv(256)); s.close()
-        self.assertEqual(self.send(path='/v1/messages?model=eco-muse')[0], 403)
+
+        self.assertEqual(self.send_headers_only(
+            path='/v1/messages?model=eco-muse', body=body.decode())[0], 403)
         self.assertEqual(self.upstream.received, [])
 
     def test_duplicate_json_keys_cannot_bypass_model_filter(self):
@@ -173,7 +199,8 @@ class Tests(unittest.TestCase):
         c.close()
 
     def test_audit_contains_only_forwarding_attempts_and_no_sensitive_content(self):
-        self.assertEqual(self.send('POST', '/key/generate')[0], 403)
+        self.assertEqual(self.send_headers_only('POST', '/key/generate')[0], 403)
+        self.assertEqual(self.upstream.received, [])
         self.assertEqual(self.send()[0], 200)
         log = (Path(self.tmp.name)/'audit.jsonl').read_text()
         records = [json.loads(line) for line in log.splitlines()]
@@ -262,19 +289,39 @@ class Tests(unittest.TestCase):
         self.upstream.status = 429; self.upstream.chunks = [b'data: x\n\n', b'data: y\n\n']
         self.assertEqual(self.send(), (429, b'data: x\n\ndata: y\n\n'))
 
+    def test_zero_length_upstream_is_not_rejected(self):
+        self.upstream.chunks = []
+        self.upstream.content_length = 0
+        self.assertEqual(self.send(), (200, b''))
+
     def test_socket_is_private(self):
         self.assertEqual(self.sockpath.stat().st_mode & 0o777, 0o700 - 0o100)
 
 class ProcessTests(unittest.TestCase):
+    def test_status_is_sent_before_upstream_headers_are_read(self):
+        events = []
+        handler = object.__new__(proxy.Handler)
+        handler.send_response = lambda status: events.append(('statut', status))
+        class FakeResponse:
+            status = 200
+            def getheaders(self):
+                events.append(('en-têtes', None))
+                raise http.client.HTTPException('fictif')
+        response = FakeResponse()
+        with self.assertRaises(http.client.HTTPException):
+            handler._send_stream_headers(response)
+        self.assertEqual(events, [('statut', 200), ('en-têtes', None)])
+
     def test_socket_path_too_long_preserves_original_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             audit, ledger = root / 'audit', root / 'ledger'
             ledger.write_text('')
+            path = str(root / ('x' * 150))
+            kwargs = dict(key=FAKE_KEY, run='test-run', model='eco-deepseek', port=1, timeout=1,
+                          audit_path=str(audit), ledger_path=str(ledger), budget=Decimal('1'))
             with self.assertRaises(OSError) as erreur:
-                proxy.Server(str(root / ('x' * 150)), proxy.Handler, key=FAKE_KEY, run='test-run',
-                             model='eco-deepseek', port=1, timeout=1, audit_path=str(audit),
-                             ledger_path=str(ledger), budget=Decimal('1'))
+                proxy.Server(path, proxy.Handler, **kwargs)
             self.assertIn('path too long', str(erreur.exception).lower())
 
     def test_chmod_failure_closes_listener_and_preserves_error(self):
@@ -282,11 +329,12 @@ class ProcessTests(unittest.TestCase):
             root = Path(tmp)
             audit, ledger, sockpath = root / 'audit', root / 'ledger', root / 'socket'
             ledger.write_text('')
+            path = str(sockpath)
+            kwargs = dict(key=FAKE_KEY, run='test-run', model='eco-deepseek', port=1, timeout=1,
+                          audit_path=str(audit), ledger_path=str(ledger), budget=Decimal('1'))
             with patch.object(proxy.os, 'chmod', side_effect=PermissionError('chmod factice')):
                 with self.assertRaisesRegex(PermissionError, 'chmod factice'):
-                    proxy.Server(str(sockpath), proxy.Handler, key=FAKE_KEY, run='test-run',
-                                 model='eco-deepseek', port=1, timeout=1, audit_path=str(audit),
-                                 ledger_path=str(ledger), budget=Decimal('1'))
+                    proxy.Server(path, proxy.Handler, **kwargs)
             client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             try:
                 with self.assertRaises(ConnectionRefusedError):
@@ -329,10 +377,7 @@ class ProcessTests(unittest.TestCase):
                 })
             finally:
                 (root / 'proxy-stop').write_text('arrêt fictif')
-                try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    self.fail('arrêt coopératif du relais non confirmé')
+                process.wait(timeout=5)
 
     def test_world_readable_key_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -71,12 +71,22 @@ class Livraison(unittest.TestCase):
             L.planifier(self.release, self.cible, self.root / 'refuse/plan.json')
 
     def test_sante_echouee_restaure_code_et_dependances(self):
-        with self.assertRaisesRegex(ValueError, 'santé'):
+        with self.assertRaisesRegex(ValueError, 'indisponible après livraison'):
             self.activer(False)
         self.assertEqual(self.appels, ['stop', 'start', 'stop', 'start'])
         self.assertEqual((self.cible / 'app/server/code.ts').read_text(), 'ancien')
         self.assertEqual((self.cible / 'app/node_modules/code.js').read_text(), 'anciennes dépendances')
         self.assertEqual((self.cible / 'app/inconnu').read_text(), 'conserver')
+
+    def test_activation_verifie_creative_sans_exiger_un_moteur_optionnel(self):
+        with patch.object(L, 'sante_creative', return_value=True) as core, patch.object(L, 'sante', return_value=False) as moteur:
+            L.activer(self.release, self.cible, self.data, self.backup, self.actions, self.dependances,
+                      stopper=lambda: self.appels.append('stop'), demarrer=lambda: self.appels.append('start'),
+                      identite=lambda _data: None)
+        core.assert_called_once_with()
+        moteur.assert_not_called()
+        self.assertEqual(self.appels, ['stop', 'start'])
+        self.assertEqual((self.cible / 'app/server/code.ts').read_text(), 'nouveau')
 
     def test_travail_actif_empeche_maintenance(self):
         with sqlite3.connect(self.data / 'openfield.db') as db:
