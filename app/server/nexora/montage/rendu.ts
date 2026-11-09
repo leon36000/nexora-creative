@@ -12,9 +12,9 @@ import { dirname, join } from 'node:path';
 import { couperLignes, texteAss } from '../cartons.js';
 import { ffmpegParDefaut } from './analyse.js';
 import { type EditPlan, lignedeTemps, validerEditPlan } from './editplan.js';
+import { segmentsVitesse } from './retiming.js';
 
 export const TAILLES: Record<EditPlan['format'], [number, number]> = { '16:9': [1280, 720], '9:16': [720, 1280], '1:1': [720, 720] };
-const RAMPE_MORCEAUX = 6;
 
 export interface OptionsRendu { apercu?: boolean; taille?: [number, number]; dossierPolices?: string }
 export interface CommandeRendu { args: string[]; ass: string | null; dureeS: number }
@@ -74,16 +74,19 @@ export function commandeRendu(plan: EditPlan, chemin: (src: string) => string, s
     const zoom = c.zoom && c.zoom.a !== c.zoom.de ? `,scale=w='trunc(iw*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':h='trunc(ih*(${n(c.zoom.de)}+(${n(c.zoom.a - c.zoom.de)})*t/${n(dureeClip)})/2)*2':eval=frame,crop=${W}:${H},setsar=1` : '';
     if (c.rampe) {
       const morceaux: string[] = [];
-      let lu = c.entree_f, restant = c.duree_f;
-      for (let m = 0; m < RAMPE_MORCEAUX; m++) {
-        const sortieF = m === RAMPE_MORCEAUX - 1 ? restant : Math.max(1, Math.round(c.duree_f / RAMPE_MORCEAUX));
-        const v = c.rampe.de + ((c.rampe.a - c.rampe.de) * (m + 0.5)) / RAMPE_MORCEAUX;
-        const conso = Math.max(1, Math.round(sortieF * v));
-        filtres.push(`[${k}:v]trim=start=${secs(lu, fps)}:duration=${secs(conso, fps)},setpts=(PTS-STARTPTS)/${n(v)},${base}[r${i}_${m}]`);
+      const sentinelles: number[] = [];
+      let finAvecSentinelle = 0;
+      const segments = segmentsVitesse(c);
+      for (const [m, segment] of segments.entries()) {
+        const finSource = segment.entree_f + segment.source_f;
+        // Une image sentinelle donne aussi une durée à concat pour un morceau d'une seule image.
+        filtres.push(`[${k}:v]fps=${fps},trim=start_frame=${segment.entree_f}:end_frame=${finSource},settb=AVTB,setpts=(PTS-STARTPTS)*${segment.duree_f}/${segment.source_f},fps=${fps}:eof_action=pass,tpad=stop_mode=clone:stop=${segment.duree_f + 1},${base},trim=end_frame=${segment.duree_f + 1},setpts=N/(${fps}*TB)[r${i}_${m}]`);
         morceaux.push(`[r${i}_${m}]`);
-        lu += conso; restant -= sortieF;
+        finAvecSentinelle += segment.duree_f + 1;
+        sentinelles.push(finAvecSentinelle - 1);
       }
-      filtres.push(`${morceaux.join('')}concat=n=${RAMPE_MORCEAUX}:v=1:a=0,setpts=PTS-STARTPTS${zoom},trim=duration=${n(dureeClip)}[c${i}]`);
+      const sansSentinelles = sentinelles.map(image => `eq(n,${image})`).join('+');
+      filtres.push(`${morceaux.join('')}concat=n=${segments.length}:v=1:a=0,select='not(${sansSentinelles})',setpts=N/(${fps}*TB)${zoom},trim=end_frame=${c.duree_f}[c${i}]`);
     } else {
       const conso = Math.max(1, Math.round(c.duree_f * c.vitesse));
       filtres.push(`[${k}:v]trim=start=${secs(c.entree_f, fps)}:duration=${secs(conso, fps)},setpts=(PTS-STARTPTS)/${n(c.vitesse)},${base}${zoom},trim=duration=${n(dureeClip)},setpts=PTS-STARTPTS[c${i}]`);
