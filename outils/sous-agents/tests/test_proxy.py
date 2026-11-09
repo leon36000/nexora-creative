@@ -188,7 +188,19 @@ class Tests(unittest.TestCase):
         finally:
             for c in clients: c.close()
 
+    def test_upstream_timeout_is_separate_from_server_poll_interval(self):
+        # main() uses Server.timeout for its handle_request polling interval.
+        # The upstream request must keep the separately configured 3s timeout.
+        self.server.timeout = 0.2
+        self.upstream.chunks = [b'data: first\n\n', b'data: second\n\n']
+        self.upstream.pause_after_first = 0.35
+        code, body = self.send()
+        self.assertEqual(code, 200)
+        self.assertIn(b'data: first\n\n', body)
+        self.assertIn(b'data: second\n\n', body)
+
     def test_incomplete_upstream_is_detected_by_client(self):
+        self.server.timeout = 0.2
         self.upstream.chunks = [b'data: partial\n\n']
         self.upstream.content_length = 100
         c = UnixHTTP(self.sockpath)
