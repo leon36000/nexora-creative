@@ -29,6 +29,7 @@ const imagesNonNeg = z.number().int().min(0).max(200_000);
 
 const Source = z.object({
   kind: z.enum(['video', 'audio', 'image']),
+  a_audio: z.boolean().optional().describe('présence mesurée d’un flux audio dans une source vidéo'),
   duree_f: imagesPos.optional().describe('durée connue de la source, en images au fps du plan'),
   chemin: z.string().max(400).optional(),
   mots: z.array(z.tuple([imagesNonNeg, imagesNonNeg])).max(2000).optional().describe('intervalles de parole [début, fin[ en images'),

@@ -46,6 +46,7 @@ function pointLibre(c: Curseur, t: number): number {
 export function montageAuto(b: Brief): EditPlan {
   const { fps } = b;
   const musique = b.musique;
+  const sonPremierPlan = !!b.voix || b.clips.some(c => c.a_audio === true);
   const total = Math.max(2, Math.min(b.duree_cible_s, musique ? Math.max(2, musique.duree_s) : b.duree_cible_s));
   const totalF = framesDe(total, fps);
   const coupesS = grilleDeCoupes(b, totalF / fps);
@@ -119,7 +120,7 @@ export function montageAuto(b: Brief): EditPlan {
     });
   }
   const sources: EditPlan['sources'] = {};
-  for (const c of b.clips) sources[c.id] = { kind: 'video', duree_f: framesDe(c.duree_s, fps), ...(c.mots?.length ? { mots: c.mots.map(([x, y]) => [framesDe(x, fps), framesDe(y, fps)] as [number, number]) } : {}) };
+  for (const c of b.clips) sources[c.id] = { kind: 'video', duree_f: framesDe(c.duree_s, fps), ...(c.a_audio === undefined ? {} : { a_audio: c.a_audio }), ...(c.mots?.length ? { mots: c.mots.map(([x, y]) => [framesDe(x, fps), framesDe(y, fps)] as [number, number]) } : {}) };
   if (musique) sources[musique.id] = { kind: 'audio', duree_f: framesDe(musique.duree_s, fps) };
   if (b.voix) sources[b.voix.id] = { kind: 'audio', duree_f: framesDe(b.voix.duree_s, fps) };
 
@@ -142,9 +143,9 @@ export function montageAuto(b: Brief): EditPlan {
     version: 1, fps, format: b.format, genre: b.genre, titre: b.enonce.slice(0, 80),
     sources, video,
     audio: {
-      ...(musique ? { musique: { src: musique.id, entree_f: 0, duree_f: totalF, gain_db: b.voix ? -14 : -8, fondu_in_f: Math.floor(fps * 0.3), fondu_out_f: Math.min(totalF - 1, Math.floor(fps * 1.5)) } } : {}),
+      ...(musique ? { musique: { src: musique.id, entree_f: 0, duree_f: totalF, gain_db: sonPremierPlan ? -14 : -8, fondu_in_f: Math.floor(fps * 0.3), fondu_out_f: Math.min(totalF - 1, Math.floor(fps * 1.5)) } } : {}),
       voix: b.voix ? [{ src: b.voix.id, debut_f: Math.floor(fps * 0.5), entree_f: 0, duree_f: Math.min(framesDe(b.voix.duree_s, fps), totalF - Math.floor(fps * 0.5) - 1), gain_db: 0 }] : [],
-      ducking: b.voix && musique ? { actif: true, profondeur_db: 10 } : { actif: false, profondeur_db: 0 },
+      ducking: sonPremierPlan && musique ? { actif: true, profondeur_db: 10 } : { actif: false, profondeur_db: 0 },
       cible_lufs: -14, crete_db: -1, fondu_coupe_ms: 30,
     },
     textes, generations: [],
