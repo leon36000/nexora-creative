@@ -19,6 +19,7 @@ const allCalls: RecordedCall[] = [];
 let calls: RecordedCall[] = [];
 let capacity: Capacity = { kind: 'ready', enabled: true, max: 2 };
 let generationStatus = 200;
+let uploadUnavailable = false;
 let imageDirectory = '';
 let imagePaths = {} as Record<'front' | 'left' | 'back' | 'right', string>;
 let client!: Client;
@@ -52,6 +53,8 @@ async function fakeFetch(input: unknown, init?: RequestInit): Promise<Response> 
     return jsonResponse([
       { id: 42, status: 'done', kind: 'still', settings: JSON.stringify({ userPrompt: 'primary prompt', width: 1, height: 1 }) },
       { id: 43, status: 'done', kind: 'still', settings: JSON.stringify({ userPrompt: 'left prompt', width: 1, height: 1 }) },
+      { id: 44, status: 'done', kind: 'object', settings: '{}' },
+      { id: 45, status: 'rendering', kind: 'still', settings: '{}' },
     ]);
   }
   if (url === `${origin}/api/media/42` && method === 'GET') {
@@ -61,6 +64,7 @@ async function fakeFetch(input: unknown, init?: RequestInit): Promise<Response> 
     return new Response(Buffer.from(pngs.left, 'base64'), { headers: { 'content-type': 'image/png' } });
   }
   if (url === `${origin}/api/upload` && method === 'POST') {
+    if (uploadUnavailable) return jsonResponse({ error: 'upload unavailable' }, 503);
     return jsonResponse({ name: `token:${String((body as { name?: unknown } | null)?.name ?? 'missing')}` });
   }
   if (url === `${origin}/api/generate` && method === 'POST') {
@@ -74,6 +78,7 @@ async function fakeFetch(input: unknown, init?: RequestInit): Promise<Response> 
 function beginCase(nextCapacity: Capacity, nextGenerationStatus = 200) {
   capacity = nextCapacity;
   generationStatus = nextGenerationStatus;
+  uploadUnavailable = false;
   calls = [];
 }
 
@@ -286,9 +291,9 @@ describe.sequential('MCP make_3d multivue → HTTP factice', () => {
     });
     expect(result.isError).not.toBe(true);
     expect(at('/api/takes', 'GET')).toHaveLength(2);
-    expect(at('/api/media/42', 'GET')).toHaveLength(1);
-    expect(at('/api/media/43', 'GET')).toHaveLength(1);
-    expect(at('/api/upload', 'POST').map((call) => (call.body as { name: string }).name)).toEqual(['take_42.png', 'take_43.png']);
+    expect(at('/api/media/42', 'GET')).toHaveLength(0);
+    expect(at('/api/media/43', 'GET')).toHaveLength(0);
+    expect(at('/api/upload', 'POST')).toHaveLength(0);
     expect(at('/api/generate').map((call) => call.body)).toEqual([{
       kind: 'object',
       app: 'object',
@@ -299,6 +304,72 @@ describe.sequential('MCP make_3d multivue → HTTP factice', () => {
       vues: { left: { sourceTake: 43 } },
       shotName: 'object_primary prompt',
       userPrompt: '3D: primary prompt',
+    }]);
+  });
+
+  it('utilise les prises existantes même si l’import de fichier est indisponible', async () => {
+    beginCase({ kind: 'ready', enabled: true, max: 2 });
+    uploadUnavailable = true;
+    const result = await callTool({ image: 'take:42', quality: 'draft', count: 1, views: { left: 'take:43' } });
+    expect(result.isError).not.toBe(true);
+    expect(at('/api/upload', 'POST')).toHaveLength(0);
+    expect(at('/api/media/42', 'GET')).toHaveLength(0);
+    expect(at('/api/media/43', 'GET')).toHaveLength(0);
+    expect(at('/api/generate', 'POST').map((call) => call.body)).toEqual([{
+      kind: 'object', app: 'object', quality: 'draft', removeBackground: true, count: 1,
+      sourceTake: 42, vues: { left: { sourceTake: 43 } },
+      shotName: 'object_primary prompt', userPrompt: '3D: primary prompt',
+    }]);
+  });
+
+  it.each(['take:44', 'take:45', 'take:999'])('refuse la prise invalide %s sans import ni génération', async (image) => {
+    beginCase({ kind: 'ready', enabled: true, max: 2 });
+    const result = await callTool({ image });
+    expect(result.isError).toBe(true);
+    expect(at('/api/upload', 'POST')).toHaveLength(0);
+    expect(at('/api/generate', 'POST')).toHaveLength(0);
+  });
+
+  it('refuse aussi une vue secondaire qui est une prise non terminée', async () => {
+    beginCase({ kind: 'ready', enabled: true, max: 2 });
+    const result = await callTool({ image: 'take:42', views: { left: 'take:45' } });
+    expect(result.isError).toBe(true);
+    expect(at('/api/upload', 'POST')).toHaveLength(0);
+    expect(at('/api/generate', 'POST')).toHaveLength(0);
+  });
+
+  it('relaie le refus du serveur pour une prise existante', async () => {
+    beginCase({ kind: 'ready', enabled: true, max: 2 }, 422);
+    const result = await callTool({ image: 'take:42' });
+    expect(result.isError).toBe(true);
+    expect(toolText(result)).toContain('server final capacity refusal');
+    expect(at('/api/upload', 'POST')).toHaveLength(0);
+    expect(at('/api/generate', 'POST')).toHaveLength(1);
+  });
+
+  it('accepte une seule prise existante sans lire la capacité ni importer son fichier', async () => {
+    beginCase({ kind: 'ready', enabled: false, max: 2 });
+    const result = await callTool({ image: 'take:42' });
+    expect(result.isError).not.toBe(true);
+    expect(at('/api/nexora/etat')).toHaveLength(0);
+    expect(at('/api/media/42')).toHaveLength(0);
+    expect(at('/api/upload')).toHaveLength(0);
+    expect(at('/api/generate').map((call) => call.body)).toEqual([{
+      kind: 'object', app: 'object', quality: 'draft', removeBackground: true, count: 1,
+      sourceTake: 42, shotName: 'object_primary prompt', userPrompt: '3D: primary prompt',
+    }]);
+  });
+
+  it('importe uniquement la vue locale lorsqu’une prise est utilisée comme face avant', async () => {
+    beginCase({ kind: 'ready', enabled: true, max: 2 });
+    const result = await callTool({ image: 'take:42', views: { left: imagePaths.left } });
+    expect(result.isError).not.toBe(true);
+    expect(at('/api/media/42')).toHaveLength(0);
+    expect(at('/api/upload').map((call) => (call.body as { name: string }).name)).toEqual(['left.png']);
+    expect(at('/api/generate').map((call) => call.body)).toEqual([{
+      kind: 'object', app: 'object', quality: 'draft', removeBackground: true, count: 1,
+      sourceTake: 42, vues: { left: { image: 'token:left.png' } },
+      shotName: 'object_primary prompt', userPrompt: '3D: primary prompt',
     }]);
   });
 
