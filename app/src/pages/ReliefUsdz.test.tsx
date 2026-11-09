@@ -101,3 +101,108 @@ describe('rapport Mesh avec limite d’instances', () => {
     errorLog.mockRestore();
   });
 });
+
+describe('cible de simplification et résultat réel', () => {
+  it.each([
+    ['fr', 'Cible de triangles (approximative)', 'Résultat après simplification', 'Analyse du maillage'],
+    ['en', 'Target triangles (approximate)', 'Result after simplification', 'Analyzing the mesh'],
+  ] as const)('indique la cible puis le nombre réellement obtenu en %s', async (langue, cibleLabel, resultatLabel, chargement) => {
+    let finir!: (response: Response) => void;
+    const attente = new Promise<Response>((resolve) => { finir = resolve; });
+    const rapport = { sommets: 100, triangles: 399146, degeneres: 0, aretesOuvertes: 0, aretesNonVariete: 0, composantes: 1, etanche: true, taille: [1, 1, 1], volume: 1, avertissements: [] };
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/cartes')) return Promise.resolve(new Response(JSON.stringify({ cartes: [] }), { status: 200 }));
+      if (url.includes('/rapport?')) return attente;
+      if (url.includes('/rapport')) return Promise.resolve(new Response(JSON.stringify({ rapport, decime: null, cible: null, juge: null, compatibiliteObj: { compatible: true, code: null } }), { status: 200 }));
+      throw new Error(`unexpected request ${url}`);
+    }));
+    const take = { id: 42, status: 'done', kind: 'object', settings: '{}', output_path: 'fixture.glb' } as Take;
+    await act(async () => { root.render(<ReliefOutils take={take} langue={langue} />); });
+    expect(conteneur.textContent).toContain(cibleLabel);
+    const button = [...conteneur.querySelectorAll('button')].find((element) => element.textContent === '5 k');
+    await act(async () => { button!.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+    expect(conteneur.textContent).toContain(chargement);
+    expect(conteneur.querySelector('a[href*="format=glb"][href*="faces="]')).toBeNull();
+    expect(conteneur.textContent).not.toContain(resultatLabel);
+    const decime = { ...rapport, triangles: 13185 };
+    await act(async () => { finir(new Response(JSON.stringify({ rapport, decime, cible: 5000, juge: null, compatibiliteObj: { compatible: true, code: null } }), { status: 200 })); });
+    expect(conteneur.textContent).toContain(resultatLabel);
+    const count = new Intl.NumberFormat(langue === 'fr' ? 'fr-CA' : 'en-CA').format(13185);
+    expect(conteneur.textContent).toContain(count + ' triangles');
+    expect(conteneur.querySelector('a[href*="format=glb"][href*="faces=5000"]')).not.toBeNull();
+  });
+  it('précise quand la cible dépasse le modèle et ne provoque aucune réduction', async () => {
+    const rapport = { sommets: 3, triangles: 1, degeneres: 0, aretesOuvertes: 3, aretesNonVariete: 0, composantes: 1, etanche: false, taille: [1, 1, 0], volume: null, avertissements: [] };
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => Promise.resolve(new Response(JSON.stringify(String(input).includes('/cartes') ? { cartes: [] } : { rapport, decime: null, cible: null, juge: null, compatibiliteObj: { compatible: true, code: null } }), { status: 200 }))));
+    const take = { id: 42, status: 'done', kind: 'object', settings: '{}', output_path: 'fixture.glb' } as Take;
+    await act(async () => { root.render(<ReliefOutils take={take} langue="en" />); });
+    const button = [...conteneur.querySelectorAll('button')].find((element) => element.textContent === '5 k');
+    await act(async () => { button!.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+    expect(conteneur.textContent).toContain('Full model: no reduction needed');
+    expect(conteneur.textContent).toContain('1 triangles');
+  });
+});
+
+describe('changement de cible pendant le calcul', () => {
+  it('ignore le résultat périmé et attend le résultat de la cible courante', async () => {
+    let finir5!: (v: Response) => void, finir10!: (v: Response) => void;
+    const pending5 = new Promise<Response>((resolve) => { finir5 = resolve; });
+    const pending10 = new Promise<Response>((resolve) => { finir10 = resolve; });
+    const rapport = { sommets: 100, triangles: 399146, degeneres: 0, aretesOuvertes: 0, aretesNonVariete: 0, composantes: 1, etanche: true, taille: [1, 1, 1], volume: 1, avertissements: [] };
+    const response = (n: number) => new Response(JSON.stringify({ rapport, decime: { ...rapport, triangles: n }, cible: n, juge: null, compatibiliteObj: { compatible: true, code: null } }), { status: 200 });
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/cartes')) return Promise.resolve(new Response(JSON.stringify({ cartes: [] }), { status: 200 }));
+      if (url.includes('faces=5000')) return pending5;
+      if (url.includes('faces=10000')) return pending10;
+      return Promise.resolve(response(399146));
+    }));
+    const take = { id: 42, status: 'done', kind: 'object', settings: '{}', output_path: 'fixture.glb' } as Take;
+    await act(async () => { root.render(<ReliefOutils take={take} langue="en" />); });
+    for (const label of ['5 k', '10 k']) {
+      const button = [...conteneur.querySelectorAll('button')].find((element) => element.textContent === label)!;
+      await act(async () => { button.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+    }
+    await act(async () => { finir5(response(13185)); });
+    expect(conteneur.textContent).toContain('Analyzing the mesh');
+    expect(conteneur.textContent).not.toContain('13,185 triangles');
+    expect(conteneur.querySelector('a[href*="format=glb"][href*="faces="]')).toBeNull();
+    await act(async () => { finir10(response(15000)); });
+    expect(conteneur.textContent).toContain('15,000 triangles');
+    expect(conteneur.querySelector('a[href*="format=glb"][href*="faces=10000"]')).not.toBeNull();
+  });
+});
+
+describe('retour à une cible précédente', () => {
+  it('attend une nouvelle analyse avant de réactiver son export', async () => {
+    let terminer!: (v: Response) => void;
+    const nouveau5 = new Promise<Response>((resolve) => { terminer = resolve; });
+    const attente10 = new Promise<Response>(() => {});
+    const rapport = { sommets: 100, triangles: 399146, degeneres: 0, aretesOuvertes: 0, aretesNonVariete: 0, composantes: 1, etanche: true, taille: [1, 1, 1], volume: 1, avertissements: [] };
+    const response = () => new Response(JSON.stringify({ rapport, decime: { ...rapport, triangles: 13185 }, cible: 5000, juge: null, compatibiliteObj: { compatible: true, code: null } }), { status: 200 });
+    let nombre5 = 0;
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/cartes')) return Promise.resolve(new Response(JSON.stringify({ cartes: [] }), { status: 200 }));
+      if (url.includes('faces=5000')) return ++nombre5 === 1 ? Promise.resolve(response()) : nouveau5;
+      if (url.includes('faces=10000')) return attente10;
+      return Promise.resolve(response());
+    }));
+    const take = { id: 42, status: 'done', kind: 'object', settings: '{}', output_path: 'fixture.glb' } as Take;
+    await act(async () => { root.render(<ReliefOutils take={take} langue="en" />); });
+    const click = async (label: string) => {
+      const button = [...conteneur.querySelectorAll('button')].find((element) => element.textContent === label)!;
+      await act(async () => { button.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+    };
+    await click('5 k');
+    expect(conteneur.textContent).toContain('13,185 triangles');
+    await click('10 k');
+    await click('5 k');
+    expect(conteneur.textContent).toContain('Analyzing the mesh');
+    expect(conteneur.textContent).not.toContain('13,185 triangles');
+    expect(conteneur.querySelector('a[href*="format=glb"][href*="faces="]')).toBeNull();
+    await act(async () => { terminer(response()); });
+    expect(conteneur.textContent).toContain('13,185 triangles');
+  });
+});
