@@ -23,6 +23,7 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 from typing import Callable, Mapping
 import uuid
 
@@ -47,6 +48,7 @@ class RpcError(ValueError):
 _CHILD_ENV = {'PATH': '/usr/bin:/bin', 'PYTHONNOUSERSITE': '1',
               'PYTHONDONTWRITEBYTECODE': '1'}
 _CHILD_MODULE = 'outils.sync.labo.sync_worker_rpc'
+CHILD_ERROR_RECEIPT = 'worker-error.json'
 
 
 def _known_source_root() -> Path:
@@ -237,6 +239,58 @@ def _private_file(path: Path, label: str, allow_missing: bool = False) -> None:
     if (not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid() or
             st.st_mode & 0o077 or st.st_nlink != 1):
         raise RpcError(f'{label} doit être un fichier privé régulier')
+
+
+def _write_child_error_receipt(task_root: Path, job_id: str, error: BaseException) -> None:
+    """Écrit un diagnostic borné dans un dossier de tâche déjà privé et validé."""
+    if MAX_JOB_ID.fullmatch(job_id) is None:
+        return
+    root = Path(task_root)
+    _trusted_dir(root, 'racine des tâches')
+    run = root / f'sync-{job_id}'
+    _trusted_dir(run, 'dossier de tâche')
+
+    def label(value: object, fallback: str) -> str:
+        raw = str(value)
+        if not raw or len(raw) > 128 or re.fullmatch(r'[A-Za-z0-9_.<>-]+', raw) is None:
+            return fallback
+        return raw
+
+    frames = []
+    for frame in traceback.extract_tb(error.__traceback__)[-12:]:
+        frames.append({
+            'file': label(Path(frame.filename).name, 'source.py'),
+            'function': label(frame.name, '<unknown>'),
+            'line': int(frame.lineno),
+        })
+    payload = {
+        'schema': 'nexora.sync.worker-child-error.v1',
+        'exceptionClass': label(type(error).__name__, 'Exception'),
+        'frames': frames,
+    }
+    data = (json.dumps(payload, ensure_ascii=True, sort_keys=True,
+                       separators=(',', ':'), allow_nan=False) + '\n').encode('ascii')
+    path = run / CHILD_ERROR_RECEIPT
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0)
+    try:
+        fd = os.open(path, flags, 0o600)
+    except FileExistsError:
+        return
+    try:
+        os.fchmod(fd, 0o600)
+        st = os.fstat(fd)
+        if (not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid() or
+                st.st_mode & 0o077 or st.st_nlink != 1):
+            raise RpcError('reçu enfant non privé')
+        offset = 0
+        while offset < len(data):
+            written = os.write(fd, data[offset:])
+            if written <= 0:
+                raise OSError('écriture du reçu enfant interrompue')
+            offset += written
+        os.fsync(fd)
+    finally:
+        os.close(fd)
 
 
 class SyncWorkerRpc:
@@ -831,7 +885,11 @@ def main() -> int:
             parser.error('commande enfant incomplète')
         try:
             _executer_tache_enfant(args.task_root, args.task_id, args.engine, args.plan_sha256)
-        except BaseException:
+        except BaseException as exc:
+            try:
+                _write_child_error_receipt(args.task_root, args.task_id, exc)
+            except BaseException:
+                pass
             return 1
         return 0
     if any(v is not None for v in (args.task_root, args.task_id, args.engine, args.plan_sha256)):

@@ -22,6 +22,8 @@ from outils.sync.labo.sync_worker_rpc import (
     AllowlistResolver, SyncWorkerRpc, TakeRecord,
 )
 
+CHILD_ERROR_RECEIPT_NAME = 'worker-error.json'
+
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -363,6 +365,53 @@ class SyncWorkerRpcTests(unittest.TestCase):
             (request['jobId'],)))
         self.assertEqual(self.server.inspect(request['jobId']),
                          (200, {'state': 'running', 'progress': 0}))
+
+    def _run_child_before_preparation(self, run: Path, task_id: str) -> int:
+        argv = [sys.executable, '-m', rpc._CHILD_MODULE, '--execute-task',
+                '--task-root', str(self.server.task_root), '--task-id', task_id,
+                '--engine', 'musetalk', '--plan-sha256', '0' * 64]
+        return rpc._run_child_process(argv)
+
+    def test_child_preexecution_failure_writes_private_bounded_diagnostic(self):
+        task_id = str(uuid.uuid4())
+        run = self.server.task_root / f'sync-{task_id}'
+        run.mkdir(mode=0o700)
+
+        status = self._run_child_before_preparation(run, task_id)
+
+        self.assertEqual(status, 1)
+        receipt_path = run / CHILD_ERROR_RECEIPT_NAME
+        self.assertTrue(receipt_path.is_file())
+        receipt = json.loads(receipt_path.read_text(encoding='ascii'))
+        self.assertEqual(receipt['schema'], 'nexora.sync.worker-child-error.v1')
+        self.assertEqual(receipt['exceptionClass'], 'ErreurTache')
+        self.assertLessEqual(len(receipt['frames']), 12)
+        self.assertTrue(any(frame['function'] == '_executer_tache_enfant'
+                            for frame in receipt['frames']))
+        self.assertTrue(all(set(frame) == {'file', 'function', 'line'} and
+                            isinstance(frame['line'], int) and frame['line'] > 0
+                            for frame in receipt['frames']))
+        details = json.dumps(receipt)
+        self.assertNotIn(str(self.state_root), details)
+        self.assertNotIn('message', receipt)
+        st = receipt_path.stat(follow_symlinks=False)
+        self.assertEqual(stat.S_IMODE(st.st_mode), 0o600)
+        self.assertEqual(st.st_uid, os.getuid())
+        self.assertEqual(st.st_nlink, 1)
+
+    def test_child_diagnostic_is_exclusive_and_preserves_existing_receipt(self):
+        task_id = str(uuid.uuid4())
+        run = self.server.task_root / f'sync-{task_id}'
+        run.mkdir(mode=0o700)
+        receipt_path = run / CHILD_ERROR_RECEIPT_NAME
+        sentinel = b'previous private receipt\n'
+        receipt_path.write_bytes(sentinel)
+        receipt_path.chmod(0o600)
+
+        status = self._run_child_before_preparation(run, task_id)
+
+        self.assertEqual(status, 1)
+        self.assertEqual(receipt_path.read_bytes(), sentinel)
 
     def test_real_supervisor_installs_signals_in_dedicated_python_main_thread(self):
         run = self.case / 'signal-child-run'
