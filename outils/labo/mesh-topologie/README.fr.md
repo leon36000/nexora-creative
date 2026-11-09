@@ -5,7 +5,7 @@ Cet outil produit un diagnostic géométrique et, facultativement, un STL dériv
 Dans le dépôt, avec les dépendances Node de l’application et NumPy déjà disponibles :
 
 ```sh
-app/node_modules/.bin/tsx outils/labo/mesh-topologie/extract-glb.ts source.glb nouveau-dossier-extraction
+app/node_modules/.bin/tsx outils/labo/mesh-topologie/extract-glb.mts source.glb nouveau-dossier-extraction
 python3 outils/labo/mesh-topologie/topology.py --positions nouveau-dossier-extraction/positions.f64le --faces nouveau-dossier-extraction/faces.u32le --out nouveau-rapport.json
 python3 -m unittest discover -s outils/labo/mesh-topologie -p 'test_*.py'
 ```
