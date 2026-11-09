@@ -1,4 +1,4 @@
-import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from 'node:http';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -72,6 +72,27 @@ describe('transport Sync sur un vrai socket Unix privé', () => {
     const pending = worker.inspect(JOB_ID, controller.signal);
     controller.abort();
     await expect(pending).rejects.toThrow();
+  });
+
+  it('refuse un flux incomplet et un acquittement HTTP 202 sur une lecture', async () => {
+    const { worker } = await service((_req, res) => {
+      res.writeHead(200, { 'content-type': 'application/json', 'content-length': 100 });
+      res.write('{');
+      res.flushHeaders();
+      setImmediate(() => res.socket?.destroy());
+    });
+    await expect(worker.capabilities(new AbortController().signal)).rejects.toThrow();
+    const second = await service((_req, res) => { res.writeHead(202); res.end('{}'); });
+    await expect(second.worker.capabilities(new AbortController().signal)).rejects.toThrow('indisponible');
+  });
+
+  it('ne suit pas un alias de dossier vers le socket', async () => {
+    const { root, socket } = await service((_req, res) => { res.end('{}'); });
+    const aliases = mkdtempSync('/tmp/nx-sync-alias-');
+    symlinkSync(root, join(aliases, 'linked'));
+    const alias = new UnixSyncWorker(join(aliases, 'linked', 'worker.sock'));
+    await expect(alias.capabilities(new AbortController().signal)).rejects.toThrow('non privé');
+    expect(() => new UnixSyncWorker(socket.replace('/worker.sock', '/../worker.sock'))).toThrow('invalide');
   });
 
   it.each([

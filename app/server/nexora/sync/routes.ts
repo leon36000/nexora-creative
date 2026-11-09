@@ -86,6 +86,7 @@ export type SyncWorkerObservation =
   | { state: 'not_found' }
   | { state: 'queued' }
   | { state: 'running'; progress: number }
+  | { state: 'dispatch_unknown'; errorCode: 'engine_failed' | 'worker_timeout' }
   | { state: 'completed'; result: SyncWorkerResultManifest }
   | { state: 'failed'; errorCode?: string };
 
@@ -255,6 +256,12 @@ async function actualiser(worker: SyncWorker | undefined, store: SyncJobStore, j
     if (observation.state === 'running') {
       if (!Number.isInteger(observation.progress) || observation.progress < 0 || observation.progress > 100) return job;
       return store.transition(job.organisationId, job.id, 'running', { workerJobId: job.id, progress: observation.progress, errorCode: null }, now()) ?? job;
+    }
+    if (observation.state === 'dispatch_unknown') {
+      if (observation.errorCode !== 'engine_failed' && observation.errorCode !== 'worker_timeout') return job;
+      return store.transition(job.organisationId, job.id, 'dispatch_unknown', {
+        workerJobId: job.id, errorCode: 'execution_unverified',
+      }, now()) ?? job;
     }
     if (observation.state === 'failed') {
       return store.transition(job.organisationId, job.id, 'failed', { workerJobId: job.id, errorCode: errorCode(observation.errorCode) }, now()) ?? job;

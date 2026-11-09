@@ -8,7 +8,7 @@ import stat
 import time
 
 from outils.sync import valider_duree_av as av
-from outils.sync.labo import capsule_sync, highsync_preflight, lanceur_musetalk
+from outils.sync.labo import capsule_sync, highsync_preflight, lanceur_musetalk, media_sync
 from outils.sync.labo import latentsync_execution as commun
 from outils.sync.labo.musetalk_patch import PATCHED_SHA256
 
@@ -101,15 +101,11 @@ def _verifier(c, run: Path):
         highsync_preflight._verifier_fichier(path.resolve(), c['executables_sha256'][name])
     if Path(c['ffmpeg']).parent != Path(c['ffprobe']).parent:
         raise ValueError('paire FFmpeg/FFprobe requise')
-    provenance = run/'provenance-entrees.json'
-    highsync_preflight._verifier_fichier(provenance, c['provenance_sha256'])
-    p = commun._lire(provenance)
-    if p['modele_demande'] != 'elevenlabs/eleven-v4':
-        raise ValueError('provenance Eleven4 requise')
-    for name in ('audio-original.mp3', AUDIO_ENTREE_WAV, VIDEO_ENTREE_MP4):
-        highsync_preflight._verifier_fichier(run/name, p['fichiers'][name])
+    _origine, fichiers = media_sync.verifier_provenance(run, c['provenance_sha256'])
+    # Le banc Eleven4 garde sa provenance complète; le chemin générique ne contient
+    # que les deux médias que le serveur a déjà résolus et autorisés.
     return highsync_preflight.preflight(run/VIDEO_ENTREE_MP4, run/AUDIO_ENTREE_WAV,
-        p['fichiers'][VIDEO_ENTREE_MP4], p['fichiers'][AUDIO_ENTREE_WAV],
+        fichiers[VIDEO_ENTREE_MP4], fichiers[AUDIO_ENTREE_WAV],
         Path(c['ffmpeg']), Path(c['ffprobe']))
 
 

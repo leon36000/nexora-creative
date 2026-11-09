@@ -1,6 +1,6 @@
-import { lstatSync } from 'node:fs';
+import { lstatSync, realpathSync } from 'node:fs';
 import { request } from 'node:http';
-import { dirname, isAbsolute } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import type {
   SyncWorker, SyncWorkerCapabilities, SyncWorkerObservation, SyncWorkerRequest,
 } from './routes.js';
@@ -12,7 +12,7 @@ const JOB_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 /** Transport R&D local seulement. Aucune nouvelle tentative d'envoi implicite. */
 export class UnixSyncWorker implements SyncWorker {
   constructor(private readonly socketPath: string) {
-    if (!isAbsolute(socketPath) || socketPath.includes('\0') || Buffer.byteLength(socketPath) > 107) {
+    if (!isAbsolute(socketPath) || resolve(socketPath) !== socketPath || socketPath.includes('\0') || Buffer.byteLength(socketPath) > 107) {
       throw new Error('Chemin de socket Sync invalide');
     }
   }
@@ -22,7 +22,8 @@ export class UnixSyncWorker implements SyncWorker {
     if (uid === undefined) throw new Error('Socket Sync non pris en charge');
     const parent = lstatSync(dirname(this.socketPath));
     const socket = lstatSync(this.socketPath);
-    if (!parent.isDirectory() || parent.isSymbolicLink() || parent.uid !== uid || (parent.mode & 0o077) !== 0 ||
+    if (!parent.isDirectory() || parent.isSymbolicLink() || realpathSync(dirname(this.socketPath)) !== dirname(this.socketPath) ||
+        parent.uid !== uid || (parent.mode & 0o077) !== 0 ||
         !socket.isSocket() || socket.uid !== uid || (socket.mode & 0o077) !== 0) {
       throw new Error('Socket Sync non privé');
     }
@@ -44,6 +45,7 @@ export class UnixSyncWorker implements SyncWorker {
         const chunks: Buffer[] = [];
         res.on('error', reject);
         res.on('aborted', () => reject(new Error('Réponse Sync interrompue')));
+        res.on('close', () => { if (!res.complete) reject(new Error('Réponse Sync interrompue')); });
         res.on('data', (chunk: Buffer) => {
           bytes += chunk.length;
           if (bytes > MAX_RESPONSE_BYTES) {
@@ -54,7 +56,7 @@ export class UnixSyncWorker implements SyncWorker {
           } else chunks.push(chunk);
         });
         res.on('end', () => {
-          if (res.statusCode !== 200 && res.statusCode !== 202) {
+          if (res.statusCode !== 200 && !(method === 'POST' && res.statusCode === 202)) {
             reject(new Error(`Worker Sync indisponible (${res.statusCode ?? 0})`));
             return;
           }

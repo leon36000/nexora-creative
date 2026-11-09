@@ -64,10 +64,10 @@ const STATES = new Set<SyncJobState>([
 ]);
 const TRANSITIONS: Record<SyncJobState, ReadonlySet<SyncJobState>> = {
   dispatching: new Set(['queued', 'running', 'completed_rnd', 'dispatch_unknown', 'failed']),
-  dispatch_unknown: new Set(['queued', 'running', 'completed_rnd', 'failed']),
-  queued: new Set(['running', 'completed_rnd', 'failed']),
+  dispatch_unknown: new Set(['dispatch_unknown', 'queued', 'running', 'completed_rnd', 'failed']),
+  queued: new Set(['dispatch_unknown', 'running', 'completed_rnd', 'failed']),
   // Worker status can be polled repeatedly while progress advances.
-  running: new Set(['running', 'completed_rnd', 'failed']),
+  running: new Set(['dispatch_unknown', 'running', 'completed_rnd', 'failed']),
   completed_rnd: new Set(),
   failed: new Set(),
 };
@@ -176,6 +176,10 @@ export class SyncJobStore {
       if (!row) return undefined;
       const current = rowToJob(row);
       if (!TRANSITIONS[current.state].has(next)) return current;
+      // Une observation ancienne ne peut masquer une fin d'exécution non vérifiée.
+      // Seul un résultat concluant permet ensuite de sortir de cet état.
+      if (current.state === 'dispatch_unknown' && current.errorCode === 'execution_unverified' &&
+          (next === 'queued' || next === 'running')) return current;
       const workerJobId = patch.workerJobId === undefined ? current.workerJobId : patch.workerJobId;
       const errorCode = patch.errorCode === undefined ? current.errorCode : patch.errorCode;
       const progress = patch.progress === undefined ? current.progress : Math.max(current.progress, patch.progress);

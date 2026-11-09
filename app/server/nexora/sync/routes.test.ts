@@ -487,6 +487,43 @@ describe('ACK Sync indéterminé — régressions root', () => {
 });
 
 describe('observations Sync et identité du média — régressions root', () => {
+  it.each(['queued', 'running'] as const)('garde la capacité et signale un résultat non vérifié après %s', async (initial) => {
+    const x = setup(); active.push(x);
+    const payload = { engine: 'musetalk', videoTakeId: 1, audioTakeId: 2 };
+    const first = await x.app.inject({ method: 'POST', url: '/api/nexora/sync/travaux', headers: headers(), payload });
+    const id = first.json().job.id;
+    if (initial === 'running') x.store.transition('org-a', id, 'running', { progress: 60 });
+    x.worker.inspect = async () => ({ state: 'dispatch_unknown', errorCode: 'engine_failed' });
+    const response = await x.app.inject({ method: 'GET', url: '/api/nexora/sync/travaux/' + id, headers: headers() });
+    expect(response.json().job).toMatchObject({ state: 'dispatch_unknown', errorCode: 'execution_unverified', humanReview: 'pending' });
+    expect(response.json().job.result).toBeNull();
+    const second = await x.app.inject({ method: 'POST', url: '/api/nexora/sync/travaux', headers: headers('different-request-001'), payload });
+    expect(second.statusCode).toBe(429);
+    expect(x.calls.enqueue).toHaveLength(1);
+  });
+
+  it('ne remplace pas une erreur d’exécution connue par une ancienne observation running', async () => {
+    const x = setup(); active.push(x);
+    const first = await x.app.inject({ method: 'POST', url: '/api/nexora/sync/travaux', headers: headers(), payload: { engine: 'musetalk', videoTakeId: 1, audioTakeId: 2 } });
+    const id = first.json().job.id;
+    let release!: () => void, entered!: () => void;
+    const waiting = new Promise<void>(resolve => { release = resolve; });
+    const started = new Promise<void>(resolve => { entered = resolve; });
+    let calls = 0;
+    x.worker.inspect = async () => {
+      if (++calls === 1) { entered(); await waiting; return { state: 'running', progress: 80 }; }
+      return { state: 'dispatch_unknown', errorCode: 'engine_failed' };
+    };
+    const url = '/api/nexora/sync/travaux/' + id;
+    const slow = x.app.inject({ method: 'GET', url, headers: headers() }).then(r => r);
+    await started;
+    const uncertain = await x.app.inject({ method: 'GET', url, headers: headers() });
+    expect(uncertain.json().job.state).toBe('dispatch_unknown');
+    release();
+    const late = await slow;
+    expect(late.json().job).toMatchObject({ state: 'dispatch_unknown', errorCode: 'execution_unverified' });
+  });
+
   it.each(['video', 'audio'] as const)('refuse la même clé si le contenu %s change pour le même ID', async (kind) => {
     const x = setup(); active.push(x);
     const payload = { engine: 'musetalk', videoTakeId: 1, audioTakeId: 2 };
