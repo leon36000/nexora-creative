@@ -26,6 +26,9 @@ DEFAULT_SAMPLES = 20_000
 MAX_SAMPLES = 100_000
 DEFAULT_SEED = 20261109
 
+LABEL_A_REFERENCE = "A/reference"
+LABEL_B_CANDIDATE = "B/candidate"
+
 
 @dataclass(frozen=True)
 class MeshArrays:
@@ -143,24 +146,24 @@ def _prepare_mesh(arrays: MeshArrays, center: np.ndarray, diagonal: float, label
 
 def prepare_pair(vertices_a: np.ndarray, faces_a: np.ndarray,
                  vertices_b: np.ndarray, faces_b: np.ndarray) -> PreparedPair:
-    a = validate_arrays(vertices_a, faces_a, "A/reference")
-    b = validate_arrays(vertices_b, faces_b, "B/candidate")
+    a = validate_arrays(vertices_a, faces_a, LABEL_A_REFERENCE)
+    b = validate_arrays(vertices_b, faces_b, LABEL_B_CANDIDATE)
     a_area_signal = _twice_areas(a.vertices, a.faces)
     a_valid = a.faces[a_area_signal > 0]
     b_area_signal = _twice_areas(b.vertices, b.faces)
     b_valid = b.faces[b_area_signal > 0]
     if not len(a_valid):
-        raise ValueError("A/reference: no non-zero-area triangles")
+        raise ValueError(f"{LABEL_A_REFERENCE}: no non-zero-area triangles")
     if not len(b_valid):
-        raise ValueError("B/candidate: no non-zero-area triangles")
+        raise ValueError(f"{LABEL_B_CANDIDATE}: no non-zero-area triangles")
     a_used = np.unique(a_valid)
     b_used = np.unique(b_valid)
     ref_low, ref_high, ref_diagonal = _bbox_diagonal(a.vertices[a_used])
     ref_center = ref_low + (ref_high - ref_low) * 0.5
     combined = np.concatenate((a.vertices[a_used], b.vertices[b_used]), axis=0)
     _, _, combined_diagonal = _bbox_diagonal(combined)
-    prepared_a = _prepare_mesh(a, ref_center, ref_diagonal, "A/reference")
-    prepared_b = _prepare_mesh(b, ref_center, ref_diagonal, "B/candidate")
+    prepared_a = _prepare_mesh(a, ref_center, ref_diagonal, LABEL_A_REFERENCE)
+    prepared_b = _prepare_mesh(b, ref_center, ref_diagonal, LABEL_B_CANDIDATE)
     return PreparedPair(
         a=prepared_a,
         b=prepared_b,
@@ -340,6 +343,14 @@ def file_sha(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _validate_metadata_hash(metadata: dict, expected: dict, key: str) -> None:
+    value = metadata.get(key)
+    if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
+        raise ValueError(f"extractor metadata has invalid {key}")
+    if value != expected[key]:
+        raise ValueError(f"extractor metadata {key} does not match its source file")
+
+
 def load_extraction_metadata(path: Path, source_glb_path: Path, positions_path: Path,
                              faces_path: Path, arrays: MeshArrays) -> dict:
     for item, label in ((path, "metadata"), (source_glb_path, "source GLB")):
@@ -359,11 +370,7 @@ def load_extraction_metadata(path: Path, source_glb_path: Path, positions_path: 
         "triangles": len(arrays.faces),
     }
     for key in ("source_sha256", "positions_sha256", "faces_sha256"):
-        value = metadata.get(key)
-        if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
-            raise ValueError(f"extractor metadata has invalid {key}")
-        if value != expected[key]:
-            raise ValueError(f"extractor metadata {key} does not match its source file")
+        _validate_metadata_hash(metadata, expected, key)
     for key in ("vertices", "triangles"):
         if type(metadata.get(key)) is not int or metadata[key] != expected[key]:
             raise ValueError(f"extractor metadata {key} does not match the supplied array")
@@ -380,13 +387,13 @@ def load_extraction_metadata(path: Path, source_glb_path: Path, positions_path: 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--a-positions", type=Path, required=True, help="A/reference positions.f64le")
-    parser.add_argument("--a-faces", type=Path, required=True, help="A/reference faces.u32le")
-    parser.add_argument("--a-glb", type=Path, required=True, help="original A/reference GLB; hash checked against source.json")
+    parser.add_argument("--a-positions", type=Path, required=True, help=f"{LABEL_A_REFERENCE} positions.f64le")
+    parser.add_argument("--a-faces", type=Path, required=True, help=f"{LABEL_A_REFERENCE} faces.u32le")
+    parser.add_argument("--a-glb", type=Path, required=True, help=f"original {LABEL_A_REFERENCE} GLB; hash checked against source.json")
     parser.add_argument("--a-source-json", type=Path, required=True, help="extract-glb.mts source.json for A")
-    parser.add_argument("--b-positions", type=Path, required=True, help="B/candidate positions.f64le")
-    parser.add_argument("--b-faces", type=Path, required=True, help="B/candidate faces.u32le")
-    parser.add_argument("--b-glb", type=Path, required=True, help="original B/candidate GLB; hash checked against source.json")
+    parser.add_argument("--b-positions", type=Path, required=True, help=f"{LABEL_B_CANDIDATE} positions.f64le")
+    parser.add_argument("--b-faces", type=Path, required=True, help=f"{LABEL_B_CANDIDATE} faces.u32le")
+    parser.add_argument("--b-glb", type=Path, required=True, help=f"original {LABEL_B_CANDIDATE} GLB; hash checked against source.json")
     parser.add_argument("--b-source-json", type=Path, required=True, help="extract-glb.mts source.json for B")
     parser.add_argument("--max-faces", type=int, default=DEFAULT_MAX_FACES, help="per-mesh allocation limit; hard maximum 2000000")
     parser.add_argument("--samples-per-direction", type=int, default=DEFAULT_SAMPLES)
@@ -399,10 +406,10 @@ def main() -> None:
         raise SystemExit(f"samples-per-direction must be between 1 and {MAX_SAMPLES}")
     if not 1 <= args.max_faces <= HARD_MAX_FACES:
         raise SystemExit(f"max-faces must be between 1 and {HARD_MAX_FACES}")
-    check_binary_pair(args.a_positions, args.a_faces, "A/reference", args.max_faces)
-    check_binary_pair(args.b_positions, args.b_faces, "B/candidate", args.max_faces)
-    a = load_binary_pair(args.a_positions, args.a_faces, "A/reference", args.max_faces)
-    b = load_binary_pair(args.b_positions, args.b_faces, "B/candidate", args.max_faces)
+    check_binary_pair(args.a_positions, args.a_faces, LABEL_A_REFERENCE, args.max_faces)
+    check_binary_pair(args.b_positions, args.b_faces, LABEL_B_CANDIDATE, args.max_faces)
+    a = load_binary_pair(args.a_positions, args.a_faces, LABEL_A_REFERENCE, args.max_faces)
+    b = load_binary_pair(args.b_positions, args.b_faces, LABEL_B_CANDIDATE, args.max_faces)
     a_meta = load_extraction_metadata(args.a_source_json, args.a_glb, args.a_positions, args.a_faces, a)
     b_meta = load_extraction_metadata(args.b_source_json, args.b_glb, args.b_positions, args.b_faces, b)
     prepared = prepare_pair(a.vertices, a.faces, b.vertices, b.faces)
