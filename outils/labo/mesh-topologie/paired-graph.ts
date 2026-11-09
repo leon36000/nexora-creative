@@ -19,7 +19,7 @@ const POST: Record<string, string> = {
   apply: 'ApplyTextureToMesh', final: 'MeshSmoothNormals', save: 'SaveGLB',
 };
 const COMMON_POST = ['remesh', 'dec', 'smooth', 'uv', 'bake', 'apply', 'final', 'save'];
-const BRANCHES: readonly string[] = ['A', 'B', 'C', 'D'];
+const BRANCHES = new Set<string>(['A', 'B', 'C', 'D']);
 
 function renommer(value: unknown, post: Set<string>, branch: Branch): unknown {
   if (Array.isArray(value)) {
@@ -46,22 +46,21 @@ function variante(inputs: Record<string, unknown>, branch: Branch): void {
   }
 }
 
-/** Quatre variantes au plus, amont TRELLIS et voxels partagés, GLB seulement. */
-export function buildPairedTrellisGraph(p: PairedParams): { graph: Graph; outputs: string[] } {
+function verifierParams(p: PairedParams): void {
   if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,199}$/.test(p.image) || p.image.includes('..')) throw new Error('image Comfy invalide');
   if (!Number.isInteger(p.seed) || p.seed < 0 || p.seed > 0xffffffff) throw new Error('seed invalide');
   if (p.quality !== 'draft' && p.quality !== 'quality') throw new Error('profil invalide');
   if (typeof p.removeBackground !== 'boolean') throw new Error('fond invalide');
   if (!/^ESSAI\/[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(p.filenamePrefix)) throw new Error('préfixe ESSAI invalide');
-  if (!Array.isArray(p.branches) || !p.branches.length || !p.branches.includes('A') || p.branches.length > 4 || new Set(p.branches).size !== p.branches.length || p.branches.some((b) => !BRANCHES.includes(b))) throw new Error('branches invalides');
+  if (!Array.isArray(p.branches) || !p.branches.length || !p.branches.includes('A') || p.branches.length > 4 || new Set(p.branches).size !== p.branches.length || p.branches.some((b) => !BRANCHES.has(b))) throw new Error('branches invalides');
 
-  const base = buildTrellisGraph({ ...p, turntableFrames: 0 }) as Graph;
-  const postNames = [...COMMON_POST, ...(p.quality === 'quality' ? ['nrm', 'ao'] : [])];
-  const post = new Set(postNames);
+}
+
+function verifierBase(base: Graph, postNames: string[], post: Set<string>, quality: ObjectQuality): void {
   for (const name of postNames) if (base[name]?.class_type !== POST[name]) throw new Error(`graphe officiel incompatible : ${name}`);
   if (base.subject?.class_type !== 'PreviewImage' || base.mesh?.class_type !== 'VaeDecodeShapeTrellis' || base.colors?.class_type !== 'VaeDecodeTextureTrellis') throw new Error('amont officiel incompatible');
   const remeshAttendu: Record<string, unknown> = {
-    mesh: ['mesh', 0], resolution: p.quality === 'draft' ? 512 : 768, sign_mode: 'udf',
+    mesh: ['mesh', 0], resolution: quality === 'draft' ? 512 : 768, sign_mode: 'udf',
     'sign_mode.qef': false, 'sign_mode.drop_inverted_components': false, 'sign_mode.drop_enclosed_components': false,
     band: 1, project_back: 0, fix_poles: false, smooth_iters: 0, drop_small_components: 0.01, precluster_max_verts: 20_000_000,
   };
@@ -73,6 +72,15 @@ export function buildPairedTrellisGraph(p: PairedParams): { graph: Graph; output
   for (const [name, node] of Object.entries(base)) {
     if (!post.has(name) && name !== 'subject' && /^(?:Save|Preview)/.test(node.class_type)) throw new Error('sortie officielle inattendue');
   }
+}
+
+/** Quatre variantes au plus, amont TRELLIS et voxels partagés, GLB seulement. */
+export function buildPairedTrellisGraph(p: PairedParams): { graph: Graph; outputs: string[] } {
+  verifierParams(p);
+  const base = buildTrellisGraph({ ...p, turntableFrames: 0 }) as Graph;
+  const postNames = [...COMMON_POST, ...(p.quality === 'quality' ? ['nrm', 'ao'] : [])];
+  const post = new Set(postNames);
+  verifierBase(base, postNames, post, p.quality);
   const graph: Graph = {};
   for (const [name, node] of Object.entries(base)) if (!post.has(name) && name !== 'subject') graph[name] = structuredClone(node);
   const outputs: string[] = [];

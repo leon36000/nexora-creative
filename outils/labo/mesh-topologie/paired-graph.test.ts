@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import * as trellis from '../../../app/server/graphs/trellis';
 import { buildTrellisGraph } from '../../../app/server/graphs/trellis';
@@ -97,4 +98,14 @@ describe('construction appariée TRELLIS', () => {
   ])('refuse une entrée non conforme %#', (candidate) => {
     expect(() => buildPairedTrellisGraph(candidate as PairedParams)).toThrow();
   });
+});
+
+// Empreintes de référence de la construction avant refactor, toutes branches confondues.
+it.each([
+  ['draft', 'f82e7de5af00da7b4412c2de19c12dc70acbda405ff04cc11fcf2369441457b5'],
+  ['quality', '8976035df0a353992964b27ed000656ceb4226f5a5f944cdea401728e8cbe18a'],
+] as const)('conserve intégralement le graphe apparié %s', (quality, expected) => {
+  const graph = buildPairedTrellisGraph({ image: 's01.png', seed: 0, quality, removeBackground: true,
+    filenamePrefix: 'ESSAI/paired', branches: ['A', 'B', 'C', 'D'] });
+  expect(createHash('sha256').update(JSON.stringify(graph)).digest('hex')).toBe(expected);
 });

@@ -34,8 +34,7 @@ function verifierValeur(value: unknown, type: string, meta: ObjectRecord): void 
   }
 }
 
-/** Vérifie toutes les options A/B/C/D et les valeurs des branches demandées. */
-export function verifyPairedRemeshSchema(objectInfo: unknown, paired: ReturnType<typeof buildPairedTrellisGraph>): void {
+function lireModes(objectInfo: unknown): { required: ObjectRecord; modes: Record<string, ObjectRecord> } {
   const required = objet(objet(objet(objet(objectInfo).RemeshMesh).input).required);
   clesExactes(required, [...Object.keys(COMMUN), 'sign_mode']);
   for (const [key, type] of Object.entries(COMMUN)) specification(required[key], type);
@@ -52,19 +51,31 @@ export function verifyPairedRemeshSchema(objectInfo: unknown, paired: ReturnType
     clesExactes(modes[mode], Object.keys(fields));
     for (const [key, type] of Object.entries(fields)) specification(modes[mode][key], type);
   }
+  return { required, modes };
+}
+
+function verifierSorties(paired: ReturnType<typeof buildPairedTrellisGraph>, required: ObjectRecord, modes: Record<string, ObjectRecord>): void {
   const outputs = paired.outputs;
   if (!Array.isArray(outputs) || outputs.length < 1 || outputs.length > 4 || new Set(outputs).size !== outputs.length || !outputs.includes('A_save')) throw new Error('sorties appariées invalides');
-  for (const output of outputs) {
-    if (!/^[ABCD]_save$/.test(output)) throw new Error('sortie appariée invalide');
-    const inputs = objet(paired.graph[`${output[0]}_remesh`]?.inputs);
-    const mode = inputs.sign_mode;
-    if (typeof mode !== 'string' || !MODES[mode]) throw new Error('mode RemeshMesh inconnu');
-    const expectedMode: Record<string, string> = { A: 'udf', B: 'udf', C: 'sdf', D: 'solid' };
-    if (mode !== expectedMode[output[0]] || inputs.fix_poles !== (output[0] === 'B') || inputs['sign_mode.qef'] !== false ||
-        (mode === 'sdf' && inputs['sign_mode.manifold'] !== true) || (mode === 'solid' && inputs['sign_mode.fill'] !== 20) ||
-        (mode === 'udf' && (inputs['sign_mode.drop_inverted_components'] !== false || inputs['sign_mode.drop_enclosed_components'] !== false))) throw new Error('variante RemeshMesh modifiée');
-    clesExactes(inputs, [...Object.keys(COMMUN), 'sign_mode', ...Object.keys(MODES[mode]).map((key) => `sign_mode.${key}`)]);
-    for (const [key, type] of Object.entries(COMMUN)) verifierValeur(inputs[key], type, specification(required[key], type));
-    for (const [key, type] of Object.entries(MODES[mode])) verifierValeur(inputs[`sign_mode.${key}`], type, specification(modes[mode][key], type));
-  }
+  for (const output of outputs) verifierSortie(output, paired, required, modes);
+}
+
+function verifierSortie(output: string, paired: ReturnType<typeof buildPairedTrellisGraph>, required: ObjectRecord, modes: Record<string, ObjectRecord>): void {
+  if (!/^[ABCD]_save$/.test(output)) throw new Error('sortie appariée invalide');
+  const inputs = objet(paired.graph[`${output[0]}_remesh`]?.inputs);
+  const mode = inputs.sign_mode;
+  if (typeof mode !== 'string' || !MODES[mode]) throw new Error('mode RemeshMesh inconnu');
+  const expectedMode: Record<string, string> = { A: 'udf', B: 'udf', C: 'sdf', D: 'solid' };
+  if (mode !== expectedMode[output[0]] || inputs.fix_poles !== output.startsWith('B') || inputs['sign_mode.qef'] !== false ||
+      (mode === 'sdf' && inputs['sign_mode.manifold'] !== true) || (mode === 'solid' && inputs['sign_mode.fill'] !== 20) ||
+      (mode === 'udf' && (inputs['sign_mode.drop_inverted_components'] !== false || inputs['sign_mode.drop_enclosed_components'] !== false))) throw new Error('variante RemeshMesh modifiée');
+  clesExactes(inputs, [...Object.keys(COMMUN), 'sign_mode', ...Object.keys(MODES[mode]).map((key) => `sign_mode.${key}`)]);
+  for (const [key, type] of Object.entries(COMMUN)) verifierValeur(inputs[key], type, specification(required[key], type));
+  for (const [key, type] of Object.entries(MODES[mode])) verifierValeur(inputs[`sign_mode.${key}`], type, specification(modes[mode][key], type));
+}
+
+/** Vérifie toutes les options A/B/C/D et les valeurs des branches demandées. */
+export function verifyPairedRemeshSchema(objectInfo: unknown, paired: ReturnType<typeof buildPairedTrellisGraph>): void {
+  const { required, modes } = lireModes(objectInfo);
+  verifierSorties(paired, required, modes);
 }

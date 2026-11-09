@@ -7,7 +7,7 @@ import { lireGlb } from '../../../app/server/nexora/relief.ts';
 const sha = (value: Uint8Array) => createHash('sha256').update(value).digest('hex');
 async function main() {
   const [sourceArg, outArg] = process.argv.slice(2);
-  if (!sourceArg || !outArg || process.argv.length !== 4) throw new Error('usage : tsx extract-glb.ts SOURCE.glb NOUVEAU_DOSSIER');
+  if (!sourceArg || !outArg || process.argv.length !== 4) throw new Error('usage : tsx extract-glb.mts SOURCE.glb NOUVEAU_DOSSIER');
   const source = resolve(sourceArg), out = resolve(outArg);
   if (!lstatSync(source).isFile() || !source.toLowerCase().endsWith('.glb')) throw new Error('GLB ordinaire attendu');
   const glb = readFileSync(source), mesh = await lireGlb(glb);
@@ -19,4 +19,4 @@ async function main() {
   writeFileSync(join(out, 'faces.u32le'), faces, { flag: 'wx' });
   writeFileSync(join(out, 'source.json'), JSON.stringify({ scope: 'géométrie aplatie seulement, GLB source inchangé', source_sha256: sha(glb), positions_sha256: sha(positions), faces_sha256: sha(faces), vertices: mesh.positions.length / 3, triangles: mesh.indices.length / 3 }, null, 2) + '\n', { flag: 'wx' });
 }
-main().catch(error => { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; });
+try { await main(); } catch (error) { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; }
