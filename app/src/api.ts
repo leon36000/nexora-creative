@@ -83,6 +83,10 @@ export interface PhoneEvent {
   reason?: 'received' | 'expired' | 'cancelled' | 'abuse' | 'replaced';
 }
 
+export class ErreurApi extends Error {
+  constructor(message: string, public readonly code?: string) { super(message); }
+}
+
 export class EchecFilmPartiel extends Error {
   constructor(message: string, public readonly filmId: number, public readonly prises: { plan: number; takeId: number }[], public readonly verificationRequise: boolean, public readonly conflit?: { filmId: number; plan: number; takeId: number }) { super(message); }
 }
@@ -116,7 +120,7 @@ async function j<T>(url: string, init?: RequestInit): Promise<T> {
     console.error(`[openfield] ${init?.method || 'GET'} ${url} failed:`, msg);
     const partiel = erreurFilmPartiel(url, d, msg);
     if (partiel) throw partiel;
-    throw new Error(msg);
+    throw new ErreurApi(msg, typeof d?.code === 'string' ? d.code : undefined);
   }
   return d as T;
 }
