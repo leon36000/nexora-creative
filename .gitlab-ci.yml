@@ -157,7 +157,8 @@ nexora_director_tests_cpu:
   script:
     - mkdir -p .ci-director/home .ci-director/tmp .ci-director/cache .ci-director/npm-cache
     - touch .ci-director/npm-user-config .ci-director/npm-global-config
-    - apk add --no-cache python3 make g++
+    - sh outils/ci/test-retry-director-alpine-deps.sh
+    - sh outils/ci/retry-director-alpine-deps.sh
     - 'env -i PATH=/usr/local/bin:/usr/bin:/bin HOME="$CI_PROJECT_DIR/.ci-director/home" TMPDIR="$CI_PROJECT_DIR/.ci-director/tmp" DIRECTOR_CI_ROOT="$CI_PROJECT_DIR" DIRECTOR_CI_CACHE="$CI_PROJECT_DIR/.ci-director/cache" MESH_CI_COVERAGE="$CI_PROJECT_DIR/.ci-director/coverage-mesh" npm_config_cache="$CI_PROJECT_DIR/.ci-director/npm-cache" npm_config_userconfig="$CI_PROJECT_DIR/.ci-director/npm-user-config" npm_config_globalconfig="$CI_PROJECT_DIR/.ci-director/npm-global-config" npm_config_nodedir=/usr/local npm_config_build_from_source=true sh app/scripts/ci-director.sh'
     - mkdir -p .ci-director/coverage-mesh-viewer
     - node --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=.ci-director/coverage-mesh-viewer/lcov.info --test outils/labo/mesh-visual-bench/metrics.test.mjs outils/labo/mesh-visual-bench/views.test.mjs
