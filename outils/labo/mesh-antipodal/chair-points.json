@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "reference_glb_sha256": "ade78eec619abcc715a4b4c35a0402d2419b9f17de5ca42c4615faaec813d38e",
+  "edges_report_sha256": "f2979b9740bacfb115b55e2f93ccf5e6afa86df6ccb393bb50daafe41e569d5c",
+  "note": "Points proches des 7 arêtes de D : milieu ± 0,0002 unités selon normale de la première face ; pas de classification a priori. Centre bbox candidat, extérieur lointain. Le point intérieur candidat D a été choisi après un petit sondage exploratoire ; ce n’est pas un échantillon indépendant.",
+  "points": [
+    {
+      "id": "bbox_center_candidate",
+      "point": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "outside_far",
+      "point": [
+        2,
+        2,
+        2
+      ]
+    },
+    {
+      "id": "edge1_minus",
+      "point": [
+        -0.23476525965962175,
+        0.04718667268753052,
+        0.1403713724207858
+      ]
+    },
+    {
+      "id": "edge1_plus",
+      "point": [
+        -0.23504609044757124,
+        0.04718667268753052,
+        0.14065621284723484
+      ]
+    },
+    {
+      "id": "edge2_minus",
+      "point": [
+        -0.23479064098711533,
+        0.0473475307226181,
+        0.1464032941771665
+      ]
+    },
+    {
+      "id": "edge2_plus",
+      "point": [
+        -0.23494930275563675,
+        0.0473475307226181,
+        0.14603610697258326
+      ]
+    },
+    {
+      "id": "edge3_minus",
+      "point": [
+        -0.21513165814388263,
+        0.05184011426890354,
+        0.25750630985258804
+      ]
+    },
+    {
+      "id": "edge3_plus",
+      "point": [
+        -0.21529064791690838,
+        0.052206871238107876,
+        0.2575208555603148
+      ]
+    },
+    {
+      "id": "edge4_minus",
+      "point": [
+        -0.2111270488119674,
+        0.08219844520378335,
+        0.2286915949253949
+      ]
+    },
+    {
+      "id": "edge4_plus",
+      "point": [
+        -0.21107392899030922,
+        0.08217413305949943,
+        0.22908730593634521
+      ]
+    },
+    {
+      "id": "edge5_minus",
+      "point": [
+        0.061771198852751154,
+        0.06078640930354595,
+        -0.014989887362191338
+      ]
+    },
+    {
+      "id": "edge5_plus",
+      "point": [
+        0.06188197459390412,
+        0.06078640930354595,
+        -0.0146055324023274
+      ]
+    },
+    {
+      "id": "edge6_minus",
+      "point": [
+        0.21505041909963904,
+        0.04191766358095814,
+        0.009845293947975951
+      ]
+    },
+    {
+      "id": "edge6_plus",
+      "point": [
+        0.21511931227891626,
+        0.04231167905848812,
+        0.009842941647846383
+      ]
+    },
+    {
+      "id": "edge7_minus",
+      "point": [
+        0.21516208996061775,
+        0.045024534761094435,
+        0.04037561183772386
+      ]
+    },
+    {
+      "id": "edge7_plus",
+      "point": [
+        0.2152351672482064,
+        0.04506074816069664,
+        0.03998401472367941
+      ]
+    },
+    {
+      "id": "inside_candidate_D_leg_exploratory",
+      "point": [
+        -0.23,
+        -0.35,
+        -0.25
+      ]
+    }
+  ]
+}

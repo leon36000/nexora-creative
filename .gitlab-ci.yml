@@ -42,7 +42,7 @@ nexora_sonar_developpement:
         test -f "$rapport" || exit 1
         nexora_sonar_lcov="${nexora_sonar_lcov:+$nexora_sonar_lcov,}$rapport"
       done
-    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.tests=. '-Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.test.mjs,**/*.test.cjs,**/test_*.py,app/scripts/test-*.mjs,app/scripts/test-*.ts' '-Dsonar.test.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' '-Dsonar.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' -Dsonar.python.coverage.reportPaths=.ci-v7/sonar-reports/coverage-v7.xml,.ci-v7/sonar-reports/coverage-sync.xml,.ci-v7/sonar-reports/coverage-sous-agents.xml,.ci-v7/sonar-reports/coverage-matte.xml,.ci-v7/sonar-reports/coverage-finish.xml,.ci-v7/sonar-reports/coverage-mesh-paint.xml,.ci-v7/sonar-reports/coverage-mesh-benchmark.xml,.ci-v7/sonar-reports/coverage-mesh-topology.xml,.ci-v7/sonar-reports/coverage-mesh-viewer.xml "-Dsonar.javascript.lcov.reportPaths=$nexora_sonar_lcov" -Dsonar.javascript.node.maxspace=4096 -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
+    - sonar-scanner -Dsonar.projectKey=gitlab-${CI_PROJECT_ID} -Dsonar.projectVersion=developpement -Dsonar.sources=. -Dsonar.tests=. '-Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.test.mjs,**/*.test.cjs,**/test_*.py,app/scripts/test-*.mjs,app/scripts/test-*.ts' '-Dsonar.test.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' '-Dsonar.exclusions=.ci-v7/**,.ci-director/**,.ci-sousagents/**' -Dsonar.python.coverage.reportPaths=.ci-v7/sonar-reports/coverage-v7.xml,.ci-v7/sonar-reports/coverage-sync.xml,.ci-v7/sonar-reports/coverage-sous-agents.xml,.ci-v7/sonar-reports/coverage-matte.xml,.ci-v7/sonar-reports/coverage-finish.xml,.ci-v7/sonar-reports/coverage-mesh-paint.xml,.ci-v7/sonar-reports/coverage-mesh-benchmark.xml,.ci-v7/sonar-reports/coverage-mesh-topology.xml,.ci-v7/sonar-reports/coverage-mesh-viewer.xml,.ci-v7/sonar-reports/coverage-mesh-antipodal.xml "-Dsonar.javascript.lcov.reportPaths=$nexora_sonar_lcov" -Dsonar.javascript.node.maxspace=4096 -Dsonar.scm.revision=${CI_COMMIT_SHA} -Dsonar.analysis.ciPipelineUrl=${CI_PIPELINE_URL} -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300
 
 nexora_rapports_sonar:
   stage: test
@@ -78,6 +78,7 @@ nexora_rapports_sonar:
           ('.ci-v7/coverage-mesh-benchmark.xml', 'coverage-mesh-benchmark.xml'),
           ('.ci-v7/coverage-mesh-topology.xml', 'coverage-mesh-topology.xml'),
           ('.ci-v7/coverage-mesh-viewer.xml', 'coverage-mesh-viewer.xml'),
+          ('.ci-v7/coverage-mesh-antipodal.xml', 'coverage-mesh-antipodal.xml'),
           ('.ci-director/coverage/lcov.info', 'director.lcov.info'),
           ('.ci-director/coverage-mesh/lcov.info', 'mesh.lcov.info'),
           ('.ci-director/coverage-mesh-viewer/lcov.info', 'mesh-viewer.lcov.info'),
@@ -145,6 +146,8 @@ nexora_v7_tests_cpu:
     - 'COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-mesh-topology" python3 -m coverage xml -o .ci-v7/coverage-mesh-topology.xml'
     - 'env -i PATH=/usr/local/bin:/usr/bin:/bin PYTHONPATH="$CI_PROJECT_DIR/outils/labo/mesh-visual-bench" TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" PYTHONDONTWRITEBYTECODE=1 COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-mesh-viewer" python3 -m coverage run --branch --source=outils/labo/mesh-visual-bench -m unittest discover -v -s outils/labo/mesh-visual-bench -p "test_*.py"'
     - 'COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-mesh-viewer" python3 -m coverage xml -o .ci-v7/coverage-mesh-viewer.xml'
+    - 'env -i PATH=/usr/local/bin:/usr/bin:/bin PYTHONPATH="$CI_PROJECT_DIR/outils/labo/mesh-antipodal" TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" PYTHONDONTWRITEBYTECODE=1 COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-mesh-antipodal" python3 -m coverage run --branch --source=outils/labo/mesh-antipodal -m unittest discover -v -s outils/labo/mesh-antipodal -p "test_*.py"'
+    - 'COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-mesh-antipodal" python3 -m coverage xml -o .ci-v7/coverage-mesh-antipodal.xml'
   artifacts:
     when: always
     expire_in: 14 days
