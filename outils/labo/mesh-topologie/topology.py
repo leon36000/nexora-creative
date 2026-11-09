@@ -63,6 +63,7 @@ def analyze(vertices, faces):
     quant, quant_ids = np.unique(np.floor(vertices * 1e5 + .5).astype(np.int64), axis=0, return_inverse=True)
     pairs = np.unique(np.column_stack((exact_ids, quant_ids)), axis=0)
     return {'scope': 'diagnostic géométrique; pas de contrôle auto-intersection ni impression',
+            'raw_indices': _stats(vertices, faces, np.arange(len(vertices), dtype=np.int64), len(vertices)),
             'exact': _stats(vertices, faces, exact_ids, len(exact)),
             'quantized': _stats(vertices, faces, quant_ids, len(quant)),
             'partitions_identical': len(pairs) == len(exact) == len(quant),

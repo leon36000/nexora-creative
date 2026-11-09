@@ -12,6 +12,11 @@ python3 -m unittest discover -s outils/labo/mesh-topologie -p 'test_*.py'
 
 L’extracteur utilise la scène et les transformations traitées par `lireGlb`, et écrit les positions monde en float64 little-endian, les indices uint32 little-endian et leurs SHA-256. La sortie doit être un dossier neuf. Le diagnostic compare la soudure de positions exactement égales à la quantification q=100000, applique le seuil de norme au carré du produit vectoriel de `analyser` (1e-18), et indique les arêtes ouvertes, non manifold, composantes et tailles. Des sommets distincts peuvent être fusionnés par quantification ; une différence de résultats doit être examinée.
 
+`raw_indices` mesure les statistiques avec les indices source ; `exact` et `quantized` restent inchangés.
+Les coutures UV peuvent dupliquer des sommets malgré des positions identiques.
+Une différence entre ces vues est descriptive : elle ne prouve ni défaut ni étanchéité.
+Les seuils et les données d’entrée ne sont pas modifiés.
+
 Pour un essai volumique distinct, avec `meshlib-core` et NumPy installés dans un environnement privé :
 
 ```sh
