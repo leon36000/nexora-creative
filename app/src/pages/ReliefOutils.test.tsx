@@ -102,3 +102,38 @@ describe('compatibilité de téléchargement OBJ', () => {
     expect(renderToStaticMarkup(<LienExportMesh {...props} compatibilite={{ compatible: true, code: null }} />)).toContain('href="/obj"');
   });
 });
+
+describe('limites de lecture Mesh', () => {
+  it.each([
+    ['fr', 'MESH_INSTANCE_LIMIT', 'dépasse la capacité', 'Télécharger le GLB original'],
+    ['en', 'MESH_INSTANCE_LIMIT', 'exceeds the capacity', 'Download the original GLB'],
+    ['fr', 'MESH_INSTANCE_INVALID', 'données d’instances du modèle sont invalides', 'Télécharger le GLB original'],
+    ['en', 'MESH_INSTANCE_INVALID', 'invalid instance data', 'Download the original GLB'],
+    ['fr', 'MESH_EXTENSION_UNSUPPORTED', 'extension requise non prise en charge', 'Télécharger le GLB original'],
+    ['en', 'MESH_EXTENSION_UNSUPPORTED', 'unsupported required extension', 'Download the original GLB'],
+  ] as const)('affiche %s/%s et maintient le GLB original', (langue, code, message, lien) => {
+    const html = renderToStaticMarkup(<EtatAnalyseMaillage rapport={null} loading={false} failed code={code} takeId={42} langue={langue} />);
+    expect(html).toContain(message); expect(html).toContain(lien);
+    expect(html).toContain('href="/api/nexora/relief/42/export?format=glb"');
+    expect(html).toContain('download');
+  });
+});
+
+describe('erreurs API existantes', () => {
+  it('conserve les messages, transmet le code éventuel et retourne les succès', async () => {
+    const { api, ErreurApi } = await import('../api');
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      vi.stubGlobal('fetch', vi.fn()
+        .mockResolvedValueOnce(new Response(JSON.stringify({ error: 'ancien message' }), { status: 503 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ error: 'limite', code: 'MESH_INSTANCE_LIMIT' }), { status: 422 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ rapport: base }), { status: 200 })));
+      await expect(api.reliefRapport(42)).rejects.toMatchObject({ message: 'ancien message', code: undefined });
+      const error = await api.reliefRapport(42).catch((value: unknown) => value);
+      expect(error).toBeInstanceOf(ErreurApi);
+      expect(error).toMatchObject({ message: 'limite', code: 'MESH_INSTANCE_LIMIT' });
+      const result = await api.reliefRapport(42);
+      expect(result.rapport).toEqual(base);
+    } finally { vi.unstubAllGlobals(); consoleError.mockRestore(); }
+  });
+});

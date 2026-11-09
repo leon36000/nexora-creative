@@ -1,6 +1,6 @@
 /** Mesh exports, topology report, PBR maps, turntable GIF and four-view judge. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { api, reliefCarteUrl, reliefExportUrl, reliefGifUrl, type FormatRelief, type JugeRelief, type RapportMaillage, type RapportRelief, type Take } from '../api';
+import { api, ErreurApi, reliefCarteUrl, reliefExportUrl, reliefGifUrl, type FormatRelief, type JugeRelief, type RapportMaillage, type RapportRelief, type Take } from '../api';
 import { recreate } from '../Viewer';
 import { toast } from '../store';
 import { Icon } from '../ui';
@@ -89,11 +89,17 @@ export function ResumeMaillage({ r, langue = 'fr' }: { r: RapportMaillage; langu
   );
 }
 
-export function EtatAnalyseMaillage({ rapport, loading, failed, langue = 'fr' }: {
-  rapport: RapportMaillage | null; loading: boolean; failed: boolean; langue?: LangueClient;
+export function EtatAnalyseMaillage({ rapport, loading, failed, langue = 'fr', code, takeId }: {
+  rapport: RapportMaillage | null; loading: boolean; failed: boolean; langue?: LangueClient; code?: string | null; takeId?: number;
 }) {
   const c = meshCopy(langue);
-  if (failed) return <div role="alert" className="dim" style={{ fontSize: 12, color: 'var(--danger, #e5534b)' }}>{c.reportFailure}</div>;
+  if (failed) {
+    const messages: Record<string, string> = { MESH_INSTANCE_LIMIT: c.instanceLimit, MESH_INSTANCE_INVALID: c.instanceInvalid, MESH_EXTENSION_UNSUPPORTED: c.extensionUnsupported };
+    return <div role="alert" className="dim" style={{ fontSize: 12, color: 'var(--danger, #e5534b)' }}>
+      {messages[code ?? ''] ?? c.reportFailure}
+      {takeId !== undefined && <div><a href={reliefExportUrl(takeId, 'glb')} download>{c.downloadOriginalGlb}</a></div>}
+    </div>;
+  }
   if (rapport) return <ResumeMaillage r={rapport} langue={langue} />;
   if (loading) return <div role="status" className="dim" style={{ fontSize: 12 }}>{c.reportLoading}</div>;
   return null;
@@ -160,17 +166,17 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
     return () => { vivant.current = false; };
   }, []);
   const [info, setInfo] = useState<RapportRelief | null>(null);
-  const [erreurRapport, setErreurRapport] = useState(false);
+  const [erreurRapport, setErreurRapport] = useState<string | null>(null);
   const [cartes, setCartes] = useState<CartePbr[]>([]);
   const [juge, setJuge] = useState<JugeRelief | null>(null);
   const [jugement, setJugement] = useState(false);
   useEffect(() => {
     let mort = false;
     setInfo(null);
-    setErreurRapport(false);
+    setErreurRapport(null);
     api.reliefRapport(take.id, faces || undefined)
       .then((r) => { if (!mort) { setInfo(r); setJuge((j) => j ?? r.juge); } })
-      .catch(() => { if (!mort) { setInfo(null); setErreurRapport(true); } });
+      .catch((error: unknown) => { if (!mort) { setInfo(null); setErreurRapport(error instanceof ErreurApi ? error.code ?? 'ERREUR' : 'ERREUR'); } });
     return () => { mort = true; };
   }, [take.id, faces]);
   useEffect(() => {
@@ -205,8 +211,8 @@ function ReliefOutilsModele({ take, format, setFormat, faces, setFaces, langue }
         <div className="seg" role="group" aria-label={c.numberOfFaces}>
           {FACES.map((v) => <button key={v} type="button" className={faces === v ? 'on' : ''} onClick={() => setFaces(v)}>{nomFaces(v, langue)}</button>)}
         </div>
-        <EtatAnalyseMaillage rapport={affiche ?? null} loading={!info && !erreurRapport} failed={erreurRapport} langue={langue} />
-        <LienExportMesh format={format} url={urlExport} takeId={take.id} compatibilite={info?.compatibiliteObj} rapportRecu={info !== null} rapportEchoue={erreurRapport} langue={langue} />
+        <EtatAnalyseMaillage rapport={affiche ?? null} loading={!info && !erreurRapport} failed={!!erreurRapport} code={erreurRapport} takeId={take.id} langue={langue} />
+        <LienExportMesh format={format} url={urlExport} takeId={take.id} compatibilite={info?.compatibiliteObj} rapportRecu={info !== null} rapportEchoue={!!erreurRapport} langue={langue} />
         <div className="dim" style={{ fontSize: 11.5 }}>{c.serverNoCredits}</div>
       </div>
 

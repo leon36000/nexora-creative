@@ -5,7 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('../Viewer', () => ({ recreate: vi.fn() }));
 vi.mock('../store', () => ({ toast: vi.fn() }));
 vi.mock('../ui', () => ({ Icon: () => null }));
-import { TelechargementUsdz } from './ReliefOutils';
+import ReliefOutils, { TelechargementUsdz } from './ReliefOutils';
+import type { Take } from '../api';
 
 let conteneur: HTMLDivElement, root: Root;
 beforeEach(() => {
@@ -62,5 +63,41 @@ describe('export USDZ', () => {
     await act(async () => { finir({ ok: true, status: 200 }); });
     expect((requete.mock.calls[0][1].signal as AbortSignal).aborted).toBe(true);
     expect(clic).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('rapport Mesh avec limite d’instances', () => {
+  it('affiche chargement, limite et GLB actif, puis reprend après changement de cible', async () => {
+    let resolveFirst!: (response: Response) => void, resolveSecond!: (response: Response) => void;
+    const first = new Promise<Response>((resolve) => { resolveFirst = resolve; });
+    const second = new Promise<Response>((resolve) => { resolveSecond = resolve; });
+    const calls: string[] = [];
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      const url = String(input); calls.push(url);
+      if (url.includes('/cartes')) return Promise.resolve(new Response(JSON.stringify({ cartes: [] }), { status: 200 }));
+      if (url.includes('/rapport?')) return second;
+      if (url.includes('/rapport')) return first;
+      throw new Error(`unexpected request ${url}`);
+    }));
+    const take = { id: 42, status: 'done', kind: 'object', settings: '{}', output_path: 'fixture.glb' } as Take;
+    await act(async () => { root.render(<ReliefOutils take={take} langue="en" />); });
+    expect(conteneur.textContent).toContain('Analyzing the mesh');
+    await act(async () => { resolveFirst(new Response(JSON.stringify({ error: 'Unprocessable Entity', code: 'MESH_INSTANCE_LIMIT', message: 'limit' }), { status: 422 })); });
+    expect(conteneur.querySelector('[role="alert"]')?.textContent).toContain('exceeds the capacity');
+    const link = [...conteneur.querySelectorAll('a')].find((a) => a.textContent?.includes('Download the original GLB'));
+    expect(link?.getAttribute('href')).toBe('/api/nexora/relief/42/export?format=glb');
+    expect(link?.hasAttribute('download')).toBe(true);
+    const button = [...conteneur.querySelectorAll('button')].find((element) => element.textContent === '100 k');
+    expect(button).toBeTruthy();
+    await act(async () => { button!.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+    expect(conteneur.textContent).toContain('Analyzing the mesh');
+    const rapport = { sommets: 3, triangles: 1, degeneres: 0, aretesOuvertes: 3, aretesNonVariete: 0, composantes: 1, etanche: false, taille: [1, 1, 0], volume: null, avertissements: [] };
+    await act(async () => { resolveSecond(new Response(JSON.stringify({ rapport, decime: null, compatibiliteObj: { compatible: true, code: null } }), { status: 200 })); });
+    expect(conteneur.querySelector('[role="alert"]')).toBeNull();
+    expect(conteneur.textContent).toContain('1 triangles');
+    expect(calls.some((url) => url.endsWith('/rapport?faces=100000'))).toBe(true);
+    errorLog.mockRestore();
   });
 });
