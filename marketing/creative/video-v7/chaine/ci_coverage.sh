@@ -24,6 +24,8 @@ match = re.search(r'^Ran (\d+) tests? in ', Path(sys.argv[1]).read_text(), re.M)
 if not match or int(match.group(1)) < 20:
     raise SystemExit('Au moins 20 tests OPSYS sont attendus')
 PY
+python3 -m coverage run --parallel-mode --branch -m unittest discover -s deploy/proxmox -p 'test_*release.py' -v > "$V7_CI_ROOT/release-tests.log" 2>&1 || status=1
+cat "$V7_CI_ROOT/release-tests.log"
 python3 -m coverage combine --keep > "$V7_CI_ROOT/coverage-combine.log" 2>&1 || status=1
 python3 -m coverage xml -o "$V7_CI_ROOT/coverage.xml" > "$V7_CI_ROOT/coverage-xml.log" 2>&1 || status=1
 cat "$V7_CI_ROOT/coverage-combine.log" "$V7_CI_ROOT/coverage-xml.log"

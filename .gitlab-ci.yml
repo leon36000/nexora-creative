@@ -3,6 +3,24 @@ pc4_ci_fallback:
   image: alpine:3.22
   script: [echo "Local security scans completed"]
 
+nexora_release_amd64:
+  stage: test
+  image: node:24.22.2-bookworm@sha256:994ed664b2644b1b186516daaa1fb7aa93a1e717da2a0ff17094c765d5dbfde1
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "fix/deploiement-creative-isole-20261105"'
+    - if: '$CI_COMMIT_BRANCH == "developpement"'
+      when: manual
+      allow_failure: true
+  script:
+    - sh deploy/proxmox/ci-build-release.sh
+  artifacts:
+    when: on_success
+    expire_in: 7 days
+    paths:
+      - .ci-release/artefact/release.tar
+      - .ci-release/artefact/release.sha256
+      - .ci-release/artefact/source.sha256
+
 nexora_sonar_developpement:
   stage: test
   needs:
@@ -110,7 +128,7 @@ nexora_v7_tests_cpu:
   script:
     - mkdir -p ".ci-v7/home-$CI_JOB_ID" ".ci-v7/cache-$CI_JOB_ID" ".ci-v7/tmp-$CI_JOB_ID" ".ci-v7/test-$CI_JOB_ID" ".ci-v7/coverage-$CI_JOB_ID"
     - 'if python3 -B recherche/30-annexes/finish-banc/verifier_paquet.py > .ci-v7/finish-verification.log 2>&1; then cat .ci-v7/finish-verification.log; else cat .ci-v7/finish-verification.log; exit 1; fi'
-    - apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+    - apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core git
     - python3 -m pip install --no-cache-dir numpy==2.2.6 Pillow==11.2.1 coverage==7.10.7
     - 'if env -i HOME="$CI_PROJECT_DIR/.ci-v7/home-$CI_JOB_ID" PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin V7_CI_ROOT="$CI_PROJECT_DIR/.ci-v7" TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" V7_TEST_TMPDIR="$CI_PROJECT_DIR/.ci-v7/test-$CI_JOB_ID" V6_CACHE="$CI_PROJECT_DIR/.ci-v7/cache-$CI_JOB_ID" V6_FFMPEG=/usr/bin/ffmpeg V6_FFPROBE=/usr/bin/ffprobe PYTHONDONTWRITEBYTECODE=1 COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage" COVERAGE_RCFILE="$CI_PROJECT_DIR/marketing/creative/video-v7/chaine/coverage-ci.ini" sh marketing/creative/video-v7/chaine/ci_coverage.sh > .ci-v7/job.log 2>&1; then cat .ci-v7/job.log; else cat .ci-v7/job.log; exit 1; fi'
     - 'env -i TMPDIR="$CI_PROJECT_DIR/.ci-v7/tmp-$CI_JOB_ID" PATH=/usr/local/bin:/usr/bin:/bin PYTHONDONTWRITEBYTECODE=1 COVERAGE_RCFILE="$CI_PROJECT_DIR/outils/sync/coverage-ci.ini" COVERAGE_FILE="$CI_PROJECT_DIR/.ci-v7/coverage-$CI_JOB_ID/.coverage-sync" SYNC_TEST_ROOT="$CI_PROJECT_DIR/.ci-v7/test-$CI_JOB_ID" SYNC_FFMPEG=/usr/bin/ffmpeg SYNC_FFPROBE=/usr/bin/ffprobe python3 -m coverage run -m unittest discover -v -s outils/sync'
