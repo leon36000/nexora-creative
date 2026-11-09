@@ -251,16 +251,59 @@ class Tests(unittest.TestCase):
         self.assertLess(elapsed, 1.5)
         self.assertEqual(len(self.upstream.received), 1)
 
-    def test_failed_connection_is_recorded_as_attempt_not_confirmed_delivery(self):
-        # An unused local port refuses connections; this does not prove upstream receipt.
+    def test_refused_preconnection_does_not_mark_cost_unknown(self):
+        # A refusal before the TCP connection cannot be delivered upstream.
         sock = socket.socket(); sock.bind(('127.0.0.1', 0)); port = sock.getsockname()[1]; sock.close()
         self.server.port = port
         self.assertEqual(self.send()[0], 502)
+        self.server.port = self.upstream.server_port
+        self.assertEqual(self.send()[0], 200)
         log = (Path(self.tmp.name)/'audit.jsonl').read_text()
         records = [json.loads(line) for line in log.splitlines()]
         self.assertEqual(len(records), 1); self.assertEqual(records[0]['sequence'], 1)
-        self.assertRegex(records[0]['call'], r'^lot-test-run--p[0-9a-f]{16}--c1$')
+        self.assertEqual(len(self.upstream.received), 1)
+
+    def test_failure_after_connected_attempt_stays_unknown_and_blocks(self):
+        audit_path = Path(self.tmp.name) / 'audit.jsonl'
+        class ConnectedButFailed:
+            def connect(self): pass
+            def request(self, *_args, **_kwargs): raise OSError(32, 'synthetic send failure')
+            def close(self): pass
+        with patch.object(proxy.http.client, 'HTTPConnection', return_value=ConnectedButFailed()):
+            self.assertEqual(self.send()[0], 502)
+        records = [json.loads(line) for line in audit_path.read_text().splitlines()]
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]['sequence'], 1)
+        self.assertEqual(self.server.budget_status(), 'inconnu')
+        self.assertEqual(self.send()[0], 503)
         self.assertEqual(self.upstream.received, [])
+
+    def test_fake_upstream_disconnect_after_body_keeps_cost_unknown(self):
+        class ReceiveThenClose(BaseHTTPRequestHandler):
+            def log_message(self, *_args): pass
+            def do_POST(inner):
+                inner.rfile.read(int(inner.headers['Content-Length']))
+                inner.server.requests_received += 1
+                inner.connection.shutdown(socket.SHUT_RDWR)
+                inner.connection.close()
+
+        drop_server = ThreadingHTTPServer(('127.0.0.1', 0), ReceiveThenClose)
+        drop_server.requests_received = 0
+        drop_thread = threading.Thread(target=drop_server.serve_forever, daemon=True)
+        drop_thread.start()
+        try:
+            self.server.port = drop_server.server_port
+            self.assertEqual(self.send()[0], 502)
+            self.assertEqual(drop_server.requests_received, 1)
+            self.assertEqual(len((Path(self.tmp.name) / 'audit.jsonl').read_text().splitlines()), 1)
+            self.assertEqual(self.server.budget_status(), 'inconnu')
+            self.server.port = self.upstream.server_port
+            self.assertEqual(self.send()[0], 503)
+            self.assertEqual(self.upstream.received, [])
+        finally:
+            drop_server.shutdown()
+            drop_server.server_close()
+            drop_thread.join()
 
     def test_second_concurrent_request_is_not_forwarded(self):
         self.upstream.chunks = [b'data:a\n\n', b'data:b\n\n']; self.upstream.pause_after_first = 0.8

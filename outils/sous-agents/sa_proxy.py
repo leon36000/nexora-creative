@@ -232,12 +232,12 @@ class Handler(BaseHTTPRequestHandler):
                     'budget atteint' if budget == 'limite' else 'coût précédent inconnu')
         return False
 
-    def _open_upstream(self, body, headers):
-        """Return (connection, response), or None after a rejection has been sent."""
+    def _connect_upstream(self):
+        """Connect before recording an attempt; a refused TCP connect cannot be delivered."""
         connection = http.client.HTTPConnection('127.0.0.1', self.server.port, timeout=self.server.timeout)
         try:
-            connection.request('POST', self.path, body=body, headers=headers)
-            return connection, connection.getresponse()
+            connection.connect()
+            return connection
         except (OSError, http.client.HTTPException, ValueError):
             connection.close()
             self.reject(502, 'passerelle indisponible')
@@ -270,15 +270,22 @@ class Handler(BaseHTTPRequestHandler):
     def dispatch(self, body, headers):
         if not self._check_budget():
             return
+        connection = self._connect_upstream()
+        if connection is None:
+            return
         try:
             headers['x-sa-run'] = self.server.record_attempt()
         except OSError:
+            connection.close()
             self.reject(503, 'journal indisponible')
             return
-        opened = self._open_upstream(body, headers)
-        if opened is None:
+        try:
+            connection.request('POST', self.path, body=body, headers=headers)
+            response = connection.getresponse()
+        except (OSError, http.client.HTTPException, ValueError):
+            connection.close()
+            self.reject(502, 'passerelle indisponible')
             return
-        connection, response = opened
         try:
             self._stream_response(response)
         finally:
