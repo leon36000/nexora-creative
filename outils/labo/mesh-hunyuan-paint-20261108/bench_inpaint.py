@@ -23,14 +23,18 @@ def sha_array(array):
     return hashlib.sha256(memoryview(array).cast('B')).hexdigest()
 
 
-def load_inputs(texture_path, mask_path):
-    texture = np.load(texture_path, allow_pickle=False)
-    mask = np.load(mask_path, allow_pickle=False)
+def _require_npy_arrays(texture, mask):
     if not isinstance(texture, np.ndarray) or not isinstance(mask, np.ndarray):
         for value in (texture, mask):
             if hasattr(value, 'close'):
                 value.close()
         raise ValueError('inputs must be NPY arrays')
+
+
+def load_inputs(texture_path, mask_path):
+    texture = np.load(texture_path, allow_pickle=False)
+    mask = np.load(mask_path, allow_pickle=False)
+    _require_npy_arrays(texture, mask)
     if texture.dtype != np.float32 or texture.ndim != 3 or texture.shape[2] != 3:
         raise ValueError('texture must be HxWx3 float32')
     if mask.dtype != np.uint8 or mask.ndim != 2 or mask.shape != texture.shape[:2] or not mask.size:

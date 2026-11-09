@@ -31,8 +31,9 @@ export function audioDesClips(plan: EditPlan, index: ReadonlyMap<string, number>
       const fin = (segment.entree_f + segment.source_f) * parImage;
       const longueur = segment.duree_f * parImage;
       const tempo = filtresTempo(segment.vitesse);
+      const tempoFiltre = tempo ? `,${tempo}` : '';
       const nom = `sonclip${i}s${j}`;
-      filtres.push(`[${k}:a]aresample=${FREQUENCE}:async=1:first_pts=0,aformat=sample_fmts=fltp:channel_layouts=stereo,atrim=start_sample=${debut}:end_sample=${fin},asetpts=N/SR/TB${tempo ? `,${tempo}` : ''},apad=whole_len=${longueur},atrim=end_sample=${longueur},asetpts=N/SR/TB[${nom}]`);
+      filtres.push(`[${k}:a]aresample=${FREQUENCE}:async=1:first_pts=0,aformat=sample_fmts=fltp:channel_layouts=stereo,atrim=start_sample=${debut}:end_sample=${fin},asetpts=N/SR/TB${tempoFiltre},apad=whole_len=${longueur},atrim=end_sample=${longueur},asetpts=N/SR/TB[${nom}]`);
       morceaux.push(`[${nom}]`);
     }
     const entreeTransition = i > 0 && clip.transition_in.type !== 'cut' ? clip.transition_in.duree_f * parImage : 0;
@@ -41,7 +42,9 @@ export function audioDesClips(plan: EditPlan, index: ReadonlyMap<string, number>
     const longueur = clip.duree_f * parImage;
     const entree = Math.min(Math.floor(longueur / 2), Math.max(fonduCoupe, entreeTransition));
     const sortie = Math.min(Math.floor(longueur / 2), Math.max(fonduCoupe, sortieTransition));
-    const fondus = `${entree ? `,afade=t=in:ss=0:ns=${entree}` : ''}${sortie ? `,afade=t=out:ss=${longueur - sortie}:ns=${sortie}` : ''}`;
+    let fondus = '';
+    if (entree) fondus += `,afade=t=in:ss=0:ns=${entree}`;
+    if (sortie) fondus += `,afade=t=out:ss=${longueur - sortie}:ns=${sortie}`;
     const assemblage = morceaux.length > 1 ? `concat=n=${morceaux.length}:v=0:a=1` : 'anull';
     const nom = `sonclip${i}`;
     filtres.push(`${morceaux.join('')}${assemblage}${fondus},adelay=${debuts[i] * parImage}S:all=1,apad=whole_len=${total * parImage},atrim=end_sample=${total * parImage}[${nom}]`);
