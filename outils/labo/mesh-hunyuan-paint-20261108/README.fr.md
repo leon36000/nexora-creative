@@ -29,3 +29,16 @@ node outils/labo/mesh-hunyuan-paint-20261108/transfer-glb.cjs \
 Sur la chaise, les 149 942 triangles ont été appariés à 10⁻⁶ unité près ; deux sommets de sortie issus d’une normale source nulle conservent la normale Paint. Un comparateur indépendant a mesuré les 449 824 coins définis : erreur angulaire maximale 2,70×10⁻⁶ degré. Les positions, UV et indices du résultat Paint, ses images et son facteur `KHR_materials_specular` restent inchangés dans ce témoin. Ce contrôle ne promet ni conservation des UV d’origine, ni prise en charge des scènes multi-primitives, animées ou avec peau. Le GLB d’entrée ne comportait pas de facteur spéculaire équivalent ; la comparaison visuelle ne mesure donc pas un effet de texture isolé.
 
 La sortie historique a été produite par des scripts privés antérieurs à ce refactor portable : le reçu interne mesure 759,28 s et le superviseur 763,50 s, avec des points de départ et d’arrêt différents. Ces scripts avaient limité OMP et MKL à deux threads, contrairement au réglage souhaité pour pc1 ; le présent lanceur n’impose pas cette limite. Son SHA-256 GLB est `b4b2b9b22bb3bdc2d5d1e22d639ed4918cda71a09f33cf38a7f27146bc26c84f`. Le refactor de ce dossier a été vérifié sur CPU et en `--dry-run` ; aucune inférence GPU n’a été revendiquée avec lui. Un rendu neutre à 1024² montre des fibres sur l’assise : la première vue à 384² les rendait peu visibles. La fidélité du motif et du relief à la référence reste à évaluer ; aucune qualité générale ni parité avec un service tiers n’est revendiquée.
+
+### Rejouer un inpainting CPU depuis des NPY
+
+`bench_inpaint.py` accepte une texture `float32` H×W×3 dans [0,1] et un masque `uint8` H×W binaire (0 ou 255), tous deux contigus en ordre C, chargés avec `allow_pickle=False`. Il vérifie la version et le répertoire du module `cv2` déjà disponible ; il ne l’installe pas et ne change pas l’environnement. Le chemin et le SHA attestent le module Python, pas individuellement les bibliothèques natives chargées.
+
+```sh
+python3 outils/labo/mesh-hunyuan-paint-20261108/bench_inpaint.py \
+  --texture /chemin/mesh-texture.npy --mask /chemin/mesh-mask.npy \
+  --opencv-version 4.11.0 --opencv-root /chemin/site-prive \
+  --output-dir /chemin/nouveau-dossier
+```
+
+La sortie est exclusive. Le reçu contient les SHA des NPY et des deux tableaux uint8 effectivement remis à `cv2.inpaint`, vérifiés avant et après appel. Les durées de conversion et d’inpainting sont mesurées séparément et additionnées ; le hachage intermédiaire est exclu. Il s’agit d’un témoin CPU NS rayon 3, sans attestation de fidélité visuelle ou de gain produit. Le test de refus fonctionne sans OpenCV ; le test fonctionnel local a utilisé une véritable installation privée sur une petite image.
