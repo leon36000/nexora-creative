@@ -41,6 +41,12 @@ FPS_CIBLE = 24
 TEAM_SOURCE_SCOPE = 'Shared technical bench; source attribution not inferred; no human approval'
 
 
+ERR_IDENTITE_GPU = 'Identité GPU invalide'
+CHEMIN_INFERENCE = 'scripts/inference.py'
+CHEMIN_CONFIG_LANCEUR = 'config/launcher.json'
+NOM_EVENEMENTS = 'events.jsonl'
+NOM_RESULTAT = 'result.json'
+
 def _objet_json_sans_doublon(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     result = {}
     for key, value in pairs:
@@ -82,11 +88,11 @@ def configurer(path: Path) -> None:
         raise ValueError('GPU ou minimum mémoire invalide')
     if process is not None:
         if not isinstance(process, dict) or set(process) != {'pid', 'start_ticks', 'uid', 'exe', 'max_used_mib'}:
-            raise ValueError('Identité GPU invalide')
+            raise ValueError(ERR_IDENTITE_GPU)
         if type(process['pid']) is not int or process['pid'] <= 0 or type(process['max_used_mib']) is not int or not 0 <= process['max_used_mib'] <= 512:
-            raise ValueError('Identité GPU invalide')
+            raise ValueError(ERR_IDENTITE_GPU)
         if not all(isinstance(process[k], str) and process[k].isdigit() for k in ('start_ticks', 'uid')):
-            raise ValueError('Identité GPU invalide')
+            raise ValueError(ERR_IDENTITE_GPU)
         chemin(process['exe'])
     inputs = cfg['inputs']
     if not isinstance(inputs, dict) or 'video' not in inputs or not set(inputs) <= {'video', 'fr', 'en'} or not set(inputs) & {'fr', 'en'}:
@@ -113,7 +119,7 @@ def configurer(path: Path) -> None:
 
 
 EXPECTED_SOURCE = {
-    "scripts/inference.py": "aaf9c8289c8f07eaf00b87fb11442ac0e1005ac4e2f469966ae3dab2dc4a03aa",
+    CHEMIN_INFERENCE: "aaf9c8289c8f07eaf00b87fb11442ac0e1005ac4e2f469966ae3dab2dc4a03aa",
     "musetalk/utils/preprocessing.py": "14a4202869bc8dfa761a3c4c3fb13afe2be4aeb9b853e2389c4e7860b439799c",
     "musetalk/utils/face_parsing/resnet.py": "7bd02989cd50904713ede4fb9ca468e0d45f0cb0c7ed55e12fc8e2b05e591184",
     "musetalk/utils/face_parsing/model.py": "4fd6c5f15979686367b261749dd13f28fc9e551b4e60f5844656ce2cdeac98db",
@@ -274,7 +280,7 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
 
 def make_preserving_runner(source: Path) -> bytes:
     actual = sha256_file(source)
-    expected = EXPECTED_SOURCE["scripts/inference.py"]
+    expected = EXPECTED_SOURCE[CHEMIN_INFERENCE]
     if actual != expected:
         raise RuntimeError(f"upstream inference source changed: {actual}")
     text = source.read_text(encoding="utf-8")
@@ -456,7 +462,7 @@ def prepare(language: str) -> Path:
     (run_dir / "inputs").mkdir(mode=0o700, exist_ok=False)
     (run_dir / "runner").mkdir(mode=0o700, exist_ok=False)
     (run_dir / "config").mkdir(mode=0o700, exist_ok=False)
-    create_exclusive(run_dir / "config/launcher.json", CONFIG_BYTES)
+    create_exclusive(run_dir / CHEMIN_CONFIG_LANCEUR, CONFIG_BYTES)
 
     staged_video = run_dir / "inputs" / f"video-{language}.mp4"
     voice_suffix = voice_info["path"].suffix.lower()
@@ -468,7 +474,7 @@ def prepare(language: str) -> Path:
     copied_voice_source = copy_exclusive(voice_info["path"], staged_voice_source, voice_info["sha256"], voice_info["bytes"])
     model_audio = make_model_audio(staged_voice_source, staged_voice_model)
     safe_runner = run_dir / "runner" / "inference_preserve.py"
-    source_inference = SOURCE / "scripts/inference.py"
+    source_inference = SOURCE / CHEMIN_INFERENCE
     safe_runner_bytes = make_preserving_runner(source_inference)
     create_exclusive(safe_runner, safe_runner_bytes)
     safe_diff = "".join(
@@ -561,7 +567,7 @@ def prepare(language: str) -> Path:
         "execution": "not launched; requires separate explicit root review and fresh GPU preflight",
     }
     create_json_exclusive(run_dir / "manifest.json", manifest)
-    create_exclusive(run_dir / "events.jsonl", (json.dumps({"event": "prepared", "utc": utc_now(), "run_id": run_id}) + "\n").encode())
+    create_exclusive(run_dir / NOM_EVENEMENTS, (json.dumps({"event": "prepared", "utc": utc_now(), "run_id": run_id}) + "\n").encode())
     create_json_exclusive(run_dir / "launch-plan.json", {"run_id": run_id, "command": command, "run_directory": str(run_dir), "launcher_sha256": manifest["launcher"]["sha256"], "status": "not_started"})
     return run_dir
 
@@ -737,7 +743,7 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
             raise RuntimeError(f"staged input hash mismatch: {staged_path}")
     safe_runner_path = run_dir / "runner/inference_preserve.py"
     config_path = run_dir / "config/task.yaml"
-    for path in (run_dir / "runner", run_dir / "config", safe_runner_path, config_path, run_dir / "config/launcher.json"):
+    for path in (run_dir / "runner", run_dir / "config", safe_runner_path, config_path, run_dir / CHEMIN_CONFIG_LANCEUR):
         if path.is_symlink():
             raise RuntimeError("prepared runner or configuration path is a symlink")
     key = manifest.get("language_key")
@@ -748,7 +754,7 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
             raise RuntimeError("prepared input differs from launcher configuration")
     if sha256_file(safe_runner_path) != manifest["safe_runner_sha256"]:
         raise RuntimeError("prepared runner hash mismatch")
-    if safe_runner_path.read_bytes() != make_preserving_runner(SOURCE / "scripts/inference.py"):
+    if safe_runner_path.read_bytes() != make_preserving_runner(SOURCE / CHEMIN_INFERENCE):
         raise RuntimeError("prepared runner differs from pinned transformation")
     if sha256_file(config_path) != manifest["config_sha256"]:
         raise RuntimeError("prepared config hash mismatch")
@@ -756,7 +762,7 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
                      + f'  audio_path: {json.dumps(staged_inputs[1]["path"])}\n').encode()
     if config_path.read_bytes() != expected_task:
         raise RuntimeError("prepared task differs from staged inputs")
-    if sha256_file(run_dir / "config/launcher.json") != CONFIG_SHA:
+    if sha256_file(run_dir / CHEMIN_CONFIG_LANCEUR) != CONFIG_SHA:
         raise RuntimeError("stored launcher configuration mismatch")
     expected_output = expected_final_output_path(run_dir, Path(staged_inputs[0]["path"]), Path(staged_inputs[1]["path"]))
     if manifest.get("planned_command") != construire_commande(run_dir):
@@ -771,7 +777,7 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
     active_fd: int | None = None
     child_started = False
     try:
-        append_event(run_dir / "events.jsonl", {"event": "launch_requested", "utc": utc_now(), "run_id": run_id})
+        append_event(run_dir / NOM_EVENEMENTS, {"event": "launch_requested", "utc": utc_now(), "run_id": run_id})
 
         active_path = RUNS / "active-gpu.lock"
         active_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -813,7 +819,7 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
         child_exception = None
         completed = None
         with os.fdopen(fd, "wb") as log:
-            append_event(run_dir / "events.jsonl", {"event": "model_process_launch_requested", "utc": utc_now(), "run_id": run_id})
+            append_event(run_dir / NOM_EVENEMENTS, {"event": "model_process_launch_requested", "utc": utc_now(), "run_id": run_id})
             try:
                 child_started = True
                 completed = subprocess.run(
@@ -849,7 +855,7 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
                 postflight_exception = f"{type(exc).__name__}: {exc}"
         artifact_rows = []
         for path in sorted(run_dir.rglob("*")):
-            if path.is_file() and path.name not in {"result.json"}:
+            if path.is_file() and path.name not in {NOM_RESULTAT}:
                 artifact_rows.append({"relative_path": str(path.relative_to(run_dir)), "bytes": path.stat().st_size, "sha256": sha256_file(path)})
         success = (
             child_exception is None
@@ -872,11 +878,11 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
             "retained_artifacts": artifact_rows,
             "human_status": "unapproved technical lab output; no voice or marketing approval",
         }
-        create_json_exclusive(run_dir / "result.json", result)
-        append_event(run_dir / "events.jsonl", {"event": result["status"], "utc": result["finished_utc"], "run_id": run_id})
+        create_json_exclusive(run_dir / NOM_RESULTAT, result)
+        append_event(run_dir / NOM_EVENEMENTS, {"event": result["status"], "utc": result["finished_utc"], "run_id": run_id})
         return 0 if success else 1
     except Exception as exc:
-        if not (run_dir / "result.json").exists():
+        if not (run_dir / NOM_RESULTAT).exists():
             status = "refused_preflight" if not (run_dir / "results").exists() else "launcher_error"
             terminal = {
                 "run_id": run_id,
@@ -887,8 +893,8 @@ def safe_run(run_id: str, root_reviewed: bool, technical_unapproved: bool) -> in
                 "execution_stage": "model_start_attempted" if child_started else "before_model_start",
                 "human_status": "unapproved technical lab attempt; model execution may have started" if child_started else "unapproved technical lab attempt; model execution not started",
             }
-            create_json_exclusive(run_dir / "result.json", terminal)
-            append_event(run_dir / "events.jsonl", {"event": status, "utc": terminal["finished_utc"], "run_id": run_id})
+            create_json_exclusive(run_dir / NOM_RESULTAT, terminal)
+            append_event(run_dir / NOM_EVENEMENTS, {"event": status, "utc": terminal["finished_utc"], "run_id": run_id})
             return 2
         raise
     finally:
@@ -914,7 +920,7 @@ def main() -> int:
 
     if args.command == "self-test":
         verify_static_assets()
-        safe = make_preserving_runner(SOURCE / "scripts/inference.py").decode("utf-8")
+        safe = make_preserving_runner(SOURCE / CHEMIN_INFERENCE).decode("utf-8")
         self_test_gpu_policy()
         print(f"safe_runner_sha256={hashlib.sha256(safe.encode()).hexdigest()}")
         print("cleanup_calls=0 overwrite_y=0 checked_ffmpeg_calls=3 ast=parse_ok gpu_policy_mocks=5_pass")

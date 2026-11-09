@@ -31,6 +31,29 @@ POIDS = {
 }
 
 
+VIDEO_ENTREE = 'video-entree.mp4'
+AUDIO_ENTREE = 'audio-entree.wav'
+SORTIE = 'sortie.mp4'
+INTERMEDIAIRES = 'intermediaires'
+RUNTIME_CONFIG = 'runtime-config.json'
+PLAN_EXECUTION = 'plan-execution.json'
+EXECUTION_LOG = 'execution.log'
+RESULTAT_EXECUTION = 'resultat-execution.json'
+EXECUTION_PID = 'execution-pid.json'
+ARRET_NON_CONFIRME = 'arret-non-confirme.json'
+MANIFEST = 'manifest.json'
+PROVENANCE_AUDIO = 'provenance-audio.json'
+AUDIO_ORIGINAL = 'audio-original.mp3'
+INFERENCE_ADAPTEE = 'inference_adaptee.py'
+IMAGE_PROCESSOR = 'highsync_image_processor.py'
+WHISPER_INIT = 'whisper_init_adapte.py'
+WHISPER_INIT_CIBLE = 'src/models/whisper/whisper/__init__.py'
+S3FD_SOUS_DOSSIER = 'face_detection/detection/sfd'
+QUERY_COMPUTE_APPS = '--query-compute-apps=gpu_uuid,pid,used_memory'
+FORMAT_CSV = '--format=csv,noheader,nounits'
+MODELE_AUDIO = 'elevenlabs/eleven-v4'
+STATUT_PLANIFIE = 'planifie_sans_inference'
+
 def _ecrire(path: Path, data: bytes):
     with path.open('xb') as fichier:
         os.fchmod(fichier.fileno(), 0o600)
@@ -92,7 +115,7 @@ def snapshot_gpu(nvidia_smi: Path, gpu_uuid: str):
         if len(result.stdout) > 65536:
             raise ValueError('réponse GPU excessive')
         return result.stdout.splitlines()
-    rows = query(['--query-gpu=uuid,memory.total,memory.free,utilization.gpu', '--format=csv,noheader,nounits'])
+    rows = query(['--query-gpu=uuid,memory.total,memory.free,utilization.gpu', FORMAT_CSV])
     entries = [line.split(',') for line in rows]
     selected = [row for row in entries if len(row) == 4 and row[0].strip() == gpu_uuid]
     # Ce protocole vise pc3 à GPU unique ; ne pas extrapoler à une autre topologie.
@@ -100,7 +123,7 @@ def snapshot_gpu(nvidia_smi: Path, gpu_uuid: str):
         raise ValueError('GPU absent ou ambigu')
     row = selected[0]
     info = {'uuid': gpu_uuid, 'total_mib': int(row[1]), 'free_mib': int(row[2]), 'utilisation': int(row[3])}
-    apps = query(['--query-compute-apps=gpu_uuid,pid,used_memory', '--format=csv,noheader,nounits'])
+    apps = query([QUERY_COMPUTE_APPS, FORMAT_CSV])
     processes = []
     for line in apps:
         cols = line.split(',')
@@ -133,7 +156,7 @@ def construire_runtime(run: Path, source: Path, source_manifest: Path, poids: di
     """Copie les sources épinglées et écrit une configuration locale neuve."""
     if run.is_symlink() or run.resolve() != run or not run.is_dir():
         raise ValueError('répertoire essai invalide')
-    manifest = lire_json(run/'manifest.json')
+    manifest = lire_json(run/MANIFEST)
     if manifest.get('statut') != 'prepare_sans_inference' or manifest.get('detector_backend') != 's3fd':
         raise ValueError('essai non préparé')
     for cle, attendu in POIDS.items():
@@ -144,23 +167,23 @@ def construire_runtime(run: Path, source: Path, source_manifest: Path, poids: di
         raise ValueError('ensemble VAE incohérent')
     fichiers = verifier_sources(source, source_manifest)
     attendu = manifest['entrees']
-    highsync_preflight._verifier_fichier(run/'video-entree.mp4', attendu['video_sha256'])
-    highsync_preflight._verifier_fichier(run/'audio-entree.wav', attendu['audio_sha256'])
-    for nom, champ in (('inference_adaptee.py','runner_sha256'), ('highsync_image_processor.py','image_processor_sha256'), ('highsync_s3fd.py','s3fd_adapter_sha256'), ('whisper_init_adapte.py','whisper_adapte_sha256')):
+    highsync_preflight._verifier_fichier(run/VIDEO_ENTREE, attendu['video_sha256'])
+    highsync_preflight._verifier_fichier(run/AUDIO_ENTREE, attendu['audio_sha256'])
+    for nom, champ in ((INFERENCE_ADAPTEE,'runner_sha256'), (IMAGE_PROCESSOR,'image_processor_sha256'), ('highsync_s3fd.py','s3fd_adapter_sha256'), (WHISPER_INIT,'whisper_adapte_sha256')):
         highsync_preflight._verifier_fichier(run/nom, manifest[champ])
     runtime = run/'runtime'
     runtime.mkdir(mode=0o700)
     for nom, sha in fichiers.items():
         cible = runtime / nom
         cible.parent.mkdir(parents=True, exist_ok=True)
-        if nom == 'src/models/whisper/whisper/__init__.py':
-            data = (run/'whisper_init_adapte.py').read_bytes()
+        if nom == WHISPER_INIT_CIBLE:
+            data = (run/WHISPER_INIT).read_bytes()
         else:
             data = (source/nom).read_bytes()
             if hashlib.sha256(data).hexdigest() != sha:
                 raise ValueError('source modifiée pendant la copie')
         _ecrire(cible, data)
-    for nom in ('inference_adaptee.py','highsync_image_processor.py','highsync_s3fd.py'):
+    for nom in (INFERENCE_ADAPTEE,IMAGE_PROCESSOR,'highsync_s3fd.py'):
         _ecrire(runtime/nom, (run/nom).read_bytes())
     dossier_base = runtime/'base'/'unet'
     dossier_base.mkdir(parents=True)
@@ -173,13 +196,13 @@ def construire_runtime(run: Path, source: Path, source_manifest: Path, poids: di
     cfg['denoising_unet_path'] = poids['denoising']
     cfg['audio_model_path'] = poids['whisper']
     cfg['vae']['model_path'] = str(Path(poids['vae']).parent)
-    cfg['save_path'] = str(run/'intermediaires')
+    cfg['save_path'] = str(run/INTERMEDIAIRES)
     cfg['mask_path'] = str(runtime/'masks/mask_64.png')
     cfg['mask_512_path'] = str(runtime/'masks/mask_512.png')
-    cfg['output'] = str(run/'sortie.mp4')
-    cfg['source_video'] = str(run/'video-entree.mp4')
-    cfg['driving_audio'] = str(run/'audio-entree.wav')
-    _ecrire(run/'runtime-config.json', json.dumps(cfg, sort_keys=True, indent=2).encode())
+    cfg['output'] = str(run/SORTIE)
+    cfg['source_video'] = str(run/VIDEO_ENTREE)
+    cfg['driving_audio'] = str(run/AUDIO_ENTREE)
+    _ecrire(run/RUNTIME_CONFIG, json.dumps(cfg, sort_keys=True, indent=2).encode())
     return runtime
 
 
@@ -211,23 +234,23 @@ def planifier(run: Path, source: Path, source_manifest: Path, poids: dict, optio
     modele_s3fd = Path(options['s3fd_poids'])
     if _hash(modele_s3fd) != highsync_s3fd.WEIGHT_SHA:
         raise ValueError('poids détecteur divergents')
-    racine_s3fd = Path(options['s3fd_utils_root']) / 'face_detection/detection/sfd'
+    racine_s3fd = Path(options['s3fd_utils_root']) / S3FD_SOUS_DOSSIER
     for nom, attendu in highsync_s3fd.SOURCE_SHA.items():
         highsync_preflight._verifier_fichier(racine_s3fd/nom, attendu)
-    origine = lire_json(run.parent/'provenance-audio.json')
-    prep = lire_json(run/'manifest.json')
+    origine = lire_json(run.parent/PROVENANCE_AUDIO)
+    prep = lire_json(run/MANIFEST)
     if origine.get('essai') != run.name or origine.get('audio_pcm_sha256') != prep['entrees']['audio_sha256']:
         raise ValueError('filiation audio incohérente')
-    highsync_preflight._verifier_fichier(run.parent/'audio-original.mp3', origine['audio_original_sha256'])
+    highsync_preflight._verifier_fichier(run.parent/AUDIO_ORIGINAL, origine['audio_original_sha256'])
     evidence_path = Path(options['audio_provenance_path'])
     highsync_preflight._verifier_fichier(evidence_path, options['audio_provenance_sha256'])
     evidence = lire_json(evidence_path)
-    correspondances = [a for a in evidence.get('assets', []) if a.get('sha256') == origine['audio_original_sha256'] and a.get('voice_id') == options['voice_id'] and a.get('model') == 'elevenlabs/eleven-v4']
-    if evidence.get('requested_model') != 'elevenlabs/eleven-v4' or len(correspondances) != 1:
+    correspondances = [a for a in evidence.get('assets', []) if a.get('sha256') == origine['audio_original_sha256'] and a.get('voice_id') == options['voice_id'] and a.get('model') == MODELE_AUDIO]
+    if evidence.get('requested_model') != MODELE_AUDIO or len(correspondances) != 1:
         raise ValueError('provenance audio demandée non établie')
     if _hash(Path(options['ffmpeg'])) != origine['ffmpeg_sha256']:
         raise ValueError('FFmpeg différent de la conversion audio')
-    highsync_preflight.preflight(run/'video-entree.mp4', run/'audio-entree.wav',
+    highsync_preflight.preflight(run/VIDEO_ENTREE, run/AUDIO_ENTREE,
         prep['entrees']['video_sha256'], prep['entrees']['audio_sha256'],
         Path(options['ffmpeg']), Path(options['ffprobe']))
     gpu, processus = snapshot_gpu(Path(options['nvidia_smi']), options['gpu_uuid'])
@@ -236,9 +259,9 @@ def planifier(run: Path, source: Path, source_manifest: Path, poids: dict, optio
     if ram < options['min_ram_mib']:
         raise ValueError('RAM disponible insuffisante')
     runtime = construire_runtime(run, source, source_manifest, poids)
-    commande = [options['python'], str(runtime/'inference_adaptee.py'),
-        '--config', str(run/'runtime-config.json'), '--source_video', str(run/'video-entree.mp4'),
-        '--driving_audio', str(run/'audio-entree.wav'), '--output', str(run/'sortie.mp4'),
+    commande = [options['python'], str(runtime/INFERENCE_ADAPTEE),
+        '--config', str(run/RUNTIME_CONFIG), '--source_video', str(run/VIDEO_ENTREE),
+        '--driving_audio', str(run/AUDIO_ENTREE), '--output', str(run/SORTIE),
         '--ffmpeg', options['ffmpeg'], '--cuda-fraction', str(options['cuda_fraction']),
         '--s3fd-utils-root', options['s3fd_utils_root'], '--s3fd-poids', options['s3fd_poids']]
     runtime_hash = {}
@@ -247,16 +270,16 @@ def planifier(run: Path, source: Path, source_manifest: Path, poids: dict, optio
             raise ValueError('lien interdit dans le runtime')
         if chemin.is_file():
             runtime_hash[str(chemin.relative_to(runtime))] = _hash(chemin)
-    plan = {'statut': 'planifie_sans_inference', 'commande': commande, 'options': options,
+    plan = {'statut': STATUT_PLANIFIE, 'commande': commande, 'options': options,
             'poids': poids, 'source': str(source), 'source_manifest': str(source_manifest),
-            'runtime_sha256': runtime_hash, 'configuration_sha256': _hash(run/'runtime-config.json'),
-            'preparation_sha256': _hash(run/'manifest.json'), 'provenance_sha256': _hash(run.parent/'provenance-audio.json'),
+            'runtime_sha256': runtime_hash, 'configuration_sha256': _hash(run/RUNTIME_CONFIG),
+            'preparation_sha256': _hash(run/MANIFEST), 'provenance_sha256': _hash(run.parent/PROVENANCE_AUDIO),
             'executables_sha256': {k: _hash(Path(options[k]).resolve()) for k in ('python','ffmpeg','ffprobe','nvidia_smi')},
             'prevol_gpu': gpu, 'prevol_processus': processus, 'prevol_ram_mib': ram,
             'allocateur_limite_estimee_mib': gpu['total_mib'] * options['cuda_fraction'],
             'memoire_auteur_gb': 10, 'avertissement': 'limite par processus conservatrice ; un OOM ne prouve pas une incompatibilité du modèle',
-            'audio_modele_demande': 'elevenlabs/eleven-v4', 'audio_modele_effectivement_servi': 'non atteste'}
-    _ecrire(run/'plan-execution.json', (json.dumps(plan, ensure_ascii=False, sort_keys=True, indent=2)+'\n').encode())
+            'audio_modele_demande': MODELE_AUDIO, 'audio_modele_effectivement_servi': 'non atteste'}
+    _ecrire(run/PLAN_EXECUTION, (json.dumps(plan, ensure_ascii=False, sort_keys=True, indent=2)+'\n').encode())
     return plan
 
 
@@ -278,8 +301,8 @@ def _arreter_enfant(process):
 
 def _vram_enfant(nvidia_smi: Path, pid: int, gpu_uuid: str):
     try:
-        resultat = subprocess.run([str(nvidia_smi), '--query-compute-apps=gpu_uuid,pid,used_memory',
-                                   '--format=csv,noheader,nounits'], stdin=subprocess.DEVNULL,
+        resultat = subprocess.run([str(nvidia_smi), QUERY_COMPUTE_APPS,
+                                   FORMAT_CSV], stdin=subprocess.DEVNULL,
                                   stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                                   text=True, timeout=5, check=True)
         for ligne in resultat.stdout.splitlines():
@@ -295,30 +318,30 @@ def executer(run: Path, plan_sha256: str):
     """Exécute uniquement le plan relu identifié par SHA ; pas de reprise implicite."""
     if run.is_symlink() or not run.is_absolute() or run.resolve() != run or not run.is_dir():
         raise ValueError('répertoire essai invalide')
-    plan_path = run/'plan-execution.json'
+    plan_path = run/PLAN_EXECUTION
     highsync_preflight._verifier_fichier(plan_path, plan_sha256)
     plan = lire_json(plan_path)
-    if plan.get('statut') != 'planifie_sans_inference':
+    if plan.get('statut') != STATUT_PLANIFIE:
         raise ValueError('plan invalide')
     opts, poids = plan['options'], plan['poids']
     runtime = run/'runtime'
-    commande = [opts['python'], str(runtime/'inference_adaptee.py'),
-        '--config', str(run/'runtime-config.json'), '--source_video', str(run/'video-entree.mp4'),
-        '--driving_audio', str(run/'audio-entree.wav'), '--output', str(run/'sortie.mp4'),
+    commande = [opts['python'], str(runtime/INFERENCE_ADAPTEE),
+        '--config', str(run/RUNTIME_CONFIG), '--source_video', str(run/VIDEO_ENTREE),
+        '--driving_audio', str(run/AUDIO_ENTREE), '--output', str(run/SORTIE),
         '--ffmpeg', opts['ffmpeg'], '--cuda-fraction', str(opts['cuda_fraction']),
         '--s3fd-utils-root', opts['s3fd_utils_root'], '--s3fd-poids', opts['s3fd_poids']]
     if plan['commande'] != commande or opts['cuda_fraction'] != 0.60:
         raise ValueError('commande ou fraction modifiée')
     if not isinstance(opts.get('delai_secondes'), int) or not 1 <= opts['delai_secondes'] <= 3600:
         raise ValueError('délai invalide')
-    highsync_preflight._verifier_fichier(run/'manifest.json', plan['preparation_sha256'])
-    highsync_preflight._verifier_fichier(run.parent/'provenance-audio.json', plan['provenance_sha256'])
-    highsync_preflight._verifier_fichier(run/'runtime-config.json', plan['configuration_sha256'])
-    prep = lire_json(run/'manifest.json')
-    origine = lire_json(run.parent/'provenance-audio.json')
-    highsync_preflight._verifier_fichier(run.parent/'audio-original.mp3', origine['audio_original_sha256'])
+    highsync_preflight._verifier_fichier(run/MANIFEST, plan['preparation_sha256'])
+    highsync_preflight._verifier_fichier(run.parent/PROVENANCE_AUDIO, plan['provenance_sha256'])
+    highsync_preflight._verifier_fichier(run/RUNTIME_CONFIG, plan['configuration_sha256'])
+    prep = lire_json(run/MANIFEST)
+    origine = lire_json(run.parent/PROVENANCE_AUDIO)
+    highsync_preflight._verifier_fichier(run.parent/AUDIO_ORIGINAL, origine['audio_original_sha256'])
     highsync_preflight._verifier_fichier(Path(opts['audio_provenance_path']), opts['audio_provenance_sha256'])
-    highsync_preflight.preflight(run/'video-entree.mp4', run/'audio-entree.wav',
+    highsync_preflight.preflight(run/VIDEO_ENTREE, run/AUDIO_ENTREE,
         prep['entrees']['video_sha256'], prep['entrees']['audio_sha256'],
         Path(opts['ffmpeg']), Path(opts['ffprobe']))
     verifier_sources(Path(plan['source']), Path(plan['source_manifest']))
@@ -326,7 +349,7 @@ def executer(run: Path, plan_sha256: str):
         highsync_preflight._verifier_fichier(Path(poids[cle]), attendu)
     highsync_preflight._verifier_fichier(Path(opts['s3fd_poids']), highsync_s3fd.WEIGHT_SHA)
     for nom, attendu in highsync_s3fd.SOURCE_SHA.items():
-        highsync_preflight._verifier_fichier(Path(opts['s3fd_utils_root'])/'face_detection/detection/sfd'/nom, attendu)
+        highsync_preflight._verifier_fichier(Path(opts['s3fd_utils_root'])/S3FD_SOUS_DOSSIER/nom, attendu)
     for cle, attendu in plan['executables_sha256'].items():
         highsync_preflight._verifier_fichier(Path(opts[cle]).resolve(), attendu)
     fichiers = {str(x.relative_to(runtime)) for x in runtime.rglob('*') if x.is_file()}
@@ -334,7 +357,7 @@ def executer(run: Path, plan_sha256: str):
         raise ValueError('contenu runtime différent du plan')
     for nom, sha in plan['runtime_sha256'].items():
         highsync_preflight._verifier_fichier(runtime/nom, sha)
-    if any(os.path.lexists(run/x) for x in ('sortie.mp4','intermediaires','execution.log','resultat-execution.json')):
+    if any(os.path.lexists(run/x) for x in (SORTIE,INTERMEDIAIRES,EXECUTION_LOG,RESULTAT_EXECUTION)):
         raise ValueError('traces d’exécution déjà présentes')
     gpu, processus = snapshot_gpu(Path(opts['nvidia_smi']), opts['gpu_uuid'])
     verifier_gpu(gpu, processus, opts['processus_autorises'], opts['min_vram_mib'])
@@ -366,12 +389,12 @@ def executer(run: Path, plan_sha256: str):
                'IMAGEIO_FFMPEG_EXE':opts['ffmpeg'], 'TOKENIZERS_PARALLELISM':'false'}
         gpu, processus = snapshot_gpu(Path(opts['nvidia_smi']), opts['gpu_uuid'])
         verifier_gpu(gpu, processus, opts['processus_autorises'], opts['min_vram_mib'])
-        with (run/'execution.log').open('xb') as log:
+        with (run/EXECUTION_LOG).open('xb') as log:
             os.fchmod(log.fileno(), 0o600)
             process = subprocess.Popen(commande, cwd=runtime, env=env, stdin=subprocess.DEVNULL,
                                        stdout=log, stderr=subprocess.STDOUT, pass_fds=(active_fd,))
             bilan.update(phase='inference_demarrée', child_pid=process.pid)
-            _ecrire(run/'execution-pid.json', json.dumps({'pid':process.pid}).encode())
+            _ecrire(run/EXECUTION_PID, json.dumps({'pid':process.pid}).encode())
             debut = time.monotonic()
             while process.poll() is None:
                 elapsed = time.monotonic()-debut
@@ -380,7 +403,7 @@ def executer(run: Path, plan_sha256: str):
                     bilan['phase'] = 'delai_depasse'
                     bilan['descendants_non_verifies'] = True
                     if not bilan['arret_confirme']:
-                        _ecrire(run/'arret-non-confirme.json', json.dumps({'pid': process.pid}).encode())
+                        _ecrire(run/ARRET_NON_CONFIRME, json.dumps({'pid': process.pid}).encode())
                         # Conserver le verrou commun jusqu'à constater la fin de notre enfant.
                         while process.poll() is None:
                             time.sleep(2)
@@ -399,18 +422,18 @@ def executer(run: Path, plan_sha256: str):
             bilan['phase'] = 'inference_echouee'
             return bilan
         bilan['phase'] = 'validation_av'
-        resultat = av.valider(run/'audio-entree.wav', run/'sortie.mp4',
+        resultat = av.valider(run/AUDIO_ENTREE, run/SORTIE,
                              Path(opts['ffmpeg']), Path(opts['ffprobe']), .08, cadence_cible='25')
         bilan['validation_av'] = resultat
         if resultat['valide']:
-            bilan.update(statut='av_valide_non_jugé', phase='termine', sortie_sha256=_hash(run/'sortie.mp4'))
+            bilan.update(statut='av_valide_non_jugé', phase='termine', sortie_sha256=_hash(run/SORTIE))
         return bilan
     except Exception:
         if process is not None and process.poll() is None:
             bilan['arret_confirme'] = _arreter_enfant(process)
             bilan['descendants_non_verifies'] = True
             if not bilan['arret_confirme']:
-                _ecrire(run/'arret-non-confirme.json', json.dumps({'pid': process.pid}).encode())
+                _ecrire(run/ARRET_NON_CONFIRME, json.dumps({'pid': process.pid}).encode())
                 while process.poll() is None:
                     time.sleep(2)
                 bilan['arret_confirme'] = True
@@ -418,7 +441,7 @@ def executer(run: Path, plan_sha256: str):
     finally:
         if bilan['vram_echantillons_mib']:
             bilan['vram_max_observe_mib'] = max(bilan['vram_echantillons_mib'])
-        _ecrire(run/'resultat-execution.json', (json.dumps(bilan, ensure_ascii=False, indent=2)+'\n').encode())
+        _ecrire(run/RESULTAT_EXECUTION, (json.dumps(bilan, ensure_ascii=False, indent=2)+'\n').encode())
         if active_fd is not None:
             os.close(active_fd)
         os.close(fd)
@@ -442,7 +465,7 @@ def main():
         if args.phase == 'plan':
             result = planifier(args.run, args.source, args.source_manifest,
                                lire_json(args.poids_json), lire_json(args.options_json))
-            print(json.dumps({'statut':result['statut'], 'plan_sha256':_hash(args.run/'plan-execution.json')}, ensure_ascii=False))
+            print(json.dumps({'statut':result['statut'], 'plan_sha256':_hash(args.run/PLAN_EXECUTION)}, ensure_ascii=False))
             return 0
         result = executer(args.run, args.plan_sha256)
         print(json.dumps({'statut': result['statut'], 'phase': result['phase']}, ensure_ascii=False))

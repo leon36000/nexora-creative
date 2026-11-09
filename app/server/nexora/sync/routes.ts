@@ -10,7 +10,6 @@ import {
   SyncJobStore,
   type SyncEngine,
   type SyncJob,
-  type SyncJobState,
 } from './store.js';
 
 const PREFIX = '/api/nexora/sync';
@@ -143,6 +142,22 @@ function qui() {
   return { organisationId: c?.organisationId ?? 'local', utilisateurId: c?.utilisateurId ?? 'local' };
 }
 
+interface DemandeSync {
+  engine: SyncEngine;
+  videoTakeId: number;
+  audioTakeId: number;
+  langueClient?: LangueClient;
+}
+
+function demandeValide(b: unknown): b is DemandeSync {
+  if (!object(b)) return false;
+  return !Object.keys(b).some((k) => !['engine', 'videoTakeId', 'audioTakeId', 'langueClient'].includes(k)) &&
+    (b.engine === 'musetalk' || b.engine === 'latentsync') &&
+    Number.isSafeInteger(b.videoTakeId) && Number(b.videoTakeId) >= 1 &&
+    Number.isSafeInteger(b.audioTakeId) && Number(b.audioTakeId) >= 1 &&
+    (b.langueClient === undefined || b.langueClient === 'fr' || b.langueClient === 'en');
+}
+
 function capabilityValide(c: unknown): c is SyncWorkerCapabilities {
   if (!object(c) || c.protocol !== 'nexora.sync.worker.v1' || typeof c.workerId !== 'string' ||
       !/^[A-Za-z0-9._-]{1,64}$/.test(c.workerId) || typeof c.ready !== 'boolean' ||
@@ -174,7 +189,7 @@ async function lireCapacites(worker: SyncWorker | undefined, timeoutMs: number) 
 }
 
 function validAsset(asset: SyncTakeAsset | undefined, expected: 'video' | 'audio', org: string, cap: SyncEngineCapability): asset is SyncTakeAsset {
-  if (!asset || asset.organisationId !== org || asset.status !== 'done' || asset.kind !== expected) return false;
+  if (asset?.organisationId !== org || asset.status !== 'done' || asset.kind !== expected) return false;
   if (!Number.isSafeInteger(asset.id) || asset.id < 1 || !isAbsolute(asset.outputPath) ||
       asset.outputPath.includes('\0') || !SHA256.test(asset.sha256) ||
       !Number.isSafeInteger(asset.bytes) || asset.bytes <= 0 || asset.bytes > cap.maxInputBytes ||
@@ -240,6 +255,44 @@ function errorCode(v: unknown): string {
   return typeof v === 'string' && ['input_rejected', 'engine_failed', 'worker_timeout'].includes(v) ? v : 'worker_failed';
 }
 
+function conclureTravail(store: SyncJobStore, job: SyncJob, result: unknown, now: () => number): SyncJob {
+  if (!resultValide(result, job)) {
+    return store.transition(job.organisationId, job.id, 'failed', { workerJobId: job.id, errorCode: 'invalid_result_manifest' }, now()) ?? job;
+  }
+  return store.transition(job.organisationId, job.id, 'completed_rnd', {
+    workerJobId: job.id,
+    progress: 100,
+    errorCode: null,
+    resultSha256: result.outputSha256,
+    resultBytes: result.outputBytes,
+    avStatus: result.avStatus,
+  }, now()) ?? job;
+}
+
+function reutiliserTravail(
+  reply: FastifyReply, old: SyncJob,
+  input: { engine: SyncEngine; video: SyncTakeAsset; audio: SyncTakeAsset },
+  langue: LangueClient | undefined,
+) {
+  const { engine, video, audio } = input;
+  if (old.engine !== engine || old.videoTakeId !== video.id || old.audioTakeId !== audio.id ||
+      old.videoSha256 !== video.sha256 || old.audioSha256 !== audio.sha256) {
+    return erreur(reply, 409, 'sync_idempotency_conflict', langue,
+      'Cette clé de requête a déjà servi à une autre demande.',
+      'This idempotency key was already used for a different request.');
+  }
+  if (old.state === 'dispatch_unknown' || old.state === 'dispatching') {
+    return erreur(reply, 504, 'sync_acceptance_unknown', langue,
+      'La mise en file n’est pas confirmée. Consulte le travail avant de réessayer.',
+      'Queue acceptance is unconfirmed. Check the job before retrying.',
+      { jobId: old.id, accepted: false });
+  }
+  if (old.state === 'failed') {
+    return reply.code(200).send({ accepted: false, reused: true, job: vue(old) });
+  }
+  return reply.code(200).send({ accepted: true, reused: true, job: vue(old) });
+}
+
 async function actualiser(worker: SyncWorker | undefined, store: SyncJobStore, job: SyncJob, timeoutMs: number, now = Date.now) {
   if (!worker || !['dispatching', 'dispatch_unknown', 'queued', 'running'].includes(job.state)) return job;
   try {
@@ -267,17 +320,7 @@ async function actualiser(worker: SyncWorker | undefined, store: SyncJobStore, j
       return store.transition(job.organisationId, job.id, 'failed', { workerJobId: job.id, errorCode: errorCode(observation.errorCode) }, now()) ?? job;
     }
     if (observation.state === 'completed') {
-      if (!resultValide(observation.result, job)) {
-        return store.transition(job.organisationId, job.id, 'failed', { workerJobId: job.id, errorCode: 'invalid_result_manifest' }, now()) ?? job;
-      }
-      return store.transition(job.organisationId, job.id, 'completed_rnd', {
-        workerJobId: job.id,
-        progress: 100,
-        errorCode: null,
-        resultSha256: observation.result.outputSha256,
-        resultBytes: observation.result.outputBytes,
-        avStatus: observation.result.avStatus,
-      }, now()) ?? job;
+      return conclureTravail(store, job, observation.result, now);
     }
   } catch {
     // L’état durable précédent reste disponible si le worker ne répond pas.
@@ -313,12 +356,7 @@ export function enregistrerRoutesSync(app: FastifyInstance, deps: SyncRouteDeps)
   app.post(PREFIX + '/travaux', { bodyLimit: MAX_BODY }, async (req: FastifyRequest, reply: FastifyReply) => {
     const b = req.body;
     const langue = object(b) ? lireLangueClient(b.langueClient) : undefined;
-    if (!object(b) ||
-        Object.keys(b).some((k) => !['engine', 'videoTakeId', 'audioTakeId', 'langueClient'].includes(k)) ||
-        (b.engine !== 'musetalk' && b.engine !== 'latentsync') ||
-        !Number.isSafeInteger(b.videoTakeId) || Number(b.videoTakeId) < 1 ||
-        !Number.isSafeInteger(b.audioTakeId) || Number(b.audioTakeId) < 1 ||
-        (b.langueClient !== undefined && b.langueClient !== 'fr' && b.langueClient !== 'en')) {
+    if (!demandeValide(b)) {
       return erreur(reply, 400, 'sync_invalid_request', langue,
         'La demande de synchronisation est invalide.',
         'The sync request is invalid.');
@@ -333,7 +371,7 @@ export function enregistrerRoutesSync(app: FastifyInstance, deps: SyncRouteDeps)
     const { organisationId, utilisateurId } = qui();
     const caps = await lireCapacites(deps.worker, timeoutCap);
     const cap = caps.engines[engine];
-    if (!deps.worker || caps.workerState !== 'ready' || !cap || cap.ready !== true) {
+    if (!deps.worker || caps.workerState !== 'ready' || cap?.ready !== true) {
       return erreur(reply, 503, 'sync_worker_unavailable', langue,
         'Aucun worker Sync prêt pour ce moteur.',
         'No Sync worker is ready for this engine.');
@@ -382,23 +420,7 @@ export function enregistrerRoutesSync(app: FastifyInstance, deps: SyncRouteDeps)
         'The Sync worker is busy. Try again later.');
     }
     if (reservation.kind === 'existing') {
-      const old = reservation.job;
-      if (old.engine !== engine || old.videoTakeId !== video.id || old.audioTakeId !== audio.id ||
-          old.videoSha256 !== video.sha256 || old.audioSha256 !== audio.sha256) {
-        return erreur(reply, 409, 'sync_idempotency_conflict', langue,
-          'Cette clé de requête a déjà servi à une autre demande.',
-          'This idempotency key was already used for a different request.');
-      }
-      if (old.state === 'dispatch_unknown' || old.state === 'dispatching') {
-        return erreur(reply, 504, 'sync_acceptance_unknown', langue,
-          'La mise en file n’est pas confirmée. Consulte le travail avant de réessayer.',
-          'Queue acceptance is unconfirmed. Check the job before retrying.',
-          { jobId: old.id, accepted: false });
-      }
-      if (old.state === 'failed') {
-        return reply.code(200).send({ accepted: false, reused: true, job: vue(old) });
-      }
-      return reply.code(200).send({ accepted: true, reused: true, job: vue(old) });
+      return reutiliserTravail(reply, reservation.job, { engine, video, audio }, langue);
     }
 
     const job = reservation.job;
@@ -448,7 +470,7 @@ export function enregistrerRoutesSync(app: FastifyInstance, deps: SyncRouteDeps)
         { jobId: job.id, accepted: false });
     }
     const queued = deps.store.transition(organisationId, job.id, 'queued', { workerJobId: job.id, errorCode: null }, maintenant());
-    if (!queued || queued.workerJobId !== job.id || !['queued', 'running', 'completed_rnd'].includes(queued.state)) {
+    if (queued?.workerJobId !== job.id || !['queued', 'running', 'completed_rnd'].includes(queued.state)) {
       return erreur(reply, 503, 'sync_persistence_unconfirmed', langue,
         'Le travail est enregistré, mais son acceptation n’est pas confirmée.',
         'The job is recorded, but acceptance is not confirmed.',

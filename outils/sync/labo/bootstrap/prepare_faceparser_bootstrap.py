@@ -25,6 +25,9 @@ EXPECTED = {
     "musetalk/utils/preprocessing.py": "ca22548666af9bb0b059306e3955bffb97a4a97592b4a050fdce42c5361359f8",
 }
 
+FACE_PARSING_INIT_PATH = "musetalk/utils/face_parsing/__init__.py"
+PREPROCESSING_PATH = "musetalk/utils/preprocessing.py"
+
 REPLACEMENTS = {
     "musetalk/utils/face_parsing/resnet.py": [
         (
@@ -79,7 +82,7 @@ REPLACEMENTS = {
             "        self.cp = ContextPath(resnet_path, pretrained=pretrained)\n",
         ),
     ],
-    "musetalk/utils/face_parsing/__init__.py": [
+    FACE_PARSING_INIT_PATH: [
         (
             "        net = BiSeNet(resnet_path)\n"
             "        if torch.cuda.is_available():\n"
@@ -99,7 +102,7 @@ REPLACEMENTS = {
             "            net.cuda()\n",
         )
     ],
-    "musetalk/utils/preprocessing.py": [
+    PREPROCESSING_PATH: [
         (
             "model = init_model(config_file, checkpoint_file, device=device)\n",
             "# Nexora compatibility: allow only NumPy containers in the official DWPose checkpoint under Torch 2.7.\n"
@@ -172,10 +175,10 @@ def build_outputs(source_root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
             raise BootstrapError(f"patched Python is invalid: {relative}") from exc
         outputs[relative] = text.encode("utf-8")
 
-    init_text = outputs["musetalk/utils/face_parsing/__init__.py"].decode("utf-8")
+    init_text = outputs[FACE_PARSING_INIT_PATH].decode("utf-8")
     if "weights_only=True" not in init_text or "strict=True" not in init_text or "pretrained=False" not in init_text:
         raise BootstrapError("safe strict FaceParser bootstrap postconditions failed")
-    pose_text = outputs["musetalk/utils/preprocessing.py"].decode("utf-8")
+    pose_text = outputs[PREPROCESSING_PATH].decode("utf-8")
     if "torch.serialization.safe_globals(" not in pose_text or "weights_only=False" in pose_text:
         raise BootstrapError("scoped DWPose safe-globals postconditions failed")
 
