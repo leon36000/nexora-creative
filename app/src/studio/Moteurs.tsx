@@ -9,6 +9,17 @@ const NOMS: Record<string, { court: string; role: string }> = {
   rtx5090: { court: 'RTX 5090', role: 'rtx5090' },
 };
 
+function classePoint(m: MoteurGpu): string {
+  if (!m.enLigne) return '';
+  return m.enCours ? 'busy' : 'on';
+}
+
+function infobulle(m: MoteurGpu, copy: ReturnType<typeof libellesNavigation>): string {
+  const etat = m.enLigne ? copy.gpu.online : copy.gpu.offline;
+  const taches = m.enCours ? `, ${copy.gpu.tasks(m.enCours)}` : '';
+  return `${m.nom}: ${etat}${taches} · ${m.recettes.join(', ')}`;
+}
+
 export function Moteurs({ langue = 'fr' }: { langue?: LangueClient } = {}) {
   const [moteurs, setMoteurs] = useState<MoteurGpu[]>([]);
   const copy = libellesNavigation(langue);
@@ -25,8 +36,8 @@ export function Moteurs({ langue = 'fr' }: { langue?: LangueClient } = {}) {
         const n = NOMS[m.id] ?? { court: m.nom, role: '' };
         const role = n.role ? copy.gpu.roles[n.role] ?? n.role : '';
         return (
-          <span key={m.id} className="st-gpu" title={`${m.nom}: ${m.enLigne ? copy.gpu.online : copy.gpu.offline}${m.enCours ? `, ${copy.gpu.tasks(m.enCours)}` : ''} · ${m.recettes.join(', ')}`}>
-            <i className={`st-dot ${m.enLigne ? (m.enCours ? 'busy' : 'on') : ''}`} />
+          <span key={m.id} className="st-gpu" title={infobulle(m, copy)}>
+            <i className={`st-dot ${classePoint(m)}`} />
             <b>{n.court}</b>
             <span className="long">{role}</span>
           </span>
