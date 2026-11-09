@@ -1,0 +1,117 @@
+{
+  "RemeshMesh": {
+    "input": {
+      "required": {
+        "mesh": [
+          "MESH",
+          {}
+        ],
+        "resolution": [
+          "INT",
+          {
+            "min": 32,
+            "max": 2048
+          }
+        ],
+        "sign_mode": [
+          "COMFY_DYNAMICCOMBO_V3",
+          {
+            "options": [
+              {
+                "key": "udf",
+                "inputs": {
+                  "required": {
+                    "qef": [
+                      "BOOLEAN",
+                      {}
+                    ],
+                    "drop_inverted_components": [
+                      "BOOLEAN",
+                      {}
+                    ],
+                    "drop_enclosed_components": [
+                      "BOOLEAN",
+                      {}
+                    ]
+                  }
+                }
+              },
+              {
+                "key": "sdf",
+                "inputs": {
+                  "required": {
+                    "qef": [
+                      "BOOLEAN",
+                      {}
+                    ],
+                    "manifold": [
+                      "BOOLEAN",
+                      {}
+                    ]
+                  }
+                }
+              },
+              {
+                "key": "solid",
+                "inputs": {
+                  "required": {
+                    "fill": [
+                      "FLOAT",
+                      {
+                        "min": 0.0,
+                        "max": 1000.0
+                      }
+                    ],
+                    "qef": [
+                      "BOOLEAN",
+                      {}
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "band": [
+          "FLOAT",
+          {
+            "min": 0.5,
+            "max": 4.0
+          }
+        ],
+        "project_back": [
+          "FLOAT",
+          {
+            "min": 0.0,
+            "max": 1.0
+          }
+        ],
+        "fix_poles": [
+          "BOOLEAN",
+          {}
+        ],
+        "smooth_iters": [
+          "INT",
+          {
+            "min": 0,
+            "max": 20
+          }
+        ],
+        "drop_small_components": [
+          "FLOAT",
+          {
+            "min": 0.0,
+            "max": 0.5
+          }
+        ],
+        "precluster_max_verts": [
+          "INT",
+          {
+            "min": 0,
+            "max": 100000000
+          }
+        ]
+      }
+    }
+  }
+}
