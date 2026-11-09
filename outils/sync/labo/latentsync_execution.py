@@ -17,7 +17,7 @@ import time
 import urllib.request
 
 from outils.sync import valider_duree_av as av
-from outils.sync.labo import capsule_sync, highsync_preflight
+from outils.sync.labo import capsule_sync, highsync_preflight, media_sync
 
 
 def empreinte(path: Path) -> str:
@@ -98,15 +98,11 @@ def _verifier(c, run: Path):
     for nom in ('config.json', 'diffusion_pytorch_model.bin'):
         if str(Path(c['vae'])/nom) not in c['poids_sha256']:
             raise ValueError('VAE non épinglé')
-    provenance = run/'provenance-entrees.json'
-    highsync_preflight._verifier_fichier(provenance, c['provenance_sha256'])
-    p = _lire(provenance)
-    if p['modele_demande'] != 'elevenlabs/eleven-v4':
-        raise ValueError('provenance Eleven4 requise')
-    for nom in ('audio-original.mp3', 'audio-entree.wav', 'video-entree.mp4'):
-        highsync_preflight._verifier_fichier(run/nom, p['fichiers'][nom])
+    origine, fichiers = media_sync.verifier_provenance(run, c['provenance_sha256'])
+    # Le banc Eleven4 reste validé avec sa provenance et son audio original exacts.
+    # Le moteur générique reçoit seulement les deux médias hachés issus de prises résolues par le serveur.
     return highsync_preflight.preflight(run/'video-entree.mp4', run/'audio-entree.wav',
-        p['fichiers']['video-entree.mp4'], p['fichiers']['audio-entree.wav'],
+        fichiers['video-entree.mp4'], fichiers['audio-entree.wav'],
         Path(c['ffmpeg']), Path(c['ffprobe']))
 
 
