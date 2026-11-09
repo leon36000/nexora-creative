@@ -924,6 +924,17 @@ server.registerTool('upscale', {
 
 // ---------- image to 3D ----------
 
+/** Mesh accepte directement les prises d'image existantes ; le serveur prépare leur fichier. */
+async function meshImageSource(ref: string): Promise<SourceRef> {
+  const match = /^take:(\d+)$/i.exec(ref.trim());
+  if (!match) return sourceRef(await resolveInput(ref, 'image'), 'image');
+  const take = await getTake(Number(match[1]));
+  if (take.status !== 'done') throw new Error(`take ${take.id} is ${take.status}, not done`);
+  if (take.kind !== 'still') throw new Error(`take ${take.id} is ${take.kind === 'object' ? 'a 3D model' : 'a video'}; this input needs an image`);
+  const settings = settingsOf(take);
+  return { token: '', kind: 'image', name: `take ${take.id}`, w: 0, h: 0, seconds: 0, takeId: take.id, prompt: settings.userPrompt || settings.prompt };
+}
+
 server.registerTool('make_3d', {
   title: `Make 3D (${PRODUIT_3D})`,
   description: [
@@ -957,10 +968,10 @@ server.registerTool('make_3d', {
     const limit = typeof max === 'number' && Number.isFinite(max) ? Math.max(2, Math.min(4, Math.floor(max))) : 2;
     if (sides.length + 1 > limit) throw new Error(`${PRODUIT_3D}: multi-view accepts at most ${limit} views.`);
   }
-  const src = sourceRef(await resolveInput(a.image, 'image'), 'image');
+  const src = await meshImageSource(a.image);
   if (a.views) {
     views = {};
-    for (const side of sides) views[side] = sourceRef(await resolveInput(a.views[side]!, 'image'), 'image');
+    for (const side of sides) views[side] = await meshImageSource(a.views[side]!);
   }
   return queue(wire(objectBody({ source: src, quality: a.quality === 'high' ? 'quality' : 'draft', cutout: a.remove_background, count: a.count, views })), { quality: a.quality });
 }));
