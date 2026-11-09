@@ -94,6 +94,7 @@ nexora_matte_verite_tests_cpu:
   script:
     - mkdir -p .ci-matte/tmp
     - 'PIP_CONFIG_FILE=/dev/null python3 -m pip install --no-cache-dir --disable-pip-version-check numpy==2.2.6 opencv-python-headless==4.13.0.92 coverage==7.10.7'
+    - 'env -i PATH=/usr/local/bin:/usr/bin:/bin TMPDIR="$CI_PROJECT_DIR/.ci-matte/tmp" PYTHONDONTWRITEBYTECODE=1 python3 outils/labo/mesh-hunyuan-paint-20261108/smoke_bench_inpaint.py --opencv-version 4.13.0'
     - 'env -i PATH=/usr/local/bin:/usr/bin:/bin TMPDIR="$CI_PROJECT_DIR/.ci-matte/tmp" PYTHONDONTWRITEBYTECODE=1 COVERAGE_FILE="$CI_PROJECT_DIR/.ci-matte/.coverage" COVERAGE_RCFILE="$CI_PROJECT_DIR/outils/detourage/verite/coverage-ci.ini" python3 -m coverage run --branch -m unittest discover -s outils/detourage/verite/tests -p "test_*.py" -v'
     - 'env -i PATH=/usr/local/bin:/usr/bin:/bin COVERAGE_FILE="$CI_PROJECT_DIR/.ci-matte/.coverage" COVERAGE_RCFILE="$CI_PROJECT_DIR/outils/detourage/verite/coverage-ci.ini" python3 -m coverage xml -o "$CI_PROJECT_DIR/.ci-matte/coverage.xml"'
   artifacts:
