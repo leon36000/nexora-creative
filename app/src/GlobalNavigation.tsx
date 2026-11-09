@@ -13,11 +13,11 @@ export interface LienNavigation {
 }
 
 interface Props {
-  langue: LangueClient;
-  path: string;
-  params: URLSearchParams;
-  apps: LienNavigation[];
-  children?: ReactNode;
+  readonly langue: LangueClient;
+  readonly path: string;
+  readonly params: URLSearchParams;
+  readonly apps: readonly LienNavigation[];
+  readonly children?: ReactNode;
 }
 
 export function GlobalNavigation({ langue, path, params, apps, children }: Props) {
