@@ -27,12 +27,16 @@ export interface ClientDetourage {
   sortie(id: string, chemin: string, range?: string): Promise<Response>;
 }
 
+export class ErreurRequeteDetourage extends Error {
+  constructor(readonly statut: number, message: string) { super(message); }
+}
+
 async function verifier(r: Response): Promise<Response> {
   if (r.ok) return r;
   const t = await r.text().catch(() => '');
   let m = `HTTP ${r.status}`;
   try { m = (JSON.parse(t) as { erreur?: string }).erreur ?? m; } catch { /* corps non JSON */ }
-  throw new Error(`détourage : ${m}`);
+  throw new ErreurRequeteDetourage(r.status, `détourage : ${m}`);
 }
 
 /**
@@ -49,12 +53,19 @@ export function clientDetourage(base: string, f0: typeof fetch = fetch, jeton?: 
     async segmenter(c) {
       const r = await verifier(await f(u('/segmenter'), { ...json({ image_b64: c.imageB64, points: c.points, boite: c.boite ?? null, sam: c.sam }), signal: AbortSignal.timeout(120_000) }));
       const j = (await r.json()) as any;
+      if (typeof j?.masque_b64 !== 'string' || !Number.isFinite(j.score) || !Number.isFinite(j.aire) || !Number.isFinite(j.secondes)
+        || !Number.isInteger(j.largeur) || !Number.isInteger(j.hauteur)) throw new Error('Réponse de détourage invalide.');
       return { masqueB64: j.masque_b64, score: j.score, aire: j.aire, secondes: j.secondes, largeur: j.largeur, hauteur: j.hauteur };
     },
     async texte(c) {
       const r = await verifier(await f(u('/texte'), { ...json({ image_b64: c.imageB64, texte: c.texte, seuil: c.seuil }), signal: AbortSignal.timeout(120_000) }));
       const j = (await r.json()) as any;
-      const objets = (Array.isArray(j.objets) ? j.objets : []).map((o: any) => ({ masqueB64: o.masque_b64, score: o.score, boite: o.boite, aire: o.aire }));
+      if (!Array.isArray(j?.objets) || !Number.isFinite(j.secondes) || !Number.isInteger(j.largeur) || !Number.isInteger(j.hauteur)
+        || j.objets.some((o: any) => typeof o?.masque_b64 !== 'string' || !Number.isFinite(o.score) || !Number.isFinite(o.aire)
+          || !Array.isArray(o.boite) || o.boite.length !== 4 || o.boite.some((v: unknown) => !Number.isFinite(v)))) {
+        throw new Error('Réponse de détourage invalide.');
+      }
+      const objets = j.objets.map((o: any) => ({ masqueB64: o.masque_b64, score: o.score, boite: o.boite, aire: o.aire }));
       return { objets, secondes: j.secondes, largeur: j.largeur, hauteur: j.hauteur };
     },
     async deposer(id, nom, flux, octets) {

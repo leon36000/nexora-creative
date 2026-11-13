@@ -208,16 +208,168 @@ describe('santé du détourage rapide', () => {
     });
     try {
       const refus = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
-      expect(refus.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      expect(refus.json().rapide).toMatchObject({ disponible: false, moteur: null, moteurs: [{ id: 'rapide', disponible: false }] });
       statut = 200;
       const incomplet = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
-      expect(incomplet.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      expect(incomplet.json().rapide).toMatchObject({ disponible: false, moteur: null, moteurs: [{ id: 'rapide', disponible: false }] });
       corps = { ok: false };
       const malade = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
-      expect(malade.json().rapide).toMatchObject({ disponible: false, moteur: { id: 'rapide' } });
+      expect(malade.json().rapide).toMatchObject({ disponible: false, moteur: null, moteurs: [{ id: 'rapide', disponible: false }] });
       corps = { ok: true };
       const ok = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
       expect(ok.json().rapide).toMatchObject({ disponible: true, moteur: { id: 'rapide' } });
+    } finally {
+      arreter();
+      await app.close();
+      await new Promise<void>((r) => faux.close(() => r()));
+    }
+  });
+
+  it('bascule du service natif hors ligne vers le moteur rapide sain pour l’aperçu et les nouveaux travaux', async () => {
+    let appelsNatif = 0;
+    const natif = createServer((_req, res) => { appelsNatif++; res.statusCode = 503; res.end('{"ok":false}'); });
+    const appelsRepli: string[] = [];
+    const repli = createServer((req, res) => {
+      appelsRepli.push(`${req.method} ${req.url}`);
+      res.setHeader('content-type', 'application/json');
+      if (req.url === '/sante') res.end('{"ok":true,"modeles":{"sam":["SAM 3.1"]}}');
+      else if (req.url === '/segmenter') res.end('{"masque_b64":"REPLI","score":0.9,"aire":0.2,"secondes":0.2,"largeur":8,"hauteur":8}');
+      else if (req.url === '/texte') res.end('{"objets":[],"secondes":0.2,"largeur":8,"hauteur":8}');
+      else { res.statusCode = 404; res.end('{}'); }
+    });
+    await new Promise<void>((r) => natif.listen(0, '127.0.0.1', r));
+    await new Promise<void>((r) => repli.listen(0, '127.0.0.1', r));
+    const portNatif = (natif.address() as AddressInfo).port;
+    const portRepli = (repli.address() as AddressInfo).port;
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-repli-sain-')),
+      moteurs: () => [{ id: 'pc3', nom: 'PC3', recettes: ['detourage-rapide'], detourageUrl: `http://127.0.0.1:${portRepli}` }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'PC5', detourageUrl: `http://127.0.0.1:${portNatif}` }),
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const capacites = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(capacites.json().rapide).toMatchObject({
+        disponible: true, moteur: { id: 'pc3', nom: 'PC3' },
+        moteurs: [{ id: 'detourage-natif', disponible: false }, { id: 'pc3', disponible: true }],
+      });
+      const apercu = await app.inject({ method: 'POST', url: '/api/nexora/detourage/apercu',
+        payload: { imageB64: 'A'.repeat(200), points: [[0.5, 0.5, 1]] } });
+      expect(apercu.statusCode).toBe(200);
+      expect(apercu.json().masqueB64).toBe('REPLI');
+      const texte = await app.inject({ method: 'POST', url: '/api/nexora/detourage/texte',
+        payload: { imageB64: 'A'.repeat(200), texte: 'person' } });
+      expect(texte.statusCode).toBe(200);
+      const travail = await app.inject({ method: 'POST', url: '/api/nexora/detourage/travaux', payload: { nom: 'essai de repli' } });
+      expect(travail.statusCode).toBe(200);
+      expect(travail.json().moteur).toBe('pc3');
+      expect(appelsNatif).toBeGreaterThan(0);
+      expect(appelsRepli).toContain('POST /segmenter');
+      expect(appelsRepli).toContain('POST /texte');
+    } finally {
+      arreter();
+      await app.close();
+      await new Promise<void>((r) => natif.close(() => r()));
+      await new Promise<void>((r) => repli.close(() => r()));
+    }
+  });
+
+  it('essaie le moteur de repli si le moteur sain échoue pendant l’aperçu', async () => {
+    const principal = createServer((req, res) => {
+      res.setHeader('content-type', 'application/json');
+      if (req.url === '/sante') res.end('{"ok":true}');
+      else { res.statusCode = 500; res.end('{"erreur":"modèle indisponible"}'); }
+    });
+    let appelsRepli = 0;
+    const repli = createServer((req, res) => {
+      res.setHeader('content-type', 'application/json');
+      if (req.url === '/sante') res.end('{"ok":true}');
+      else if (req.url === '/segmenter') { appelsRepli++; res.end('{"masque_b64":"REPLI","score":0.9,"aire":0.2,"secondes":0.2,"largeur":8,"hauteur":8}'); }
+      else { res.statusCode = 404; res.end('{}'); }
+    });
+    await new Promise<void>((r) => principal.listen(0, '127.0.0.1', r));
+    await new Promise<void>((r) => repli.listen(0, '127.0.0.1', r));
+    const portPrincipal = (principal.address() as AddressInfo).port;
+    const portRepli = (repli.address() as AddressInfo).port;
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-repli-operation-')),
+      moteurs: () => [{ id: 'pc3', nom: 'PC3', recettes: ['detourage-rapide'], detourageUrl: `http://127.0.0.1:${portRepli}` }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'PC5', detourageUrl: `http://127.0.0.1:${portPrincipal}` }),
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const apercu = await app.inject({ method: 'POST', url: '/api/nexora/detourage/apercu',
+        payload: { imageB64: 'A'.repeat(200), points: [[0.5, 0.5, 1]] } });
+      expect(apercu.statusCode).toBe(200);
+      expect(apercu.json().masqueB64).toBe('REPLI');
+      expect(appelsRepli).toBe(1);
+    } finally {
+      arreter();
+      await app.close();
+      await new Promise<void>((r) => principal.close(() => r()));
+      await new Promise<void>((r) => repli.close(() => r()));
+    }
+  });
+
+  it('ne traite pas une réponse 200 mal formée comme un masque valide', async () => {
+    const principal = createServer((req, res) => {
+      res.setHeader('content-type', 'application/json');
+      if (req.url === '/sante') res.end('{"ok":true}');
+      else res.end('{}');
+    });
+    let appelsRepli = 0;
+    const repli = createServer((req, res) => {
+      res.setHeader('content-type', 'application/json');
+      if (req.url === '/sante') res.end('{"ok":true}');
+      else if (req.url === '/segmenter') { appelsRepli++; res.end('{"masque_b64":"REPLI","score":0.9,"aire":0.2,"secondes":0.2,"largeur":8,"hauteur":8}'); }
+      else { res.statusCode = 404; res.end('{}'); }
+    });
+    await new Promise<void>((r) => principal.listen(0, '127.0.0.1', r));
+    await new Promise<void>((r) => repli.listen(0, '127.0.0.1', r));
+    const portPrincipal = (principal.address() as AddressInfo).port;
+    const portRepli = (repli.address() as AddressInfo).port;
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-reponse-invalide-')),
+      moteurs: () => [{ id: 'pc3', nom: 'PC3', recettes: ['detourage-rapide'], detourageUrl: `http://127.0.0.1:${portRepli}` }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'PC5', detourageUrl: `http://127.0.0.1:${portPrincipal}` }),
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const apercu = await app.inject({ method: 'POST', url: '/api/nexora/detourage/apercu',
+        payload: { imageB64: 'A'.repeat(200), points: [[0.5, 0.5, 1]] } });
+      expect(apercu.statusCode).toBe(200);
+      expect(apercu.json().masqueB64).toBe('REPLI');
+      expect(appelsRepli).toBe(1);
+    } finally {
+      arreter();
+      await app.close();
+      await new Promise<void>((r) => principal.close(() => r()));
+      await new Promise<void>((r) => repli.close(() => r()));
+    }
+  });
+
+  it('refuse aperçu et nouveau travail lorsque tous les moteurs rapides sont en panne', async () => {
+    const faux = createServer((_req, res) => { res.statusCode = 503; res.end('{"ok":false}'); });
+    await new Promise<void>((r) => faux.listen(0, '127.0.0.1', r));
+    const port = (faux.address() as AddressInfo).port;
+    const app = Fastify();
+    const { arreter } = enregistrerDetourage(app, {
+      dossierDonnees: mkdtempSync(join(tmpdir(), 'detourage-tous-hs-')),
+      moteurs: () => [{ id: 'pc3', nom: 'PC3', recettes: ['detourage-rapide'], detourageUrl: `http://127.0.0.1:${port}` }],
+      serviceNatif: () => ({ id: 'detourage-natif', nom: 'PC5', detourageUrl: `http://127.0.0.1:${port}` }),
+      facturation: () => null, nexora: false,
+    });
+    try {
+      const capacites = await app.inject({ method: 'GET', url: '/api/nexora/detourage/capacites' });
+      expect(capacites.json().rapide).toMatchObject({ disponible: false, moteur: null });
+      const apercu = await app.inject({ method: 'POST', url: '/api/nexora/detourage/apercu',
+        payload: { imageB64: 'A'.repeat(200), points: [[0.5, 0.5, 1]] } });
+      expect(apercu.statusCode).toBe(503);
+      const travail = await app.inject({ method: 'POST', url: '/api/nexora/detourage/travaux', payload: {} });
+      expect(travail.statusCode).toBe(503);
     } finally {
       arreter();
       await app.close();

@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ParamsSchema, secondesEstimees, versParamsMoteur } from './schema.js';
-import { clientDetourage, type ClientDetourage } from './client.js';
+import { clientDetourage, ErreurRequeteDetourage, type ClientDetourage } from './client.js';
 import { ID_DETOURAGE_NATIF } from './identite.js';
 import { Detourage, ErreurDetourage } from './gestion.js';
 import { compteCourant } from '../compte.js';
@@ -34,6 +34,12 @@ export function moteurPour(moteurs: MoteurDetourageDeclare[], palier: string): M
   return moteurs.find((m) => m.detourageUrl && (m.recettes.includes(`detourage-${palier}`) || (palier === 'rapide' && m.recettes.includes('*'))));
 }
 
+function moteursRapides(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): Array<ServiceDetourage | MoteurDetourageDeclare> {
+  const natifValide = serviceNatifUnique(moteurs, natif);
+  const repli = moteursSansCollision(moteurs).filter((m) => m.detourageUrl && (m.recettes.includes('detourage-rapide') || m.recettes.includes('*')));
+  return [...(natifValide ? [natifValide] : []), ...repli];
+}
+
 function serviceNatifUnique(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): ServiceDetourage | undefined {
   return natif?.id === ID_DETOURAGE_NATIF && !moteurs.some((m) => m.id === natif.id) ? natif : undefined;
 }
@@ -43,7 +49,7 @@ function moteursSansCollision(moteurs: MoteurDetourageDeclare[]): MoteurDetourag
 }
 
 export function serviceRapide(moteurs: MoteurDetourageDeclare[], natif?: ServiceDetourage): ServiceDetourage | MoteurDetourageDeclare | undefined {
-  return serviceNatifUnique(moteurs, natif) ?? moteurPour(moteursSansCollision(moteurs), 'rapide');
+  return moteursRapides(moteurs, natif)[0];
 }
 
 export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage): { detourage: Detourage; arreter: () => void } {
@@ -60,9 +66,11 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   };
   const detourage = new Detourage({
     registre: join(deps.dossierDonnees, 'detourage', 'registre.json'),
-    moteur: (palier) => {
+    moteur: (palier, moteurId) => {
       const moteurs = deps.moteurs(), natif = deps.serviceNatif?.();
-      const m = palier === 'rapide' ? serviceRapide(moteurs, natif) : moteurPour(moteursSansCollision(moteurs), palier);
+      const m = palier === 'rapide'
+        ? (moteurId ? moteursRapides(moteurs, natif).find((candidat) => candidat.id === moteurId) : serviceRapide(moteurs, natif))
+        : moteurPour(moteursSansCollision(moteurs), palier);
       const c = m && clientDe(m.id);
       return m && c ? { id: m.id, client: c } : null;
     },
@@ -80,6 +88,32 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
       deps.journal?.(`détourage : ${e instanceof Error ? e.message : e}`);
       return reply.code(502).send({ error: e instanceof Error ? e.message : 'Le moteur de détourage ne répond pas.' });
     }
+  };
+  const etatsRapides = async () => {
+    const candidats = moteursRapides(deps.moteurs(), deps.serviceNatif?.());
+    return Promise.all(candidats.map(async (service) => {
+      const sante = await clientDe(service.id)?.sante().catch(() => null) ?? null;
+      return { service, sante };
+    }));
+  };
+  const servicesRapidesSains = async () => (await etatsRapides()).filter((controle) => controle.sante?.ok === true);
+  const serviceRapideSain = async () => (await servicesRapidesSains())[0] ?? null;
+  const avecRepliRapide = async <T>(operation: (client: ClientDetourage) => Promise<T>): Promise<T> => {
+    const sains = await servicesRapidesSains();
+    if (!sains.length) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
+    let dernier: unknown;
+    for (const { service } of sains) {
+      const client = clientDe(service.id);
+      if (!client) continue;
+      try { return await operation(client); }
+      catch (e) {
+        // Une requête invalide ne changera pas selon le GPU ; les erreurs de service et de réseau peuvent se replier.
+        if (e instanceof ErreurRequeteDetourage && e.statut >= 400 && e.statut < 500 && ![401, 403, 404, 408, 429].includes(e.statut)) throw e;
+        dernier = e;
+      }
+    }
+    if (dernier instanceof Error) throw dernier;
+    throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
   };
   const idDe = (req: FastifyRequest, reply: FastifyReply): string | null => {
     const id = (req.params as { id?: string }).id ?? '';
@@ -104,12 +138,13 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
 
   app.get(`${P}/capacites`, async () => {
     const m = deps.moteurs();
-    const rapide = serviceRapide(m, deps.serviceNatif?.());
+    const controles = await etatsRapides();
+    const rapide = controles.find((controle) => controle.sante?.ok === true) ?? null;
     const pro = moteurPour(moteursSansCollision(m), 'pro');
-    let sante: Record<string, unknown> | null = null;
-    if (rapide) sante = await clientDe(rapide.id)?.sante().catch(() => null) ?? null;
     return {
-      rapide: { disponible: sante?.ok === true, moteur: rapide ? { id: rapide.id, nom: rapide.nom } : null, modeles: sante?.modeles ?? null,
+      rapide: { disponible: rapide !== null, moteur: rapide ? { id: rapide.service.id, nom: rapide.service.nom } : null,
+        modeles: rapide?.sante?.modeles ?? null,
+        moteurs: controles.map(({ service, sante }) => ({ id: service.id, nom: service.nom, disponible: sante?.ok === true })),
         description: 'SAM 3.1 (sélection par clics, boîte ou mot, suivi) + ViTMatte (bords) + stabilisation par flux optique' },
       pro: { disponible: false, moteur: pro ? { id: pro.id, nom: pro.nom } : null,
         description: 'Détourage avancé indisponible actuellement.' },
@@ -127,11 +162,8 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     if (points.some((p) => p.length !== 3 || p.slice(0, 2).some((v) => !(v >= 0 && v <= 1)) || ![0, 1].includes(p[2]))) throw new ErreurDetourage('Clics invalides.');
     const boite = Array.isArray(b.boite) && b.boite.length === 4 && b.boite.every((v) => Number(v) >= 0 && Number(v) <= 1) ? b.boite.map(Number) : null;
     if (!points.length && !boite) throw new ErreurDetourage('Clique sur le sujet.');
-    const m = serviceRapide(deps.moteurs(), deps.serviceNatif?.());
-    const c = m && clientDe(m.id);
-    if (!c) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
     // Le moteur choisit SAM 3.1 : plus de variante à envoyer.
-    return c.segmenter({ imageB64: b.imageB64, points, boite });
+    return avecRepliRapide((client) => client.segmenter({ imageB64: b.imageB64!, points, boite }));
   }));
 
   /** Sélection par un mot (en anglais, l’encodeur de SAM 3.1) : une image -> les objets trouvés, sans travail ni crédit. */
@@ -142,10 +174,7 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
     if (!texte || texte.length > 120) throw new ErreurDetourage('Écris ce qu’il faut détourer, en anglais (ex. person).');
     const seuil = b.seuil === undefined || b.seuil === null ? 0.4 : Number(b.seuil);
     if (!(seuil >= 0.05 && seuil <= 0.95)) throw new ErreurDetourage('Seuil invalide (0,05 à 0,95).');
-    const m = serviceRapide(deps.moteurs(), deps.serviceNatif?.());
-    const c = m && clientDe(m.id);
-    if (!c) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
-    return c.texte({ imageB64: b.imageB64, texte, seuil });
+    return avecRepliRapide((client) => client.texte({ imageB64: b.imageB64!, texte, seuil }));
   }));
 
   app.get(`${P}/travaux`, async (_req, reply) => garde(reply, async () => detourage.lister(qui().org).map(vue)));
@@ -153,8 +182,11 @@ export function enregistrerDetourage(app: FastifyInstance, deps: DepsDetourage):
   app.post(`${P}/travaux`, async (req, reply) => garde(reply, async () => {
     const b = (req.body ?? {}) as { nom?: string; palier?: string };
     if (b.palier === 'pro') throw new ErreurDetourage('Le détourage pro n’est pas encore disponible.', 503);
+    detourage.assurerRegistreDisponible();
+    const choix = await serviceRapideSain();
+    if (!choix) throw new ErreurDetourage('Aucun moteur de détourage en ligne.', 503);
     const { org, user } = qui();
-    return vue(detourage.creer(org, user, String(b.nom ?? ''), b.palier === 'pro' ? 'pro' : 'rapide'));
+    return vue(detourage.creer(org, user, String(b.nom ?? ''), 'rapide', choix.service.id));
   }));
 
   // Dépôt de la vidéo (ou d'un fond) en flux : jamais en mémoire, jamais sur le disque du serveur de Creative.
