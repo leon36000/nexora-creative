@@ -122,6 +122,8 @@ export class Detourage {
     if (this.registreIndisponible) throw new ErreurDetourage('Le registre du détourage est indisponible. Réessaie plus tard.', 503);
   }
 
+  assurerRegistreDisponible(): void { this.verifierRegistre(); }
+
   private sauver() {
     this.verifierRegistre();
     mkdirSync(dirname(this.o.registre), { recursive: true });
@@ -153,9 +155,9 @@ export class Detourage {
 
   obtenir(org: string, id: string): TravailDetourage { return this.possede(org, id); }
 
-  creer(org: string, utilisateur: string, nom: string, palier = 'rapide'): TravailDetourage {
+  creer(org: string, utilisateur: string, nom: string, palier = 'rapide', moteurId?: string): TravailDetourage {
     this.verifierRegistre();
-    const m = this.o.moteur(palier);
+    const m = this.o.moteur(palier, moteurId);
     if (!m) throw new ErreurDetourage(palier === 'pro' ? 'Le détourage pro n’est pas encore disponible.' : 'Aucun moteur de détourage en ligne.', 503);
     const t: TravailDetourage = {
       id: randomBytes(12).toString('hex'), organisation: org, utilisateur, nom: nom.slice(0, 120) || 'Sans titre', moteurId: m.id,
