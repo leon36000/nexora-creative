@@ -13,7 +13,7 @@ export PATH="$WORK/bin:$(dirname "$PYTHON"):/usr/local/bin:/usr/bin:/bin"
 export PYTHONPATH="$ROOT/outils/sous-agents/tests"
 export COVERAGE_FILE="$WORK/coverage/.coverage" COVERAGE_RCFILE="$ROOT/outils/sous-agents/tests/coverage-ci.ini"
 if "$PYTHON" -m coverage run -m unittest -v \
-  test_activation test_cost_snapshot test_cout test_lot test_lot_direct test_proxy test_proxy_launcher test_proxy_launcher_direct test_runner test_sa_callbacks > "$WORK/tests.log" 2>&1; then
+  test_activation test_cost_snapshot test_cout test_lot test_lot_direct test_proxy test_proxy_launcher test_proxy_launcher_direct test_runner test_sa_callbacks test_qwen test_bench_pc4 > "$WORK/tests.log" 2>&1; then
   cat "$WORK/tests.log"
 else
   cat "$WORK/tests.log"

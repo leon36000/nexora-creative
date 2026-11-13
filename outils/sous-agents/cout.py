@@ -13,6 +13,22 @@ from pathlib import Path
 # Enough precision for bounded input values and realistic journal sizes.
 getcontext().prec = 128
 
+KNOWN_ALIASES = (
+    'eco-deepseek',
+    'eco-muse',
+    'eco-gemini',
+    'eco-gemini-eleve',
+    'gemini',
+    'eco-qwen',
+    'eco-carbon',
+    'eco-carbon-eleve',
+    'eco-terra',
+    'eco-sol',
+    'eco-argon',
+    'eco-kimi',
+)
+FREE_ALIASES = ('eco-qwen',)
+
 
 def unique_object(pairs):
     result = {}
@@ -34,11 +50,22 @@ def number(value: object) -> Decimal | None:
                       and (result.is_zero() or -30 <= result.adjusted() <= 30)) else None
 
 
-def aggregate(rows: list[dict]) -> dict:
-    costs = [number(row.get('cost')) for row in rows]
+def row_cost(row: dict, *, force_zero: bool = False) -> Decimal | None:
+    parsed = number(row.get('cost'))
+    if force_zero or row.get('alias') in FREE_ALIASES:
+        if parsed is not None or row.get('cost') is None:
+            return Decimal(0)
+        return None
+    return parsed
+
+
+def aggregate(rows: list[dict], *, zero_cost: bool = False) -> dict:
+    costs = [row_cost(row, force_zero=zero_cost) for row in rows]
+
     def tokens(value):
         n = number(value)
         return n if n is not None and n == n.to_integral_value() else None
+
     ins = [tokens(row.get('in')) for row in rows]
     outs = [tokens(row.get('out')) for row in rows]
     missing = sum(x is None for x in costs)
@@ -60,6 +87,24 @@ def money(amount: str) -> str:
     except InvalidOperation:
         # A very large recorded number stays visible rather than being silently replaced with zero.
         return amount
+
+
+def format_line(label: str, group: dict, *, undated: int = 0, unattributed: int = 0, exact_zero: bool = False) -> str:
+    known = money(group['cout_connu'])
+    amount = Decimal(group['cout_connu'])
+    shown = '<$0.00001' if Decimal(0) < amount < Decimal('0.00001') else f'≈${known}'
+    if not group['requetes']:
+        cost = '$0.00000' if exact_zero else 'aucune donnée de coût'
+    elif group['cout_total'] is None:
+        cost = f'coût déclaré {shown} + {group["couts_inconnus"]} coût(s) inconnu(s)'
+        if label == 'TOTAL' and (undated or unattributed):
+            cost += f' + {undated + unattributed} entrée(s) non attribuable(s)'
+    elif exact_zero and amount == 0:
+        cost = '$0.00000'
+    else:
+        cost = shown
+    unknown = f' (+{group["statuts_inconnus"]} statut(s) inconnu(s))' if group['statuts_inconnus'] else ''
+    return f'{label}\t{group["requetes"]} req\t{group["echecs"]} echecs{unknown}\t{group["in"] or "?"} in\t{group["out"] or "?"} out\t{cost}'
 
 
 def main() -> int:
@@ -95,6 +140,7 @@ def main() -> int:
     except (OSError, UnicodeError, RuntimeError):
         print('journal indisponible ; coût inconnu', file=sys.stderr)
         return 1
+
     def day(row: dict) -> date | None:
         stamp = row.get('ts')
         if not isinstance(stamp, str):
@@ -120,15 +166,37 @@ def main() -> int:
         rows = [row for row in rows if day(row) is not None and day(row) >= parsed]
     else:
         undated = 0
+
     groups: dict[str, list[dict]] = {}
+    free_rows: list[dict] = []
+    paid_rows: list[dict] = []
     for row in rows:
         alias = row.get('alias')
         # Ne jamais recopier de texte arbitraire ni de données du journal dans la sortie.
-        if alias not in ('eco-deepseek', 'eco-muse', 'eco-gemini', 'eco-gemini-eleve', 'gemini'):
+        if alias not in KNOWN_ALIASES:
             alias = 'autre'
         groups.setdefault(alias, []).append(row)
-    report = {'groupes': {key: aggregate(val) for key, val in sorted(groups.items())},
-              'total': aggregate(rows), 'sans_date': undated, 'sans_identifiant': unattributed}
+        if alias in FREE_ALIASES:
+            free_rows.append(row)
+        else:
+            paid_rows.append(row)
+
+    group_reports = {
+        key: aggregate(val, zero_cost=(key in FREE_ALIASES))
+        for key, val in sorted(groups.items())
+    }
+    free_report = aggregate(free_rows, zero_cost=True)
+    paid_report = aggregate(paid_rows)
+    total_report = aggregate(rows)
+
+    report = {
+        'groupes': group_reports,
+        'gratuit': free_report,
+        'payant': paid_report,
+        'total': total_report,
+        'sans_date': undated,
+        'sans_identifiant': unattributed,
+    }
     if undated or unattributed:
         # A row excluded for missing attribution may belong to the requested selection.
         report['total']['cout_total'] = None
@@ -136,20 +204,12 @@ def main() -> int:
     if args.json:
         print(json.dumps(report, ensure_ascii=False))
         return 0
-    for alias, group in [*report['groupes'].items(), ('TOTAL', report['total'])]:
-        known = money(group['cout_connu'])
-        amount = Decimal(group['cout_connu'])
-        shown = '<$0.00001' if Decimal(0) < amount < Decimal('0.00001') else f'≈${known}'
-        if not group['requetes']:
-            cost = 'aucune donnée de coût'
-        elif group['cout_total'] is None:
-            cost = f'coût déclaré {shown} + {group["couts_inconnus"]} coût(s) inconnu(s)'
-            if alias == 'TOTAL' and (undated or unattributed):
-                cost += f' + {undated + unattributed} entrée(s) non attribuable(s)'
-        else:
-            cost = shown
-        unknown = f' (+{group["statuts_inconnus"]} statut(s) inconnu(s))' if group['statuts_inconnus'] else ''
-        print(f'{alias}\t{group["requetes"]} req\t{group["echecs"]} echecs{unknown}\t{group["in"] or "?"} in\t{group["out"] or "?"} out\t{cost}')
+
+    for alias, group in report['groupes'].items():
+        print(format_line(alias, group, exact_zero=(alias in FREE_ALIASES)))
+    if free_rows:
+        print(format_line('GRATUIT', free_report, exact_zero=True))
+    print(format_line('TOTAL', report['total'], undated=undated, unattributed=unattributed))
     if undated or unattributed:
         print(f'Non attribuables au filtre : {undated} sans date, {unattributed} sans identifiant.')
     return 0

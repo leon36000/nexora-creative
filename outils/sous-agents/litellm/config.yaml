@@ -1,6 +1,27 @@
 # Passerelle LiteLLM LÉGÈRE réservée aux sous-agents (hors production, sans base de données).
 # Les clés ne sont jamais ici : elles arrivent par variables d'environnement (voir gateway.sh).
 model_list:
+  # Qwen3.8 Flash Next local sur pc4 (RTX 3090, Strata OpenAI-compatible) — coût nul ($0).
+  # Limite conservatrice : max 2 requêtes en parallèle (mono-GPU RTX 3090), file d'attente RPM 24, repli vers eco-deepseek.
+  # Carte officielle qwen4exp + budget de réflexion borné (évite le défaut implicite xhigh de Strata).
+  - model_name: eco-qwen
+    litellm_params:
+      model: openai/swift-1.5-qwen3.8-flash-next-abliterated-iq3_s
+      api_base: os.environ/STRATA_API_BASE
+      api_key: os.environ/STRATA_API_KEY
+      temperature: 1.0
+      top_p: 0.95
+      extra_body:
+        top_k: 20
+        reasoning_effort: "medium"
+        reasoning_budget_tokens: 4096
+        reasoning_loop_recovery: "recover"
+      max_parallel_requests: 2
+      rpm: 24
+      timeout: 240
+      stream_timeout: 90
+      input_cost_per_token: 0.0
+      output_cost_per_token: 0.0
   # Le moins cher, le plus rapide : modifications en masse, résumés, tests simples (DeepInfra, 0,20 $ / 0,60 $ par M de jetons).
   - model_name: eco-deepseek
     litellm_params:
@@ -71,3 +92,9 @@ litellm_settings:
 router_settings:
   num_retries: 2
   timeout: 600
+  allowed_fails: 1
+  cooldown_time: 30
+  fallbacks:
+    - {"eco-qwen": ["eco-deepseek"]}
+  context_window_fallbacks:
+    - {"eco-qwen": ["eco-deepseek"]}

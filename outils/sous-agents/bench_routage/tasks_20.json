@@ -1,0 +1,994 @@
+[
+  {
+    "id": "T01",
+    "category": "extraction",
+    "expected_route": "eco-qwen",
+    "files": {
+      "access.log": "127.0.0.1 - alice [10/Nov/2026:10:00:01 +0000] \"GET /index.html HTTP/1.1\" 200 1024\n192.168.1.5 - - [10/Nov/2026:10:01:22 +0000] \"POST /api/login HTTP/1.1\" 401 512\n10.0.0.2 - bob [10/Nov/2026:10:02:03 +0000] \"GET /static/app.js HTTP/1.1\" 304 0\n"
+    },
+    "prompt": "Dans le dossier courant, le fichier d'entree access.log contient 3 lignes de logs Nginx (format combine simplifie). Ecris un script ou une procedure de ton choix puis produis OBLIGATOIREMENT le fichier resultat requests.json dans le dossier courant. Format exige : une liste JSON de 3 objets, dans l'ordre des lignes du log, chacun avec EXACTEMENT les cles {ip (str), method (str), path (str), status (int), bytes (int)}. Exemple d'objet : {\"ip\": \"127.0.0.1\", \"method\": \"GET\", \"path\": \"/index.html\", \"status\": 200, \"bytes\": 1024}. Extrais method/path depuis la requete entre guillemets, status/bytes depuis les deux derniers champs. N'ajoute aucune cle, ne change pas l'ordre.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "requests.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "requests.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_equals",
+        "path": "requests.json",
+        "key": "",
+        "expected": [
+          {
+            "ip": "127.0.0.1",
+            "method": "GET",
+            "path": "/index.html",
+            "status": 200,
+            "bytes": 1024
+          },
+          {
+            "ip": "192.168.1.5",
+            "method": "POST",
+            "path": "/api/login",
+            "status": 401,
+            "bytes": 512
+          },
+          {
+            "ip": "10.0.0.2",
+            "method": "GET",
+            "path": "/static/app.js",
+            "status": 304,
+            "bytes": 0
+          }
+        ],
+        "points": 5,
+        "label": "contenu exact"
+      },
+      {
+        "type": "py_assert",
+        "points": 2,
+        "label": "types exacts",
+        "code": "import json;d=json.load(open('requests.json'));assert isinstance(d,list)and len(d)==3;[ (_ for _ in ()).throw(AssertionError(f\"types ligne {i}\")) for i,e in enumerate(d) if not(isinstance(e.get('ip'),str)and isinstance(e.get('method'),str)and isinstance(e.get('path'),str)and isinstance(e.get('status'),int)and isinstance(e.get('bytes'),int) and set(e)=={'ip','method','path','status','bytes'})];print('types ok')"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "ordre preserve",
+        "code": "import json;d=json.load(open('requests.json'));assert [x['path'] for x in d]==['/index.html','/api/login','/static/app.js'], 'ordre';print('ordre ok')"
+      }
+    ]
+  },
+  {
+    "id": "T02",
+    "category": "extraction",
+    "expected_route": "eco-qwen",
+    "files": {
+      "table.md": "| name | age | city |\n|---|---|---|\n| Alice | 30 | Paris |\n| Bob | 25 | Lyon |\n| Chloé | 35 | Marseille |\n"
+    },
+    "prompt": "Dans le dossier courant, table.md contient un tableau Markdown (en-tete + separateur + 3 lignes de donnees). Produis OBLIGATOIREMENT data.csv dans le dossier courant : en-tete exacte `name,age,city` puis les 3 lignes dans le meme ordre, cellules rognees (strip), sans espaces superflus, encodage UTF-8, fins de ligne \\n. Ne reordonne pas, ne traduis pas, ne rajoute pas de colonne. Le fichier doit etre lisible par le module csv standard.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "data.csv",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "csv_headers",
+        "path": "data.csv",
+        "expected": [
+          "name",
+          "age",
+          "city"
+        ],
+        "points": 2,
+        "label": "en-tetes"
+      },
+      {
+        "type": "csv_equals",
+        "path": "data.csv",
+        "expected": [
+          [
+            "name",
+            "age",
+            "city"
+          ],
+          [
+            "Alice",
+            "30",
+            "Paris"
+          ],
+          [
+            "Bob",
+            "25",
+            "Lyon"
+          ],
+          [
+            "Chloé",
+            "35",
+            "Marseille"
+          ]
+        ],
+        "points": 5,
+        "label": "contenu exact"
+      },
+      {
+        "type": "py_assert",
+        "points": 2,
+        "label": "3 lignes + utf8",
+        "code": "import csv;rows=list(csv.reader(open('data.csv',encoding='utf-8')));assert len(rows)==4,rows;assert all(len(r)==3 for r in rows);print('csv ok')"
+      }
+    ]
+  },
+  {
+    "id": "T03",
+    "category": "extraction",
+    "expected_route": "eco-qwen",
+    "files": {
+      "app.sh": "#!/bin/bash\necho $NEXORA_API_KEY\necho ${DB_HOST}\necho \"$LOG_LEVEL\"\n",
+      "deploy.sh": "#!/bin/bash\nexport NEXORA_REGION=\"eu-west\"\necho ${DB_HOST}\necho $RETRY_COUNT\n",
+      "run.py": "import os\na=os.environ[\"NEXORA_API_KEY\"]\nb=os.getenv(\"CACHE_TTL\")\nc=os.environ.get('DB_HOST')\nprint(a,b,c)\n"
+    },
+    "prompt": "Dans le dossier courant, 3 scripts (app.sh, deploy.sh, run.py) referencent des variables d'environnement via $VAR, ${VAR}, os.environ[...], os.environ.get(...), os.getenv(...). Produis OBLIGATOIREMENT env_vars.json dans le dossier courant : la liste JSON triee (ordre ASCII croissant) des noms UNIQUES de variables referencees. Inclus les variables lues ET celles exportees (export ...). Attendu : 6 noms dont CACHE_TTL, DB_HOST, LOG_LEVEL, NEXORA_API_KEY, NEXORA_REGION, RETRY_COUNT. Format : [\"CACHE_TTL\", ...] sans doublon, sans valeur, sans cle supplementaire.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "env_vars.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "env_vars.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_equals",
+        "path": "env_vars.json",
+        "key": "",
+        "expected": [
+          "CACHE_TTL",
+          "DB_HOST",
+          "LOG_LEVEL",
+          "NEXORA_API_KEY",
+          "NEXORA_REGION",
+          "RETRY_COUNT"
+        ],
+        "points": 6,
+        "label": "liste exacte triee"
+      },
+      {
+        "type": "py_assert",
+        "points": 2,
+        "label": "tri + unicite",
+        "code": "import json;d=json.load(open('env_vars.json'));assert isinstance(d,list);assert d==sorted(d), 'non trie';assert len(d)==len(set(d))==6;print('tri ok')"
+      }
+    ]
+  },
+  {
+    "id": "T04",
+    "category": "resume_factuel",
+    "expected_route": "eco-qwen",
+    "files": {
+      "module_a.py": "import os\nimport json\nfrom pathlib import Path\n\ndef load_config(path):\n    with open(path) as f:\n        return json.load(f)\n\ndef save_result(data, path):\n    with open(path, 'w') as f:\n        json.dump(data, f)\n\ndef _helper(x):\n    return os.path.basename(str(x))\n"
+    },
+    "prompt": "Dans le dossier courant, module_a.py est un petit module Python. Produis OBLIGATOIREMENT summary.json dans le dossier courant avec EXACTEMENT les cles {functions, imports, function_count}. functions : liste triee de TOUS les noms de fonctions definies par `def` au niveau module (y compris privees prefixees _) : [\"_helper\", \"load_config\", \"save_result\"]. imports : liste triee des modules top-level importes (import x / from x import ...) : [\"json\", \"os\", \"pathlib\"]. function_count : 3 (int). Aucune autre cle. Listes triees ASCII, chaines exactes.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "summary.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "summary.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "summary.json",
+        "key": "",
+        "expected": [
+          "function_count",
+          "functions",
+          "imports"
+        ],
+        "points": 2,
+        "label": "cles exactes"
+      },
+      {
+        "type": "json_equals",
+        "path": "summary.json",
+        "key": "functions",
+        "expected": [
+          "_helper",
+          "load_config",
+          "save_result"
+        ],
+        "points": 3,
+        "label": "fonctions"
+      },
+      {
+        "type": "json_equals",
+        "path": "summary.json",
+        "key": "imports",
+        "expected": [
+          "json",
+          "os",
+          "pathlib"
+        ],
+        "points": 2,
+        "label": "imports"
+      },
+      {
+        "type": "json_equals",
+        "path": "summary.json",
+        "key": "function_count",
+        "expected": 3,
+        "points": 1,
+        "label": "compte"
+      }
+    ]
+  },
+  {
+    "id": "T05",
+    "category": "resume_factuel",
+    "expected_route": "eco-qwen",
+    "files": {
+      "docker-compose.yml": "services:\n  web:\n    image: nexora/web:1.2\n    ports: [\"8080:8080\", \"3000:3000\"]\n  db:\n    image: postgres:16\n    ports: [\"5432:5432\"]\n  cache:\n    image: redis:7\n    ports: [\"6379:6379\"]\n",
+      "nginx.conf": "server {\n  listen 8080;\n  location / { proxy_pass http://web:3000; }\n}\n"
+    },
+    "prompt": "Dans le dossier courant, docker-compose.yml et nginx.conf decrivent les ports exposes. Produis OBLIGATOIREMENT ports.json dans le dossier courant avec EXACTEMENT la cle {ports} : liste d'entiers triee croissante des ports HOTES publies (partie gauche de \"HOST:CONT\"). Attendu : [3000, 5432, 6379, 8080]. Ignore les ports internes / proxy_pass. Aucune autre cle, entiers (pas de chaines), ordre croissant.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "ports.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "ports.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "ports.json",
+        "key": "",
+        "expected": [
+          "ports"
+        ],
+        "points": 2,
+        "label": "cle unique"
+      },
+      {
+        "type": "json_equals",
+        "path": "ports.json",
+        "key": "ports",
+        "expected": [
+          3000,
+          5432,
+          6379,
+          8080
+        ],
+        "points": 5,
+        "label": "ports exacts"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "types int",
+        "code": "import json;d=json.load(open('ports.json'));assert all(isinstance(x,int) for x in d['ports']);print('ints ok')"
+      }
+    ]
+  },
+  {
+    "id": "T06",
+    "category": "resume_factuel",
+    "expected_route": "eco-qwen",
+    "files": {
+      "handler.py": "def handle(path):\n    try:\n        with open(path) as f:\n            data = f.read()\n    except FileNotFoundError:\n        return 'missing'\n    try:\n        n = int(data.strip())\n        d = {'n': n}\n    except (ValueError, KeyError) as e:\n        return f'bad: {e}'\n    return d\n"
+    },
+    "prompt": "Dans le dossier courant, handler.py contient des blocs try/except. Produis OBLIGATOIREMENT errors.json dans le dossier courant avec EXACTEMENT la cle {handled_errors} : liste triee des noms d'exceptions capturees par des clauses except (y compris tuples). Attendu : [\"FileNotFoundError\", \"KeyError\", \"ValueError\"]. N'inclus pas Exception de base ni les exceptions levees (raise). Aucune autre cle.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "errors.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "errors.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "errors.json",
+        "key": "",
+        "expected": [
+          "handled_errors"
+        ],
+        "points": 2,
+        "label": "cle unique"
+      },
+      {
+        "type": "json_equals",
+        "path": "errors.json",
+        "key": "handled_errors",
+        "expected": [
+          "FileNotFoundError",
+          "KeyError",
+          "ValueError"
+        ],
+        "points": 5,
+        "label": "erreurs exactes"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "tri ascii",
+        "code": "import json;d=json.load(open('errors.json'));assert d['handled_errors']==sorted(d['handled_errors']);print('tri ok')"
+      }
+    ]
+  },
+  {
+    "id": "T07",
+    "category": "tests_unitaires",
+    "expected_route": "eco-qwen",
+    "files": {
+      "calc.py": "def add(a, b):\n    return a + b\n\ndef div(a, b):\n    if b == 0:\n        raise ZeroDivisionError('division by zero')\n    return a / b\n"
+    },
+    "prompt": "Dans le dossier courant, calc.py fournit add(a,b) et div(a,b) (div leve ZeroDivisionError si b==0). Ecris OBLIGATOIREMENT test_calc.py dans le dossier courant : tests `unittest` (import unittest + import calc) avec AU MOINS 3 methodes de test couvrant : add nominal, div nominale, div par zero via assertRaises(ZeroDivisionError). Le fichier doit s'executer par `python3 -m unittest test_calc -v` avec statut OK. Ne modifie pas calc.py. Nom de classe libre, noms de methodes commencant par test.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "test_calc.py",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "regex_match",
+        "path": "test_calc.py",
+        "pattern": "assertRaises\\s*\\(\\s*ZeroDivisionError",
+        "points": 2,
+        "label": "cas limite zero"
+      },
+      {
+        "type": "unittest_pass",
+        "test_file": "test_calc.py",
+        "min_tests": 3,
+        "points": 7,
+        "label": "tests passent"
+      }
+    ]
+  },
+  {
+    "id": "T08",
+    "category": "tests_unitaires",
+    "expected_route": "eco-qwen",
+    "files": {
+      "strings.py": "def truncate(s, n):\n    \"\"\"Retourne s tronquee a n caracteres (n>=0).\"\"\"\n    if not isinstance(n, int) or n < 0:\n        raise ValueError('n must be a non-negative int')\n    return s[:n]\n"
+    },
+    "prompt": "Dans le dossier courant, strings.py fournit truncate(s, n) : retourne s[:n], leve ValueError si n negatif ou non-int. Ecris OBLIGATOIREMENT test_strings.py dans le dossier courant : tests `unittest` (import unittest + import strings) avec AU MOINS 3 methodes couvrant : troncature nominale (ex. truncate('nexora',3)=='nex'), cas limite n==0 (chaine vide), et ValueError sur n negatif via assertRaises. Doit passer via `python3 -m unittest test_strings -v` (OK). Ne modifie pas strings.py.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "test_strings.py",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "regex_match",
+        "path": "test_strings.py",
+        "pattern": "assertRaises\\s*\\(\\s*ValueError",
+        "points": 2,
+        "label": "cas limite ValueError"
+      },
+      {
+        "type": "unittest_pass",
+        "test_file": "test_strings.py",
+        "min_tests": 3,
+        "points": 7,
+        "label": "tests passent"
+      }
+    ]
+  },
+  {
+    "id": "T09",
+    "category": "tests_unitaires",
+    "expected_route": "eco-qwen",
+    "files": {
+      "collection.py": "def dedup(items):\n    \"\"\"Supprime les doublons en preservant l'ordre.\"\"\"\n    seen = set()\n    out = []\n    for x in items:\n        if x not in seen:\n            seen.add(x)\n            out.append(x)\n    return out\n"
+    },
+    "prompt": "Dans le dossier courant, collection.py fournit dedup(items) : supprime les doublons en preservant l'ordre. Ecris OBLIGATOIREMENT test_collection.py dans le dossier courant : tests `unittest` (import unittest + import collection) avec AU MOINS 3 methodes couvrant : doublons (dedup([1,2,1,3])==[1,2,3]), ordre preserve, et cas limite liste vide (dedup([])==[]). Doit passer via `python3 -m unittest test_collection -v` (OK). Ne modifie pas collection.py.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "test_collection.py",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "regex_match",
+        "path": "test_collection.py",
+        "pattern": "dedup\\s*\\(\\s*\\[\\s*\\]",
+        "points": 2,
+        "label": "cas limite vide"
+      },
+      {
+        "type": "unittest_pass",
+        "test_file": "test_collection.py",
+        "min_tests": 3,
+        "points": 7,
+        "label": "tests passent"
+      }
+    ]
+  },
+  {
+    "id": "T10",
+    "category": "traduction_i18n",
+    "expected_route": "eco-qwen",
+    "files": {
+      "en.json": "{\n  \"welcome\": \"Hello {user}, you have {count} tasks in your workspace\",\n  \"logout\": \"Log out\"\n}\n"
+    },
+    "prompt": "Dans le dossier courant, en.json contient des chaines EN avec placeholders {user} et {count}. Produis OBLIGATOIREMENT fr.json dans le dossier courant : traduction FR professionnelle avec les MEMES cles que en.json, placeholders {user} et {count} preserves a 100% (meme orthographe, memes accolades, aucune suppression/ajout). Glossaire Nexora obligatoire : `workspace` -> `espace de travail` (dans welcome). `Log out` -> `Se déconnecter`. Format : JSON valide, memes cles, valeurs FR non vides et differentes de l'EN (sauf placeholders).",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "fr.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "fr.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "fr.json",
+        "key": "",
+        "expected": [
+          "logout",
+          "welcome"
+        ],
+        "points": 1,
+        "label": "cles identiques"
+      },
+      {
+        "type": "py_assert",
+        "points": 4,
+        "label": "placeholders 100%",
+        "code": "import json,re;src=json.load(open('en.json'));out=json.load(open('fr.json'));assert set(src)==set(out), 'cles';\ndef ph(s): return (sorted(re.findall(r'\\{[^}]+\\}',s)), sorted(re.findall(r'%s',s)))\nfor k in src:\n    assert ph(src[k])==ph(out[k]), f\"placeholders {k}: {ph(src[k])} vs {ph(out[k])}\"\nassert sorted(re.findall(r'\\{[^}]+\\}',out['welcome']))==['{count}','{user}']\nprint('placeholders ok')"
+      },
+      {
+        "type": "text_contains",
+        "path": "fr.json",
+        "substrings": [
+          "espace de travail",
+          "Se déconnecter"
+        ],
+        "points": 2,
+        "label": "glossaire"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "traduction reelle",
+        "code": "import json;src=json.load(open('en.json'));out=json.load(open('fr.json'));assert out['welcome']!=src['welcome'] and out['logout']!=src['logout'];assert len(out['welcome'])>10;print('trad ok')"
+      }
+    ]
+  },
+  {
+    "id": "T11",
+    "category": "traduction_i18n",
+    "expected_route": "eco-qwen",
+    "files": {
+      "fr.json": "{\n  \"invite\": \"%s vous a invité dans l'espace de travail\",\n  \"quota\": \"Quota dépassé\"\n}\n"
+    },
+    "prompt": "Dans le dossier courant, fr.json contient des chaines FR avec placeholder %s. Produis OBLIGATOIREMENT en.json dans le dossier courant : traduction EN professionnelle avec les MEMES cles que fr.json, placeholder %s preserve a 100% (meme nombre d'occurrences par chaine, pas de {..} ajoute). Glossaire Nexora obligatoire : `espace de travail` -> `workspace` (dans invite). `Quota dépassé` -> `Quota exceeded`. Format : JSON valide, memes cles, valeurs EN non vides et differentes du FR.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "en.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "en.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "en.json",
+        "key": "",
+        "expected": [
+          "invite",
+          "quota"
+        ],
+        "points": 1,
+        "label": "cles identiques"
+      },
+      {
+        "type": "py_assert",
+        "points": 4,
+        "label": "%s preserve 100%",
+        "code": "import json;src=json.load(open('fr.json'));out=json.load(open('en.json'));assert set(src)==set(out);\nfor k in src:\n    assert src[k].count('%s')==out[k].count('%s')==1 if k=='invite' else out[k].count('%s')==src[k].count('%s'), k\nassert out['invite'].count('%s')==1;assert '{' not in out['invite'];print('%s ok')"
+      },
+      {
+        "type": "text_contains",
+        "path": "en.json",
+        "substrings": [
+          "workspace",
+          "Quota exceeded"
+        ],
+        "points": 2,
+        "label": "glossaire"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "traduction reelle",
+        "code": "import json;src=json.load(open('fr.json'));out=json.load(open('en.json'));assert out['invite']!=src['invite'];print('trad ok')"
+      }
+    ]
+  },
+  {
+    "id": "T12",
+    "category": "traduction_i18n",
+    "expected_route": "eco-qwen",
+    "files": {
+      "en.json": "{\n  \"report\": \"Agent processed {count} files in %s\",\n  \"retry\": \"Retry\"\n}\n"
+    },
+    "prompt": "Dans le dossier courant, en.json contient une chaine MIXTE avec {count} ET %s. Produis OBLIGATOIREMENT fr.json dans le dossier courant : traduction FR avec MEMES cles, placeholders {count} et %s preserves a 100% chacun (compte exact par chaine). Glossaire Nexora : `Agent` -> `Agent` (capitalisation conservee, ne pas traduire en `Representant`), `Retry` -> `Réessayer`. JSON valide, valeurs FR differentes de l'EN, placeholders intacts.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "fr.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "fr.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "fr.json",
+        "key": "",
+        "expected": [
+          "report",
+          "retry"
+        ],
+        "points": 1,
+        "label": "cles identiques"
+      },
+      {
+        "type": "py_assert",
+        "points": 4,
+        "label": "mixte {count}+%s",
+        "code": "import json,re;src=json.load(open('en.json'));out=json.load(open('fr.json'));assert set(src)==set(out);\nassert out['report'].count('{count}')==1 and out['report'].count('%s')==1, out['report']\nassert out['retry'].count('%s')==0 and '{' not in out['retry']\nprint('mixte ok')"
+      },
+      {
+        "type": "text_contains",
+        "path": "fr.json",
+        "substrings": [
+          "Agent",
+          "Réessayer"
+        ],
+        "points": 2,
+        "label": "glossaire"
+      },
+      {
+        "type": "text_not_contains",
+        "path": "fr.json",
+        "substrings": [
+          "Representant",
+          "representant"
+        ],
+        "points": 1,
+        "label": "pas de sur-traduction"
+      }
+    ]
+  },
+  {
+    "id": "T13",
+    "category": "inventaire",
+    "expected_route": "eco-qwen",
+    "files": {
+      "a.py": "def alpha():\n    pass\n\ndef beta():\n    alpha()\n",
+      "b.py": "from a import alpha\n\ndef gamma():\n    alpha()\n    alpha()\n",
+      "c.py": "import a\n\ndef delta():\n    a.beta()\n    a.alpha()\n",
+      "d.py": "def epsilon():\n    pass\n"
+    },
+    "prompt": "Dans le dossier courant, un mini-depot de 4 fichiers (a.py, b.py, c.py, d.py) definit des fonctions et des appels. Produis OBLIGATOIREMENT inventory.json dans le dossier courant avec EXACTEMENT la cle {functions_defined} : liste triee de TOUS les noms de fonctions definies par `def` dans les 4 fichiers. Attendu : [\"alpha\", \"beta\", \"delta\", \"epsilon\", \"gamma\"]. Analyse statique uniquement (pas d'execution). Aucune autre cle.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "inventory.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "inventory.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "inventory.json",
+        "key": "",
+        "expected": [
+          "functions_defined"
+        ],
+        "points": 2,
+        "label": "cle unique"
+      },
+      {
+        "type": "json_equals",
+        "path": "inventory.json",
+        "key": "functions_defined",
+        "expected": [
+          "alpha",
+          "beta",
+          "delta",
+          "epsilon",
+          "gamma"
+        ],
+        "points": 5,
+        "label": "symboles exacts"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "tri",
+        "code": "import json;d=json.load(open('inventory.json'));assert d['functions_defined']==sorted(d['functions_defined']);print('tri ok')"
+      }
+    ]
+  },
+  {
+    "id": "T14",
+    "category": "inventaire",
+    "expected_route": "eco-qwen",
+    "files": {
+      "a.py": "def alpha():\n    pass\n\ndef beta():\n    alpha()\n",
+      "b.py": "from a import alpha\n\ndef gamma():\n    alpha()\n    alpha()\n",
+      "c.py": "import a\n\ndef delta():\n    a.beta()\n    a.alpha()\n",
+      "d.py": "def epsilon():\n    pass\n"
+    },
+    "prompt": "Dans le dossier courant, le mini-depot (a.py, b.py, c.py, d.py) contient des appels de fonctions (y compris via attribut a.foo : compter le nom final foo). Produis OBLIGATOIREMENT calls.json dans le dossier courant avec EXACTEMENT la cle {call_counts} : objet {nom: nombre d'appels statiques} pour chaque fonction definie (0 si jamais appelee). Attendu : {\"alpha\": 4, \"beta\": 1, \"gamma\": 0, \"delta\": 0, \"epsilon\": 0} (beta appelle alpha 1x, gamma 2x, delta appelle a.beta 1x et a.alpha 1x). Aucune autre cle.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "calls.json",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "json_valid",
+        "path": "calls.json",
+        "points": 1,
+        "label": "json valide"
+      },
+      {
+        "type": "json_keys",
+        "path": "calls.json",
+        "key": "",
+        "expected": [
+          "call_counts"
+        ],
+        "points": 2,
+        "label": "cle unique"
+      },
+      {
+        "type": "json_equals",
+        "path": "calls.json",
+        "key": "call_counts",
+        "expected": {
+          "alpha": 4,
+          "beta": 1,
+          "gamma": 0,
+          "delta": 0,
+          "epsilon": 0
+        },
+        "points": 5,
+        "label": "comptes exacts"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "somme=5",
+        "code": "import json;d=json.load(open('calls.json'));assert sum(d['call_counts'].values())==5, d;print('somme ok')"
+      }
+    ]
+  },
+  {
+    "id": "T15",
+    "category": "securite",
+    "expected_route": "hors-qwen",
+    "files": {
+      "serve.py": "import os\nBASE = 'data'\n\ndef read_file(name):\n    p = os.path.join(BASE, name)\n    with open(p, encoding='utf-8') as f:\n        return f.read()\n",
+      "data/hello.txt": "hello nexora\n",
+      "secret.txt": "TOP-SECRET-NEXORA\n"
+    },
+    "prompt": "AUDIT SECURITE (path traversal + symlink). Dans le dossier courant, serve.py expose read_file(name) vulnerable (os.path.join sans normalisation) + data/hello.txt + secret.txt (hors data, a ne jamais exposer). Produis OBLIGATOIREMENT secure_serve.py dans le dossier courant exposant read_file(name: str) -> str avec BASE='data' : (1) normalise via os.path.realpath (resout .. ET symlinks), (2) refuse (ValueError) si le chemin resolu sort de data/ (os.path.commonpath), (3) lit en utf-8 sinon. Conserve l'API read_file(name). Le fichier doit bloquer `../secret.txt` et un symlink data/link -> ../secret.txt. N'ecris pas de reseau, reste deterministe.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "secure_serve.py",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "regex_match",
+        "path": "secure_serve.py",
+        "pattern": "realpath",
+        "points": 1,
+        "label": "resout symlinks"
+      },
+      {
+        "type": "regex_match",
+        "path": "secure_serve.py",
+        "pattern": "commonpath|abspath",
+        "points": 1,
+        "label": "confinement"
+      },
+      {
+        "type": "py_assert",
+        "points": 3,
+        "label": "traversal bloque",
+        "code": "import secure_serve\nfor evil in ['../secret.txt','..\\\\secret.txt','subdir/../../secret.txt']:\n    try:\n        secure_serve.read_file(evil); raise SystemExit(f'FAIL ouvert: {evil}')\n    except (ValueError, FileNotFoundError, OSError): pass\nprint('traversal bloque')"
+      },
+      {
+        "type": "py_assert",
+        "points": 3,
+        "label": "symlink bloque",
+        "code": "import os\nimport secure_serve\np=os.path.join('data','link_evil')\ntry:\n    os.unlink(p)\nexcept FileNotFoundError:\n    pass\nos.symlink(os.path.abspath('secret.txt'),p)\ntry:\n    secure_serve.read_file('link_evil')\n    raise SystemExit('FAIL symlink lu')\nexcept (ValueError,OSError):\n    print('symlink bloque')\nfinally:\n    (os.unlink(p) if os.path.islink(p) else None)"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "legitime ok",
+        "code": "import secure_serve;assert secure_serve.read_file('hello.txt').strip()=='hello nexora';print('legitime ok')"
+      }
+    ]
+  },
+  {
+    "id": "T16",
+    "category": "securite",
+    "expected_route": "hors-qwen",
+    "files": {
+      "check_then_write.py": "import os\n\ndef save(path, data):\n    if not os.path.exists(path):\n        with open(path, 'w', encoding='utf-8') as f:\n            f.write(data)\n    return path\n"
+    },
+    "prompt": "AUDIT TOCTOU. check_then_write.py fait `if not exists: open('w')` : fenetre de race (deux processus peuvent ecraser / symlink swap entre test et ecriture). Produis OBLIGATOIREMENT secure_save.py exposant save(path, data) ATOMIQUE : creation exclusive via open(path,'x',encoding='utf-8') (ou O_CREAT|O_EXCL), leve FileExistsError si le fichier existe deja, ne tronque JAMAIS un fichier existant, cree les dossiers parents si besoin. Sans reseau, deterministe.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "secure_save.py",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "regex_match",
+        "path": "secure_save.py",
+        "pattern": "O_EXCL|mode\\s*=\\s*['\\\"]x['\\\"]|['\\\"]x['\\\"]",
+        "points": 2,
+        "label": "exclusif atomique"
+      },
+      {
+        "type": "py_assert",
+        "points": 4,
+        "label": "pas d'ecrasement",
+        "code": "import os,secure_save;p='t16_out.txt';open(p,'w').write('ORIGINAL');\ntry:\n    secure_save.save(p,'PIRATE'); raise SystemExit('FAIL ecrase')\nexcept FileExistsError: pass\nassert open(p).read()=='ORIGINAL', 'corrompu';print('exclusif ok')"
+      },
+      {
+        "type": "py_assert",
+        "points": 3,
+        "label": "creation + race simulee",
+        "code": "import os,threading,secure_save\nfor f in ['t16_a.txt','t16_b.txt']:\n    (os.unlink(f) if os.path.exists(f) else None)\nsecure_save.save('t16_a.txt','hello');assert open('t16_a.txt').read()=='hello'\nwins=[0];\ndef w():\n    try:\n        secure_save.save('t16_b.txt','x'); wins[0]+=1\n    except FileExistsError: pass\nts=[threading.Thread(target=w) for _ in range(8)];[t.start() for t in ts];[t.join(timeout=10) for t in ts]\nassert wins[0]==1, wins\nprint('race ok')"
+      }
+    ]
+  },
+  {
+    "id": "T17",
+    "category": "concurrent_transactionnel",
+    "expected_route": "hors-qwen",
+    "files": {
+      "counter.py": "import threading\ncount = 0\n\ndef increment(n):\n    global count\n    for _ in range(n):\n        c = count\n        count = c + 1\n"
+    },
+    "prompt": "CONCURRENCE CRITIQUE. counter.py incremente sans verrou (race) et un verrou naif multi-ressources peut deadlocker. Produis OBLIGATOIREMENT counter_fixed.py exposant `count` (int, 0 au depart), `lock = threading.Lock()` (ou RLock), et `increment(n)` qui boucle n fois `with lock: count+=1` (lecture-modification-ecriture SOUS verrou, un seul verrou global, ordre fixe, aucun acquire imbrique inverse). Exigences : 8 threads x 5000 increments => count==40000, termine en <15s, sans deadlock, resultat deterministe. Ne change pas la signature increment(n).",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "counter_fixed.py",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "regex_match",
+        "path": "counter_fixed.py",
+        "pattern": "threading\\.(Lock|RLock)\\s*\\(",
+        "points": 2,
+        "label": "verrou unique"
+      },
+      {
+        "type": "py_assert",
+        "points": 4,
+        "label": "40000 sans race",
+        "code": "import importlib.util,threading\nspec=importlib.util.spec_from_file_location('cf','counter_fixed.py')\ncf=importlib.util.module_from_spec(spec);spec.loader.exec_module(cf)\ncf.count=0\nts=[threading.Thread(target=cf.increment,args=(5000,)) for _ in range(8)]\n[t.start() for t in ts]\n[t.join(timeout=15) for t in ts]\nassert not any(t.is_alive() for t in ts), 'deadlock'\nassert cf.count==40000, cf.count\nprint('40000 ok')"
+      },
+      {
+        "type": "py_assert",
+        "points": 3,
+        "label": "deterministe x2",
+        "code": "import importlib.util,threading\nspec=importlib.util.spec_from_file_location('cf2','counter_fixed.py')\ncf=importlib.util.module_from_spec(spec);spec.loader.exec_module(cf)\ncf.count=0\nts=[threading.Thread(target=cf.increment,args=(1000,)) for _ in range(4)]\n[t.start() for t in ts]\n[t.join(timeout=15) for t in ts]\nassert cf.count==4000, cf.count\nprint('reproductible ok')"
+      }
+    ]
+  },
+  {
+    "id": "T18",
+    "category": "concurrent_transactionnel",
+    "expected_route": "hors-qwen",
+    "files": {
+      "transactions.csv": "id,amount\n1,10.10\n2,20.20\n2,20.20\n3,NaN\n4,\n5,5.55\n6,nan\n7,abc\n"
+    },
+    "prompt": "RECONCILIATION FINANCIERE EXACTE. transactions.csv contient des doublons d'id et des montants NaN/vides/invalides. Produis OBLIGATOIREMENT reconcile.py (executable : `python3 reconcile.py` lit transactions.csv et ecrit result.json) ET result.json avec EXACTEMENT {total, unique_count, duplicates, ignored_nan}. Regles : Decimal exact (jamais float), deduplique par id (garde PREMIERE occurrence), ignore lignes a montant NaN (insensible a la casse) / vide / non-numerique, total en string a 2 decimales. Attendu : total \"35.85\" (10.10+20.20+5.55), unique_count 4 (ids 1,2,5 + ... voir regle : ids valides uniques = 1,2,5 => 3 ? LIRE LA SUITE), duplicates [\"2\"], ignored_nan 4. PRECISION : ids 3,4,6,7 ignores (montants invalides) ; uniques valides = {1,2,5} => unique_count 3 ; ids en double parmi TOUTES les lignes = [\"2\"]. Si ton code suit ces regles, result.json = {\"total\":\"35.85\",\"unique_count\":3,\"duplicates\":[\"2\"],\"ignored_nan\":4}.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "reconcile.py",
+        "points": 1,
+        "label": "script present"
+      },
+      {
+        "type": "file_exists",
+        "path": "result.json",
+        "points": 1,
+        "label": "resultat present"
+      },
+      {
+        "type": "regex_match",
+        "path": "reconcile.py",
+        "pattern": "Decimal",
+        "points": 1,
+        "label": "Decimal exact"
+      },
+      {
+        "type": "json_keys",
+        "path": "result.json",
+        "key": "",
+        "expected": [
+          "duplicates",
+          "ignored_nan",
+          "total",
+          "unique_count"
+        ],
+        "points": 1,
+        "label": "cles exactes"
+      },
+      {
+        "type": "json_equals",
+        "path": "result.json",
+        "key": "",
+        "expected": {
+          "total": "35.85",
+          "unique_count": 3,
+          "duplicates": [
+            "2"
+          ],
+          "ignored_nan": 4
+        },
+        "points": 5,
+        "label": "montants exacts"
+      },
+      {
+        "type": "py_assert",
+        "points": 1,
+        "label": "pas de float",
+        "code": "import re;s=open('reconcile.py').read();assert 'Decimal' in s;assert not re.search(r'\\btotal\\s*=\\s*0\\.0\\b',s);print('decimal ok')"
+      }
+    ]
+  },
+  {
+    "id": "T19",
+    "category": "architecture",
+    "expected_route": "hors-qwen",
+    "files": {
+      "context.md": "# Contexte Nexora\nOptions pour 50k taches/jour, budget <= 900 EUR/mois, p95 <= 800ms, dispo >= 99.9%.\n- A: mono-worker eco-qwen local : 120 EUR/mois, p95 1400ms, dispo 99.5%.\n- B: pool hybride qwen+file secours : 620 EUR/mois, p95 650ms, dispo 99.95%.\n- C: tout hors-qwen premium : 2400 EUR/mois, p95 380ms, dispo 99.99%.\nContrainte: donnees UE uniquement.\n"
+    },
+    "prompt": "ARBITRAGE ADR CHIFFRE. context.md impose budget<=900 EUR/mois, p95<=800ms, dispo>=99.9%, donnees UE, 50k taches/jour. Produis OBLIGATOIREMENT ADR.md (min 25 lignes non vides) avec : (1) tableau comparatif A/B/C reprenant les 3 chiffres (EUR/mois, p95 ms, dispo %) de chaque option, (2) verification explicite de chaque contrainte (budget / latence / dispo / UE) par option, (3) DECISION : option B (seule a satisfaire les 4 contraintes), (4) plan de repli si B depasse 900 EUR (ex. quota eco-qwen + cache), (5) les mots `budget`, `p95`, `dispo`, `UE`, `B` et les nombres 900, 800, 99.9, 620, 650, 99.95. Sans reseau.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "ADR.md",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "py_assert",
+        "points": 3,
+        "label": "25 lignes + decision B",
+        "code": "t=open('ADR.md',encoding='utf-8').read();lines=[l for l in t.splitlines() if l.strip()];assert len(lines)>=25, len(lines);assert 'B' in t;print(len(lines),'lignes ok')"
+      },
+      {
+        "type": "text_contains",
+        "path": "ADR.md",
+        "substrings": [
+          "900",
+          "800",
+          "99.9",
+          "620",
+          "650",
+          "99.95",
+          "budget",
+          "p95",
+          "dispo",
+          "UE"
+        ],
+        "points": 4,
+        "label": "chiffres + contraintes"
+      },
+      {
+        "type": "regex_match",
+        "path": "ADR.md",
+        "pattern": "(?i)decisi[os]n[^\\n]{0,80}B",
+        "points": 2,
+        "label": "decision B explicite"
+      }
+    ]
+  },
+  {
+    "id": "T20",
+    "category": "architecture",
+    "expected_route": "hors-qwen",
+    "files": {
+      "fsm.py": "STATE='idle'\n\ndef on_event(e):\n    global STATE\n    if STATE=='idle':\n        if e=='start': STATE='running'\n        elif e=='quit': STATE='closed'\n        elif e=='fail': STATE='error'\n    elif STATE=='running':\n        if e=='pause': STATE='paused'\n        elif e=='done': STATE='closed'\n        elif e=='fail': STATE='error'\n    elif STATE=='paused':\n        if e=='resume': STATE='running'\n        elif e=='quit': STATE='closed'\n        elif e=='fail': STATE='error'\n    elif STATE=='error':\n        if e=='reset': STATE='idle'\n    return STATE\n"
+    },
+    "prompt": "REFACTORING AUTOMATE. fsm.py implemente un automate if/elif fragile (etats idle/running/paused/error/closed ; evenements start/quit/fail/pause/done/resume/reset). Produis OBLIGATOIREMENT fsm_refactored.py exposant TRANSITIONS (dict {(etat,evenement): nouvel_etat}) avec AU MOINS les 10 transitions du code d'origine, STATES (set/list des 5 etats), et on_event(e) + reset() : transition via table, evenement inconnu => ValueError, etat final 'closed' absorbant (reste 'closed'). Comportement strictement equivalent a fsm.py sur toutes les sequences (ex. idle--start->running--pause->paused--resume->running--done->closed ; error--reset->idle). Sans reseau.",
+    "checks": [
+      {
+        "type": "file_exists",
+        "path": "fsm_refactored.py",
+        "points": 1,
+        "label": "fichier present"
+      },
+      {
+        "type": "regex_match",
+        "path": "fsm_refactored.py",
+        "pattern": "TRANSITIONS\\s*=",
+        "points": 2,
+        "label": "table explicite"
+      },
+      {
+        "type": "py_assert",
+        "points": 4,
+        "label": "equivalence fsm",
+        "code": "import importlib.util\ndef load(p,n):\n    s=importlib.util.spec_from_file_location(n,p);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m\na=load('fsm.py','a');b=load('fsm_refactored.py','b')\nseqs=[['start','pause','resume','done'],['start','fail','reset','start','done'],['quit'],['start','pause','quit'],['fail','reset','quit'],['start','done']]\nexp=['closed','closed','closed','closed','closed','closed']\nassert len(b.TRANSITIONS)>=10, len(b.TRANSITIONS)\nassert set(b.STATES)=={'idle','running','paused','error','closed'}, b.STATES\nimport copy\nfor s,e in zip(seqs,exp):\n    a.STATE='idle';[a.on_event(x) for x in s];b.reset();[b.on_event(x) for x in s]\n    assert a.STATE==b.STATE==e, (s,a.STATE,b.STATE)\ntry:\n    b.reset();b.on_event('nope'); raise SystemExit('FAIL ValueError')\nexcept ValueError: pass\nb.reset();b.on_event('quit');assert b.on_event('quit')=='closed'\nprint('fsm equivalente')"
+      },
+      {
+        "type": "py_assert",
+        "points": 3,
+        "label": "reset + absorbant",
+        "code": "import importlib.util;s=importlib.util.spec_from_file_location('m','fsm_refactored.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nm.reset();assert m.on_event('start')=='running';m.reset()\nimport inspect;assert callable(m.reset)\nprint('reset ok')"
+      }
+    ]
+  }
+]

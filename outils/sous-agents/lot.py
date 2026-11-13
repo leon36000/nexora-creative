@@ -21,6 +21,13 @@ ALIASES = {
     "muse": "eco-muse", "eco-muse": "eco-muse",
     "gemini": "eco-gemini", "eco-gemini": "eco-gemini",
     "gemini-eleve": "eco-gemini-eleve", "eco-gemini-eleve": "eco-gemini-eleve",
+    "qwen": "eco-qwen", "eco-qwen": "eco-qwen",
+    "carbon": "eco-carbon", "eco-carbon": "eco-carbon",
+    "carbon-eleve": "eco-carbon-eleve", "eco-carbon-eleve": "eco-carbon-eleve",
+    "terra": "eco-terra", "eco-terra": "eco-terra",
+    "sol": "eco-sol", "eco-sol": "eco-sol",
+    "argon": "eco-argon", "eco-argon": "eco-argon",
+    "kimi": "eco-kimi", "eco-kimi": "eco-kimi",
 }
 # With <=64 coefficient digits and adjusted exponent >= -30, the lowest
 # nonzero Decimal exponent accepted below is -30 - (64 - 1) = -93.
@@ -543,6 +550,14 @@ def launch(task: Task, alias: str, lot_id: str, lot_dir: Path, turns: int, run_b
 def main(argv: list[str]) -> int:
     try:
         alias, prompt_dir, work_root, parallelism, allow_create = parse_args(argv)
+        if alias == "eco-qwen":
+            try:
+                qwen_conc = max(1, int(os.environ.get("SA_QWEN_MAX_CONCURRENCY", "2")))
+                qwen_lot_cap = max(qwen_conc, int(os.environ.get("SA_QWEN_LOT_PARALLEL", "3")))
+            except ValueError:
+                raise LotError("SA_QWEN_MAX_CONCURRENCY ou SA_QWEN_LOT_PARALLEL invalide") from None
+            cap = qwen_lot_cap if os.environ.get("SA_QWEN_FALLBACK", "1") == "1" else qwen_conc
+            parallelism = min(parallelism, cap)
         budget = positive_decimal(os.environ.get("LOT_BUDGET", "5"), "LOT_BUDGET")
         per_run_budget = positive_decimal(os.environ.get("LOT_RUN_BUDGET", "0.30"), "LOT_RUN_BUDGET")
         if per_run_budget > budget:

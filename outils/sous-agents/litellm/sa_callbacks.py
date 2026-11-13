@@ -1,9 +1,29 @@
 """Journal JSONL des appels (comptes de jetons, coût, durée) — jamais les prompts ni les réponses."""
-import json, math, os, time
+import json, math, os, re, time
 from decimal import Decimal
 from litellm.integrations.custom_logger import CustomLogger
 
 LOG = os.environ.get("SA_LOG", "/app/state/usage.jsonl")
+# Modèle local gratuit sur pc4 : cost_snapshot refuse cost=null (HTTP 503), donc eco-qwen vaut 0.0 quand response_cost est absent.
+ZERO_COST_ALIASES = frozenset({"eco-qwen"})
+_CCH_RE = re.compile(r"cch=[0-9a-fA-F]{5,16}")
+
+
+def _pin_billing_in_data(data):
+    """Neutralise le hash dynamique cch=... du header de facturation Claude sur eco-qwen pour préserver le cache KV pc4."""
+    msgs = data.get("messages")
+    if not isinstance(msgs, list):
+        return
+    for m in msgs:
+        if not isinstance(m, dict) or m.get("role") != "system":
+            continue
+        c = m.get("content")
+        if isinstance(c, str) and "x-anthropic-billing-header" in c:
+            m["content"] = _CCH_RE.sub("cch=00000", c)
+        elif isinstance(c, list):
+            for part in c:
+                if isinstance(part, dict) and isinstance(part.get("text"), str) and "x-anthropic-billing-header" in part["text"]:
+                    part["text"] = _CCH_RE.sub("cch=00000", part["text"])
 
 
 def _hdr(kwargs, name):
@@ -45,10 +65,12 @@ def _write(rec):
 class SaLogger(CustomLogger):
     async def async_pre_call_hook(self, user_api_key_dict, cache, data, call_type):
         # L'effort de raisonnement et le point de terminaison sont fixés par config.yaml (extra_body) : on retire ceux que
-        # le client (claude) ajoute, sinon OpenRouter reçoit deux valeurs contradictoires (reasoning_effort et reasoning.effort).
+        # le client (claude) ajoute, sinon l'amont reçoit deux valeurs contradictoires (reasoning_effort et reasoning.effort).
         if isinstance(data, dict) and str(data.get("model", "")).startswith("eco-"):
             for k in ("reasoning_effort", "reasoning", "thinking", "output_config"):
                 data.pop(k, None)
+            if str(data.get("model", "")) == "eco-qwen":
+                _pin_billing_in_data(data)
         return data
 
     def _rec(self, kwargs, resp, start, end, ok):
@@ -63,14 +85,18 @@ class SaLogger(CustomLogger):
                 }
         except Exception:
             pass
+        alias = ((kwargs.get("litellm_params") or {}).get("metadata") or {}).get("model_group") or kwargs.get("model")
+        cost = _cost(kwargs)
+        if cost is None and alias in ZERO_COST_ALIASES:
+            cost = 0.0
         return {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "run": _hdr(kwargs, "x-sa-run"),
-            "alias": ((kwargs.get("litellm_params") or {}).get("metadata") or {}).get("model_group") or kwargs.get("model"),
+            "alias": alias,
             "ok": ok,
             "in": usage.get("in", 0),
             "out": usage.get("out", 0),
-            "cost": _cost(kwargs),
+            "cost": cost,
             "sec": round((end - start).total_seconds(), 2),
         }
 

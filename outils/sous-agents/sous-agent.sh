@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lance UN sous-agent Claude Code sur un modèle bon marché (via la passerelle LiteLLM locale).
-# Usage : sous-agent.sh [-w] <deepseek|muse|gemini|eco-…> <fichier-prompt> <dossier-de-travail> [max-tours=30] [budget-usd=0.50]
+# Usage : sous-agent.sh [-w] <deepseek|muse|gemini|gemini-eleve|qwen|eco-…> <fichier-prompt> <dossier-de-travail> [max-tours=30] [budget-usd=0.50]
 #   -w  : attendre la fin (sinon : lancement en arrière-plan, la commande rend la main et affiche le dossier de résultat).
 # Sortie : $SA_OUT (défaut ~/.local/share/nexora-sous-agents/runs/<id>/) contenant pid, result.json, transcript.jsonl, summary.txt, stderr.log.
 # Variables : SA_TIMEOUT (secondes, défaut 900), SA_OUT, SA_TAG (préfixe d'identifiant, utilisé par lot.sh), SA_EXTRA_RO (dossiers montés en lecture seule, séparés par « : »).
@@ -14,7 +14,7 @@ unset SA_INTERNAL_RUN_ID
 WAIT=0; [ "${1:-}" = "-w" ] && { WAIT=1; shift; }
 [ $# -ge 3 ] || { sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2; }
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
-ALIAS="$(sa_alias "$1")" || { echo "alias inconnu : $1 (deepseek|muse|gemini)" >&2; exit 2; }
+ALIAS="$(sa_alias "$1")" || { echo "alias inconnu : $1 (deepseek|muse|gemini|gemini-eleve|qwen)" >&2; exit 2; }
 PYTHON_BIN="$(command -v python3)" || { echo "Python indisponible" >&2; exit 2; }
 TIMEOUT_LIMIT="$("$PYTHON_BIN" -E -s -S -c 'import decimal,re,sys
 x=sys.argv[1]; m=re.fullmatch(r"([+]?(?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[eE][+-]?[0-9]+)?)([smhd]?)",x)
@@ -287,9 +287,73 @@ print("<$0.00001" if 0<d<Decimal("0.00001") else "$"+format(d,".5f"))' "$1" 2>/d
 
 runner() {
   local t0=$SECONDS
+  local EFFECTIVE_ALIAS="$ALIAS" FALLBACK_NOTE="" QWEN_HOLDER_PID="" QWEN_IN_FD="" QWEN_OUT_FD=""
+  release_qwen_slot() {
+    if [ -n "$QWEN_IN_FD" ]; then
+      eval "exec ${QWEN_IN_FD}>&-" 2>/dev/null || true
+      QWEN_IN_FD=""
+    fi
+    if [ -n "$QWEN_OUT_FD" ]; then
+      eval "exec ${QWEN_OUT_FD}<&-" 2>/dev/null || true
+      QWEN_OUT_FD=""
+    fi
+    if [ -n "$QWEN_HOLDER_PID" ]; then
+      wait "$QWEN_HOLDER_PID" 2>/dev/null || true
+      QWEN_HOLDER_PID=""
+    fi
+  }
+  if [ "$ALIAS" = "eco-qwen" ]; then
+    local DECISION OK_DEC REASON
+    DECISION="$("$PYTHON_BIN" -E -s -S "$SA_DIR/qwen_ctl.py" resolve eco-qwen --keyfile "$SA_STRATA_KEYFILE" 2>/dev/null)" || DECISION=""
+    OK_DEC="$(jq -r '.ok // false' <<< "$DECISION" 2>/dev/null || echo false)"
+    REASON="$(jq -r '.reason // "pc4_indisponible"' <<< "$DECISION" 2>/dev/null || echo pc4_indisponible)"
+    if [ "$OK_DEC" != "true" ]; then
+      printf '{"type":"result","is_error":true,"subtype":"pc4_indisponible","reason":"%s"}\n' "$REASON" > "$OUT/result.json"
+      printf 'FAIL:pc4_indisponible %s %s cout=aucun_appel raison=%s dossier=%s\n' "$ALIAS" "$RUN" "$REASON" "$OUT" > "$OUT/summary.txt"
+      touch "$OUT/done"
+      return 1
+    fi
+    EFFECTIVE_ALIAS="$(jq -r '.model' <<< "$DECISION")"
+    if [ "$(jq -r '.fallback_used // false' <<< "$DECISION")" = "true" ]; then
+      FALLBACK_NOTE=" repli_depuis=eco-qwen raison=$REASON"
+    fi
+    if [ "$EFFECTIVE_ALIAS" = "eco-qwen" ]; then
+      local SLOT_MSG=""
+      coproc QWEN_SLOT { "$PYTHON_BIN" -E -s -S "$SA_DIR/qwen_ctl.py" hold-slot --lock-dir "$SA_STATE/locks/qwen" --slots "${SA_QWEN_MAX_CONCURRENCY:-2}" --wait "${SA_QWEN_QUEUE_TIMEOUT:-180}" --timeout-exit 75; }
+      QWEN_IN_FD="${QWEN_SLOT[1]}"
+      QWEN_OUT_FD="${QWEN_SLOT[0]}"
+      QWEN_HOLDER_PID="$QWEN_SLOT_PID"
+      IFS= read -r SLOT_MSG <&"$QWEN_OUT_FD" || SLOT_MSG=""
+      case "$SLOT_MSG" in
+        LOCKED\ *) ;;
+        TIMEOUT*)
+          release_qwen_slot
+          if [ "${SA_QWEN_FALLBACK:-1}" = "1" ]; then
+            EFFECTIVE_ALIAS="$(sa_alias "${SA_QWEN_FALLBACK_MODEL:-eco-deepseek}")" || EFFECTIVE_ALIAS="eco-deepseek"
+            case "$EFFECTIVE_ALIAS" in eco-deepseek|eco-muse) ;; *) EFFECTIVE_ALIAS="eco-deepseek";; esac
+            FALLBACK_NOTE=" repli_depuis=eco-qwen raison=file_pc4_pleine"
+          else
+            printf '{"type":"result","is_error":true,"subtype":"file_pc4_pleine"}\n' > "$OUT/result.json"
+            printf 'FAIL:file_pc4_pleine %s %s cout=aucun_appel dossier=%s\n' "$ALIAS" "$RUN" "$OUT" > "$OUT/summary.txt"
+            touch "$OUT/done"
+            return 1
+          fi
+          ;;
+        *)
+          release_qwen_slot
+          printf '{"type":"result","is_error":true,"subtype":"semaphore_qwen_invalide"}\n' > "$OUT/result.json"
+          printf 'FAIL:semaphore_qwen_invalide %s %s cout=aucun_appel dossier=%s\n' "$ALIAS" "$RUN" "$OUT" > "$OUT/summary.txt"
+          touch "$OUT/done"
+          return 1
+          ;;
+      esac
+    fi
+  fi
   # Le relais hôte injecte la vraie clé ; la sandbox ne reçoit qu'un identifiant factice.
   (
-    exec env -i SA_PROXY_RUN="$RUN" SA_PROXY_MODEL="$ALIAS" SA_PROXY_PORT="$SA_PORT" \
+    [ -n "$QWEN_IN_FD" ] && eval "exec ${QWEN_IN_FD}>&-"
+    [ -n "$QWEN_OUT_FD" ] && eval "exec ${QWEN_OUT_FD}<&-"
+    exec env -i SA_PROXY_RUN="$RUN" SA_PROXY_MODEL="$EFFECTIVE_ALIAS" SA_PROXY_PORT="$SA_PORT" \
       SA_PROXY_TIMEOUT="${SA_TIMEOUT:-900}" SA_PROXY_AUDIT="$OUT/proxy-audit.jsonl" \
       SA_PROXY_LEDGER="$(realpath -m -- "$SA_STATE/usage.jsonl")" SA_PROXY_BUDGET="$BUDGET" \
       SA_PROXY_LEDGER_WAIT="$LEDGER_WAIT" \
@@ -303,6 +367,7 @@ runner() {
     sleep 0.2
   done
   if [ ! -S "$SOCKDIR/gw.sock" ]; then
+    release_qwen_slot
     local WAIT_RC=0
     stop_bridge || WAIT_RC=125
     [ "$WAIT_RC" -eq 0 ] && WAIT_RC="$BRIDGE_STOP_RC"
@@ -311,7 +376,7 @@ runner() {
     [ "$BRIDGE_RC" -eq 3 ] && START_SUBTYPE="cle_indisponible"
     [ "$BRIDGE_RC" -eq 4 ] && START_SUBTYPE="journal_indisponible"
     printf '{"type":"result","is_error":true,"subtype":"%s"}\n' "$START_SUBTYPE" > "$OUT/result.json"
-    printf 'FAIL:%s %s %s cout=aucun_appel dossier=%s\n' "$START_SUBTYPE" "$ALIAS" "$RUN" "$OUT" > "$OUT/summary.txt"
+    printf 'FAIL:%s %s %s cout=aucun_appel dossier=%s\n' "$START_SUBTYPE" "$EFFECTIVE_ALIAS" "$RUN" "$OUT" > "$OUT/summary.txt"
     touch "$OUT/done"
     return 1
   fi
@@ -320,28 +385,53 @@ runner() {
   local RO=(); IFS=: read -ra EX <<<"${SA_EXTRA_RO:-}"; for d in "${EX[@]}"; do [ -n "$d" ] && RO+=(--ro-bind "$d" "$d"); done
   local CLAUDE_REAL NODE_DIR; CLAUDE_REAL="$(readlink -f "$(command -v claude)")"; NODE_DIR="$(dirname "$(readlink -f "$(command -v node)")")"
   local SYS="Tu es un sous-agent d'exécution. Travaille UNIQUEMENT dans le dossier courant ($WORK). Pas de réseau, pas de web. N'écris rien hors de ce dossier. Sois concis et vérifie ton travail en exécutant les tests ou commandes demandés. Termine par un court compte rendu : fichiers modifiés, commandes lancées, résultat, doutes éventuels."
-  local CLIENT_START=$SECONDS TIMED_OUT=0
-  timeout --kill-after=10 "${SA_TIMEOUT:-900}" bwrap --clearenv --die-with-parent --unshare-pid --unshare-net --unshare-ipc --unshare-uts \
-    --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 \
-    --ro-bind /etc /etc --proc /proc --dev /dev --tmpfs /tmp \
-    --ro-bind "$CLAUDE_REAL" /opt/claude --ro-bind "$NODE_DIR" /opt/node \
-    "${RO[@]}" --bind "$WORK" "$WORK" --bind "$SOCKDIR" /run/sa --chdir "$WORK" \
-    --setenv HOME /tmp/home --setenv PATH /opt/node:/usr/local/bin:/usr/bin:/bin --setenv CLAUDE_CONFIG_DIR /tmp/home/.claude \
-    --setenv ANTHROPIC_BASE_URL "http://127.0.0.1:$SA_PORT" --setenv ANTHROPIC_API_KEY "nexora-sandbox" \
-    --setenv ANTHROPIC_MODEL "$ALIAS" --setenv ANTHROPIC_SMALL_FAST_MODEL "$ALIAS" \
-    --setenv ANTHROPIC_DEFAULT_OPUS_MODEL "$ALIAS" --setenv ANTHROPIC_DEFAULT_SONNET_MODEL "$ALIAS" --setenv ANTHROPIC_DEFAULT_HAIKU_MODEL "$ALIAS" \
-    --setenv CLAUDE_CODE_SUBAGENT_MODEL "$ALIAS" --setenv ANTHROPIC_CUSTOM_HEADERS "x-sa-run: $RUN" \
-    --setenv DISABLE_TELEMETRY 1 --setenv DISABLE_ERROR_REPORTING 1 --setenv DISABLE_AUTOUPDATER 1 --setenv DISABLE_BUG_COMMAND 1 \
-    --setenv CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 1 --setenv CLAUDE_CODE_DISABLE_AUTO_MEMORY 1 --setenv NO_COLOR 1 \
-    --setenv CLAUDE_CODE_MAX_OUTPUT_TOKENS 16000 \
-    sh -c 'mkdir -p /tmp/home/.claude; socat TCP-LISTEN:'"$SA_PORT"',bind=127.0.0.1,fork,reuseaddr UNIX-CONNECT:/run/sa/gw.sock & sleep 0.3; exec "$@"' sh \
-    /opt/claude -p --bare --model "$ALIAS" --output-format stream-json --verbose \
-      --max-turns "$TURNS" --no-session-persistence --permission-mode dontAsk \
-      --tools "Read,Edit,Write,Glob,Grep,Bash" --allowedTools "Read Edit Write Glob Grep Bash" \
-      --disallowedTools "WebFetch WebSearch Agent Task Bash(git push:*) Bash(ssh:*) Bash(scp:*) Bash(sudo:*) Bash(curl:*) Bash(wget:*)" \
-      --append-system-prompt "$SYS" --strict-mcp-config --disable-slash-commands \
-      < "$PROMPT" > "$OUT/transcript.jsonl" 2> "$OUT/stderr.log" &
-  local PID=$! CLIENT_TOKEN=""; echo $PID > "$OUT/pid"
+  local CLIENT_START=$SECONDS TIMED_OUT=0 PID
+  if [ -n "$QWEN_IN_FD" ]; then
+    eval 'timeout --kill-after=10 "${SA_TIMEOUT:-900}" bwrap --clearenv --die-with-parent --unshare-pid --unshare-net --unshare-ipc --unshare-uts \
+      --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 \
+      --ro-bind /etc /etc --proc /proc --dev /dev --tmpfs /tmp \
+      --ro-bind "$CLAUDE_REAL" /opt/claude --ro-bind "$NODE_DIR" /opt/node \
+      "${RO[@]}" --bind "$WORK" "$WORK" --bind "$SOCKDIR" /run/sa --chdir "$WORK" \
+      --setenv HOME /tmp/home --setenv PATH /opt/node:/usr/local/bin:/usr/bin:/bin --setenv CLAUDE_CONFIG_DIR /tmp/home/.claude \
+      --setenv ANTHROPIC_BASE_URL "http://127.0.0.1:$SA_PORT" --setenv ANTHROPIC_API_KEY "nexora-sandbox" \
+      --setenv ANTHROPIC_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_SMALL_FAST_MODEL "$EFFECTIVE_ALIAS" \
+      --setenv ANTHROPIC_DEFAULT_OPUS_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_DEFAULT_SONNET_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_DEFAULT_HAIKU_MODEL "$EFFECTIVE_ALIAS" \
+      --setenv CLAUDE_CODE_SUBAGENT_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_CUSTOM_HEADERS "x-sa-run: $RUN" \
+      --setenv DISABLE_TELEMETRY 1 --setenv DISABLE_ERROR_REPORTING 1 --setenv DISABLE_AUTOUPDATER 1 --setenv DISABLE_BUG_COMMAND 1 \
+      --setenv CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 1 --setenv CLAUDE_CODE_DISABLE_AUTO_MEMORY 1 --setenv NO_COLOR 1 \
+      --setenv CLAUDE_CODE_MAX_OUTPUT_TOKENS 16000 \
+      sh -c '\''mkdir -p /tmp/home/.claude; socat TCP-LISTEN:'"$SA_PORT"',bind=127.0.0.1,fork,reuseaddr UNIX-CONNECT:/run/sa/gw.sock & sleep 0.3; exec "$@"'\'' sh \
+      /opt/claude -p --bare --model "$EFFECTIVE_ALIAS" --output-format stream-json --verbose \
+        --max-turns "$TURNS" --no-session-persistence --permission-mode dontAsk \
+        --tools "Read,Edit,Write,Glob,Grep,Bash" --allowedTools "Read Edit Write Glob Grep Bash" \
+        --disallowedTools "WebFetch WebSearch Agent Task Bash(git push:*) Bash(ssh:*) Bash(scp:*) Bash(sudo:*) Bash(curl:*) Bash(wget:*)" \
+        --append-system-prompt "$SYS" --strict-mcp-config --disable-slash-commands \
+        < "$PROMPT" > "$OUT/transcript.jsonl" 2> "$OUT/stderr.log" '"${QWEN_IN_FD}"'>&- '"${QWEN_OUT_FD}"'<&- &'
+    PID=$!
+  else
+    timeout --kill-after=10 "${SA_TIMEOUT:-900}" bwrap --clearenv --die-with-parent --unshare-pid --unshare-net --unshare-ipc --unshare-uts \
+      --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 \
+      --ro-bind /etc /etc --proc /proc --dev /dev --tmpfs /tmp \
+      --ro-bind "$CLAUDE_REAL" /opt/claude --ro-bind "$NODE_DIR" /opt/node \
+      "${RO[@]}" --bind "$WORK" "$WORK" --bind "$SOCKDIR" /run/sa --chdir "$WORK" \
+      --setenv HOME /tmp/home --setenv PATH /opt/node:/usr/local/bin:/usr/bin:/bin --setenv CLAUDE_CONFIG_DIR /tmp/home/.claude \
+      --setenv ANTHROPIC_BASE_URL "http://127.0.0.1:$SA_PORT" --setenv ANTHROPIC_API_KEY "nexora-sandbox" \
+      --setenv ANTHROPIC_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_SMALL_FAST_MODEL "$EFFECTIVE_ALIAS" \
+      --setenv ANTHROPIC_DEFAULT_OPUS_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_DEFAULT_SONNET_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_DEFAULT_HAIKU_MODEL "$EFFECTIVE_ALIAS" \
+      --setenv CLAUDE_CODE_SUBAGENT_MODEL "$EFFECTIVE_ALIAS" --setenv ANTHROPIC_CUSTOM_HEADERS "x-sa-run: $RUN" \
+      --setenv DISABLE_TELEMETRY 1 --setenv DISABLE_ERROR_REPORTING 1 --setenv DISABLE_AUTOUPDATER 1 --setenv DISABLE_BUG_COMMAND 1 \
+      --setenv CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 1 --setenv CLAUDE_CODE_DISABLE_AUTO_MEMORY 1 --setenv NO_COLOR 1 \
+      --setenv CLAUDE_CODE_MAX_OUTPUT_TOKENS 16000 \
+      sh -c 'mkdir -p /tmp/home/.claude; socat TCP-LISTEN:'"$SA_PORT"',bind=127.0.0.1,fork,reuseaddr UNIX-CONNECT:/run/sa/gw.sock & sleep 0.3; exec "$@"' sh \
+      /opt/claude -p --bare --model "$EFFECTIVE_ALIAS" --output-format stream-json --verbose \
+        --max-turns "$TURNS" --no-session-persistence --permission-mode dontAsk \
+        --tools "Read,Edit,Write,Glob,Grep,Bash" --allowedTools "Read Edit Write Glob Grep Bash" \
+        --disallowedTools "WebFetch WebSearch Agent Task Bash(git push:*) Bash(ssh:*) Bash(scp:*) Bash(sudo:*) Bash(curl:*) Bash(wget:*)" \
+        --append-system-prompt "$SYS" --strict-mcp-config --disable-slash-commands \
+        < "$PROMPT" > "$OUT/transcript.jsonl" 2> "$OUT/stderr.log" &
+    PID=$!
+  fi
+  local CLIENT_TOKEN=""; echo $PID > "$OUT/pid"
   CLIENT_TOKEN="$(capture_child "$PID")" || CLIENT_TOKEN=""
   # Surveillance locale indicative : une requête en vol peut dépasser le budget.
   local SPENT=0 COUNT=0 ATTEMPTS=0 PENDING=0 CAPPED=0 UNKNOWN=0 SNAP="" COMPARE_RC=0
@@ -373,6 +463,7 @@ runner() {
   done
   local RC=0 CLIENT_NON_CONFIRME=0
   wait_child_bounded "$PID" || RC=$?
+  release_qwen_slot
   if [ "$WAIT_CHILD_CONFIRMED" = 0 ]; then CLIENT_NON_CONFIRME=1; UNKNOWN=1; fi
   local RELAIS_NON_CONFIRME=0
   stop_bridge || { RELAIS_NON_CONFIRME=1; UNKNOWN=1; }
@@ -412,8 +503,8 @@ runner() {
   local ETAT_CLIENT="confirme" ETAT_RELAIS="confirme"
   [ "$CLIENT_NON_CONFIRME" = 1 ] && ETAT_CLIENT="non_confirme"
   [ "$RELAIS_NON_CONFIRME" = 1 ] && ETAT_RELAIS="non_confirme"
-  printf '%s %s %s num_turns_client=%s cout=%s cout_exact=%s source_cout=estimation_passerelle jetons=%s duree=%ss arret_client=%s arret_relais=%s dossier=%s\n' \
-    "$ST" "$ALIAS" "$RUN" "$TURNS_USED" "$COUT" "$COUT_EXACT" "$TOK" "$((SECONDS-t0))" "$ETAT_CLIENT" "$ETAT_RELAIS" "$OUT" > "$OUT/summary.txt"
+  printf '%s %s %s num_turns_client=%s cout=%s cout_exact=%s source_cout=estimation_passerelle jetons=%s duree=%ss arret_client=%s arret_relais=%s%s dossier=%s\n' \
+    "$ST" "$EFFECTIVE_ALIAS" "$RUN" "$TURNS_USED" "$COUT" "$COUT_EXACT" "$TOK" "$((SECONDS-t0))" "$ETAT_CLIENT" "$ETAT_RELAIS" "$FALLBACK_NOTE" "$OUT" > "$OUT/summary.txt"
   touch "$OUT/done"
 }
 runner
