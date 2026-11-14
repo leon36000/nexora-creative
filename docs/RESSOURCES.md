@@ -208,3 +208,9 @@ MatAnyone2 ajoute un fichier de 141 199 924 octets au volume candidats déjà pr
 ### Recontrôle live Proxmox et VM GPU — 14 novembre 2026, 07:46 UTC
 
 Les VMs Nexora 201–205 et 207 sont en marche, toutes à 4 vCPU; les planchers ballon restent 4/2/4/fixe/3/fixe Gio respectivement, avec VM207 fixe à 8 Gio. Aucune allocation n’a été modifiée. `ssd-1tb` indique 91,00 % utilisé, `local-lvm` 88,19 % et `backup-nvme0` 61,36 %. Dans VM204, les volumes `/`, Sync, candidats et voix ont respectivement 5,23 Go, 4,79 Go, 1,46 Go et 1,10 Go disponibles; la mémoire disponible est 5,42 Go et 12,6 Mo de swap sont utilisés. Voir les mesures exactes dans `docs/INVENTAIRE-VM-PC5.md`.
+
+### Mesure RRD et rôle Ollama WorkStudio — 14 novembre 2026, 08:11 UTC
+
+Une semaine de RRD Proxmox (`MAX`) montre des pics RAM proches des allocations sur VM202 (92 %), VM203 (92 %) et VM207 (99 %); VM201 atteint 80 %. VM204 garde ses 8 Gio fixes pour le passthrough GPU. VM205 affiche 22 % au compteur hôte, mais QEMU Guest Agent est inactif et l’empreinte SSH n’est pas validée. Aucune réduction de RAM ou de vCPU n’est justifiée par ces données agrégées; aucun réglage n’a été changé.
+
+Sur VM203, l’Ollama de WorkStudio reste un service applicatif requis par son Compose et peut servir les fournisseurs de chat locaux; la configuration d’embeddings vise Ollama VM204. BGE-M3 existe aux deux endroits et aucun modèle n’est chargé. Ne pas retirer le conteneur ou son poids tant que le code réellement déployé et les consommateurs ne sont pas validés.

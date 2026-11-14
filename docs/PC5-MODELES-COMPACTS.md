@@ -1,6 +1,6 @@
 # Modèles compacts Nexora — PC5 / VM 204
 
-État revérifié le 14 novembre 2026, 06:07 UTC. La cible durable est la VM GPU 204 sur PC5.
+État revérifié le 14 novembre 2026, 08:11 UTC. La cible durable est la VM GPU 204 sur PC5.
 
 ## Règle permanente du fondateur
 
@@ -11,7 +11,7 @@ L’objectif actif de centralisation PC5 contient déjà cette règle. Cette pag
 ## Contenu vérifié
 
 - models/nexora-local-small/INVENTAIRE.csv : 142 fichiers, tous présents.
-- models/nexora-candidates/INVENTAIRE-CANDIDATS.csv : 73 entrées / 15 108 667 783 octets, toutes présentes; les candidats couvrent speech, vision et restauration vidéo.
+- models/nexora-candidates/INVENTAIRE-CANDIDATS.csv : 74 entrées / 15 249 867 707 octets, toutes présentes et aux tailles déclarées; les candidats couvrent speech, vision et restauration vidéo.
 - MuseTalk 1.5 : 18 fichiers / 5 970 975 309 octets sous /srv/nexora-gpu/models/nexora-sync/MuseTalk.
 - LatentSync 1.5 : 15 fichiers officiels Hugging Face à la révision 32a20d29aead0498e3e885e90dbbe8027da1b61b, plus les 3 fichiers du VAE stabilityai/sd-vae-ft-mse à la révision 31f26fdeee1355a5c34592e401dd41e45d25a493. Total vérifié : 18 fichiers / 10 156 719 188 octets; manifeste nexora-sync/LatentSync-1.5/INVENTAIRE-MODELES.csv. Aucun fichier absent, aucune taille erronée et aucun .part.
 - faster-whisper large-v3-turbo : déjà présent dans le cache HF central de la VM; model.bin 1 617 884 929 octets et SHA-256 officiel e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da. Aucun doublon téléchargé.
@@ -32,14 +32,14 @@ RIFE 4.7 est aussi présent dans les candidats, mais le nœud RIFE VFI manque au
 ### Vérification des sources PC1 et PC3 — 14 novembre 2026
 
 - Confirmation du fondateur : tous les petits modèles qui fonctionnent individuellement sur un GPU PC5 restent stockés dans VM204, même si leur total dépasse la VRAM. Chaque carte a 8 Gio, non combinés automatiquement; charger le modèle requis à la demande et réserver une carte par essai.
-- Les manifestes vérifiés couvrent 142 fichiers local-small, 73 candidats, 18 MuseTalk et 18 LatentSync 1.5 + VAE. Les dossiers PC5 ont été revus; aucune famille compacte admissible manquante n’a été identifiée.
+- Les manifestes vérifiés couvrent 142 fichiers local-small, 74 candidats, 18 MuseTalk et 18 LatentSync 1.5 + VAE. Les dossiers PC5 ont été revus; aucune famille compacte admissible manquante n’a été identifiée dans les sources alors accessibles.
 - Inventaire en lecture seule du dossier MiniMax H3 de PC1 : poids H3 de 22,89 et 13,61 Go, encodeur Qwen3-VL 32B de 15,69 Go. MiniMax Music 3 comprend un DiT de 2,50 Go, mais son encodeur int8 fait 9,20 Go et les nœuds nécessaires manquent; le DiT seul n’est pas fonctionnel. Aucun de ces composants n’a été copié.
 - SAM 3.1 et ViTMatte small/base connus sur PC3 sont déjà dans VM204. L’accès PC3 par le NAT documenté a refusé la connexion; VM205 demeure à vérifier sans contourner son empreinte SSH. PC6 n’a pas été consulté. Aucun modèle n’a été chargé, copié ou supprimé pendant ce relevé. Les copies BGE-M3/Whisper Medium restent jusqu’à migration vérifiée.
 - GPU VM204 au contrôle : RTX 2080 SUPER 312 Mio, RTX 2070 SUPER 224 Mio, 0 % chacune; aucun service redémarré.
 
 ### Vérification physique des manifestes et services — 14 novembre 2026
 
-Comparaison live des chemins CSV avec le système de fichiers : local-small 142/142 présents, candidats 71/71, MuseTalk 18/18, LatentSync 1.5 + VAE 18/18; zéro fichier listé manquant. À cet instant, Comfy 8188/8189 et nexora-services 8190 répondent 200; files 0/0; Ollama /api/ps est vide; les RTX 2080 SUPER et 2070 SUPER affichent 312/224 Mio et 0 %. Les services écoutent sur l’adresse LAN.
+Contrôle physique antérieur : local-small 142/142, candidats 71/71, MuseTalk 18/18, LatentSync 1.5 + VAE 18/18. Le comptage candidats a ensuite progressé à 73 puis 74 avec les copies InsightFace et MatAnyone2 ci-dessous. Au recontrôle du 14 novembre à 08:11 UTC, le manifeste candidats est à 74/74 et local-small à 142/142, chemins et tailles conformes.
 
 ### Modèles voix compacts centralisés — 14 novembre 2026
 
@@ -66,3 +66,11 @@ Le volume voix de 16 Gio est monté sur `/srv/nexora-gpu/models/nexora-voice-mod
 Un poids MatAnyone2 complet a été repéré dans une archive Matte de PC1 et copié sans modifier la source vers `/srv/nexora-gpu/models/nexora-candidates/matte/matanyone2/matanyone2.safetensors`. Taille : 141 199 924 octets; SHA-256 source/destination : `70d3bf1d85d0aaf2020f9ef3577239f4f83b77c2ba47fca1eebaaf872f9ad40f`. Provenance : `PeiqingYang/MatAnyone2`, révision `40c894a6f68d1f55c86ab0de838d89dc61587930` ([code et README officiels](https://github.com/pq-yang/MatAnyone2/tree/40c894a6f68d1f55c86ab0de838d89dc61587930)); le dépôt décrit le détourage vidéo à partir d’une vidéo et d’un masque sur la première image.
 
 Le manifeste candidats VM204 contient maintenant 74 poids; contrôle physique 74/74 présents, aucune taille erronée. Le volume candidats est à 92 % selon `df`, avec 1 462 857 728 octets disponibles. Le poids reste stocké seulement : VRAM, vitesse, qualité, runtime ComfyUI et intégration Creative non validés. Il est candidat à l’essai isolé sur une seule carte, pas annoncé comme fonction livrée.
+
+### Sources PC4 et Ollama WorkStudio — 14 novembre 2026, 08:11 UTC
+
+Inventaire en lecture seule de `~/nexora-pc4/models` sur PC4 : six poids Wan 2.2 14B (14,29 à 17,35 Go), un encodeur UMT5 FP8 de 6,74 Go, deux LoRA de 1,23 Go et un VAE de 0,25 Go. Ces petits fichiers sont des composants de la chaîne Wan 2.2; aucun modèle Nexora compact autonome manquant n’a été identifié dans ce répertoire, et aucun fichier n’a été copié. La chaîne vidéo complète reste sur PC4.
+
+VM203 conserve le conteneur Ollama de WorkStudio avec BGE-M3 installé (1,2 Go, aucun modèle chargé). VM204 héberge aussi BGE-M3 (1,08 Gio, aucun modèle chargé); le Compose WorkStudio pointe les embeddings vers VM204, mais dépend toujours d’un Ollama local sain et son code GitLab `main` enregistre les modèles de discussion locaux sur `http://ollama:11434`. Le SHA de l’image déployée n’a pas été relié au code examiné. Ne pas arrêter le service ni supprimer la copie tant que le routage déployé n’est pas vérifié.
+
+Au recontrôle live de 08:11 UTC, les API LAN 8188/8189/8190/11434 répondent 200, les files Comfy sont à 0/0 et les deux GPU sont au repos; `/api/ps` ne rapporte aucun modèle chargé. Une seule installation ComfyUI a été observée sur VM204; aucune unité ou conteneur Comfy n’a été trouvé sur VM201/202/203/207. VM205 reste hors inventaire invité (QGA inactif, empreinte SSH non validée); VM206 n’a pas été consultée.
