@@ -28,3 +28,11 @@ Les files ComfyUI 8188/8189 répondaient 200 avec 0 en cours et 0 en attente; le
 LatentSync 1.5 est préparé sur disque seulement. Le runtime n’est pas installé, Creative ne l’appelle pas encore et aucune qualité/durée n’a été mesurée. Le dépôt officiel annonce 8 Gio minimum; les deux cartes PC5 en ont 8 Gio chacune, donc tester sur une seule carte réservée avant de le déclarer utilisable. LatentSync 1.6 (18 Gio minimum), MiniMax H3 et les gros modèles vidéo demeurent sur leurs moteurs dédiés ou le cloud.
 
 RIFE 4.7 est aussi présent dans les candidats, mais le nœud RIFE VFI manque aux deux workers ComfyUI; le poids reste non intégrable jusqu’à une maintenance Comfy planifiée.
+
+### Vérification des sources PC1 et PC3 — 14 novembre 2026
+
+- Confirmation du fondateur : tous les petits modèles qui fonctionnent individuellement sur un GPU PC5 restent stockés dans VM204, même si leur total dépasse la VRAM. Chaque carte a 8 Gio, non combinés automatiquement; charger le modèle requis à la demande et réserver une carte par essai.
+- Les manifestes vérifiés couvrent 142 fichiers local-small, 71 candidats, 18 MuseTalk et 18 LatentSync 1.5 + VAE. Les dossiers PC5 ont été revus; aucune famille compacte admissible manquante n’a été identifiée.
+- Inventaire en lecture seule du dossier MiniMax H3 de PC1 : poids H3 de 22,89 et 13,61 Go, encodeur Qwen3-VL 32B de 15,69 Go. MiniMax Music 3 comprend un DiT de 2,50 Go, mais son encodeur int8 fait 9,20 Go et les nœuds nécessaires manquent; le DiT seul n’est pas fonctionnel. Aucun de ces composants n’a été copié.
+- SAM 3.1 et ViTMatte small/base connus sur PC3 sont déjà dans VM204. L’accès PC3 par le NAT documenté a refusé la connexion; VM205 demeure à vérifier sans contourner son empreinte SSH. PC6 n’a pas été consulté. Aucun modèle n’a été chargé, copié ou supprimé pendant ce relevé. Les copies BGE-M3/Whisper Medium restent jusqu’à migration vérifiée.
+- GPU VM204 au contrôle : RTX 2080 SUPER 312 Mio, RTX 2070 SUPER 224 Mio, 0 % chacune; aucun service redémarré.
