@@ -928,3 +928,10 @@ L’audit ciblé de l’archive Matte PC1 a trouvé MatAnyone2 (141 199 924 octe
 ### Recontrôle lecture seule des ressources PC5 — 14 novembre 2026, 07:46 UTC
 
 VM201–205 et 207 en marche; 4 vCPU chacune, allocations RAM et disques consignés dans `docs/INVENTAIRE-VM-PC5.md`. Aucun changement de ressource. VM204 : services actifs, santé LAN 8188/8189/8190/11434 = 200, files Comfy 0/0, Ollama vide, GPU 0 %; RAM disponible 5,42 Go et swap 12,6 Mo. Une seule installation ComfyUI existe dans VM204; aucun ComfyUI détecté sur 201/202/203/207 via QGA. VM205 reste non inspectée (agent invité inactif, clé SSH non validée); VM206 exclue.
+
+### Sources PC4 et vérification des modèles PC5 — 14 novembre 2026, 08:11 UTC
+
+- Relecture physique des manifestes VM204 par QGA : local-small 142/142, candidats 74/74 (15 249 867 707 octets), LatentSync 18/18; aucun chemin ou écart de taille. Le total candidats 71/73 des anciens relevés précède l’ajout de MatAnyone2.
+- Inventaire en lecture seule de `~/nexora-pc4/models` : les poids repérés forment la chaîne Wan 2.2 (6 diffusion 14B de 14,29–17,35 Go, encodeur UMT5 6,74 Go, deux LoRA 1,23 Go et VAE 0,25 Go). Aucun paquet compact Nexora autonome trouvé dans ce répertoire; rien n’a été copié.
+- WorkStudio VM203 conserve son Ollama et BGE-M3 (1,2 GB selon `ollama list`), sans modèle chargé. VM204 héberge également BGE-M3 (1,08 Gio) et ne charge aucun modèle. Le Compose WorkStudio dépend toujours d’un Ollama local sain; son URL d’embeddings vise VM204, tandis que le code GitLab `main` ajoute les fournisseurs de chat locaux sur `http://ollama:11434`. Ne pas arrêter le service ni supprimer sa copie avant vérification de la version déployée et de ses consommateurs.
+- Mesure Proxmox hebdomadaire et usages invités consignés dans `docs/INVENTAIRE-VM-PC5.md`; les pics ne justifient pas de réduction RAM/vCPU. Aucune VM, allocation, source ou service n’a été modifié. PC3 et VM205 restent bloqués par l’accès/empreinte; VM206 et PC6 hors périmètre.

@@ -1154,3 +1154,11 @@ Poids Safetensors de 141 199 924 octets copié depuis l’archive Matte PC1 vers
 ### Recontrôle PC5 — 14 novembre 2026, 07:46 UTC
 
 Proxmox confirme 201–205 et 207 en marche, tous à 4 vCPU; aucune allocation changée. VM204 garde une installation ComfyUI unique (`/srv/nexora-gpu/ComfyUI`) pour 8188/8189. Aucun ComfyUI repéré sur les invités 201/202/203/207 par QGA (dossiers Nexora, unités et conteneurs vérifiés). Services VM204 8188/8189/8190/11434 répondent 200; files 0/0, aucun modèle chargé dans Ollama, GPU au repos. VM205 : QEMU Guest Agent arrêté et clé SSH non validée; ne pas entrer ou contourner SSH strict. VM206 non interrogée. Détails des allocations, pools et volumes : `docs/INVENTAIRE-VM-PC5.md`.
+
+### État courant — inventaire des sources et ressources, 14 novembre 2026, 08:11 UTC
+
+- La règle permanente reste : VM204 contient tous les petits modèles Nexora utilisables seuls par un GPU PC5, même si le total excède la VRAM; chargement à la demande, une seule carte par essai. Manifestes recontrôlés : local-small 142/142, candidats 74/74, LatentSync 18/18; MuseTalk 18/18 au relevé précédent. Les anciens comptes candidats 71/73 sont historiques.
+- PC4 `~/nexora-pc4/models` contient la chaîne Wan 2.2 et ses composants; aucun modèle autonome compact manquant n’a été relevé dans ce chemin. Aucun poids copié ni PC4 nettoyé.
+- WorkStudio sur VM203 utilise un Ollama local pour ses fournisseurs de chat et en dépend au démarrage; ses embeddings pointent vers VM204. BGE-M3 est présent aux deux endroits, sans modèle chargé. Ne pas arrêter ou effacer le service/poids tant que le routage réellement déployé n’est pas identifié; aucun secret ni `.env` lu.
+- RRD mémoire MAX sur une semaine : pics observés de 80–99 % sur les VMs 201–204/207; VM205 22 % mais accès invité non validé. Aucune baisse RAM/vCPU ne se justifie; détails dans `docs/INVENTAIRE-VM-PC5.md`.
+- PC3 demeure inaccessible par le NAT documenté; VM205 QEMU Guest Agent inactif et empreinte SSH non validée. Continuer sans contourner SSH strict. VM206 exclue, aucune activité sur PC6.

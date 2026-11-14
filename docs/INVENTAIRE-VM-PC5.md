@@ -94,3 +94,9 @@ Proxmox : VM201–205 et VM207 en marche, chacune à 4 vCPU. Configurations : 20
 VM204 : `/` 68 518 965 248 / 73 766 789 120 octets utilisés (93 %, 5 231 046 656 libres); Sync 16 127 913 984 / 21 024 690 176 (78 %, 4 794 101 760 libres); candidats 15 250 259 968 / 16 729 894 912 (92 %, 1 462 857 728 libres); voix 15 503 785 984 / 16 794 906 624 (94 %, 1 102 569 472 libres). RAM disponible 5 416 284 160 octets; swap utilisée 12 640 256 octets; charge moyenne 0,00.
 
 Les contrôles invités confirment une seule installation ComfyUI dans VM204 : `/srv/nexora-gpu/ComfyUI`, partagée par les workers 8188/8189. QEMU Guest Agent répond sur 201/202/203/207; les répertoires Nexora, unités systemd et conteneurs vérifiés n’y montrent pas ComfyUI. VM205 tourne mais son agent invité ne répond pas; son disque et ses modèles n’ont pas été inspectés. Sur VM204, services actifs; 8188/8189/8190/11434 HTTP 200; files Comfy 0/0; Ollama sans modèle chargé; RTX 2080 SUPER 122 Mio et RTX 2070 SUPER 224 Mio, toutes deux à 0 %. Aucune inférence ni relance de service.
+
+## Recontrôle des ressources — 14 novembre 2026, 08:11 UTC
+
+`rrddata` Proxmox sur une semaine, agrégation `MAX` : 307 échantillons pour les VM 201–205 et 193 pour VM207. Pics mémoire rapportés : VM201 8,02/10,24 Gio (80 %), VM202 3,67/4 Gio (92 %), VM203 7,38/8 Gio (92 %), VM204 8,05/8 Gio (compteur légèrement supérieur à l’allocation fixe GPU), VM205 1,73/8 Gio (22 %, mais accès invité non vérifié), VM207 7,94/8 Gio (99 %). Ces séries échantillonnées ne justifient aucune baisse de RAM ou de vCPU; VM206 exclue.
+
+`df` invité : racine VM201 24 %, VM202 11 %, VM203 16 %, VM207 8 %. VM204 : racine 93 %, Sync 78 %, candidats 92 %, voix 94 %. VM205 reste inconnue sans QEMU Guest Agent ni empreinte SSH validée. Pools Proxmox au même contrôle : `ssd-1tb` 91,23 % (83 937 672 KiB libres), `local-lvm` 88,19 %, `backup-nvme0` 61,36 %, `local` 36,69 %. Aucune allocation ni donnée n’a été modifiée.
