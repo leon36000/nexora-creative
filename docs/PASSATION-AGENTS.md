@@ -1150,3 +1150,7 @@ Le disque voix de 16 Gio sur VM204 est à 94 % selon `df`, avec 1 102 569 472 oc
 ### MatAnyone2 — candidat compact stocké sur PC5 — 14 novembre 2026
 
 Poids Safetensors de 141 199 924 octets copié depuis l’archive Matte PC1 vers `/srv/nexora-gpu/models/nexora-candidates/matte/matanyone2/`; SHA-256 vérifié, source PC1 intacte. Le manifeste candidats a 74 poids, 74/74 présents par chemin et taille; 1 462 857 728 octets libres sur ce volume. Modèle inactif, sans runtime Comfy/Creative ni qualification GPU. L’audit PC1 ciblé n’a identifié aucun autre paquet compact complet absent dans les racines Nexora examinées; archives personnelles non Nexora, PC3 et VM205 restent hors inventaire. Continuer la règle : stockage central VM204, chargement à la demande, un GPU par essai.
+
+### Recontrôle PC5 — 14 novembre 2026, 07:46 UTC
+
+Proxmox confirme 201–205 et 207 en marche, tous à 4 vCPU; aucune allocation changée. VM204 garde une installation ComfyUI unique (`/srv/nexora-gpu/ComfyUI`) pour 8188/8189. Aucun ComfyUI repéré sur les invités 201/202/203/207 par QGA (dossiers Nexora, unités et conteneurs vérifiés). Services VM204 8188/8189/8190/11434 répondent 200; files 0/0, aucun modèle chargé dans Ollama, GPU au repos. VM205 : QEMU Guest Agent arrêté et clé SSH non validée; ne pas entrer ou contourner SSH strict. VM206 non interrogée. Détails des allocations, pools et volumes : `docs/INVENTAIRE-VM-PC5.md`.

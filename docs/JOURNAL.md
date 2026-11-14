@@ -924,3 +924,7 @@ Après copie, les services 8188/8189/8190/11434 répondent sur le LAN, les files
 ### Ajout d’un candidat Matte compact à VM204 — 14 novembre 2026
 
 L’audit ciblé de l’archive Matte PC1 a trouvé MatAnyone2 (141 199 924 octets), absent des manifestes PC5 précédents. Copie du fichier Safetensors vers `nexora-candidates/matte/matanyone2/`, SHA-256 source/destination concordants; source PC1 conservée. Mise à jour du manifeste PC5 : 74 poids, 74/74 présents par chemin et taille; espace libre du volume candidats 1 462 857 728 octets. Le dépôt officiel prend une vidéo et un masque de première image ([MatAnyone2](https://github.com/pq-yang/MatAnyone2/tree/40c894a6f68d1f55c86ab0de838d89dc61587930)). Aucun runtime Comfy ou Creative installé, aucune inférence GPU lancée; stockage uniquement, qualification future.
+
+### Recontrôle lecture seule des ressources PC5 — 14 novembre 2026, 07:46 UTC
+
+VM201–205 et 207 en marche; 4 vCPU chacune, allocations RAM et disques consignés dans `docs/INVENTAIRE-VM-PC5.md`. Aucun changement de ressource. VM204 : services actifs, santé LAN 8188/8189/8190/11434 = 200, files Comfy 0/0, Ollama vide, GPU 0 %; RAM disponible 5,42 Go et swap 12,6 Mo. Une seule installation ComfyUI existe dans VM204; aucun ComfyUI détecté sur 201/202/203/207 via QGA. VM205 reste non inspectée (agent invité inactif, clé SSH non validée); VM206 exclue.
