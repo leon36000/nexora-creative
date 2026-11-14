@@ -40,3 +40,8 @@ Le fondateur exige que tu agisses en ORCHESTRATEUR à temps plein : tu décides,
 - **Contraintes** : bac à sable sans réseau, écriture seulement dans son dossier de travail ; donne-lui les textes et fichiers (dossier de travail, ou `SA_EXTRA_RO` pour des dossiers en lecture seule) ; jamais deux agents dans le même dossier ; ils n'ont ni SSH ni GitLab : c'est toi qui exécutes, pousses et intègres ; vérifie chaque livrable (ils inventent parfois des références).
 - **Tes propres sous-agents** : GPT-6.1 Terra effort élevé (ils orchestrent à leur tour des essaims avec ces mêmes commandes) ; GPT-6 Luna max pour le volume.
 - **Quotas** : au moins 200 appels de sous-agents par session et au moins 70 % du volume de production délégué. **Contrôle de fin de session** : relève `cout.sh` ; si le compte du jour est inférieur à 200 appels, ta session est insuffisante : relance un essaim avant de conclure, et donne les deux chiffres (début, fin) au fondateur.
+
+
+## PC5 — règle permanente pour les poids compacts
+
+Tous les poids de modèles compacts qui peuvent être utilisés individuellement par une carte GPU de PC5 doivent être présents sur disque dans la VM 204, même si l’ensemble ne peut pas tenir simultanément en VRAM. Charger à la demande, réserver une carte par essai, éviter les copies en double sur les autres PC. Un poids présent n’est pas nécessairement intégré à Creative ni qualifié en inférence. Garder les grands modèles sur leurs moteurs dédiés ou le cloud conformément aux choix du fondateur. L’inventaire et l’état courant sont dans docs/PC5-MODELES-COMPACTS.md.

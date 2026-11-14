@@ -177,3 +177,8 @@ Ordre : 2 (risque de perte), 1 (inconnu), 4, 5, 3.
 Transcription Studio (04/11) : Whisper large-v3-turbo (`deepdml/faster-whisper-large-v3-turbo-ct2`, déjà dans `/srv/nexora-gpu/hf`, aucun nouveau poids) servi par `nexora-services` ; ajouts : `transcrire_endpoint.py` (quelques Ko) et `transcrire.token` (44 octets, mode 600) dans `/srv/nexora-gpu` ; disque de la VM inchangé, ≈ 4 Go libres. VRAM : modèle déchargé après 120 s d'inactivité.
 
 Rétention : sorties ComfyUI dans `/srv/nexora-gpu/output/gpu{0,1}` à purger à la main (rien n'est sauvegardé) ; modèles non dupliqués inutilement (le lot A1 de 8,9 Go est copié une fois, seuls les 5 fichiers nécessaires). VM 9100 non touchée par ce travail, mais **arrêtée par le redémarrage de l'hôte** (pas de `onboot`) : à relancer ou supprimer par le fondateur.
+
+
+## Modèles compacts — règle du fondateur
+
+Tout poids compact utilisable individuellement sur les GPU PC5 réside dans la VM 204, même si tous les poids ne tiennent pas simultanément en VRAM. Charger seulement les modèles utiles à chaque tâche; ne pas dupliquer ces poids sur les autres PC. La présence ne vaut pas intégration ou qualification. Inventaire et preuve : docs/PC5-MODELES-COMPACTS.md.
