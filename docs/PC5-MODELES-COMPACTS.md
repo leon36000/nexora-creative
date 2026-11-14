@@ -36,3 +36,7 @@ RIFE 4.7 est aussi présent dans les candidats, mais le nœud RIFE VFI manque au
 - Inventaire en lecture seule du dossier MiniMax H3 de PC1 : poids H3 de 22,89 et 13,61 Go, encodeur Qwen3-VL 32B de 15,69 Go. MiniMax Music 3 comprend un DiT de 2,50 Go, mais son encodeur int8 fait 9,20 Go et les nœuds nécessaires manquent; le DiT seul n’est pas fonctionnel. Aucun de ces composants n’a été copié.
 - SAM 3.1 et ViTMatte small/base connus sur PC3 sont déjà dans VM204. L’accès PC3 par le NAT documenté a refusé la connexion; VM205 demeure à vérifier sans contourner son empreinte SSH. PC6 n’a pas été consulté. Aucun modèle n’a été chargé, copié ou supprimé pendant ce relevé. Les copies BGE-M3/Whisper Medium restent jusqu’à migration vérifiée.
 - GPU VM204 au contrôle : RTX 2080 SUPER 312 Mio, RTX 2070 SUPER 224 Mio, 0 % chacune; aucun service redémarré.
+
+### Vérification physique des manifestes et services — 14 novembre 2026
+
+Comparaison live des chemins CSV avec le système de fichiers : local-small 142/142 présents, candidats 71/71, MuseTalk 18/18, LatentSync 1.5 + VAE 18/18; zéro fichier listé manquant. À cet instant, Comfy 8188/8189 et nexora-services 8190 répondent 200; files 0/0; Ollama /api/ps est vide; les RTX 2080 SUPER et 2070 SUPER affichent 312/224 Mio et 0 %. Les services écoutent sur l’adresse LAN.

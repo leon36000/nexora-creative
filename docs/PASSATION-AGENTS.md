@@ -1123,3 +1123,10 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 - Catalogue sur VM204 : 142/142 petits fichiers locaux, 18/18 MuseTalk et 71 entrées candidats présents avec tailles conformes. Ajout de `rife47.pth` (21 344 827 octets) au dépôt candidat, SHA-256 conforme au digest GitHub Release. Aucun poids n’a été chargé en inférence.
 - ComfyUI est installé une seule fois sur VM204; 8188/8189 répondent, les deux files sont vides et les deux GPU sont au repos. Le nœud `RIFE VFI` manque toutefois dans `/object_info`; le nouveau poids reste inactif jusqu’à une maintenance autorisée. Aucun worker partagé redémarré.
 - WorkStudio VM203 utilise encore son Ollama local et son modèle BGE-M3 à l’arrêt; le fichier Compose vise l’Ollama PC5, mais l’application en cours pointe toujours vers le conteneur local. Seul `.env.example` existe dans le déploiement; aucun secret lu, aucun redéploiement fait. Pour basculer sans perdre la configuration, le fondateur doit restaurer le fichier d’environnement sécurisé dans `/srv/nexora/workstudio/deploy/.env`; ne pas transmettre son contenu.
+
+### Relevé actuel PC5 — 14 novembre 2026
+
+- VMs 201–205 et 207 ont quatre vCPU chacune. Planchers RAM ballon : 201=4 Gio, 202=2, 203=4, 205=3; VM204=8 fixes pour GPU; VM207=8 fixes pour CI. Aucune réduction sûre prouvée ni appliquée.
+- Disques mesurés : 201=24 %, 202=11 %, 203=16 %, 204 racine=88 % / Sync=78 % / candidats=91 %, 207=13 %. VM205 non vérifiée. Pool ssd-1tb=91,64 %.
+- VM204 : services GPU 200, files Comfy 0/0, Ollama sans modèle chargé, GPU au repos; manifestes 142/142, 71/71, 18/18, 18/18 présents.
+- À reprendre sans contournement : VM205 (empreinte SSH modifiée) et PC3 (NAT SSH refusé). WorkStudio .env absent; garder sa copie BGE jusqu’à migration vérifiée. PC6/VM206 hors périmètre.
