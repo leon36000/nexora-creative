@@ -65,6 +65,12 @@ Manifestes VM204 : local-small 142/142 présents; candidats 71/71; MuseTalk 18/1
 
 PC3 demeure inaccessible par le NAT SSH documenté. Le .env sécurisé WorkStudio est absent; sa copie BGE locale reste intacte jusqu’à une migration vérifiée. PC6 et VM206 non consultés ni modifiés.
 
+### Actualisation après centralisation des petits modèles voix — 14 novembre 2026
+
+VM204 possède désormais quatre espaces modèles : racine 73,77 Go (68,52 Go utilisés; 5,23 Go libres), Sync 21,02 Go (16,13 utilisés; 4,79 libres), candidats 16,73 Go (15,11 utilisés; 1,60 libre) et voix 16,79 Go (15,50 utilisés; 1,10 libre). Les taux de disponibilité suivent `df`; aucun disque existant n’a été redimensionné pendant cette étape. Le disque voix de 16 Gio est monté en ext4 avec `noatime`.
+
+La centralisation voix ajoute sept paquets et un manifeste de 64 chemins vérifiés par empreinte : détails dans `docs/PC5-MODELES-COMPACTS.md` et `docs/PC5-VOIX-COMPACTES.tsv`. PC1 reste intact. Contrôle après copie : Comfy 8188/8189, service 8190 et API Ollama répondent sur le LAN; files Comfy 0/0; aucun modèle Ollama chargé; RTX 2080 SUPER 122 Mio et RTX 2070 SUPER 224 Mio, toutes deux à 0 %. Aucun service n’a été redémarré et aucune inférence n’a été lancée.
+
 
 ## Centralisation des modèles compacts — 14 novembre 2026, 06:07 UTC
 

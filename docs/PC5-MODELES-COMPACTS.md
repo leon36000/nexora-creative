@@ -41,6 +41,14 @@ RIFE 4.7 est aussi présent dans les candidats, mais le nœud RIFE VFI manque au
 
 Comparaison live des chemins CSV avec le système de fichiers : local-small 142/142 présents, candidats 71/71, MuseTalk 18/18, LatentSync 1.5 + VAE 18/18; zéro fichier listé manquant. À cet instant, Comfy 8188/8189 et nexora-services 8190 répondent 200; files 0/0; Ollama /api/ps est vide; les RTX 2080 SUPER et 2070 SUPER affichent 312/224 Mio et 0 %. Les services écoutent sur l’adresse LAN.
 
+### Modèles voix compacts centralisés — 14 novembre 2026
+
+Inspection ciblée de la cache voix active de PC1 : les sept paquets suivants ont été copiés dans VM204, en conservant les sources PC1 intactes : Qwen3-TTS 1.7B Base, Qwen3-TTS 1.7B VoiceDesign, XTTS-v2, F5-TTS Québec + Vocos, Chatterbox Multilingual V2, Chatterbox Multilingual V3 et Chatterbox English. L’inventaire `docs/PC5-VOIX-COMPACTES.tsv` liste 64 chemins (21 101 440 506 octets logiques); le manifeste PC1 et les fichiers VM204 concordent par SHA-256.
+
+Le volume voix de 16 Gio est monté sur `/srv/nexora-gpu/models/nexora-voice-models` (1 102 569 472 octets disponibles au contrôle). XTTS-v2 et le poids T3 propre à V3 résident sur la racine de VM204 puis sont liés depuis leurs chemins de modèles; les deux modèles Qwen 1.7B partagent le tokenizer déjà centralisé du 0.6B. Tous les modèles restent inactifs, prêts à être sélectionnés un à la fois. Aucun test GPU n’a validé la VRAM, la vitesse ou la qualité; V3 et English ne sont pas encore intégrés au moteur Creative.
+
+État live après copie : les services GPU répondent, les files Comfy sont vides et les deux GPU sont au repos. L’espace libre est de 5 231 235 072 octets sur `/`, 4 794 101 760 sur Sync, 1 604 071 424 sur candidats et 1 102 569 472 sur voix. Les paquets ont été sélectionnés pour une tentative individuelle sur une carte de 8 Gio; cela ne vaut pas preuve d’exécution GPU.
+
 
 ### Transfert des dépendances compactes de Sync — 14 novembre 2026, 06:07 UTC
 
