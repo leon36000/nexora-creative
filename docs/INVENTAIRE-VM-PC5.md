@@ -57,10 +57,10 @@ Lecture seule; VM206 exclue.
 | 205 | Infrastructure | 4 vCPU; max 8 Gio, ballon min 3 | invité non vérifié : empreinte SSH changée |
 | 207 | Runner isolé | 4 vCPU; 8 Gio fixes | 9,5/77 Gio (13 %); 5,0 Gio disponibles |
 
-Pools Proxmox : ssd-1tb 91,64 % (≈76 Gio libres), local-lvm 88,19 %, backup-nvme0 61,36 %. Aucun réglage CPU/RAM/disque modifié. Les relevés ne prouvent pas qu’une réduction serait sûre; VM204 a du swap occupé et VM205 n’a pas de mesure invitée fiable.
+Pools Proxmox : ssd-1tb 91,64 % (≈76 Gio libres), local-lvm 88,19 %, backup-nvme0 61,36 %. Aucune allocation CPU/RAM/disque modifiée; les relevés ne prouvent pas qu’une réduction serait sûre.
 
-VM204 : services GPU et agent invité actifs; santé 8188/8189/8190 = HTTP 200; files Comfy 0/0; Ollama /api/ps vide; GPU 0 %, 312/224 Mio. Aucun service/conteneur Comfy détecté sur VM201, 202, 203 et 207; VM205 non vérifiée. Services Comfy liés à l’adresse LAN, pas à localhost.
+VM204 : Comfy 8188/8189 et services 8190 HTTP 200; files 0/0; Ollama /api/ps vide; GPU 0 %, 312/224 Mio. Aucun Comfy détecté sur VM201, 202, 203 et 207; VM205 non vérifiée.
 
-Vérification des chemins du manifeste VM204 : local-small 142/142 présents; candidats 71/71; MuseTalk 18/18; LatentSync 1.5 + VAE 18/18; zéro chemin manquant. Les fichiers bruts incluent aussi index et README.
+Manifestes VM204 : local-small 142/142 présents; candidats 71/71; MuseTalk 18/18; LatentSync 1.5 + VAE 18/18; zéro chemin manquant. Les fichiers bruts incluent aussi les README et index.
 
-PC3 reste injoignable par le NAT SSH documenté. Le .env sécurisé WorkStudio est absent; sa copie BGE locale reste intacte jusqu’à migration vérifiée. PC6 et VM206 non consultés ni modifiés.
+PC3 demeure inaccessible par le NAT SSH documenté. Le .env sécurisé WorkStudio est absent; sa copie BGE locale reste intacte jusqu’à une migration vérifiée. PC6 et VM206 non consultés ni modifiés.

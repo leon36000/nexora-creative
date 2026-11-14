@@ -39,4 +39,4 @@ RIFE 4.7 est aussi présent dans les candidats, mais le nœud RIFE VFI manque au
 
 ### Vérification physique des manifestes et services — 14 novembre 2026
 
-Comparaison live des chemins de chaque CSV avec le système de fichiers : local-small 142/142 présents, candidats 71/71, MuseTalk 18/18, LatentSync 1.5 + VAE 18/18; zéro fichier listé manquant. Les nombres bruts de fichiers comprennent README, CSV d’inventaire et métadonnées. À cet instant, Comfy 8188/8189 et nexora-services 8190 répondent 200; files 0/0; Ollama /api/ps est vide; les RTX 2080 SUPER et 2070 SUPER affichent 312/224 Mio et 0 %. Les services écoutent sur l’adresse LAN.
+Comparaison live des chemins CSV avec le système de fichiers : local-small 142/142 présents, candidats 71/71, MuseTalk 18/18, LatentSync 1.5 + VAE 18/18; zéro fichier listé manquant. À cet instant, Comfy 8188/8189 et nexora-services 8190 répondent 200; files 0/0; Ollama /api/ps est vide; les RTX 2080 SUPER et 2070 SUPER affichent 312/224 Mio et 0 %. Les services écoutent sur l’adresse LAN.

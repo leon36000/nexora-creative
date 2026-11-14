@@ -185,4 +185,4 @@ Tout poids compact utilisable individuellement sur les GPU PC5 réside dans la V
 
 ### État live PC5 — 14 novembre 2026
 
-VMs Nexora 201–205 et 207 : 4 vCPU chacune; RAM max 10/4/8/8/8/8 Gio, planchers ballon 4/2/4/fixe/3/fixe. Disques minces; les usages observés et les limitations sont dans docs/INVENTAIRE-VM-PC5.md. Aucune allocation abaissée faute de preuve en charge représentative. Pool ssd-1tb 91,64 %, local-lvm 88,19 %, backup-nvme0 61,36 %. VM206 exclue du relevé détaillé.
+VMs Nexora 201–205 et 207 : 4 vCPU chacune; RAM max 10/4/8/8/8/8 Gio; planchers ballon 4/2/4/fixe/3/fixe. Aucune allocation réduite faute de preuve en charge représentative. Pools : ssd-1tb 91,64 %, local-lvm 88,19 %, backup-nvme0 61,36 %. Détails invités dans docs/INVENTAIRE-VM-PC5.md; VM206 exclue.
