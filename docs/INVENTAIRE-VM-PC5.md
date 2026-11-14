@@ -7,7 +7,7 @@ Relevé du 13 novembre 2026 (heure de Montréal). Périmètre : VMs Nexora activ
 | 201 | Site / pile | 4 vCPU, 10 Gio, disque 220 Go | 50/213 Go (24 %) | 7,1 Gio disponibles |
 | 202 | Creative | 4 vCPU, 4 Gio, disque 120 Go | 13/116 Go (11 %) | 2,9 Gio disponibles |
 | 203 | WorkStudio | 4 vCPU, 8 Gio, disque 150 Go | 23/145 Go (16 %) | 4,9 Gio disponibles |
-| 204 | GPU, ComfyUI, services de modèles | 4 vCPU, 8 Gio, disque système 72 Go + disque Sync 8 Gio + disque candidats 16 Gio | `/`: 65/69 Gio (94 %); Sync: 5,6/7,8 Gio (73 %); candidats: 15/16 Gio (91 %) | 5,8 Gio disponibles; 3,4 Gio de swap occupés |
+| 204 | GPU, ComfyUI, services de modèles | 4 vCPU, 8 Gio, disque système 72 Go + disque Sync 20 Gio + disque candidats 16 Gio | `/`: 65/69 Gio (94 %); Sync: 16/20 Gio (78 %; 4,5 Gio libres); candidats: 15/16 Gio (91 %) | 5,8 Gio disponibles; 3,4 Gio de swap occupés |
 | 205 | Infrastructure | 4 vCPU, 8 Gio, disque 450 Go | Non vérifiable : QEMU Guest Agent inactif et la vérification SSH stricte a refusé une clé d’hôte différente. Aucune clé locale n’a été remplacée. | PVE rapporte environ 1,6 Gio résidents sur 8 Gio; métrique invitée non vérifiée |
 | 207 | Runner CI isolé | 4 vCPU, 8 Gio, disque 80,5 Go | 3,7/77 Go (5 %) | 7,0 Gio disponibles au relevé |
 
@@ -38,3 +38,8 @@ Les mesures sont des instantanés et ne remplacent pas la surveillance en charge
 - VM204 : racine `/` 65/69 Gio (94 %, 4,6 Gio libres), modèles sur FS racine 23 Gio; venv 8,2 Gio, venv-audio 2,2 Gio, venv-banc 458 Mio (`du -x`). Disques montés séparément : candidats 15/16 Gio (91 %, 1,6 Gio libres), Sync 5,6/7,8 Gio (73 %, 2,2 Gio libres). Pas de suppression ni déplacement.
 - WorkStudio VM203 : le conteneur Ollama local contient BGE-M3 mais n’a aucun modèle chargé; l’application utilise encore le nom d’hôte local `ollama`. Le YAML Compose pointe vers PC5/204, mais `.env` est absent; aucun secret lu, aucun conteneur redéployé ou arrêté. L’API Ollama de PC5/204 possède aussi BGE-M3, non chargé.
 - ComfyUI reste une installation unique sur VM204. Le checkpoint RIFE 4.7 a été ajouté au manifeste candidats avec digest GitHub vérifié, mais `RIFE VFI` est absent de `/object_info`; son intégration attend une maintenance planifiée.
+
+
+## État des modèles PC5 — 13 novembre 2026, 22:52 (Montréal)
+
+Le volume Sync /srv/nexora-gpu/models/nexora-sync est maintenant de 20 Gio après extension en ligne du disque de VM204 et agrandissement ext4. Relevé après transfert : 16 Gio utilisés, 4,5 Gio libres (78 %). Le cache des modèles compacts est centralisé dans VM204 et chargé à la demande; le détail est dans docs/PC5-MODELES-COMPACTS.md.

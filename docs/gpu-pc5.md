@@ -95,3 +95,10 @@ Règle de routage (`moteursPour`, `server/engine.ts`) : le moteur qui **finit le
 ## Chaleur, bruit, consommation
 
 Sous charge maximale les deux cartes tirent ensemble ~455 W (GPU seuls) ; au repos ~50 W. Le serveur est une machine d'atelier : les ventilateurs montent à fond sous TRELLIS ou matmul continu (non mesuré en décibels). La 2070 SUPER est plus chaude (62 °C contre 49 °C). Aucune surcote ni limite de puissance modifiée.
+
+
+## Modèles compacts — centralisation PC5 (13 novembre 2026)
+
+Le fondateur demande de conserver dans la VM GPU 204 tous les poids compacts utilisables individuellement sur l’une des deux cartes 8 Gio, même si on ne les charge pas tous ensemble. Ils sont activés à la demande, une carte réservée par essai. Inventaires live : nexora-local-small (142 fichiers), nexora-candidates (71 entrées), MuseTalk (18 fichiers), LatentSync 1.5 et son VAE (18 fichiers). faster-whisper large-v3-turbo se trouve déjà dans le cache HF de la VM; son empreinte officielle a été vérifiée. Le détail complet et les limites de qualification sont dans docs/PC5-MODELES-COMPACTS.md.
+
+LatentSync 1.5 est rangé dans /srv/nexora-gpu/models/nexora-sync/LatentSync-1.5 avec son manifeste. Aucun runtime ni branchement Creative n’a été installé et aucun rendu GPU n’a été lancé. Son minimum officiel de 8 Gio correspond à la capacité exacte de chaque carte PC5; une qualification isolée reste nécessaire. Le volume Sync est 20 Gio, 16 Gio utilisés, 4,5 Gio libres.
