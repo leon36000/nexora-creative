@@ -4,6 +4,10 @@ Mis à jour le 04/11/2026 (transcription sur la VM 204 ; VM 204 `nexora-gpu` et 
 
 Qui vit où : `docs/ENVIRONNEMENTS.md`. Journal des suppressions : `docs/JOURNAL.md` (entrée « ménage d'infrastructure : conventions »). Inventaire automatique : `ressources/inventaire.sh` (lecture seule).
 
+## État courant — centralisation Nexora sur PC5 (13/11/2026)
+
+L’architecture de travail actuelle place les applications et services Nexora sur PC5; les modèles compacts sont rangés dans la VM GPU 204 et chargés selon le besoin. Les grands modèles restent raccordés à leurs moteurs dédiés ou au cloud. Les tableaux d’allocation datés du 02–04/11 ci-dessous sont des relevés historiques; l’état live vérifié est dans [`docs/INVENTAIRE-VM-PC5.md`](INVENTAIRE-VM-PC5.md). Le code produit demeure dans GitLab pc4. Aucun changement de VM206 ni de machine autre que PC5 n’est autorisé par cette tranche.
+
 ## 1. Conventions
 
 **Noms.** Volumes logiques et dossiers dédiés : `nexora-<produit>-<usage>` (ex. `nexora-creative-archives`). Produits : `site`, `creative`, `workstudio`, `code`, `rag`. Les noms hérités (`nexora-archives`, `backups`) restent jusqu'à la prochaine recréation, sans renommage à chaud.
