@@ -1131,6 +1131,12 @@ Autres limites identifiées, non corrigées : fusion des positions arrondies à 
 - VM204 : services GPU 200, files Comfy 0/0, Ollama sans modèle chargé, GPU au repos; manifestes 142/142, 71/71, 18/18, 18/18 présents.
 - À reprendre sans contournement : VM205 (empreinte SSH modifiée) et PC3 (NAT SSH refusé). WorkStudio .env absent; garder sa copie BGE jusqu’à migration vérifiée. PC6/VM206 hors périmètre.
 
+### Centralisation des voix compactes PC5 — 14 novembre 2026
+
+Le fondateur confirme que chaque petit modèle pouvant être utilisé seul sur une carte GPU de PC5 doit être présent dans VM204; la collection n’a pas à tenir simultanément dans les 8 Gio de VRAM. Charger uniquement le modèle requis et réserver une seule carte par essai. Les paquets voix identifiés dans la cache active de PC1 sont maintenant centralisés : Qwen3-TTS 1.7B Base/VoiceDesign, XTTS-v2, F5-TTS Québec + Vocos et Chatterbox Multilingual V2/V3/English. PC1 n’a pas été modifié; 64 chemins sont inventoriés dans `docs/PC5-VOIX-COMPACTES.tsv`, SHA-256 concordants.
+
+Le disque voix de 16 Gio sur VM204 est à 94 % selon `df`, avec 1 102 569 472 octets disponibles. V3/English et les autres nouveaux paquets restent stockage uniquement : aucune inférence GPU ou intégration Creative n’est revendiquée. Services accessibles et files Comfy vides après copie. Il reste à confirmer indépendamment les empreintes d’hôte de PC3 et VM205; ne jamais contourner SSH strict. VM206, PC6 et les données source ne sont pas touchés.
+
 
 ### Centralisation PC1 → VM204 — 14 novembre 2026, 06:07 UTC
 

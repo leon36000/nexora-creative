@@ -914,3 +914,9 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Hunyuan Paint reste exclu en pièces détachées : son pipeline demande au moins 21 Gio de VRAM; LatentSync 1.6 demande 18 Gio minimum. Les lots incomplets ne constituent pas un modèle utilisable sur une carte PC5 de 8 Gio.
 - Après copie : services actifs; endpoints LAN 8188/8189/8190/11434 HTTP 200; files Comfy 0/0; Ollama sans modèle chargé; GPU à 0 %, 312/224 Mio. Aucun redémarrage ni essai d’inférence. Le volume candidats utilise 15 109 046 272 octets et en garde 1 604 071 424 libres (91 %); Sync garde 4 794 101 760 octets libres; la racine 9 461 444 608.
 - PC3 et VM205 demeurent non vérifiés sans validation indépendante de leurs clés SSH; PC6/VM206 hors périmètre.
+
+### Centralisation PC1 → VM204 — modèles voix compacts, 14 novembre 2026
+
+Les sept paquets compacts Qwen3-TTS 1.7B Base/VoiceDesign, XTTS-v2, F5-TTS Québec + Vocos et Chatterbox Multilingual V2/V3/English sont maintenant stockés dans VM204, copiés depuis PC1 sans modifier la source. Le manifeste compte 64 chemins (21 101 440 506 octets logiques); les SHA-256 source/destination concordent. Un disque de 16 Gio a été attaché à VM204 et monté à `/srv/nexora-gpu/models/nexora-voice-models`; XTTS-v2 et le poids T3 V3 sont liés depuis la racine, et le tokenizer Qwen est partagé.
+
+Après copie, les services 8188/8189/8190/11434 répondent sur le LAN, les files Comfy sont vides, Ollama ne charge aucun modèle et les deux GPU sont au repos. Aucun rendu, inférence, redémarrage ou suppression de source n’a eu lieu. V3 et English ne sont pas intégrés à Creative; la VRAM réelle de chaque paquet reste à qualifier. Inventaire : `docs/PC5-VOIX-COMPACTES.tsv`.

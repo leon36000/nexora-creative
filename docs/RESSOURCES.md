@@ -187,6 +187,10 @@ Tout poids compact utilisable individuellement sur les GPU PC5 réside dans la V
 
 VMs Nexora 201–205 et 207 : 4 vCPU chacune; RAM max 10/4/8/8/8/8 Gio; planchers ballon 4/2/4/fixe/3/fixe. Aucune allocation réduite faute de preuve en charge représentative. Pools : ssd-1tb 91,64 %, local-lvm 88,19 %, backup-nvme0 61,36 %. Détails invités dans docs/INVENTAIRE-VM-PC5.md; VM206 exclue.
 
+### Modèles voix compacts PC5 — 14 novembre 2026
+
+Un disque fin de 16 Gio sur `ssd-1tb` est monté dans VM204 à `/srv/nexora-gpu/models/nexora-voice-models` (15,50 Go utilisés, 1,10 Go disponibles au relevé). Il conserve les paquets Qwen3-TTS 1.7B Base/VoiceDesign, XTTS-v2, F5-TTS Québec + Vocos et Chatterbox Multilingual V2/V3/English. XTTS-v2 et un poids propre à V3 sont sur la racine VM204 avec liens depuis les chemins attendus; le tokenizer Qwen est partagé avec le modèle 0.6B déjà présent. Inventaire et preuves : `docs/PC5-VOIX-COMPACTES.tsv`. Aucune autre allocation Proxmox modifiée.
+
 
 ### Centralisation PC1 → VM204 — 14 novembre 2026, 06:07 UTC
 
