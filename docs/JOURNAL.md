@@ -897,3 +897,10 @@ Commit final de la revue bloqué : git add refuse index.lock (.git en lecture se
 - Catalogue sur VM204 : 142/142 petits fichiers locaux, 18/18 MuseTalk et 71 entrées candidats présents avec tailles conformes. Ajout de `rife47.pth` (21 344 827 octets) au dépôt candidat, SHA-256 conforme au digest GitHub Release. Aucun poids n’a été chargé en inférence.
 - ComfyUI est installé une seule fois sur VM204; 8188/8189 répondent, les deux files sont vides et les deux GPU sont au repos. Le nœud `RIFE VFI` manque toutefois dans `/object_info`; le nouveau poids reste inactif jusqu’à une maintenance autorisée. Aucun worker partagé redémarré.
 - WorkStudio VM203 utilise encore son Ollama local et son modèle BGE-M3 à l’arrêt; le fichier Compose vise l’Ollama PC5, mais l’application en cours pointe toujours vers le conteneur local. Seul `.env.example` existe dans le déploiement; aucun secret lu, aucun redéploiement fait. Pour basculer sans perdre la configuration, le fondateur doit restaurer le fichier d’environnement sécurisé dans `/srv/nexora/workstudio/deploy/.env`; ne pas transmettre son contenu.
+
+### Contrôle PC5 complet et manifestes — 14 novembre 2026
+
+- Relevé lecture seule des VMs 201–205 et 207; VM206 exclue. Usages courants consignés dans docs/INVENTAIRE-VM-PC5.md. Aucune baisse CPU/RAM/disque appliquée : les mesures ne prouvent pas qu’elle serait sûre, VM204 a 3,1 Gio de swap occupés et VM205 n’a pas de mesure invitée fiable.
+- VM204 : santé Comfy 8188/8189 et service 8190 = 200, files 0/0, Ollama sans modèle chargé, GPU au repos. Aucun Comfy détecté sur 201/202/203/207; VM205 non vérifiée.
+- Manifestes live : local-small 142/142, candidats 71/71, MuseTalk 18/18, LatentSync + VAE 18/18 présents. Aucune copie nécessaire, aucun service relancé.
+- PC3 NAT SSH refusé; WorkStudio .env absent et reste sur Ollama local. PC6/VM206 intacts. Objectif PC5 actif.
