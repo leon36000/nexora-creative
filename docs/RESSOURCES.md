@@ -200,3 +200,7 @@ Un disque fin de 16 Gio sur `ssd-1tb` est monté dans VM204 à `/srv/nexora-gpu/
 - Hunyuan Paint reste exclu en pièces détachées : son pipeline demande au moins 21 Gio de VRAM; LatentSync 1.6 demande 18 Gio minimum. Les lots incomplets ne constituent pas un modèle utilisable sur une carte PC5 de 8 Gio.
 - Après copie : services actifs; endpoints LAN 8188/8189/8190/11434 HTTP 200; files Comfy 0/0; Ollama sans modèle chargé; GPU à 0 %, 312/224 Mio. Aucun redémarrage ni essai d’inférence. Le volume candidats utilise 15 109 046 272 octets et en garde 1 604 071 424 libres (91 %); Sync garde 4 794 101 760 octets libres; la racine 9 461 444 608.
 - PC3 et VM205 demeurent non vérifiés sans validation indépendante de leurs clés SSH; PC6/VM206 hors périmètre.
+
+### Candidat Matte ajouté — 14 novembre 2026
+
+MatAnyone2 ajoute un fichier de 141 199 924 octets au volume candidats déjà provisionné; aucune ressource Proxmox ni aucun autre disque n’a été ajouté pour ce poids. Après copie : 15 250 259 968 octets utilisés, 1 462 857 728 disponibles (92 % selon `df`). Détail et empreinte : `docs/PC5-MODELES-COMPACTS.md`.

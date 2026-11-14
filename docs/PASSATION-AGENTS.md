@@ -1146,3 +1146,7 @@ Le disque voix de 16 Gio sur VM204 est à 94 % selon `df`, avec 1 102 569 472 oc
 - Hunyuan Paint reste exclu en pièces détachées : son pipeline demande au moins 21 Gio de VRAM; LatentSync 1.6 demande 18 Gio minimum. Les lots incomplets ne constituent pas un modèle utilisable sur une carte PC5 de 8 Gio.
 - Après copie : services actifs; endpoints LAN 8188/8189/8190/11434 HTTP 200; files Comfy 0/0; Ollama sans modèle chargé; GPU à 0 %, 312/224 Mio. Aucun redémarrage ni essai d’inférence. Le volume candidats utilise 15 109 046 272 octets et en garde 1 604 071 424 libres (91 %); Sync garde 4 794 101 760 octets libres; la racine 9 461 444 608.
 - PC3 et VM205 demeurent non vérifiés sans validation indépendante de leurs clés SSH; PC6/VM206 hors périmètre.
+
+### MatAnyone2 — candidat compact stocké sur PC5 — 14 novembre 2026
+
+Poids Safetensors de 141 199 924 octets copié depuis l’archive Matte PC1 vers `/srv/nexora-gpu/models/nexora-candidates/matte/matanyone2/`; SHA-256 vérifié, source PC1 intacte. Le manifeste candidats a 74 poids, 74/74 présents par chemin et taille; 1 462 857 728 octets libres sur ce volume. Modèle inactif, sans runtime Comfy/Creative ni qualification GPU. L’audit PC1 ciblé n’a identifié aucun autre paquet compact complet absent dans les racines Nexora examinées; archives personnelles non Nexora, PC3 et VM205 restent hors inventaire. Continuer la règle : stockage central VM204, chargement à la demande, un GPU par essai.
