@@ -1,10 +1,10 @@
 # Ressources Nexora : conventions, registre d'allocation, plan HDD
 
-Mis à jour le 04/11/2026 (transcription sur la VM 204 ; VM 204 `nexora-gpu` et les deux GPU, §8). Règle du fondateur : ne jamais allouer plus que le besoin réel ; tout est classé, étiqueté, propre ; aucun fichier épars ; chaque Mo a une affectation. pc5 (Proxmox `pve`) est le vrai serveur Nexora : tout ce qui est Nexora y vit, sauf les modèles (pc1, pc6), les GPU et le poste de développement. Le code est sur GitLab (pc4). Tests et expériences se font sur pc1 et pc6 et sont supprimés à la fin.
+Mis à jour le 14/11/2026. Règle actuelle du fondateur : PC5 héberge les applications et services Nexora; tous les petits modèles utilisables individuellement sur ses GPU sont centralisés dans la VM GPU 204 et chargés à la demande, même si leur somme dépasse la VRAM cumulée. Les modèles trop grands restent sur leurs moteurs dédiés ou dans le cloud. Le code produit demeure dans GitLab pc4. Les consignes et tableaux datés du 02–04/11 ci-dessous sont historiques lorsqu’ils contredisent cette règle.
 
 Qui vit où : `docs/ENVIRONNEMENTS.md`. Journal des suppressions : `docs/JOURNAL.md` (entrée « ménage d'infrastructure : conventions »). Inventaire automatique : `ressources/inventaire.sh` (lecture seule).
 
-## État courant — centralisation Nexora sur PC5 (13/11/2026)
+## État courant — centralisation Nexora sur PC5 (14/11/2026)
 
 L’architecture de travail actuelle place les applications et services Nexora sur PC5; les modèles compacts sont rangés dans la VM GPU 204 et chargés selon le besoin. Les grands modèles restent raccordés à leurs moteurs dédiés ou au cloud. Les tableaux d’allocation datés du 02–04/11 ci-dessous sont des relevés historiques; l’état live vérifié est dans [`docs/INVENTAIRE-VM-PC5.md`](INVENTAIRE-VM-PC5.md). Le code produit demeure dans GitLab pc4. Aucun changement de VM206 ni de machine autre que PC5 n’est autorisé par cette tranche.
 
@@ -25,7 +25,7 @@ L’architecture de travail actuelle place les applications et services Nexora s
 | Cache régénérable (uv, pip, npm, bun) | purgé au-delà de 200 Mo |
 | Volume Docker anonyme sans conteneur | supprimé après 24 h |
 | Sauvegarde vzdump | `keep-last=1` jusqu'à l'arrivée du HDD |
-| Modèles | permanents sur pc1 et pc6 |
+| Modèles compacts utilisables individuellement sur PC5 | permanents dans VM204, chargés à la demande; les modèles trop grands restent sur leurs moteurs dédiés ou le cloud |
 
 ## 2. Registre d'allocation (état au 02/11/2026)
 
@@ -186,3 +186,13 @@ Tout poids compact utilisable individuellement sur les GPU PC5 réside dans la V
 ### État live PC5 — 14 novembre 2026
 
 VMs Nexora 201–205 et 207 : 4 vCPU chacune; RAM max 10/4/8/8/8/8 Gio; planchers ballon 4/2/4/fixe/3/fixe. Aucune allocation réduite faute de preuve en charge représentative. Pools : ssd-1tb 91,64 %, local-lvm 88,19 %, backup-nvme0 61,36 %. Détails invités dans docs/INVENTAIRE-VM-PC5.md; VM206 exclue.
+
+
+### Centralisation PC1 → VM204 — 14 novembre 2026, 06:07 UTC
+
+- Le fondateur confirme la règle permanente : stocker dans VM204 tous les petits modèles utilisables individuellement par un GPU PC5, même si la somme dépasse la VRAM; charger uniquement ceux requis et réserver une carte par essai.
+- Copie depuis l’arbre actif PC1 `NexoraStudioWork`, sans supprimer ni modifier la source, vers `/srv/nexora-gpu/models/nexora-candidates/vision/insightface/buffalo_l/` : `2d106det.onnx` (5 030 888 octets, SHA-256 `f001b856447c413801ef5c42091ed0cd516fcd21f2d6b79635b1e733a7109dbf`) et `det_10g.onnx` (16 923 827 octets, SHA-256 `5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91`). Hashes source/destination identiques; une ligne par fichier dans le manifeste.
+- Le manifeste candidats compte 73 poids / 15 108 667 783 octets; les 73/73 chemins et tailles concordent. `sfd_face.pth`, `whisper/tiny.pt` et les auxiliaires `s3fd` de MuseTalk étaient déjà présents. Aucun autre modèle compact complet manquant n’a été repéré dans les dossiers actifs PC1 examinés; archives/sauvegardes PC1 non couvertes.
+- Hunyuan Paint reste exclu en pièces détachées : son pipeline demande au moins 21 Gio de VRAM; LatentSync 1.6 demande 18 Gio minimum. Les lots incomplets ne constituent pas un modèle utilisable sur une carte PC5 de 8 Gio.
+- Après copie : services actifs; endpoints LAN 8188/8189/8190/11434 HTTP 200; files Comfy 0/0; Ollama sans modèle chargé; GPU à 0 %, 312/224 Mio. Aucun redémarrage ni essai d’inférence. Le volume candidats utilise 15 109 046 272 octets et en garde 1 604 071 424 libres (91 %); Sync garde 4 794 101 760 octets libres; la racine 9 461 444 608.
+- PC3 et VM205 demeurent non vérifiés sans validation indépendante de leurs clés SSH; PC6/VM206 hors périmètre.
