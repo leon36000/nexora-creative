@@ -7,7 +7,7 @@ Mis en place le 03/11/2026. Ordre du fondateur : les deux cartes entières, le m
 | Élément | Valeur |
 |---|---|
 | Matériel (hôte `pve`) | RTX 2080 SUPER (06:00.x, lien PCIe **x4**, 8 Go) et RTX 2070 SUPER (01:00.x, x16, 8 Go) ; Turing sm_75 : fp16 et int8 oui, **bf16 et fp8 non** (bf16 n'est qu'émulé) |
-| VM | 204 `nexora-gpu`, q35 + OVMF, 4 vCPU `host`, 8 Go fixes (ballon coupé), disque 60 Go fin sur `ssd-1tb`, swap 8 Go dans la VM, `onboot`, étiquettes `nexora;gpu;prod`, **hors du job vzdump** (modèles et sorties se régénèrent) |
+| VM | 204 `nexora-gpu`, q35 + OVMF, 4 vCPU `host`, 8 Go fixes (ballon coupé), disque 72 Go fin sur `ssd-1tb` (état live du 13/11; 60 Go à la création), swap 8 Go dans la VM, `onboot`, étiquettes `nexora;gpu;prod`, **hors du job vzdump** (modèles et sorties se régénèrent) |
 | Accès | `ssh nexora-gpu` (192.168.1.124, utilisateur `nexora`, clé `~/.ssh/id_ed25519_nexora_vm`). Pare-feu Proxmox `/etc/pve/firewall/204.fw` : entrée coupée sauf SSH, 8188-8190 et ping depuis 192.168.1.0/24 |
 | Pilote | `nvidia-driver-595-server-open` (595.91.07, DKMS), `nvidia-persistenced` actif |
 | Python | `/srv/nexora-gpu/venv` (torch 2.11.0+cu128, ComfyUI) et `/srv/nexora-gpu/venv-audio` (services) |
