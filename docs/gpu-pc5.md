@@ -106,3 +106,7 @@ LatentSync 1.5 est rangé dans /srv/nexora-gpu/models/nexora-sync/LatentSync-1.5
 ### Modèles voix compacts — actualisation du 14 novembre 2026
 
 Qwen3-TTS 1.7B Base/VoiceDesign, XTTS-v2, F5-TTS Québec + Vocos et Chatterbox Multilingual V2/V3/English sont centralisés dans VM204. Détail des empreintes et des liens de poids : `docs/PC5-MODELES-COMPACTS.md` et `docs/PC5-VOIX-COMPACTES.tsv`. Le volume dédié est monté sur `/srv/nexora-gpu/models/nexora-voice-models`, 16 Gio provisionnés, 1,10 Go disponibles au contrôle. Le stockage permet de sélectionner les modèles au besoin; il ne signifie ni qu’ils sont tous intégrés au service 8190 ni que leur inférence GPU a été qualifiée. Les deux cartes restent à 8 Gio chacune et le service ne charge pas plusieurs gros modèles simultanément.
+
+### MatAnyone2 — candidat de détourage vidéo
+
+Poids compact centralisé sous `/srv/nexora-gpu/models/nexora-candidates/matte/matanyone2/`, manifeste et provenance dans `docs/PC5-MODELES-COMPACTS.md`. Il reste inactif : aucun nœud ComfyUI ou client Creative installé, aucune mesure VRAM ni génération. Réserver une carte et qualifier sur un court extrait avant intégration.

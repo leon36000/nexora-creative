@@ -82,3 +82,7 @@ La centralisation voix ajoute sept paquets et un manifeste de 64 chemins vérifi
 - Hunyuan Paint reste exclu en pièces détachées : son pipeline demande au moins 21 Gio de VRAM; LatentSync 1.6 demande 18 Gio minimum. Les lots incomplets ne constituent pas un modèle utilisable sur une carte PC5 de 8 Gio.
 - Après copie : services actifs; endpoints LAN 8188/8189/8190/11434 HTTP 200; files Comfy 0/0; Ollama sans modèle chargé; GPU à 0 %, 312/224 Mio. Aucun redémarrage ni essai d’inférence. Le volume candidats utilise 15 109 046 272 octets et en garde 1 604 071 424 libres (91 %); Sync garde 4 794 101 760 octets libres; la racine 9 461 444 608.
 - PC3 et VM205 demeurent non vérifiés sans validation indépendante de leurs clés SSH; PC6/VM206 hors périmètre.
+
+### MatAnyone2 centralisé — 14 novembre 2026
+
+Copie PC1 → VM204 vérifiée par taille (141 199 924 octets) et SHA-256 `70d3bf1d85d0aaf2020f9ef3577239f4f83b77c2ba47fca1eebaaf872f9ad40f`; PC1 reste intact. Le manifeste candidats passe à 74 poids, tous présents avec la taille attendue. Volume candidats : 15 250 259 968 octets utilisés, 1 462 857 728 disponibles (92 % selon `df`). Aucun service redémarré et aucune inférence GPU exécutée.
