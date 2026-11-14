@@ -204,3 +204,7 @@ Un disque fin de 16 Gio sur `ssd-1tb` est monté dans VM204 à `/srv/nexora-gpu/
 ### Candidat Matte ajouté — 14 novembre 2026
 
 MatAnyone2 ajoute un fichier de 141 199 924 octets au volume candidats déjà provisionné; aucune ressource Proxmox ni aucun autre disque n’a été ajouté pour ce poids. Après copie : 15 250 259 968 octets utilisés, 1 462 857 728 disponibles (92 % selon `df`). Détail et empreinte : `docs/PC5-MODELES-COMPACTS.md`.
+
+### Recontrôle live Proxmox et VM GPU — 14 novembre 2026, 07:46 UTC
+
+Les VMs Nexora 201–205 et 207 sont en marche, toutes à 4 vCPU; les planchers ballon restent 4/2/4/fixe/3/fixe Gio respectivement, avec VM207 fixe à 8 Gio. Aucune allocation n’a été modifiée. `ssd-1tb` indique 91,00 % utilisé, `local-lvm` 88,19 % et `backup-nvme0` 61,36 %. Dans VM204, les volumes `/`, Sync, candidats et voix ont respectivement 5,23 Go, 4,79 Go, 1,46 Go et 1,10 Go disponibles; la mémoire disponible est 5,42 Go et 12,6 Mo de swap sont utilisés. Voir les mesures exactes dans `docs/INVENTAIRE-VM-PC5.md`.

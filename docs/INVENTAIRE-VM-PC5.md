@@ -86,3 +86,11 @@ La centralisation voix ajoute sept paquets et un manifeste de 64 chemins vérifi
 ### MatAnyone2 centralisé — 14 novembre 2026
 
 Copie PC1 → VM204 vérifiée par taille (141 199 924 octets) et SHA-256 `70d3bf1d85d0aaf2020f9ef3577239f4f83b77c2ba47fca1eebaaf872f9ad40f`; PC1 reste intact. Le manifeste candidats passe à 74 poids, tous présents avec la taille attendue. Volume candidats : 15 250 259 968 octets utilisés, 1 462 857 728 disponibles (92 % selon `df`). Aucun service redémarré et aucune inférence GPU exécutée.
+
+### Recontrôle des ressources et services PC5 — 14 novembre 2026, 07:46 UTC
+
+Proxmox : VM201–205 et VM207 en marche, chacune à 4 vCPU. Configurations : 201 = 10 Gio RAM, ballon min. 4, disque 220 Go; 202 = 4/2 Gio, 120 Go; 203 = 8/4 Gio, 150 Go; 204 = 8 Gio fixes, disques 72+20+16+16 Gio; 205 = 8/3 Gio, 450 Go; 207 = 8 Gio fixes, disque 82 432 Mo. Aucune allocation modifiée. Pools : `ssd-1tb` 91,00 % (86 139 002 KiB libres), `local-lvm` 88,19 %, `backup-nvme0` 61,36 %. VM206 exclue.
+
+VM204 : `/` 68 518 965 248 / 73 766 789 120 octets utilisés (93 %, 5 231 046 656 libres); Sync 16 127 913 984 / 21 024 690 176 (78 %, 4 794 101 760 libres); candidats 15 250 259 968 / 16 729 894 912 (92 %, 1 462 857 728 libres); voix 15 503 785 984 / 16 794 906 624 (94 %, 1 102 569 472 libres). RAM disponible 5 416 284 160 octets; swap utilisée 12 640 256 octets; charge moyenne 0,00.
+
+Les contrôles invités confirment une seule installation ComfyUI dans VM204 : `/srv/nexora-gpu/ComfyUI`, partagée par les workers 8188/8189. QEMU Guest Agent répond sur 201/202/203/207; les répertoires Nexora, unités systemd et conteneurs vérifiés n’y montrent pas ComfyUI. VM205 tourne mais son agent invité ne répond pas; son disque et ses modèles n’ont pas été inspectés. Sur VM204, services actifs; 8188/8189/8190/11434 HTTP 200; files Comfy 0/0; Ollama sans modèle chargé; RTX 2080 SUPER 122 Mio et RTX 2070 SUPER 224 Mio, toutes deux à 0 %. Aucune inférence ni relance de service.
