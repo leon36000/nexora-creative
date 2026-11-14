@@ -182,3 +182,7 @@ Rétention : sorties ComfyUI dans `/srv/nexora-gpu/output/gpu{0,1}` à purger à
 ## Modèles compacts — règle du fondateur
 
 Tout poids compact utilisable individuellement sur les GPU PC5 réside dans la VM 204, même si tous les poids ne tiennent pas simultanément en VRAM. Charger seulement les modèles utiles à chaque tâche; ne pas dupliquer ces poids sur les autres PC. La présence ne vaut pas intégration ou qualification. Inventaire et preuve : docs/PC5-MODELES-COMPACTS.md.
+
+### État live PC5 — 14 novembre 2026
+
+VMs Nexora 201–205 et 207 : 4 vCPU chacune; RAM max 10/4/8/8/8/8 Gio, planchers ballon 4/2/4/fixe/3/fixe. Disques minces; les usages observés et les limitations sont dans docs/INVENTAIRE-VM-PC5.md. Aucune allocation abaissée faute de preuve en charge représentative. Pool ssd-1tb 91,64 %, local-lvm 88,19 %, backup-nvme0 61,36 %. VM206 exclue du relevé détaillé.

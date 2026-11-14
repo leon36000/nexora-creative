@@ -43,3 +43,24 @@ Les mesures sont des instantanés et ne remplacent pas la surveillance en charge
 ## État des modèles PC5 — 13 novembre 2026, 22:52 (Montréal)
 
 Le volume Sync /srv/nexora-gpu/models/nexora-sync est maintenant de 20 Gio après extension en ligne du disque de VM204 et agrandissement ext4. Relevé après transfert : 16 Gio utilisés, 4,5 Gio libres (78 %). Le cache des modèles compacts est centralisé dans VM204 et chargé à la demande; le détail est dans docs/PC5-MODELES-COMPACTS.md.
+
+### Relevé live PC5 — 14 novembre 2026
+
+Lecture seule; VM206 exclue.
+
+| VM | Rôle | CPU / RAM Proxmox | Disque invité observé |
+|---:|---|---|---|
+| 201 | Pile/site | 4 vCPU; max 10 Gio, ballon min 4 | 50/213 Gio (24 %); 4,1 Gio disponibles |
+| 202 | Creative | 4 vCPU; max 4 Gio, ballon min 2 | 13/116 Gio (11 %); 3,0 Gio disponibles |
+| 203 | WorkStudio | 4 vCPU; max 8 Gio, ballon min 4 | 23/145 Gio (16 %); 4,0 Gio disponibles |
+| 204 | GPU | 4 vCPU; 8 Gio fixes | racine 60/69 Gio (88 %); Sync 16/20 Gio (78 %); candidats 15/16 Gio (91 %); 5,0 Gio disponibles et 3,1 Gio de swap occupés |
+| 205 | Infrastructure | 4 vCPU; max 8 Gio, ballon min 3 | invité non vérifié : empreinte SSH changée |
+| 207 | Runner isolé | 4 vCPU; 8 Gio fixes | 9,5/77 Gio (13 %); 5,0 Gio disponibles |
+
+Pools Proxmox : ssd-1tb 91,64 % (≈76 Gio libres), local-lvm 88,19 %, backup-nvme0 61,36 %. Aucun réglage CPU/RAM/disque modifié. Les relevés ne prouvent pas qu’une réduction serait sûre; VM204 a du swap occupé et VM205 n’a pas de mesure invitée fiable.
+
+VM204 : services GPU et agent invité actifs; santé 8188/8189/8190 = HTTP 200; files Comfy 0/0; Ollama /api/ps vide; GPU 0 %, 312/224 Mio. Aucun service/conteneur Comfy détecté sur VM201, 202, 203 et 207; VM205 non vérifiée. Services Comfy liés à l’adresse LAN, pas à localhost.
+
+Vérification des chemins du manifeste VM204 : local-small 142/142 présents; candidats 71/71; MuseTalk 18/18; LatentSync 1.5 + VAE 18/18; zéro chemin manquant. Les fichiers bruts incluent aussi index et README.
+
+PC3 reste injoignable par le NAT SSH documenté. Le .env sécurisé WorkStudio est absent; sa copie BGE locale reste intacte jusqu’à migration vérifiée. PC6 et VM206 non consultés ni modifiés.
